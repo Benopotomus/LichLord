@@ -33,6 +33,27 @@ namespace Starter
 		private NetworkRunner _runnerInstance;
 		private static string _shutdownStatus;
 
+        private void Start()
+        {
+            // Load nickname from PlayerPrefs or generate one
+            string nickname = PlayerPrefs.GetString("PlayerName");
+            if (string.IsNullOrEmpty(nickname))
+                nickname = "Player" + Random.Range(10000, 100000);
+
+            NicknameText.text = nickname;
+            RoomText.text = string.IsNullOrEmpty(RoomText.text) ? "DefaultRoom" : RoomText.text;
+
+            // Display any previous shutdown reason
+            StatusText.text = _shutdownStatus ?? string.Empty;
+            _shutdownStatus = null;
+
+            // Automatically start game
+            StartGame();
+
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        
 		public async void StartGame()
 		{
 			await Disconnect();
@@ -68,7 +89,7 @@ namespace Starter
 			{
 				StatusText.text = "";
 				PanelGroup.gameObject.SetActive(false);
-			}
+            }
 			else
 			{
 				StatusText.text = $"Connection Failed: {startTask.Result.ShutdownReason}";

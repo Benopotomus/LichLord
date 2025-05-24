@@ -4,7 +4,7 @@
     "PeerMode": 0,
     "LagCompensation": {
         "Enabled": false,
-        "HitboxBufferLengthInMs": 400,
+        "HitboxBufferLengthInMs": 30,
         "HitboxDefaultCapacity": 512,
         "CachedStaticCollidersSize": 64
     },
@@ -63,10 +63,14 @@
         "Assembly-CSharp",
         "Assembly-CSharp-firstpass",
         "Fusion.Addons.Physics",
-        "Fusion.Addons.FSM"
+        "Fusion.Addons.FSM",
+        "Starter.Shooter",
+        "LichLord",
+        "Starter.ThirdPersonCharacter",
+        "Starter"
     ],
     "UseSerializableDictionary": true,
     "NullChecksForNetworkedProperties": true,
     "CheckRpcAttributeUsage": false,
-    "CheckNetworkedPropertiesBeingEmpty": false
+    "CheckNetworkedPropertiesBeingEmpty": true
 }
