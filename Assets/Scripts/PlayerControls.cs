@@ -116,6 +116,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CameraViewSwitch"",
+                    ""type"": ""Button"",
+                    ""id"": ""f705210b-3615-4b83-8cd3-c6e97555e5f9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -512,6 +521,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Fire"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9e6f1d6c-f21b-4106-86c1-7358d5220b10"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""CameraViewSwitch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1109,6 +1129,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Next = m_Gameplay.FindAction("Next", throwIfNotFound: true);
         m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
         m_Gameplay_Fire = m_Gameplay.FindAction("Fire", throwIfNotFound: true);
+        m_Gameplay_CameraViewSwitch = m_Gameplay.FindAction("CameraViewSwitch", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1192,6 +1213,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Next;
     private readonly InputAction m_Gameplay_Sprint;
     private readonly InputAction m_Gameplay_Fire;
+    private readonly InputAction m_Gameplay_CameraViewSwitch;
     public struct GameplayActions
     {
         private @PlayerControls m_Wrapper;
@@ -1206,6 +1228,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Next => m_Wrapper.m_Gameplay_Next;
         public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
         public InputAction @Fire => m_Wrapper.m_Gameplay_Fire;
+        public InputAction @CameraViewSwitch => m_Wrapper.m_Gameplay_CameraViewSwitch;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1245,6 +1268,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Fire.started += instance.OnFire;
             @Fire.performed += instance.OnFire;
             @Fire.canceled += instance.OnFire;
+            @CameraViewSwitch.started += instance.OnCameraViewSwitch;
+            @CameraViewSwitch.performed += instance.OnCameraViewSwitch;
+            @CameraViewSwitch.canceled += instance.OnCameraViewSwitch;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -1279,6 +1305,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Fire.started -= instance.OnFire;
             @Fire.performed -= instance.OnFire;
             @Fire.canceled -= instance.OnFire;
+            @CameraViewSwitch.started -= instance.OnCameraViewSwitch;
+            @CameraViewSwitch.performed -= instance.OnCameraViewSwitch;
+            @CameraViewSwitch.canceled -= instance.OnCameraViewSwitch;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -1471,6 +1500,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnNext(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
+        void OnCameraViewSwitch(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

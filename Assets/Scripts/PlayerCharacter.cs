@@ -19,6 +19,7 @@ namespace LichLord
         [Header("References")]
         public Health Health;
         public CharacterMovement CharacterMovement;
+        public PlayerCameraController PlayerCameraController;
         public PlayerCharacterInput PlayerInput;
         public Animator Animator;
         public Transform CameraPivot;
@@ -108,6 +109,8 @@ namespace LichLord
 
             var input = Health.IsAlive ? PlayerInput.CurrentInput : default;
             ProcessInput(input);
+
+
             CharacterMovement.ProcessMovementInput(input);
 
             CharacterMovement.KCC.SetActive(Health.IsAlive);
@@ -117,22 +120,18 @@ namespace LichLord
 
         public override void Render()
         {
-          
             ShowFireEffects();
 
             // Disable hits when player is dead
             Hitbox.enabled = Health.IsAlive;
         }
 
-        private void Awake()
-        {
-
-        }
-
         private void LateUpdate()
         {
             if (Health.IsAlive == false)
                 return;
+
+            // IK after animations
 
             // Update camera pivot (influences ChestIK)
             // (KCC look rotation is set earlier in Render)
@@ -144,23 +143,11 @@ namespace LichLord
             float blendAmount = HasStateAuthority ? 0.05f : 0.2f;
             ChestBone.position = Vector3.Lerp(ChestTargetPosition.position, ChestBone.position, blendAmount);
             ChestBone.rotation = Quaternion.Lerp(ChestTargetPosition.rotation, ChestBone.rotation, blendAmount);
-
-            // Only local player needs to update the camera
-            if (HasStateAuthority)
-            {
-                // Transfer properties from camera handle to Main Camera.
-                Camera.main.transform.SetPositionAndRotation(CameraHandle.position, CameraHandle.rotation);
-            }
+            
         }
 
         private void ProcessInput(GameplayInput input)
         {
-
-
-            // Update camera pivot so fire transform (CameraHandle) is correct
-            var pitchRotation = CharacterMovement.KCC.GetLookRotation(true, false);
-            CameraPivot.localRotation = Quaternion.Euler(pitchRotation);
-
             if (input.Fire)
             {
                 Fire();
