@@ -224,6 +224,7 @@ GameObject:
   - component: {fileID: 5761594593767146104}
   - component: {fileID: 4625314071529301451}
   - component: {fileID: 1776246608945052242}
+  - component: {fileID: 576985687314793959}
   m_Layer: 6
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -277,6 +278,7 @@ MonoBehaviour:
   - {fileID: 2971398371087610287}
   - {fileID: 5761594593767146104}
   - {fileID: 1776246608945052242}
+  - {fileID: 576985687314793959}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7362189930313428062
 MonoBehaviour:
@@ -364,6 +366,7 @@ MonoBehaviour:
   CharacterMovement: {fileID: 5761594593767146104}
   PlayerCameraController: {fileID: 1776246608945052242}
   PlayerInput: {fileID: 4625314071529301451}
+  ActionManager: {fileID: 0}
   Animator: {fileID: 4073002756564798429}
   CameraPivot: {fileID: 4348685969970783698}
   CameraHandle: {fileID: 53799290566343439}
@@ -377,15 +380,8 @@ MonoBehaviour:
   - {fileID: 4223813532148550129}
   - {fileID: 7348894790141556170}
   - {fileID: 9101397391339694623}
-  HitMask:
-    serializedVersion: 2
-    m_Bits: 0
-  ImpactPrefab: {fileID: 921809749201012083, guid: 7b3d9616a600e0a408561256ba1be9d9,
-    type: 3}
-  MuzzleParticle: {fileID: 2310922988817635306}
   ChestTargetPosition: {fileID: 536988984119202717}
   ChestBone: {fileID: 1992701519831656905}
-  FireSound: {fileID: 3515788271502590058}
   _Nickname: 
   _ChickenKills: 0
 --- !u!114 &5761594593767146104
@@ -406,6 +402,7 @@ MonoBehaviour:
   ScalingRoot: {fileID: 2514133352862161986}
   WalkSpeed: 2
   SprintSpeed: 5
+  SprintAccelerationTime: 0.3
   UpGravity: -10
   DownGravity: -10
   RotationSpeed: 8
@@ -420,8 +417,9 @@ MonoBehaviour:
   FlyVerticalBraking: 4
   FlyHorizontalSpeed: 4
   JumpImpulse: 3
-  JumpHoldVelcity: 6
+  JumpHoldVelocity: 5.5
   FlyHoldThreshold: 1
+  JumpBufferTime: 0.2
   FootstepSound: {fileID: 7822257894759364770}
   JumpAudioClip: {fileID: 8300000, guid: 954f599c4f88a224a8a2afe32f524af6, type: 3}
   LandAudioClip: {fileID: 8300000, guid: 5d389baa695e70746b0c2ad612c4bb81, type: 3}
@@ -455,6 +453,23 @@ MonoBehaviour:
   shoulderOffset: 0.5
   cameraDistance: 4
   cameraHeight: 1.5
+--- !u!114 &576985687314793959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8648bbd4493d628428de4afb43facc2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  availableActions:
+  - {fileID: 11400000, guid: c99343f3cf003ec4b96f719243227f69, type: 2}
+  actionSpawnPoint: {fileID: 848804875403309391}
+  gunModel: {fileID: 4223813532148550129}
+  gunMuzzleParticle: {fileID: 2310922988817635306}
 --- !u!1 &3226221424221943437
 GameObject:
   m_ObjectHideFlags: 0

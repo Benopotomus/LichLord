@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
+  m_Name: Gun
+  m_EditorClassIdentifier: 
+  ActionName: Gun
+  Type: 2
+  Damage: 10
+  Cooldown: 0.1
+  ProjectilePrefab: {fileID: 0}
+  ProjectileSpeed: 20
+  Range: 100
+  ActionSound: {fileID: 8300000, guid: 4bf4f7f783a5af94fbc3dce27a76d5f9, type: 3}
+  ActionEffect: {fileID: 0}
+  ImpactPrefab: {fileID: 0}
+  HitMask:
+    serializedVersion: 2
+    m_Bits: 0
+  AnimationTrigger: 
+  AnimationDuration: 1
+  MovementSpeedMultiplier: 1

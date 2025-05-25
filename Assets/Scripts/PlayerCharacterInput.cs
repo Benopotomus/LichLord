@@ -11,9 +11,10 @@ namespace LichLord
         public bool JumpHeld;
         public bool Crouch;
         public bool CrouchHeld;
-        public bool Fire;
+        public bool Fire; // Triggers selected action (e.g., melee or spell)
         public bool Sprint;
         public bool ToggleCameraView;
+        public int ActionSelection; // Index of selected action (0 for none, 1-9 for actions)
     }
 
     public class PlayerCharacterInput : MonoBehaviour
@@ -26,6 +27,15 @@ namespace LichLord
         private void Awake()
         {
             _controls = new PlayerControls();
+            _controls.Gameplay.Action1.performed += _ => _input.ActionSelection = 1;
+            _controls.Gameplay.Action2.performed += _ => _input.ActionSelection = 2;
+            _controls.Gameplay.Action3.performed += _ => _input.ActionSelection = 3;
+            _controls.Gameplay.Action4.performed += _ => _input.ActionSelection = 4;
+            _controls.Gameplay.Action5.performed += _ => _input.ActionSelection = 5;
+            _controls.Gameplay.Action6.performed += _ => _input.ActionSelection = 6;
+            _controls.Gameplay.Action7.performed += _ => _input.ActionSelection = 7;
+            _controls.Gameplay.Action8.performed += _ => _input.ActionSelection = 8;
+            _controls.Gameplay.Action9.performed += _ => _input.ActionSelection = 9;
         }
 
         private void OnEnable() => _controls.Enable();
@@ -33,19 +43,19 @@ namespace LichLord
 
         public void ResetInput()
         {
-            // Only reset one-frame inputs, preserve JumpHeld
+            // Reset one-frame inputs, preserve JumpHeld
             _input.Jump = false;
             _input.Crouch = false;
             _input.Fire = false;
             _input.Sprint = false;
-            // Debug.Log($"[PlayerCharacterInput] ResetInput called, JumpHeld preserved: {_input.JumpHeld}");
+            _input.ToggleCameraView = false;
+
         }
 
         private void Update()
         {
             if (Cursor.lockState != CursorLockMode.Locked)
             {
-                // Debug.Log($"[PlayerCharacterInput] Cursor not locked, skipping input for {gameObject.name}");
                 return;
             }
 
@@ -63,11 +73,6 @@ namespace LichLord
             _input.Fire |= _controls.Gameplay.Fire.WasPressedThisFrame();
             _input.Sprint = _controls.Gameplay.Sprint.IsPressed();
             _input.ToggleCameraView = _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
-
-            if (_input.JumpHeld)
-            {
-                Debug.Log($"[PlayerCharacterInput] Jump key held for {gameObject.name}, JumpHeld: {_input.JumpHeld}");
-            }
         }
 
         public Vector2 ClampLookRotation(Vector2 lookRotation)

@@ -125,6 +125,87 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action1"",
+                    ""type"": ""Button"",
+                    ""id"": ""adf88c46-9b3d-4cf8-a5f1-f035b683ff6b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action2"",
+                    ""type"": ""Button"",
+                    ""id"": ""419743d3-eb07-4b6e-bcac-69fd7ef72375"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action3"",
+                    ""type"": ""Button"",
+                    ""id"": ""cf7bef1e-7fce-4fc7-96f7-ec9260a34619"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action4"",
+                    ""type"": ""Button"",
+                    ""id"": ""d84185e3-3a12-4548-8e94-d3e9bc26364f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action5"",
+                    ""type"": ""Button"",
+                    ""id"": ""550d5008-244f-4a3a-9712-5be469e0217e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action6"",
+                    ""type"": ""Button"",
+                    ""id"": ""a6f5ece1-a381-4863-ba81-2a54c54ce4ec"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action7"",
+                    ""type"": ""Button"",
+                    ""id"": ""df46d99d-f296-4728-887f-3414311a1834"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action8"",
+                    ""type"": ""Button"",
+                    ""id"": ""b6172b42-2ccd-474c-863a-b9b572b3f66e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action9"",
+                    ""type"": ""Button"",
+                    ""id"": ""3e63b310-8a20-4df0-9bea-a472a70dc75b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -532,6 +613,105 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""CameraViewSwitch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3c2daf67-b7ac-4fd0-b92d-f1a233a22343"",
+                    ""path"": ""<Keyboard>/#(1)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2e07a91e-705e-4fa4-bf6a-738ca3df7010"",
+                    ""path"": ""<Keyboard>/#(2)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""df8ab29a-71f3-46f6-aaa8-a34b85a6aa33"",
+                    ""path"": ""<Keyboard>/#(3)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e489d572-43c7-4a6a-b757-07d6b2254dd3"",
+                    ""path"": ""<Keyboard>/#(4)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b1b1853c-5239-46a1-88ff-dd9d8ec9fb12"",
+                    ""path"": ""<Keyboard>/#(5)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action5"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ec96f330-00bb-4fd5-8444-b8137bacae58"",
+                    ""path"": ""<Keyboard>/#(6)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action6"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1e6fbf9e-7885-488f-a59f-459e53f649e4"",
+                    ""path"": ""<Keyboard>/#(7)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action7"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4f51c969-1944-43f4-9bef-a334b903d45a"",
+                    ""path"": ""<Keyboard>/#(8)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action8"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e0d5e502-4075-420f-80d9-789ea75c7c99"",
+                    ""path"": ""<Keyboard>/#(9)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Action9"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1130,6 +1310,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
         m_Gameplay_Fire = m_Gameplay.FindAction("Fire", throwIfNotFound: true);
         m_Gameplay_CameraViewSwitch = m_Gameplay.FindAction("CameraViewSwitch", throwIfNotFound: true);
+        m_Gameplay_Action1 = m_Gameplay.FindAction("Action1", throwIfNotFound: true);
+        m_Gameplay_Action2 = m_Gameplay.FindAction("Action2", throwIfNotFound: true);
+        m_Gameplay_Action3 = m_Gameplay.FindAction("Action3", throwIfNotFound: true);
+        m_Gameplay_Action4 = m_Gameplay.FindAction("Action4", throwIfNotFound: true);
+        m_Gameplay_Action5 = m_Gameplay.FindAction("Action5", throwIfNotFound: true);
+        m_Gameplay_Action6 = m_Gameplay.FindAction("Action6", throwIfNotFound: true);
+        m_Gameplay_Action7 = m_Gameplay.FindAction("Action7", throwIfNotFound: true);
+        m_Gameplay_Action8 = m_Gameplay.FindAction("Action8", throwIfNotFound: true);
+        m_Gameplay_Action9 = m_Gameplay.FindAction("Action9", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1214,6 +1403,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Sprint;
     private readonly InputAction m_Gameplay_Fire;
     private readonly InputAction m_Gameplay_CameraViewSwitch;
+    private readonly InputAction m_Gameplay_Action1;
+    private readonly InputAction m_Gameplay_Action2;
+    private readonly InputAction m_Gameplay_Action3;
+    private readonly InputAction m_Gameplay_Action4;
+    private readonly InputAction m_Gameplay_Action5;
+    private readonly InputAction m_Gameplay_Action6;
+    private readonly InputAction m_Gameplay_Action7;
+    private readonly InputAction m_Gameplay_Action8;
+    private readonly InputAction m_Gameplay_Action9;
     public struct GameplayActions
     {
         private @PlayerControls m_Wrapper;
@@ -1229,6 +1427,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Sprint => m_Wrapper.m_Gameplay_Sprint;
         public InputAction @Fire => m_Wrapper.m_Gameplay_Fire;
         public InputAction @CameraViewSwitch => m_Wrapper.m_Gameplay_CameraViewSwitch;
+        public InputAction @Action1 => m_Wrapper.m_Gameplay_Action1;
+        public InputAction @Action2 => m_Wrapper.m_Gameplay_Action2;
+        public InputAction @Action3 => m_Wrapper.m_Gameplay_Action3;
+        public InputAction @Action4 => m_Wrapper.m_Gameplay_Action4;
+        public InputAction @Action5 => m_Wrapper.m_Gameplay_Action5;
+        public InputAction @Action6 => m_Wrapper.m_Gameplay_Action6;
+        public InputAction @Action7 => m_Wrapper.m_Gameplay_Action7;
+        public InputAction @Action8 => m_Wrapper.m_Gameplay_Action8;
+        public InputAction @Action9 => m_Wrapper.m_Gameplay_Action9;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1271,6 +1478,33 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @CameraViewSwitch.started += instance.OnCameraViewSwitch;
             @CameraViewSwitch.performed += instance.OnCameraViewSwitch;
             @CameraViewSwitch.canceled += instance.OnCameraViewSwitch;
+            @Action1.started += instance.OnAction1;
+            @Action1.performed += instance.OnAction1;
+            @Action1.canceled += instance.OnAction1;
+            @Action2.started += instance.OnAction2;
+            @Action2.performed += instance.OnAction2;
+            @Action2.canceled += instance.OnAction2;
+            @Action3.started += instance.OnAction3;
+            @Action3.performed += instance.OnAction3;
+            @Action3.canceled += instance.OnAction3;
+            @Action4.started += instance.OnAction4;
+            @Action4.performed += instance.OnAction4;
+            @Action4.canceled += instance.OnAction4;
+            @Action5.started += instance.OnAction5;
+            @Action5.performed += instance.OnAction5;
+            @Action5.canceled += instance.OnAction5;
+            @Action6.started += instance.OnAction6;
+            @Action6.performed += instance.OnAction6;
+            @Action6.canceled += instance.OnAction6;
+            @Action7.started += instance.OnAction7;
+            @Action7.performed += instance.OnAction7;
+            @Action7.canceled += instance.OnAction7;
+            @Action8.started += instance.OnAction8;
+            @Action8.performed += instance.OnAction8;
+            @Action8.canceled += instance.OnAction8;
+            @Action9.started += instance.OnAction9;
+            @Action9.performed += instance.OnAction9;
+            @Action9.canceled += instance.OnAction9;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -1308,6 +1542,33 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @CameraViewSwitch.started -= instance.OnCameraViewSwitch;
             @CameraViewSwitch.performed -= instance.OnCameraViewSwitch;
             @CameraViewSwitch.canceled -= instance.OnCameraViewSwitch;
+            @Action1.started -= instance.OnAction1;
+            @Action1.performed -= instance.OnAction1;
+            @Action1.canceled -= instance.OnAction1;
+            @Action2.started -= instance.OnAction2;
+            @Action2.performed -= instance.OnAction2;
+            @Action2.canceled -= instance.OnAction2;
+            @Action3.started -= instance.OnAction3;
+            @Action3.performed -= instance.OnAction3;
+            @Action3.canceled -= instance.OnAction3;
+            @Action4.started -= instance.OnAction4;
+            @Action4.performed -= instance.OnAction4;
+            @Action4.canceled -= instance.OnAction4;
+            @Action5.started -= instance.OnAction5;
+            @Action5.performed -= instance.OnAction5;
+            @Action5.canceled -= instance.OnAction5;
+            @Action6.started -= instance.OnAction6;
+            @Action6.performed -= instance.OnAction6;
+            @Action6.canceled -= instance.OnAction6;
+            @Action7.started -= instance.OnAction7;
+            @Action7.performed -= instance.OnAction7;
+            @Action7.canceled -= instance.OnAction7;
+            @Action8.started -= instance.OnAction8;
+            @Action8.performed -= instance.OnAction8;
+            @Action8.canceled -= instance.OnAction8;
+            @Action9.started -= instance.OnAction9;
+            @Action9.performed -= instance.OnAction9;
+            @Action9.canceled -= instance.OnAction9;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -1501,6 +1762,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnSprint(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
         void OnCameraViewSwitch(InputAction.CallbackContext context);
+        void OnAction1(InputAction.CallbackContext context);
+        void OnAction2(InputAction.CallbackContext context);
+        void OnAction3(InputAction.CallbackContext context);
+        void OnAction4(InputAction.CallbackContext context);
+        void OnAction5(InputAction.CallbackContext context);
+        void OnAction6(InputAction.CallbackContext context);
+        void OnAction7(InputAction.CallbackContext context);
+        void OnAction8(InputAction.CallbackContext context);
+        void OnAction9(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

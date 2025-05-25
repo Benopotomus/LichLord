@@ -25,6 +25,7 @@ namespace LichLord
         [Header("Movement Setup")]
         public float WalkSpeed = 2f;
         public float SprintSpeed = 5f;
+        public float SprintAccelerationTime = 0.3f; // Time to transition between walk and sprint speeds
         public float UpGravity = -10f;
         public float DownGravity = -20f;
         public float RotationSpeed = 8f;
@@ -44,16 +45,18 @@ namespace LichLord
         public float FlyHorizontalSpeed = 4f;
 
         [Header("Jump Setup")]
-        public float JumpImpulse = 9f;
-        public float JumpHoldVelcity = 12f;
+        public float JumpImpulse = 3f;
+        public float JumpHoldVelocity = 5.5f; 
         public float FlyHoldThreshold = 0.75f;
         public float JumpBufferTime = 0.2f; // Grace period for jump input
 
         private float _jumpHeldTime;
         private Vector3 _moveVelocity;
         private float _verticalInput = 0f;
-        private float _jumpBufferTimer = 0f; // Tracks time since jump input
-        private bool _jumpInputBuffered = false; // Tracks if jump input is pending
+        private float _jumpBufferTimer = 0f;
+        private bool _jumpInputBuffered = false;
+        private float _castSpeedMultiplier = 1f; // Multiplier for movement speed during actions
+        private float _currentMoveSpeed; // Tracks current movement speed for sprint lerp
 
         private int _animIDSpeedX = Animator.StringToHash("SpeedX");
         private int _animIDSpeedZ = Animator.StringToHash("SpeedZ");
@@ -78,6 +81,8 @@ namespace LichLord
             _moveVelocity = Vector3.zero;
             _jumpBufferTimer = 0f;
             _jumpInputBuffered = false;
+            _castSpeedMultiplier = 1f;
+            _currentMoveSpeed = WalkSpeed; // Initialize to walk speed
         }
 
         public void Respawn()
@@ -87,6 +92,8 @@ namespace LichLord
             _jumpHeldTime = 0f;
             _jumpBufferTimer = 0f;
             _jumpInputBuffered = false;
+            _castSpeedMultiplier = 1f;
+            _currentMoveSpeed = WalkSpeed; // Reset to walk speed
         }
 
         public override void Render()
@@ -98,14 +105,10 @@ namespace LichLord
 
             var moveSpeed = transform.InverseTransformVector(KCC.RealVelocity);
 
-            /*
             Animator.SetFloat(_animIDSpeedX, moveSpeed.x, 0.1f, Time.deltaTime);
             Animator.SetFloat(_animIDSpeedZ, moveSpeed.z, 0.1f, Time.deltaTime);
             Animator.SetBool(_animIDGrounded, KCC.IsGrounded);
             Animator.SetFloat(_animIDPitch, KCC.GetLookRotation(true, false).x, 0.02f, Time.deltaTime);
-            Animator.SetBool(_animIDJump, CurrentMovementState == MovementState.Jumping);
-            Animator.SetBool(_animIDFreeFall, KCC.RealVelocity.y < -10f && !KCC.IsGrounded && CurrentMovementState != MovementState.Flying);
-            */
 
             FootstepSound.enabled = KCC.IsGrounded && KCC.RealSpeed > 1f;
             ScalingRoot.localScale = Vector3.Lerp(ScalingRoot.localScale, Vector3.one, Time.deltaTime * 8f);
@@ -124,12 +127,22 @@ namespace LichLord
             ProcessMovementInput(PlayerInput.CurrentInput);
         }
 
+        public void SetCastSpeedMultiplier(float multiplier)
+        {
+            _castSpeedMultiplier = multiplier;
+        }
+
         public void ProcessMovementInput(GameplayInput input)
         {
             KCC.SetLookRotation(input.LookRotation, -90f, 90f);
 
             var moveDirection = KCC.TransformRotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
-            float currentSpeed = input.Sprint ? SprintSpeed : WalkSpeed;
+
+            // Lerp current move speed toward target speed (WalkSpeed or SprintSpeed)
+            float targetSpeed = input.Sprint ? SprintSpeed : WalkSpeed;
+            float lerpSpeed = Mathf.Lerp(_currentMoveSpeed, targetSpeed, Runner.DeltaTime / SprintAccelerationTime);
+            _currentMoveSpeed = lerpSpeed;
+            float currentSpeed = _currentMoveSpeed * _castSpeedMultiplier;
             var desiredMoveVelocity = moveDirection * currentSpeed;
 
             float acceleration = desiredMoveVelocity == Vector3.zero
@@ -190,7 +203,7 @@ namespace LichLord
 
                     if (input.JumpHeld)
                     {
-                        _verticalInput += (JumpHoldVelcity * Runner.DeltaTime);
+                        _verticalInput += (JumpHoldVelocity * Runner.DeltaTime);
                         _jumpHeldTime += Runner.DeltaTime;
                     }
 
@@ -218,7 +231,7 @@ namespace LichLord
                         }
                     }
 
-                    horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, SprintSpeed);
+                    horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, SprintSpeed * _castSpeedMultiplier);
                     _moveVelocity = new Vector3(horizontalVelocity.x, _verticalInput, horizontalVelocity.z);
 
                     KCC.Move(_moveVelocity, 0f);
@@ -238,7 +251,7 @@ namespace LichLord
                         _verticalInput = Mathf.Lerp(_verticalInput, 0, FlyVerticalBraking * Runner.DeltaTime);
                     }
 
-                    horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, FlyHorizontalSpeed);
+                    horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, FlyHorizontalSpeed * _castSpeedMultiplier);
                     _moveVelocity = new Vector3(horizontalVelocity.x, _verticalInput, horizontalVelocity.z);
 
                     KCC.Move(_moveVelocity, 0f);
