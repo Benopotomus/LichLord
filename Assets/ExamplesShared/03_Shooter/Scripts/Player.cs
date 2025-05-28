@@ -182,6 +182,7 @@ namespace Starter.Shooter
 
 		private void LateUpdate()
 		{
+			return;
 			if (Health.IsAlive == false)
 				return;
 

@@ -16,8 +16,6 @@ namespace LichLord
         public float cameraDistance = 4f;
         public float cameraHeight = 1.5f;
 
-        private PlayerCharacterInput _playerInput;
-
         private bool isFirstPerson = false;
 
         public override void Spawned()
@@ -40,29 +38,19 @@ namespace LichLord
             }
         }
 
-        void Start()
-        {
-            _playerInput = GetComponent<PlayerCharacterInput>();
-            if (!_playerInput)
-                Debug.LogError("[PlayerCameraController] Missing PlayerCharacterInput component.");
-
-        }
-
-        void LateUpdate()
+        public void ProcessInput(GameplayInput input)
         {
             if (!HasStateAuthority)
                 return;
 
-            if (_playerInput == null) return;
-
-            if (_playerInput.CurrentInput.ToggleCameraView)
+            if (input.ToggleCameraView)
             {
                 isFirstPerson = !isFirstPerson;
                 CameraManager.Instance.SetCameraView(isFirstPerson);
             }
 
-            firstPersonFollowTarget.rotation = Quaternion.Euler(_playerInput.CurrentInput.LookRotation);
-            thirdPersonFollowTarget.rotation = Quaternion.Euler(_playerInput.CurrentInput.LookRotation);
+            firstPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
+            thirdPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
 
         }
 

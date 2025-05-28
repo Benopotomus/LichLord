@@ -17,52 +17,49 @@ namespace LichLord
         [Networked] private TickTimer CooldownTimer { get; set; }
         [Networked] private TickTimer AnimationTimer { get; set; }
 
-        private PlayerCharacterInput _playerInput;
-        private CharacterMovement _characterMovement;
-        private PlayerCharacter _playerCharacter; // For OnEnemyKilled callback
-        private NetworkObject _networkObject;
+        [SerializeField] private PlayerCreatureInput _playerInput;
+        [SerializeField] private CreatureMovement _characterMovement;
+        [SerializeField] private PlayerCreature _playerCharacter;
+        [SerializeField] private NetworkObject _networkObject;
+        private bool _hasInitializedSelection; // Track if initial selection is set
 
         public override void Spawned()
         {
             base.Spawned();
-            _playerInput = GetComponent<PlayerCharacterInput>();
-            _characterMovement = GetComponent<CharacterMovement>();
-            _playerCharacter = GetComponent<PlayerCharacter>();
-            _networkObject = GetComponent<NetworkObject>();
-
-            if (!_playerInput)
-                Debug.LogError("[ActionManager] Missing PlayerCharacterInput component.");
-            if (!_characterMovement)
-                Debug.LogError("[ActionManager] Missing CharacterMovement component.");
-            if (!_playerCharacter)
-                Debug.LogError("[ActionManager] Missing PlayerCharacter component.");
-            if (!actionSpawnPoint)
-                Debug.LogError("[ActionManager] Action spawn point not assigned.");
-            if (availableActions.Count == 0)
-                Debug.LogWarning("[ActionManager] No actions assigned to availableActions list.");
-            if (!gunModel)
-                Debug.LogError("[ActionManager] Gun model not assigned in Inspector.");
-            if (!gunMuzzleParticle)
-                Debug.LogError("[ActionManager] Gun muzzle particle not assigned in Inspector.");
 
             if (HasStateAuthority)
             {
-                SelectedActionIndex = -1;
+                // Automatically select element 0 (slot 1) if available
+                if (availableActions.Count > 0)
+                {
+                    SelectedActionIndex = 0;
+                    _hasInitializedSelection = true;
+                    RPC_LogActionSelection(0); // Notify clients of initial selection
+                    Debug.Log($"[ActionManager] Automatically selected action: {availableActions[0].ActionName} (Type: {availableActions[0].Type}, Index: 0)");
+                }
+                else
+                {
+                    SelectedActionIndex = -1;
+                    Debug.LogWarning("[ActionManager] No actions available, no initial selection set.");
+                }
                 CooldownTimer = TickTimer.None;
                 AnimationTimer = TickTimer.None;
             }
 
-            UpdateGunModelVisibility(); // Initialize gun model visibility
+            UpdateGunModelVisibility();
         }
 
-        public override void FixedUpdateNetwork()
+        // Called From FSM
+        public void ProcessInput(GameplayInput input)
         {
-            if (!HasStateAuthority || _playerInput == null) return;
+            if (!HasStateAuthority) return;
 
-            ProcessActionSelection(_playerInput.CurrentInput);
+            ProcessActionSelection(input);
 
-            if (_playerInput.CurrentInput.Fire)
+            if (input.Fire)
             {
+                Debug.Log("Fire Pressed");
+
                 if (SelectedActionIndex < 0 || SelectedActionIndex >= availableActions.Count)
                 {
                     Debug.Log("[ActionManager] Fire input (LMB) ignored: No action selected or invalid index.");
@@ -103,26 +100,55 @@ namespace LichLord
 
         private void ProcessActionSelection(GameplayInput input)
         {
-            if (SelectedActionIndex - 1 == input.ActionSelection)
+            int newIndex = -1; // Default to no selection
+            // Handle scroll delta
+            if (input.ScrollDelta != 0 && availableActions.Count > 1)
+            {
+                int delta = input.ScrollDelta > 0 ? 1 : -1; // 120 -> 1, -120 -> -1
+                newIndex = (SelectedActionIndex + delta + availableActions.Count) % availableActions.Count;
+                Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
+            }
+
+            if (input.ActionSelection > 0)
+            {
+                Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}");
+                newIndex = input.ActionSelection - 1; // 1-based to 0-based
+            }
+
+            // Early exit for invalid ActionSelection
+            if (newIndex >= availableActions.Count)
+            {
+                Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (exceeds availableActions.Count={availableActions.Count})");
+                return;
+            }
+
+            if (newIndex < 0)
                 return;
 
-            if (input.ActionSelection == 0)
+            // Skip if no change in selection
+            if (newIndex == SelectedActionIndex)
+                return;
+
+            // Update selection
+            UpdateActionSelection(newIndex);
+        }
+
+        private void UpdateActionSelection(int newIndex)
+        {
+            SelectedActionIndex = newIndex;
+            _hasInitializedSelection = newIndex >= 0; // True if a valid action is selected
+            RPC_LogActionSelection(newIndex);
+
+            if (newIndex >= 0 && newIndex < availableActions.Count)
             {
-                if (SelectedActionIndex != -1)
-                {
-                    SelectedActionIndex = -1;
-                    RPC_LogActionSelection(-1);
-                    Debug.Log("[ActionManager] Action selection cleared");
-                    UpdateGunModelVisibility();
-                }
+                Debug.Log($"[ActionManager] Selected action: {availableActions[newIndex].ActionName} (Index: {newIndex})");
             }
-            else if (input.ActionSelection > 0 && input.ActionSelection <= availableActions.Count)
+            else
             {
-                SelectedActionIndex = input.ActionSelection - 1;
-                RPC_LogActionSelection(SelectedActionIndex);
-                Debug.Log($"[ActionManager] Selected action: {availableActions[SelectedActionIndex].ActionName} (Index: {SelectedActionIndex})");
-                UpdateGunModelVisibility();
+                Debug.Log("[ActionManager] Action selection cleared");
             }
+
+            UpdateGunModelVisibility();
         }
 
         private void ExecuteAction(ActionData data)
@@ -173,7 +199,7 @@ namespace LichLord
                 }
                 if (data.ActionEffect != null)
                 {
-                    data.ActionEffect.Play(); // Play spell-specific particle effect
+                    data.ActionEffect.Play();
                 }
             }
             else if (data.Type == ActionType.Gun)
@@ -197,7 +223,7 @@ namespace LichLord
 
                 if (gunMuzzleParticle != null)
                 {
-                    gunMuzzleParticle.Play(); // Play muzzle flash on gun model
+                    gunMuzzleParticle.Play();
                 }
                 else
                 {
@@ -211,7 +237,7 @@ namespace LichLord
 
             if (data.ActionSound != null)
             {
-                AudioSource.PlayClipAtPoint(data.ActionSound, actionSpawnPoint.position); // Play gun sound
+                AudioSource.PlayClipAtPoint(data.ActionSound, actionSpawnPoint.position);
             }
         }
 
@@ -221,11 +247,11 @@ namespace LichLord
             if (gunModel != null)
             {
                 gunModel.SetActive(isGunSelected);
-                //Debug.Log($"[ActionManager] Gun model {(isGunSelected ? "enabled" : "disabled")} for action index {SelectedActionIndex}");
+                Debug.Log($"[ActionManager] Gun model {(isGunSelected ? "enabled" : "disabled")} for action index {SelectedActionIndex}");
             }
             else if (isGunSelected)
             {
-                //Debug.LogError("[ActionManager] Gun model is not assigned but Gun action is selected.");
+                Debug.LogError("[ActionManager] Gun model is not assigned but Gun action is selected.");
             }
         }
 
@@ -234,11 +260,11 @@ namespace LichLord
         {
             if (actionIndex == -1)
             {
-                //Debug.Log("[ActionManager] Player cleared action selection");
+                Debug.Log("[ActionManager] Player cleared action selection");
             }
             else if (availableActions.Count > actionIndex)
             {
-                //Debug.Log($"[ActionManager] Player selected action: {availableActions[actionIndex].ActionName} (Index: {actionIndex})");
+                Debug.Log($"[ActionManager] Player selected action: {availableActions[actionIndex].ActionName} (Type: {availableActions[actionIndex].Type}, Index: {actionIndex})");
             }
         }
 
@@ -248,10 +274,16 @@ namespace LichLord
             Debug.Log($"[ActionManager] Player executed action: {actionName}");
             if (_characterMovement != null && _characterMovement.Animator != null && !string.IsNullOrEmpty(animationTrigger))
             {
-                _characterMovement.Animator.SetTrigger(animationTrigger); // Triggers "Shoot" for gun
+                _characterMovement.Animator.SetTrigger(animationTrigger);
             }
         }
 
         public int GetSelectedActionIndex => SelectedActionIndex;
+
+        // Provide access to availableActions.Count
+        public int GetAvailableActionsCount()
+        {
+            return availableActions.Count;
+        }
     }
 }

@@ -16,13 +16,13 @@ namespace Starter.Shooter
 
 		private SpawnPoint[] _spawnPoints;
 
-		public Vector3 GetSpawnPosition()
-		{
-			var spawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
-			var randomPositionOffset = Random.insideUnitCircle * spawnPoint.Radius;
-			return spawnPoint.transform.position + new Vector3(randomPositionOffset.x, 0f, randomPositionOffset.y);
-		}
-
+        public Vector3 GetSpawnPosition()
+        {
+            var spawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
+            var randomPositionOffset = Random.insideUnitCircle * spawnPoint.Radius;
+            return spawnPoint.transform.position + new Vector3(randomPositionOffset.x, 0f, randomPositionOffset.y);
+        }
+        
 		public override void Spawned()
 		{
 			_spawnPoints = FindObjectsOfType<SpawnPoint>();

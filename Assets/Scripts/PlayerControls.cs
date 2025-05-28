@@ -206,6 +206,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Scroll"",
+                    ""type"": ""Value"",
+                    ""id"": ""09107ada-81c0-4a06-8c32-1d7e05437f0a"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -712,6 +721,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Action9"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""84cab245-04fb-4550-b76b-212b60e4edb1"",
+                    ""path"": ""<Mouse>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Scroll"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1319,6 +1339,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Action7 = m_Gameplay.FindAction("Action7", throwIfNotFound: true);
         m_Gameplay_Action8 = m_Gameplay.FindAction("Action8", throwIfNotFound: true);
         m_Gameplay_Action9 = m_Gameplay.FindAction("Action9", throwIfNotFound: true);
+        m_Gameplay_Scroll = m_Gameplay.FindAction("Scroll", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1412,6 +1433,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Action7;
     private readonly InputAction m_Gameplay_Action8;
     private readonly InputAction m_Gameplay_Action9;
+    private readonly InputAction m_Gameplay_Scroll;
     public struct GameplayActions
     {
         private @PlayerControls m_Wrapper;
@@ -1436,6 +1458,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Action7 => m_Wrapper.m_Gameplay_Action7;
         public InputAction @Action8 => m_Wrapper.m_Gameplay_Action8;
         public InputAction @Action9 => m_Wrapper.m_Gameplay_Action9;
+        public InputAction @Scroll => m_Wrapper.m_Gameplay_Scroll;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1505,6 +1528,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Action9.started += instance.OnAction9;
             @Action9.performed += instance.OnAction9;
             @Action9.canceled += instance.OnAction9;
+            @Scroll.started += instance.OnScroll;
+            @Scroll.performed += instance.OnScroll;
+            @Scroll.canceled += instance.OnScroll;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -1569,6 +1595,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Action9.started -= instance.OnAction9;
             @Action9.performed -= instance.OnAction9;
             @Action9.canceled -= instance.OnAction9;
+            @Scroll.started -= instance.OnScroll;
+            @Scroll.performed -= instance.OnScroll;
+            @Scroll.canceled -= instance.OnScroll;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -1771,6 +1800,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnAction7(InputAction.CallbackContext context);
         void OnAction8(InputAction.CallbackContext context);
         void OnAction9(InputAction.CallbackContext context);
+        void OnScroll(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
