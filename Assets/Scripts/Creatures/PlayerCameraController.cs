@@ -38,19 +38,19 @@ namespace LichLord
             }
         }
 
-        public void ProcessInput(GameplayInput input)
+        public void ProcessInput(FGameplayInput input)
         {
             if (!HasStateAuthority)
                 return;
+
+            firstPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
+            thirdPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
 
             if (input.ToggleCameraView)
             {
                 isFirstPerson = !isFirstPerson;
                 CameraManager.Instance.SetCameraView(isFirstPerson);
             }
-
-            firstPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
-            thirdPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
 
         }
 

@@ -1,5 +1,5 @@
 
-namespace LichLord.Projeciles
+namespace LichLord.Projectiles
 {
     using Fusion;
     using UnityEngine;

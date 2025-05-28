@@ -5,7 +5,7 @@ using Starter.Shooter;
 
 namespace LichLord
 {
-    public class ActionManager : NetworkBehaviour
+    public class CreatureActions : NetworkBehaviour
     {
         [Header("Action Setup")]
         [SerializeField] private List<ActionData> availableActions = new List<ActionData>();
@@ -17,10 +17,8 @@ namespace LichLord
         [Networked] private TickTimer CooldownTimer { get; set; }
         [Networked] private TickTimer AnimationTimer { get; set; }
 
-        [SerializeField] private PlayerCreatureInput _playerInput;
-        [SerializeField] private CreatureMovement _characterMovement;
-        [SerializeField] private PlayerCreature _playerCharacter;
-        [SerializeField] private NetworkObject _networkObject;
+        [SerializeField] private PlayerCreature _playerCreature;
+
         private bool _hasInitializedSelection; // Track if initial selection is set
 
         public override void Spawned()
@@ -50,7 +48,7 @@ namespace LichLord
         }
 
         // Called From FSM
-        public void ProcessInput(GameplayInput input)
+        public void ProcessInput(FGameplayInput input)
         {
             if (!HasStateAuthority) return;
 
@@ -85,20 +83,17 @@ namespace LichLord
                 RPC_NotifyActionExecution(availableActions[SelectedActionIndex].ActionName, availableActions[SelectedActionIndex].AnimationTrigger);
             }
 
-            if (_characterMovement != null)
+            if (AnimationTimer.ExpiredOrNotRunning(Runner))
             {
-                if (AnimationTimer.ExpiredOrNotRunning(Runner))
-                {
-                    _characterMovement.SetCastSpeedMultiplier(1f);
-                }
-                else
-                {
-                    _characterMovement.SetCastSpeedMultiplier(availableActions[SelectedActionIndex].MovementSpeedMultiplier);
-                }
+                _playerCreature.Movement.SetCastSpeedMultiplier(1f);
+            }
+            else
+            {
+                _playerCreature.Movement.SetCastSpeedMultiplier(availableActions[SelectedActionIndex].MovementSpeedMultiplier);
             }
         }
 
-        private void ProcessActionSelection(GameplayInput input)
+        private void ProcessActionSelection(FGameplayInput input)
         {
             int newIndex = -1; // Default to no selection
             // Handle scroll delta
@@ -161,7 +156,7 @@ namespace LichLord
                     var health = hit.collider.GetComponentInParent<Health>();
                     if (health != null)
                     {
-                        health.Killed = enemyHealth => _playerCharacter.OnEnemyKilled(enemyHealth);
+                        health.Killed = enemyHealth => _playerCreature.OnEnemyKilled(enemyHealth);
                         health.TakeHit(data.Damage, true);
                     }
                     Debug.Log($"[ActionManager] Melee hit {hit.collider.gameObject.name} with {data.ActionName}, damage: {data.Damage}");
@@ -191,7 +186,7 @@ namespace LichLord
                         var health = hit.collider.GetComponentInParent<Health>();
                         if (health != null)
                         {
-                            health.Killed = enemyHealth => _playerCharacter.OnEnemyKilled(enemyHealth);
+                            health.Killed = enemyHealth => _playerCreature.OnEnemyKilled(enemyHealth);
                             health.TakeHit(data.Damage, true);
                         }
                         Debug.Log($"[ActionManager] Spell hit {hit.collider.gameObject.name} with {data.ActionName}, damage: {data.Damage}");
@@ -213,7 +208,7 @@ namespace LichLord
                     var health = hit.collider.GetComponentInParent<Health>();
                     if (health != null)
                     {
-                        health.Killed = enemyHealth => _playerCharacter.OnEnemyKilled(enemyHealth);
+                        health.Killed = enemyHealth => _playerCreature.OnEnemyKilled(enemyHealth);
                         health.TakeHit(data.Damage, true);
                     }
                     hitPosition = hit.point;
@@ -272,9 +267,9 @@ namespace LichLord
         private void RPC_NotifyActionExecution(string actionName, string animationTrigger)
         {
             Debug.Log($"[ActionManager] Player executed action: {actionName}");
-            if (_characterMovement != null && _characterMovement.Animator != null && !string.IsNullOrEmpty(animationTrigger))
+            if (_playerCreature.Animator != null && !string.IsNullOrEmpty(animationTrigger))
             {
-                _characterMovement.Animator.SetTrigger(animationTrigger);
+                _playerCreature.Animator.SetTrigger(animationTrigger);
             }
         }
 

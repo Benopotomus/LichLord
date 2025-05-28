@@ -117,13 +117,13 @@ namespace LichLord
             _castSpeedMultiplier = multiplier;
         }
 
-        public void SetLookRotation(GameplayInput input)
+        public void SetLookRotation(FGameplayInput input)
         {
             KCC.SetLookRotation(input.LookRotation, -90f, 90f);
         }
 
         // Called from FSM
-        public void ProcessInput(GameplayInput input)
+        public void ProcessInput(FGameplayInput input)
         {
             KCC.SetLookRotation(input.LookRotation, -90f, 90f);
 

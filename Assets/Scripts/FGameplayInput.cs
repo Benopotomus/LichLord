@@ -2,7 +2,7 @@
 
 namespace LichLord
 {
-    public struct GameplayInput
+    public struct FGameplayInput
     {
         public Vector2 LookRotation;
         public Vector2 MoveDirection;

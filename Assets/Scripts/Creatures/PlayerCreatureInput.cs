@@ -5,16 +5,16 @@ namespace LichLord
 {
     public class PlayerCreatureInput : MonoBehaviour
     {
-        public GameplayInput CurrentInput => _input;
-        public GameplayInput PreviousInput { get; private set; }
+        public FGameplayInput CurrentInput => _input;
+        public FGameplayInput PreviousInput { get; private set; }
 
-        private GameplayInput _input;
+        private FGameplayInput _input;
         private PlayerControls _controls;
 
         private void Awake()
         {
             _controls = new PlayerControls();
-            _input = new GameplayInput { ActionSelection = 0 }; // Default to 0 per reset requirement
+            _input = new FGameplayInput { ActionSelection = 0 }; // Default to 0 per reset requirement
             Debug.Log($"[PlayerCharacterInput] Initialized ActionSelection={_input.ActionSelection}");
 
             // Bind Action1 to Action9 dynamically
@@ -72,7 +72,7 @@ namespace LichLord
             _input.Fire |= _controls.Gameplay.Fire.WasPressedThisFrame();
 
             _input.Sprint = _controls.Gameplay.Sprint.IsPressed();
-            _input.ToggleCameraView = _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
+            _input.ToggleCameraView |= _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
 
             // Scroll input
             if (_controls.Gameplay.Scroll.WasPerformedThisFrame())

@@ -13,7 +13,7 @@ namespace LichLord
 
         protected override void OnFixedUpdate()
         {
-            GameplayInput input = fsmRef.Creature.Input.CurrentInput;
+            FGameplayInput input = fsmRef.Creature.Input.CurrentInput;
             fsmRef.Creature.Movement.ProcessInput(input);
             fsmRef.Creature.Actions.ProcessInput(input);
             fsmRef.Creature.CameraController.ProcessInput(input);

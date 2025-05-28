@@ -20,7 +20,7 @@ namespace LichLord
         public CreatureMovement Movement;
         public PlayerCameraController CameraController;
         public PlayerCreatureInput Input;
-        public ActionManager Actions;
+        public CreatureActions Actions;
         public Animator Animator;
         public Transform CameraPivot;
         public UINameplate Nameplate;
@@ -99,7 +99,7 @@ namespace LichLord
             // Ensure ActionManager is assigned
             if (Actions == null)
             {
-                Actions = GetComponent<ActionManager>();
+                Actions = GetComponent<CreatureActions>();
                 if (Actions == null)
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }
