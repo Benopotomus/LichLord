@@ -7,12 +7,58 @@
       "dependencies": {},
       "hash": "2525aafcf6156d3a6c8c922a239dc8dd8095d251"
     },
+    "com.dicewrenchdesigns.dwddotweensequencer": {
+      "version": "https://github.com/dicewrench/DWD.Toolkit.DoTweenSequencer.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.dicewrenchdesigns.dwdpooling": "https://github.com/dicewrench/DWD.Toolkit.Pooling.git"
+      },
+      "hash": "d186289a5b740b29946630fccc42cf1df05498d9"
+    },
     "com.dicewrenchdesigns.dwdeditor": {
       "version": "https://github.com/dicewrench/DWD.Toolkit.Editor.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
       "hash": "815e01ded1a4c139d672bc586e9526236af53c3b"
+    },
+    "com.dicewrenchdesigns.dwdloading": {
+      "version": "https://github.com/dicewrench/DWD.Toolkit.Loading.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.editorcoroutines": "1.0.0",
+        "com.dicewrenchdesigns.dwdobjectid": "1.0.0",
+        "com.dicewrenchdesigns.dwdeditor": "1.0.0"
+      },
+      "hash": "7fc1b570467ade3f9fd9e1b3a46f62cab12aba70"
+    },
+    "com.dicewrenchdesigns.dwdlocalization": {
+      "version": "https://github.com/Dicewrench-Designs/DWD-Localization.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.dicewrenchdesigns.dwdobjectid": "1.0.0",
+        "com.dicewrenchdesigns.dwdloading": "1.0.0"
+      },
+      "hash": "e0a48ff84c3b2603ace17cb6bc6adf5dfd40d5af"
+    },
+    "com.dicewrenchdesigns.dwdobjectid": {
+      "version": "https://github.com/dicewrench/DWD.Toolkit.ObjectID.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.dicewrenchdesigns.dwdeditor": "1.0.0"
+      },
+      "hash": "d48d7ccad1d84294e51f1648a850c3bd5bf68c1d"
+    },
+    "com.dicewrenchdesigns.dwdpooling": {
+      "version": "https://github.com/dicewrench/DWD.Toolkit.Pooling.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "d53cee02536938cbe38fdcd3697c66e4603f0fa0"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -54,6 +100,13 @@
     "com.unity.collab-proxy": {
       "version": "2.5.2",
       "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.editorcoroutines": {
+      "version": "1.0.0",
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
