@@ -2,14 +2,16 @@
 namespace LichLord.Projectiles
 {
     using UnityEngine;
-    //using DWD.Utility.Loading;
-   // using DWD.Pooling;
+    using DWD.Utility.Loading;
+    using DWD.Pooling;
     using Fusion;
+    using DG.Tweening;
+
     //using DG.Tweening;
 
     public class RenderProjectile
     {
-        /*
+        
         public ProjectilePool OwningPool { get; set; }
         public bool IsFinished { get; private set; }
 
@@ -34,7 +36,7 @@ namespace LichLord.Projectiles
         // Visuals
         private AssetBundleLoader PrefabLoader;
         public DWDObjectPoolObject VisualsPrefab { get; private set; }
-        public ProjectileVisual VisualsInstance { get; private set; }
+        public ProjectileVisualEffect VisualsInstance { get; private set; }
         private const bool _FORCE_WARMUP_VISUALS = false;
         private bool _hasWarmedUp = false;
 
@@ -52,15 +54,10 @@ namespace LichLord.Projectiles
             Definition = Global.Tables.ProjectileTable.TryGetDefinition(data.DefinitionID);
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;
-            SpawnPosition = data.Position.ToVector2();
-            TargetPosition = data.TargetPosition.ToVector2();
-            RenderPosition = data.Position.ToVector2();
 
             if (Definition != null)
             {
                 Definition.ProjectileMovement.ActivateRender(this, ref data);
-                RenderVelocity = Definition.ProjectileMovement.GetInitialVelocity(Definition, TargetPosition, SpawnPosition);
-                RenderRotation = Definition.ProjectileMovement.GetRotation(Definition, TargetPosition, SpawnPosition, RenderVelocity);
                 LoadVisualsPrefab(Definition.VisualsPrefab);
             }
         }
@@ -90,8 +87,7 @@ namespace LichLord.Projectiles
                 IsFinished = true;
                 return;
             }
-
-            
+  
             if (Definition == null || VisualsInstance == null)
                 return;
 
@@ -101,11 +97,7 @@ namespace LichLord.Projectiles
             }
 
             Timestamp = toData.FireTick * networkDelta;
-            TargetPosition = toData.TargetPosition.ToVector2();
-            float renderTime2 = OwningPool.HasInputAuthority ? Runner.LocalRenderTime : Runner.RemoteRenderTime;
-
-            float renderTimeSinceFired = renderTime2 - Timestamp;
-
+            float renderTimeSinceFired = renderTime - Timestamp;
             Definition.ProjectileMovement.OnRender(this, ref toData, ref fromData, bufferAlpha, localDelta, renderTimeSinceFired);
 
             VisualsInstance.UpdateVisuals(this);
@@ -164,7 +156,7 @@ namespace LichLord.Projectiles
                 _hasWarmedUp = true;
                 Shader.WarmupAllShaders();
             }
-            VisualsInstance = DWDObjectPool.Instance.SpawnAt(VisualsPrefab, RenderPosition, Quaternion.identity) as ProjectileVisual;
+            VisualsInstance = DWDObjectPool.Instance.SpawnAt(VisualsPrefab, RenderPosition, Quaternion.identity) as ProjectileVisualEffect;
 
             if (VisualsInstance != null)
                 VisualsInstance.InitializeVisuals(this);
@@ -172,6 +164,6 @@ namespace LichLord.Projectiles
                 Debug.LogWarning("Visual Instance for Projectile is null!  Object Pool failed to spawn for " + Definition.name);
         }
 
-        */
+        
     }
 }

@@ -2,7 +2,7 @@
 
 namespace LichLord.Projectiles
 {
-    [CreateAssetMenu(menuName = "Hallowheart/Projectiles/ProjectileTable")]
+    [CreateAssetMenu(menuName = "LichLord/Projectiles/ProjectileTable")]
     public class ProjectileTable : ObjectTable<ProjectileDefinition>
     {
 

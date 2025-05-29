@@ -301,6 +301,7 @@ GameObject:
   - component: {fileID: 4625314071529301451}
   - component: {fileID: 1776246608945052242}
   - component: {fileID: 1051259928070073083}
+  - component: {fileID: 4081789406591363571}
   - component: {fileID: 4155602845998252645}
   - component: {fileID: 6744880684058088246}
   m_Layer: 6
@@ -504,6 +505,18 @@ MonoBehaviour:
     StepRequireGroundTarget: 0
     SnapDistance: 0.25
     SnapSpeed: 4
+--- !u!114 &4081789406591363571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3562d1a79e42f624e9804557b883b27e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &4155602845998252645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -527,6 +540,7 @@ MonoBehaviour:
   - {fileID: 4625314071529301451}
   - {fileID: 1776246608945052242}
   - {fileID: 1051259928070073083}
+  - {fileID: 4081789406591363571}
   - {fileID: 7904855827506051427}
   - {fileID: 7134053186718281712}
   - {fileID: 3226170803067638791}

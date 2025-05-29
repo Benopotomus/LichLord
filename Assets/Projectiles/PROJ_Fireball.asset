@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
+  m_Name: PROJ_Fireball
+  m_EditorClassIdentifier: 
+  _tableID: 1
+  _lifetime: 10
+  _deactivationSpawnedProjectiles: []
+  _projectileMovement: {fileID: 11400000, guid: 339f033f4deb71d4e9d8f12a1f09c1af,
+    type: 2}
+  _speed: 0
+  _impactCollisionLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  _overlapCollisionLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _extents: {x: 0, y: 0, z: 0}
+  _onlyAffectsOnce: 0
+  _affectsEachCast: 0
+  _collisionCheckTrim: {x: 0, y: 0}
+  _collisionCheckRate: 0
+  _collisionSweepsPerTick: 1
+  _collisionCheckNumber: 4
+  _onlyAffectImpactTarget: 0
+  _lineOfSightLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _visualsPrefab:
+    _name: PROJ_VIS_Fireball
+    _bundle: proj_vis_fireball
+  _height: 0
+  _impactSticksToHitActor: 0
+  _homesAtApex: 0

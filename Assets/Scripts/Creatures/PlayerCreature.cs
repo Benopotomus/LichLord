@@ -7,13 +7,14 @@ using Fusion.Addons.SimpleKCC;
 using UnityEngine.Rendering;
 using Starter.Shooter;
 using Starter;
+using LichLord.Projectiles;
 
 namespace LichLord
 {
     /// <summary>
     /// Main player script - controls player movement, actions, and animations.
     /// </summary>
-    public sealed class PlayerCreature : NetworkBehaviour
+    public sealed class PlayerCreature : NetworkBehaviour , INetActor, IHitInstigator, IHitTarget
     {
         [Header("References")]
         public Health Health;
@@ -21,6 +22,7 @@ namespace LichLord
         public PlayerCameraController CameraController;
         public PlayerCreatureInput Input;
         public CreatureActions Actions;
+        public PlayerProjectilePool ProjectilePool;
         public Animator Animator;
         public Transform CameraPivot;
         public UINameplate Nameplate;
@@ -48,6 +50,16 @@ namespace LichLord
         /// A static dictionary that contains lists of all the players in the game, using NetworkRunners as the keys to account for multi-peer mode
         /// </summary>
         public static Dictionary<NetworkRunner, List<Player>> PlayerListDictionary { get; set; }
+
+        public FNetObjectID NetObjectID
+        {
+            get => Object != null ? new FNetObjectID { guid = Object.Id } : default;
+        }
+
+        bool IHitTarget.IsActive => true;
+        INetActor IHitTarget.NetActor => this;
+        INetActor IHitInstigator.NetActor => this;
+
         public static bool TryGetLocalPlayer(NetworkRunner runner, out Player player)
         {
             if (runner == null)
@@ -158,6 +170,21 @@ namespace LichLord
                 return; // Do not show nickname for local player
 
             Nameplate.SetNickname(Nickname);
+        }
+
+        void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        void IHitTarget.ProcessHit(ref FHitUtilityData hit)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        void IHitTarget.OnHitTaken(ref FHitUtilityData hit)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

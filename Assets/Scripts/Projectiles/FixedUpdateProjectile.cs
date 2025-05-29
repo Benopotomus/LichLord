@@ -7,32 +7,30 @@ namespace LichLord.Projectiles
 
     public class FixedUpdateProjectile
     {
-        /*
+        
         public int Index { get; set; }
         public ProjectilePool OwningPool { get; set; }
         public SceneContext Context { get; set; }
-        public PlayerRef InputAuthority { get; set; }
+        public PlayerRef StateAuthority { get; set; }
+        public NetworkRunner Runner => OwningPool.Runner;
 
         public ProjectileDefinition Definition { get; private set; }
         public IHitInstigator Instigator { get; set; }
         public INetActor Target { get; private set; }
-        public Vector2 SpawnPosition { get; private set; }
-        public Vector2 TargetPosition { get; private set; }
         public float Timestamp { get; set; }
         public int FireTick { get; set; }
 
         public FProjectilePayload Payload = new FProjectilePayload();
         public FProjectilePayload Payload_SpawnedProjectile = new FProjectilePayload();
 
-        public NetworkRunner Runner => OwningPool.Runner;
-        public float SimTimeSinceFired { get => Runner.SimulationTime - Timestamp; }
-
-        public Vector2 FixedUpdatePosition { get; set; }
-        public float FixedUpdateRotation { get; set; }
-        public Vector2 FixedUpdateVelocity { get; set; }
+        public Vector3 FixedUpdatePosition { get; set; }
+        public Quaternion FixedUpdateRotation { get; set; }
+        public Vector3 FixedUpdateVelocity { get; set; }
 
         public float Lifetime { get; set; }
         public bool IsDataSet { get; set;}
+
+        //FProjectileCollisionEvent _collisionEvent = new FProjectileCollisionEvent();
 
         // Collisions
         private List<IHitTarget> AffectedActors = new List<IHitTarget>();
@@ -54,24 +52,8 @@ namespace LichLord.Projectiles
             Definition = Global.Tables.ProjectileTable.TryGetDefinition(data.DefinitionID);
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;
-            SpawnPosition = data.Position.ToVector2();
-            TargetPosition = data.TargetPosition.ToVector2();
             Instigator = data.InstigatorID.GetHitInstigator(Runner);
-            FixedUpdatePosition = SpawnPosition;
-
-            if (Definition != null)
-            {
-                Lifetime = Definition.Lifetime;
-
-                ProjectileMovement projectileMovement = Definition.ProjectileMovement;
-                if (projectileMovement != null)
-                {
-                    projectileMovement.ActivateFixedUpdate(this, ref data);
-                    FixedUpdateVelocity = projectileMovement.GetInitialVelocity(Definition, TargetPosition, SpawnPosition);
-                    FixedUpdateRotation = projectileMovement.GetRotation(Definition, TargetPosition, SpawnPosition, FixedUpdateVelocity);
-                }
-            }
-
+            FixedUpdatePosition = data.Position;
             IsDataSet = true;
         }
 
@@ -163,6 +145,7 @@ namespace LichLord.Projectiles
 
         private void CollideWithHitData(ref FProjectileData data, ref FPhysicsHitData hitData, int tick)
         {
+            /*
             Vector2 sourcePosition = hitData.ProjectilePosition;
             Vector2 targetTestPosition = hitData.HitObject.transform.position.ToVector2();
             IHitTarget currentActor = hitData.HitTarget;
@@ -195,16 +178,17 @@ namespace LichLord.Projectiles
                 
             }
             HandleActorCollision(currentActor, ref data, sourcePosition, ref hitData, tick);
+            */
         }
 
-        FProjectileCollisionEvent _collisionEvent = new FProjectileCollisionEvent();
-
+        
         public void HandleActorCollision(IHitTarget collidedActor, 
             ref FProjectileData data, 
             Vector2 sourcePosition,
             ref FPhysicsHitData hitdata,
             int tick)
         {
+            /*
             _collisionEvent.projectile = this;
             _collisionEvent.hitTarget = collidedActor;
             _collisionEvent.collideTick = OwningPool.Runner.Tick;
@@ -212,6 +196,7 @@ namespace LichLord.Projectiles
             _collisionEvent.impactRotationRadians = GetImpactRotationRadiansFromActor(ref hitdata);
 
             Definition.ImpactResponse.HandleCollisionHitActor(this, ref data, ref _collisionEvent, tick);
+        */
         }
 
         public void HandleImpact(IHitTarget collidedActor,
@@ -219,6 +204,7 @@ namespace LichLord.Projectiles
             ref FPhysicsHitData hitdata,
             int tick)
         {
+            /*
             _collisionEvent.projectile = this;
             _collisionEvent.hitTarget = collidedActor;
             _collisionEvent.collideTick = OwningPool.Runner.Tick;
@@ -230,15 +216,17 @@ namespace LichLord.Projectiles
                 Definition.ImpactResponse.SpawnGameplayEffectsForInstigator(this, ref data, ref _collisionEvent, tick);
                 data.InstigatorEffectApplied = true;
             }
+            */
         }
 
-        public float GetImpactRotationRadiansFromActor(ref FPhysicsHitData hitData)
+        public Quaternion GetImpactRotationRadiansFromActor(ref FPhysicsHitData hitData)
         {
-            return GetImpactRotationRadians(hitData.HitObject.transform.position);
+            return GetImpactRotation(hitData.HitObject.transform.position);
         }
 
-        public float GetImpactRotationRadians(Vector2 impactPosition)
+        public Quaternion GetImpactRotation(Vector3 impactPosition)
         {
+            /*
             //Debug.Log("Hit Object Position: " + impactPosition + ", FixedUpdatePosition: " + FixedUpdatePosition);
             switch (Definition.EffectSource)
             {
@@ -260,12 +248,15 @@ namespace LichLord.Projectiles
                 default:
                     return 0f;
             }
+            */
+
+            return Quaternion.identity;
         }
 
         private List<GameObject> GetIgnoreGameObjects(INetActor currentActor)
         {
             List<GameObject> ignoredGameObjects = new List<GameObject>();
-
+            /*
             if (Instigator.NetActor.ActorNode != null) // instigator can be null before this goes through
             {
                 HitboxComponent ignoredHitBox = NetActorUtility.GetActorHitbox(Instigator.NetActor);
@@ -283,12 +274,13 @@ namespace LichLord.Projectiles
                 if (ignoredHitBox != null)
                     ignoredGameObjects.Add(ignoredHitBox.gameObject);
             }
-
+            */
             return ignoredGameObjects;
         }
 
         public void SpawnDeactivationProjectiles(ref FProjectileData data, ref FPhysicsHitData impactHit)
         {
+            /*
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
             for (int i = 0; i < Definition.DeactivationSpawnedProjectiles.Count; i++)
             {
@@ -310,7 +302,8 @@ namespace LichLord.Projectiles
 
                 OwningPool.SpawnProjectile(fireEvent);
             }
+            */
         }
-        */
+        
     }
 }

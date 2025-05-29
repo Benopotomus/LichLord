@@ -1,192 +1,151 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
 using UnityEngine;
+using DWD.Utility.Loading;
 using Fusion;
-using System;
 
 namespace LichLord
 {
-    public interface IGlobalService
-    {
-        void Initialize();
-        void Tick();
-        void Deinitialize();
-    }
-
-    [System.Serializable]
-    public static class Global
+    /// <summary>
+    /// Manages global resources and initialization, persisting across all scenes.
+    /// Automatically created at runtime and remains active for the entire game.
+    /// </summary>
+    public class Global : MonoBehaviour
     {
         // PUBLIC MEMBERS
-
-        [SerializeField]
-        public static GlobalSettings Settings;
-        [SerializeField]
-        public static GlobalTables Tables;
-        [SerializeField]
-        public static Networking Networking;
-        /*
-            [SerializeField]
-            public static RuntimeSettings RuntimeSettings;
-            [SerializeField]
-            public static PlayerService PlayerService;
-
-            [SerializeField]
-            public static MultiplayManager MultiplayManager;
-        */
-
+        public static GlobalSettings Settings { get; private set; }
+        public static GlobalTables Tables { get; private set; }
+        public static RuntimeSettings RuntimeSettings { get; private set; }
+        public static Networking Networking { get; private set; }
+        public static bool IsInitialized { get; private set; }
+        public static event Action OnInitialized;
 
         // PRIVATE MEMBERS
+        private const string SETTINGS_BUNDLE = "globalsettings";
+        private const string TABLES_BUNDLE = "globaltables";
+        private static Global _instance;
 
-        private static bool _isInitialized = false;
-public static bool IsInitialized { get { return _isInitialized; } }
+        [SerializeField] private AssetBundleManager _assetBundleManager;
+        // PUBLIC METHODS
 
-public static Action OnInitialized;
+        private void Awake()
+        {
+            // Ensure only one Global instance exists
+            if (_instance != null && _instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
 
-public static void SetInitialized(bool value)
-{
-    _isInitialized = value;
-    OnInitialized?.Invoke();
-}
+            _instance = this;
+            DontDestroyOnLoad(gameObject); // Persist across scenes
+            StartCoroutine(InitializeCoroutine());
+        }
 
-private static List<IGlobalService> _globalServices = new List<IGlobalService>(16);
+        private void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                Deinitialize();
+                _instance = null;
+            }
+        }
 
-// PUBLIC METHODS
-
-public static void Quit()
-{
-    Deinitialize();
-
+        /// <summary>
+        /// Quits the application, cleaning up global resources.
+        /// </summary>
+        public static void Quit()
+        {
+            if (Application.isPlaying)
+            {
+                Deinitialize();
 #if UNITY_EDITOR
-    UnityEditor.EditorApplication.isPlaying = false;
+                UnityEditor.EditorApplication.isPlaying = false;
 #else
-    Application.Quit();
+           Application.Quit();
 #endif
-}
-
-// PRIVATE METHODS
-
-[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-private static void InitializeSubSystem()
-{
-    /*
-    if (Application.isBatchMode == true)
-    {
-        UnityEngine.AudioListener.volume = 0.0f;
-        PlayerLoopUtility.RemovePlayerLoopSystems(typeof(PostLateUpdate.UpdateAudio));
-    }
-
-#if UNITY_EDITOR
-    if (Application.isPlaying == false)
-        return;
-#endif
-    if (PlayerLoopUtility.HasPlayerLoopSystem(typeof(Global)) == false)
-    {
-        PlayerLoopUtility.AddPlayerLoopSystem(typeof(Global), typeof(Update.ScriptRunBehaviourUpdate), BeforeUpdate, AfterUpdate);
-    }
-    */
-        Application.quitting -= OnApplicationQuit;
-            Application.quitting += OnApplicationQuit;
-
-            //_isInitialized = true;
+            }
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void InitializeBeforeSceneLoad()
+        // PRIVATE METHODS
+        /// <summary>
+        /// Creates a Global instance if none exists.
+        /// </summary>
+        private static void EnsureInstance()
         {
-            Initialize();
-
-            // You can pause network services here
-            /*
-            if (ApplicationSettings.IsBatchServer == true)
+            if (_instance == null)
             {
-                Application.targetFrameRate = TickRate.Resolve(NetworkProjectConfig.Global.Simulation.TickRateSelection).Server;
+                var go = new GameObject(nameof(Global));
+                _instance = go.AddComponent<Global>();
             }
-
-            if (ApplicationSettings.HasFrameRate == true)
-            {
-                Application.targetFrameRate = ApplicationSettings.FrameRate;
-            }
-            */
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void InitializeAfterSceneLoad()
+        /// <summary>
+        /// Initializes global resources by loading asset bundles.
+        /// </summary>
+        private IEnumerator InitializeCoroutine()
         {
-            // You can unpause network services here
+            Instantiate(_assetBundleManager);
+
+            // Wait for AssetBundleManager to be ready
+            while (AssetBundleManager.Instance == null || !AssetBundleManager.Instance.ReadyToLoad)
+                yield return null;
+
+            // Load settings bundle
+            var settingsLoader = AssetBundleManager.Instance.LoadBundle(SETTINGS_BUNDLE, false) as AssetBundleLoader;
+            while (!settingsLoader.IsLoaded)
+                yield return null;
+            Settings = settingsLoader.GetAsset<GlobalSettings>();
+            if (Settings == null)
+            {
+                Debug.LogError($"Failed to load {SETTINGS_BUNDLE} asset.", this);
+                yield break;
+            }
+
+            // Load tables bundle
+            var tableLoader = AssetBundleManager.Instance.LoadBundle(TABLES_BUNDLE, false) as AssetBundleLoader;
+            while (!tableLoader.IsLoaded)
+                yield return null;
+            Tables = tableLoader.GetAsset<GlobalTables>();
+            if (Tables == null)
+            {
+                Debug.LogError($"Failed to load {TABLES_BUNDLE} asset.", this);
+                yield break;
+            }
+
+            // Initialize runtime settings and networking
+            RuntimeSettings = new RuntimeSettings();
+            RuntimeSettings.Initialize(Settings);
+            Networking = CreateStaticObject<Networking>();
+
+            // Mark as initialized
+            IsInitialized = true;
+            OnInitialized?.Invoke();
         }
 
-        private static void Initialize()
-        {
-            /*
-            if (GlobalInitializer.Instance == null)
-            {
-                GameObject go = new GameObject("GlobalInitializer");
-                GlobalInitializer init = go.AddComponent<GlobalInitializer>();
-                init.InitializeGlobals();
-            }
-            else
-            {
-                GlobalInitializer.Instance.InitializeGlobals();
-            }
-            */
-        }
-
+        /// <summary>
+        /// Cleans up global resources.
+        /// </summary>
         private static void Deinitialize()
         {
-            if (_isInitialized == false)
+            if (!IsInitialized)
                 return;
 
-            for (int i = _globalServices.Count - 1; i >= 0; i--)
-            {
-                var service = _globalServices[i];
-                if (service != null)
-                {
-                    service.Deinitialize();
-                }
-            }
-
-            _isInitialized = false;
+            IsInitialized = false;
+            Settings = null;
+            Tables = null;
+            RuntimeSettings = null;
+            Networking = null;
+            OnInitialized = null; // Clear event handlers
         }
 
-        private static void OnApplicationQuit()
+        /// <summary>
+        /// Creates a persistent GameObject with the specified component.
+        /// </summary>
+        private static T CreateStaticObject<T>() where T : Component
         {
-            Deinitialize();
-        }
-
-        private static void BeforeUpdate()
-        {
-            for (int i = 0; i < _globalServices.Count; i++)
-            {
-                _globalServices[i].Tick();
-            }
-        }
-
-        private static void AfterUpdate()
-        {
-            if (Application.isPlaying == false)
-            {
-                // PlayerLoopUtility.RemovePlayerLoopSystems(typeof(Global));
-            }
-        }
-
-        public static void PrepareGlobalServices()
-        {
-              /*
-            //PlayerService = new PlayerService();
-
-            //_globalServices.Add(PlayerService);
-          
-            for (int i = 0; i < _globalServices.Count; i++)
-            {
-                _globalServices[i].Initialize();
-            }
-              */
-        }
-
-        public static T CreateStaticObject<T>() where T : Component
-        {
-            GameObject gameObject = new GameObject(typeof(T).Name);
-            UnityEngine.Object.DontDestroyOnLoad(gameObject);
-
+            var gameObject = new GameObject(typeof(T).Name);
+            DontDestroyOnLoad(gameObject);
             return gameObject.AddComponent<T>();
         }
     }

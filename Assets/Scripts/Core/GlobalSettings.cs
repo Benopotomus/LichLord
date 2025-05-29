@@ -5,7 +5,7 @@ using Fusion;
 namespace LichLord
 {
     [Serializable]
-    [CreateAssetMenu(fileName = "GlobalSettings", menuName = "Hallowheart/Settings/Global Settings")]
+    [CreateAssetMenu(fileName = "GlobalSettings", menuName = "LichLord/Settings/Global Settings")]
     public class GlobalSettings : ScriptableObject
     {
         public NetworkRunner RunnerPrefab;
@@ -19,13 +19,14 @@ namespace LichLord
         public ScenesSettings Scenes;
         public GameSessionSettings GameSessions;
         public NetworkSettings Network;
+        */
 
         [Space]
         public OptionsData DefaultOptions;
 
         [Space]
         public StandaloneConfiguration DebugConnection;
-        */
+
 
     }
 }

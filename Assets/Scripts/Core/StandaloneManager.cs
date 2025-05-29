@@ -47,16 +47,6 @@ namespace LichLord
 
         // MONOBEHAVIOUR
 
-        [SerializeField]
-        GlobalSettings _globalSettings;
-
-
-        protected void Awake()
-        {
-            Global.Networking = Global.CreateStaticObject<Networking>();
-            Global.Settings = _globalSettings;
-        }
-
         protected IEnumerator Start()
         {
             StandaloneConfiguration configuration = ExternalConfiguration ?? _defaultConfiguration;
@@ -64,6 +54,9 @@ namespace LichLord
 
             if(!EnableStandaloneManager)
                 yield break;
+
+            while (Global.IsInitialized == false)
+                yield return null;
 
             var scenePath = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
 

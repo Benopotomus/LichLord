@@ -5,10 +5,8 @@ namespace LichLord.Projectiles
     using UnityEngine;
     using System.Collections.Generic;
 
-
-    public partial class ProjectilePool : NetworkBehaviour
+    public partial class ProjectilePool : ContextBehaviour
     {
-        /*
         protected const int MAX_PROJECTILE_COUNT = 64;
 
         [Networked, Capacity(MAX_PROJECTILE_COUNT)]
@@ -52,7 +50,7 @@ namespace LichLord.Projectiles
                 projectile.Index = i;
                 projectile.OwningPool = this;
                 projectile.Context = Context;
-                projectile.InputAuthority = Object.InputAuthority;
+                projectile.StateAuthority = Object.InputAuthority;
                 _fixedUpdateProjectiles[i] = projectile;
             }
         }
@@ -130,7 +128,7 @@ namespace LichLord.Projectiles
 
             int bufferLength = _projectileDatas.Length;
 
-            float ping = (float)Runner.GetPlayerRtt(Object.InputAuthority);
+            float ping = (float)Runner.GetPlayerRtt(Object.StateAuthority);
 
             // If our predicted views were not confirmed by the server, discard them
             for (int i = fromDataCount; i < _viewCount; i++)
@@ -238,28 +236,15 @@ namespace LichLord.Projectiles
             data.DefinitionID = (ushort)definition.TableID;
             data.FireTick = fireEvent.fireTick;
             data.Position = fireEvent.spawnPosition;
-            data.TargetPosition = fireEvent.targetPosition;
-
-            if (fireEvent.spawnItem != null)
-                data.SpawnItemData.Item = fireEvent.spawnItem.ToItemData();
-            else
-                data.SpawnItemData.Item.Clear();
 
             ProjectileMovement projectileMovement = definition.ProjectileMovement;
-
-            if (projectileMovement is EncirclingMovement)
-                data.EncircleData.AttachedActorID = fireEvent.instigator.NetActor.NetObjectID;
-            else if (projectileMovement is BouncingMovement)
-                data.BounceData.BounceCount = 0;
-            else if (projectileMovement is LinearDynamicSpeedMovement)
-                if (fireEvent.overrideSpeed != 0)
-                    data.DynamicSpeedData.SpeedPercent = (fireEvent.overrideSpeed);
 
             return data;
         }
 
         void OnDrawGizmos()
         {
+            /*
             if (_fixedUpdateProjectiles == null) return;
 
             for (int i = 0; i < MAX_PROJECTILE_COUNT; i++)
@@ -294,6 +279,7 @@ namespace LichLord.Projectiles
                 // Restore default transformation
                 Gizmos.matrix = Matrix4x4.identity;
             }
+            */
         }
 
         protected class ViewEntry
@@ -301,8 +287,6 @@ namespace LichLord.Projectiles
             public RenderProjectile Projectile;
             public FProjectileData LastData;
         }
-
-                */
     }
 
 

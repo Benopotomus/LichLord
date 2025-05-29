@@ -35,14 +35,23 @@ namespace LichLord
 
         public NetworkObject GetNetObject(NetworkRunner runner)
         {
-            if (!IsValid())
-                return null;
+            return IsValid() ? runner.FindObject(guid) : null;
+        }
 
-            NetworkObject netObject = runner.FindObject(guid);
-            if (netObject == null)
-                return null;
+        public T GetComponent<T>(NetworkRunner runner) where T : class
+        {
+            var netObject = GetNetObject(runner);
+            return netObject != null ? netObject.GetComponent<T>() : null;
+        }
 
-            return netObject;
+        public IHitInstigator GetHitInstigator(NetworkRunner runner)
+        {
+            return GetComponent<IHitInstigator>(runner);
+        }
+
+        public IHitTarget GetHitTarget(NetworkRunner runner)
+        {
+            return GetComponent<IHitTarget>(runner);
         }
 
         // Override Equals

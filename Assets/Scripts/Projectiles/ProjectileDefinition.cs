@@ -1,19 +1,16 @@
+using DWD.Utility.Loading;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.Projectiles
 {
-    [CreateAssetMenu(menuName = "Hallowheart/Projectiles/ProjectileDefinition")]
+    [CreateAssetMenu(menuName = "LichLord/Projectiles/ProjectileDefinition")]
     public class ProjectileDefinition : TableObject
     {
         //Definitions
         [SerializeField]
         protected float _lifetime;
         public float Lifetime => _lifetime;
-
-        [SerializeField] // the time after the lifetime has passed that it remains active, but finished
-        protected float _finshedDuration;
-        public float FinshedDuration => _finshedDuration;
 
         [SerializeField]
         protected List<ProjectileDefinition> _deactivationSpawnedProjectiles = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);
@@ -75,9 +72,10 @@ namespace LichLord.Projectiles
         public LayerMask LineOfSightLayer => _lineOfSightLayer;
 
         //Visuals
+        [BundleObject(typeof(GameObject))]
         [SerializeField]
-        protected GameObject _visualsPrefab;
-        public GameObject VisualsPrefab => _visualsPrefab;
+        protected BundleObject _visualsPrefab;
+        public BundleObject VisualsPrefab => _visualsPrefab;
 
         //[SerializeField]
         //protected ImpactDefinition _impactDefinition;

@@ -27,7 +27,7 @@ namespace LichLord.Projectiles
         [FieldOffset(12)]
         public Vector3Compressed Position;
         [FieldOffset(24)]
-        public Vector3Compressed Velocity;
+        public Vector3Compressed TargetPosition;
         [FieldOffset(36)]
 
         // Custom Data

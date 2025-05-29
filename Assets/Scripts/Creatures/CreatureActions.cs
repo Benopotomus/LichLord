@@ -168,7 +168,7 @@ namespace LichLord
                 {
                     Vector3 spawnPos = actionSpawnPoint.position;
                     Quaternion spawnRot = actionSpawnPoint.rotation;
-                    var projectile = Runner.Spawn(data.ProjectilePrefab, spawnPos, spawnRot, Object.InputAuthority);
+                    var projectile = Runner.Spawn(data.ProjectilePrefab, spawnPos, spawnRot);
                     if (projectile != null)
                     {
                         var rb = projectile.GetComponent<Rigidbody>();

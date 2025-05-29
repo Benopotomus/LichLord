@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LichLord.Projectiles;
+using System;
 using UnityEngine;
 
 namespace LichLord
@@ -7,6 +8,8 @@ namespace LichLord
     [CreateAssetMenu(fileName = "GlobalTables", menuName = "LichLord/Tables/GlobalTables")]
     public class GlobalTables : ScriptableObject
     {
+        public ProjectileTable ProjectileTable;
+
         /*
         public ItemTable ItemTable;
         public PropTable PropTable;
@@ -16,7 +19,7 @@ namespace LichLord
         public TileScriptTable TileScriptTable;
         public GameplayEffectTable GameplayEffectTable;
         public ExecutionTable ExecutionTable;
-        public ProjectileTable ProjectileTable;
+
         public ImpactTable ImpactTable;
         public EnchantmentTable EnchantmentTable;
         public StatNameTable StatNameTable;
