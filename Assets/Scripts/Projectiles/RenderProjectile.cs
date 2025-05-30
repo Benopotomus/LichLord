@@ -26,10 +26,9 @@ namespace LichLord.Projectiles
         public INetActor EncircleAttachedActor { get; set; }
         public Vector2 EncircleDirection { get; set; }
 
-        public Vector2 RenderPosition { get; set; }
-        public float RenderRotation { get; set; }
-        public Vector2 RenderVelocity { get; set; }
-        public float RenderHeight { get; set; }
+        public Vector3 RenderPosition { get; set; }
+        public Quaternion RenderRotation { get; set; }
+        public Vector3 RenderVelocity { get; set; }
 
         public NetworkRunner Runner => OwningPool.Runner;
 
@@ -54,7 +53,7 @@ namespace LichLord.Projectiles
             Definition = Global.Tables.ProjectileTable.TryGetDefinition(data.DefinitionID);
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;
-
+            
             if (Definition != null)
             {
                 Definition.ProjectileMovement.ActivateRender(this, ref data);
@@ -67,9 +66,9 @@ namespace LichLord.Projectiles
             Definition = null;
             Timestamp = 0f;
             FireTick = 0;
-            SpawnPosition = Vector2.zero;
-            TargetPosition = Vector2.zero;
-            RenderRotation = 0;
+            SpawnPosition = Vector3.zero;
+            TargetPosition = Vector3.zero;
+            RenderRotation = Quaternion.identity;
 
             ClearVisuals();
         }

@@ -15,39 +15,31 @@ namespace LichLord.Projectiles
             float deltaTime,
             float renderTimeSinceFired)
         {
-            /*
-            Vector2 lastPosition = projectile.RenderPosition;
-            Vector2 newRenderTargetPosition = GetLinearMovePosition(projectile.Definition, ref toData, renderTimeSinceFired);
+            Vector3 lastPosition = projectile.RenderPosition;
+            Vector3 newRenderTargetPosition = GetLinearMovePosition(projectile.Definition, ref toData, renderTimeSinceFired);
             float interpolationProgress = 0f;
 
-            if (newRenderTargetPosition != toData.Position.ToVector2())
-            {
-                // Do not start interpolation until projectile should actually move
-                projectile.InterpolationTime += Time.deltaTime;
-                interpolationProgress = Mathf.Clamp01(projectile.InterpolationTime / projectile.InterpolationDuration);
-            }
-
+            // Do not start interpolation until projectile should actually move
+            projectile.InterpolationTime += Time.deltaTime;
+            interpolationProgress = Mathf.Clamp01(projectile.InterpolationTime / projectile.InterpolationDuration);
+            
             var lerpPosition = Vector3.Lerp(projectile.RenderPosition, newRenderTargetPosition, interpolationProgress);
 
             projectile.RenderPosition = lerpPosition;
             projectile.RenderVelocity = projectile.RenderPosition - lastPosition;
-            projectile.RenderRotation = GetRotation(projectile.Definition, toData.TargetPosition.ToVector2(), toData.Position.ToVector2(), projectile.RenderVelocity);
-            projectile.RenderHeight = GetHeightFromFloor(projectile, projectile.RenderPosition, renderTimeSinceFired);
-            */
+            projectile.RenderRotation = GetRotation(projectile.Definition, toData.TargetPosition, toData.Position, projectile.RenderVelocity);
         }
 
         private Vector3 GetLinearMovePosition(ProjectileDefinition definition, 
             ref FProjectileData toData, 
             float timeSinceFired)
         {
-            /*
+            
             if (timeSinceFired <= 0f)
                 return toData.Position;
 
-            Vector2 velocity = (toData.TargetPosition - toData.Position).ToVector2().normalized * definition.Speed;
-            return toData.Position.ToVector2() + (velocity * timeSinceFired);
-            */
-            return Vector3.zero;
+            Vector3 velocity = Vector3CompressedExtensions.SubtractAndNormalize(toData.TargetPosition, toData.Position) * definition.Speed;
+            return toData.Position + (velocity * timeSinceFired);
         }
 
         public override Vector3 GetInitialVelocity(ProjectileDefinition definition, 
@@ -66,7 +58,6 @@ namespace LichLord.Projectiles
             float simulationTime, 
             float deltaTime)
         {
-            /*
             ProjectileDefinition definition = projectile.Definition;
 
             float lastTimeSinceFired = ((tick - data.FireTick) - 1) * deltaTime;
@@ -76,19 +67,18 @@ namespace LichLord.Projectiles
 
             Vector2 newVelocity = newPosition - oldPosition;
 
-            float oldRotation = projectile.FixedUpdateRotation;
-            float newRotation = GetRotation(
+            Quaternion oldRotation = projectile.FixedUpdateRotation;
+            Quaternion newRotation = GetRotation(
                 projectile.Definition,
-                projectile.TargetPosition,
-                projectile.SpawnPosition,
+                data.TargetPosition,
+                data.Position,
                 projectile.FixedUpdateVelocity);
 
-            CheckAndHandleCollision(projectile, ref data, tick, simulationTime, oldPosition, newPosition, oldRotation, newRotation);
+            //CheckAndHandleCollision(projectile, ref data, tick, simulationTime, oldPosition, newPosition, oldRotation, newRotation);
 
             projectile.FixedUpdatePosition = newPosition;
             projectile.FixedUpdateVelocity = newVelocity;
             projectile.FixedUpdateRotation = newRotation;
-            */
         }
     }
 }

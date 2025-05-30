@@ -80,7 +80,7 @@ namespace LichLord.Projectiles
             if (Definition == null)
                 return;
 
-            if (Runner.SimulationTime >= (data.FireTick * deltaTime) + Lifetime)
+            if (Runner.SimulationTime >= (data.FireTick * deltaTime) + Definition.Lifetime)
             {
                 OnLifetimeExpired(ref data);
             }

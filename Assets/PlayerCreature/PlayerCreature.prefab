@@ -353,6 +353,7 @@ MonoBehaviour:
   CameraController: {fileID: 4625314071529301451}
   Input: {fileID: 5761594593767146104}
   Actions: {fileID: 576985687314793959}
+  ProjectilePool: {fileID: 4081789406591363571}
   Animator: {fileID: 4073002756564798429}
   CameraPivot: {fileID: 4348685969970783698}
   Nameplate: {fileID: 9066350602577507296}
@@ -405,13 +406,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   availableActions:
-  - {fileID: 11400000, guid: c99343f3cf003ec4b96f719243227f69, type: 2}
+  - {fileID: 11400000, guid: ab2eaa20b9837d04b8ecbc24c9441efc, type: 2}
   - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
   - {fileID: 11400000, guid: 6ae0811a92740524bac81d96653a2a22, type: 2}
-  actionSpawnPoint: {fileID: 848804875403309391}
+  ActionSpawnPoint: {fileID: 3591005714103112523}
+  _playerCreature: {fileID: 2971398371087610287}
   gunModel: {fileID: 4223813532148550129}
   gunMuzzleParticle: {fileID: 2310922988817635306}
-  _playerCreature: {fileID: 2971398371087610287}
 --- !u!114 &4625314071529301451
 MonoBehaviour:
   m_ObjectHideFlags: 0

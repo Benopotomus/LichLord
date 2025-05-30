@@ -11,6 +11,7 @@ namespace LichLord.Projectiles
         public virtual void ActivateRender(RenderProjectile projectile, 
             ref FProjectileData data)
         {
+            projectile.RenderPosition = data.Position;
         }
 
         public virtual void OnRender(RenderProjectile projectile,

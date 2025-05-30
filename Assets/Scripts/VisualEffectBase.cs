@@ -8,8 +8,8 @@ namespace LichLord
 
     public class VisualEffectBase : DWDObjectPoolObject
     {
-        [SerializeField] protected Transform _visualsSortingRoot;
-        public Transform VisualsRoot => _visualsSortingRoot;
+        [SerializeField] protected Transform _transform;
+        public Transform CachedTransform => _transform;
 
         [SerializeField] protected float _recycleDelay = 0;
 

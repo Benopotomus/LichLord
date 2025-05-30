@@ -6,10 +6,6 @@ namespace LichLord.Projectiles
 {
     public class ProjectileVisualEffect : VisualEffectBase
     {
-        [SerializeField] protected Transform _visual;
-        public Transform Visual => _visual;
-
-        [SerializeField] protected bool _orientUp;
         [SerializeField] protected CinemachineImpulseSource _cameraShake;
 
         protected Vector3 _workingPosition = Vector3.zero;
@@ -17,8 +13,6 @@ namespace LichLord.Projectiles
         protected Vector3 _workingScale = Vector3.one;
 
         public RenderProjectile Projectile { get; private set; }
-
-        [SerializeField] string _renderProjectileInfo;
 
         public virtual void InitializeVisuals(RenderProjectile projectile)
         {
@@ -36,6 +30,8 @@ namespace LichLord.Projectiles
                 _cameraShake.GenerateImpulse();
 
             onInitialized?.Invoke(this);
+
+            Debug.Log(projectile.RenderPosition);
         }
 
         public virtual void UpdateVisuals(RenderProjectile projectile)
@@ -55,23 +51,19 @@ namespace LichLord.Projectiles
         protected virtual void UpdateVisualsPosition(RenderProjectile projectile)
         {
             // Visuals Root is Shadow and the _visual is at projectile position
-            float height = projectile.RenderHeight;
-            //Debug.Log(height);
-            // Set the shadow position
-            _visualsSortingRoot.position = projectile.RenderPosition - new Vector2(0, height);
-            _visual.position = projectile.RenderPosition;
+            CachedTransform.position = projectile.RenderPosition;
 
         }
 
-        protected virtual float GetVisualsRotationDegrees(RenderProjectile projectile)
+        protected virtual Quaternion GetVisualsRotationDegrees(RenderProjectile projectile)
         {
-            return projectile.RenderRotation * Mathf.Rad2Deg;
+            return projectile.RenderRotation;
         }
 
         protected virtual void UpdateVisualsRotation(RenderProjectile projectile)
         {
-            _workingEulerAngles.z = GetVisualsRotationDegrees(projectile);
-            _visual.eulerAngles = _workingEulerAngles;
+            _workingEulerAngles = GetVisualsRotationDegrees(projectile).eulerAngles;
+            CachedTransform.eulerAngles = _workingEulerAngles;
         }
     }
 }

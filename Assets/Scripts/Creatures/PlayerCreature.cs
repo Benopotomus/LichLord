@@ -14,14 +14,14 @@ namespace LichLord
     /// <summary>
     /// Main player script - controls player movement, actions, and animations.
     /// </summary>
-    public sealed class PlayerCreature : NetworkBehaviour , INetActor, IHitInstigator, IHitTarget
+    public sealed class PlayerCreature : ContextBehaviour , INetActor, IHitInstigator, IHitTarget
     {
         [Header("References")]
         public Health Health;
         public CreatureMovement Movement;
         public PlayerCameraController CameraController;
         public PlayerCreatureInput Input;
-        public CreatureActions Actions;
+        public CreatureManeuvers Actions;
         public PlayerProjectilePool ProjectilePool;
         public Animator Animator;
         public Transform CameraPivot;
@@ -111,7 +111,7 @@ namespace LichLord
             // Ensure ActionManager is assigned
             if (Actions == null)
             {
-                Actions = GetComponent<CreatureActions>();
+                Actions = GetComponent<CreatureManeuvers>();
                 if (Actions == null)
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }

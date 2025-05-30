@@ -119,7 +119,7 @@ namespace LichLord
             if (_selfInitialize == true && IsActive == false)
             {
                 // UI cannot be initialized in Awake, Canvas elements need to Awake first
-                AddService(_context.UI);
+                //AddService(_context.UI);
                 //Debug.Log("Here");
                 yield return Activate();
             }

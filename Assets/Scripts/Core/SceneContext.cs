@@ -6,6 +6,7 @@
 namespace LichLord
 {
     using Fusion;
+    using LichLord.Projectiles;
     using LichLord.UI;
 
     [System.Serializable]
@@ -15,23 +16,24 @@ namespace LichLord
         public bool HasInput;
         public string PeerUserID;
 
-        public SceneUI UI;
+        //public SceneUI UI;
         public NetworkRunner Runner;
         public NetworkGame NetworkGame;
         public SpawnManager SpawnManager;
+        public ProjectileManager ProjectileManager;
+        public SceneCamera Camera;
 
         // General
         /*
         public ObjectCache ObjectCache;
         //public GeneralInput GeneralInput;
-        public SceneCamera Camera;
 
         public Matchmaking Matchmaking;
 
         public SceneInput Input;
 
         public ActorEventManager ActorEventManager;
-        public ProjectileManager ProjectileManager;
+
         public ImpactManager ImpactManager;
         public GameplayEffectManager GameplayEffectManager;
         public LevelManager LevelManager;

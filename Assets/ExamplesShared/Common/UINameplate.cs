@@ -17,7 +17,7 @@ namespace Starter
 			NicknameText.text = nickname;
 		}
 
-		private void Awake()
+		private void Start()
 		{
 			_cameraTransform = Camera.main.transform;
 			NicknameText.text = string.Empty;

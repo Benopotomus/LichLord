@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace LichLord.UI
 {
@@ -252,6 +253,12 @@ namespace LichLord.UI
 
         protected override sealed void OnInitialize()
         {
+            EventSystem eventSystem = Context.Runner.SimulationUnityScene.GetComponent<EventSystem>(true);
+            if (eventSystem != null)
+            {
+                eventSystem.gameObject.SetActive(true);
+            }
+
             Canvas = GetComponent<Canvas>();
             UICamera = Canvas.worldCamera;
             _views = GetComponentsInChildren<UIView>(true);

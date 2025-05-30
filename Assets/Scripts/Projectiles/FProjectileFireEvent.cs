@@ -15,14 +15,4 @@
         public FProjectilePayload payload;
         public FProjectilePayload payload_spawnedProjectile;
     }
-
-    public struct FProjectilePayload
-    {
-        public FDamagePotential damagePotential;
-
-        public void Copy(ref FProjectilePayload other)
-        {
-            damagePotential = other.damagePotential;
-        }
-    }
 }

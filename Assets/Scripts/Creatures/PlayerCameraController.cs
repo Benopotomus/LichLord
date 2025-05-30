@@ -5,7 +5,7 @@ using Fusion;
 
 namespace LichLord
 {
-    public class PlayerCameraController : NetworkBehaviour
+    public class PlayerCameraController : ContextBehaviour
     {
         [Header("Cinemachine Cameras")]
         public Transform firstPersonFollowTarget;
@@ -24,17 +24,9 @@ namespace LichLord
 
             if (HasStateAuthority)
             {
-                if (CameraManager.Instance != null)
-                {
-                    CameraManager.Instance.SetCameraTargets(
+                Context.Camera.SetCameraTargets(
                         firstPersonFollowTarget,
-                        thirdPersonFollowTarget
-                    );
-                }
-                else
-                {
-                    Debug.LogError("[PlayerCameraController] CameraManager instance not found!");
-                }
+                        thirdPersonFollowTarget);
             }
         }
 
@@ -49,7 +41,7 @@ namespace LichLord
             if (input.ToggleCameraView)
             {
                 isFirstPerson = !isFirstPerson;
-                CameraManager.Instance.SetCameraView(isFirstPerson);
+                Context.Camera.SetCameraView(isFirstPerson);
             }
 
         }

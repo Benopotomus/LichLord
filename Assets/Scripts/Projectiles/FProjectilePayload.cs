@@ -1,4 +1,4 @@
-﻿namespace LichLord
+﻿namespace LichLord.Projectiles
 {
     public struct FProjectilePayload
     {

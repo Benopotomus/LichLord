@@ -24,7 +24,7 @@ namespace LichLord.Projectiles
         {
             if (actor is PlayerCreature playerCreature)
             {
-                if (playerCreature.Object.HasStateAuthority)
+                if (playerCreature.HasStateAuthority)
                 {
                     return playerCreature.ProjectilePool;
                 }
