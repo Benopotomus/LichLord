@@ -62,10 +62,10 @@ namespace LichLord.Projectiles
 
             float lastTimeSinceFired = ((tick - data.FireTick) - 1) * deltaTime;
             float newTimeSinceFired = (tick - data.FireTick) * deltaTime;
-            Vector2 oldPosition = GetLinearMovePosition(definition,  ref data, lastTimeSinceFired);
-            Vector2 newPosition = GetLinearMovePosition(definition,  ref data, newTimeSinceFired);
+            Vector3 oldPosition = GetLinearMovePosition(definition,  ref data, lastTimeSinceFired);
+            Vector3 newPosition = GetLinearMovePosition(definition,  ref data, newTimeSinceFired);
 
-            Vector2 newVelocity = newPosition - oldPosition;
+            Vector3 newVelocity = newPosition - oldPosition;
 
             Quaternion oldRotation = projectile.FixedUpdateRotation;
             Quaternion newRotation = GetRotation(

@@ -30,8 +30,6 @@ namespace LichLord.Projectiles
                 _cameraShake.GenerateImpulse();
 
             onInitialized?.Invoke(this);
-
-            Debug.Log(projectile.RenderPosition);
         }
 
         public virtual void UpdateVisuals(RenderProjectile projectile)

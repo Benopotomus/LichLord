@@ -274,6 +274,7 @@ namespace LichLord.Projectiles
             data.DefinitionID = (ushort)definition.TableID;
             data.FireTick = fireEvent.fireTick;
             data.Position = fireEvent.spawnPosition;
+            data.TargetPosition = fireEvent.targetPosition;
 
             ProjectileMovement projectileMovement = definition.ProjectileMovement;
 
