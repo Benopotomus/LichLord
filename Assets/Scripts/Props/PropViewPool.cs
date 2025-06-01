@@ -1,9 +1,9 @@
-﻿namespace LichLord.Projectiles
+﻿namespace LichLord.Props
 {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
 
-    public class ViewPool<T> where T : new()
+    public class PropViewPool<T> where T : new()
     {
         // CONSTANTS
 
@@ -11,7 +11,7 @@
 
         // PUBLIC MEMBERS
 
-        public static readonly ViewPool<T> Shared = new();
+        public static readonly PropViewPool<T> Shared = new();
 
         // PRIVATE MEMBERS
 
@@ -58,18 +58,18 @@
         }
     }
 
-    public static class ViewPool
+    public static class PropViewPool
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>() where T : new()
         {
-            return ViewPool<T>.Shared.Get();
+            return PropViewPool<T>.Shared.Get();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Return<T>(T item) where T : new()
         {
-            ViewPool<T>.Shared.Return(item);
+            PropViewPool<T>.Shared.Return(item);
         }
     }
 

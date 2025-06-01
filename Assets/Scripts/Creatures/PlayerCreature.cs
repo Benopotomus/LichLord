@@ -1,9 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
-using Fusion.Addons.KCC;
-using Fusion.Addons.SimpleKCC;
 using UnityEngine.Rendering;
 using Starter.Shooter;
 using Starter;
@@ -41,16 +38,6 @@ namespace LichLord
 
         private GameManager _gameManager;
 
-        /// <summary>
-        /// A static dictionary of the local player, using the NetworkRunner as the key to account for multi-peer mode.
-        /// </summary>
-        public static Dictionary<NetworkRunner, Player> LocalPlayerDictionary { get; set; }
-
-        /// <summary>
-        /// A static dictionary that contains lists of all the players in the game, using NetworkRunners as the keys to account for multi-peer mode
-        /// </summary>
-        public static Dictionary<NetworkRunner, List<Player>> PlayerListDictionary { get; set; }
-
         public FNetObjectID NetObjectID
         {
             get => Object != null ? new FNetObjectID { guid = Object.Id } : default;
@@ -60,23 +47,28 @@ namespace LichLord
         INetActor IHitTarget.NetActor => this;
         INetActor IHitInstigator.NetActor => this;
 
-        public static bool TryGetLocalPlayer(NetworkRunner runner, out Player player)
+        public static bool TryGetLocalPlayer(NetworkRunner runner, out PlayerCreature playerCreature)
         {
-            if (runner == null)
-            {
-                player = null;
-                return false;
-            }
+            playerCreature = null;
 
-            if (LocalPlayerDictionary.TryGetValue(runner, out player))
-            {
-                return player != null;
-            }
-            return false;
+            if (runner == null)
+                return false;
+
+            runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObject);
+
+            if(playerObject == null)
+                return false;
+
+            playerCreature = playerObject.GetComponent<PlayerCreature>();
+            if (playerCreature == null)
+                return false;
+
+            return true;
         }
 
         public override void Spawned()
         {
+            Runner.SetPlayerObject(Runner.LocalPlayer, Object);
             Runner.SetPlayerAlwaysInterested(Runner.LocalPlayer, Object, true);
 
             if (HasStateAuthority)

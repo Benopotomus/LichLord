@@ -11,8 +11,8 @@ namespace LichLord.Projectiles
 
     public class RenderProjectile
     {
-        
         public ProjectilePool OwningPool { get; set; }
+        public NetworkRunner Runner => OwningPool.Runner;
         public bool IsFinished { get; private set; }
 
         public ProjectileDefinition Definition { get; private set; }
@@ -29,8 +29,6 @@ namespace LichLord.Projectiles
         public Vector3 RenderPosition { get; set; }
         public Quaternion RenderRotation { get; set; }
         public Vector3 RenderVelocity { get; set; }
-
-        public NetworkRunner Runner => OwningPool.Runner;
 
         // Visuals
         private AssetBundleLoader PrefabLoader;

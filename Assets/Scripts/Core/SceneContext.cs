@@ -7,6 +7,7 @@ namespace LichLord
 {
     using Fusion;
     using LichLord.Projectiles;
+    using LichLord.Props;
     using LichLord.UI;
 
     [System.Serializable]
@@ -21,6 +22,7 @@ namespace LichLord
         public NetworkGame NetworkGame;
         public SpawnManager SpawnManager;
         public ProjectileManager ProjectileManager;
+        public PropManager PropManager;
         public SceneCamera Camera;
 
         // General

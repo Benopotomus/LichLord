@@ -1,4 +1,5 @@
 ﻿using LichLord.Projectiles;
+using LichLord.Props;
 using System;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ namespace LichLord
     public class GlobalTables : ScriptableObject
     {
         public ProjectileTable ProjectileTable;
+        public PropTable PropTable;
 
         /*
         public ItemTable ItemTable;

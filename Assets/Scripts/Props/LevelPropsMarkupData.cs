@@ -3,8 +3,8 @@
 namespace LichLord.Props
 {
     [CreateAssetMenu(fileName = "PropPointMarkupData", menuName = "LichLord/Props/PropPointMarkupData")]
-    public class PropPointMarkupData : ScriptableObject
+    public class LevelPropsMarkupData : ScriptableObject
     {
-        public PropPointData[] propPoints;
+        public PropMarkupData[] propMarkupDatas;
     }
 }

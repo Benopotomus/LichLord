@@ -58,7 +58,7 @@ namespace LichLord.Projectiles
                         continue;
 
                     // Spawn a RenderProjectile for this projectile
-                    RenderProjectile projectile = ViewPool.Get<RenderProjectile>();
+                    RenderProjectile projectile = ProjectileViewPool.Get<RenderProjectile>();
                     if (projectile == null)
                     {
                         Debug.LogWarning($"[ProjectilePool] Failed to get RenderProjectile for index {i}");
@@ -69,7 +69,7 @@ namespace LichLord.Projectiles
                     projectile.ActivateRender(ref data);
 
                     // Create and store ViewEntry
-                    ViewEntry newEntry = ViewPool.Get<ViewEntry>();
+                    ViewEntry newEntry = ProjectileViewPool.Get<ViewEntry>();
                     newEntry.Projectile = projectile;
                     newEntry.LastData = data;
                     _views.Add(i, newEntry);
@@ -187,14 +187,14 @@ namespace LichLord.Projectiles
                 if (_views.TryGetValue(i, out ViewEntry oldEntry) == true)
                     continue;
 
-                RenderProjectile projectile = ViewPool.Get<RenderProjectile>();
+                RenderProjectile projectile = ProjectileViewPool.Get<RenderProjectile>();
                 if (projectile == null)
                     continue;
 
                 projectile.OwningPool = this;
                 projectile.ActivateRender(ref data);
 
-                ViewEntry newEntry = ViewPool.Get<ViewEntry>();
+                ViewEntry newEntry = ProjectileViewPool.Get<ViewEntry>();
                 newEntry.Projectile = projectile;
                 _views.Add(i, newEntry);
             }
@@ -251,7 +251,7 @@ namespace LichLord.Projectiles
         private void ReturnEntry(ViewEntry entry, bool misprediction)
         {
             ReturnView(entry.Projectile, misprediction);
-            ViewPool.Return(entry);
+            ProjectileViewPool.Return(entry);
         }
 
         protected void ReturnView(RenderProjectile projectile, bool misprediction)
