@@ -9,7 +9,7 @@ namespace LichLord.Props
         public int guid; // Unique identifier
         public Vector3 position; // World position
         public Quaternion rotation; // World rotation
-        public int definitionID; // PropDefinition.TableID
+        public int definitionId; // PropDefinition.TableID
         public uint data; // Custom runtime data (like FPropData.Data)
 
         public PropRuntimeState(int guid, 
@@ -21,7 +21,7 @@ namespace LichLord.Props
             this.guid = guid;
             this.position = position;
             this.rotation = rotation;
-            this.definitionID = propDefinitionId;
+            this.definitionId = propDefinitionId;
             this.data = data;
         }
     }

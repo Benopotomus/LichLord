@@ -36,7 +36,7 @@
             set => _stateData = value;
         }
 
-        public int PropGUID
+        public int GUID
         {
             get => _propGUID;
             set => _propGUID = value;
@@ -93,7 +93,7 @@
 
         public bool IsEqualToRuntimeData(PropRuntimeState other)
         {
-            if (_definitionId != other.definitionID)
+            if (_definitionId != other.definitionId)
                 return false;
 
             if (StateData != other.data)

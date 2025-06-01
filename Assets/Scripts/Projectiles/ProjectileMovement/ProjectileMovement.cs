@@ -54,9 +54,9 @@ namespace LichLord.Projectiles
             Quaternion oldRotation,
             Quaternion newRotation)
         {
-            /*
+            
             float simTimeSinceFired = simulationTime - (data.FireTick * projectile.Runner.DeltaTime);
-
+            /*
             if (ProjectileUtility.IsCollidingActive(projectile.Definition, simTimeSinceFired))
             {
                 int collisionCheckRate = projectile.Definition.CollisionCheckRate;

@@ -47,7 +47,6 @@ namespace LichLord.Projectiles
             Vector3 spawnPosition)
         {
             return Vector3.zero;
-            // return (targetPositon - spawnPosition).normalized * definition.Speed;
         }
 
         // FIXED UPDATE
@@ -74,7 +73,7 @@ namespace LichLord.Projectiles
                 data.Position,
                 projectile.FixedUpdateVelocity);
 
-            //CheckAndHandleCollision(projectile, ref data, tick, simulationTime, oldPosition, newPosition, oldRotation, newRotation);
+            CheckAndHandleCollision(projectile, ref data, tick, simulationTime, oldPosition, newPosition, oldRotation, newRotation);
 
             projectile.FixedUpdatePosition = newPosition;
             projectile.FixedUpdateVelocity = newVelocity;

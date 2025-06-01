@@ -34,8 +34,8 @@ namespace LichLord.Props
             }
 
             ref FPropData data = ref _propDatas.GetRef(_dataCount);
-            data.PropGUID = propRuntimeState.guid;
-            data.DefinitionID = propRuntimeState.definitionID;
+            data.GUID = propRuntimeState.guid;
+            data.DefinitionID = propRuntimeState.definitionId;
             data.Position = propRuntimeState.position;
             data.Rotation = propRuntimeState.rotation;
             data.IsActive = true;
@@ -70,24 +70,7 @@ namespace LichLord.Props
                 if (!data.IsActive)
                     continue;
 
-                // Find corresponding PropRuntimeState
-                PropRuntimeState runtimeState = propManager.RuntimePropStates[data.PropGUID];
-                if (runtimeState == null)
-                {
-                    Debug.LogWarning($"No PropRuntimeState found for guid {data.PropGUID}.", this);
-                    continue;
-                }
-
-                if (!data.IsEqualToRuntimeData(runtimeState))
-                {
-                    // Update PropRuntimeState
-                    runtimeState.position = data.Position;
-                    runtimeState.rotation = Quaternion.LookRotation(data.Forward, Vector3.up);
-                    runtimeState.definitionID = data.DefinitionID;
-                    runtimeState.data = data.StateData;
-
-                    // This should probably force an update on the propmanger render thread.
-                }
+                propManager.OverrideRuntimeData(ref data);
             }
         }
     }

@@ -8,17 +8,16 @@ namespace LichLord.Props
     public class PropManager : ContextBehaviour
     {
         [SerializeField] private PropSpawner _propSpawner;
-
         [SerializeField] private LevelPropsMarkupData levelPropsMarkupData;
-        [SerializeField] private PropReplicationData propReplicationPrefab; 
-        [SerializeField] private string saveFileName = "PropSaveData.json"; // Save file name
-        [SerializeField] private float spawnRadius = 50f; // Distance to spawn props
-        [SerializeField] private float despawnRadius = 60f; // Distance to despawn props
+        [SerializeField] private PropReplicationData propReplicationPrefab;
+        [SerializeField] private string saveFileName = "PropSaveData.json";
+        [SerializeField] private float spawnRadius = 50f;
+        [SerializeField] private float despawnRadius = 60f;
 
-        public List<PropRuntimeState> RuntimePropStates = new List<PropRuntimeState>(); // index is GUID
-        private List<PropRuntimeState> deltaStates = new List<PropRuntimeState>(); // States that are different from base loaded defaults
+        [SerializeField] private List<PropRuntimeState> _runtimePropStates = new List<PropRuntimeState>(); // index is GUID
+        [SerializeField] private Dictionary<int, PropRuntimeState> _deltaStates = new Dictionary<int, PropRuntimeState>(); // Changed to Dictionary with guid as key
 
-        private List<PropLoadState> propLoadStates = new List<PropLoadState>(); 
+        private List<PropLoadState> _propLoadStates = new List<PropLoadState>();
         private List<PropReplicationData> propReplicators;
         private string saveFilePath;
 
@@ -68,43 +67,53 @@ namespace LichLord.Props
                     propMarkupData.propDefinition.TableID,
                     0);
 
-                RuntimePropStates.Add(propRuntimeState);
-                propLoadStates.Add(new PropLoadState());
+                _runtimePropStates.Add(propRuntimeState);
+                _propLoadStates.Add(new PropLoadState());
             }
         }
-        
+
         private void ApplySavedDelta()
         {
             // Load runtime state from file
             LoadSavedPropStates();
 
-            for (int i = 0; i < deltaStates.Count; i++)
+            foreach (PropRuntimeState deltaState in _deltaStates.Values)
             {
-                PropRuntimeState deltaState = deltaStates[i];
-                int guid = deltaStates[i].guid;
+                int guid = deltaState.guid;
 
-                //get a state and overwrite it
-                PropRuntimeState changedState = RuntimePropStates[guid];
+                // Ensure lists have enough capacity
+                while (_runtimePropStates.Count <= guid)
+                {
+                    _runtimePropStates.Add(null);
+                    _propLoadStates.Add(new PropLoadState());
+                }
+
+                // Update runtime state
+                PropRuntimeState changedState = _runtimePropStates[guid];
                 changedState.position = deltaState.position;
                 changedState.rotation = deltaState.rotation;
-                changedState.definitionID = deltaState.definitionID;
+                changedState.definitionId = deltaState.definitionId;
                 changedState.data = deltaState.data;
             }
 
-            int propReplicatorCount = (deltaStates.Count / PropConstants.MAX_PROP_REPS_NETOBJECT) + 1;
+            int propReplicatorCount = (_deltaStates.Count + PropConstants.MAX_PROP_REPS_NETOBJECT - 1) / PropConstants.MAX_PROP_REPS_NETOBJECT;
 
             for (int i = 0; i < propReplicatorCount; i++)
             {
                 var propReplicationObject = Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
-
                 propReplicators.Add(propReplicationObject);
-                
-                int startIndex = i * PropConstants.MAX_PROP_REPS_NETOBJECT;
-                int endIndex = Mathf.Min(startIndex + PropConstants.MAX_PROP_REPS_NETOBJECT, RuntimePropStates.Count);
 
-                for (int j = startIndex; j < endIndex; j++)
+                int startIndex = i * PropConstants.MAX_PROP_REPS_NETOBJECT;
+                int endIndex = Mathf.Min(startIndex + PropConstants.MAX_PROP_REPS_NETOBJECT, _deltaStates.Count);
+
+                int index = 0;
+                foreach (PropRuntimeState deltaState in _deltaStates.Values)
                 {
-                    propReplicationObject.AddProp(RuntimePropStates[j]);
+                    if (index >= startIndex && index < endIndex)
+                    {
+                        propReplicationObject.AddProp(deltaState);
+                    }
+                    index++;
                 }
             }
         }
@@ -120,16 +129,14 @@ namespace LichLord.Props
                 return;
 
             Vector3 viewPosition = playerCreature.transform.position;
-
             float renderDeltaTime = Runner.LocalAlpha;
 
-            for (int i = 0; i < RuntimePropStates.Count; i++)
+            for (int i = 0; i < _runtimePropStates.Count; i++)
             {
-                PropRuntimeState propState = RuntimePropStates[i];
-                PropLoadState propLoadState = propLoadStates[i];
+                PropRuntimeState propState = _runtimePropStates[i];
+                PropLoadState propLoadState = _propLoadStates[i];
 
                 float distance = Vector3.Distance(viewPosition, propState.position);
-
                 bool shouldBeActive = distance <= spawnRadius;
 
                 if (shouldBeActive && propLoadState.LoadState == ELoadState.None)
@@ -141,8 +148,7 @@ namespace LichLord.Props
                 {
                     propLoadState.Prop.UpdateProp(propState, renderDeltaTime);
                 }
-                else if (!shouldBeActive && distance > despawnRadius 
-                    && propLoadState.LoadState == ELoadState.Loaded)
+                else if (!shouldBeActive && distance > despawnRadius && propLoadState.LoadState == ELoadState.Loaded)
                 {
                     DespawnProp(propState.guid);
                 }
@@ -152,15 +158,14 @@ namespace LichLord.Props
         private void OnPropSpawned(PropRuntimeState propRuntimeState, Prop prop)
         {
             int guid = propRuntimeState.guid;
-
-            PropLoadState propLoadState = propLoadStates[guid];
+            PropLoadState propLoadState = _propLoadStates[guid];
             propLoadState.Prop = prop;
             propLoadState.LoadState = ELoadState.Loaded;
         }
 
         private void DespawnProp(int guid)
         {
-            PropLoadState propLoadState = propLoadStates[guid];
+            PropLoadState propLoadState = _propLoadStates[guid];
             if (propLoadState.LoadState == ELoadState.Loaded)
             {
                 propLoadState.Prop.StartRecycle();
@@ -168,9 +173,54 @@ namespace LichLord.Props
             }
         }
 
+        public void OverrideRuntimeData(ref FPropData data)
+        {
+            // Access PropManager
+            PropManager propManager = Context.PropManager;
+            if (propManager == null)
+            {
+                Debug.LogError("PropManager not found in Context.", this);
+                return;
+            }
+
+            // Ensure RuntimePropStates and propLoadStates have enough capacity
+            while (_runtimePropStates.Count <= data.GUID)
+            {
+                PropRuntimeState addedState = new PropRuntimeState(
+                    _runtimePropStates.Count,
+                    Vector3.zero,
+                    Quaternion.identity,
+                    0,
+                    0);
+
+                // Add to the runtime list and loadstate list
+                _runtimePropStates.Add(addedState);
+                _propLoadStates.Add(new PropLoadState());
+            }
+
+            PropRuntimeState modifiedState = _runtimePropStates[data.GUID];
+
+            if (!data.IsEqualToRuntimeData(modifiedState))
+            {
+                modifiedState.guid = data.GUID;
+                modifiedState.position = data.Position;
+                modifiedState.rotation = Quaternion.LookRotation(data.Forward, Vector3.up);
+                modifiedState.definitionId = data.DefinitionID;
+                modifiedState.data = data.StateData;
+            }
+
+            _deltaStates[data.GUID] = modifiedState;
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        private void RPC_ModifyProp(int guid)
+        {
+
+        }
+
         private void LoadSavedPropStates()
         {
-            deltaStates.Clear();
+            _deltaStates.Clear();
 
             if (File.Exists(saveFilePath))
             {
@@ -185,22 +235,25 @@ namespace LichLord.Props
                             int guid = entry.guid;
 
                             // Ensure lists have enough capacity
-                            while (RuntimePropStates.Count <= guid)
+                            while (_runtimePropStates.Count <= guid)
                             {
-                                RuntimePropStates.Add(null);
-                                propLoadStates.Add(new PropLoadState());
+                                _runtimePropStates.Add(null);
+                                _propLoadStates.Add(new PropLoadState());
                             }
 
-                            // Update or add runtime state
-                            RuntimePropStates[guid] = new PropRuntimeState(
+                            // Create runtime state
+                            PropRuntimeState runtimeState = new PropRuntimeState(
                                 guid,
                                 entry.position,
                                 entry.rotation,
                                 entry.definitionId,
                                 entry.data);
 
-                            // Add to deltaStates for chunk initialization
-                            deltaStates.Add(RuntimePropStates[guid]);
+                            // Update RuntimePropStates
+                            _runtimePropStates[guid] = runtimeState;
+
+                            // Add to deltaStates with guid as key
+                            _deltaStates[guid] = runtimeState;
                         }
                     }
                 }
@@ -216,16 +269,15 @@ namespace LichLord.Props
             try
             {
                 var entries = new List<PropSaveState>();
-                for (int i = 0; i < RuntimePropStates.Count; i++)
+                foreach (PropRuntimeState state in _deltaStates.Values)
                 {
-                    PropRuntimeState state = RuntimePropStates[i];
                     if (state != null) // Skip null entries
                     {
                         entries.Add(new PropSaveState(
                             state.guid,
                             state.position,
                             state.rotation,
-                            state.definitionID,
+                            state.definitionId,
                             state.data
                         ));
                     }
@@ -254,15 +306,16 @@ namespace LichLord.Props
                 try
                 {
                     File.Delete(saveFilePath);
-                    RuntimePropStates.Clear();
-                    foreach (var loadState in propLoadStates)
+                    _runtimePropStates.Clear();
+                    _deltaStates.Clear();
+                    foreach (var loadState in _propLoadStates)
                     {
                         if (loadState.LoadState == ELoadState.Loaded)
                         {
                             loadState.Prop.StartRecycle();
                         }
                     }
-                    propLoadStates.Clear();
+                    _propLoadStates.Clear();
                     Debug.Log("Runtime state reset to default LevelPropsMarkupData.");
                 }
                 catch (System.Exception e)

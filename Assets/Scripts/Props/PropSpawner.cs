@@ -11,11 +11,11 @@ namespace LichLord.Props
 
         public void SpawnProp(PropRuntimeState propRuntimeState)
         {
-            PropDefinition definition = Global.Tables.PropTable.TryGetDefinition(propRuntimeState.definitionID);
+            PropDefinition definition = Global.Tables.PropTable.TryGetDefinition(propRuntimeState.definitionId);
 
             if (definition == null)
             {
-                Debug.LogWarning("Trying to spawn prop with invalid definition, id: " + propRuntimeState.definitionID);
+                Debug.LogWarning("Trying to spawn prop with invalid definition, id: " + propRuntimeState.definitionId);
                 return;
             }
 
