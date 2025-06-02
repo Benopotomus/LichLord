@@ -4,13 +4,15 @@ using DWD.Pooling;
 
 namespace LichLord.Props
 {
-    public class Prop : DWDObjectPoolObject
+    public class Prop : DWDObjectPoolObject, IHitTarget
     {
         protected PropManager _propManager;
         protected PropRuntimeState _propRuntimeState;
 
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
+
+        public HurtboxComponent Hurtbox;
 
         public virtual void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
@@ -23,6 +25,13 @@ namespace LichLord.Props
 
         public virtual void UpdateProp(PropRuntimeState propState, float renderDeltaTime)
         {
+            if (propState.stateData == 1)
+            {
+                gameObject.SetActive(false);
+            }
+            else
+                gameObject.SetActive(true);
+
             /*
             // Update position and rotation
             Vector3 moveTarget = propData.Position;
@@ -50,6 +59,17 @@ namespace LichLord.Props
         public void StartRecycle()
         {
             DWDObjectPool.Instance.Recycle(this);
+        }
+
+        public void ProcessHit(ref FHitUtilityData hit)
+        {
+            Debug.Log("Process Hit");
+            _propManager.ApplyDamage(_propRuntimeState.guid, Vector3.zero, 9001);
+            //_propManager.RPC_ModifyProp()
+        }
+
+        public void OnHitTaken(ref FHitUtilityData hit)
+        {
         }
     }
 }

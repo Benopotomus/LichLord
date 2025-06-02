@@ -20,10 +20,10 @@ namespace LichLord
         public PlayerCreatureInput Input;
         public CreatureManeuvers Actions;
         public PlayerProjectilePool ProjectilePool;
+        public HurtboxComponent Hurtbox;
         public Animator Animator;
         public Transform CameraPivot;
         public UINameplate Nameplate;
-        public Collider Hurtbox;
         public Renderer[] HeadRenderers;
         public GameObject[] FirstPersonOverlayObjects;
 
@@ -33,8 +33,6 @@ namespace LichLord
 
         [Networked, HideInInspector, Capacity(24), OnChangedRender(nameof(OnNicknameChanged))]
         public string Nickname { get; set; }
-        [Networked, HideInInspector]
-        public int ChickenKills { get; set; }
 
         private GameManager _gameManager;
 
@@ -43,8 +41,6 @@ namespace LichLord
             get => Object != null ? new FNetObjectID { guid = Object.Id } : default;
         }
 
-        bool IHitTarget.IsActive => true;
-        INetActor IHitTarget.NetActor => this;
         INetActor IHitInstigator.NetActor => this;
 
         public static bool TryGetLocalPlayer(NetworkRunner runner, out PlayerCreature playerCreature)
@@ -143,7 +139,7 @@ namespace LichLord
 
         private void Respawn(Vector3 position)
         {
-            ChickenKills = 0;
+
             Health.Revive();
 
             Movement.KCC.SetPosition(position);
@@ -152,8 +148,6 @@ namespace LichLord
 
         public void OnEnemyKilled(Health enemyHealth)
         {
-            // Killing chicken grants 1 point, killing other player has -10 points penalty
-            ChickenKills += enemyHealth.GetComponent<Chicken>() != null ? 1 : -10;
         }
 
         private void OnNicknameChanged()
@@ -166,17 +160,17 @@ namespace LichLord
 
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
         void IHitTarget.ProcessHit(ref FHitUtilityData hit)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
         void IHitTarget.OnHitTaken(ref FHitUtilityData hit)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
     }
 }

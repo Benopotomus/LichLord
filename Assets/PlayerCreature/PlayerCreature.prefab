@@ -354,16 +354,15 @@ MonoBehaviour:
   Input: {fileID: 5761594593767146104}
   Actions: {fileID: 576985687314793959}
   ProjectilePool: {fileID: 4081789406591363571}
+  Hurtbox: {fileID: 1365664862452816086}
   Animator: {fileID: 4073002756564798429}
   CameraPivot: {fileID: 4348685969970783698}
   Nameplate: {fileID: 9066350602577507296}
-  Hurtbox: {fileID: 4418046949703133837}
   HeadRenderers: []
   FirstPersonOverlayObjects: []
   ChestTargetPosition: {fileID: 536988984119202717}
   ChestBone: {fileID: 1992701519831656905}
   _Nickname: 
-  _ChickenKills: 0
 --- !u!114 &7362189930313428062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -701,9 +700,11 @@ GameObject:
   m_Component:
   - component: {fileID: 4600737129142820866}
   - component: {fileID: 4418046949703133837}
+  - component: {fileID: 1365664862452816086}
+  - component: {fileID: 6473061361037763551}
   m_Layer: 8
   m_Name: HurtBox
-  m_TagString: Untagged
+  m_TagString: Undefined
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -737,6 +738,33 @@ CapsuleCollider:
   m_Height: 1.7
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1365664862452816086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4261313477181150585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b160ea708e51d134d92362fd75959145, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hurtBoxes:
+  - {fileID: 4418046949703133837}
+--- !u!114 &6473061361037763551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4261313477181150585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e45c0c9d6208e7d4581d8d4f14ecb433, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _owner: {fileID: 3123905968297068043}
 --- !u!1 &5779396718131720744
 GameObject:
   m_ObjectHideFlags: 0
@@ -5930,7 +5958,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6912795904567410480}
   m_LocalRotation: {x: 1.7763568e-15, y: -7.1054274e-15, z: 5.646419e-23, w: 1}
-  m_LocalPosition: {x: -0, y: 0.765, z: 0}
+  m_LocalPosition: {x: 2, y: 0.765, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

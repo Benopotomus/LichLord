@@ -1,45 +1,47 @@
 ﻿using Fusion;
 using UnityEngine;
-// Creates and manages a list of networked prop data
 
 namespace LichLord.Props
 {
-    public class PropReplicationData : ContextBehaviour, INetActor
+    public class PropReplicationData : ContextBehaviour
     {
         [Networked, Capacity(PropConstants.MAX_PROP_REPS_NETOBJECT)]
-        private NetworkArray<FPropData> _propDatas { get; }
+        private NetworkDictionary<int, FPropData> _propDatas { get; }
 
         [Networked]
         protected int _dataCount { get; set; }
         public int DataCount => _dataCount;
 
-        protected ArrayReader<FPropData> _dataBufferReader;
-        protected PropertyReader<int> _dataCountReader;
-
-        public FNetObjectID NetObjectID
+        public bool TryGetPropData(int guid, out FPropData data)
         {
-            get => Object != null ? new FNetObjectID { guid = Object.Id } : default;
+            return _propDatas.TryGet(guid, out data);
         }
-        public ref FPropData GetPropData(int index)
+
+        public void UpdatePropData(int guid, FPropData updatedData)
         {
-            return ref _propDatas.GetRef(index);
+            _propDatas.Set(guid, updatedData);
         }
 
         public void AddProp(PropRuntimeState propRuntimeState)
         {
-            if (!HasFreeProp())
+            if (_dataCount >= PropConstants.MAX_PROP_REPS_NETOBJECT)
             {
-                Debug.LogWarning("Trying to add a prop data to a chunk when there's no room");
+                Debug.LogWarning("Trying to add a prop data to a replicator when there's no room");
                 return;
             }
 
-            ref FPropData data = ref _propDatas.GetRef(_dataCount);
-            data.GUID = propRuntimeState.guid;
-            data.DefinitionID = propRuntimeState.definitionId;
-            data.Position = propRuntimeState.position;
-            data.Rotation = propRuntimeState.rotation;
-            data.IsActive = true;
-            data.StateData = propRuntimeState.data;
+            FPropData data = new FPropData
+            {
+                GUID = propRuntimeState.guid,
+                DefinitionID = propRuntimeState.definitionId,
+                Position = propRuntimeState.position,
+                Rotation = propRuntimeState.rotation,
+                IsActive = true,
+                StateData = propRuntimeState.stateData
+            };
+
+            _propDatas.Add(propRuntimeState.guid, data);
+            Context.PropManager.OverrideRuntimeData(ref data);
             _dataCount++;
         }
 
@@ -48,29 +50,18 @@ namespace LichLord.Props
             return _dataCount < PropConstants.MAX_PROP_REPS_NETOBJECT;
         }
 
-        public override void Spawned()
-        {
-            _dataBufferReader = GetArrayReader<FPropData>(nameof(_propDatas));
-            _dataCountReader = GetPropertyReader<int>(nameof(_dataCount));
-        }
-
         public override void Render()
         {
             if (!Context.IsGameplayActive())
                 return;
 
-            PropManager propManager = Context.PropManager;
-
-            // Update PropManager.runtimePropStates for each prop
-            for (int i = 0; i < PropConstants.MAX_PROP_REPS_NETOBJECT; i++)
+            foreach (var kvp in _propDatas)
             {
-                ref FPropData data = ref _propDatas.GetRef(i);
-
-                // Skip inactive or destroyed props
+                FPropData data = kvp.Value;
                 if (!data.IsActive)
                     continue;
 
-                propManager.OverrideRuntimeData(ref data);
+                Context.PropManager.OverrideRuntimeData(ref data);
             }
         }
     }

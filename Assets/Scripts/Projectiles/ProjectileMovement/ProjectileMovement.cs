@@ -11,7 +11,7 @@ namespace LichLord.Projectiles
         public virtual void ActivateRender(RenderProjectile projectile, 
             ref FProjectileData data)
         {
-            projectile.RenderPosition = data.Position;
+            projectile.Position = data.Position;
         }
 
         public virtual void OnRender(RenderProjectile projectile,
@@ -19,7 +19,8 @@ namespace LichLord.Projectiles
             ref FProjectileData fromData,
             float bufferAlpha,
             float deltaTime,
-            float renderTimeSinceFired)
+            float renderTimeSinceFired,
+            int tick)
         { 
         }
 
@@ -43,87 +44,6 @@ namespace LichLord.Projectiles
             float simulationTime, 
             float deltaTime)
         {
-        }
-
-        protected virtual void CheckAndHandleCollision(FixedUpdateProjectile projectile,
-            ref FProjectileData data,
-            int tick,
-            float simulationTime,
-            Vector3 oldPosition,
-            Vector3 newPosition,
-            Quaternion oldRotation,
-            Quaternion newRotation)
-        {
-            
-            float simTimeSinceFired = simulationTime - (data.FireTick * projectile.Runner.DeltaTime);
-            /*
-            if (ProjectileUtility.IsCollidingActive(projectile.Definition, simTimeSinceFired))
-            {
-                int collisionCheckRate = projectile.Definition.CollisionCheckRate;
-
-                // Check every tick if rate is 0, otherwise follow the tick interval
-                if (collisionCheckRate == 0 || (tick % collisionCheckRate == 0))
-                {
-                    PerformCollisionChecks(projectile, ref data, tick, simulationTime, 
-                        oldPosition, newPosition, 
-                        oldRotation, newRotation);
-                }
-            }
-            */
-        }
-
-        protected virtual void PerformCollisionChecks(FixedUpdateProjectile projectile,
-            ref FProjectileData data,
-            int tick,
-            float simulationTime,
-            Vector3 oldPosition,
-            Vector3 newPosition,
-            Quaternion oldRotation,
-            Quaternion newRotation)
-        {
-            /*
-            ProjectileDefinition definition = projectile.Definition;
-
-            FPhysicsHitData impactHit = new FPhysicsHitData();
-            List<FPhysicsHitData> hitDatas = new List<FPhysicsHitData>();
-            
-            data.IsReflected = false;
-
-            int sweepCount = Mathf.Max(definition.CollisionSweepsPerTick, 1);
-            for (int i = 1; i <= sweepCount; i++)
-            {
-                float sweepLerp = i / (float)sweepCount;
-                Vector2 sweepLocation = Vector2.Lerp(oldPosition, newPosition, sweepLerp);
-                float sweepRotation = Mathf.Lerp(oldRotation, newRotation, sweepLerp);
-
-                // Perform the shape collision check
-                ProjectileUtility.CheckShapeCollisions(projectile,
-                    ref data,
-                    tick,
-                    simulationTime,
-                    sweepLocation,
-                    sweepRotation,
-                    ref hitDatas,
-                    ref impactHit);
-
-                if (definition.OnlyAffectImpactTarget && impactHit.IsAssigned)
-                {
-                    hitDatas = new List<FPhysicsHitData> { impactHit };
-                    projectile.UpdateAffectedActors(ref data, hitDatas, tick);
-                }
-                else
-                {
-                    projectile.UpdateAffectedActors(ref data, hitDatas, tick);
-                }
-
-                // If there's an impact, handle it
-                if (impactHit.IsAssigned)
-                {
-                    definition.ImpactResponse.HandleImpact(projectile, ref data, ref impactHit, tick);
-                    break;
-                }
-            }
-            */
         }
 
         // BOTH

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Fusion;
 using LichLord.Projectiles;
-using Starter.Shooter;
 
 namespace LichLord
 {
@@ -28,7 +27,7 @@ namespace LichLord
             Vector3 hitPosition = Vector3.zero;
             Vector3 hitNormal = Vector3.zero;
 
-            Vector3 targetPos = playerCreature.Context.Camera.RaycastFromCameraCenter(out RaycastHit hitInfo);
+            Vector3 targetPos = playerCreature.Context.Camera.RaycastFromCameraCenter(playerCreature.Hurtbox.gameObject, out RaycastHit hitInfo);
 
             // Spawn projectile if projectileDefinition is set
             if (projectileDefinition != null)
@@ -53,7 +52,7 @@ namespace LichLord
                     );
 
                     var projectile = projectileManager.SpawnProjectile(fireEvent);
-                    Debug.Log($"[GunActionData] Fired projectile with {ActionName} using ProjectileManager");
+                    //Debug.Log($"[GunActionData] Fired projectile with {ActionName} using ProjectileManager");
                 }
                 else
                 {
@@ -61,13 +60,6 @@ namespace LichLord
                 }
             }
 
-            // Play muzzle effect
-            if (ActionEffect != null)
-            {
-                var effectInstance = Object.Instantiate(ActionEffect, spawnPoint.position, spawnPoint.rotation);
-                effectInstance.Play();
-                Debug.Log($"[GunActionData] Played muzzle effect for {ActionName}");
-            }
 
             // Trigger RPC via CreatureActions
             if (playerCreature.Actions != null)

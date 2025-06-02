@@ -2,6 +2,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
+using FusionHelpers;
+using System;
 
 namespace LichLord.Props
 {
@@ -21,6 +23,8 @@ namespace LichLord.Props
         private List<PropReplicationData> propReplicators;
         private string saveFilePath;
 
+        [SerializeField] private TickAlignedEventRelay _eventStub;
+
         public override void Spawned()
         {
             _propSpawner.OnPropSpawned += OnPropSpawned;
@@ -33,6 +37,60 @@ namespace LichLord.Props
             {
                 ApplySavedDelta();
             }
+
+            RegisterEventListener((DamageEvent evt) => ApplyDamage(evt.guid, evt.impulse, evt.damage));
+        }
+
+        public void ApplyDamage(int guid, Vector3 impulse, int damage)
+        {
+            Debug.Log("ApplyDamage: " + guid);
+
+            PropRuntimeState propRuntimeState = _runtimePropStates[guid];
+            propRuntimeState.stateData = 1;
+
+            // find its FPropData if it exists and adjust that
+            List<PropReplicationData> repDatas = Runner.GetAllBehaviours<PropReplicationData>();
+
+            bool dataFound = false;
+            for (int i = 0; i < repDatas.Count; i++)
+            {
+                PropReplicationData repData = repDatas[i];
+
+                if (repData.TryGetPropData(guid, out var propData))
+                {
+                    propData.StateData = propRuntimeState.stateData;
+                    repData.UpdatePropData(guid, propData);
+                    OverrideRuntimeData(ref propData);
+                    dataFound = true;
+                }
+            }
+
+            // if it doesnt exist, add a propdata for it
+            if (!dataFound)
+            {
+                for (int i = 0; i < repDatas.Count; i++)
+                {
+                    PropReplicationData repData = repDatas[i];
+
+                    if (repData.HasFreeProp())
+                    {
+                        // Adding a prop overrides the runtime data
+                        repData.AddProp(propRuntimeState);
+                        break;
+                    }
+                }
+            }
+
+            PropLoadState loadState = _propLoadStates[guid];
+            if (loadState.LoadState == ELoadState.Loaded)
+            {
+                loadState.Prop.UpdateProp(propRuntimeState, Runner.LocalAlpha);
+            }
+        }
+
+        protected void RegisterEventListener<T>(Action<T> listener) where T : unmanaged, INetworkEvent
+        {
+            _eventStub.RegisterEventListener(listener);
         }
 
         private void LoadBaseLevelProps()
@@ -93,7 +151,7 @@ namespace LichLord.Props
                 changedState.position = deltaState.position;
                 changedState.rotation = deltaState.rotation;
                 changedState.definitionId = deltaState.definitionId;
-                changedState.data = deltaState.data;
+                changedState.stateData = deltaState.stateData;
             }
 
             int propReplicatorCount = (_deltaStates.Count + PropConstants.MAX_PROP_REPS_NETOBJECT - 1) / PropConstants.MAX_PROP_REPS_NETOBJECT;
@@ -116,6 +174,9 @@ namespace LichLord.Props
                     index++;
                 }
             }
+
+            // Add another prop replicator so we have one at least to start with.
+            Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
         }
 
         public override void Render()
@@ -161,6 +222,7 @@ namespace LichLord.Props
             PropLoadState propLoadState = _propLoadStates[guid];
             propLoadState.Prop = prop;
             propLoadState.LoadState = ELoadState.Loaded;
+            prop.OnSpawned(propRuntimeState, this);
         }
 
         private void DespawnProp(int guid)
@@ -206,17 +268,12 @@ namespace LichLord.Props
                 modifiedState.position = data.Position;
                 modifiedState.rotation = Quaternion.LookRotation(data.Forward, Vector3.up);
                 modifiedState.definitionId = data.DefinitionID;
-                modifiedState.data = data.StateData;
+                modifiedState.stateData = data.StateData;
             }
 
             _deltaStates[data.GUID] = modifiedState;
         }
 
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        private void RPC_ModifyProp(int guid)
-        {
-
-        }
 
         private void LoadSavedPropStates()
         {
@@ -247,7 +304,7 @@ namespace LichLord.Props
                                 entry.position,
                                 entry.rotation,
                                 entry.definitionId,
-                                entry.data);
+                                entry.stateData);
 
                             // Update RuntimePropStates
                             _runtimePropStates[guid] = runtimeState;
@@ -278,7 +335,7 @@ namespace LichLord.Props
                             state.position,
                             state.rotation,
                             state.definitionId,
-                            state.data
+                            state.stateData
                         ));
                     }
                 }
@@ -299,32 +356,6 @@ namespace LichLord.Props
             SaveRuntimeState();
         }
 
-        public void ResetRuntimeState()
-        {
-            if (File.Exists(saveFilePath))
-            {
-                try
-                {
-                    File.Delete(saveFilePath);
-                    _runtimePropStates.Clear();
-                    _deltaStates.Clear();
-                    foreach (var loadState in _propLoadStates)
-                    {
-                        if (loadState.LoadState == ELoadState.Loaded)
-                        {
-                            loadState.Prop.StartRecycle();
-                        }
-                    }
-                    _propLoadStates.Clear();
-                    Debug.Log("Runtime state reset to default LevelPropsMarkupData.");
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogError($"Failed to reset runtime state: {e.Message}");
-                }
-            }
-        }
-
         public class PropLoadState
         {
             public Prop Prop;
@@ -337,6 +368,13 @@ namespace LichLord.Props
             Loading,
             Loaded,
             Unloading,
+        }
+
+        public struct DamageEvent : INetworkEvent
+        {
+            public int guid;
+            public Vector3 impulse;
+            public int damage;
         }
     }
 }

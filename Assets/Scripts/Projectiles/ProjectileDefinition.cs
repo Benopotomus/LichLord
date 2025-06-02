@@ -1,3 +1,4 @@
+using DWD.AnimationCurveAsset;
 using DWD.Utility.Loading;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,6 +36,15 @@ namespace LichLord.Projectiles
         protected LayerMask _overlapCollisionLayer;
         public LayerMask OverlapCollisionLayer => _overlapCollisionLayer;
 
+        [SerializeField]// if this range is exceeded. do something
+        protected EShapeType _shape;
+        public EShapeType Shape => _shape;
+
+        // Line of Sight
+        [SerializeField]
+        protected ELineOfSightRequirement _lineOfSightRequirement; // if the hit occurs, ensure that we have LOS from the instigator to the target or fail.
+        public ELineOfSightRequirement LineOfSightRequirement => _lineOfSightRequirement;
+
         [SerializeField]
         protected Vector3 _extents;
         public Vector3 Extents => _extents;
@@ -70,6 +80,10 @@ namespace LichLord.Projectiles
         [SerializeField]
         protected LayerMask _lineOfSightLayer;
         public LayerMask LineOfSightLayer => _lineOfSightLayer;
+
+        [SerializeField]
+        protected AnimationCurveAsset _scaleOverLifetime;
+        public AnimationCurveAsset ScaleOverLifetime => _scaleOverLifetime;
 
         //Visuals
         [BundleObject(typeof(GameObject))]

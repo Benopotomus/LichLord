@@ -9,26 +9,15 @@ namespace LichLord.Projectiles
 
     //using DG.Tweening;
 
-    public class RenderProjectile
+    public class RenderProjectile : Projectile
     {
-        public ProjectilePool OwningPool { get; set; }
-        public NetworkRunner Runner => OwningPool.Runner;
         public bool IsFinished { get; private set; }
 
-        public ProjectileDefinition Definition { get; private set; }
-        public INetActor Instigator { get; set; }
-        public INetActor Target { get; private set; }
         public Vector2 SpawnPosition { get; private set; }
         public Vector2 TargetPosition { get; private set; }
-        public float Timestamp { get; set; }
-        public int FireTick { get; set; }
 
         public INetActor EncircleAttachedActor { get; set; }
         public Vector2 EncircleDirection { get; set; }
-
-        public Vector3 RenderPosition { get; set; }
-        public Quaternion RenderRotation { get; set; }
-        public Vector3 RenderVelocity { get; set; }
 
         // Visuals
         private AssetBundleLoader PrefabLoader;
@@ -57,6 +46,8 @@ namespace LichLord.Projectiles
                 Definition.ProjectileMovement.ActivateRender(this, ref data);
                 LoadVisualsPrefab(Definition.VisualsPrefab);
             }
+
+            AffectedActors.Clear();
         }
 
         public void DeactivateRenderProjectile()
@@ -66,7 +57,7 @@ namespace LichLord.Projectiles
             FireTick = 0;
             SpawnPosition = Vector3.zero;
             TargetPosition = Vector3.zero;
-            RenderRotation = Quaternion.identity;
+            Rotation = Quaternion.identity;
 
             ClearVisuals();
         }
@@ -77,7 +68,7 @@ namespace LichLord.Projectiles
                 VisualsInstance.StartRecycle();
         }
 
-        public void OnRender(ref FProjectileData toData, ref FProjectileData fromData, float bufferAlpha, float renderTime, float networkDelta, float localDelta)
+        public void OnRender(ref FProjectileData toData, ref FProjectileData fromData, float bufferAlpha, float renderTime, float networkDelta, float localDelta, int tick)
         {
             if (toData.IsFinished == true)
             {
@@ -95,7 +86,7 @@ namespace LichLord.Projectiles
 
             Timestamp = toData.FireTick * networkDelta;
             float renderTimeSinceFired = renderTime - Timestamp;
-            Definition.ProjectileMovement.OnRender(this, ref toData, ref fromData, bufferAlpha, localDelta, renderTimeSinceFired);
+            Definition.ProjectileMovement.OnRender(this, ref toData, ref fromData, bufferAlpha, localDelta, renderTimeSinceFired, tick);
 
             VisualsInstance.UpdateVisuals(this);
         }
@@ -153,7 +144,7 @@ namespace LichLord.Projectiles
                 _hasWarmedUp = true;
                 Shader.WarmupAllShaders();
             }
-            VisualsInstance = DWDObjectPool.Instance.SpawnAt(VisualsPrefab, RenderPosition, Quaternion.identity) as ProjectileVisualEffect;
+            VisualsInstance = DWDObjectPool.Instance.SpawnAt(VisualsPrefab, Position, Quaternion.identity) as ProjectileVisualEffect;
 
             if (VisualsInstance != null)
                 VisualsInstance.InitializeVisuals(this);

@@ -55,35 +55,29 @@ namespace LichLord
 
             if (input.Fire)
             {
-                Debug.Log("Fire Pressed");
+                //Debug.Log("Fire Pressed");
 
                 if (SelectedActionIndex < 0 || SelectedActionIndex >= availableActions.Count)
                 {
-                    Debug.Log("[ActionManager] Fire input (LMB) ignored: No action selected or invalid index.");
+                    //Debug.Log("[ActionManager] Fire input (LMB) ignored: No action selected or invalid index.");
                     return;
                 }
 
                 if (!CooldownTimer.ExpiredOrNotRunning(Runner))
                 {
-                    Debug.Log($"[ActionManager] Fire input (LMB) ignored: Action {availableActions[SelectedActionIndex].ActionName} on cooldown.");
-                    return;
-                }
-
-                if (!AnimationTimer.ExpiredOrNotRunning(Runner))
-                {
-                    Debug.Log($"[ActionManager] Fire input (LMB) ignored: Action {availableActions[SelectedActionIndex].ActionName} animation in progress.");
+                    //Debug.Log($"[ActionManager] Fire input (LMB) ignored: Action {availableActions[SelectedActionIndex].ActionName} on cooldown.");
                     return;
                 }
 
                 ManeuverDefinition selectedAction = availableActions[SelectedActionIndex];
-                Debug.Log($"[ActionManager] Executing action: {selectedAction.ActionName} (Index: {SelectedActionIndex})");
+                //Debug.Log($"[ActionManager] Executing action: {selectedAction.ActionName} (Index: {SelectedActionIndex})");
                 selectedAction.Execute(_playerCreature, Runner);
                 CooldownTimer = TickTimer.CreateFromSeconds(Runner, selectedAction.Cooldown);
                 AnimationTimer = TickTimer.CreateFromSeconds(Runner, selectedAction.AnimationDuration);
                 RPC_NotifyActionExecution(selectedAction.ActionName, selectedAction.AnimationTrigger);
             }
 
-            if (AnimationTimer.ExpiredOrNotRunning(Runner))
+            if (CooldownTimer.ExpiredOrNotRunning(Runner))
             {
                 _playerCreature.Movement.SetCastSpeedMultiplier(1f);
             }
@@ -194,7 +188,7 @@ namespace LichLord
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         private void RPC_NotifyActionExecution(string actionName, string animationTrigger)
         {
-            Debug.Log($"[ActionManager] Player executed action: {actionName}");
+            //Debug.Log($"[ActionManager] Player executed action: {actionName}");
             if (_playerCreature.Animator != null && !string.IsNullOrEmpty(animationTrigger))
             {
                 _playerCreature.Animator.SetTrigger(animationTrigger);
@@ -206,8 +200,18 @@ namespace LichLord
         {
             ManeuverDefinition maneuver = availableActions[SelectedActionIndex];
 
+            Vector3 direction = (targetPosition - spawnPosition).normalized;
+            Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+
             if (maneuver.TableID != maneuverID)
                 return;
+
+            // Play muzzle effect
+            if (maneuver.ActionEffect != null)
+            {
+                var effectInstance = Instantiate(maneuver.ActionEffect, spawnPosition, rotation);
+                effectInstance.Play();
+            }
 
             if (maneuver.ActionSound != null)
             {

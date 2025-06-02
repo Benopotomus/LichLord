@@ -22,7 +22,7 @@
         [FieldOffset(17)]
         private int _definitionId; // 4 bytes. definition id;
         [FieldOffset(23)]
-        private uint _stateData; // 4 bytes
+        private int _stateData; // 4 bytes
 
         public int DefinitionID
         {
@@ -30,7 +30,7 @@
             set => _definitionId = value;
         }
 
-        public uint StateData
+        public int StateData
         {
             get => _stateData;
             set => _stateData = value;
@@ -96,7 +96,7 @@
             if (_definitionId != other.definitionId)
                 return false;
 
-            if (StateData != other.data)
+            if (StateData != other.stateData)
                 return false;
 
             if (Position != other.position) 

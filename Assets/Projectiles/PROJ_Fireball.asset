@@ -20,11 +20,13 @@ MonoBehaviour:
   _speed: 10
   _impactCollisionLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 257
   _overlapCollisionLayer:
     serializedVersion: 2
-    m_Bits: 0
-  _extents: {x: 0, y: 0, z: 0}
+    m_Bits: 257
+  _shape: 1
+  _lineOfSightRequirement: 0
+  _extents: {x: 0.125, y: 0, z: 0}
   _onlyAffectsOnce: 0
   _affectsEachCast: 0
   _collisionCheckTrim: {x: 0, y: 0}
@@ -35,6 +37,7 @@ MonoBehaviour:
   _lineOfSightLayer:
     serializedVersion: 2
     m_Bits: 0
+  _scaleOverLifetime: {fileID: 0}
   _visualsPrefab:
     _name: PROJ_VIS_Fireball
     _bundle: proj_vis_fireball

@@ -13,9 +13,10 @@ namespace LichLord.Projectiles
             ref FProjectileData fromData,
             float bufferAlpha,
             float deltaTime,
-            float renderTimeSinceFired)
+            float renderTimeSinceFired,
+            int tick)
         {
-            Vector3 lastPosition = projectile.RenderPosition;
+            Vector3 lastPosition = projectile.Position;
             Vector3 newRenderTargetPosition = GetLinearMovePosition(projectile.Definition, ref toData, renderTimeSinceFired);
             float interpolationProgress = 0f;
 
@@ -23,11 +24,11 @@ namespace LichLord.Projectiles
             projectile.InterpolationTime += Time.deltaTime;
             interpolationProgress = Mathf.Clamp01(projectile.InterpolationTime / projectile.InterpolationDuration);
             
-            var lerpPosition = Vector3.Lerp(projectile.RenderPosition, newRenderTargetPosition, interpolationProgress);
+            var lerpPosition = Vector3.Lerp(projectile.Position, newRenderTargetPosition, interpolationProgress);
 
-            projectile.RenderPosition = lerpPosition;
-            projectile.RenderVelocity = projectile.RenderPosition - lastPosition;
-            projectile.RenderRotation = GetRotation(projectile.Definition, toData.TargetPosition, toData.Position, projectile.RenderVelocity);
+            projectile.Position = lerpPosition;
+            projectile.Velocity = projectile.Position - lastPosition;
+            projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition, toData.Position, projectile.Velocity);
         }
 
         private Vector3 GetLinearMovePosition(ProjectileDefinition definition, 
@@ -66,18 +67,26 @@ namespace LichLord.Projectiles
 
             Vector3 newVelocity = newPosition - oldPosition;
 
-            Quaternion oldRotation = projectile.FixedUpdateRotation;
+            Quaternion oldRotation = projectile.Rotation;
             Quaternion newRotation = GetRotation(
                 projectile.Definition,
                 data.TargetPosition,
                 data.Position,
-                projectile.FixedUpdateVelocity);
+                projectile.Velocity);
 
-            CheckAndHandleCollision(projectile, ref data, tick, simulationTime, oldPosition, newPosition, oldRotation, newRotation);
+            ProjectilePhysicsUtility.CheckAndHandleCollision(projectile, 
+                ref data, 
+                tick, 
+                simulationTime,
+                deltaTime, 
+                oldPosition, 
+                newPosition,
+                oldRotation,
+                newRotation);
 
-            projectile.FixedUpdatePosition = newPosition;
-            projectile.FixedUpdateVelocity = newVelocity;
-            projectile.FixedUpdateRotation = newRotation;
+            projectile.Position = newPosition;
+            projectile.Velocity = newVelocity;
+            projectile.Rotation = newRotation;
         }
     }
 }

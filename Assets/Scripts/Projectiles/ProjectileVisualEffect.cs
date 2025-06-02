@@ -49,13 +49,13 @@ namespace LichLord.Projectiles
         protected virtual void UpdateVisualsPosition(RenderProjectile projectile)
         {
             // Visuals Root is Shadow and the _visual is at projectile position
-            CachedTransform.position = projectile.RenderPosition;
+            CachedTransform.position = projectile.Position;
 
         }
 
         protected virtual Quaternion GetVisualsRotationDegrees(RenderProjectile projectile)
         {
-            return projectile.RenderRotation;
+            return projectile.Rotation;
         }
 
         protected virtual void UpdateVisualsRotation(RenderProjectile projectile)

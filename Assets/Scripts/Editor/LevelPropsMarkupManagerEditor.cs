@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using LichLord.Props;
+using System.IO;
 
 [CustomEditor(typeof(LevelPropsMarkupManager))]
 public class LevelPropsMarkupManagerEditor : Editor
@@ -52,18 +53,26 @@ public class LevelPropsMarkupManagerEditor : Editor
             EditorUtility.SetDirty(manager.LevelPropsMarkup);
         }
 
-        if (GUILayout.Button("Clear Saved Preferences"))
+        if (GUILayout.Button(new GUIContent("Clear Saves", "Deletes the PropSaveData.json file.")))
         {
-            PropManager propManager = FindObjectOfType<PropManager>();
-            if (propManager != null)
+            string saveFileName = "PropSaveData.json";
+            string saveFilePath = Path.Combine(Application.persistentDataPath, saveFileName);
+
+            if (File.Exists(saveFilePath))
             {
-                Undo.RecordObject(propManager, "Clear Saved Preferences");
-                propManager.ResetRuntimeState();
-                EditorUtility.SetDirty(propManager);
+                try
+                {
+                    File.Delete(saveFilePath);
+                    EditorUtility.DisplayDialog("Success", "PropSaveData.json has been deleted.", "OK");
+                }
+                catch (System.Exception e)
+                {
+                    EditorUtility.DisplayDialog("Error", $"Failed to delete PropSaveData.json: {e.Message}", "OK");
+                }
             }
             else
             {
-                EditorUtility.DisplayDialog("Error", "No PropManager found in the scene.", "OK");
+                EditorUtility.DisplayDialog("Info", "PropSaveData.json does not exist.", "OK");
             }
         }
     }

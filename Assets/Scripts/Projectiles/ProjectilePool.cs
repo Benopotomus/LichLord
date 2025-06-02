@@ -152,7 +152,7 @@ namespace LichLord.Projectiles
                 return;
 
             float renderTime = HasStateAuthority ? Runner.LocalRenderTime : Runner.RemoteRenderTime;
-
+            int tick = Runner.Tick;
             float localDeltaTime = Runner.LocalAlpha;
             float networkDeltaTime = Runner.DeltaTime;
 
@@ -219,7 +219,7 @@ namespace LichLord.Projectiles
                     //if (HasInputAuthority)
                     //   Debug.Log("Key: " + pair.Key + " toData Finished: " + toData.IsFinished +  " fromData Finished: " + fromData.IsFinished + " RT: " + Runner.LocalRenderTime);
 
-                    projectile.OnRender(ref toData, ref fromData, bufferAlpha, renderTime, networkDeltaTime, localDeltaTime);
+                    projectile.OnRender(ref toData, ref fromData, bufferAlpha, renderTime, networkDeltaTime, localDeltaTime, tick);
                     pair.Value.LastData = toData;
                 }
                 else
@@ -227,7 +227,7 @@ namespace LichLord.Projectiles
 
                     //Debug.Log("First Render " + Runner.SimulationTime);
                     // Use last data to Render when there are no data available in the buffer
-                    projectile.OnRender(ref pair.Value.LastData, ref pair.Value.LastData, 0f, renderTime, networkDeltaTime, localDeltaTime);
+                    projectile.OnRender(ref pair.Value.LastData, ref pair.Value.LastData, 0f, renderTime, networkDeltaTime, localDeltaTime, tick);
                 }
 
                 if (projectile.IsFinished == true)
@@ -283,7 +283,7 @@ namespace LichLord.Projectiles
 
         void OnDrawGizmos()
         {
-            /*
+            
             if (_fixedUpdateProjectiles == null) return;
 
             for (int i = 0; i < MAX_PROJECTILE_COUNT; i++)
@@ -294,31 +294,25 @@ namespace LichLord.Projectiles
                 Gizmos.color = Color.blue;
 
                 // Ensure rotation values are correct
-                Quaternion rotation = Quaternion.Euler(0, 0, projectile.FixedUpdateRotation * Mathf.Rad2Deg);
+                Quaternion rotation = projectile.Rotation;
 
                 // Use correct transformation matrix assignment
-                Gizmos.matrix = Matrix4x4.TRS(projectile.FixedUpdatePosition, rotation, Vector3.one);
+                Gizmos.matrix = Matrix4x4.TRS(projectile.Position, rotation, Vector3.one);
 
                 switch (projectile.Definition.Shape)
                 {
-                    case eShapeType.BOX:
-                        Gizmos.DrawWireCube(Vector3.zero, projectile.Definition.Extents * 2);
-                        break;
-                    case eShapeType.CIRCLE:
+                    case EShapeType.Sphere:
                         Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x);
                         break;
-                    case eShapeType.OVAL:
-                        float scale = projectile.Definition.Extents.x;
-                        Gizmos.DrawWireSphere(new Vector3(-0.168f, 0, 0) * scale, 0.33f * scale);
-                        Gizmos.DrawWireSphere(Vector3.zero, 0.376f * scale);
-                        Gizmos.DrawWireSphere(new Vector3(0.168f, 0, 0) * scale, 0.33f * scale);
+                    case EShapeType.Raycast:
+                        Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x);
                         break;
                 }
 
                 // Restore default transformation
                 Gizmos.matrix = Matrix4x4.identity;
             }
-            */
+            
         }
 
         protected class ViewEntry

@@ -12,8 +12,11 @@ namespace LichLord
         [Header("Raycast Settings")]
         [SerializeField] private float maxRaycastDistance = 100f;
         [SerializeField] private LayerMask raycastLayerMask;
+        [SerializeField] private float sphereRadius = 0.25f; // Radius of the debug sphere
 
         private bool isFirstPerson = false;
+        private Vector3 lastRaycastPoint; // Store last hit/max range point
+        private bool lastRaycastHit; // True if last raycast hit something
 
         protected override void OnInitialize()
         {
@@ -68,13 +71,12 @@ namespace LichLord
             }
         }
 
-
         /// <summary>
         /// Performs a raycast from the center of the active camera
         /// </summary>
         /// <param name="hitInfo">Raycast hit information if something was hit</param>
-        /// <returns>True if the raycast hit something, false otherwise</returns>
-        public Vector3 RaycastFromCameraCenter(out RaycastHit hitInfo)
+        /// <returns>The hit point if the raycast hit something, otherwise the point at max range</returns>
+        public Vector3 RaycastFromCameraCenter(GameObject ignoredObject, out RaycastHit hitInfo)
         {
             // Get the active camera's Cinemachine brain
             Camera mainCamera = Camera.main;
@@ -82,6 +84,8 @@ namespace LichLord
             {
                 Debug.LogWarning("[CameraManager] Main camera not found!");
                 hitInfo = new RaycastHit();
+                lastRaycastPoint = Vector3.zero;
+                lastRaycastHit = false;
                 return Vector3.zero;
             }
 
@@ -89,17 +93,52 @@ namespace LichLord
             Vector3 rayOrigin = mainCamera.transform.position;
             Vector3 rayDirection = mainCamera.transform.forward;
 
-            // Perform raycast
-            if (Physics.Raycast(rayOrigin, rayDirection, out hitInfo, maxRaycastDistance, raycastLayerMask))
+            // Perform raycast with all hits
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, maxRaycastDistance, raycastLayerMask);
+
+            // Find the closest valid hit, ignoring the specified object
+            RaycastHit closestHit = new RaycastHit();
+            float closestDistance = float.MaxValue;
+            bool foundValidHit = false;
+
+            foreach (var hit in hits)
             {
-                Debug.DrawRay(rayOrigin, rayDirection * hitInfo.distance, Color.red, 1f);
+                // Skip hits on the ignored object or its children
+                if (ignoredObject != null && (hit.collider.gameObject == ignoredObject || hit.collider.transform.IsChildOf(ignoredObject.transform)))
+                    continue;
+
+                if (hit.distance < closestDistance)
+                {
+                    closestHit = hit;
+                    closestDistance = hit.distance;
+                    foundValidHit = true;
+                }
+            }
+
+            if (foundValidHit)
+            {
+                hitInfo = closestHit;
+                lastRaycastPoint = hitInfo.point;
+                lastRaycastHit = true;
                 return hitInfo.point;
             }
 
-            // Return point at max distance if no hit
+            // Return point at max distance if no valid hit
             Vector3 maxRangePoint = rayOrigin + rayDirection * maxRaycastDistance;
-            Debug.DrawRay(rayOrigin, rayDirection * maxRaycastDistance, Color.green, 1f);
+            hitInfo = new RaycastHit();
+            lastRaycastPoint = maxRangePoint;
+            lastRaycastHit = false;
             return maxRangePoint;
+        }
+
+        private void OnDrawGizmos()
+        {
+            // Draw sphere at the last raycast point
+            if (lastRaycastPoint != Vector3.zero)
+            {
+                Gizmos.color = lastRaycastHit ? Color.red : Color.green;
+                Gizmos.DrawWireSphere(lastRaycastPoint, sphereRadius);
+            }
         }
     }
 }

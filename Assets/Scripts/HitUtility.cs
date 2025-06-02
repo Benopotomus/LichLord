@@ -2,7 +2,6 @@
 
 namespace LichLord
 {
-    using Fusion;
     using UnityEngine;
 
     public enum EHitAction : byte
@@ -14,19 +13,15 @@ namespace LichLord
 
     public struct FHitUtilityData
     {
-        public IHitInstigator Instigator;
-        public IHitTarget Target;
-        //public FDamageData DamageData;
-        public int StaggerRating;
-        public float KnockbackStrength;
-        public bool IsFatal;
-        public Vector2 ImpactPosition;
-        public float ImpactRadians;
-        public bool IsPredictiveHit;
-        public PlayerRef PlayerRef;
-        public uint PredictionKey;
-        public int Tick;
-        public bool IsBlockable;
+        public IHitInstigator instigator;
+        public IHitTarget target;
+        public FDamageData damageData;
+        public int staggerRating;
+        public float knockbackStrength;
+        public bool isFatal;
+        public Vector3 impactPosition;
+        public Quaternion impactRotation;
+        public int tick;
     }
 
     public enum EHitType
@@ -39,8 +34,6 @@ namespace LichLord
 
     public interface IHitTarget
     {
-        bool IsActive { get; }
-        INetActor NetActor { get; }
         void ProcessHit(ref FHitUtilityData hit);
         void OnHitTaken(ref FHitUtilityData hit);
     }
@@ -61,8 +54,8 @@ namespace LichLord
         public static FHitUtilityData ProcessHit(ref FHitUtilityData hit,
             SceneContext context)
         {
-            hit.Target.ProcessHit(ref hit);
-            hit.Instigator.HitPerformed(ref hit);
+            hit.target.ProcessHit(ref hit);
+            hit.instigator.HitPerformed(ref hit);
             return hit;
         }
     }

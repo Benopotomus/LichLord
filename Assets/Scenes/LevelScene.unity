@@ -256,7 +256,8 @@ MonoBehaviour:
   maxRaycastDistance: 100
   raycastLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 257
+  sphereRadius: 0.5
 --- !u!4 &35686578
 Transform:
   m_ObjectHideFlags: 0
@@ -4512,10 +4513,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 65908985}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fcce9ef62115d6c41a17b709c52f509c, type: 3}
+  m_Script: {fileID: 11500000, guid: 52d46662719be9543b18a2b2b422a53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  propData: {fileID: 11400000, guid: 018bc79722ab7b14994974e04abfd788, type: 2}
+  levelPropsMarkupData: {fileID: 11400000, guid: 018bc79722ab7b14994974e04abfd788,
+    type: 2}
 --- !u!1 &923841554
 GameObject:
   m_ObjectHideFlags: 0
@@ -4781,6 +4783,7 @@ MonoBehaviour:
     NetworkGame: {fileID: 707992503}
     SpawnManager: {fileID: 923841557}
     ProjectileManager: {fileID: 805418401}
+    PropManager: {fileID: 1239710300}
     Camera: {fileID: 35686577}
 --- !u!4 &969338786
 Transform:
@@ -4826,6 +4829,7 @@ MonoBehaviour:
   - {fileID: 805418401}
   - {fileID: 805418399}
   - {fileID: 1239710300}
+  - {fileID: 1239710302}
   ForceRemoteRenderTimeframe: 0
 --- !u!1001 &971290954
 PrefabInstance:
@@ -6410,8 +6414,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1239710298}
-  - component: {fileID: 1239710299}
   - component: {fileID: 1239710300}
+  - component: {fileID: 1239710301}
+  - component: {fileID: 1239710302}
   m_Layer: 0
   m_Name: PropManager
   m_TagString: Untagged
@@ -6434,20 +6439,6 @@ Transform:
   m_Father: {fileID: 969338786}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1239710299
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239710297}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba190db7f72952447a9bd5fc8a1a7036, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  propMarkupData: {fileID: 11400000, guid: 018bc79722ab7b14994974e04abfd788, type: 2}
-  propPrefabs: []
 --- !u!114 &1239710300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6460,10 +6451,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb19fce7ab9b9db40a7cff4992401e95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  propMarkupData: {fileID: 0}
-  chunkPrefab:
-    RawGuidValue: 00000000000000000000000000000000
-  saveFileName: PropRuntimeData.json
+  _propSpawner: {fileID: 1239710301}
+  levelPropsMarkupData: {fileID: 11400000, guid: 018bc79722ab7b14994974e04abfd788,
+    type: 2}
+  propReplicationPrefab: {fileID: -4379536383621625491, guid: 71a3c1d4b1a5d7e468142df35f3096d7,
+    type: 3}
+  saveFileName: PropSaveData.json
+  spawnRadius: 50
+  despawnRadius: 60
+  _runtimePropStates: []
+  _eventStub: {fileID: 1239710302}
+--- !u!114 &1239710301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1239710297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3b2c1e8ccf26684eb9c3837831eff6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1239710302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1239710297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4065fad91402e064fbcca9a9419bde60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1242354971
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11578,7 +11599,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8944336656349189697}
   m_LocalRotation: {x: 1.7763568e-15, y: -7.1054274e-15, z: 5.646419e-23, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -2.9977473e-10, y: 0.25, z: 3.397707e-12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
