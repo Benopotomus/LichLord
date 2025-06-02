@@ -22,7 +22,7 @@ namespace LichLord.Props
             _propDatas.Set(guid, updatedData);
         }
 
-        public void AddProp(PropRuntimeState propRuntimeState)
+        public void AddProp(PropRuntimeState propRuntimeState, bool initializing = false)
         {
             if (_dataCount >= PropConstants.MAX_PROP_REPS_NETOBJECT)
             {
@@ -41,7 +41,10 @@ namespace LichLord.Props
             };
 
             _propDatas.Add(propRuntimeState.guid, data);
-            Context.PropManager.OverrideRuntimeData(ref data);
+
+            if (!initializing)
+                Context.PropManager.OverrideRuntimeData(ref data);
+
             _dataCount++;
         }
 

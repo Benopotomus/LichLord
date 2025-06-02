@@ -17,13 +17,13 @@ namespace LichLord
         public bool HasInput;
         public string PeerUserID;
 
-        //public SceneUI UI;
         public NetworkRunner Runner;
         public NetworkGame NetworkGame;
         public SpawnManager SpawnManager;
         public ProjectileManager ProjectileManager;
         public PropManager PropManager;
         public SceneCamera Camera;
+        public SceneUI UI;
 
         // General
         /*

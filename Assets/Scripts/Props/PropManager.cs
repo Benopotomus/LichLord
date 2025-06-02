@@ -169,7 +169,7 @@ namespace LichLord.Props
                 {
                     if (index >= startIndex && index < endIndex)
                     {
-                        propReplicationObject.AddProp(deltaState);
+                        propReplicationObject.AddProp(deltaState, true);
                     }
                     index++;
                 }

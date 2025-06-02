@@ -84,6 +84,9 @@ namespace LichLord.Projectiles
                 oldRotation,
                 newRotation);
 
+            if (data.IsFinished)
+                return;
+
             projectile.Position = newPosition;
             projectile.Velocity = newVelocity;
             projectile.Rotation = newRotation;

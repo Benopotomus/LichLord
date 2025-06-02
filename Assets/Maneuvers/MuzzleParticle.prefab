@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 6279558729318757068}
   - component: {fileID: 9002971475211555945}
   - component: {fileID: 3042650691186336498}
+  - component: {fileID: 8132386031226939365}
+  - component: {fileID: 3681557076833651950}
   m_Layer: 0
   m_Name: MuzzleParticle
   m_TagString: Untagged
@@ -4871,3 +4873,32 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &8132386031226939365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498475631563499932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b290f6a1505683b4695f69bfb8e0dc82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _visualEffectBase: {fileID: 3681557076833651950}
+  _particleSystem: {fileID: 9002971475211555945}
+--- !u!114 &3681557076833651950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2498475631563499932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59c598bb2ecaede49936d72ddcfe4251, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _transform: {fileID: 6279558729318757068}
+  _recycleDelay: 0
+  _lifetime: 0.5

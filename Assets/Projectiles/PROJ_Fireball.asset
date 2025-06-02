@@ -17,21 +17,21 @@ MonoBehaviour:
   _deactivationSpawnedProjectiles: []
   _projectileMovement: {fileID: 11400000, guid: 339f033f4deb71d4e9d8f12a1f09c1af,
     type: 2}
-  _speed: 10
+  _speed: 50
   _impactCollisionLayer:
     serializedVersion: 2
     m_Bits: 257
   _overlapCollisionLayer:
     serializedVersion: 2
     m_Bits: 257
-  _shape: 1
+  _shape: 2
   _lineOfSightRequirement: 0
   _extents: {x: 0.125, y: 0, z: 0}
   _onlyAffectsOnce: 0
   _affectsEachCast: 0
   _collisionCheckTrim: {x: 0, y: 0}
   _collisionCheckRate: 0
-  _collisionSweepsPerTick: 1
+  _collisionSweepsPerTick: 5
   _collisionCheckNumber: 4
   _onlyAffectImpactTarget: 0
   _lineOfSightLayer:

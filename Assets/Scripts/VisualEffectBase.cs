@@ -33,22 +33,13 @@ namespace LichLord
         // Called externally.
         public virtual void StartRecycle()
         {
-            if (_recycleDelay == 0)
-                RecycleVisualEffect();
-            else
-                StartCoroutine(RecycleAfterDelay());
-        }
-
-        protected IEnumerator RecycleAfterDelay()
-        {
-            onRecycleDelayStart?.Invoke(this);
-            yield return new WaitForSeconds(_recycleDelay);
-            //yield return DWD.Utility.StaticTimer.Seconds(_recycleDelay);
             RecycleVisualEffect();
         }
 
         protected virtual void RecycleVisualEffect()
         {
+            Debug.Log("recycle");
+
             onRecycled?.Invoke(this);
             DWDObjectPool.Instance.Recycle(this);
         }

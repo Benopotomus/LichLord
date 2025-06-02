@@ -148,6 +148,9 @@ namespace LichLord.Projectiles
             ref FPhysicsHitData impactHit,
             int tick)
         {
+            data.IsFinished = true;
+            projectile.Position = impactHit.ProjectilePosition;
+            
             SpawnImpactEffect(projectile, ref data, ref impactHit, tick);
 
             if (projectile is FixedUpdateProjectile fixedUpdateProjectile)

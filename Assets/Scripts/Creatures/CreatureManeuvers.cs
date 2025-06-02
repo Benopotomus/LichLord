@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Starter.Shooter;
 using LichLord.Projectiles;
 using System.Linq;
+using DWD.Pooling;
 
 namespace LichLord
 {
@@ -209,8 +210,8 @@ namespace LichLord
             // Play muzzle effect
             if (maneuver.ActionEffect != null)
             {
-                var effectInstance = Instantiate(maneuver.ActionEffect, spawnPosition, rotation);
-                effectInstance.Play();
+                var effectInstance = DWDObjectPool.Instance.SpawnAt(maneuver.ActionEffect, spawnPosition, rotation) as VisualEffectBase;
+                effectInstance.Initialize();
             }
 
             if (maneuver.ActionSound != null)

@@ -15,7 +15,7 @@ namespace LichLord
         public float ProjectileSpeed = 20f; // For spell/gun projectiles
         public float Range = 100f; // Range for raycast (spells, melee, gun)
         public AudioClip ActionSound; // Sound played when performing action (e.g., FireSound for gun)
-        public ParticleSystem ActionEffect; // VFX played when performing action (e.g., MuzzleParticle for gun)
+        public VisualEffectBase ActionEffect; // VFX played when performing action (e.g., MuzzleParticle for gun)
         public GameObject ImpactPrefab; // Impact effect for gun hits
         public LayerMask HitMask; // Layers to hit for gun/spell raycasts
         public string AnimationTrigger; // Animator trigger (e.g., "Shoot" for gun)
