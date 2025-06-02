@@ -24,6 +24,11 @@ namespace LichLord.Props
             CachedTransform.rotation = _propRuntimeState.rotation;
         }
 
+        public virtual void UpdateRuntimeState()
+        { 
+        
+        }
+
         public virtual void UpdateProp(PropRuntimeState propState, float renderDeltaTime)
         {
             if (propState.stateData == 1)
@@ -58,14 +63,14 @@ namespace LichLord.Props
 
             Debug.Log($"[Prop] Processing hit for guid {_propRuntimeState.guid} with damage 9001");
 
-            // Find the master client (host)
-            RelayPlayer masterPlayer = null;
             foreach (PlayerRef player in runner.ActivePlayers)
             {
                 NetworkObject playerObj = runner.GetPlayerObject(player);
                 if (playerObj != null)
                 {
+                    /// How do i just send this to the masterclient player?
                     RelayPlayer relayPlayer = playerObj.GetComponent<RelayPlayer>();
+
                     relayPlayer.RaiseEvent(new DamageEvent
                     {
                         guid = _propRuntimeState.guid,
@@ -73,17 +78,6 @@ namespace LichLord.Props
                         damage = 9001
                     });
                 }
-            }
-
-            if (masterPlayer != null)
-            {
-                masterPlayer.RaiseEvent(new DamageEvent
-                {
-                    guid = _propRuntimeState.guid,
-                    impulse = Vector3.zero,
-                    damage = 9001
-                });
-                Debug.Log($"[Prop] Sent DamageEvent for guid {_propRuntimeState.guid} to master client (host) player {masterPlayer.PlayerId}");
             }
         }
     }

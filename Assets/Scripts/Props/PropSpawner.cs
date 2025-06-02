@@ -1,4 +1,5 @@
-﻿using DWD.Utility.Loading;
+﻿using DWD.Pooling;
+using DWD.Utility.Loading;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -66,7 +67,14 @@ namespace LichLord.Props
             if (prefab == null)
                 return;
 
-            GameObject instance = Instantiate(prefab, runtimeState.position, runtimeState.rotation);
+            var poolObject = prefab.GetComponent<DWDObjectPoolObject>();
+            if (poolObject == null)
+            {
+                Debug.LogWarning("Could not spawn prop " + runtimeState.definitionId + ".  Could not find DWDObjectPoolObject Component!");
+                return;
+            }
+
+            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, runtimeState.position, runtimeState.rotation);
 
             Prop spawnedProp = instance.GetComponent<Prop>();
 

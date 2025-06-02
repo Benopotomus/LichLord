@@ -11,7 +11,6 @@ namespace LichLord.Props
         public Quaternion rotation; // World rotation
         public int definitionId; // PropDefinition.TableID
         public int stateData; // Custom runtime data (like FPropData.Data)
-        public PropReplicationData replicationData;
 
         public PropRuntimeState(int guid, 
             Vector3 position, 

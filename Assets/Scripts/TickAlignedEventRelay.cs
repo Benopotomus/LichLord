@@ -41,10 +41,10 @@ namespace FusionHelpers
 	{
 		// Theoretical maximum number of events you'll ever send with each relay in a single tick.
 		// In reality this needs to be a couple of times larger than that to avoid loosing events due to package drops.
-		const int MAX_EVENTS = 10;
+		const int MAX_EVENTS = 20;
 		
 		// The maximum size of any event sent with the relay (in bytes).
-		const int MAX_EVENT_SIZE = 64;
+		const int MAX_EVENT_SIZE = 32;
 
 		// Each event has a header which identifies the event and its intended target authority as well as a byte array payload.
 		private struct EventHeader : INetworkStruct

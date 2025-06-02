@@ -348,6 +348,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20a9eed319f21474a9ade4e7241e26eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _eventRelayPrefab: {fileID: 6216721781973090943, guid: 2a4ca20818b5c0949877f1f758ac500f,
+    type: 3}
+  _eventRelay: {fileID: 0}
+  _eventStub: {fileID: 0}
   Health: {fileID: 7362189930313428062}
   Movement: {fileID: 1776246608945052242}
   CameraController: {fileID: 4625314071529301451}
@@ -363,10 +367,6 @@ MonoBehaviour:
   ChestTargetPosition: {fileID: 536988984119202717}
   ChestBone: {fileID: 1992701519831656905}
   _Nickname: 
-  _eventRelayPrefab: {fileID: 6216721781973090943, guid: 2a4ca20818b5c0949877f1f758ac500f,
-    type: 3}
-  _eventStub: {fileID: 0}
-  _eventRelay: {fileID: 0}
 --- !u!114 &7362189930313428062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -707,7 +707,7 @@ GameObject:
   - component: {fileID: 6473061361037763551}
   m_Layer: 8
   m_Name: HurtBox
-  m_TagString: Undefined
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

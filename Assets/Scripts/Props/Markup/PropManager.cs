@@ -1,9 +1,7 @@
 ﻿using Fusion;
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
 using FusionHelpers;
-using System;
 
 namespace LichLord.Props
 {
@@ -12,27 +10,19 @@ namespace LichLord.Props
         [SerializeField] private PropSpawner _propSpawner;
         [SerializeField] private LevelPropsMarkupData levelPropsMarkupData;
         [SerializeField] private PropReplicationData propReplicationPrefab;
-        [SerializeField] private string saveFileName = "PropSaveData.json";
+        [SerializeField] private PropSaveLoadManager saveLoadManager;
         [SerializeField] private float spawnRadius = 50f;
         [SerializeField] private float despawnRadius = 60f;
 
-        [SerializeField] private List<PropRuntimeState> _runtimePropStates = new List<PropRuntimeState>(); // index is GUID
-        [SerializeField] private Dictionary<int, PropRuntimeState> _deltaStates = new Dictionary<int, PropRuntimeState>(); // Changed to Dictionary with guid as key
+        [SerializeField] private List<PropRuntimeState> _runtimePropStates = new List<PropRuntimeState>();
+        [SerializeField] private Dictionary<int, PropRuntimeState> _deltaStates = new Dictionary<int, PropRuntimeState>();
         [SerializeField] private List<PropReplicationData> propReplicators;
 
         private List<PropLoadState> _propLoadStates = new List<PropLoadState>();
 
-        private string saveFilePath;
-
-        public void AddReplicator(PropReplicationData replicationData)
-        { 
-            propReplicators.Add(replicationData);
-        }
-
         public override void Spawned()
         {
             _propSpawner.OnPropSpawned += OnPropSpawned;
-            saveFilePath = Path.Combine(Application.persistentDataPath, saveFileName);
             propReplicators = new List<PropReplicationData>();
 
             LoadBaseLevelProps();
@@ -41,6 +31,11 @@ namespace LichLord.Props
             {
                 ApplySavedDelta();
             }
+        }
+
+        public void AddReplicator(PropReplicationData replicationData)
+        {
+            propReplicators.Add(replicationData);
         }
 
         public void ApplyDamage(int guid, Vector3 impulse, int damage)
@@ -57,14 +52,12 @@ namespace LichLord.Props
 
                 if (repData.TryGetPropData(guid, out var propData))
                 {
-                    propRuntimeState.replicationData = repData;
                     propData.StateData = propRuntimeState.stateData;
                     repData.UpdatePropData(guid, propData);
                     dataFound = true;
                 }
             }
 
-            // if it doesnt exist, add a propdata for it
             if (!dataFound)
             {
                 for (int i = 0; i < propReplicators.Count; i++)
@@ -73,9 +66,7 @@ namespace LichLord.Props
 
                     if (repData.HasFreeProp())
                     {
-                        // Adding a prop overrides the runtime data
                         repData.AddProp(propRuntimeState);
-                        propRuntimeState.replicationData = repData;
                         break;
                     }
                 }
@@ -86,6 +77,9 @@ namespace LichLord.Props
             {
                 loadState.Prop.UpdateProp(propRuntimeState, Runner.LocalAlpha);
             }
+
+            // Update delta states for saving
+            _deltaStates[guid] = propRuntimeState;
         }
 
         private void LoadBaseLevelProps()
@@ -102,7 +96,6 @@ namespace LichLord.Props
                 return;
             }
 
-            // Initialize runtime states for all props
             for (int i = 0; i < levelPropsMarkupData.propMarkupDatas.Length; i++)
             {
                 PropMarkupData propMarkupData = levelPropsMarkupData.propMarkupDatas[i];
@@ -127,21 +120,11 @@ namespace LichLord.Props
 
         private void ApplySavedDelta()
         {
-            // Load runtime state from file
-            LoadSavedPropStates();
+            saveLoadManager.LoadSavedPropStates(_runtimePropStates, _propLoadStates, _deltaStates);
 
             foreach (PropRuntimeState deltaState in _deltaStates.Values)
             {
                 int guid = deltaState.guid;
-
-                // Ensure lists have enough capacity
-                while (_runtimePropStates.Count <= guid)
-                {
-                    _runtimePropStates.Add(null);
-                    _propLoadStates.Add(new PropLoadState());
-                }
-
-                // Update runtime state
                 PropRuntimeState changedState = _runtimePropStates[guid];
                 changedState.position = deltaState.position;
                 changedState.rotation = deltaState.rotation;
@@ -170,7 +153,6 @@ namespace LichLord.Props
                 }
             }
 
-            // Add another prop replicator so we have one at least to start with.
             Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
         }
 
@@ -186,6 +168,12 @@ namespace LichLord.Props
 
             Vector3 viewPosition = playerCreature.transform.position;
             float renderDeltaTime = Runner.LocalAlpha;
+
+            // Ensure an empty replicator exists on the master client
+            if (Runner.IsSharedModeMasterClient)
+            {
+                EnsureEmptyReplicator();
+            }
 
             for (int i = 0; i < _runtimePropStates.Count; i++)
             {
@@ -212,25 +200,43 @@ namespace LichLord.Props
             }
         }
 
+        private void EnsureEmptyReplicator()
+        {
+            // Check if there is at least one completely empty replicator (zero entries)
+            bool hasEmptyReplicator = false;
+            foreach (var replicator in propReplicators)
+            {
+                if (replicator.DataCount == 0)
+                {
+                    hasEmptyReplicator = true;
+                    break;
+                }
+            }
+
+            // If no empty replicator exists, spawn a new one
+            if (!hasEmptyReplicator)
+            {
+                var newReplicator = Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
+            }
+        }
+
         private void RefreshRuntimePropState(PropRuntimeState propState)
         {
-            // Check the replication data
-            PropReplicationData replicator = null;
+            bool replicatorFound = false;
 
             for (int i = 0; i < propReplicators.Count; i++)
             {
                 if (propReplicators[i].TryGetPropData(propState.guid, out FPropData propData))
                 {
-                    replicator = propReplicators[i];
+                    replicatorFound = true;
                     propState.stateData = propData.StateData;
-                    propState.replicationData = replicator;
                 }
             }
 
-            if (replicator == null)
+            // if no replicator, reset default state
+            if (!replicatorFound)
             {
                 propState.stateData = 0;
-                propState.replicationData = null;
             }
         }
 
@@ -253,85 +259,13 @@ namespace LichLord.Props
             }
         }
 
-        private void LoadSavedPropStates()
-        {
-            _deltaStates.Clear();
-
-            if (File.Exists(saveFilePath))
-            {
-                try
-                {
-                    string json = File.ReadAllText(saveFilePath);
-                    PropSaveData saveData = JsonUtility.FromJson<PropSaveData>(json);
-                    if (saveData?.props != null)
-                    {
-                        foreach (var entry in saveData.props)
-                        {
-                            int guid = entry.guid;
-
-                            // Ensure lists have enough capacity
-                            while (_runtimePropStates.Count <= guid)
-                            {
-                                _runtimePropStates.Add(null);
-                                _propLoadStates.Add(new PropLoadState());
-                            }
-
-                            // Create runtime state
-                            PropRuntimeState runtimeState = new PropRuntimeState(
-                                guid,
-                                entry.position,
-                                entry.rotation,
-                                entry.definitionId,
-                                entry.stateData);
-
-                            // Update RuntimePropStates
-                            _runtimePropStates[guid] = runtimeState;
-
-                            // Add to deltaStates with guid as key
-                            _deltaStates[guid] = runtimeState;
-                        }
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogError($"Failed to load saved state from {saveFilePath}: {e.Message}");
-                }
-            }
-        }
-
-        private void SaveRuntimeState()
-        {
-            try
-            {
-                var entries = new List<PropSaveState>();
-                foreach (PropRuntimeState state in _deltaStates.Values)
-                {
-                    if (state != null) // Skip null entries
-                    {
-                        entries.Add(new PropSaveState(
-                            state.guid,
-                            state.position,
-                            state.rotation,
-                            state.definitionId,
-                            state.stateData
-                        ));
-                    }
-                }
-
-                PropSaveData saveData = new PropSaveData { props = entries.ToArray() };
-                string json = JsonUtility.ToJson(saveData, true);
-                File.WriteAllText(saveFilePath, json);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Failed to save runtime state to {saveFilePath}: {e.Message}");
-            }
-        }
-
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             base.Despawned(runner, hasState);
-            SaveRuntimeState();
+            if (runner.IsSharedModeMasterClient)
+            {
+                saveLoadManager.SaveRuntimeState(_deltaStates);
+            }
         }
 
         public class PropLoadState
@@ -348,5 +282,4 @@ namespace LichLord.Props
             Unloading,
         }
     }
-
 }
