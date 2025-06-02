@@ -2,11 +2,12 @@
 
 namespace LichLord
 {
-    [RequireComponent(typeof(ParticleSystem))]
     public class VisualEffectParticleSystem : MonoBehaviour
     {
         [SerializeField] VisualEffectBase _visualEffectBase;
-        [SerializeField] ParticleSystem _particleSystem;
+        [SerializeField] ParticleSystem[] _particleSystems;
+
+        [SerializeField] bool _clearSystemOnRecycleStart;
 
         private void Awake()
         {
@@ -20,23 +21,33 @@ namespace LichLord
 
         private void OnInitialized(VisualEffectBase gameplayEffectVisual)
         {
-            _particleSystem.Stop();
-            _particleSystem.Clear();
-            _particleSystem.Play();
+            foreach (var particle in _particleSystems)
+            {
+                particle.Stop();
+                particle.Clear();
+                particle.Play();
+            }
         }
 
         private void OnRecycleDelayStart(VisualEffectBase obj)
         {
-            _particleSystem.Stop();
+            foreach (var particle in _particleSystems)
+                particle.Stop();
+
+            if (_clearSystemOnRecycleStart)
+            {
+                foreach (var particle in _particleSystems)
+                    particle.Clear();
+            }
         }
 
         private void OnRecycled(VisualEffectBase gameplayEffectVisual)
         {
-            if (_particleSystem == null)
-                return;
-            
-            _particleSystem.Stop();
-            _particleSystem.Clear();
+            foreach (var particle in _particleSystems)
+            {
+                particle.Stop();
+                particle.Clear();
+            }
         }
 
         private void OnDestroy()

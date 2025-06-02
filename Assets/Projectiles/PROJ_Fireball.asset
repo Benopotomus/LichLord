@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _tableID: 1
   _lifetime: 10
-  _deactivationSpawnedProjectiles: []
+  _deactivationSpawnedProjectiles:
+  - {fileID: 11400000, guid: b523ee05e006f2749901e9c2798f5875, type: 2}
   _projectileMovement: {fileID: 11400000, guid: 339f033f4deb71d4e9d8f12a1f09c1af,
     type: 2}
   _speed: 30
@@ -26,6 +27,7 @@ MonoBehaviour:
     m_Bits: 257
   _shape: 1
   _lineOfSightRequirement: 0
+  _rotationType: 1
   _extents: {x: 0.125, y: 0, z: 0}
   _onlyAffectsOnce: 0
   _affectsEachCast: 0

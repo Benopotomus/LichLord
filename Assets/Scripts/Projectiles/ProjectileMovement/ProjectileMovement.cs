@@ -12,6 +12,8 @@ namespace LichLord.Projectiles
             ref FProjectileData data)
         {
             projectile.Position = data.Position;
+            projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition, data.Position);
+            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition, data.Position, projectile.Velocity);
         }
 
         public virtual void OnRender(RenderProjectile projectile,
@@ -61,34 +63,31 @@ namespace LichLord.Projectiles
             Vector3 targetPositon, 
             Vector3 spawnPosition)
         {
-            return Vector3.zero;
+            return (targetPositon - spawnPosition).normalized;
         }
 
         public virtual Quaternion GetRotation(ProjectileDefinition definition, 
             Vector3 targetPosition, 
-            Vector3 spawnPosition, 
+            Vector3 currentPosition, 
             Vector3 velocity)
         {
-            /*
             switch (definition.RotationType)
             {
-                case eProjectileRotationType.FACE_TARGET:
-                    Vector2 direction = (targetPosition - spawnPosition).normalized;
-                    return Mathf.Atan2(direction.y, direction.x);
+                case ERotationType.FaceVelocity:
+                    if (velocity.sqrMagnitude < 0.0001f)
+                        return Quaternion.identity;
 
-                case eProjectileRotationType.NO_ROTATION:
-                    return 0f;
+                    return Quaternion.LookRotation(velocity.normalized);
+                case ERotationType.FaceTarget:
+                    Vector3 direction = (targetPosition - currentPosition).normalized;
+                    if (direction.sqrMagnitude < 0.0001f)
+                        return Quaternion.identity;
 
-                case eProjectileRotationType.FACE_VELOCITY:
-                    Vector2 normalizeVelocity = velocity.normalized;
-                    return Mathf.Atan2(normalizeVelocity.y, normalizeVelocity.x);
+                    return Quaternion.LookRotation(velocity.normalized);
 
                 default:
-                    return 0f;
+                    return Quaternion.identity;
             }
-            */
-
-            return Quaternion.identity;
         }
     }
 }

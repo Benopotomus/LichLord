@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
+  m_Name: PROJ_FireballExplosion
+  m_EditorClassIdentifier: 
+  _tableID: 2
+  _lifetime: 0.2
+  _deactivationSpawnedProjectiles: []
+  _projectileMovement: {fileID: 11400000, guid: 73f3a09a38ebc1549a0ae6dde5708fca,
+    type: 2}
+  _speed: 0
+  _impactCollisionLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _overlapCollisionLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  _shape: 1
+  _lineOfSightRequirement: 0
+  _rotationType: 1
+  _extents: {x: 2.5, y: 0, z: 0}
+  _onlyAffectsOnce: 0
+  _affectsEachCast: 0
+  _collisionCheckTrim: {x: 0, y: 0}
+  _collisionCheckRate: 0
+  _collisionSweepsPerTick: 1
+  _collisionCheckNumber: 4
+  _onlyAffectImpactTarget: 0
+  _lineOfSightLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _scaleOverLifetime: {fileID: 11400000, guid: 917ff6c25fd8b034c9accb9b7c3f5fd8, type: 2}
+  _visualsPrefab:
+    _name: PROJ_VIS_FireballExplosion
+    _bundle: proj_vis_fireballexplosion
+  _height: 0
+  _impactSticksToHitActor: 0
+  _homesAtApex: 0

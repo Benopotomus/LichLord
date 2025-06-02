@@ -33,8 +33,19 @@ namespace LichLord
         // Called externally.
         public virtual void StartRecycle()
         {
+            if (_recycleDelay == 0)
+                RecycleVisualEffect();
+            else
+                StartCoroutine(RecycleAfterDelay());
+        }
+
+        protected IEnumerator RecycleAfterDelay()
+        {
+            onRecycleDelayStart?.Invoke(this);
+            yield return new WaitForSeconds(_recycleDelay);
             RecycleVisualEffect();
         }
+
 
         protected virtual void RecycleVisualEffect()
         {

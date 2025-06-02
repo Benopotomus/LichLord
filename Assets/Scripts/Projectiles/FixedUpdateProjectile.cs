@@ -119,7 +119,7 @@ namespace LichLord.Projectiles
 
         public void SpawnDeactivationProjectiles(ref FProjectileData data, ref FPhysicsHitData impactHit)
         {
-            /*
+            
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
             for (int i = 0; i < Definition.DeactivationSpawnedProjectiles.Count; i++)
             {
@@ -129,19 +129,15 @@ namespace LichLord.Projectiles
                     Instigator,
                     new FNetObjectID(),
                     impactHit.ProjectilePosition,
-                    impactHit.ProjectilePosition + (data.TargetPosition - data.Position).ToVector2().normalized,
+                    impactHit.ProjectilePosition + Vector3CompressedExtensions.SubtractAndNormalize(data.TargetPosition, data.Position), 
                     OwningPool.Runner.Tick,
                     ref Payload_SpawnedProjectile,
-                    ref Payload_SpawnedProjectile,
-                    0,
-                    false,
-                    Vector2.zero,
-                    0
-                    );
+                    ref Payload_SpawnedProjectile);
+
 
                 OwningPool.SpawnProjectile(fireEvent);
             }
-            */
+            
         }
         
     }

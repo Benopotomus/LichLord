@@ -299,10 +299,14 @@ namespace LichLord.Projectiles
                 // Use correct transformation matrix assignment
                 Gizmos.matrix = Matrix4x4.TRS(projectile.Position, rotation, Vector3.one);
 
+                float simTimeSinceFired = Runner.SimulationTime - (projectile.FireTick * projectile.Runner.DeltaTime);
+
+                float scale = ProjectilePhysicsUtility.GetScaleAtTime(projectile.Definition, simTimeSinceFired);
+
                 switch (projectile.Definition.Shape)
                 {
                     case EShapeType.Sphere:
-                        Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x);
+                        Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x * scale);
                         break;
                     case EShapeType.Raycast:
                         Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x);

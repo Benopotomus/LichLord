@@ -7,9 +7,9 @@ namespace LichLord
         public bool IsAssigned;
         public GameObject HitObject;
         public IHitTarget HitTarget;
-        public Vector2 ProjectilePosition;
-        public Vector2 ImpactVelocity;
-        public Vector2 ImpactPoint;
-        public Vector2 HitNormal;
+        public Vector3 ProjectilePosition;
+        public Vector3 ImpactVelocity;
+        public Vector3 ImpactPoint;
+        public Vector3 HitNormal;
     }
 }

@@ -29,7 +29,7 @@
                 // Check every tick if rate is 0, otherwise follow the tick interval
                 if (collisionCheckRate == 0 || (tick % collisionCheckRate == 0))
                 {
-                    PerformCollisionChecks(projectile, ref data, tick, simulationTime,
+                    PerformCollisionChecks(projectile, ref data, tick, simTimeSinceFired,
                         oldPosition, newPosition,
                         oldRotation, newRotation);
                 }
@@ -40,7 +40,7 @@
         private static void PerformCollisionChecks(Projectile projectile,
             ref FProjectileData data,
             int tick,
-            float simulationTime,
+            float simTimeSinceFired,
             Vector3 oldPosition,
             Vector3 newPosition,
             Quaternion oldRotation,
@@ -53,40 +53,32 @@
 
             data.IsReflected = false;
 
-            int sweepCount = Mathf.Max(definition.CollisionSweepsPerTick, 1);
-            for (int i = 1; i <= sweepCount; i++)
+            // Perform the shape collision check
+            CheckShapeCollisions(projectile,
+                ref data,
+                tick,
+                simTimeSinceFired,
+                newPosition,
+                newRotation,
+                ref hitDatas,
+                ref impactHit);
+
+            if (definition.OnlyAffectImpactTarget && impactHit.IsAssigned)
             {
-                float sweepLerp = i / (float)sweepCount;
-                Vector3 sweepLocation = Vector3.Lerp(oldPosition, newPosition, sweepLerp);
-                Quaternion sweepRotation = Quaternion.Lerp(oldRotation, newRotation, sweepLerp);
-
-                // Perform the shape collision check
-                CheckShapeCollisions(projectile,
-                    ref data,
-                    tick,
-                    simulationTime,
-                    sweepLocation,
-                    sweepRotation,
-                    ref hitDatas,
-                    ref impactHit);
-
-                if (definition.OnlyAffectImpactTarget && impactHit.IsAssigned)
-                {
-                    hitDatas = new List<FPhysicsHitData> { impactHit };
-                    projectile.UpdateAffectedActors(ref data, hitDatas, tick);
-                }
-                else
-                {
-                    projectile.UpdateAffectedActors(ref data, hitDatas, tick);
-                }
-
-                // If there's an impact, handle it
-                if (impactHit.IsAssigned)
-                {
-                    ProjectileImpactUtility.HandleImpact(projectile, ref data, ref impactHit, tick);
-                    break;
-                }
+                hitDatas = new List<FPhysicsHitData> { impactHit };
+                projectile.UpdateAffectedActors(ref data, hitDatas, tick);
             }
+            else
+            {
+                projectile.UpdateAffectedActors(ref data, hitDatas, tick);
+            }
+
+            // If there's an impact, handle it
+            if (impactHit.IsAssigned)
+            {
+                ProjectileImpactUtility.HandleImpact(projectile, ref data, ref impactHit, tick);
+            }
+            
         }
 
         public static void CheckShapeCollisions(Projectile projectile,
@@ -118,8 +110,7 @@
         {
 
             List<FOverlapHit> hitResults;
-
-            if (projectile.Definition.Speed > 0)
+            if(projectile.Position != queryShape.position) 
                 hitResults = GetCastHits(projectile, ref queryShape);
             else
                 hitResults = GetOverlapHits(projectile, ref queryShape);
@@ -137,7 +128,7 @@
 
                 if (gameObjectHit.tag == "Hurtbox")
                 {
-                    HurtboxOwner hitboxOwnerComp = gameObjectHit.GetComponent<HurtboxOwner>();
+                        HurtboxOwner hitboxOwnerComp = gameObjectHit.GetComponent<HurtboxOwner>();
                     if (hitboxOwnerComp == null)
                         continue;
 
@@ -227,9 +218,7 @@
                     int hitCount = Physics.OverlapSphereNonAlloc(
                         position,
                         queryShape.shapeExtents.x,
-
                         collidersHit,
-
                         definition.OverlapCollisionLayer);
 
                     for (int i = 0; i < hitCount; i++)

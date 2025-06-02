@@ -45,6 +45,11 @@ namespace LichLord.Projectiles
         protected ELineOfSightRequirement _lineOfSightRequirement; // if the hit occurs, ensure that we have LOS from the instigator to the target or fail.
         public ELineOfSightRequirement LineOfSightRequirement => _lineOfSightRequirement;
 
+        // Line of Sight
+        [SerializeField]
+        protected ERotationType _rotationType; // if the hit occurs, ensure that we have LOS from the instigator to the target or fail.
+        public ERotationType RotationType => _rotationType;
+
         [SerializeField]
         protected Vector3 _extents;
         public Vector3 Extents => _extents;
