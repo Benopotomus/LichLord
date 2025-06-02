@@ -18,12 +18,16 @@ namespace LichLord.Props
 
         [SerializeField] private List<PropRuntimeState> _runtimePropStates = new List<PropRuntimeState>(); // index is GUID
         [SerializeField] private Dictionary<int, PropRuntimeState> _deltaStates = new Dictionary<int, PropRuntimeState>(); // Changed to Dictionary with guid as key
+        [SerializeField] private List<PropReplicationData> propReplicators;
 
         private List<PropLoadState> _propLoadStates = new List<PropLoadState>();
-        private List<PropReplicationData> propReplicators;
+
         private string saveFilePath;
 
-        [SerializeField] private TickAlignedEventRelay _eventStub;
+        public void AddReplicator(PropReplicationData replicationData)
+        { 
+            propReplicators.Add(replicationData);
+        }
 
         public override void Spawned()
         {
@@ -37,8 +41,6 @@ namespace LichLord.Props
             {
                 ApplySavedDelta();
             }
-
-            RegisterEventListener((DamageEvent evt) => ApplyDamage(evt.guid, evt.impulse, evt.damage));
         }
 
         public void ApplyDamage(int guid, Vector3 impulse, int damage)
@@ -48,19 +50,16 @@ namespace LichLord.Props
             PropRuntimeState propRuntimeState = _runtimePropStates[guid];
             propRuntimeState.stateData = 1;
 
-            // find its FPropData if it exists and adjust that
-            List<PropReplicationData> repDatas = Runner.GetAllBehaviours<PropReplicationData>();
-
             bool dataFound = false;
-            for (int i = 0; i < repDatas.Count; i++)
+            for (int i = 0; i < propReplicators.Count; i++)
             {
-                PropReplicationData repData = repDatas[i];
+                PropReplicationData repData = propReplicators[i];
 
                 if (repData.TryGetPropData(guid, out var propData))
                 {
+                    propRuntimeState.replicationData = repData;
                     propData.StateData = propRuntimeState.stateData;
                     repData.UpdatePropData(guid, propData);
-                    OverrideRuntimeData(ref propData);
                     dataFound = true;
                 }
             }
@@ -68,14 +67,15 @@ namespace LichLord.Props
             // if it doesnt exist, add a propdata for it
             if (!dataFound)
             {
-                for (int i = 0; i < repDatas.Count; i++)
+                for (int i = 0; i < propReplicators.Count; i++)
                 {
-                    PropReplicationData repData = repDatas[i];
+                    PropReplicationData repData = propReplicators[i];
 
                     if (repData.HasFreeProp())
                     {
                         // Adding a prop overrides the runtime data
                         repData.AddProp(propRuntimeState);
+                        propRuntimeState.replicationData = repData;
                         break;
                     }
                 }
@@ -86,11 +86,6 @@ namespace LichLord.Props
             {
                 loadState.Prop.UpdateProp(propRuntimeState, Runner.LocalAlpha);
             }
-        }
-
-        protected void RegisterEventListener<T>(Action<T> listener) where T : unmanaged, INetworkEvent
-        {
-            _eventStub.RegisterEventListener(listener);
         }
 
         private void LoadBaseLevelProps()
@@ -207,12 +202,35 @@ namespace LichLord.Props
                 }
                 else if (shouldBeActive && propLoadState.LoadState == ELoadState.Loaded)
                 {
+                    RefreshRuntimePropState(propState);
                     propLoadState.Prop.UpdateProp(propState, renderDeltaTime);
                 }
                 else if (!shouldBeActive && distance > despawnRadius && propLoadState.LoadState == ELoadState.Loaded)
                 {
                     DespawnProp(propState.guid);
                 }
+            }
+        }
+
+        private void RefreshRuntimePropState(PropRuntimeState propState)
+        {
+            // Check the replication data
+            PropReplicationData replicator = null;
+
+            for (int i = 0; i < propReplicators.Count; i++)
+            {
+                if (propReplicators[i].TryGetPropData(propState.guid, out FPropData propData))
+                {
+                    replicator = propReplicators[i];
+                    propState.stateData = propData.StateData;
+                    propState.replicationData = replicator;
+                }
+            }
+
+            if (replicator == null)
+            {
+                propState.stateData = 0;
+                propState.replicationData = null;
             }
         }
 
@@ -234,46 +252,6 @@ namespace LichLord.Props
                 propLoadState.LoadState = ELoadState.None;
             }
         }
-
-        public void OverrideRuntimeData(ref FPropData data)
-        {
-            // Access PropManager
-            PropManager propManager = Context.PropManager;
-            if (propManager == null)
-            {
-                Debug.LogError("PropManager not found in Context.", this);
-                return;
-            }
-
-            // Ensure RuntimePropStates and propLoadStates have enough capacity
-            while (_runtimePropStates.Count <= data.GUID)
-            {
-                PropRuntimeState addedState = new PropRuntimeState(
-                    _runtimePropStates.Count,
-                    Vector3.zero,
-                    Quaternion.identity,
-                    0,
-                    0);
-
-                // Add to the runtime list and loadstate list
-                _runtimePropStates.Add(addedState);
-                _propLoadStates.Add(new PropLoadState());
-            }
-
-            PropRuntimeState modifiedState = _runtimePropStates[data.GUID];
-
-            if (!data.IsEqualToRuntimeData(modifiedState))
-            {
-                modifiedState.guid = data.GUID;
-                modifiedState.position = data.Position;
-                modifiedState.rotation = Quaternion.LookRotation(data.Forward, Vector3.up);
-                modifiedState.definitionId = data.DefinitionID;
-                modifiedState.stateData = data.StateData;
-            }
-
-            _deltaStates[data.GUID] = modifiedState;
-        }
-
 
         private void LoadSavedPropStates()
         {
@@ -369,12 +347,6 @@ namespace LichLord.Props
             Loaded,
             Unloading,
         }
-
-        public struct DamageEvent : INetworkEvent
-        {
-            public int guid;
-            public Vector3 impulse;
-            public int damage;
-        }
     }
+
 }

@@ -22,9 +22,9 @@ namespace LichLord
         public Transform ScalingRoot;
 
         [Header("Movement Setup")]
-        public float WalkSpeed = 2f;
-        public float SprintSpeed = 5f;
-        public float SprintAccelerationTime = 0.3f; // Time to transition between walk and sprint speeds
+        public float WalkSpeed = 4f;
+        public float SprintSpeed = 7f;
+        public float SprintAccelerationTime = 0.3f;
         public float UpGravity = -10f;
         public float DownGravity = -20f;
         public float RotationSpeed = 8f;
@@ -36,26 +36,25 @@ namespace LichLord
         public float AirDeceleration = 1.3f;
 
         [Header("Flying Setup")]
-        public float FlyAscendSpeed = 1f;
-        public float FlyDescendSpeed = 1f;
+        public float FlyAscendSpeed = 3f;
+        public float FlyDescendSpeed = 6f;
         public float FlyAscendAcceleration = 4f;
-        public float FlyDescendAcceleration = 4f;
-        public float FlyVerticalBraking = 4f;
-        public float FlyHorizontalSpeed = 4f;
+        public float FlyDescendAcceleration = 2f;
+        public float FlyVerticalBraking = 2f;
+        public float FlyHorizontalSpeed = 7f;
 
         [Header("Jump Setup")]
-        public float JumpImpulse = 3f;
-        public float JumpHoldVelocity = 5.5f; 
-        public float FlyHoldThreshold = 0.75f;
-        public float JumpBufferTime = 0.2f; // Grace period for jump input
+        public float JumpImpulse = 5f;
+        public float JumpHoldVelocity = 5.5f;
+        public float JumpBufferTime = 0.2f;
 
-        private float _jumpHeldTime;
+        private float _jumpBufferTimer;
+        private bool _jumpInputBuffered;
         private Vector3 _moveVelocity;
-        private float _verticalInput = 0f;
-        private float _jumpBufferTimer = 0f;
-        private bool _jumpInputBuffered = false;
-        private float _castSpeedMultiplier = 1f; // Multiplier for movement speed during actions
-        private float _currentMoveSpeed; // Tracks current movement speed for sprint lerp
+        private float _verticalInput;
+        private float _castSpeedMultiplier = 1f;
+        private float _currentMoveSpeed;
+        private int _jumpCount; // Track number of jumps
 
         private int _animIDSpeedX = Animator.StringToHash("SpeedX");
         private int _animIDSpeedZ = Animator.StringToHash("SpeedZ");
@@ -76,26 +75,25 @@ namespace LichLord
             base.Spawned();
             KCC.Settings.ForcePredictedLookRotation = true;
             CurrentMovementState = MovementState.Grounded;
-            _jumpHeldTime = 0f;
+            _jumpCount = 0;
             _moveVelocity = Vector3.zero;
             _jumpBufferTimer = 0f;
             _jumpInputBuffered = false;
             _castSpeedMultiplier = 1f;
-            _currentMoveSpeed = WalkSpeed; // Initialize to walk speed
+            _currentMoveSpeed = WalkSpeed;
         }
 
         public void Respawn()
         {
             _moveVelocity = Vector3.zero;
             CurrentMovementState = MovementState.Grounded;
-            _jumpHeldTime = 0f;
+            _jumpCount = 0;
             _jumpBufferTimer = 0f;
             _jumpInputBuffered = false;
             _castSpeedMultiplier = 1f;
-            _currentMoveSpeed = WalkSpeed; // Reset to walk speed
+            _currentMoveSpeed = WalkSpeed;
         }
 
-        // Called from FSM
         public void OnRender()
         {
             var moveSpeed = transform.InverseTransformVector(KCC.RealVelocity);
@@ -122,14 +120,12 @@ namespace LichLord
             KCC.SetLookRotation(input.LookRotation, -90f, 90f);
         }
 
-        // Called from FSM
         public void ProcessInput(FGameplayInput input)
         {
             KCC.SetLookRotation(input.LookRotation, -90f, 90f);
 
             var moveDirection = KCC.TransformRotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
 
-            // Lerp current move speed toward target speed (WalkSpeed or SprintSpeed)
             float targetSpeed = input.Sprint ? SprintSpeed : WalkSpeed;
             float lerpSpeed = Mathf.Lerp(_currentMoveSpeed, targetSpeed, Runner.DeltaTime / SprintAccelerationTime);
             _currentMoveSpeed = lerpSpeed;
@@ -146,7 +142,6 @@ namespace LichLord
             float jumpImpulse = 0f;
             bool isRising = KCC.RealVelocity.y > 0f;
 
-            // Update jump buffer timer
             if (input.Jump && !input.JumpHeld)
             {
                 _jumpInputBuffered = true;
@@ -167,19 +162,19 @@ namespace LichLord
                 case MovementState.Grounded:
                     KCC.SetGravity(isRising ? UpGravity : DownGravity);
                     _verticalInput = 0;
+                    _jumpCount = 0; // Reset jump count when grounded
 
                     if (KCC.ProjectOnGround(_moveVelocity, out var projectedVector))
                     {
                         _moveVelocity = projectedVector;
                     }
 
-                    // Check for jump input or buffered jump
                     if ((_jumpInputBuffered || input.Jump) && KCC.IsGrounded)
                     {
                         jumpImpulse = JumpImpulse;
-                        _jumpHeldTime = 0f;
+                        _jumpCount = 1;
                         CurrentMovementState = MovementState.Jumping;
-                        _jumpInputBuffered = false; // Clear buffer after jump
+                        _jumpInputBuffered = false;
                         if (JumpAudioClip != null)
                         {
                             FootstepSound.PlayOneShot(JumpAudioClip);
@@ -192,30 +187,28 @@ namespace LichLord
                 case MovementState.Jumping:
                     KCC.SetGravity(isRising ? UpGravity : DownGravity);
 
-                    if (input.JumpHeld)
+                    if ((_jumpInputBuffered || input.Jump) && _jumpCount < 2)
                     {
-                        _verticalInput += (JumpHoldVelocity * Runner.DeltaTime);
-                        _jumpHeldTime += Runner.DeltaTime;
-                    }
-
-                    if (!KCC.IsGrounded && _jumpHeldTime >= FlyHoldThreshold)
-                    {
+                        jumpImpulse = JumpImpulse;
+                        _jumpCount = 2;
                         CurrentMovementState = MovementState.Flying;
                         _verticalInput = FlyAscendSpeed;
                         _moveVelocity.y = _verticalInput;
-                        _jumpHeldTime = 0f;
+                        _jumpInputBuffered = false;
                         KCC.SetGravity(0f);
                         KCC.ResetVelocity();
-                        KCC.Move(_moveVelocity, 0f);
-                        break;
+                        if (JumpAudioClip != null)
+                        {
+                            //FootstepSound.PlayOneShot(JumpAudioClip);
+                        }
                     }
 
                     if (KCC.IsGrounded)
                     {
                         CurrentMovementState = MovementState.Grounded;
                         _moveVelocity.y = 0f;
-                        _jumpHeldTime = 0f;
-                        _jumpInputBuffered = false; // Clear buffer on landing
+                        _jumpCount = 0;
+                        _jumpInputBuffered = false;
                         if (LandAudioClip != null)
                         {
                             FootstepSound.PlayOneShot(LandAudioClip);
@@ -225,12 +218,12 @@ namespace LichLord
                     horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, SprintSpeed * _castSpeedMultiplier);
                     _moveVelocity = new Vector3(horizontalVelocity.x, _verticalInput, horizontalVelocity.z);
 
-                    KCC.Move(_moveVelocity, 0f);
+                    KCC.Move(_moveVelocity, jumpImpulse);
                     break;
 
                 case MovementState.Flying:
-
                     KCC.SetGravity(0f);
+                    KCC.ResetVelocity();
                     if (input.JumpHeld)
                     {
                         _verticalInput = Mathf.Lerp(_verticalInput, FlyAscendSpeed, FlyAscendAcceleration * Runner.DeltaTime);
@@ -253,7 +246,8 @@ namespace LichLord
                     {
                         CurrentMovementState = MovementState.Grounded;
                         _moveVelocity.y = 0f;
-                        _jumpInputBuffered = false; // Clear buffer on landing
+                        _jumpCount = 0;
+                        _jumpInputBuffered = false;
                         if (LandAudioClip != null)
                         {
                             FootstepSound.PlayOneShot(LandAudioClip);

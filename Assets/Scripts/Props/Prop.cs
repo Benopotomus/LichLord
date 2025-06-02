@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using DG.Tweening;
 using DWD.Pooling;
+using Fusion;
 
 namespace LichLord.Props
 {
@@ -32,26 +33,6 @@ namespace LichLord.Props
             else
                 gameObject.SetActive(true);
 
-            /*
-            // Update position and rotation
-            Vector3 moveTarget = propData.Position;
-            if (CachedTransform.position != moveTarget)
-            {
-                CachedTransform.position = Vector3.Lerp(CachedTransform.position, moveTarget, 10 * renderDeltaTime);
-            }
-
-            Quaternion rotTarget = Quaternion.LookRotation(propData.Forward, Vector3.up);
-            if (CachedTransform.rotation != rotTarget)
-            {
-                CachedTransform.rotation = Quaternion.Slerp(CachedTransform.rotation, rotTarget, 10 * renderDeltaTime);
-            }
-
-            // Handle destruction
-            if (propData.IsDestroyed)
-            {
-                StartRecycle();
-            }
-            */
         }
 
         protected virtual void UpdateAllStates() { }
@@ -61,15 +42,49 @@ namespace LichLord.Props
             DWDObjectPool.Instance.Recycle(this);
         }
 
-        public void ProcessHit(ref FHitUtilityData hit)
-        {
-            Debug.Log("Process Hit");
-            _propManager.ApplyDamage(_propRuntimeState.guid, Vector3.zero, 9001);
-            //_propManager.RPC_ModifyProp()
-        }
-
         public void OnHitTaken(ref FHitUtilityData hit)
         {
+        }
+
+        public void ProcessHit(ref FHitUtilityData hit)
+        {
+            if (_propManager == null || _propRuntimeState == null)
+            {
+                Debug.LogWarning($"[Prop] Cannot process hit: PropManager or PropRuntimeState is null for guid {_propRuntimeState?.guid}.");
+                return;
+            }
+
+            NetworkRunner runner = _propManager.Runner;
+
+            Debug.Log($"[Prop] Processing hit for guid {_propRuntimeState.guid} with damage 9001");
+
+            // Find the master client (host)
+            RelayPlayer masterPlayer = null;
+            foreach (PlayerRef player in runner.ActivePlayers)
+            {
+                NetworkObject playerObj = runner.GetPlayerObject(player);
+                if (playerObj != null)
+                {
+                    RelayPlayer relayPlayer = playerObj.GetComponent<RelayPlayer>();
+                    relayPlayer.RaiseEvent(new DamageEvent
+                    {
+                        guid = _propRuntimeState.guid,
+                        impulse = Vector3.zero,
+                        damage = 9001
+                    });
+                }
+            }
+
+            if (masterPlayer != null)
+            {
+                masterPlayer.RaiseEvent(new DamageEvent
+                {
+                    guid = _propRuntimeState.guid,
+                    impulse = Vector3.zero,
+                    damage = 9001
+                });
+                Debug.Log($"[Prop] Sent DamageEvent for guid {_propRuntimeState.guid} to master client (host) player {masterPlayer.PlayerId}");
+            }
         }
     }
 }

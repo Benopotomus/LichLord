@@ -5,13 +5,15 @@ using UnityEngine.Rendering;
 using Starter.Shooter;
 using Starter;
 using LichLord.Projectiles;
+using FusionHelpers;
+using System;
 
 namespace LichLord
 {
     /// <summary>
     /// Main player script - controls player movement, actions, and animations.
     /// </summary>
-    public sealed class PlayerCreature : ContextBehaviour , INetActor, IHitInstigator, IHitTarget
+    public class PlayerCreature : RelayPlayer , INetActor, IHitInstigator, IHitTarget
     {
         [Header("References")]
         public Health Health;
@@ -64,6 +66,8 @@ namespace LichLord
 
         public override void Spawned()
         {
+            base.Spawned();
+
             Runner.SetPlayerObject(Runner.LocalPlayer, Object);
             Runner.SetPlayerAlwaysInterested(Runner.LocalPlayer, Object, true);
 
@@ -103,6 +107,12 @@ namespace LichLord
                 if (Actions == null)
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }
+        }
+
+        public void ApplyDamage(int guid, Vector3 impulse, int damage)
+        {
+            //Context.PropManager.RaiseEvent(new DamageEvent { impulse = Vector3.zero, damage = 9001 });
+
         }
 
         public override void FixedUpdateNetwork()

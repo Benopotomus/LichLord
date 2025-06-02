@@ -38,8 +38,6 @@ namespace LichLord
 
         protected virtual void RecycleVisualEffect()
         {
-            Debug.Log("recycle");
-
             onRecycled?.Invoke(this);
             DWDObjectPool.Instance.Recycle(this);
         }

@@ -363,6 +363,10 @@ MonoBehaviour:
   ChestTargetPosition: {fileID: 536988984119202717}
   ChestBone: {fileID: 1992701519831656905}
   _Nickname: 
+  _eventRelayPrefab: {fileID: 6216721781973090943, guid: 2a4ca20818b5c0949877f1f758ac500f,
+    type: 3}
+  _eventStub: {fileID: 0}
+  _eventRelay: {fileID: 0}
 --- !u!114 &7362189930313428062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -444,8 +448,8 @@ MonoBehaviour:
   KCC: {fileID: 1051259928070073083}
   Animator: {fileID: 4073002756564798429}
   ScalingRoot: {fileID: 3148250353762206361}
-  WalkSpeed: 2
-  SprintSpeed: 5
+  WalkSpeed: 4
+  SprintSpeed: 7
   SprintAccelerationTime: 0.3
   UpGravity: -10
   DownGravity: -20
@@ -454,15 +458,14 @@ MonoBehaviour:
   GroundDeceleration: 25
   AirAcceleration: 25
   AirDeceleration: 1.3
-  FlyAscendSpeed: 1
-  FlyDescendSpeed: 3
+  FlyAscendSpeed: 3
+  FlyDescendSpeed: 6
   FlyAscendAcceleration: 4
-  FlyDescendAcceleration: 4
-  FlyVerticalBraking: 2
-  FlyHorizontalSpeed: 5
-  JumpImpulse: 3
+  FlyDescendAcceleration: 2
+  FlyVerticalBraking: 1
+  FlyHorizontalSpeed: 7
+  JumpImpulse: 5
   JumpHoldVelocity: 5.5
-  FlyHoldThreshold: 0.75
   JumpBufferTime: 0.2
   FootstepSound: {fileID: 7822257894759364770}
   JumpAudioClip: {fileID: 8300000, guid: 111193ad93ba31640ba3bdc4695615fa, type: 3}

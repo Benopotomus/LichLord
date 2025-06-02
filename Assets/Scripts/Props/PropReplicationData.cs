@@ -12,6 +12,12 @@ namespace LichLord.Props
         protected int _dataCount { get; set; }
         public int DataCount => _dataCount;
 
+        public override void Spawned()
+        {
+            base.Spawned();
+            Context.PropManager.AddReplicator(this);
+        }
+
         public bool TryGetPropData(int guid, out FPropData data)
         {
             return _propDatas.TryGet(guid, out data);
@@ -42,30 +48,12 @@ namespace LichLord.Props
 
             _propDatas.Add(propRuntimeState.guid, data);
 
-            if (!initializing)
-                Context.PropManager.OverrideRuntimeData(ref data);
-
             _dataCount++;
         }
 
         public bool HasFreeProp()
         {
             return _dataCount < PropConstants.MAX_PROP_REPS_NETOBJECT;
-        }
-
-        public override void Render()
-        {
-            if (!Context.IsGameplayActive())
-                return;
-
-            foreach (var kvp in _propDatas)
-            {
-                FPropData data = kvp.Value;
-                if (!data.IsActive)
-                    continue;
-
-                Context.PropManager.OverrideRuntimeData(ref data);
-            }
         }
     }
 }
