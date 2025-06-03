@@ -37,6 +37,7 @@ namespace LichLord.Buildables
                 return;
             }
 
+            /*
             FBuildableData data = new FBuildableData
             {
                 GUID = propRuntimeState.guid,
@@ -46,9 +47,9 @@ namespace LichLord.Buildables
                 IsActive = true,
                 StateData = propRuntimeState.stateData
             };
-
+            
             _buildDatas.Add(propRuntimeState.guid, data);
-
+            */
             _dataCount++;
         }
 

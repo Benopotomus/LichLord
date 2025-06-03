@@ -304,6 +304,7 @@ GameObject:
   - component: {fileID: 4081789406591363571}
   - component: {fileID: 4155602845998252645}
   - component: {fileID: 6744880684058088246}
+  - component: {fileID: 4804172155013043321}
   m_Layer: 6
   m_Name: PlayerCreature
   m_TagString: Player
@@ -350,8 +351,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _eventRelayPrefab: {fileID: 6216721781973090943, guid: 2a4ca20818b5c0949877f1f758ac500f,
     type: 3}
-  _eventRelay: {fileID: 0}
-  _eventStub: {fileID: 0}
+  _eventRelay: {fileID: 4804172155013043321}
+  _eventStub: {fileID: 4804172155013043321}
   Health: {fileID: 7362189930313428062}
   Movement: {fileID: 1776246608945052242}
   CameraController: {fileID: 4625314071529301451}
@@ -544,6 +545,7 @@ MonoBehaviour:
   - {fileID: 1776246608945052242}
   - {fileID: 1051259928070073083}
   - {fileID: 4081789406591363571}
+  - {fileID: 4804172155013043321}
   - {fileID: 7904855827506051427}
   - {fileID: 7134053186718281712}
   - {fileID: 3226170803067638791}
@@ -564,6 +566,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &4804172155013043321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4065fad91402e064fbcca9a9419bde60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3226221424221943437
 GameObject:
   m_ObjectHideFlags: 0
