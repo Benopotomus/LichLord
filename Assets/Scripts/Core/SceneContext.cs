@@ -6,6 +6,7 @@
 namespace LichLord
 {
     using Fusion;
+    using LichLord.Buildables;
     using LichLord.Projectiles;
     using LichLord.Props;
     using LichLord.UI;
@@ -22,6 +23,7 @@ namespace LichLord
         public SpawnManager SpawnManager;
         public ProjectileManager ProjectileManager;
         public PropManager PropManager;
+        public BuildableManager BuildableManager;
         public SceneCamera Camera;
         public SceneUI UI;
 

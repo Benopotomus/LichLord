@@ -15,7 +15,7 @@ public class LevelPropsMarkupManager : MonoBehaviour
             if (point.propDefinition == null) continue;
 
             Mesh mesh = GetMeshFromPrefab(point.propDefinition.prefab);
-            Color color = point.propDefinition.propName switch
+            Color color = point.propDefinition.Name switch
             {
                 "Tree" => Color.green,
                 "Rock" => Color.gray,

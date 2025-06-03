@@ -1,10 +1,9 @@
-using DWD.Utility.Loading;
+﻿using DWD.Utility.Loading;
 using UnityEngine;
 
-namespace LichLord.Props
+namespace LichLord.Buildables
 {
-    [CreateAssetMenu(fileName = "PropDefinition", menuName = "LichLord/Props/PropDefinition")]
-    public class PropDefinition : TableObject
+    public class BuildableDefinition : TableObject
     {
         [SerializeField]
         protected string _name;
@@ -15,7 +14,5 @@ namespace LichLord.Props
         [SerializeField]
         protected BundleObject _prefabBundle;
         public BundleObject PrefabBundle => _prefabBundle;
-
-        public GameObject prefab;
     }
 }

@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace LichLord.Props
 {
-    public class PropReplicationData : ContextBehaviour
+    public class PropReplicator : ContextBehaviour
     {
-        [Networked, Capacity(PropConstants.MAX_PROP_REPS_NETOBJECT)]
+        [Networked, Capacity(PropConstants.MAX_PROP_REPS)]
         private NetworkDictionary<int, FPropData> _propDatas { get; }
 
         [Networked]
@@ -30,7 +30,7 @@ namespace LichLord.Props
 
         public void AddProp(PropRuntimeState propRuntimeState, bool initializing = false)
         {
-            if (_dataCount >= PropConstants.MAX_PROP_REPS_NETOBJECT)
+            if (_dataCount >= PropConstants.MAX_PROP_REPS)
             {
                 Debug.LogWarning("Trying to add a prop data to a replicator when there's no room");
                 return;
@@ -53,7 +53,7 @@ namespace LichLord.Props
 
         public bool HasFreeProp()
         {
-            return _dataCount < PropConstants.MAX_PROP_REPS_NETOBJECT;
+            return _dataCount < PropConstants.MAX_PROP_REPS;
         }
     }
 }

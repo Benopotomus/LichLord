@@ -9,21 +9,21 @@ namespace LichLord.Props
     {
         [SerializeField] private PropSpawner _propSpawner;
         [SerializeField] private LevelPropsMarkupData levelPropsMarkupData;
-        [SerializeField] private PropReplicationData propReplicationPrefab;
+        [SerializeField] private PropReplicator propReplicationPrefab;
         [SerializeField] private PropSaveLoadManager saveLoadManager;
         [SerializeField] private float spawnRadius = 50f;
         [SerializeField] private float despawnRadius = 60f;
 
         [SerializeField] private List<PropRuntimeState> _runtimePropStates = new List<PropRuntimeState>();
         [SerializeField] private Dictionary<int, PropRuntimeState> _deltaStates = new Dictionary<int, PropRuntimeState>();
-        [SerializeField] private List<PropReplicationData> propReplicators;
+        [SerializeField] private List<PropReplicator> _propReplicators;
 
         private List<PropLoadState> _propLoadStates = new List<PropLoadState>();
 
         public override void Spawned()
         {
             _propSpawner.OnPropSpawned += OnPropSpawned;
-            propReplicators = new List<PropReplicationData>();
+            _propReplicators = new List<PropReplicator>();
 
             LoadBaseLevelProps();
 
@@ -33,9 +33,9 @@ namespace LichLord.Props
             }
         }
 
-        public void AddReplicator(PropReplicationData replicationData)
+        public void AddReplicator(PropReplicator replicationData)
         {
-            propReplicators.Add(replicationData);
+            _propReplicators.Add(replicationData);
         }
 
         public void ApplyDamage(int guid, Vector3 impulse, int damage)
@@ -46,9 +46,9 @@ namespace LichLord.Props
             propRuntimeState.stateData = 1;
 
             bool dataFound = false;
-            for (int i = 0; i < propReplicators.Count; i++)
+            for (int i = 0; i < _propReplicators.Count; i++)
             {
-                PropReplicationData repData = propReplicators[i];
+                PropReplicator repData = _propReplicators[i];
 
                 if (repData.TryGetPropData(guid, out var propData))
                 {
@@ -60,9 +60,9 @@ namespace LichLord.Props
 
             if (!dataFound)
             {
-                for (int i = 0; i < propReplicators.Count; i++)
+                for (int i = 0; i < _propReplicators.Count; i++)
                 {
-                    PropReplicationData repData = propReplicators[i];
+                    PropReplicator repData = _propReplicators[i];
 
                     if (repData.HasFreeProp())
                     {
@@ -132,15 +132,15 @@ namespace LichLord.Props
                 changedState.stateData = deltaState.stateData;
             }
 
-            int propReplicatorCount = (_deltaStates.Count + PropConstants.MAX_PROP_REPS_NETOBJECT - 1) / PropConstants.MAX_PROP_REPS_NETOBJECT;
+            int propReplicatorCount = (_deltaStates.Count + PropConstants.MAX_PROP_REPS - 1) / PropConstants.MAX_PROP_REPS;
 
             for (int i = 0; i < propReplicatorCount; i++)
             {
                 var propReplicationObject = Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
-                propReplicators.Add(propReplicationObject);
+                _propReplicators.Add(propReplicationObject);
 
-                int startIndex = i * PropConstants.MAX_PROP_REPS_NETOBJECT;
-                int endIndex = Mathf.Min(startIndex + PropConstants.MAX_PROP_REPS_NETOBJECT, _deltaStates.Count);
+                int startIndex = i * PropConstants.MAX_PROP_REPS;
+                int endIndex = Mathf.Min(startIndex + PropConstants.MAX_PROP_REPS, _deltaStates.Count);
 
                 int index = 0;
                 foreach (PropRuntimeState deltaState in _deltaStates.Values)
@@ -190,7 +190,7 @@ namespace LichLord.Props
                 }
                 else if (shouldBeActive && propLoadState.LoadState == ELoadState.Loaded)
                 {
-                    RefreshRuntimePropState(propState);
+                    RefreshRuntimeState(propState);
                     propLoadState.Prop.UpdateProp(propState, renderDeltaTime);
                 }
                 else if (!shouldBeActive && distance > despawnRadius && propLoadState.LoadState == ELoadState.Loaded)
@@ -204,7 +204,7 @@ namespace LichLord.Props
         {
             // Check if there is at least one completely empty replicator (zero entries)
             bool hasEmptyReplicator = false;
-            foreach (var replicator in propReplicators)
+            foreach (var replicator in _propReplicators)
             {
                 if (replicator.DataCount == 0)
                 {
@@ -220,13 +220,13 @@ namespace LichLord.Props
             }
         }
 
-        private void RefreshRuntimePropState(PropRuntimeState propState)
+        private void RefreshRuntimeState(PropRuntimeState propState)
         {
             bool replicatorFound = false;
 
-            for (int i = 0; i < propReplicators.Count; i++)
+            for (int i = 0; i < _propReplicators.Count; i++)
             {
-                if (propReplicators[i].TryGetPropData(propState.guid, out FPropData propData))
+                if (_propReplicators[i].TryGetPropData(propState.guid, out FPropData propData))
                 {
                     replicatorFound = true;
                     propState.stateData = propData.StateData;

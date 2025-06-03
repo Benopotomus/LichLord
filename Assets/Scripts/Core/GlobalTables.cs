@@ -1,4 +1,5 @@
 ﻿using LichLord.Projectiles;
+using LichLord.Buildables;
 using LichLord.Props;
 using System;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace LichLord
     {
         public ProjectileTable ProjectileTable;
         public PropTable PropTable;
+        public BuildableTable BuildableTable;
 
         /*
         public ItemTable ItemTable;
