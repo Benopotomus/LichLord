@@ -98,6 +98,9 @@ namespace SoulGames.EasyGridBuilderPro
         #region Extras
         private Collider GetMouseWorldPositionCollider3D()
         {
+            if (Camera.main == null)
+                return null;
+
             foreach (EasyGridBuilderPro easyGridBuilderLite in easyGridBuilderProList)
             {
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

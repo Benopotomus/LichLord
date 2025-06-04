@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 5
+  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -22,6 +22,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Fireball01Trail_SGAddScroll
   m_Shader: {fileID: 4800000, guid: 8dd944eaa6c5f9d40a31d383a07fd824, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _SURFACE_TYPE_TRANSPARENT
   m_InvalidKeywords: []
@@ -33,6 +35,7 @@ Material:
     RenderType: Transparent
   disabledShaderPasses:
   - DepthOnly
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -137,6 +140,7 @@ Material:
     - Vector1_C1728026: 4
     - Vector1_D1034171: 0.05
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _BUILTIN_AlphaClip: 0
     - _BUILTIN_Blend: 2
     - _BUILTIN_CullMode: 0
@@ -151,6 +155,7 @@ Material:
     - _Blend: 2
     - _BumpScale: 1
     - _CastShadows: 1
+    - _Clip: 0.01
     - _ColorMultiplier: 53.3
     - _Cull: 0
     - _Cutoff: 0.5

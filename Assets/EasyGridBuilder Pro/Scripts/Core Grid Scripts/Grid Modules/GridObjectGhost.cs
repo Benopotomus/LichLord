@@ -38,6 +38,8 @@ namespace SoulGames.EasyGridBuilderPro
             {
                 grid.OnSelectedBuildableChanged += OnSelectedChanged;
             }
+
+            OnSelectedChanged(this, System.EventArgs.Empty);
         }
         
         private void OnDestroy()
@@ -51,14 +53,14 @@ namespace SoulGames.EasyGridBuilderPro
 
         private void OnSelectedChanged(object sender, System.EventArgs e)
         {
-            //Debug.Log("OnSelectedChanged");
+            Debug.Log("OnSelectedChanged");
             CleanObject();
             RefreshVisual();
         }
 
         private void OnGridSystemChanged(EasyGridBuilderPro currentActiveSystem)
         {
-            //Debug.Log("OnGirdSystemChanged");
+            Debug.Log("OnGirdSystemChanged");
             this.currentActiveSystem = currentActiveSystem;
             BuildableGridObjectTypeSO buildableGridObjectTypeSO = currentActiveSystem.GetBuildableGridObjectTypeSO();
             CleanObject();

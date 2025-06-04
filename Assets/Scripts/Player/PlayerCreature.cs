@@ -1,12 +1,10 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 using UnityEngine.Rendering;
 using Starter.Shooter;
 using Starter;
 using LichLord.Projectiles;
-using FusionHelpers;
-using System;
+using SoulGames.EasyGridBuilderPro;
 
 namespace LichLord
 {
@@ -45,6 +43,9 @@ namespace LichLord
 
         INetActor IHitInstigator.NetActor => this;
 
+        [SerializeField]
+        private BuildableGridObjectTypeSO item;
+
         public static bool TryGetLocalPlayer(NetworkRunner runner, out PlayerCreature playerCreature)
         {
             playerCreature = null;
@@ -67,6 +68,9 @@ namespace LichLord
         public override void Spawned()
         {
             base.Spawned();
+
+            Context.LocalPlayerCreature = this;
+            Context.LocalPlayerRef = Object.StateAuthority;
 
             Runner.SetPlayerObject(Runner.LocalPlayer, Object);
             Runner.SetPlayerAlwaysInterested(Runner.LocalPlayer, Object, true);
@@ -96,8 +100,6 @@ namespace LichLord
                 {
                     FirstPersonOverlayObjects[i].layer = overlayLayer;
                 }
-
-                // Look rotation interpolation is skipped for local player
             }
 
             // Ensure ActionManager is assigned
@@ -107,6 +109,8 @@ namespace LichLord
                 if (Actions == null)
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }
+
+            EasyGridBuilderPro.Instance.SetSelectedBuildable(item);
         }
 
         public void ApplyDamage(int guid, Vector3 impulse, int damage)

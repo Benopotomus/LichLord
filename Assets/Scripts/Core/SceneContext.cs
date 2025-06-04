@@ -7,9 +7,11 @@ namespace LichLord
 {
     using Fusion;
     using LichLord.Buildables;
+    using LichLord.NonPlayerCharacters;
     using LichLord.Projectiles;
     using LichLord.Props;
     using LichLord.UI;
+    using UnityEngine;
 
     [System.Serializable]
     public class SceneContext
@@ -24,8 +26,14 @@ namespace LichLord
         public ProjectileManager ProjectileManager;
         public PropManager PropManager;
         public BuildableManager BuildableManager;
+        public NonPlayerCharacterManager NonPlayerCharacterManager;
         public SceneCamera Camera;
         public SceneUI UI;
+
+        [HideInInspector]
+        public PlayerRef LocalPlayerRef;
+        [HideInInspector]
+        public PlayerCreature LocalPlayerCreature;
 
         // General
         /*

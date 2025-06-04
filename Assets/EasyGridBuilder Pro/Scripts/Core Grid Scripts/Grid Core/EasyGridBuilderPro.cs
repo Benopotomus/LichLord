@@ -528,6 +528,13 @@ namespace SoulGames.EasyGridBuilderPro
             }
         }
 
+        public void SetSelectedBuildable(BuildableGridObjectTypeSO item)
+        {
+            buildableGridObjectTypeSO = item;
+            OnSelectedBuildableChanged?.Invoke(this, EventArgs.Empty); //Invoke the event 'OnSelectedBuildableChanged'
+        }
+
+
         private void Awake()
         {
         }
@@ -1192,6 +1199,7 @@ namespace SoulGames.EasyGridBuilderPro
 
         public void TriggerBuildablePlacement() //This function handles 'buildableGridObjectTypeSO' object placement
         {
+
             buildablePlacementKeyHolding = true;
             if (!MultiGridManager.Instance.onGrid || MultiGridManager.Instance.activeGridSystem != this) return;
 
@@ -1202,6 +1210,8 @@ namespace SoulGames.EasyGridBuilderPro
 
             if (currentBuildableObjectType == BuildableObjectType.DefaultObject)
             {
+                Debug.Log("TriggerBuildablePlacement");
+
                 if (buildableGridObjectTypeSO != null)
                 {
                     if (GetGridMode() == GridMode.None || GetGridMode() == GridMode.Build)
@@ -2969,20 +2979,21 @@ namespace SoulGames.EasyGridBuilderPro
                         }
                     }
                 }
-
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (useBuildableDistance)
-                {
-                    if (!distanceCheckObject) distanceCheckObject = Camera.main.transform;
-                    if (Vector3.Distance(distanceCheckObject.position, mousePosition) > distanceMin && Vector3.Distance(distanceCheckObject.position, mousePosition) < distanceMax)
+                if (Camera.main != null)
+                { 
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    if (useBuildableDistance)
                     {
-                    }
-                    else
-                    {
-                        valid = false;
+                        if (!distanceCheckObject) distanceCheckObject = Camera.main.transform;
+                        if (Vector3.Distance(distanceCheckObject.position, mousePosition) > distanceMin && Vector3.Distance(distanceCheckObject.position, mousePosition) < distanceMax)
+                        {
+                        }
+                        else
+                        {
+                            valid = false;
+                        }
                     }
                 }
-
                 // if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f))
                 // {
                 //     if (raycastHit.collider.GetComponent<BuildableObjectAreaBlocker>())
@@ -4162,6 +4173,9 @@ namespace SoulGames.EasyGridBuilderPro
 
         protected Vector3 GetMouseWorldPosition()
         {
+            if (Camera.main == null)
+                return new Vector3(-99999, -99999, -99999);
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, mouseColliderLayerMask))
             {
@@ -4175,6 +4189,9 @@ namespace SoulGames.EasyGridBuilderPro
 
         private Vector3 BuildableFreeObjectCollidingMousePosition()
         {
+            if (Camera.main == null)
+                return new Vector3(-99999, -99999, -99999);
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, freeObjectCollidingLayerMask))
             {

@@ -1,5 +1,5 @@
-using UnityEngine;
 using Cinemachine;
+using UnityEngine;
 
 namespace LichLord
 {
@@ -12,10 +12,12 @@ namespace LichLord
         [Header("Raycast Settings")]
         [SerializeField] private float maxRaycastDistance = 100f;
         [SerializeField] private LayerMask raycastLayerMask;
-        [SerializeField] private float sphereRadius = 0.25f; // Radius of the debug sphere
+        private float sphereRadius = 0.1f; // Radius of the debug sphere
 
         private bool isFirstPerson = false;
-        private Vector3 lastRaycastPoint; // Store last hit/max range point
+        private FCachedRaycast _cachedRaycastHit; // Store last hit/max range point
+        public FCachedRaycast CachedRaycastHit => _cachedRaycastHit;
+
         private bool lastRaycastHit; // True if last raycast hit something
 
         protected override void OnInitialize()
@@ -71,22 +73,30 @@ namespace LichLord
             }
         }
 
+        protected override void OnTick()
+        {
+            PlayerCreature localPlayerCreature = Context.LocalPlayerCreature;
+
+            if(localPlayerCreature != null ) 
+                RaycastFromCameraCenter(localPlayerCreature.gameObject);
+
+
+        }
+
         /// <summary>
         /// Performs a raycast from the center of the active camera
         /// </summary>
         /// <param name="hitInfo">Raycast hit information if something was hit</param>
         /// <returns>The hit point if the raycast hit something, otherwise the point at max range</returns>
-        public Vector3 RaycastFromCameraCenter(GameObject ignoredObject, out RaycastHit hitInfo)
+        public void RaycastFromCameraCenter(GameObject ignoredObject)
         {
             // Get the active camera's Cinemachine brain
             Camera mainCamera = Camera.main;
             if (mainCamera == null)
             {
                 Debug.LogWarning("[CameraManager] Main camera not found!");
-                hitInfo = new RaycastHit();
-                lastRaycastPoint = Vector3.zero;
-                lastRaycastHit = false;
-                return Vector3.zero;
+                _cachedRaycastHit.raycastHit = new RaycastHit();
+                _cachedRaycastHit.position = Vector3.zero;
             }
 
             // Calculate ray from camera center
@@ -117,28 +127,32 @@ namespace LichLord
 
             if (foundValidHit)
             {
-                hitInfo = closestHit;
-                lastRaycastPoint = hitInfo.point;
+                _cachedRaycastHit.raycastHit = closestHit;
+                _cachedRaycastHit.position = closestHit.point;
                 lastRaycastHit = true;
-                return hitInfo.point;
+                return;
             }
 
             // Return point at max distance if no valid hit
             Vector3 maxRangePoint = rayOrigin + rayDirection * maxRaycastDistance;
-            hitInfo = new RaycastHit();
-            lastRaycastPoint = maxRangePoint;
-            lastRaycastHit = false;
-            return maxRangePoint;
+            _cachedRaycastHit.raycastHit = new RaycastHit();
+            _cachedRaycastHit.position = maxRangePoint;
         }
 
         private void OnDrawGizmos()
         {
             // Draw sphere at the last raycast point
-            if (lastRaycastPoint != Vector3.zero)
+            if (_cachedRaycastHit.position != Vector3.zero)
             {
                 Gizmos.color = lastRaycastHit ? Color.red : Color.green;
-                Gizmos.DrawWireSphere(lastRaycastPoint, sphereRadius);
+                Gizmos.DrawWireSphere(_cachedRaycastHit.position, sphereRadius);
             }
         }
+    }
+
+    public struct FCachedRaycast
+    { 
+        public RaycastHit raycastHit;
+        public Vector3 position;
     }
 }

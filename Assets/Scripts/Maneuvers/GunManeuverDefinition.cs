@@ -27,7 +27,7 @@ namespace LichLord
             Vector3 hitPosition = Vector3.zero;
             Vector3 hitNormal = Vector3.zero;
 
-            Vector3 targetPos = playerCreature.Context.Camera.RaycastFromCameraCenter(playerCreature.Hurtbox.gameObject, out RaycastHit hitInfo);
+            Vector3 targetPos = playerCreature.Context.Camera.CachedRaycastHit.position;
 
             // Spawn projectile if projectileDefinition is set
             if (projectileDefinition != null)
