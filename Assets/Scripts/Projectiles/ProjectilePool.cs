@@ -296,6 +296,13 @@ namespace LichLord.Projectiles
                 // Ensure rotation values are correct
                 Quaternion rotation = projectile.Rotation;
 
+                // If the rotation is invalid (near zero), use identity to avoid errors
+                float sqrMagnitude = rotation.x * rotation.x + rotation.y * rotation.y + rotation.z * rotation.z + rotation.w * rotation.w;
+                if (sqrMagnitude < 0.0001f)
+                {
+                    rotation = Quaternion.identity;
+                }
+
                 // Use correct transformation matrix assignment
                 Gizmos.matrix = Matrix4x4.TRS(projectile.Position, rotation, Vector3.one);
 

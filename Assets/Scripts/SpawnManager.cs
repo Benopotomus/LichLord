@@ -79,5 +79,10 @@ namespace LichLord
             return Vector3.zero;
         }
 
+        public void SpawnNPC()
+        { 
+        
+        }
+
     }
 }

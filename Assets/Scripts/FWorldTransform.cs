@@ -8,7 +8,7 @@ namespace LichLord
     public struct FWorldTransform : INetworkStruct
     {
         [FieldOffset(0)]
-        private Vector3Compressed _position; // 12 bytes
+        private Vector3 _position; // 12 bytes
         [FieldOffset(12)]
         private ushort _compressedRotation; // 2 bytes (octahedral encoding)
         // 14
@@ -42,7 +42,7 @@ namespace LichLord
 
         public bool IsPositionEqual(ref FWorldTransform other)
         {
-            return _position.X == other._position.X && _position.Y == other._position.Y;
+            return _position.x == other._position.x && _position.y == other._position.y && _position.z == other._position.z;
         }
 
         public bool IsRotationEqual(ref FWorldTransform other)

@@ -110,7 +110,7 @@ namespace LichLord
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }
 
-            EasyGridBuilderPro.Instance.SetSelectedBuildable(item);
+            //EasyGridBuilderPro.Instance.SetSelectedBuildable(item);
         }
 
         public void ApplyDamage(int guid, Vector3 impulse, int damage)

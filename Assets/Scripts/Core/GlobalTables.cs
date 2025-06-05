@@ -1,6 +1,7 @@
 ﻿using LichLord.Projectiles;
 using LichLord.Buildables;
 using LichLord.Props;
+using LichLord.NonPlayerCharacters;
 using System;
 using UnityEngine;
 
@@ -13,10 +14,10 @@ namespace LichLord
         public ProjectileTable ProjectileTable;
         public PropTable PropTable;
         public BuildableTable BuildableTable;
+        public NonPlayerCharacterTable NonPlayerCharacterTable;
 
         /*
         public ItemTable ItemTable;
-        public PropTable PropTable;
         public MarkupPropTable MarkupPropTable;
         public HeroTable HeroTable;
         public MonsterTable MonsterTable;

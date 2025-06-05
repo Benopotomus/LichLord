@@ -229,6 +229,7 @@ namespace LichLord.Props
                 if (_propReplicators[i].TryGetPropData(propState.guid, out FPropData propData))
                 {
                     replicatorFound = true;
+                    propState.guid = propData.GUID;
                     propState.stateData = propData.StateData;
                 }
             }

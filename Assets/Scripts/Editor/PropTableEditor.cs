@@ -3,7 +3,7 @@ using LichLord.Props;
 
 namespace LichLord.Editor
 {
-    [CustomEditor(typeof(LichLord.Props.PropTable))]
+    [CustomEditor(typeof(PropTable))]
     public class PropTableEditor : ObjectTableEditor<
         PropDefinition,
         PropTable>
