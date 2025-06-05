@@ -22,14 +22,14 @@ namespace LichLord.NonPlayerCharacters
 
         public override void Spawned()
         {
-            if (Runner.IsSharedModeMasterClient)
+            if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
-                for (int i = 0; i < 256; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     Vector3 randomPosition = new Vector3(
-                        Random.Range(-25f, 25f),
+                        Random.Range(-15f, 15f),
                         1f, // Keep Y fixed
-                        Random.Range(-25f, 25f)
+                        Random.Range(-15f, 15f)
                     );
 
                     SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1));
@@ -48,35 +48,32 @@ namespace LichLord.NonPlayerCharacters
 
         public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition)
         {
-            if (!Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
+            if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
-                Debug.Log("Attempting to spawn on not the master client");
-                return;
-            }
+                EnsureEmptyReplicator();
 
-            EnsureEmptyReplicator();
-
-            // Get a free replicator and add its data
-            for (int i = 0; i < _replicators.Count; i++)
-            {
-                NonPlayerCharacterReplicator replicator = _replicators[i];
-                if (replicator.HasFreeSlot())
+                // Get a free replicator and add its data
+                for (int i = 0; i < _replicators.Count; i++)
                 {
-                    FNonPlayerCharacterData data = new FNonPlayerCharacterData
+                    NonPlayerCharacterReplicator replicator = _replicators[i];
+                    if (replicator.HasFreeSlot())
                     {
-                        DefinitionID = definition.TableID,
-                        Transform = new FWorldTransform
+                        FNonPlayerCharacterData data = new FNonPlayerCharacterData
                         {
-                            Position = spawnPos,
-                            Rotation = Quaternion.identity,
-                        },
-                        //Velocity = Vector3.zero,
-                        StateData = 0,
-                        Health = 0,
-                    };
+                            DefinitionID = definition.TableID,
+                            Transform = new FWorldTransform
+                            {
+                                Position = spawnPos,
+                                Rotation = Quaternion.identity,
+                            },
+                            //Velocity = Vector3.zero,
+                            StateData = 0,
+                            Health = 0,
+                        };
 
-                    replicator.AddNPC(data);
-                    break;
+                        replicator.AddNPC(data);
+                        break;
+                    }
                 }
             }
         }

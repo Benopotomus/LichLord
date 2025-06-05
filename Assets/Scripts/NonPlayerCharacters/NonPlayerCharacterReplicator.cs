@@ -109,6 +109,8 @@ namespace LichLord.NonPlayerCharacters
             Vector3 viewPosition = playerCreature.transform.position;
             float renderDeltaTime = Time.deltaTime;
             float ping = (float)Runner.GetPlayerRtt(playerCreature.Object.StateAuthority);
+            bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
+            bool shouldBeActive = true;
 
             for (int i = 0; i < _dataCount; i++)
             {
@@ -120,11 +122,7 @@ namespace LichLord.NonPlayerCharacters
                 runtimeState.SetState(ref data);
                 runtimeState.replicator = this;
 
-                bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
-
                 float distance = Vector3.Distance(viewPosition, data.Transform.Position);
-                bool shouldBeActive = hasAuthority ? true : distance <= spawnRadius;
-                shouldBeActive = true;
 
                 if (shouldBeActive && loadState.LoadState == ELoadState.None)
                 {

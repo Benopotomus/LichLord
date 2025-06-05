@@ -93,7 +93,7 @@ namespace LichLord.Buildables
             float renderDeltaTime = Runner.LocalAlpha;
 
             // Ensure an empty replicator exists on the master client
-            if (Runner.IsSharedModeMasterClient)
+            if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
                 EnsureEmptyReplicator();
             }

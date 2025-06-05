@@ -17,8 +17,6 @@ namespace LichLord
 
         public override void Spawned()
         {
-            Runner.SetIsSimulated(Object, true);
-
             // Find spawn points
             _spawnPoints = FindObjectsOfType<SpawnPoint>();
             if (_spawnPoints == null || _spawnPoints.Length == 0)

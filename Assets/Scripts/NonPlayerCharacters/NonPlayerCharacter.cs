@@ -21,50 +21,50 @@ namespace LichLord.NonPlayerCharacters
         public Transform CachedTransform => _transform;
 
         [SerializeField] private FollowerEntity _follower;
-        public FollowerEntity Agent => _follower;
+        public FollowerEntity AIFollower => _follower;
 
         public HurtboxComponent Hurtbox;
 
         public INetActor NetActor => this;
         public FNetObjectID NetObjectID => new FNetObjectID();
 
-        private Vector3 _lastPosition;
         [SerializeField] private Vector3 _moveTarget = Vector3.zero;
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, NonPlayerCharacterManager manager)
         {
             _manager = manager;
             _runtimeState = runtimeState;
+
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            _follower.enabled = true;
             // Perform game logic updates
 
-            if (Vector3.Distance(_transform.position, _moveTarget) < 5)
+            if (Vector3.Distance(_transform.position, _moveTarget) < 3)
             {
                 _moveTarget = new Vector3(
-                   Random.Range(-30f, 30f),
+                   Random.Range(-10f, 10f),
                    0f, // Keep Y fixed
-                   Random.Range(-30f, 30f)
+                   Random.Range(-10f, 10f)
                );
             }
 
+            _follower.canMove = true;
             _follower.destination = _moveTarget;
-
+            _follower.SearchPath();
             // Update the runtime state
             data.Position = _transform.position;
             data.Rotation = _transform.rotation;
-            //data.Velocity = _transform.position - _lastPosition;
         }
+
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
-            _follower.enabled = false;
-            _transform.position = Vector3.Lerp(_transform.position, data.Position, renderDeltaTime * 4f);
-            _transform.rotation = Quaternion.Lerp(_transform.rotation, data.Rotation, renderDeltaTime * 10f);
+            _follower.canMove = false;
 
+            _follower.position = Vector3.Lerp(_transform.position, data.Position, renderDeltaTime * 4f);
+            _follower.rotation = Quaternion.Lerp(_transform.rotation, data.Rotation, renderDeltaTime * 10f);
         }
 
         public void ProcessHit(ref FHitUtilityData hit)

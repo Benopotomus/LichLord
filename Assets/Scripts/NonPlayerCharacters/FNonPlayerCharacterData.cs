@@ -8,16 +8,14 @@
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
-        private ushort _definitionId; // 4 bytes. definition id;
+        private ushort _definitionId; // 2 bytes. definition id;
         [FieldOffset(2)]
-        private FWorldTransform _transform; // 14 bytes
-       // [FieldOffset(16)]
-        //private FVelocity _velocity; // 4 bytes
-        [FieldOffset(16)]
+        private FWorldTransform _transform; // 12 bytes
+        [FieldOffset(14)]
         private int _stateData; // 4 bytes
-        [FieldOffset(20)]
+        [FieldOffset(18)]
         private int _health; // 4 bytes
-        //34
+        //22
 
         public int DefinitionID
         {
