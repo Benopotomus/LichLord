@@ -5,6 +5,7 @@ using Starter.Shooter;
 using Starter;
 using LichLord.Projectiles;
 using SoulGames.EasyGridBuilderPro;
+using LichLord.NonPlayerCharacters;
 
 namespace LichLord
 {
@@ -132,6 +133,7 @@ namespace LichLord
 
         public override void Render()
         {
+            base.Render();
             // Disable hits when player is dead
             Hurtbox.enabled = Health.IsAlive;
         }
@@ -175,6 +177,10 @@ namespace LichLord
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
         {
             //throw new System.NotImplementedException();
+            if (hit.target is NonPlayerCharacter npc)
+            {
+                npc.Replicator.RPC_DealDamageToNPC(npc.NetObjectID.index, hit.damageData.damageValue);
+            }
         }
 
         void IHitTarget.ProcessHit(ref FHitUtilityData hit)

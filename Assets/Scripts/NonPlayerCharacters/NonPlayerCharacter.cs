@@ -66,37 +66,20 @@ namespace LichLord.NonPlayerCharacters
 
         public void ProcessHit(ref FHitUtilityData hit)
         {
-            if (_manager == null)
-            {
-                Debug.LogWarning($"[NonPlayerCharacter] Cannot process hit: NPCManager is null for guid {_netObjectId.index}.");
-                return;
-            }
 
-            NetworkRunner runner = _manager.Runner;
-
-            Debug.Log($"[NPC] Processing hit for guid {_netObjectId.index} with damage 9001");
-
-            foreach (PlayerRef player in runner.ActivePlayers)
-            {
-                NetworkObject playerObj = runner.GetPlayerObject(player);
-                if (playerObj != null)
-                {
-                    /// How do i just send this to the masterclient player?
-                    RelayPlayer relayPlayer = playerObj.GetComponent<RelayPlayer>();
-
-                    relayPlayer.RaiseEvent(new NonPlayerCharacterDamageEvent
-                    {
-                        guid = _netObjectId.index,
-                        impulse = Vector3.zero,
-                        damage = 9001
-                    });
-                }
-            }
         }
 
         public void ApplyDamage(Vector3 impulse, int damage)
         {
-            Debug.Log("Apply Damage " + damage); 
+            Debug.Log("Apply Damage: " + damage + ", index: " + _netObjectId.index);
+
+            if (_replicator.TryGetNPCData(_netObjectId.index, out FNonPlayerCharacterData data))
+            {
+                data.State = ENonPlayerState.Inactive;
+                data.Health = Mathf.Clamp(data.Health - 10, 0, 1000);
+                _replicator.UpdateNPCData(data);
+            }
+            StartRecycle();
         }
 
         public void OnHitTaken(ref FHitUtilityData hit)
@@ -111,6 +94,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void StartRecycle()
         {
+            _movementComponent.StartRecycle();
             DWDObjectPool.Instance.Recycle(this);
         }
 

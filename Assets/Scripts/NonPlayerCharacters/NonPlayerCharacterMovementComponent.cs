@@ -30,6 +30,8 @@ namespace LichLord.NonPlayerCharacters
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
             _lastPosition = spawnParams.position;
+            _follower.updatePosition = true;
+            _follower.updateRotation = true;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -59,7 +61,7 @@ namespace LichLord.NonPlayerCharacters
             _follower.position = Vector3.Lerp(NPC.CachedTransform.position, data.Position, renderDeltaTime * 4f);
             _follower.rotation = Quaternion.Lerp(NPC.CachedTransform.rotation, data.Rotation, renderDeltaTime * 10f);
 
-            _speedPercent = NonPlayerCharacterDataUtility.GetCurrentSpeedPercent(ref data);
+            _speedPercent = NonPlayerCharacterDataUtility.GetCurrentSpeedPercent(data);
             UpdateVelocity(ref data, renderDeltaTime);
         }
 
@@ -78,9 +80,10 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
         {
+            //30 server ticks/second
+            //10 send ticks/second
             if (tick % 3 != 0)
                 return;
-
 
             WriteData(ref data);
         }
@@ -118,5 +121,12 @@ namespace LichLord.NonPlayerCharacters
             NPC.Replicator.UpdateNPCData(data);
         }
 
+        public void StartRecycle()
+        {
+            _follower.enableLocalAvoidance = false;
+            _follower.updatePosition = false;
+            _follower.updateRotation = false;
+            _follower.canMove = false;
+        }
     }
 }

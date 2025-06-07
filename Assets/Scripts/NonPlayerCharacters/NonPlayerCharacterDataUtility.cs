@@ -43,7 +43,7 @@
 
             // Initialize Configuration
             npcData.Configuration = 0;
-            SetIndex(index, ref npcData);
+            SetGUID(index, ref npcData);
             SetDefinitionID(definition.TableID, ref npcData);
             SetTeamID(teamID, ref npcData);
 
@@ -59,12 +59,12 @@
         }
 
         // Index
-        public static int GetIndex(ref FNonPlayerCharacterData npcData)
+        public static int GetGUID(ref FNonPlayerCharacterData npcData)
         {
             return (npcData.Configuration >> INDEX_SHIFT) & INDEX_MASK;
         }
 
-        public static void SetIndex(int index, ref FNonPlayerCharacterData npcData)
+        public static void SetGUID(int index, ref FNonPlayerCharacterData npcData)
         {
             ushort config = npcData.Configuration;
             index = Mathf.Clamp(index, 0, INDEX_MASK);
@@ -143,7 +143,7 @@
         }
 
         // CurrentSpeedPercent
-        public static float GetCurrentSpeedPercent(ref FNonPlayerCharacterData npcData)
+        public static float GetCurrentSpeedPercent(FNonPlayerCharacterData npcData)
         {
             int speedValue = (npcData.Condition >> SPEED_PERCENT_SHIFT) & SPEED_PERCENT_MASK;
             return speedValue / SPEED_VALUE_MAX;
@@ -158,7 +158,7 @@
             npcData.Condition = condition;
         }
 
-        public static bool IsActive(ref FNonPlayerCharacterData npcData)
+        public static bool IsActive(FNonPlayerCharacterData npcData)
         {
             return GetNPCState(ref npcData) != ENonPlayerState.Inactive;
         }

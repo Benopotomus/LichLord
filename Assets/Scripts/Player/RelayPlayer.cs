@@ -14,36 +14,24 @@ namespace LichLord
     public class RelayPlayer : ContextBehaviour
     {
         [SerializeField]
-        [Networked] private TickAlignedEventRelay eventRelay { get; set; }
-
-        // These are local properties so they remain valid when the network state goes away (also, they don't change during the life of the NO).
-        public PlayerRef PlayerId { get; private set; } = PlayerRef.None;
-        public int PlayerIndex { get; private set; } = -1;
+        [Networked] public TickAlignedEventRelay EventRelay { get; set; }
 
         public override void Spawned()
         {
             // Getting this here because it will revert to -1 if the player disconnects, but we still want to remember the Id we were assigned for clean-up purposes
-            PlayerId = Object.InputAuthority;
-
-            Debug.Log($"Spawned Player with InputAuth {PlayerId}, Index {PlayerIndex}");
             RegisterEventListener((PropDamageEvent evt) => ApplyDamageToProp(evt.guid, evt.impulse, evt.damage));
-            RegisterEventListener((PropDamageEvent evt) => ApplyDamageToNPC(evt.guid, evt.impulse, evt.damage));
-        }
-
-        public override void Despawned(NetworkRunner runner, bool hasState)
-        {
-            Debug.Log($"Despawned Player with InputAuth {PlayerId}, Index {PlayerIndex}");
+            RegisterEventListener((NonPlayerCharacterDamageEvent evt) => ApplyDamageToNPC(evt.guid, evt.impulse, evt.damage));
         }
 
         protected void RegisterEventListener<T>(Action<T> listener) where T : unmanaged, INetworkEvent
         {
-            eventRelay.RegisterEventListener(listener);
+            EventRelay.RegisterEventListener(listener);
         }
 
         public void RaiseEvent<T>(T evt) where T : unmanaged, INetworkEvent
         {
             RelayPlayer stateAuth = Runner.GetPlayerObject(Runner.LocalPlayer).GetComponent<RelayPlayer>();
-            stateAuth.eventRelay.RaiseEventFor(eventRelay, evt);
+            stateAuth.EventRelay.RaiseEventFor(EventRelay, evt);
         }
 
         //20
@@ -52,9 +40,9 @@ namespace LichLord
             Context.PropManager.ApplyDamage(guid, impulse, damage);
         }
 
-        //20
         private void ApplyDamageToNPC(int guid, Vector3 impulse, int damage)
         {
+            Debug.Log("Relay Hit");
             Context.NonPlayerCharacterManager.ApplyDamage(guid, impulse, damage);
         }
     }

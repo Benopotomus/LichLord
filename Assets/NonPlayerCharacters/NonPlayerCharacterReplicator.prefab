@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: -7299887689998786297}
   - component: {fileID: 2437123896088490543}
   - component: {fileID: -90902155296826548}
+  - component: {fileID: 3996747563329803762}
   m_Layer: 0
   m_Name: NonPlayerCharacterReplicator
   m_TagString: Untagged
@@ -46,10 +47,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30d0a829ecf65ea448ecae17d4639737, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _EventRelay: {fileID: 3996747563329803762}
   _spawner: {fileID: 2437123896088490543}
-  spawnRadius: 50
-  despawnRadius: 60
-  _runtimeStates: []
 --- !u!114 &2437123896088490543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,4 +79,17 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: -7299887689998786297}
+  - {fileID: 3996747563329803762}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &3996747563329803762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4709618634251712557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4065fad91402e064fbcca9a9419bde60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

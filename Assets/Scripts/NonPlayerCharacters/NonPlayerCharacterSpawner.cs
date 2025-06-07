@@ -14,7 +14,7 @@ namespace LichLord.NonPlayerCharacters
         {
             var spawnParams = new FNonPlayerCharacterSpawnParams
             {
-                index = NonPlayerCharacterDataUtility.GetIndex(ref data),
+                index = NonPlayerCharacterDataUtility.GetGUID(ref data),
                 definitionId = NonPlayerCharacterDataUtility.GetDefinitionID(ref data),
                 position = data.Position,
                 rotation = data.Rotation,

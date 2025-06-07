@@ -23,6 +23,18 @@
             set => NonPlayerCharacterDataUtility.SetDefinitionID(value, ref this);
         }
 
+        public int Health
+        {
+            get => NonPlayerCharacterDataUtility.GetHealth(ref this);
+            set => NonPlayerCharacterDataUtility.SetHealth(value, ref this);
+        }
+
+        public ENonPlayerState State
+        {
+            get => NonPlayerCharacterDataUtility.GetNPCState(ref this);
+            set => NonPlayerCharacterDataUtility.SetNPCState(value, ref this);
+        }
+
         public FWorldTransform Transform
         {
             get => _transform;
@@ -65,7 +77,6 @@
             set => _condition = value;
         }
 
-        
         public ushort Configuration
         {
             get => _configuration;
@@ -83,6 +94,20 @@
             return DefinitionID != 0;
         }
 
+        public bool IsActive()
+        {
+            return NonPlayerCharacterDataUtility.IsActive(this);
+        }
+
+        public void Copy(ref FNonPlayerCharacterData other)
+        {
+            _transform = other._transform;
+            _condition = other._condition;
+            _configuration = other._configuration;
+            _events = other._events;
+            Health = other.Health;
+        }
+
         public bool IsPropDataEqual(ref FNonPlayerCharacterData other)
         {
             return IsPackedDataEqual(ref other);
@@ -91,9 +116,16 @@
         public bool IsPackedDataEqual(ref FNonPlayerCharacterData other)
         {
             return _condition == other._condition &&
-                  // _configuration == other._configuration &&
-                 //  _events == other._events &&
+                   _configuration == other._configuration &&
+                   _events == other._events &&
                    _transform.Equals(other._transform);
+        }
+
+        public bool IsStateDataEqual(ref FNonPlayerCharacterData other)
+        {
+            return _condition == other._condition &&
+                   _configuration == other._configuration &&
+                   _events == other._events;
         }
 
         public bool IsBitSet(ref byte flags, int bit)

@@ -153,6 +153,7 @@ namespace FusionHelpers
 
 		public override void Render()
 		{
+			//DebugPrintCurrentEvents();
 			if (HasStateAuthority)
 				return; // If we have State Authority then these are our outgoing messages and none of them are for us!
 
@@ -190,5 +191,38 @@ namespace FusionHelpers
 				*(T*)dst = value;
 			return result;
 		}
-	}
+
+        /// <summary>
+        /// Debug prints all current events in the event queue.
+        /// </summary>
+        public void DebugPrintCurrentEvents()
+        {
+            Debug.Log($"[TickAlignedEventRelay] Current Events for Object {Object.Id} (Next Event Index: {_nextEventIndex}, Handled Event Index: {_handledEventIndex})");
+
+            for (int i = 0; i < _eventHeaders.Length; i++)
+            {
+                EventHeader header = _eventHeaders[i];
+                // Only print events that are still relevant (id > 0 and not yet handled)
+                if (header.id > 0 && header.id > _handledEventIndex)
+                {
+                    // Get event type name
+                    string eventTypeName = header.type >= 0 && header.type < _registeredTypes.Count
+                        ? _registeredTypes[header.type].Name
+                        : "Unknown";
+
+                    // Extract event data from _eventBuffer
+                    byte[] eventData = new byte[MAX_EVENT_SIZE];
+                    for (int b = 0; b < MAX_EVENT_SIZE; b++)
+                    {
+                        eventData[b] = _eventBuffer[i * MAX_EVENT_SIZE + b];
+                    }
+
+                    // Convert event data to a hex string for readability
+                    string eventDataHex = BitConverter.ToString(eventData).Replace("-", "");
+
+                    Debug.Log($"Event [{i}]: ID={header.id}, Type={eventTypeName} (Index={header.type}), Target={header.target}, Data={eventDataHex}");
+                }
+            }
+        }
+    }
 }

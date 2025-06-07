@@ -5,6 +5,7 @@ using Starter.Shooter;
 using LichLord.Projectiles;
 using System.Linq;
 using DWD.Pooling;
+using LichLord.NonPlayerCharacters;
 
 namespace LichLord
 {
@@ -91,9 +92,6 @@ namespace LichLord
         public void OnRender()
         {
             UpdateWeaponModel();
-
-
-
         }
 
         public void UpdateWeaponModel()

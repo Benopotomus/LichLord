@@ -29,9 +29,9 @@ namespace LichLord.NonPlayerCharacters
                 for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
                 {
                     Vector3 randomPosition = new Vector3(
-                        Random.Range(-150f, 150f),
+                        Random.Range(-50f, 50f),
                         1f, // Keep Y fixed
-                        Random.Range(-150f, 150f)
+                        Random.Range(-50f, 50f)
                     );
 
                     SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamA);
@@ -74,7 +74,15 @@ namespace LichLord.NonPlayerCharacters
 
         public void ApplyDamage(int guid, Vector3 impulse, int damage)
         {
-            _replicator.ApplyDamage(guid, impulse, damage);
+            //_replicator.ApplyDamageToNPC(guid, impulse, damage);
+            /*
+            _replicator.RaiseEvent(new NonPlayerCharacterDamageEvent
+            {
+                guid = guid,
+                impulse = impulse,
+                damage = 9001
+            });
+            */
         }
 
         public class NPCLoadState
