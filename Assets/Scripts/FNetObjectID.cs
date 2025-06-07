@@ -5,12 +5,12 @@ namespace LichLord
 {
     public struct FNetObjectID : INetworkStruct
     {
-        public NetworkId guid;
+        public NetworkId networkId;
         public byte index;
 
         public bool IsValid()
         {
-            if (guid.Raw <= 0)
+            if (networkId.Raw <= 0)
                 return false;
 
             return true;
@@ -18,13 +18,13 @@ namespace LichLord
 
         public void Copy(FNetObjectID otherObjectID)
         {
-            guid = otherObjectID.guid;
+            networkId = otherObjectID.networkId;
             index = otherObjectID.index;
         }
 
         public bool IsEqual(FNetObjectID otherObjectID)
         {
-            if (guid.Raw != otherObjectID.guid.Raw)
+            if (networkId.Raw != otherObjectID.networkId.Raw)
                 return false;
 
             if (index != otherObjectID.index)
@@ -35,7 +35,7 @@ namespace LichLord
 
         public NetworkObject GetNetObject(NetworkRunner runner)
         {
-            return IsValid() ? runner.FindObject(guid) : null;
+            return IsValid() ? runner.FindObject(networkId) : null;
         }
 
         public T GetComponent<T>(NetworkRunner runner) where T : class
@@ -70,7 +70,7 @@ namespace LichLord
             unchecked // Overflow is fine, just wrap
             {
                 int hash = 17;
-                hash = hash * 31 + guid.Raw.GetHashCode();
+                hash = hash * 31 + networkId.Raw.GetHashCode();
                 hash = hash * 31 + index.GetHashCode();
                 return hash;
             }
@@ -78,7 +78,7 @@ namespace LichLord
 
         public void Clear()
         {
-            guid.Raw = 0;
+            networkId.Raw = 0;
             index = 0;
         }
     }

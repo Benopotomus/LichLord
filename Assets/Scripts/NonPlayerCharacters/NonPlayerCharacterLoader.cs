@@ -6,8 +6,8 @@ namespace LichLord.NonPlayerCharacters
     [System.Serializable]
     public class NonPlayerCharacterLoader
     {
-        private NonPlayerCharacterRuntimeState _runtimeState;
-        public NonPlayerCharacterRuntimeState RuntimeState => _runtimeState;
+        private FNonPlayerCharacterSpawnParams _spawnParams;
+        public FNonPlayerCharacterSpawnParams SpawnParams => _spawnParams;
 
         private AssetBundleLoader _loader;
         public AssetBundleLoader Loader
@@ -25,10 +25,10 @@ namespace LichLord.NonPlayerCharacters
         public System.Action<NonPlayerCharacterLoader> OnLoadComplete;
 
         public NonPlayerCharacterLoader() { }
-        public NonPlayerCharacterLoader(NonPlayerCharacterRuntimeState runtimeState,
+        public NonPlayerCharacterLoader(FNonPlayerCharacterSpawnParams spawnParams,
             AssetBundleLoader iLoader)
         {
-            _runtimeState = runtimeState;
+            _spawnParams.Copy(spawnParams);
             Loader = iLoader;
         }
 

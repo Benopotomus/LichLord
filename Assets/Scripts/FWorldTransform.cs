@@ -4,59 +4,93 @@ using UnityEngine;
 
 namespace LichLord
 {
-    [StructLayout(LayoutKind.Explicit)]
+    // Custom 24-bit signed integer struct (unchanged)
+    [StructLayout(LayoutKind.Explicit, Size = 3)]
+    public struct Int24 : INetworkStruct
+    {
+        [FieldOffset(0)] private byte byte0;
+        [FieldOffset(1)] private byte byte1;
+        [FieldOffset(2)] private byte byte2;
+
+        private const int MIN_VALUE = -8388608; // -2^23
+        private const int MAX_VALUE = 8388607;  // 2^23 - 1
+
+        public Int24(int value)
+        {
+            value = Mathf.Clamp(value, MIN_VALUE, MAX_VALUE);
+            byte0 = (byte)(value & 0xFF);
+            byte1 = (byte)((value >> 8) & 0xFF);
+            byte2 = (byte)((value >> 16) & 0xFF);
+        }
+
+        public static implicit operator int(Int24 value)
+        {
+            int result = (value.byte0 | (value.byte1 << 8) | (value.byte2 << 16));
+            if ((value.byte2 & 0x80) != 0) result |= unchecked((int)0xFF000000);
+            return result;
+        }
+
+        public static implicit operator Int24(int value) => new Int24(value);
+    }
+
+    [StructLayout(LayoutKind.Explicit, Size = 9)]
     public struct FWorldTransform : INetworkStruct
     {
-        [FieldOffset(0)]
-        private float _positionX; // 4 bytes
-        [FieldOffset(4)]
-        private short _positionYCompressed; // 2 bytes (scaled to -327.68 to 327.67)
-        [FieldOffset(6)]
-        private float _positionZ; // 4 bytes
-        [FieldOffset(10)]
-        private ushort _compressedRotation; // 2 bytes (octahedral encoding)
-        // Total: 12 bytes
+        [FieldOffset(0)] private Int24 _positionX; // 3 bytes
+        [FieldOffset(3)] private short _positionYCompressed; // 2 bytes
+        [FieldOffset(5)] private Int24 _positionZ; // 3 bytes
+        [FieldOffset(8)] private byte _compressedRotation; // 1 byte
+        // Total: 9 bytes
 
-        private const float Y_SCALE_FACTOR = 100f; // For two decimal places
-        private const float Y_MIN = -327.68f;
-        private const float Y_MAX = 327.67f;
-        private const short Y_MIN_RAW = -32768;
-        private const short Y_MAX_RAW = 32767;
+        private const float SCALE_FACTOR = 100f; // For two decimal places
+        private const float X_Z_MIN = -83886.08f; // -8,388,608 / 100
+        private const float X_Z_MAX = 83886.07f; // 8,388,607 / 100
+        private const float Y_MIN = -327.68f; // -32,768 / 100
+        private const float Y_MAX = 327.67f; // 32,767 / 100
+
+        public float PositionX
+        {
+            get => (int)_positionX / SCALE_FACTOR;
+            set => _positionX = (int)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
+        }
+
+        public float PositionY
+        {
+            get => _positionYCompressed / SCALE_FACTOR;
+            set => _positionYCompressed = (short)(Mathf.Clamp(value, Y_MIN, Y_MAX) * SCALE_FACTOR);
+        }
+
+        public float PositionZ
+        {
+            get => (int)_positionZ / SCALE_FACTOR;
+            set => _positionZ = (int)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
+        }
 
         public Vector3 Position
         {
             get => new Vector3(
-                _positionX,
-                _positionYCompressed / Y_SCALE_FACTOR,
-                _positionZ
+                (int)_positionX / SCALE_FACTOR,
+                _positionYCompressed / SCALE_FACTOR,
+                (int)_positionZ / SCALE_FACTOR
             );
             set
             {
-                _positionX = value.x;
-                // Scale and clamp Y to fit -327.68 to 327.67
-                float y = Mathf.Clamp(value.y, Y_MIN, Y_MAX);
-                _positionYCompressed = (short)Mathf.Round(y * Y_SCALE_FACTOR);
-                _positionZ = value.z;
+                _positionX = (int)(Mathf.Clamp(value.x, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
+                _positionYCompressed = (short)(Mathf.Clamp(value.y, Y_MIN, Y_MAX) * SCALE_FACTOR);
+                _positionZ = (int)(Mathf.Clamp(value.z, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
             }
         }
 
         public Vector3 Forward
         {
-            get => DecodeOctahedral(_compressedRotation);
-            set => _compressedRotation = EncodeOctahedral(value);
+            get => DecodeYaw(_compressedRotation);
+            set => _compressedRotation = EncodeYaw(value);
         }
 
         public Quaternion Rotation
         {
-            get
-            {
-                Vector3 forward = Forward;
-                return Quaternion.LookRotation(forward, Vector3.up);
-            }
-            set
-            {
-                Forward = value * Vector3.forward;
-            }
+            get => Quaternion.LookRotation(Forward, Vector3.up);
+            set => Forward = value * Vector3.forward;
         }
 
         public bool IsPositionEqual(ref FWorldTransform other)
@@ -83,46 +117,27 @@ namespace LichLord
             _compressedRotation = other._compressedRotation;
         }
 
-        private static ushort EncodeOctahedral(Vector3 normal)
+        public string DebugString()
         {
-            normal = normal.normalized;
-            float u, v;
-            if (normal.z >= 0f)
-            {
-                u = normal.x;
-                v = normal.y;
-            }
-            else
-            {
-                u = (1f - Mathf.Abs(normal.y)) * Mathf.Sign(normal.x);
-                v = (1f - Mathf.Abs(normal.x)) * Mathf.Sign(normal.y);
-            }
-            byte uByte = (byte)Mathf.RoundToInt((u * 0.5f + 0.5f) * 255f);
-            byte vByte = (byte)Mathf.RoundToInt((v * 0.5f + 0.5f) * 255f);
-            return (ushort)((vByte << 8) | uByte);
+            return $"Position: ({(int)_positionX / SCALE_FACTOR:F2}, {_positionYCompressed / SCALE_FACTOR:F2}, {(int)_positionZ / SCALE_FACTOR:F2}), " +
+                   $"Yaw: {_compressedRotation} ({(DecodeYaw(_compressedRotation).x, DecodeYaw(_compressedRotation).z)})";
         }
 
-        private static Vector3 DecodeOctahedral(ushort encoded)
+        private static byte EncodeYaw(Vector3 forward)
         {
-            byte uByte = (byte)(encoded & 0xFF);
-            byte vByte = (byte)(encoded >> 8);
-            float u = (uByte / 255f) * 2f - 1f;
-            float v = (vByte / 255f) * 2f - 1f;
-            float z = 1f - Mathf.Abs(u) - Mathf.Abs(v);
-            Vector3 normal;
-            if (z >= 0f)
-            {
-                normal = new Vector3(u, v, z);
-            }
-            else
-            {
-                normal = new Vector3(
-                    (1f - Mathf.Abs(v)) * Mathf.Sign(u),
-                    (1f - Mathf.Abs(u)) * Mathf.Sign(v),
-                    z
-                );
-            }
-            return normal.normalized;
+            forward.y = 0;
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = Vector3.forward;
+            forward.Normalize();
+            float yaw = Mathf.Atan2(forward.x, forward.z);
+            if (yaw < 0) yaw += 2 * Mathf.PI;
+            return (byte)Mathf.RoundToInt((yaw / (2 * Mathf.PI)) * 255f);
+        }
+
+        private static Vector3 DecodeYaw(byte encoded)
+        {
+            float yaw = (encoded / 255f) * 2 * Mathf.PI;
+            return new Vector3(Mathf.Sin(yaw), 0, Mathf.Cos(yaw)).normalized;
         }
     }
 }

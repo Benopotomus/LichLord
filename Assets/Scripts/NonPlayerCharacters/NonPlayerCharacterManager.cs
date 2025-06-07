@@ -8,31 +8,33 @@ namespace LichLord.NonPlayerCharacters
     {
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
         [SerializeField] private NonPlayerCharacterReplicator _replicatorPrefab;
-        [SerializeField] private List<NonPlayerCharacterReplicator> _replicators = new List<NonPlayerCharacterReplicator>();
+        [SerializeField] private NonPlayerCharacterReplicator _replicator;
 
-        [SerializeField] private Dictionary<int, NonPlayerCharacterRuntimeState> _deltaStates = new Dictionary<int, NonPlayerCharacterRuntimeState>();
+        [SerializeField] private Dictionary<int, FNonPlayerCharacterData> _deltaStates = new Dictionary<int, FNonPlayerCharacterData>();
 
-        [SerializeField] private float spawnRadius = 50f;
-        [SerializeField] private float despawnRadius = 60f;
+        [Networked]
+        private int _totalEnemies { get; set; }
 
         public void AddReplicator(NonPlayerCharacterReplicator replicator)
         {
-            _replicators.Add(replicator);
+            _replicator = replicator;
         }
 
         public override void Spawned()
         {
             if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
-                for (int i = 0; i < 1; i++)
+                var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity);
+
+                for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
                 {
                     Vector3 randomPosition = new Vector3(
-                        Random.Range(-15f, 15f),
+                        Random.Range(-150f, 150f),
                         1f, // Keep Y fixed
-                        Random.Range(-15f, 15f)
+                        Random.Range(-150f, 150f)
                     );
 
-                    SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1));
+                    SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamA);
                 }
             }
         }
@@ -46,56 +48,33 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition)
+        public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID)
         {
             if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
-                EnsureEmptyReplicator();
+                if (_replicator == null)
+                    return;
 
-                // Get a free replicator and add its data
-                for (int i = 0; i < _replicators.Count; i++)
+                int freeIndex = _replicator.GetFreeIndex();
+                if (freeIndex == -1)
                 {
-                    NonPlayerCharacterReplicator replicator = _replicators[i];
-                    if (replicator.HasFreeSlot())
-                    {
-                        FNonPlayerCharacterData data = new FNonPlayerCharacterData
-                        {
-                            DefinitionID = definition.TableID,
-                            Transform = new FWorldTransform
-                            {
-                                Position = spawnPos,
-                                Rotation = Quaternion.identity,
-                            },
-                            //Velocity = Vector3.zero,
-                            StateData = 0,
-                            Health = 0,
-                        };
-
-                        replicator.AddNPC(data);
-                        break;
-                    }
+                    Debug.Log("Can't Spawn NPC No Free Index");
+                    return;
                 }
+
+                FNonPlayerCharacterData data = new FNonPlayerCharacterData();
+                NonPlayerCharacterDataUtility.InitializeData(ref data, definition, freeIndex, teamID);
+                data.Position = spawnPos;
+                data.Rotation = Quaternion.identity;
+
+                _deltaStates[freeIndex] = data; // Store full state for persistence
+                _replicator.UpdateNPCData(data);
             }
         }
 
-        private void EnsureEmptyReplicator()
+        public void ApplyDamage(int guid, Vector3 impulse, int damage)
         {
-            // Check if there is at least one completely empty replicator (zero entries)
-            bool hasEmptyReplicator = false;
-            foreach (var replicator in _replicators)
-            {
-                if (replicator.DataCount == 0)
-                {
-                    hasEmptyReplicator = true;
-                    break;
-                }
-            }
-
-            // If no empty replicator exists, spawn a new one
-            if (!hasEmptyReplicator)
-            {
-                var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity);
-            }
+            _replicator.ApplyDamage(guid, impulse, damage);
         }
 
         public class NPCLoadState
@@ -111,6 +90,5 @@ namespace LichLord.NonPlayerCharacters
             Loaded,
             Unloading,
         }
-
     }
 }

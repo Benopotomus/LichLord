@@ -71,7 +71,7 @@ namespace LichLord.Props
                     /// How do i just send this to the masterclient player?
                     RelayPlayer relayPlayer = playerObj.GetComponent<RelayPlayer>();
 
-                    relayPlayer.RaiseEvent(new DamageEvent
+                    relayPlayer.RaiseEvent(new PropDamageEvent
                     {
                         guid = _propRuntimeState.guid,
                         impulse = Vector3.zero,

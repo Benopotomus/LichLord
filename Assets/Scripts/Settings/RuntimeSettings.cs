@@ -95,14 +95,20 @@ namespace LichLord
 
             int currentWidth = Mathf.RoundToInt(Screen.width);
             int currentHeight = Mathf.RoundToInt(Screen.height);
-            int defaultRefreshRate = Mathf.RoundToInt((float)resolutions[^1].refreshRate);
+            // Get the current refresh rate ratio from the last resolution as a fallback
+            RefreshRate defaultRefreshRate = resolutions[^1].refreshRateRatio;
 
             for (int i = 0; i < resolutions.Length; i++)
             {
                 var resolution = resolutions[i];
 
-                if (resolution.width == currentWidth && resolution.height == currentHeight && Mathf.RoundToInt((float)resolution.refreshRate) == defaultRefreshRate)
+                if (resolution.width == currentWidth &&
+                    resolution.height == currentHeight &&
+                    resolution.refreshRateRatio.numerator == defaultRefreshRate.numerator &&
+                    resolution.refreshRateRatio.denominator == defaultRefreshRate.denominator)
+                {
                     return i;
+                }
             }
 
             return -1;

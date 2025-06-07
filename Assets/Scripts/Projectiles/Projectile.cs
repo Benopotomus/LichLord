@@ -81,36 +81,36 @@ namespace LichLord.Projectiles
             Vector2 impactPosition = hitData.ProjectilePosition;
             Vector2 targetTestPosition = hitData.HitObject.transform.position.ToVector2();
             IHitTarget hitTarget = hitData.HitTarget;
+            /*
+       switch (Definition.LineOfSightRequirement)
+       {
 
-            switch (Definition.LineOfSightRequirement)
-            {
-                /*
-                case ELineOfSightRequirement.LOS_To_Instigator_Feet:
+           case ELineOfSightRequirement.LOS_To_Instigator_Feet:
 
-                    sourcePosition = Instigator.NetActor.GlobalPosition();
+               sourcePosition = Instigator.NetActor.GlobalPosition();
 
-                    if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
-                        Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor)))
-                        return;
-                    break;
+               if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
+                   Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor)))
+                   return;
+               break;
 
-                case eLineOfSightRequirement.LOS_To_Instigator_SkillComponent:
+           case eLineOfSightRequirement.LOS_To_Instigator_SkillComponent:
 
-                    sourcePosition = NetActorUtility.GetActorCenter(Instigator.NetActor);
+               sourcePosition = NetActorUtility.GetActorCenter(Instigator.NetActor);
 
-                    if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
-                        Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor))) // if the target actor is not visible, ignore
-                        return;
-                    break;
+               if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
+                   Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor))) // if the target actor is not visible, ignore
+                   return;
+               break;
 
-                case eLineOfSightRequirement.LOS_To_Projectile_Center:
-                    if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
-                        Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor))) // if the target actor is not visible, ignore
-                        return;
-                    break;
-                */
-            }
-
+           case eLineOfSightRequirement.LOS_To_Projectile_Center:
+               if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
+                   Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor))) // if the target actor is not visible, ignore
+                   return;
+               break;
+       
+        }
+    */
             _collisionEvent.projectile = this;
             _collisionEvent.hitTarget = hitTarget;
             _collisionEvent.collideTick = OwningPool.Runner.Tick;

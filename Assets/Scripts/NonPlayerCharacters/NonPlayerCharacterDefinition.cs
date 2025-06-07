@@ -16,9 +16,12 @@ namespace LichLord.NonPlayerCharacters
         protected BundleObject _prefabBundle;
         public BundleObject PrefabBundle => _prefabBundle;
 
-        //Visuals
         [SerializeField]
-        protected NonPlayerCharacterUpdateDefinition _updateDefinition;
-        public NonPlayerCharacterUpdateDefinition UpdateDefinition => _updateDefinition;
+        protected int _maxHealth;
+        public int MaxHealth => _maxHealth;
+
+        [SerializeField]
+        protected float _walkSpeed;
+        public float WalkSpeed => _walkSpeed;
     }
 }

@@ -8,19 +8,19 @@
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
-        private ushort _definitionId; // 2 bytes. definition id;
-        [FieldOffset(2)]
-        private FWorldTransform _transform; // 12 bytes
-        [FieldOffset(14)]
-        private int _stateData; // 4 bytes
-        [FieldOffset(18)]
-        private int _health; // 4 bytes
-        //22
+        private FWorldTransform _transform; // 9 bytes: Position (8) + Rotation (1)
+        [FieldOffset(9)]
+        private byte _condition; // 1 byte: NPCState (4 bits) + CurrentSpeedPercent (4 bits)
+        [FieldOffset(10)]
+        private ushort _configuration; // 2 bytes: Index (9 bits) + DefinitionID (5 bits) + TeamID (2 bits)
+        [FieldOffset(12)]
+        private ushort _events; // 2 bytes: Health (12 bits) + Status (4 bits)
+        // Total: 14 bytes
 
         public int DefinitionID
         {
-            get => _definitionId;
-            set => _definitionId = (ushort)value;
+            get => NonPlayerCharacterDataUtility.GetDefinitionID(ref this);
+            set => NonPlayerCharacterDataUtility.SetDefinitionID(value, ref this);
         }
 
         public FWorldTransform Transform
@@ -35,30 +35,47 @@
             set => _transform.Position = value;
         }
 
+        public float PositionX
+        {
+            get => _transform.PositionX;
+            set => _transform.PositionX = value;
+        }
+
+        public float PositionY
+        {
+            get => _transform.PositionY;
+            set => _transform.PositionY = value;
+        }
+
+        public float PositionZ
+        {
+            get => _transform.PositionZ;
+            set => _transform.PositionZ = value;
+        }
+
         public Quaternion Rotation
         {
             get => _transform.Rotation;
             set => _transform.Rotation = value;
         }
 
-        /*
-        public Vector3 Velocity
+        public byte Condition
         {
-            get => _velocity.Velocity;
-            set => _velocity.Velocity = value;
-        }
-        */
-
-        public int StateData
-        {
-            get => _stateData;
-            set => _stateData = value;
+            get => _condition;
+            set => _condition = value;
         }
 
-        public int Health
+        
+        public ushort Configuration
         {
-            get => _health;
-            set => _health = value;
+            get => _configuration;
+            set => _configuration = value;
+        }
+
+        public ushort Events
+        {
+            get => _events;
+            set => _events = value;
         }
 
         public bool IsValid()
@@ -68,26 +85,15 @@
 
         public bool IsPropDataEqual(ref FNonPlayerCharacterData other)
         {
-            if(_definitionId != other._definitionId)
-                return false;
-
-            if (!IsPackedDataEqual(ref other))
-                return false;
-
-            return true;
-        }
-
-        public bool IsEqualToRuntimeData(NonPlayerCharacterRuntimeState other)
-        {
-            if (_definitionId != other.definitionId)
-                return false;
-
-            return true;
+            return IsPackedDataEqual(ref other);
         }
 
         public bool IsPackedDataEqual(ref FNonPlayerCharacterData other)
         {
-            return DefinitionID == other.DefinitionID && StateData == other.StateData;
+            return _condition == other._condition &&
+                  // _configuration == other._configuration &&
+                 //  _events == other._events &&
+                   _transform.Equals(other._transform);
         }
 
         public bool IsBitSet(ref byte flags, int bit)
@@ -97,7 +103,7 @@
 
         public byte SetBit(ref byte flags, int bit, bool value)
         {
-            if (value == true)
+            if (value)
             {
                 return flags |= (byte)(1 << bit);
             }
@@ -109,7 +115,7 @@
 
         public byte SetBitNoRef(byte flags, int bit, bool value)
         {
-            if (value == true)
+            if (value)
             {
                 return flags |= (byte)(1 << bit);
             }

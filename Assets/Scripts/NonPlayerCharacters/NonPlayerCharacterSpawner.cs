@@ -8,15 +8,24 @@ namespace LichLord.NonPlayerCharacters
 {
     public class NonPlayerCharacterSpawner : MonoBehaviour
     {
-        public Action<NonPlayerCharacterRuntimeState, NonPlayerCharacter> OnSpawned;
+        public Action<FNonPlayerCharacterSpawnParams, NonPlayerCharacter> OnSpawned;
 
-        public void SpawnNPC(NonPlayerCharacterRuntimeState runtimeState)
+        public void SpawnNPC(ref FNonPlayerCharacterData data)
         {
-            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(runtimeState.definitionId);
+            var spawnParams = new FNonPlayerCharacterSpawnParams
+            {
+                index = NonPlayerCharacterDataUtility.GetIndex(ref data),
+                definitionId = NonPlayerCharacterDataUtility.GetDefinitionID(ref data),
+                position = data.Position,
+                rotation = data.Rotation,
+                teamID = NonPlayerCharacterDataUtility.GetTeamID(ref data)
+            };
+
+            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(spawnParams.definitionId);
 
             if (definition == null)
             {
-                Debug.LogWarning("Trying to spawn NPC with invalid definition, id: " + runtimeState.definitionId);
+                Debug.LogWarning("Trying to spawn NPC with invalid definition, id: " + spawnParams.definitionId);
                 return;
             }
 
@@ -36,13 +45,13 @@ namespace LichLord.NonPlayerCharacters
 
                 if (loadedBundle.BundleName == prefabBundle.Bundle)
                 {
-                    OnPrefabLoaded(runtimeState, loadedBundle);
+                    OnPrefabLoaded(spawnParams, loadedBundle);
                     return;
                 }
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            NonPlayerCharacterLoader propLoader = new NonPlayerCharacterLoader(runtimeState, prefabLoader);
+            NonPlayerCharacterLoader propLoader = new NonPlayerCharacterLoader(spawnParams, prefabLoader);
 
             if (propLoader.Loader != null)
             {
@@ -56,12 +65,11 @@ namespace LichLord.NonPlayerCharacters
         private void OnPrefabLoaded(NonPlayerCharacterLoader loader)
         {
             loader.OnLoadComplete -= OnPrefabLoaded;
-
-            OnPrefabLoaded(loader.RuntimeState, loader.Loader);
+            OnPrefabLoaded(loader.SpawnParams, loader.Loader);
         }
 
-        private void OnPrefabLoaded(NonPlayerCharacterRuntimeState runtimeState, AssetBundleLoader loadedBundle)
-       {
+        private void OnPrefabLoaded(FNonPlayerCharacterSpawnParams spawnParams, AssetBundleLoader loadedBundle)
+        {
             GameObject prefab = loadedBundle.GetAssetWithin<GameObject>();
 
             if (prefab == null)
@@ -70,11 +78,11 @@ namespace LichLord.NonPlayerCharacters
             var poolObject = prefab.GetComponent<DWDObjectPoolObject>();
             if (poolObject == null)
             {
-                Debug.LogWarning("Could not spawn NPC " + runtimeState.definitionId + ".  Could not find DWDObjectPoolObject Component!");
+                Debug.LogWarning("Could not spawn NPC " + spawnParams.definitionId + ". Could not find DWDObjectPoolObject Component!");
                 return;
             }
 
-            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, runtimeState.position, runtimeState.rotation);
+            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, spawnParams.position, spawnParams.rotation);
 
             NonPlayerCharacter spawnedProp = instance.GetComponent<NonPlayerCharacter>();
 
@@ -84,7 +92,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            OnSpawned?.Invoke(runtimeState, spawnedProp);
+            OnSpawned?.Invoke(spawnParams, spawnedProp);
         }
     }
 }

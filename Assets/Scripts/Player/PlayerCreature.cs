@@ -38,7 +38,7 @@ namespace LichLord
 
         public FNetObjectID NetObjectID
         {
-            get => Object != null ? new FNetObjectID { guid = Object.Id } : default;
+            get => Object != null ? new FNetObjectID { networkId = Object.Id } : default;
         }
 
         INetActor IHitInstigator.NetActor => this;

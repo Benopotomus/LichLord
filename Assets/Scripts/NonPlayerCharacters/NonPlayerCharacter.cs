@@ -1,9 +1,6 @@
 ﻿using DWD.Pooling;
-using Pathfinding;
-using Pathfinding.RVO;
-using System.Data;
+using Fusion;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -15,61 +12,91 @@ namespace LichLord.NonPlayerCharacters
     public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor
     {
         protected NonPlayerCharacterManager _manager;
-        protected NonPlayerCharacterRuntimeState _runtimeState;
+        public NonPlayerCharacterManager Manager => _manager;
+
+        protected NonPlayerCharacterReplicator _replicator;
+        public NonPlayerCharacterReplicator Replicator => _replicator;
+
+        [SerializeField] private NonPlayerCharacterMovementComponent _movementComponent;
+        public NonPlayerCharacterMovementComponent Movement => _movementComponent;
+
+        [SerializeField] private Animator _animator;
+        public Animator Animator => _animator;
 
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
 
-        [SerializeField] private FollowerEntity _follower;
-        public FollowerEntity AIFollower => _follower;
-
         public HurtboxComponent Hurtbox;
 
         public INetActor NetActor => this;
-        public FNetObjectID NetObjectID => new FNetObjectID();
+        private FNetObjectID _netObjectId = new FNetObjectID();
+        public FNetObjectID NetObjectID => _netObjectId;
 
-        [SerializeField] private Vector3 _moveTarget = Vector3.zero;
-
-        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, NonPlayerCharacterManager manager)
+        public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacterManager manager, NonPlayerCharacterReplicator replicator)
         {
             _manager = manager;
-            _runtimeState = runtimeState;
-
+            _replicator = replicator;
+            _netObjectId.networkId = _manager.Object.Id;
+            _netObjectId.index = (byte)spawnParams.index;
+            _movementComponent.OnSpawned(ref spawnParams);
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            // Perform game logic updates
+            var definition = GetDefinition(ref data);
+            if (definition == null)
+                return;
 
-            if (Vector3.Distance(_transform.position, _moveTarget) < 3)
-            {
-                _moveTarget = new Vector3(
-                   Random.Range(-10f, 10f),
-                   0f, // Keep Y fixed
-                   Random.Range(-10f, 10f)
-               );
-            }
-
-            _follower.canMove = true;
-            _follower.destination = _moveTarget;
-            _follower.SearchPath();
-            // Update the runtime state
-            data.Position = _transform.position;
-            data.Rotation = _transform.rotation;
+            _movementComponent.AuthorityUpdate(ref data, renderDeltaTime);
         }
-
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
-            _follower.canMove = false;
+            var definition = GetDefinition(ref data);
+            if (definition == null)
+                return;
 
-            _follower.position = Vector3.Lerp(_transform.position, data.Position, renderDeltaTime * 4f);
-            _follower.rotation = Quaternion.Lerp(_transform.rotation, data.Rotation, renderDeltaTime * 10f);
+            _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
+        }
+
+        public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
+        {
+            _movementComponent.OnFixedUpdate(ref data, tick);
         }
 
         public void ProcessHit(ref FHitUtilityData hit)
         {
+            if (_manager == null)
+            {
+                Debug.LogWarning($"[NonPlayerCharacter] Cannot process hit: NPCManager is null for guid {_netObjectId.index}.");
+                return;
+            }
 
+            NetworkRunner runner = _manager.Runner;
+
+            Debug.Log($"[NPC] Processing hit for guid {_netObjectId.index} with damage 9001");
+
+            foreach (PlayerRef player in runner.ActivePlayers)
+            {
+                NetworkObject playerObj = runner.GetPlayerObject(player);
+                if (playerObj != null)
+                {
+                    /// How do i just send this to the masterclient player?
+                    RelayPlayer relayPlayer = playerObj.GetComponent<RelayPlayer>();
+
+                    relayPlayer.RaiseEvent(new NonPlayerCharacterDamageEvent
+                    {
+                        guid = _netObjectId.index,
+                        impulse = Vector3.zero,
+                        damage = 9001
+                    });
+                }
+            }
+        }
+
+        public void ApplyDamage(Vector3 impulse, int damage)
+        {
+            Debug.Log("Apply Damage " + damage); 
         }
 
         public void OnHitTaken(ref FHitUtilityData hit)
@@ -87,5 +114,19 @@ namespace LichLord.NonPlayerCharacters
             DWDObjectPool.Instance.Recycle(this);
         }
 
+        private NonPlayerCharacterDefinition _definition;
+        public NonPlayerCharacterDefinition GetDefinition(ref FNonPlayerCharacterData data) 
+        {
+            if (data.DefinitionID == 0)
+                return null;
+
+            if (_definition == null || 
+                _definition.TableID != data.DefinitionID)
+            {
+                _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(data.DefinitionID);
+            }
+
+            return _definition;
+        }
     }
 }

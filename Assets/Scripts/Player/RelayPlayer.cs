@@ -26,13 +26,8 @@ namespace LichLord
             PlayerId = Object.InputAuthority;
 
             Debug.Log($"Spawned Player with InputAuth {PlayerId}, Index {PlayerIndex}");
-            RegisterEventListener((DamageEvent evt) => ApplyDamageToProp(evt.guid, evt.impulse, evt.damage));
-        }
-
-        private void ApplyDamageToProp(int guid, Vector3 impulse, int damage)
-        {
-            Debug.Log("Relay Player Got the message");
-            Context.PropManager.ApplyDamage(guid, impulse, damage);
+            RegisterEventListener((PropDamageEvent evt) => ApplyDamageToProp(evt.guid, evt.impulse, evt.damage));
+            RegisterEventListener((PropDamageEvent evt) => ApplyDamageToNPC(evt.guid, evt.impulse, evt.damage));
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -49,6 +44,18 @@ namespace LichLord
         {
             RelayPlayer stateAuth = Runner.GetPlayerObject(Runner.LocalPlayer).GetComponent<RelayPlayer>();
             stateAuth.eventRelay.RaiseEventFor(eventRelay, evt);
+        }
+
+        //20
+        private void ApplyDamageToProp(int guid, Vector3 impulse, int damage)
+        {
+            Context.PropManager.ApplyDamage(guid, impulse, damage);
+        }
+
+        //20
+        private void ApplyDamageToNPC(int guid, Vector3 impulse, int damage)
+        {
+            Context.NonPlayerCharacterManager.ApplyDamage(guid, impulse, damage);
         }
     }
 }
