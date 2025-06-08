@@ -26,7 +26,7 @@ namespace Starter
 		private void LateUpdate()
 		{
 			// Rotate nameplate toward camera
-			transform.rotation = _cameraTransform.rotation;
+			//transform.rotation = _cameraTransform.rotation;
 		}
 	}
 }

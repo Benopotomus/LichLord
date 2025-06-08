@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hurtBoxes:
-  - {fileID: 0}
+  - {fileID: 2797947168699986338}
 --- !u!114 &163943214470098537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,6 +97,7 @@ GameObject:
   - component: {fileID: 3975338150861302662}
   - component: {fileID: 4703270737596821085}
   - component: {fileID: 1745263153301250522}
+  - component: {fileID: 5813864165240207391}
   m_Layer: 10
   m_Name: NonPlayerCharacter
   m_TagString: Untagged
@@ -134,9 +135,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _movementComponent: {fileID: 1745263153301250522}
+  _stateComponent: {fileID: 5813864165240207391}
   _animator: {fileID: 4324904172447793275}
   _transform: {fileID: 682064007814798227}
-  Hurtbox: {fileID: 2611734871992470391}
+  _hurtbox: {fileID: 2611734871992470391}
 --- !u!136 &3975338150861302662
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -236,6 +238,20 @@ MonoBehaviour:
   _velocity: {x: 0, y: 0, z: 0}
   _isGrounded: 0
   _moveTarget: {x: 0, y: 0, z: 0}
+--- !u!114 &5813864165240207391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7301654162607387296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff59f27cff088c44193acb20a9f6ba85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 174069171961541429}
+  _currentState: 0
 --- !u!1001 &7885715844743544298
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -328,7 +344,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 7ff0cf27ed8e9684b9bdd381bab1f846, type: 2}
+      objectReference: {fileID: 9100000, guid: 9f150214475dad54a893ef671fe06cbf, type: 2}
     - target: {fileID: 5866666021909216657, guid: 25f76e473f551e64a8438e7c32a0ec8e,
         type: 3}
       propertyPath: m_ApplyRootMotion

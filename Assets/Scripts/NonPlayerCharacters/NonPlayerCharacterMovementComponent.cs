@@ -22,60 +22,82 @@ namespace LichLord.NonPlayerCharacters
 
         private Vector3 _lastPosition;
         private float _speedPercent;
+        Vector3 _localVelocity;
 
         private int _animIDSpeedX = Animator.StringToHash("Velocity X");
         private int _animIDSpeedZ = Animator.StringToHash("Velocity Z");
         private int _animIDMoving = Animator.StringToHash("Moving");
+
+        bool _followerEnabled = true;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
             _lastPosition = spawnParams.position;
             _follower.updatePosition = true;
             _follower.updateRotation = true;
+            _follower.destination = _moveTarget;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            var definition = _npc.GetDefinition(ref data);
-            _speedPercent = _follower.velocity.magnitude / definition.WalkSpeed;
+            switch (NPC.State.CurrentState)
+            {
+                case ENonPlayerState.Inactive:
+                case ENonPlayerState.HitReact:
+                case ENonPlayerState.Dead:
+                    SetFollowerEnabled(false);
+                    return;
+                default:
+                    SetFollowerEnabled(true);
+                    break;
+            }
 
+            _speedPercent = _follower.velocity.magnitude / _npc.GetDefinition(ref data).WalkSpeed;
+            
             UpdateVelocity(ref data, renderDeltaTime);
-  
+            UpdateAnimator(renderDeltaTime);
+
             if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
             {
                 _moveTarget = new Vector3(
-                   Random.Range(-50f, 50f),
+                   Random.Range(-20f, 20f),
                    0f, // Keep Y fixed
-                   Random.Range(-50f, 50f)
+                   Random.Range(-20f, 20f)
                );
+                _follower.destination = _moveTarget;
             }
-
-            _follower.canMove = true;
-            _follower.destination = _moveTarget;
         }
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
-            _follower.canMove = false;
+            SetFollowerEnabled(false);
 
-            _follower.position = Vector3.Lerp(NPC.CachedTransform.position, data.Position, renderDeltaTime * 4f);
-            _follower.rotation = Quaternion.Lerp(NPC.CachedTransform.rotation, data.Rotation, renderDeltaTime * 10f);
+            NPC.CachedTransform.position = Vector3.Lerp(NPC.CachedTransform.position, data.Position, renderDeltaTime * 4f);
+            NPC.CachedTransform.rotation = Quaternion.Lerp(NPC.CachedTransform.rotation, data.Rotation, renderDeltaTime * 10f);
 
             _speedPercent = NonPlayerCharacterDataUtility.GetCurrentSpeedPercent(data);
             UpdateVelocity(ref data, renderDeltaTime);
+            UpdateAnimator(renderDeltaTime);
         }
 
         private void UpdateVelocity(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
             _velocity = NPC.CachedTransform.position - _lastPosition;
             _lastPosition = NPC.CachedTransform.position;
-
-            NPC.Animator.SetBool(_animIDMoving, _speedPercent > 0.01f);
             Vector3 normalizedVelocity = (_velocity.normalized * _speedPercent);// * _npc.GetDefinition(ref data).WalkSpeed) ;
+            _localVelocity = NPC.CachedTransform.InverseTransformDirection(normalizedVelocity);
+        }
 
-            Vector3 localVelocity = NPC.CachedTransform.InverseTransformDirection(normalizedVelocity);
-            NPC.Animator.SetFloat(_animIDSpeedX, localVelocity.x, 0.1f, renderDeltaTime);
-            NPC.Animator.SetFloat(_animIDSpeedZ, localVelocity.z, 0.1f, renderDeltaTime);
+        private void UpdateAnimator(float renderDeltaTime)
+        {
+            bool isMoving = _speedPercent > 0.1f;
+
+            if (NPC.State.CurrentState != ENonPlayerState.Idle)
+                isMoving = false;
+
+            NPC.Animator.SetBool(_animIDMoving, isMoving);
+            NPC.Animator.SetFloat(_animIDSpeedX, _localVelocity.x, 0.1f, renderDeltaTime);
+            NPC.Animator.SetFloat(_animIDSpeedZ, _localVelocity.z, 0.1f, renderDeltaTime);
         }
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
@@ -119,6 +141,19 @@ namespace LichLord.NonPlayerCharacters
             NonPlayerCharacterDataUtility.SetCurrentSpeedPercent(_speedPercent, ref data);
 
             NPC.Replicator.UpdateNPCData(data);
+        }
+
+        private void SetFollowerEnabled(bool newEnabled)
+        {
+            if (newEnabled == _followerEnabled)
+                return;
+
+            _follower.enableLocalAvoidance = newEnabled;
+            _follower.updatePosition = newEnabled;
+            _follower.updateRotation = newEnabled;
+            _follower.canMove = newEnabled;
+
+            _followerEnabled = newEnabled;
         }
 
         public void StartRecycle()

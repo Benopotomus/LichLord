@@ -20,17 +20,22 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterMovementComponent _movementComponent;
         public NonPlayerCharacterMovementComponent Movement => _movementComponent;
 
+        [SerializeField] private NonPlayerCharacterStateComponent _stateComponent;
+        public NonPlayerCharacterStateComponent State => _stateComponent;
+
         [SerializeField] private Animator _animator;
         public Animator Animator => _animator;
 
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
 
-        public HurtboxComponent Hurtbox;
+        [SerializeField] private HurtboxComponent _hurtbox;
+        public HurtboxComponent Hurtbox => _hurtbox;
 
         public INetActor NetActor => this;
         private FNetObjectID _netObjectId = new FNetObjectID();
         public FNetObjectID NetObjectID => _netObjectId;
+
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacterManager manager, NonPlayerCharacterReplicator replicator)
         {
@@ -39,6 +44,7 @@ namespace LichLord.NonPlayerCharacters
             _netObjectId.networkId = _manager.Object.Id;
             _netObjectId.index = (byte)spawnParams.index;
             _movementComponent.OnSpawned(ref spawnParams);
+            _stateComponent.OnSpawned(ref spawnParams);
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -47,6 +53,9 @@ namespace LichLord.NonPlayerCharacters
             if (definition == null)
                 return;
 
+            _stateComponent.UpdateState(data.State);
+
+            _stateComponent.AuthorityUpdate(ref data, renderDeltaTime);
             _movementComponent.AuthorityUpdate(ref data, renderDeltaTime);
         }
 
@@ -56,6 +65,7 @@ namespace LichLord.NonPlayerCharacters
             if (definition == null)
                 return;
 
+            _stateComponent.UpdateState(data.State);
             _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
         }
 
@@ -64,22 +74,11 @@ namespace LichLord.NonPlayerCharacters
             _movementComponent.OnFixedUpdate(ref data, tick);
         }
 
+        
+
         public void ProcessHit(ref FHitUtilityData hit)
         {
 
-        }
-
-        public void ApplyDamage(Vector3 impulse, int damage)
-        {
-            Debug.Log("Apply Damage: " + damage + ", index: " + _netObjectId.index);
-
-            if (_replicator.TryGetNPCData(_netObjectId.index, out FNonPlayerCharacterData data))
-            {
-                data.State = ENonPlayerState.Inactive;
-                data.Health = Mathf.Clamp(data.Health - 10, 0, 1000);
-                _replicator.UpdateNPCData(data);
-            }
-            StartRecycle();
         }
 
         public void OnHitTaken(ref FHitUtilityData hit)

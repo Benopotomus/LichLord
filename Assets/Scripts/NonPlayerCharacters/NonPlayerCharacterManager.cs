@@ -29,9 +29,9 @@ namespace LichLord.NonPlayerCharacters
                 for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
                 {
                     Vector3 randomPosition = new Vector3(
-                        Random.Range(-50f, 50f),
+                        Random.Range(-0f, 10f),
                         1f, // Keep Y fixed
-                        Random.Range(-50f, 50f)
+                        Random.Range(-0f, 10f)
                     );
 
                     SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamA);

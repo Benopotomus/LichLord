@@ -10,7 +10,8 @@ namespace LichLord
         [SerializeField] private CinemachineVirtualCamera firstPersonCam;
 
         [Header("Raycast Settings")]
-        [SerializeField] private float maxRaycastDistance = 100f;
+        [SerializeField] private float _minRaycastDistance = 2.7f;
+        [SerializeField] private float _maxRaycastDistance = 100f;
         [SerializeField] private LayerMask raycastLayerMask;
         private float sphereRadius = 0.1f; // Radius of the debug sphere
 
@@ -60,11 +61,13 @@ namespace LichLord
         public void SetCameraView(bool firstPerson)
         {
             isFirstPerson = firstPerson;
+            _minRaycastDistance = isFirstPerson ? 0f : 5f;
 
             if (firstPersonCam != null && thirdPersonCam != null)
             {
                 firstPersonCam.Priority = firstPerson ? 20 : 10;
                 thirdPersonCam.Priority = firstPerson ? 10 : 20;
+
                 Debug.Log($"[CameraManager] Switched to {(firstPerson ? "First Person" : "Third Person")} view");
             }
             else
@@ -99,12 +102,13 @@ namespace LichLord
                 _cachedRaycastHit.position = Vector3.zero;
             }
 
+            Transform cameraTransform = mainCamera.transform;
             // Calculate ray from camera center
-            Vector3 rayOrigin = mainCamera.transform.position;
-            Vector3 rayDirection = mainCamera.transform.forward;
+            Vector3 rayOrigin = cameraTransform.position + (cameraTransform.forward * _minRaycastDistance);
+            Vector3 rayDirection = cameraTransform.forward;
 
             // Perform raycast with all hits
-            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, maxRaycastDistance, raycastLayerMask);
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, _maxRaycastDistance, raycastLayerMask);
 
             // Find the closest valid hit, ignoring the specified object
             RaycastHit closestHit = new RaycastHit();
@@ -134,7 +138,7 @@ namespace LichLord
             }
 
             // Return point at max distance if no valid hit
-            Vector3 maxRangePoint = rayOrigin + rayDirection * maxRaycastDistance;
+            Vector3 maxRangePoint = rayOrigin + rayDirection * _maxRaycastDistance;
             _cachedRaycastHit.raycastHit = new RaycastHit();
             _cachedRaycastHit.position = maxRangePoint;
         }

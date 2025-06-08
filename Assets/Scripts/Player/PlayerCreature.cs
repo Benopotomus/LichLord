@@ -180,6 +180,10 @@ namespace LichLord
             if (hit.target is NonPlayerCharacter npc)
             {
                 npc.Replicator.RPC_DealDamageToNPC(npc.NetObjectID.index, hit.damageData.damageValue);
+
+                if (!Runner.IsSharedModeMasterClient)
+                    npc.Replicator.Predict_DealDamageToNPC(npc.NetObjectID.index, hit.damageData.damageValue);
+               
             }
         }
 

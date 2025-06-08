@@ -2,6 +2,6 @@
 {
     public static class NonPlayerCharacterConstants
     {
-        public const int MAX_NPC_REPS = 128; 
+        public const int MAX_NPC_REPS = 256; 
     }
 }
