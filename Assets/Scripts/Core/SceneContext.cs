@@ -33,7 +33,7 @@ namespace LichLord
         [HideInInspector]
         public PlayerRef LocalPlayerRef;
         [HideInInspector]
-        public PlayerCreature LocalPlayerCreature;
+        public PlayerCharacter LocalPlayerCreature;
 
         // General
         /*

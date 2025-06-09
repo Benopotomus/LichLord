@@ -12,15 +12,15 @@ namespace LichLord
 
         private GameObject spawnedGunModel; // Runtime reference to the spawned gun
 
-        public override void SelectAction(PlayerCreature playerCreature, NetworkRunner runner)
+        public override void SelectAction(PlayerCharacter playerCreature, NetworkRunner runner)
         {
         }
 
-        public override void DeselectAction(PlayerCreature playerCreature, NetworkRunner runner)
+        public override void DeselectAction(PlayerCharacter playerCreature, NetworkRunner runner)
         {
         }
 
-        public override void Execute(PlayerCreature playerCreature, NetworkRunner runner)
+        public override void Execute(PlayerCharacter playerCreature, NetworkRunner runner)
         {
             // Get the action spawn point
             Transform spawnPoint = playerCreature.Actions.ActionSpawnPoint != null ? playerCreature.Actions.ActionSpawnPoint : playerCreature.transform;

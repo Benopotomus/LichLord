@@ -23,15 +23,15 @@ namespace LichLord
         [Range(0.01f, 1f)]
         public float MovementSpeedMultiplier = 1f; // Scales movement speed during action
 
-        public virtual void SelectAction(PlayerCreature playerCreature, NetworkRunner runner)
+        public virtual void SelectAction(PlayerCharacter playerCreature, NetworkRunner runner)
         {        
         }
 
-        public virtual void DeselectAction(PlayerCreature playerCreature, NetworkRunner runner)
+        public virtual void DeselectAction(PlayerCharacter playerCreature, NetworkRunner runner)
         { 
         }
 
-        public virtual void Execute(PlayerCreature playerCreature, NetworkRunner runner)
+        public virtual void Execute(PlayerCharacter playerCreature, NetworkRunner runner)
         {
         }
     }

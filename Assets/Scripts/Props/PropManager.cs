@@ -161,7 +161,7 @@ namespace LichLord.Props
             if (!Context.IsGameplayActive())
                 return;
 
-            PlayerCreature.TryGetLocalPlayer(Runner, out PlayerCreature playerCreature);
+            PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter playerCreature);
 
             if (playerCreature == null)
                 return;

@@ -13,7 +13,7 @@ namespace LichLord
         public StateMachine<StateBehaviour> StateMachine => stateMachine;
 
         [Tooltip("Reference to the Player controlled by this FSM.")]
-        public PlayerCreature Creature;
+        public PlayerCharacter Creature;
 
         public void CollectStateMachines(List<IStateMachine> stateMachines)
         {

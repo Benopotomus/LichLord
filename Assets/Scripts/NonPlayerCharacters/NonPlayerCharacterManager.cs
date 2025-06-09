@@ -12,9 +12,7 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private Dictionary<int, FNonPlayerCharacterData> _deltaStates = new Dictionary<int, FNonPlayerCharacterData>();
 
-        [Networked]
-        private int _totalEnemies { get; set; }
-
+        [SerializeField] private int _debugSpawnCount = 0;
         public void AddReplicator(NonPlayerCharacterReplicator replicator)
         {
             _replicator = replicator;
@@ -26,7 +24,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity);
 
-                for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
+                for (int i = 0; i < _debugSpawnCount; i++)
                 {
                     Vector3 randomPosition = new Vector3(
                         Random.Range(-0f, 10f),
@@ -70,19 +68,6 @@ namespace LichLord.NonPlayerCharacters
                 _deltaStates[freeIndex] = data; // Store full state for persistence
                 _replicator.UpdateNPCData(data);
             }
-        }
-
-        public void ApplyDamage(int guid, Vector3 impulse, int damage)
-        {
-            //_replicator.ApplyDamageToNPC(guid, impulse, damage);
-            /*
-            _replicator.RaiseEvent(new NonPlayerCharacterDamageEvent
-            {
-                guid = guid,
-                impulse = impulse,
-                damage = 9001
-            });
-            */
         }
 
         public class NPCLoadState

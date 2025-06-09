@@ -17,7 +17,7 @@ namespace LichLord.Projectiles
 
         public ProjectilePool GetProjectilePoolForInstigator(IHitInstigator instigator)
         {
-            if (instigator is PlayerCreature playerCreature)
+            if (instigator is PlayerCharacter playerCreature)
             {
                 if (playerCreature.HasStateAuthority)
                 {

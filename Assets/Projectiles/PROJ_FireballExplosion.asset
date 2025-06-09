@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PROJ_FireballExplosion
   m_EditorClassIdentifier: 
   _tableID: 2
-  _lifetime: 0.2
+  _lifetime: 0.5
   _deactivationSpawnedProjectiles: []
   _projectileMovement: {fileID: 11400000, guid: 73f3a09a38ebc1549a0ae6dde5708fca,
     type: 2}
@@ -30,7 +30,7 @@ MonoBehaviour:
   _extents: {x: 2.5, y: 0, z: 0}
   _onlyAffectsOnce: 0
   _affectsEachCast: 0
-  _collisionCheckTrim: {x: 0, y: 0}
+  _collisionCheckTrim: {x: 0, y: 0.1}
   _collisionCheckRate: 0
   _collisionSweepsPerTick: 1
   _collisionCheckNumber: 4

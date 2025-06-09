@@ -70,6 +70,18 @@
             set => _transform.PositionZ = value;
         }
 
+        public float Yaw
+        {
+            get => _transform.Yaw;
+            set => _transform.Yaw = value;
+        }
+
+        public float Pitch
+        {
+            get => _transform.Pitch;
+            set => _transform.Pitch = value;
+        }
+
         public Quaternion Rotation
         {
             get => _transform.Rotation;

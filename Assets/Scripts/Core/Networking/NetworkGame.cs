@@ -13,7 +13,7 @@ namespace LichLord
     public sealed class NetworkGame : ContextBehaviour, IPlayerJoined, IPlayerLeft
     {
         // PUBLIC MEMBERS
-        public List<PlayerCreature> ActivePlayers = new List<PlayerCreature>();
+        public List<PlayerCharacter> ActivePlayers = new List<PlayerCharacter>();
         public event Action GameLoaded;
 
         private PlayerRef _localPlayer;
@@ -52,12 +52,12 @@ namespace LichLord
             yield return null;
         }
 
-        public PlayerCreature GetPlayerCharacter(PlayerRef playerRef)
+        public PlayerCharacter GetPlayerCharacter(PlayerRef playerRef)
         {
             if (!playerRef.IsRealPlayer)
                 return null;
 
-            foreach (PlayerCreature player in ActivePlayers)
+            foreach (PlayerCharacter player in ActivePlayers)
             {
                 if (player.Object.InputAuthority == playerRef)
                     return player;

@@ -10,13 +10,10 @@ namespace LichLord
         [SerializeField]
         [Networked] public TickAlignedEventRelay EventRelay { get; set; }
 
-        [Networked]
-        private int Health { get; set; } = 1000;
-
         public override void Spawned()
         {
-                        base.Spawned();
-            RegisterEventListener((NonPlayerCharacterDamageEvent evt) => ApplyDamageToNPC(evt.guid, evt.impulse, evt.damage));
+            base.Spawned();
+
         }
 
         public override void Render()
@@ -36,14 +33,6 @@ namespace LichLord
             Debug.Log("Raise Event");
             RelayPlayer stateAuth = Runner.GetPlayerObject(Runner.LocalPlayer).GetComponent<RelayPlayer>();
             stateAuth.EventRelay.RaiseEventFor(EventRelay, evt);
-        }
-
-        private void ApplyDamageToNPC(int guid, Vector3 impulse, int damage)
-        {
-            Debug.Log("Relay Hit");
-            Health -= damage;
-
-            Context.NonPlayerCharacterManager.ApplyDamage(guid, impulse, damage);
         }
     }
 }

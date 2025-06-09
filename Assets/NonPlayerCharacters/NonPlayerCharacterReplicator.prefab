@@ -9,10 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7052490895677612869}
-  - component: {fileID: -7299887689998786297}
-  - component: {fileID: 2437123896088490543}
+  - component: {fileID: 3957007118019067033}
   - component: {fileID: -90902155296826548}
-  - component: {fileID: 3996747563329803762}
+  - component: {fileID: 6912625125392386295}
   m_Layer: 0
   m_Name: NonPlayerCharacterReplicator
   m_TagString: Untagged
@@ -35,7 +34,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-7299887689998786297
+--- !u!114 &3957007118019067033
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -47,20 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30d0a829ecf65ea448ecae17d4639737, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _EventRelay: {fileID: 3996747563329803762}
-  _spawner: {fileID: 2437123896088490543}
---- !u!114 &2437123896088490543
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4709618634251712557}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 109190aab22aa5e4cbf1b998ee800b3a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  _spawner: {fileID: 6912625125392386295}
 --- !u!114 &-90902155296826548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -78,10 +64,9 @@ MonoBehaviour:
   Flags: 131073
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: -7299887689998786297}
-  - {fileID: 3996747563329803762}
+  - {fileID: 3957007118019067033}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &3996747563329803762
+--- !u!114 &6912625125392386295
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -90,6 +75,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4709618634251712557}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4065fad91402e064fbcca9a9419bde60, type: 3}
+  m_Script: {fileID: 11500000, guid: 20cf32547ae23f14e8ee90c51fe0a8a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

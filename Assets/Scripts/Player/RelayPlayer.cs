@@ -20,7 +20,6 @@ namespace LichLord
         {
             // Getting this here because it will revert to -1 if the player disconnects, but we still want to remember the Id we were assigned for clean-up purposes
             RegisterEventListener((PropDamageEvent evt) => ApplyDamageToProp(evt.guid, evt.impulse, evt.damage));
-            RegisterEventListener((NonPlayerCharacterDamageEvent evt) => ApplyDamageToNPC(evt.guid, evt.impulse, evt.damage));
         }
 
         protected void RegisterEventListener<T>(Action<T> listener) where T : unmanaged, INetworkEvent
@@ -40,10 +39,5 @@ namespace LichLord
             Context.PropManager.ApplyDamage(guid, impulse, damage);
         }
 
-        private void ApplyDamageToNPC(int guid, Vector3 impulse, int damage)
-        {
-            Debug.Log("Relay Hit");
-            Context.NonPlayerCharacterManager.ApplyDamage(guid, impulse, damage);
-        }
     }
 }

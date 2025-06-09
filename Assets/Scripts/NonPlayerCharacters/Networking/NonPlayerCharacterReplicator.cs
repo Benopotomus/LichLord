@@ -48,7 +48,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 var newPredictedData = new NonPlayerCharacterState(ref targetData);
                 newPredictedData.ApplyDamage(damage);
-                Debug.Log("Creating Predicted Data: " + newPredictedData.Data.State);
+                //Debug.Log("Creating Predicted Data: " + newPredictedData.Data.State);
                 _predictedStates.Add(guid, newPredictedData);
             }
         }
@@ -166,7 +166,7 @@ namespace LichLord.NonPlayerCharacters
             if (!Context.IsGameplayActive())
                 return;
 
-            if (!PlayerCreature.TryGetLocalPlayer(Runner, out PlayerCreature playerCreature))
+            if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter playerCreature))
                 return;
 
             Vector3 viewPosition = playerCreature.transform.position;
@@ -206,7 +206,7 @@ namespace LichLord.NonPlayerCharacters
             if (!Context.IsGameplayActive())
                 return;
 
-            if (!PlayerCreature.TryGetLocalPlayer(Runner, out PlayerCreature playerCreature))
+            if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter playerCreature))
                 return;
 
             int tick = Runner.Tick;

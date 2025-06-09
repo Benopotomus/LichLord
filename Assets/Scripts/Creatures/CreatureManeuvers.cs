@@ -14,7 +14,7 @@ namespace LichLord
         [Header("Action Setup")]
         [SerializeField] private List<ManeuverDefinition> availableActions = new List<ManeuverDefinition>();
         [SerializeField] public Transform ActionSpawnPoint; // Where actions originate
-        [SerializeField] private PlayerCreature _playerCreature;
+        [SerializeField] private PlayerCharacter _playerCreature;
         [Networked] private int SelectedActionIndex { get; set; }
         [Networked] private TickTimer CooldownTimer { get; set; }
         [Networked] private TickTimer AnimationTimer { get; set; }

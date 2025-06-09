@@ -10,8 +10,8 @@ namespace LichLord
 {
     public class SpawnManager : ContextBehaviour
     {
-        [SerializeField] private PlayerCreature _playerPrefab;
-        public PlayerCreature LocalPlayer { get; private set; }
+        [SerializeField] private PlayerCharacter _playerPrefab;
+        public PlayerCharacter LocalPlayer { get; private set; }
 
         private SpawnPoint[] _spawnPoints;
 

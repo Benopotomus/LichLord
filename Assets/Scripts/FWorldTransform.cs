@@ -33,20 +33,22 @@ namespace LichLord
         public static implicit operator Int24(int value) => new Int24(value);
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 9)]
+    [StructLayout(LayoutKind.Explicit, Size = 10)]
     public struct FWorldTransform : INetworkStruct
     {
         [FieldOffset(0)] private Int24 _positionX; // 3 bytes
         [FieldOffset(3)] private short _positionYCompressed; // 2 bytes
         [FieldOffset(5)] private Int24 _positionZ; // 3 bytes
-        [FieldOffset(8)] private byte _compressedRotation; // 1 byte
-        // Total: 9 bytes
+        [FieldOffset(8)] private byte _compressedYaw; // 1 byte
+        [FieldOffset(9)] private byte _compressedPitch; // 1 byte
+        // Total: 10 bytes
 
         private const float SCALE_FACTOR = 100f; // For two decimal places
         private const float X_Z_MIN = -83886.08f; // -8,388,608 / 100
         private const float X_Z_MAX = 83886.07f; // 8,388,607 / 100
         private const float Y_MIN = -327.68f; // -32,768 / 100
         private const float Y_MAX = 327.67f; // 32,767 / 100
+        private const float TWO_PI = 2 * Mathf.PI;
 
         public float PositionX
         {
@@ -81,16 +83,36 @@ namespace LichLord
             }
         }
 
-        public Vector3 Forward
+        public float Yaw // Yaw in degrees (0 to 360)
         {
-            get => DecodeYaw(_compressedRotation);
-            set => _compressedRotation = EncodeYaw(value);
+            get => (_compressedYaw / 255f) * 360f;
+            set
+            {
+                float clampedYaw = value % 360f;
+                if (clampedYaw < 0f) clampedYaw += 360f;
+                _compressedYaw = (byte)(clampedYaw / 360f * 255f);
+            }
+        }
+
+        public float Pitch // in degrees: -90 to 90
+        {
+            get => (_compressedPitch - 127.5f) / 127.5f * 90f;
+            set
+            {
+                float clamped = Mathf.Clamp(value, -90f, 90f);
+                _compressedPitch = (byte)(((clamped / 90f) * 127.5f) + 127.5f);
+            }
         }
 
         public Quaternion Rotation
         {
-            get => Quaternion.LookRotation(Forward, Vector3.up);
-            set => Forward = value * Vector3.forward;
+            get => Quaternion.Euler(Pitch * Mathf.Rad2Deg, Yaw * Mathf.Rad2Deg, 0);
+            set
+            {
+                Vector3 euler = value.eulerAngles;
+                Yaw = euler.y * Mathf.Deg2Rad; // Set yaw in radians
+                Pitch = euler.x * Mathf.Deg2Rad; // Set pitch in radians
+            }
         }
 
         public bool IsPositionEqual(ref FWorldTransform other)
@@ -102,7 +124,8 @@ namespace LichLord
 
         public bool IsRotationEqual(ref FWorldTransform other)
         {
-            return _compressedRotation == other._compressedRotation;
+            return _compressedYaw == other._compressedYaw &&
+                   _compressedPitch == other._compressedPitch;
         }
 
         public void CopyPosition(ref FWorldTransform other)
@@ -114,30 +137,14 @@ namespace LichLord
 
         public void CopyRotation(ref FWorldTransform other)
         {
-            _compressedRotation = other._compressedRotation;
+            _compressedYaw = other._compressedYaw;
+            _compressedPitch = other._compressedPitch;
         }
 
         public string DebugString()
         {
             return $"Position: ({(int)_positionX / SCALE_FACTOR:F2}, {_positionYCompressed / SCALE_FACTOR:F2}, {(int)_positionZ / SCALE_FACTOR:F2}), " +
-                   $"Yaw: {_compressedRotation} ({(DecodeYaw(_compressedRotation).x, DecodeYaw(_compressedRotation).z)})";
-        }
-
-        private static byte EncodeYaw(Vector3 forward)
-        {
-            forward.y = 0;
-            if (forward.sqrMagnitude < 0.0001f)
-                forward = Vector3.forward;
-            forward.Normalize();
-            float yaw = Mathf.Atan2(forward.x, forward.z);
-            if (yaw < 0) yaw += 2 * Mathf.PI;
-            return (byte)Mathf.RoundToInt((yaw / (2 * Mathf.PI)) * 255f);
-        }
-
-        private static Vector3 DecodeYaw(byte encoded)
-        {
-            float yaw = (encoded / 255f) * 2 * Mathf.PI;
-            return new Vector3(Mathf.Sin(yaw), 0, Mathf.Cos(yaw)).normalized;
+                   $"Yaw: {Yaw * Mathf.Rad2Deg:F2}°, Pitch: {Pitch * Mathf.Rad2Deg:F2}° (bytes: {_compressedYaw}, {_compressedPitch})";
         }
     }
 }
