@@ -15,14 +15,6 @@ namespace LichLord.NonPlayerCharacters
             public ELoadState LoadState;
         }
 
-        public enum ELoadState
-        {
-            None,
-            Loading,
-            Loaded,
-            Unloading,
-        }
-
         [Networked, Capacity(NonPlayerCharacterConstants.MAX_NPC_REPS)]
         private NetworkArray<FNonPlayerCharacterData> _npcDatas { get; }
 

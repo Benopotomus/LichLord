@@ -6,19 +6,20 @@ using Starter;
 using LichLord.Projectiles;
 using SoulGames.EasyGridBuilderPro;
 using LichLord.NonPlayerCharacters;
+using LichLord.World;
 
 namespace LichLord
 {
     /// <summary>
     /// Main player script - controls player movement, actions, and animations.
     /// </summary>
-    public class PlayerCharacter : RelayPlayer, INetActor, IHitInstigator, IHitTarget
+    public class PlayerCharacter : RelayPlayer, INetActor, IHitInstigator, IHitTarget, IChunkTrackable
     {
         [Header("References")]
         public Health Health;
         public PlayerCharacterMovementComponent Movement;
         public PlayerCameraController CameraController;
-        public PlayerCreatureInput Input;
+        public PlayerCharacterInput Input;
         public CreatureManeuvers Actions;
         public PlayerProjectilePool ProjectilePool;
         public HurtboxComponent Hurtbox;
@@ -44,6 +45,9 @@ namespace LichLord
         }
 
         INetActor IHitInstigator.NetActor => this;
+
+        private Chunk _chunk;
+        public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
 
         [SerializeField]
         private BuildableGridObjectTypeSO item;
@@ -73,6 +77,7 @@ namespace LichLord
 
             Context.LocalPlayerCreature = this;
             Context.LocalPlayerRef = Object.StateAuthority;
+            Context.NetworkGame.OnPlayerSpawned(this);
 
             Runner.SetPlayerObject(Runner.LocalPlayer, Object);
             Runner.SetPlayerAlwaysInterested(Runner.LocalPlayer, Object, true);
@@ -107,10 +112,10 @@ namespace LichLord
             //EasyGridBuilderPro.Instance.SetSelectedBuildable(item);
         }
 
-        public void ApplyDamage(int guid, Vector3 impulse, int damage)
+        public override void Despawned(NetworkRunner runner, bool hasState)
         {
-            //Context.PropManager.RaiseEvent(new DamageEvent { impulse = Vector3.zero, damage = 9001 });
-
+            base.Despawned(runner, hasState);
+            Context.NetworkGame.OnPlayerDespawned(this);
         }
 
         public override void FixedUpdateNetwork()
@@ -118,8 +123,6 @@ namespace LichLord
             if (Health.IsFinished)
             {
             }
-
-           // Movement.KCC.SetActive(Health.IsAlive);
         }
 
         public override void Render()
@@ -127,6 +130,7 @@ namespace LichLord
             base.Render();
             // Disable hits when player is dead
             Hurtbox.enabled = Health.IsAlive;
+            UpdateChunk(Context.ChunkManager);
         }
 
         private void LateUpdate()
@@ -182,6 +186,30 @@ namespace LichLord
         void IHitTarget.OnHitTaken(ref FHitUtilityData hit)
         {
             //throw new System.NotImplementedException();
+        }
+
+        public void UpdateChunk(ChunkManager chunkManager)
+        {
+            var lastChunk = CurrentChunk;
+            var newChunk = chunkManager.GetChunkAtPosition(CachedTransform.position);
+
+            CurrentChunk = newChunk;
+
+            if (lastChunk != newChunk)
+            {
+                if(lastChunk != null)
+                    lastChunk.RemoveObject(gameObject);
+
+                newChunk.AddObject(gameObject);
+            }
+
+            if (HasStateAuthority)
+            {
+                if (lastChunk != newChunk)
+                { 
+                    //Chunk changed, toggle on/off items
+                }
+            }   
         }
     }
 }

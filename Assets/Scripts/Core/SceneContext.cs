@@ -11,6 +11,7 @@ namespace LichLord
     using LichLord.Projectiles;
     using LichLord.Props;
     using LichLord.UI;
+    using LichLord.World;
     using UnityEngine;
 
     [System.Serializable]
@@ -27,6 +28,7 @@ namespace LichLord
         public PropManager PropManager;
         public BuildableManager BuildableManager;
         public NonPlayerCharacterManager NonPlayerCharacterManager;
+        public ChunkManager ChunkManager;
         public SceneCamera Camera;
         public SceneUI UI;
 
