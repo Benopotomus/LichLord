@@ -55,7 +55,7 @@ namespace LichLord.NonPlayerCharacters
             _speedPercent = _follower.velocity.magnitude / _npc.GetDefinition(ref data).WalkSpeed;
             
             UpdateVelocity(ref data, renderDeltaTime);
-            UpdateAnimator(renderDeltaTime);
+            UpdateAnimator(ref data, renderDeltaTime);
 
             if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
             {
@@ -76,7 +76,7 @@ namespace LichLord.NonPlayerCharacters
             NPC.CachedTransform.position = Vector3.Lerp(
                 NPC.CachedTransform.position,
                 data.Position,
-                renderDeltaTime * 6f
+                renderDeltaTime * 4f
             );
 
             // Smooth yaw only
@@ -93,30 +93,28 @@ namespace LichLord.NonPlayerCharacters
                 currentEuler.z
             );
 
-            _speedPercent = NonPlayerCharacterDataUtility.GetCurrentSpeedPercent(data);
             UpdateVelocity(ref data, renderDeltaTime);
-            UpdateAnimator(renderDeltaTime);
+            UpdateAnimator(ref data, renderDeltaTime);
         }
-
 
         private void UpdateVelocity(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            _velocity = NPC.CachedTransform.position - _lastPosition;
+            _velocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
             _lastPosition = NPC.CachedTransform.position;
-            Vector3 normalizedVelocity = (_velocity.normalized * _speedPercent);// * _npc.GetDefinition(ref data).WalkSpeed) ;
-            _localVelocity = NPC.CachedTransform.InverseTransformDirection(normalizedVelocity);
+            _localVelocity = NPC.CachedTransform.InverseTransformDirection(_velocity);
         }
 
-        private void UpdateAnimator(float renderDeltaTime)
+        private void UpdateAnimator(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            bool isMoving = _speedPercent > 0.1f;
+            bool isMoving = _velocity.magnitude > 0.1f;
 
             if (NPC.State.CurrentState != ENonPlayerState.Idle)
                 isMoving = false;
 
+            Vector3 animationVelocity = _localVelocity / NPC.GetDefinition(ref data).WalkSpeed;
             NPC.Animator.SetBool(_animIDMoving, isMoving);
-            NPC.Animator.SetFloat(_animIDSpeedX, _localVelocity.x, 0.1f, renderDeltaTime);
-            NPC.Animator.SetFloat(_animIDSpeedZ, _localVelocity.z, 0.1f, renderDeltaTime);
+            NPC.Animator.SetFloat(_animIDSpeedX, animationVelocity.x, 0.1f, renderDeltaTime);
+            NPC.Animator.SetFloat(_animIDSpeedZ, animationVelocity.z, 0.1f, renderDeltaTime);
         }
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
@@ -159,8 +157,6 @@ namespace LichLord.NonPlayerCharacters
             {
                 data.Yaw = yawA;
             }
-
-            NonPlayerCharacterDataUtility.SetCurrentSpeedPercent(_speedPercent, ref data);
 
             NPC.Replicator.UpdateNPCData(data);
         }

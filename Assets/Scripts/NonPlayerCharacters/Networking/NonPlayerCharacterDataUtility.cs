@@ -10,9 +10,8 @@
         private const int DEFINITION_BITS = 5;           // 0-31
         private const int TEAM_BITS = 2;                // 0-3
         private const int NPC_STATE_BITS = 4;           // 0-15
-        private const int CURRENT_SPEED_PERCENT_BITS = 4; // 0-15
-        private const int HEALTH_BITS = 12;             // 0-4095
         private const int STATUS_BITS = 4;              // 0-15
+        private const int HEALTH_BITS = 12;             // 0-4095
 
         // Bit shifts and masks for Configuration (ushort)
         private const int INDEX_SHIFT = 0;
@@ -23,18 +22,14 @@
         private const ushort TEAM_MASK = (1 << TEAM_BITS) - 1;
 
         // Bit shifts and masks for Condition (byte)
-        private const int SPEED_PERCENT_SHIFT = 0;
-        private const int NPC_STATE_SHIFT = SPEED_PERCENT_SHIFT + CURRENT_SPEED_PERCENT_BITS;
-        private const byte SPEED_PERCENT_MASK = (1 << CURRENT_SPEED_PERCENT_BITS) - 1;
+        private const int NPC_STATE_SHIFT = 0;
+        private const int STATUS_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
         private const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
+        private const byte STATUS_MASK = (1 << STATUS_BITS) - 1;
 
         // Bit shifts and masks for Events (ushort)
         private const int HEALTH_SHIFT = 0;
-        private const int STATUS_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
-        private const ushort STATUS_MASK = (1 << STATUS_BITS) - 1;
-
-        private const float SPEED_VALUE_MAX = 15.0f;
 
         public static void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, int index, ETeamID teamID)
         {
@@ -50,12 +45,11 @@
             // Initialize Events
             npcData.Events = 0;
             SetHealth(definition.MaxHealth, ref npcData);
-            SetStatus(ENPCStatus.Neutral, ref npcData);
 
             // Initialize Condition
             npcData.Condition = 0;
             SetNPCState(ENonPlayerState.Idle, ref npcData);
-            SetCurrentSpeedPercent(0f, ref npcData);
+            SetStatus(ENPCStatus.Neutral, ref npcData);
         }
 
         // Index
@@ -117,15 +111,15 @@
         // Status
         public static ENPCStatus GetStatus(ref FNonPlayerCharacterData npcData)
         {
-            return (ENPCStatus)((npcData.Events >> STATUS_SHIFT) & STATUS_MASK);
+            return (ENPCStatus)((npcData.Condition >> STATUS_SHIFT) & STATUS_MASK);
         }
 
         public static void SetStatus(ENPCStatus status, ref FNonPlayerCharacterData npcData)
         {
-            ushort events = npcData.Events;
+            byte condition = npcData.Condition;
             int statusValue = Mathf.Clamp((int)status, 0, STATUS_MASK);
-            events = (ushort)((events & ~(STATUS_MASK << STATUS_SHIFT)) | (statusValue << STATUS_SHIFT));
-            npcData.Events = events;
+            condition = (byte)((condition & ~(STATUS_MASK << STATUS_SHIFT)) | (statusValue << STATUS_SHIFT));
+            npcData.Condition = condition;
         }
 
         // NPCState
@@ -137,24 +131,8 @@
         public static void SetNPCState(ENonPlayerState newState, ref FNonPlayerCharacterData npcData)
         {
             byte condition = npcData.Condition;
-            int stateValue = Math.Min((int)newState, NPC_STATE_MASK);
+            int stateValue = Mathf.Clamp((int)newState, 0, NPC_STATE_MASK);
             condition = (byte)((condition & ~(NPC_STATE_MASK << NPC_STATE_SHIFT)) | (stateValue << NPC_STATE_SHIFT));
-            npcData.Condition = condition;
-        }
-
-        // CurrentSpeedPercent
-        public static float GetCurrentSpeedPercent(FNonPlayerCharacterData npcData)
-        {
-            int speedValue = (npcData.Condition >> SPEED_PERCENT_SHIFT) & SPEED_PERCENT_MASK;
-            return speedValue / SPEED_VALUE_MAX;
-        }
-
-        public static void SetCurrentSpeedPercent(float speedPercent, ref FNonPlayerCharacterData npcData)
-        {
-            byte condition = npcData.Condition;
-            speedPercent = Mathf.Clamp01(speedPercent);
-            int speedValue = Mathf.RoundToInt(speedPercent * SPEED_VALUE_MAX);
-            condition = (byte)((condition & ~(SPEED_PERCENT_MASK << SPEED_PERCENT_SHIFT)) | (speedValue << SPEED_PERCENT_SHIFT));
             npcData.Condition = condition;
         }
 
@@ -163,31 +141,30 @@
             return GetNPCState(ref npcData) != ENonPlayerState.Inactive;
         }
 
-        // handle damage application by type
-        public static void ApplyDamage(ref FNonPlayerCharacterData npcData, 
-            NonPlayerCharacterDefinition definition, 
+        // Handle damage application by type
+        public static void ApplyDamage(ref FNonPlayerCharacterData npcData,
+            NonPlayerCharacterDefinition definition,
             int damage)
         {
-            npcData.Health = Mathf.Clamp(npcData.Health - damage, 0, definition.MaxHealth);
+            int currentHealth = GetHealth(ref npcData);
+            SetHealth(currentHealth - damage, ref npcData);
 
-
-            //Debug.Log("Apply Damage Health " + npcData.Health);
-            // determine what happens when health is reduced
-            // Likely want the definition to handle it
-            if (npcData.Health == 0)
+            Debug.Log("Apply Damage Health " + GetHealth(ref npcData));
+            // Determine what happens when health is reduced
+            if (GetHealth(ref npcData) == 0)
             {
-                npcData.State = TryAssignState(ref npcData, ENonPlayerState.Dead);
+                SetNPCState(TryAssignState(ref npcData, ENonPlayerState.Dead), ref npcData);
             }
             else
             {
-                npcData.State = TryAssignState(ref npcData, ENonPlayerState.HitReact);
+                SetNPCState(TryAssignState(ref npcData, ENonPlayerState.HitReact), ref npcData);
             }
         }
 
         // Prioritize the dead states over idle and hit react
-        public static ENonPlayerState TryAssignState(ref FNonPlayerCharacterData data, ENonPlayerState newState)
+        public static ENonPlayerState TryAssignState(ref FNonPlayerCharacterData npcData, ENonPlayerState newState)
         {
-            ENonPlayerState currentState = data.State;
+            ENonPlayerState currentState = GetNPCState(ref npcData);
 
             switch (newState)
             {
