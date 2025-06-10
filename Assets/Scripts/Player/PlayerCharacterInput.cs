@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace LichLord
 {
-    public class PlayerCreatureInput : MonoBehaviour
+    public class PlayerCharacterInput : MonoBehaviour
     {
         public FGameplayInput CurrentInput => _input;
         public FGameplayInput PreviousInput { get; private set; }

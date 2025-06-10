@@ -274,13 +274,5 @@ namespace LichLord.Props
             public Prop Prop;
             public ELoadState LoadState;
         }
-
-        public enum ELoadState
-        {
-            None,
-            Loading,
-            Loaded,
-            Unloading,
-        }
     }
 }

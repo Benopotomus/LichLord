@@ -6,27 +6,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
+using UnityEditor;
 
 namespace LichLord
 {
 
-    public sealed class NetworkGame : ContextBehaviour, IPlayerJoined, IPlayerLeft
+    public sealed class NetworkGame : ContextBehaviour
     {
         // PUBLIC MEMBERS
-        public List<PlayerCharacter> ActivePlayers = new List<PlayerCharacter>();
-        public event Action GameLoaded;
+        private List<PlayerCharacter> _activePlayers = new List<PlayerCharacter>();
+        public List<PlayerCharacter> ActivePlayers => _activePlayers;
 
-        private PlayerRef _localPlayer;
-        private FusionCallbacksHandler _fusionCallbacks = new FusionCallbacksHandler();
+        public event Action GameLoaded;
 
         public void Initialize()
         {
-            _localPlayer = Runner.LocalPlayer;
-            ActivePlayers.Clear();
-            _fusionCallbacks.DisconnectedFromServer -= OnDisconnectedFromServer;
-            _fusionCallbacks.DisconnectedFromServer += OnDisconnectedFromServer;
-            Runner.RemoveCallbacks(_fusionCallbacks);
-            Runner.AddCallbacks(_fusionCallbacks);
+        }
+
+        public void OnPlayerSpawned(PlayerCharacter pc)
+        {
+            if (_activePlayers.Contains(pc))
+                return;
+
+            _activePlayers.Add(pc);
+        }
+
+        public void OnPlayerDespawned(PlayerCharacter pc)
+        {
+            _activePlayers.Remove(pc);
         }
 
         public IEnumerator Activate(int levelIndex, int levelGeneratorSeed)
@@ -65,27 +72,5 @@ namespace LichLord
 
             return null;
         }
-
-        public override void FixedUpdateNetwork()
-        {
-
-        }
-
-        // IPlayerJoined/IPlayerLeft INTERFACES
-        void IPlayerJoined.PlayerJoined(PlayerRef playerRef)
-        {
-        }
-
-        void IPlayerLeft.PlayerLeft(PlayerRef playerRef)
-        {
-        }
-
-        // PRIVATE METHODS
-
-        private void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-        {
-            Log.Info($"Disconnected from server: {reason}");
-        }
-
     }
 }

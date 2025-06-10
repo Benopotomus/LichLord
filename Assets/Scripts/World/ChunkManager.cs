@@ -1,0 +1,165 @@
+﻿using Fusion;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using UnityEngine;
+
+namespace LichLord.World
+{
+    public class ChunkManager : ContextBehaviour
+    {
+        [SerializeField]
+        private WorldSettings _worldSettings;
+
+        [SerializeField]
+        private bool drawChunkBounds = true; // Toggle for gizmo drawing
+
+        [Networked, Capacity(512)] 
+        public NetworkDictionary<Vector2Int, ELoadState> _networkChunks { get; }
+        private Dictionary<Vector2Int, Chunk> _localChunks = new Dictionary<Vector2Int, Chunk>();
+
+        public override void Spawned()
+        {
+            base.Spawned();
+            InitializeWorldChunks();
+        }
+
+        private void InitializeWorldChunks()
+        {
+            var chunkGridSize = new Vector2Int(
+                Mathf.CeilToInt(_worldSettings.WorldSize.x / WorldConstants.CHUNK_SIZE),
+                Mathf.CeilToInt(_worldSettings.WorldSize.y / WorldConstants.CHUNK_SIZE)
+                );
+
+            for (int x = 0; x < chunkGridSize.x; x++)
+            {
+                for (int y = 0; y < chunkGridSize.y; y++)
+                {
+                    Vector2Int chunkID = new Vector2Int(x, y);
+
+                    _localChunks[chunkID] = new Chunk(chunkID, _worldSettings.WorldOrigin);
+
+                    if (!_networkChunks.ContainsKey(chunkID))
+                    {
+                        _networkChunks.Set(chunkID, ELoadState.None);
+                    }
+                }
+            }
+        }
+
+        public override void FixedUpdateNetwork()
+        {
+            base.FixedUpdateNetwork();
+
+            var activePlayers = Context.NetworkGame.ActivePlayers;
+            var chunksToMark = new HashSet<Vector2Int>();
+
+            // Collect all nearby chunk IDs to mark as Loaded
+            for (int i = 0; i < activePlayers.Count; i++)
+            {
+                var player = activePlayers[i];
+                if (player.CurrentChunk == null)
+                    continue;
+
+                var centerID = player.CurrentChunk.ChunkID;
+                var nearby = GetNearbyChunks(centerID, radius: 2);
+
+                for (int j = 0; j < nearby.Count; j++)
+                {
+                    chunksToMark.Add(nearby[j].ChunkID);
+                }
+            }
+
+            // Set them in the network dictionary
+            foreach (var chunkID in chunksToMark)
+            {
+                _networkChunks.Set(chunkID, ELoadState.Loaded);
+            }
+        }
+
+        public override void Render()
+        {
+            base.Render();
+
+            foreach (var networkChunk in _networkChunks)
+            {
+                // Get the local chunk for that value
+                if (_localChunks.TryGetValue(networkChunk.Key, out Chunk localChunk))
+                {
+                    if (localChunk.LoadState == ELoadState.None &&
+                        networkChunk.Value == ELoadState.Loaded)
+                    {
+                        LoadChunkIntoMemory(localChunk);
+                    }
+                }
+            }
+        }
+
+        private void LoadChunkIntoMemory(Chunk chunkToLoad)
+        {
+            if (chunkToLoad.LoadState != ELoadState.None)
+            {
+                Debug.Log("Trying to load chunk but its not ready");
+                return;
+            }
+
+            //Debug.Log("LoadChunk " + chunkToLoad.ChunkID);
+            chunkToLoad.LoadState = ELoadState.Loaded;
+        }
+
+        public Chunk GetChunkAtPosition(Vector3 position)
+        {
+            if(_localChunks.TryGetValue(GetChunkID(position), out Chunk chunk))
+                return chunk;
+
+            return null;
+        }
+
+        private Vector2Int GetChunkID(Vector3 position)
+        {
+            return new Vector2Int(
+                Mathf.FloorToInt((position.x - _worldSettings.WorldOrigin.x) / WorldConstants.CHUNK_SIZE),
+                Mathf.FloorToInt((position.z - _worldSettings.WorldOrigin.y) / WorldConstants.CHUNK_SIZE)
+            );
+        }
+
+        public List<Chunk> GetNearbyChunks(Vector2Int centerChunkID, int radius = 1)
+        {
+            List<Chunk> nearbyChunks = new List<Chunk>();
+
+            for (int dx = -radius; dx <= radius; dx++)
+            {
+                for (int dy = -radius; dy <= radius; dy++)
+                {
+                    Vector2Int checkID = new Vector2Int(centerChunkID.x + dx, centerChunkID.y + dy);
+                    if (_localChunks.TryGetValue(checkID, out Chunk chunk))
+                    {
+                        nearbyChunks.Add(chunk);
+                    }
+                }
+            }
+
+            return nearbyChunks;
+        }
+
+        void OnDrawGizmos()
+        {
+            if (!drawChunkBounds) return;
+
+            foreach (var pair in _localChunks)
+            {
+                if (pair.Value.LoadState == ELoadState.Loaded)
+                    Gizmos.color = Color.green;
+                else
+                    Gizmos.color = Color.red;
+
+                Bounds bounds = pair.Value.Bounds;
+                // Draw wireframe cube for chunk bounds (XZ plane, height ignored for visualization)
+                Gizmos.DrawWireCube(
+                    new Vector3(bounds.center.x, 0, bounds.center.z),
+                    new Vector3(bounds.size.x - 0.1f, 0.1f, bounds.size.z - 0.1f)
+                );
+            }
+        }
+    }
+}
+
