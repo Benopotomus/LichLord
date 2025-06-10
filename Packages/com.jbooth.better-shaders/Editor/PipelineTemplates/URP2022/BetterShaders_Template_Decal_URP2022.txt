@@ -1,0 +1,26 @@
+Shader "%SHADERNAME%"
+{
+    Properties
+    {
+        [HideInInspector]_DrawOrder("Draw Order", Range(-50, 50)) = 0
+        [HideInInspector][Enum(Depth Bias, 0, View Bias, 1)]_DecalMeshBiasType("DecalMesh BiasType", Float) = 0
+        [HideInInspector]_DecalMeshDepthBias("DecalMesh DepthBias", Float) = 0
+        [HideInInspector]_DecalMeshViewBias("DecalMesh ViewBias", Float) = 0
+        [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
+
+        [HideInInspector][Toggle(_MATERIAL_AFFECTS_ALBEDO)] _AffectAlbedo("Affect Albedo", Float) = 1
+        [HideInInspector][Toggle(_MATERIAL_AFFECTS_NORMAL)] _AffectNormal("Affect Normal", Float) = 1
+        [HideInInspector][Toggle(_MATERIAL_AFFECTS_NORMAL_BLEND)] _AffectNormalBlend("Affect Normal Blend", Float) = 1
+        [HideInInspector][Toggle(_MATERIAL_AFFECTS_MAOS)] _AffectMaos("Affect MAOS", Float) = 1
+
+        %PROPERTIES%
+    }
+    SubShader
+    {  
+        %DECALPASSES%
+    }
+    %CUSTOMEDITOR%
+    FallBack "Hidden/Shader Graph/FallbackError"
+}

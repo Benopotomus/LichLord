@@ -1,0 +1,318 @@
+﻿
+        Pass
+        {
+            Name "Universal Forward"
+            Tags 
+            { 
+                "LightMode" = "UniversalForward"
+            }
+            Cull Back
+            Blend One Zero
+            ZTest LEqual
+            ZWrite On
+
+            %FORWARDBASEBLEND%
+
+            %PASSFORWARD%
+
+            HLSLPROGRAM
+
+            %PRAGMAS%
+
+            %SHADERTARGET%
+
+            #pragma prefer_hlslcc gles
+            #pragma exclude_renderers d3d11_9x
+            #pragma multi_compile_fog
+            #pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+            #pragma multi_compile _ DOTS_INSTANCING_ON
+    
+            // Keywords
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile _ DYNAMICLIGHTMAP_ON
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT_LOW
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT_MEDIUM
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT_HIGH
+            #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+            #pragma multi_compile _ SHADOWS_SHADOWMASK
+            #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
+            #pragma multi_compile_fragment _ _LIGHT_LAYERS
+            #pragma multi_compile_fragment _ DEBUG_DISPLAY
+            #pragma multi_compile_fragment _ _LIGHT_COOKIES
+            #pragma multi_compile _ _FORWARD_PLUS
+            #pragma multi_compile _ EVALUATE_SH_VERTEX
+            #pragma multi_compile _ EVALUATE_SH_MIXED
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+
+        
+            // GraphKeywords: <None>
+
+            #define SHADER_PASS SHADERPASS_FORWARD
+            #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
+            #define _PASSFORWARD 1
+            #define _FOG_FRAGMENT 1
+            
+
+            %DEFINES%
+
+            // this has to be here or specular color will be ignored. Not in SG code
+            #if _SIMPLELIT
+               #define _SPECULAR_COLOR
+            #endif
+
+
+            // Includes
+          
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ProbeVolumeVariants.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DBuffer.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
+        
+
+         %URPINCLUDE%
+
+         %TEMPLATE_SHARED%
+            
+         CBUFFER_START(UnityPerMaterial)
+
+            %CBUFFER%
+
+         CBUFFER_END
+
+         %CUSTOMCBUFFER%
+
+         %CUSTOMINSTANCEPROPS%
+
+         %CODE%
+
+         %SHADERDESC%
+
+         %VERT%
+
+         %TESSELLATION%
+
+#if _UNLIT
+   #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Unlit.hlsl"  
+#endif
+
+         // fragment shader
+         void Frag (VertexToPixel IN
+              , out half4 outColor : SV_Target0
+            #ifdef _WRITE_RENDERING_LAYERS
+              , out float4 outRenderingLayers : SV_Target1
+            #endif
+            #ifdef _DEPTHOFFSET_ON
+              , out float outputDepth : SV_Depth
+            #endif
+            #if NEED_FACING
+               , bool facing : SV_IsFrontFace
+            #endif
+         )
+         {
+           UNITY_SETUP_INSTANCE_ID(IN);
+           UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
+
+           #if defined(LOD_FADE_CROSSFADE)
+              LODFadeCrossFade(IN.pos);
+           #endif
+
+
+           ShaderData d = CreateShaderData(IN
+                  #if NEED_FACING
+                     , facing
+                  #endif
+               );
+           Surface l = (Surface)0;
+
+           #ifdef _DEPTHOFFSET_ON
+              l.outputDepth = outputDepth;
+           #endif
+
+           l.Albedo = half3(0.5, 0.5, 0.5);
+           l.Normal = float3(0,0,1);
+           l.Occlusion = 1;
+           l.Alpha = 1;
+
+           ChainSurfaceFunction(l, d);
+
+           #ifdef _DEPTHOFFSET_ON
+              outputDepth = l.outputDepth;
+           #endif
+
+           #if _USESPECULAR || _SIMPLELIT
+              float3 specular = l.Specular;
+              float metallic = 1;
+           #else   
+              float3 specular = 0;
+              float metallic = l.Metallic;
+           #endif
+
+
+            
+           
+            InputData inputData = (InputData)0;
+
+            inputData.positionWS = IN.worldPos;
+            #if _WORLDSPACENORMAL
+              inputData.normalWS = l.Normal;
+            #else
+              inputData.normalWS = normalize(TangentToWorldSpace(d, l.Normal));
+            #endif
+
+            inputData.viewDirectionWS = SafeNormalize(d.worldSpaceViewDir);
+
+
+            #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                  inputData.shadowCoord = IN.shadowCoord;
+            #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                  inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
+            #else
+                  inputData.shadowCoord = float4(0, 0, 0, 0);
+            #endif
+            
+#if _BAKEDLIT
+            inputData.fogCoord = IN.fogFactorAndVertexLight.x;
+            inputData.vertexLighting = 0;
+#else
+            inputData.fogCoord = InitializeInputDataFog(float4(IN.worldPos, 1.0), IN.fogFactorAndVertexLight.x);
+            inputData.vertexLighting = IN.fogFactorAndVertexLight.yzw;
+#endif    
+
+
+
+            #if defined(_OVERRIDE_BAKEDGI)
+               inputData.bakedGI = l.DiffuseGI;
+               l.Emission += l.SpecularGI;
+            #elif _BAKEDLIT
+               inputData.bakedGI = SAMPLE_GI(IN.lightmapUV, IN.sh, inputData.normalWS);
+            #else
+               #if defined(DYNAMICLIGHTMAP_ON)
+                  inputData.bakedGI = SAMPLE_GI(IN.lightmapUV, IN.dynamicLightmapUV.xy, IN.sh, inputData.normalWS);
+                  inputData.shadowMask = SAMPLE_SHADOWMASK(IN.lightmapUV);
+               #elif !defined(LIGHTMAP_ON) && (defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2))
+                  #if UNITY_VERSION >= 60000009
+                     inputData.bakedGI = SAMPLE_GI(IN.sh, IN.worldPos, inputData.normalWS, inputData.viewDirectionWS, IN.pos, IN.probeOcclusion, inputData.shadowMask);
+                  #else
+                     inputData.bakedGI = SAMPLE_GI(IN.sh, IN.worldPos, inputData.normalWS, inputData.viewDirectionWS, IN.pos);
+                  #endif
+               #else
+                  inputData.bakedGI = SAMPLE_GI(IN.lightmapUV, IN.sh, inputData.normalWS);
+                  inputData.shadowMask = SAMPLE_SHADOWMASK(IN.lightmapUV);
+               #endif
+            #endif
+            inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.pos);
+            #if !_BAKEDLIT
+               inputData.shadowMask = SAMPLE_SHADOWMASK(IN.lightmapUV);
+           
+               #if defined(_OVERRIDE_SHADOWMASK)
+                  float4 mulColor = saturate(dot(l.ShadowMask, _MainLightOcclusionProbes)); //unity_OcclusionMaskSelector));
+                  inputData.shadowMask = mulColor;
+               #endif
+            #else
+               inputData.shadowMask = float4(1,1,1,1);
+            #endif
+
+            #if defined(DEBUG_DISPLAY)
+                #if defined(DYNAMICLIGHTMAP_ON)
+                  inputData.dynamicLightmapUV = IN.dynamicLightmapUV.xy;
+                #endif
+                #if defined(LIGHTMAP_ON)
+                  inputData.staticLightmapUV = IN.lightmapUV;
+                #else
+                  inputData.vertexSH = IN.sh;
+                #endif
+            #endif
+
+            #if _WORLDSPACENORMAL
+              float3 normalTS = WorldToTangentSpace(d, l.Normal);
+            #else
+              float3 normalTS = l.Normal;
+            #endif
+
+            SurfaceData surface         = (SurfaceData)0;
+            surface.albedo              = l.Albedo;
+            surface.metallic            = saturate(metallic);
+            surface.specular            = specular;
+            surface.smoothness          = saturate(l.Smoothness),
+            surface.occlusion           = l.Occlusion,
+            surface.emission            = l.Emission,
+            surface.alpha               = saturate(l.Alpha);
+            surface.clearCoatMask       = 0;
+            surface.clearCoatSmoothness = 1;
+
+            #ifdef _CLEARCOAT
+                  surface.clearCoatMask       = saturate(l.CoatMask);
+                  surface.clearCoatSmoothness = saturate(l.CoatSmoothness);
+            #endif
+
+            #if !_UNLIT
+               half4 color = half4(l.Albedo, l.Alpha);
+               #ifdef _DBUFFER
+                  #if _BAKEDLIT
+                     half3 bakeColor = color.rgb;
+                     float3 bakeNormal = inputData.normalWS.xyz;
+                     ApplyDecalToBaseColorAndNormal(IN.pos, bakeColor, bakeNormal);
+                     color.rgb = bakeColor;
+                     inputData.normalWS.xyz = bakeNormal;
+                  #else
+                     ApplyDecalToSurfaceData(IN.pos, surface, inputData);
+                  #endif
+               #endif
+               #if _SIMPLELIT
+                  color = UniversalFragmentBlinnPhong(
+                     inputData,
+                     surface);
+               #elif _BAKEDLIT
+                  color = UniversalFragmentBakedLit(inputData, color.rgb, color.a, normalTS);
+               #else
+                  color = UniversalFragmentPBR(inputData, surface);
+               #endif
+
+               #if !DISABLEFOG
+                  color.rgb = MixFog(color.rgb, inputData.fogCoord);
+               #endif
+
+            #else // unlit
+               #ifdef _DBUFFER
+                  ApplyDecalToSurfaceData(IN.pos, surface, inputData);
+               #endif
+               half4 color = UniversalFragmentUnlit(inputData, l.Albedo, l.Alpha);
+               #if !DISABLEFOG
+                  color.rgb = MixFog(color.rgb, inputData.fogCoord);
+               #endif
+            #endif
+            ChainFinalColorForward(l, d, color);
+
+            outColor = color;
+
+            #ifdef _WRITE_RENDERING_LAYERS
+                uint renderingLayers = GetMeshRenderingLayer();
+                outRenderingLayers = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
+            #endif
+
+         }
+
+         ENDHLSL
+
+      }
+

@@ -105,7 +105,7 @@
         "com.jbooth.foliagerenderer": "2.0.0",
         "com.unity.collections": "1.2.4"
       },
-      "hash": "44a21308c2e69fcff4a5e72e36e1a2f4e2a4c6e1"
+      "hash": "a240c3043a4957d754bc95936e4bea7251a5707c"
     },
     "com.dicewrenchdesigns.foliagerendererobjectmodule": {
       "version": "https://github.com/Dicewrench-Designs/FoliageRenderer-Object.git",
@@ -115,7 +115,13 @@
         "com.unity.collections": "1.2.4",
         "com.jbooth.foliagerenderer": "2.0.0"
       },
-      "hash": "f66ef34c5689397d0e6ed0c494b3a43ca9a3dd93"
+      "hash": "56f7cca10122a654ea4a48d62cfbfcb7bd150e40"
+    },
+    "com.jbooth.better-shaders": {
+      "version": "file:com.jbooth.better-shaders",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.jbooth.foliagerenderer": {
       "version": "https://github.com/Dicewrench-Designs/FoliageRenderer.git",
@@ -124,7 +130,7 @@
       "dependencies": {
         "com.unity.collections": "1.2.4"
       },
-      "hash": "9879ef9446956769974ca14299c4ca7a3678085d"
+      "hash": "d2c4ff72a8983e25b2a4cf790798bdce66fa91b9"
     },
     "com.jbooth.foliagerendering.deluxe": {
       "version": "https://github.com/Dicewrench-Designs/FoliageRendererDeluxeShader.git",
@@ -261,6 +267,14 @@
     },
     "com.jbooth.microsplat.triplanar": {
       "version": "file:com.jbooth.microsplat.triplanar",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.jbooth.microsplat.core": "3.9.0"
+      }
+    },
+    "com.jbooth.microsplat.urp2022": {
+      "version": "file:com.jbooth.microsplat.urp2022",
       "depth": 0,
       "source": "embedded",
       "dependencies": {

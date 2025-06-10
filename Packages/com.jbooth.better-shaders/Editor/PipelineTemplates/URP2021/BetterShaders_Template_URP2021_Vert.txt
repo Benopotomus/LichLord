@@ -1,0 +1,91 @@
+﻿
+         #if defined(_PASSSHADOW)
+            float3 _LightDirection;
+            float3 _LightPosition;
+         #endif
+
+         // vertex shader
+         VertexToPixel Vert (VertexData v)
+         {
+           
+           VertexToPixel o = (VertexToPixel)0;
+
+           UNITY_SETUP_INSTANCE_ID(v);
+           UNITY_TRANSFER_INSTANCE_ID(v, o);
+           UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+
+#if !_TESSELLATION_ON
+           ChainModifyVertex(v, o, _Time);
+#endif
+
+           %V2FUV0% o.texcoord0 = v.texcoord0;
+           %V2FUV1% o.texcoord1 = v.texcoord1;
+           %V2FUV2% o.texcoord2 = v.texcoord2;
+
+           %TEXCOORD3REQUIRE% #if %TEXCOORD3REQUIREKEY%
+           %V2FUV3% o.texcoord3 = v.texcoord3;
+           %TEXCOORD3REQUIRE% #endif
+
+           %VERTEXCOLORREQUIRE% #if %VERTEXCOLORREQUIREKEY%
+           %V2FVERTEXCOLOR% o.vertexColor = v.vertexColor;
+           %VERTEXCOLORREQUIRE% #endif
+           
+           VertexPositionInputs vertexInput = GetVertexPositionInputs(v.vertex.xyz);
+           o.worldPos = TransformObjectToWorld(v.vertex.xyz);
+           o.worldNormal = TransformObjectToWorldNormal(v.normal);
+           o.worldTangent = float4(TransformObjectToWorldDir(v.tangent.xyz), v.tangent.w);
+
+          // For some very odd reason, in 2021.2, we can't use Unity's defines, but have to use our own..
+          #if _PASSSHADOW
+              #if _CASTING_PUNCTUAL_LIGHT_SHADOW
+                 float3 lightDirectionWS = normalize(_LightPosition - o.worldPos);
+              #else
+                 float3 lightDirectionWS = _LightDirection;
+              #endif
+              // Define shadow pass specific clip position for Universal
+              o.pos = TransformWorldToHClip(ApplyShadowBias(o.worldPos, o.worldNormal, lightDirectionWS));
+              #if UNITY_REVERSED_Z
+                  o.pos.z = min(o.pos.z, UNITY_NEAR_CLIP_VALUE);
+              #else
+                  o.pos.z = max(o.pos.z, UNITY_NEAR_CLIP_VALUE);
+              #endif
+          #elif _PASSMETA
+              o.pos = MetaVertexPosition(float4(v.vertex.xyz, 0), v.texcoord1.xy, v.texcoord2.xy, unity_LightmapST, unity_DynamicLightmapST);
+          #else
+              o.pos = TransformWorldToHClip(o.worldPos);
+          #endif
+
+          %SCREENPOSREQUIRE% #if %SCREENPOSREQUIREKEY%
+          %SCREENPOS% o.screenPos = ComputeScreenPos(o.pos, _ProjectionParams.x);
+          %SCREENPOSREQUIRE% #endif
+
+          #if _PASSFORWARD || _PASSGBUFFER
+              float2 uv1 = v.texcoord1.xy;
+              OUTPUT_LIGHTMAP_UV(uv1, unity_LightmapST, o.lightmapUV);
+              %V2FUV1% o.texcoord1.xy = uv1;
+              OUTPUT_SH(o.worldNormal, o.sh);
+              #if defined(DYNAMICLIGHTMAP_ON)
+                   o.dynamicLightmapUV.xy = v.texcoord2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+              #endif
+          #endif
+
+          #ifdef VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
+              half fogFactor = 0;
+              #if defined(_FOG_FRAGMENT)
+                fogFactor = ComputeFogFactor(o.pos.z);
+              #endif
+              #if _BAKEDLIT
+                 o.fogFactorAndVertexLight = half4(fogFactor, 0, 0, 0);
+              #else
+                 half3 vertexLight = VertexLighting(o.worldPos, o.worldNormal);
+                 o.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
+              #endif
+          #endif
+
+          #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+             o.shadowCoord = GetShadowCoord(vertexInput);
+          #endif
+
+           return o;
+         }

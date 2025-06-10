@@ -125,6 +125,63 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &7392527
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7392529}
+  - component: {fileID: 7392528}
+  m_Layer: 0
+  m_Name: WindController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &7392528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7392527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d1d0f858450e472c8d1e64934cc4927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windSpeed: 30
+  turbulence: 0.25
+  noiseTexture: {fileID: 2800000, guid: a7689f441bfa94dc0b0d429bb71f4d77, type: 3}
+  bendingWorldSize: 175
+  leafWorldSize: 10
+  gustTexture: {fileID: 2800000, guid: 08482a7f8778b4badaca270a5318daa2, type: 3}
+  gustWorldSize: 600
+  gustSpeed: 50
+  gustScale: 1
+  point1: {fileID: 0}
+  point2: {fileID: 0}
+  point3: {fileID: 0}
+  point4: {fileID: 0}
+--- !u!4 &7392529
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7392527}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &35686576
 GameObject:
   m_ObjectHideFlags: 0
@@ -1203,7 +1260,7 @@ MonoBehaviour:
       keepLayersInSync: 0
       maxHeightSaveBackPerFrame: 1
       useSceneCulling: 0
-      controllFoliageDraw: 1
+      controllFoliageDraw: 0
       sceneTerrainCullingDistance: 2500
       sceneVegetationCullingDistance: 1500
       sceneCameraCullingDistance: 12000
@@ -1673,6 +1730,10 @@ GameObject:
   - component: {fileID: 1519233108}
   - component: {fileID: 1519233110}
   - component: {fileID: 1519233109}
+  - component: {fileID: 1519233112}
+  - component: {fileID: 1519233113}
+  - component: {fileID: 1519233111}
+  - component: {fileID: 1519233114}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -1732,17 +1793,17 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 1000
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
+  m_MaterialTemplate: {fileID: 0}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -1755,6 +1816,103 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
+--- !u!114 &1519233111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1519233107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f1fe382c0e8a004a90b4d8f234c6892, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _forceRefreshOnEnable: 0
+  _updateTiming: 2
+  _updateOnTransformChanged: 0
+--- !u!114 &1519233112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1519233107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cdf498ce84ce47689466d050d7dc8ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _treeProvider: {fileID: 1519233113}
+  _detailProvider: {fileID: 1519233111}
+  _additionalProviders: []
+  materialOptions:
+    supplyHeightmaps: 0
+    supplyNormalmaps: 0
+    albedoMapGeneration: 0
+    extraTextureOptions: []
+    extraDataOptions: {fileID: 0}
+--- !u!114 &1519233113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1519233107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eadb4ff6dbb6341449eeaad39eb98014, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _forceRefreshOnEnable: 0
+  _updateTiming: 2
+  _updateOnTransformChanged: 0
+  _skipInstances: 
+  _generateCollidersOnStart: 0
+--- !u!114 &1519233114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1519233107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6525fd4a9fb974b7f878dee70144de99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  templateMaterial: {fileID: 2100000, guid: 1563da7934a4c374890b5cd33ef79472, type: 2}
+  blendMat: {fileID: 0}
+  blendMatInstance: {fileID: 0}
+  keywordSO: {fileID: 11400000, guid: 50b54ae81a74e624baa527584476d46c, type: 2}
+  perPixelNormal: {fileID: 0}
+  streamTexture: {fileID: 0}
+  cavityMap: {fileID: 0}
+  procTexCfg: {fileID: 0}
+  procBiomeMask: {fileID: 0}
+  procBiomeMask2: {fileID: 0}
+  snowMaskOverride: {fileID: 0}
+  tintMapOverride: {fileID: 0}
+  globalNormalOverride: {fileID: 0}
+  globalSAOMOverride: {fileID: 0}
+  globalEmisOverride: {fileID: 0}
+  geoTextureOverride: {fileID: 0}
+  scatterMapOverride: {fileID: 0}
+  clipMap: {fileID: 0}
+  propData: {fileID: 11400000, guid: 33929277da50f5d4c9df75fbf33a913c, type: 2}
+  terrain: {fileID: 1519233110}
+  baseMapShader: {fileID: 4800000, guid: 10714af04c0be4a9ab59186d7ca73012, type: 3}
+  customControl0: {fileID: 0}
+  customControl1: {fileID: 0}
+  customControl2: {fileID: 0}
+  customControl3: {fileID: 0}
+  customControl4: {fileID: 0}
+  customControl5: {fileID: 0}
+  customControl6: {fileID: 0}
+  customControl7: {fileID: 0}
+  patchBoundsMultiplier: {x: 1, y: 1, z: 1}
+  reenabled: 1
+  importSplatMaps: []
 --- !u!1 &1532356493
 GameObject:
   m_ObjectHideFlags: 0
@@ -1948,6 +2106,233 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1657310832
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1657310834}
+  - component: {fileID: 1657310833}
+  m_Layer: 0
+  m_Name: IndirectDrawManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1657310833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1657310832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9eebefdf72f044f99884cbb247695cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terrains:
+  - {fileID: 1519233110}
+  providers:
+  - {fileID: 1519233113}
+  - {fileID: 1519233111}
+  treeDrawType:
+    cachingMode: 0
+    cachingDistance: 256
+    operationsPerFrame: 5
+    drawOptions:
+      enabled: 1
+      distanceMode: 0
+      maxDrawDistance: 2000
+      shadowDistanceMode: 0
+      shadowDistance: 40
+      maxShadowLOD: 0
+      boundsExpand: {x: 0, y: 0, z: 0}
+      density: 1
+      skipHiZ: 0
+      overrideMeshToggle: 0
+      overrideMesh: {fileID: 0}
+    overrides:
+    - overrideDrawOptions: 0
+      drawOptions:
+        enabled: 1
+        distanceMode: 0
+        maxDrawDistance: 5000
+        shadowDistanceMode: 0
+        shadowDistance: 40
+        maxShadowLOD: 0
+        boundsExpand: {x: 0, y: 0, z: 0}
+        density: 1
+        skipHiZ: 0
+        overrideMeshToggle: 0
+        overrideMesh: {fileID: 0}
+      prototype:
+        prefab: {fileID: 4012337630082778474, guid: cce4d8667f2436a479759f07084d8ff4,
+          type: 3}
+        prefabTexture: {fileID: 0}
+        bendFactor: 0
+        navMeshLod: 2147483647
+    - overrideDrawOptions: 0
+      drawOptions:
+        enabled: 1
+        distanceMode: 0
+        maxDrawDistance: 5000
+        shadowDistanceMode: 0
+        shadowDistance: 40
+        maxShadowLOD: 0
+        boundsExpand: {x: 0, y: 0, z: 0}
+        density: 1
+        skipHiZ: 0
+        overrideMeshToggle: 0
+        overrideMesh: {fileID: 0}
+      prototype:
+        prefab: {fileID: 1338854965163658714, guid: dd1cb49c7d40bfb44a9b4201f7f74b6c,
+          type: 3}
+        prefabTexture: {fileID: 0}
+        bendFactor: 0
+        navMeshLod: 2147483647
+    - overrideDrawOptions: 0
+      drawOptions:
+        enabled: 1
+        distanceMode: 0
+        maxDrawDistance: 5000
+        shadowDistanceMode: 0
+        shadowDistance: 40
+        maxShadowLOD: 0
+        boundsExpand: {x: 0, y: 0, z: 0}
+        density: 1
+        skipHiZ: 0
+        overrideMeshToggle: 0
+        overrideMesh: {fileID: 0}
+      prototype:
+        prefab: {fileID: 6179546325909802286, guid: d300c554f4589a640a733a84d30422d4,
+          type: 3}
+        prefabTexture: {fileID: 0}
+        bendFactor: 0
+        navMeshLod: 2147483647
+  detailDrawType:
+    cachingMode: 1
+    cachingDistance: 256
+    operationsPerFrame: 20
+    drawOptions:
+      enabled: 1
+      distanceMode: 0
+      maxDrawDistance: 80
+      shadowDistanceMode: 1
+      shadowDistance: 80
+      maxShadowLOD: 0
+      boundsExpand: {x: 0, y: 0, z: 0}
+      density: 1
+      skipHiZ: 0
+      overrideMeshToggle: 0
+      overrideMesh: {fileID: 0}
+    overrides:
+    - overrideDrawOptions: 0
+      drawOptions:
+        enabled: 1
+        distanceMode: 0
+        maxDrawDistance: 80
+        shadowDistanceMode: 1
+        shadowDistance: 80
+        maxShadowLOD: 0
+        boundsExpand: {x: 0, y: 0, z: 0}
+        density: 1
+        skipHiZ: 0
+        overrideMeshToggle: 0
+        overrideMesh: {fileID: 0}
+      prototype:
+        prefab: {fileID: 2803505663424749585, guid: b273de0d6e5818a4cb3195ce4f376ccb,
+          type: 3}
+        prefabTexture: {fileID: 0}
+        alignToGround: 1
+        density: 1
+        dryColor: {r: 0, g: 0, b: 0, a: 0}
+        healthyColor: {r: 0, g: 0, b: 0, a: 0}
+        holeEdgePadding: 0
+        minWidth: 2
+        maxWidth: 3
+        minHeight: 2
+        maxHeight: 3
+        noiseSeed: 26
+        noiseSpread: 1
+        positionJitter: 0.571
+        prototypeTexture: {fileID: 0}
+        renderMode: 1
+        targetCoverage: 0
+        useInstancing: 1
+        useDensityScaling: 1
+        usePrototypeMesh: 1
+    - overrideDrawOptions: 0
+      drawOptions:
+        enabled: 1
+        distanceMode: 0
+        maxDrawDistance: 80
+        shadowDistanceMode: 1
+        shadowDistance: 80
+        maxShadowLOD: 0
+        boundsExpand: {x: 0, y: 0, z: 0}
+        density: 1
+        skipHiZ: 0
+        overrideMeshToggle: 0
+        overrideMesh: {fileID: 0}
+      prototype:
+        prefab: {fileID: 398929321252300881, guid: 4e6885e0d11bd224fa27617a4657c329,
+          type: 3}
+        prefabTexture: {fileID: 0}
+        alignToGround: 1
+        density: 1
+        dryColor: {r: 0, g: 0, b: 0, a: 0}
+        healthyColor: {r: 0, g: 0, b: 0, a: 0}
+        holeEdgePadding: 0
+        minWidth: 2
+        maxWidth: 3
+        minHeight: 2
+        maxHeight: 3
+        noiseSeed: 26
+        noiseSpread: 1
+        positionJitter: 0.571
+        prototypeTexture: {fileID: 0}
+        renderMode: 1
+        targetCoverage: 0
+        useInstancing: 1
+        useDensityScaling: 1
+        usePrototypeMesh: 1
+  objectDrawType:
+    cachingMode: 1
+    cachingDistance: 256
+    operationsPerFrame: 20
+    drawOptions:
+      enabled: 1
+      distanceMode: 0
+      maxDrawDistance: 80
+      shadowDistanceMode: 1
+      shadowDistance: 80
+      maxShadowLOD: 0
+      boundsExpand: {x: 0, y: 0, z: 0}
+      density: 1
+      skipHiZ: 0
+      overrideMeshToggle: 0
+      overrideMesh: {fileID: 0}
+    overrides: []
+--- !u!4 &1657310834
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1657310832}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1668563186
 GameObject:
   m_ObjectHideFlags: 0
@@ -2144,6 +2529,122 @@ MonoBehaviour:
   OnObjectDeselectedUnityEvent:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1750085323
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1750085325}
+  - component: {fileID: 1750085324}
+  m_Layer: 0
+  m_Name: IndirectRenderer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1750085324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750085323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1789018b03bf94ae69927b04a64c5065, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hizBuffer: {fileID: 0}
+  shadowFrustumCulling: 1
+  sun: {fileID: 2114283754330233425}
+  hiZOcclusion: 1
+  distanceCheckUpdates: 1
+  frustumCheckUpdate: 1
+  maxGraphicsBufferCaches: 8
+  _cullingCameras:
+  - {fileID: 8944336656349189699}
+  - {fileID: 0}
+  _cameraData:
+    position:
+    - {x: 0, y: 0.25, z: 0, w: 0}
+    - {x: -4.838542, y: 36.9582, z: 14.978962, w: 0}
+    fov:
+    - 0.57735026
+    - 0.57735026
+    viewProjection:
+    - e00: 0.97427857
+      e01: 1.1002368e-22
+      e02: 1.3845331e-14
+      e03: -2.750592e-23
+      e10: -1.9559773e-22
+      e11: 1.7320508
+      e12: 6.1534805e-15
+      e13: -0.4330127
+      e20: -1.4219383e-14
+      e21: -3.5548457e-15
+      e22: 1.0006001
+      e23: -0.60018003
+      e30: -1.4210855e-14
+      e31: -3.5527137e-15
+      e32: 1
+      e33: 8.881784e-16
+    - e00: -1.0667206
+      e01: -0.00000008259326
+      e02: 0.061295122
+      e03: -6.079507
+      e10: -0.034408722
+      e11: 1.624881
+      e12: -0.5988136
+      e13: -51.249557
+      e20: -0.053817634
+      e21: -0.34629896
+      e22: -0.93659
+      e23: 26.412056
+      e30: -0.053817093
+      e31: -0.3462955
+      e32: -0.93658066
+      e33: 26.567068
+    calibration:
+    - {x: 0, y: 1, z: 0, w: 0}
+    - {x: 0, y: 1, z: 0, w: 0}
+    frustumPlane0:
+    - {x: 0.69783515, y: -2.5446606e-15, z: 0.71625835, w: 6.3616515e-16}
+    - {x: -0.76568866, y: -0.23663157, z: -0.5981023, w: 13.999611}
+    frustumPlane1:
+    - {x: -0.69783515, y: -2.5446608e-15, z: 0.71625835, w: 6.361652e-16}
+    - {x: 0.6921397, y: -0.23663145, z: -0.681871, w: 22.30814}
+    frustumPlane2:
+    - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: -0.21650635}
+    - {x: -0.044112906, y: 0.6392928, z: -0.7676971, w: -12.341245}
+    frustumPlane3:
+    - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0.21650635}
+    - {x: -0.009704186, y: -0.98558825, z: -0.16888353, w: 38.908314}
+    frustumPlane4:
+    - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.3}
+    - {x: -0.053817093, y: -0.3462955, z: -0.9365806, w: 26.48943}
+    frustumPlane5:
+    - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1000.1341}
+    - {x: 0.05406703, y: 0.34602898, z: 0.9366647, w: 15515.653}
+  attachReflectionProbeCamera: 0
+--- !u!4 &1750085325
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750085323}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1764214107
 GameObject:
   m_ObjectHideFlags: 0
@@ -7738,6 +8239,7 @@ GameObject:
   - component: {fileID: 8944336656349189698}
   - component: {fileID: 1137000555}
   - component: {fileID: 8944336656349189701}
+  - component: {fileID: 8944336656349189702}
   m_Layer: 2
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -7853,6 +8355,19 @@ MonoBehaviour:
   m_CameraActivatedEvent:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8944336656349189702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8944336656349189697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d4cdc97b10975d47899dd1ba194f5d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _optionalCalibration: {fileID: 0}
 --- !u!4 &8997950288910755466
 Transform:
   m_ObjectHideFlags: 0
@@ -7901,3 +8416,6 @@ SceneRoots:
   - {fileID: 1532356495}
   - {fileID: 920916318}
   - {fileID: 1116348377}
+  - {fileID: 1750085325}
+  - {fileID: 1657310834}
+  - {fileID: 7392529}

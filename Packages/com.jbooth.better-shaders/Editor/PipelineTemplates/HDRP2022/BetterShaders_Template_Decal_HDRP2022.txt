@@ -1,0 +1,35 @@
+Shader "%SHADERNAME%"
+{
+   Properties
+   {
+      [HideInInspector]_DrawOrder("Draw Order", Int) = 0
+      [HideInInspector][Enum(Depth Bias, 0, View Bias, 1)]_DecalMeshBiasType("Float", Float) = 0
+      [HideInInspector]_DecalMeshDepthBias("DecalMesh DepthBias", Float) = 0
+      [HideInInspector]_DecalMeshViewBias("DecalMesh ViewBias", Float) = 0
+      [HideInInspector]_DecalStencilWriteMask("Float", Int) = 0
+      [HideInInspector]_DecalStencilRef("Float", Int) = 0
+      [HideInInspector][ToggleUI]_AffectAlbedo("Boolean", Float) = 1
+      [HideInInspector][ToggleUI]_AffectNormal("Boolean", Float) = 1
+      [HideInInspector][ToggleUI]_AffectMetal("Boolean", Float) = 1
+      [HideInInspector][ToggleUI]_AffectSmoothness("Boolean", Float) = 1
+      [HideInInspector][ToggleUI]_AffectOcclusion("Boolean", Float) = 1
+      [HideInInspector][ToggleUI]_AffectEmission("Boolean", Float) = 1
+            
+      [HideInInspector]_DecalColorMask0("Float", Int) = 0
+      [HideInInspector]_DecalColorMask1("Float", Int) = 0
+      [HideInInspector]_DecalColorMask2("Float", Int) = 0
+      [HideInInspector]_DecalColorMask3("Float", Int) = 0
+      [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
+      [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
+      [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
+
+      %PROPERTIES%
+   }
+   SubShader
+   {
+      %DECALPASSES%
+   }
+
+   %CUSTOMEDITOR%
+   FallBack "Hidden/Shader Graph/FallbackError"
+}

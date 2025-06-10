@@ -1,0 +1,37 @@
+{
+    "name": "JBooth.BetterShaders.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:78bd2ddd6e276394a9615c203e574844",
+        "GUID:457756d89b35d2941b3e7b37b4ece6f1",
+        "GUID:c579267770062bf448e75eb160330b7f",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "USING_URP"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "",
+            "define": "USING_HDRP"
+        },
+        {
+            "name": "com.unity.modules.ui",
+            "expression": "",
+            "define": "__BETTERSHADERS__"
+        }
+    ],
+    "noEngineReferences": false
+}
