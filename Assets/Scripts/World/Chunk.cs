@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
+using LichLord.Props;
 
 namespace LichLord.World
 {
@@ -8,6 +9,7 @@ namespace LichLord.World
     public class Chunk
     {
         public List<GameObject> ObjectsInChunk = new List<GameObject>();
+        public List<PropRuntimeState> PropStates = new List<PropRuntimeState>(); // Store prop states
 
         public Vector2Int ChunkID { get; set; }
         public Bounds Bounds { get; set; }
@@ -36,6 +38,17 @@ namespace LichLord.World
         public void RemoveObject(GameObject objId)
         {
             ObjectsInChunk.Remove(objId);
+        }
+
+        public void AddObject(PropRuntimeState propState)
+        {
+            if (!PropStates.Contains(propState))
+                PropStates.Add(propState);
+        }
+
+        public void RemoveObject(PropRuntimeState propState)
+        {
+            PropStates.Remove(propState);
         }
     }
 }

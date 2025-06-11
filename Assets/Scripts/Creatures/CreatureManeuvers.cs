@@ -118,18 +118,18 @@ namespace LichLord
             {
                 int delta = input.ScrollDelta > 0 ? 1 : -1;
                 newIndex = (SelectedActionIndex + delta + availableActions.Count) % availableActions.Count;
-                Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
+                //Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
             }
 
             if (input.ActionSelection > 0)
             {
-                Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}");
+                //Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}");
                 newIndex = input.ActionSelection - 1;
             }
 
             if (newIndex >= availableActions.Count)
             {
-                Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (exceeds availableActions.Count={availableActions.Count})");
+                //Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (exceeds availableActions.Count={availableActions.Count})");
                 return;
             }
 

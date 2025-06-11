@@ -200,14 +200,6 @@
         Maneuver_4,
     }
 
-    public enum ETeamID : byte
-    {
-        PlayerTeam,
-        EnemiesTeamA,
-        EnemiesTeamB,
-        NonAligned,
-    }
-
     public enum ENPCStatus : byte
     {
         Neutral,        // Default state

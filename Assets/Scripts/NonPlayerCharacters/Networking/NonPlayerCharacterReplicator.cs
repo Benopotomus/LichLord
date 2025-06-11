@@ -1,8 +1,6 @@
 ﻿using Fusion;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
-using UnityEditor;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -48,7 +46,7 @@ namespace LichLord.NonPlayerCharacters
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_DealDamageToNPC(int guid, int damage)
         {
-            ApplyDamage(guid, Vector3.zero, damage);
+            ApplyDamage(guid, damage);
         }
 
         public override void Spawned()
@@ -236,7 +234,7 @@ namespace LichLord.NonPlayerCharacters
             character.OnSpawned(ref spawnParams, Context.NonPlayerCharacterManager, this);
         }
 
-        public void ApplyDamage(int index, Vector3 impulse, int damage)
+        public void ApplyDamage(int index, int damage)
         {
             if (TryGetNPCData(index, out FNonPlayerCharacterData data))
             {
@@ -257,7 +255,7 @@ namespace LichLord.NonPlayerCharacters
 
             // Check for predicted data
             bool hasPredictedData = _predictedStates.TryGetValue(index, out var predictedState);
-            var localData = _localNpcDatas[index];
+            FNonPlayerCharacterData localData = _localNpcDatas[index];
 
             // Check for if local data has changed
             if (localData.Health != usedData.Health ||

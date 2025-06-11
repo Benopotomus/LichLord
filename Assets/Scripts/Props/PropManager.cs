@@ -1,131 +1,154 @@
 ﻿using Fusion;
 using UnityEngine;
 using System.Collections.Generic;
-using FusionHelpers;
+using LichLord.World;
 
 namespace LichLord.Props
 {
-    public class PropManager : ContextBehaviour
+    public partial class PropManager : ContextBehaviour
     {
         [SerializeField] private PropSpawner _propSpawner;
-        [SerializeField] private LevelPropsMarkupData levelPropsMarkupData;
+        [SerializeField] private WorldSettings worldSettings;
         [SerializeField] private PropReplicator propReplicationPrefab;
         [SerializeField] private PropSaveLoadManager saveLoadManager;
-        [SerializeField] private float spawnRadius = 50f;
-        [SerializeField] private float despawnRadius = 60f;
 
-        [SerializeField] private List<PropRuntimeState> _runtimePropStates = new List<PropRuntimeState>();
+        [SerializeField] private Dictionary<int, PropRuntimeState> _authorityRuntimePropStates = new Dictionary<int, PropRuntimeState>();
         [SerializeField] private Dictionary<int, PropRuntimeState> _deltaStates = new Dictionary<int, PropRuntimeState>();
         [SerializeField] private List<PropReplicator> _propReplicators;
 
-        private List<PropLoadState> _propLoadStates = new List<PropLoadState>();
+        private Dictionary<int, PropLoadState> _propLoadStates = new Dictionary<int, PropLoadState>();
+        private HashSet<Vector2Int> _loadedChunks = new HashSet<Vector2Int>(); // Track loaded chunks
+        private HashSet<int> _usedGuids = new HashSet<int>(); // Track GUIDs to detect duplicates
 
         public override void Spawned()
         {
             _propSpawner.OnPropSpawned += OnPropSpawned;
             _propReplicators = new List<PropReplicator>();
 
-            LoadBaseLevelProps();
+            Debug.Log($"PropManager Spawned. _runtimePropStates count: {_authorityRuntimePropStates.Count}, _propLoadStates count: {_propLoadStates.Count}");
 
             if (HasStateAuthority)
             {
-                ApplySavedDelta();
+               // ApplySavedDelta();
             }
+
+            Debug.Log($"Post-cleanup _runtimePropStates count: {_authorityRuntimePropStates.Count}, _propLoadStates count: {_propLoadStates.Count}");
         }
 
-        public void AddReplicator(PropReplicator replicationData)
+        public void LoadPropsForChunk(Vector2Int chunkCoord)
         {
-            _propReplicators.Add(replicationData);
-        }
-
-        public void ApplyDamage(int guid, Vector3 impulse, int damage)
-        {
-            Debug.Log("ApplyDamage: " + guid);
-
-            PropRuntimeState propRuntimeState = _runtimePropStates[guid];
-            propRuntimeState.stateData = 1;
-
-            bool dataFound = false;
-            for (int i = 0; i < _propReplicators.Count; i++)
+            ChunkPropsMarkupData markupData = worldSettings.PropMarkupDatas.Find(data => data != null && data.ChunkCoord == chunkCoord);
+            if (markupData == null || markupData.propMarkupDatas == null || markupData.propMarkupDatas.Length == 0)
             {
-                PropReplicator repData = _propReplicators[i];
-
-                if (repData.TryGetPropData(guid, out var propData))
-                {
-                    propData.StateData = propRuntimeState.stateData;
-                    repData.UpdatePropData(guid, propData);
-                    dataFound = true;
-                }
-            }
-
-            if (!dataFound)
-            {
-                for (int i = 0; i < _propReplicators.Count; i++)
-                {
-                    PropReplicator repData = _propReplicators[i];
-
-                    if (repData.HasFreeProp())
-                    {
-                        repData.AddProp(propRuntimeState);
-                        break;
-                    }
-                }
-            }
-
-            PropLoadState loadState = _propLoadStates[guid];
-            if (loadState.LoadState == ELoadState.Loaded)
-            {
-                loadState.Prop.UpdateProp(propRuntimeState, Runner.LocalAlpha);
-            }
-
-            // Update delta states for saving
-            _deltaStates[guid] = propRuntimeState;
-        }
-
-        private void LoadBaseLevelProps()
-        {
-            if (levelPropsMarkupData == null)
-            {
-                Debug.LogError("PropPointMarkupData is not assigned.", this);
+                Debug.Log($"No props found for chunk {chunkCoord}.", this);
+                _loadedChunks.Add(chunkCoord); // Mark as loaded
                 return;
             }
 
-            if (levelPropsMarkupData.propMarkupDatas == null || levelPropsMarkupData.propMarkupDatas.Length == 0)
+            Vector3 firstPropPosition = markupData.propMarkupDatas[0]?.position ?? Vector3.zero;
+            Chunk chunk = Context.ChunkManager.GetChunkAtPosition(firstPropPosition);
+            if (chunk == null)
             {
-                Debug.LogWarning("PropPointMarkupData has no prop points.", this);
+                Debug.LogWarning($"No chunk found for markup data in chunk {chunkCoord} at position {firstPropPosition}.", this);
                 return;
             }
 
-            for (int i = 0; i < levelPropsMarkupData.propMarkupDatas.Length; i++)
+            int validProps = 0;
+            int initialStateCount = _authorityRuntimePropStates.Count;
+            for (int i = 0; i < markupData.propMarkupDatas.Length; i++)
             {
-                PropMarkupData propMarkupData = levelPropsMarkupData.propMarkupDatas[i];
-
-                if (propMarkupData.propDefinition == null)
+                PropMarkupData propMarkupData = markupData.propMarkupDatas[i];
+                if (propMarkupData == null)
                 {
-                    Debug.LogWarning($"Skipping invalid prop point with guid {i}.", this);
+                    Debug.LogWarning($"Null PropMarkupData at index {i} in chunk {chunkCoord}.", this);
                     continue;
                 }
 
+                if (propMarkupData.propDefinition == null)
+                {
+                    Debug.LogWarning($"Skipping invalid prop point with GUID {propMarkupData.guid} in chunk {chunkCoord}: null propDefinition.", this);
+                    continue;
+                }
+
+                if (propMarkupData.guid == 0 || _usedGuids.Contains(propMarkupData.guid))
+                {
+                    Debug.LogWarning($"Duplicate or invalid GUID {propMarkupData.guid} in chunk {chunkCoord}. Run 'Clean Up World Settings' in Level Editor.", this);
+                    continue;
+                }
+                _usedGuids.Add(propMarkupData.guid);
+
                 PropRuntimeState propRuntimeState = new PropRuntimeState(
-                    i,
+                    propMarkupData.guid,
                     propMarkupData.position,
                     propMarkupData.rotation,
                     propMarkupData.propDefinition.TableID,
                     0);
 
-                _runtimePropStates.Add(propRuntimeState);
-                _propLoadStates.Add(new PropLoadState());
+                Debug.Log($"Loaded PropRuntimeState for GUID {propMarkupData.guid} in chunk {chunkCoord} at position {propMarkupData.position}.", this);
+
+                _authorityRuntimePropStates.Add(propMarkupData.guid, propRuntimeState);
+                _propLoadStates.Add(propMarkupData.guid, new PropLoadState());
+                chunk.AddObject(propRuntimeState); // Add to chunk's PropStates
+                validProps++;
             }
+
+            _loadedChunks.Add(chunkCoord);
+            Debug.Log($"Loaded {validProps} props for chunk {chunkCoord}. Total states: {_authorityRuntimePropStates.Count} (added {validProps} from {initialStateCount}).", this);
+
+            // Apply delta states for newly loaded props
+            if (HasStateAuthority)
+            {
+                foreach (var kvp in _authorityRuntimePropStates)
+                {
+                    PropRuntimeState state = kvp.Value;
+                    if (state == null)
+                    {
+                        Debug.LogWarning($"Null PropRuntimeState for GUID {kvp.Key} after loading chunk {chunkCoord}.", this);
+                        continue;
+                    }
+
+                    if (_deltaStates.TryGetValue(state.guid, out PropRuntimeState deltaState))
+                    {
+                        Debug.Log($"Applying delta state for GUID {state.guid} in chunk {chunkCoord}.", this);
+                        state.position = deltaState.position;
+                        state.rotation = deltaState.rotation;
+                        state.definitionId = deltaState.definitionId;
+                        state.stateData = deltaState.stateData;
+                    }
+                }
+            }
+        }
+
+        public void AddReplicator(PropReplicator replicationData)
+        {
+            if (replicationData == null)
+            {
+                Debug.LogWarning("Null PropReplicator passed to AddReplicator.", this);
+                return;
+            }
+            _propReplicators.Add(replicationData);
         }
 
         private void ApplySavedDelta()
         {
-            saveLoadManager.LoadSavedPropStates(_runtimePropStates, _propLoadStates, _deltaStates);
+            Debug.Log($"Applying saved delta states. _deltaStates count: {_deltaStates.Count}, _runtimePropStates count: {_authorityRuntimePropStates.Count}");
+
+            // saveLoadManager.LoadSavedPropStates(_runtimePropStates.Values, _propLoadStates.Values, _deltaStates);
 
             foreach (PropRuntimeState deltaState in _deltaStates.Values)
             {
-                int guid = deltaState.guid;
-                PropRuntimeState changedState = _runtimePropStates[guid];
+                if (deltaState == null)
+                {
+                    Debug.LogWarning("Null deltaState in _deltaStates.", this);
+                    continue;
+                }
+
+                if (!_authorityRuntimePropStates.TryGetValue(deltaState.guid, out PropRuntimeState changedState) || changedState == null)
+                {
+                    Debug.LogWarning($"Invalid or null PropRuntimeState for GUID {deltaState.guid} in ApplySavedDelta.", this);
+                    continue;
+                }
+
                 changedState.position = deltaState.position;
                 changedState.rotation = deltaState.rotation;
                 changedState.definitionId = deltaState.definitionId;
@@ -137,6 +160,11 @@ namespace LichLord.Props
             for (int i = 0; i < propReplicatorCount; i++)
             {
                 var propReplicationObject = Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
+                if (propReplicationObject == null)
+                {
+                    Debug.LogWarning($"Failed to spawn PropReplicator {i}.", this);
+                    continue;
+                }
                 _propReplicators.Add(propReplicationObject);
 
                 int startIndex = i * PropConstants.MAX_PROP_REPS;
@@ -145,6 +173,9 @@ namespace LichLord.Props
                 int index = 0;
                 foreach (PropRuntimeState deltaState in _deltaStates.Values)
                 {
+                    if (deltaState == null)
+                        continue;
+
                     if (index >= startIndex && index < endIndex)
                     {
                         propReplicationObject.AddProp(deltaState, true);
@@ -166,8 +197,8 @@ namespace LichLord.Props
             if (playerCreature == null)
                 return;
 
-            Vector3 viewPosition = playerCreature.transform.position;
             float renderDeltaTime = Runner.LocalAlpha;
+            bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
 
             // Ensure an empty replicator exists on the master client
             if (Runner.IsSharedModeMasterClient)
@@ -175,37 +206,58 @@ namespace LichLord.Props
                 EnsureEmptyReplicator();
             }
 
-            for (int i = 0; i < _runtimePropStates.Count; i++)
+            //Debug.Log($"Rendering with _runtimePropStates count: {playerCreature.CachedPropStates.Count}");
+
+            // Update states from player's cached list
+            foreach (PropRuntimeState propState in playerCreature.CachedPropStates)
             {
-                PropRuntimeState propState = _runtimePropStates[i];
-                PropLoadState propLoadState = _propLoadStates[i];
+                int guid = propState.guid;
 
-                float distance = Vector3.Distance(viewPosition, propState.position);
-                bool shouldBeActive = distance <= spawnRadius;
+                if(!GetRenderState(hasAuthority, guid, out var usedState))
+                {
+                    Debug.LogWarning($"Null PropRuntimeState for GUID {guid} in Render.", this);
+                    continue;
+                }
 
-                if (shouldBeActive && propLoadState.LoadState == ELoadState.None)
+                //Debug.Log(guid + " " + usedState.guid + " " + usedState.stateData);
+
+                if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState))
+                {
+                    Debug.LogWarning($"Null or missing PropLoadState for GUID {guid} in Render.", this);
+                    continue;
+                }
+
+                // Get the chunk for this prop's position
+                Chunk propChunk = Context.ChunkManager.GetChunkAtPosition(usedState.position);
+                if (propChunk == null)
+                {
+                    Debug.LogWarning($"No chunk found for prop at position {usedState.position} (GUID {guid}).", this);
+                    continue;
+                }
+
+                if (propLoadState.LoadState == ELoadState.None)
                 {
                     propLoadState.LoadState = ELoadState.Loading;
-                    _propSpawner.SpawnProp(propState);
+                    _propSpawner.SpawnProp(usedState);
                 }
-                else if (shouldBeActive && propLoadState.LoadState == ELoadState.Loaded)
+                else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
                 {
-                    RefreshRuntimeState(propState);
-                    propLoadState.Prop.UpdateProp(propState, renderDeltaTime);
+                    propLoadState.Prop.UpdateProp(usedState, renderDeltaTime);
                 }
-                else if (!shouldBeActive && distance > despawnRadius && propLoadState.LoadState == ELoadState.Loaded)
+                else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
                 {
-                    DespawnProp(propState.guid);
+                    DespawnProp(guid);
                 }
             }
         }
 
         private void EnsureEmptyReplicator()
         {
-            // Check if there is at least one completely empty replicator (zero entries)
             bool hasEmptyReplicator = false;
             foreach (var replicator in _propReplicators)
             {
+                if (replicator == null)
+                    continue;
                 if (replicator.DataCount == 0)
                 {
                     hasEmptyReplicator = true;
@@ -213,47 +265,65 @@ namespace LichLord.Props
                 }
             }
 
-            // If no empty replicator exists, spawn a new one
             if (!hasEmptyReplicator)
             {
                 var newReplicator = Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
+                if (newReplicator != null)
+                {
+                    _propReplicators.Add(newReplicator);
+                }
             }
         }
 
-        private void RefreshRuntimeState(PropRuntimeState propState)
+        public override void FixedUpdateNetwork()
         {
-            bool replicatorFound = false;
+            float deltaTime = Runner.DeltaTime;
 
-            for (int i = 0; i < _propReplicators.Count; i++)
+            EnsureEmptyReplicator();
+
+
+            // Run through the loaded runtime states
+            // and update it with authority
+            foreach (var propState in _authorityRuntimePropStates)
             {
-                if (_propReplicators[i].TryGetPropData(propState.guid, out FPropData propData))
-                {
-                    replicatorFound = true;
-                    propState.guid = propData.GUID;
-                    propState.stateData = propData.StateData;
+                PropRuntimeState runtimeState = propState.Value;
+                if (runtimeState.UpdateState(deltaTime))
+                { 
+                    //ReplicateStateChange(runtimeState);
                 }
-            }
-
-            // if no replicator, reset default state
-            if (!replicatorFound)
-            {
-                propState.stateData = 0;
             }
         }
 
         private void OnPropSpawned(PropRuntimeState propRuntimeState, Prop prop)
         {
+            if (propRuntimeState == null)
+            {
+                Debug.LogWarning("Null propRuntimeState in OnPropSpawned.", this);
+                return;
+            }
+
             int guid = propRuntimeState.guid;
-            PropLoadState propLoadState = _propLoadStates[guid];
+            if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState) || propLoadState == null)
+            {
+                Debug.LogWarning($"Missing or null PropLoadState for GUID {guid} in OnPropSpawned.", this);
+                return;
+            }
+
             propLoadState.Prop = prop;
             propLoadState.LoadState = ELoadState.Loaded;
+
             prop.OnSpawned(propRuntimeState, this);
         }
 
-        private void DespawnProp(int guid)
+        public void DespawnProp(int guid)
         {
-            PropLoadState propLoadState = _propLoadStates[guid];
-            if (propLoadState.LoadState == ELoadState.Loaded)
+            if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState) || propLoadState == null)
+            {
+                Debug.LogWarning($"Missing or null PropLoadState for GUID {guid} in DespawnProp.", this);
+                return;
+            }
+
+            if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
             {
                 propLoadState.Prop.StartRecycle();
                 propLoadState.LoadState = ELoadState.None;
@@ -267,6 +337,20 @@ namespace LichLord.Props
             {
                 saveLoadManager.SaveRuntimeState(_deltaStates);
             }
+        }
+
+        public PropReplicator GetReplicatorWithFreeSlots()
+        {
+
+            for (int i = 0; i < _propReplicators.Count; i++)
+            {
+                PropReplicator propReplicator = _propReplicators[i];
+                if(propReplicator.HasFreeProp())
+                    return propReplicator;
+            }
+
+            Debug.Log("No replicator with free slots found");
+            return null;
         }
 
         public class PropLoadState

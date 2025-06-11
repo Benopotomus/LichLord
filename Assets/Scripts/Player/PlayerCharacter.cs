@@ -7,12 +7,11 @@ using LichLord.Projectiles;
 using SoulGames.EasyGridBuilderPro;
 using LichLord.NonPlayerCharacters;
 using LichLord.World;
+using LichLord.Props;
+using System.Collections.Generic;
 
 namespace LichLord
 {
-    /// <summary>
-    /// Main player script - controls player movement, actions, and animations.
-    /// </summary>
     public class PlayerCharacter : RelayPlayer, INetActor, IHitInstigator, IHitTarget, IChunkTrackable
     {
         [Header("References")]
@@ -49,6 +48,10 @@ namespace LichLord
         private Chunk _chunk;
         public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
 
+        // Cached list of PropRuntimeState for current and neighboring chunks
+        private List<PropRuntimeState> _cachedPropStates = new List<PropRuntimeState>();
+        public IReadOnlyList<PropRuntimeState> CachedPropStates => _cachedPropStates.AsReadOnly();
+
         [SerializeField]
         private BuildableGridObjectTypeSO item;
 
@@ -61,7 +64,7 @@ namespace LichLord
 
             runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject playerObject);
 
-            if(playerObject == null)
+            if (playerObject == null)
                 return false;
 
             playerCreature = playerObject.GetComponent<PlayerCharacter>();
@@ -109,7 +112,8 @@ namespace LichLord
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }
 
-            //EasyGridBuilderPro.Instance.SetSelectedBuildable(item);
+            // Initialize cached prop states
+            UpdateChunk(Context.ChunkManager);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -118,19 +122,16 @@ namespace LichLord
             Context.NetworkGame.OnPlayerDespawned(this);
         }
 
-        public override void FixedUpdateNetwork()
-        {
-            if (Health.IsFinished)
-            {
-            }
-        }
-
         public override void Render()
         {
             base.Render();
             // Disable hits when player is dead
             Hurtbox.enabled = Health.IsAlive;
+
+            // Change the chunk and tell the server we've changed chunks
             UpdateChunk(Context.ChunkManager);
+
+            // Update 
         }
 
         private void LateUpdate()
@@ -140,7 +141,7 @@ namespace LichLord
 
             // IK after animations
             var pitchRotation = Movement.WorldTransform.Pitch;
-            CameraPivot.localRotation = Quaternion.Euler(pitchRotation, 0 , 0);
+            CameraPivot.localRotation = Quaternion.Euler(pitchRotation, 0, 0);
 
             // Dummy IK solution: snap chest bone to ChestTargetPosition
             float blendAmount = HasStateAuthority ? 0.05f : 0.2f;
@@ -153,10 +154,6 @@ namespace LichLord
             Health.Revive();
         }
 
-        public void OnEnemyKilled(Health enemyHealth)
-        {
-        }
-
         private void OnNicknameChanged()
         {
             if (HasStateAuthority)
@@ -167,25 +164,29 @@ namespace LichLord
 
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
         {
-            //throw new System.NotImplementedException();
             if (hit.target is NonPlayerCharacter npc)
             {
                 npc.Replicator.RPC_DealDamageToNPC(npc.NetObjectID.index, hit.damageData.damageValue);
 
                 if (!Runner.IsSharedModeMasterClient)
                     npc.Replicator.Predict_DealDamageToNPC(npc.NetObjectID.index, hit.damageData.damageValue);
-               
+            }
+
+            if (hit.target is Prop prop)
+            {
+                Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
+
+                if (!Runner.IsSharedModeMasterClient)
+                    Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
             }
         }
 
         void IHitTarget.ProcessHit(ref FHitUtilityData hit)
         {
-            //throw new System.NotImplementedException();
         }
 
         void IHitTarget.OnHitTaken(ref FHitUtilityData hit)
         {
-            //throw new System.NotImplementedException();
         }
 
         public void UpdateChunk(ChunkManager chunkManager)
@@ -193,23 +194,76 @@ namespace LichLord
             var lastChunk = CurrentChunk;
             var newChunk = chunkManager.GetChunkAtPosition(CachedTransform.position);
 
-            CurrentChunk = newChunk;
-
             if (lastChunk != newChunk)
             {
-                if(lastChunk != null)
+                CurrentChunk = newChunk;
+
+                if (lastChunk != null)
                     lastChunk.RemoveObject(gameObject);
 
-                newChunk.AddObject(gameObject);
+                if (newChunk != null)
+                    newChunk.AddObject(gameObject);
+
+                // Update cached prop states on chunk change
+                UpdateVisibilePropStates(chunkManager);
+                Debug.Log($"Player chunk changed from {lastChunk?.ChunkID} to {newChunk?.ChunkID}. Cached {CachedPropStates.Count} prop states.", this);
+            }
+        }
+
+        public HashSet<int> _visibileGuids = new HashSet<int>();
+
+        private void UpdateVisibilePropStates(ChunkManager chunkManager)
+        {
+            if (CurrentChunk == null)
+                return;
+
+            // Get current and neighboring chunks (radius = 1)
+            List<Chunk> nearbyChunks = chunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
+            _cachedPropStates.Clear();
+
+            HashSet<int> newGuids = new HashSet<int>();
+            HashSet<int> oldGuids = _visibileGuids;
+            foreach (Chunk chunk in nearbyChunks)
+            {
+                if (chunk == null || chunk.PropStates == null)
+                    continue;
+
+                foreach (PropRuntimeState state in chunk.PropStates)
+                {
+                    if (state != null && !_cachedPropStates.Contains(state))
+                    {
+                        _cachedPropStates.Add(state);
+                        _visibileGuids.Add(state.guid);
+                        newGuids.Add(state.guid);
+                    }
+                }
             }
 
-            if (HasStateAuthority)
-            {
-                if (lastChunk != newChunk)
-                { 
-                    //Chunk changed, toggle on/off items
-                }
-            }   
+            // Despawn props no longer in cached states
+            DespawnUnusedProps(newGuids, oldGuids);
+
+            _visibileGuids = newGuids;
         }
+
+        private void DespawnUnusedProps(HashSet<int> newGuids, HashSet<int> oldGuids)
+        {
+            // Identify GUIDs to despawn (in previous set but not in current set)
+            List<int> guidsToDespawn = new List<int>();
+            foreach (int guid in oldGuids)
+            {
+                if (!newGuids.Contains(guid))
+                {
+                    guidsToDespawn.Add(guid);
+                }
+            }
+
+            // Despawn each prop
+            foreach (int guid in guidsToDespawn)
+            {
+                Context.PropManager.DespawnProp(guid);
+            }
+        }
+
+
     }
 }

@@ -157,6 +157,9 @@ namespace LichLord
             var moveDirection = CC.transform.rotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
 
             float targetSpeed = input.Sprint ? SprintSpeed : WalkSpeed;
+            if (CurrentMovementState == EMovementState.Flying)
+                targetSpeed = FlyHorizontalSpeed;
+
             float lerpSpeed = Mathf.Lerp(_currentMoveSpeed, targetSpeed, deltaTime / SprintAccelerationTime);
             _currentMoveSpeed = lerpSpeed;
             float currentSpeed = _currentMoveSpeed * _castSpeedMultiplier;

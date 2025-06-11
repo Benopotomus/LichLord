@@ -9,8 +9,8 @@ namespace LichLord.Props
         private NetworkDictionary<int, FPropData> _propDatas { get; }
 
         [Networked]
-        protected int _dataCount { get; set; }
-        public int DataCount => _dataCount;
+        protected ushort _dataCount { get; set; }
+        public ushort DataCount => _dataCount;
 
         public override void Spawned()
         {
@@ -40,9 +40,6 @@ namespace LichLord.Props
             {
                 GUID = propRuntimeState.guid,
                 DefinitionID = propRuntimeState.definitionId,
-                Position = propRuntimeState.position,
-                Rotation = propRuntimeState.rotation,
-                IsActive = true,
                 StateData = propRuntimeState.stateData
             };
 

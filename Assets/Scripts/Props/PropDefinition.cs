@@ -16,6 +16,11 @@ namespace LichLord.Props
         protected BundleObject _prefabBundle;
         public BundleObject PrefabBundle => _prefabBundle;
 
+        //Networking
+        [SerializeField]
+        protected PropDataDefinition _propDataDefinition;
+        public PropDataDefinition PropDataDefinition => _propDataDefinition;
+
         public GameObject prefab;
     }
 }

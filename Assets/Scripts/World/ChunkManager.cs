@@ -1,7 +1,7 @@
 ﻿using Fusion;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
+using LichLord.Props;
 
 namespace LichLord.World
 {
@@ -13,7 +13,7 @@ namespace LichLord.World
         [SerializeField]
         private bool drawChunkBounds = true; // Toggle for gizmo drawing
 
-        [Networked, Capacity(512)] 
+        [Networked, Capacity(512)]
         public NetworkDictionary<Vector2Int, ELoadState> _networkChunks { get; }
         private Dictionary<Vector2Int, Chunk> _localChunks = new Dictionary<Vector2Int, Chunk>();
 
@@ -104,11 +104,12 @@ namespace LichLord.World
 
             //Debug.Log("LoadChunk " + chunkToLoad.ChunkID);
             chunkToLoad.LoadState = ELoadState.Loaded;
+            Context.PropManager.LoadPropsForChunk(chunkToLoad.ChunkID);
         }
 
         public Chunk GetChunkAtPosition(Vector3 position)
         {
-            if(_localChunks.TryGetValue(GetChunkID(position), out Chunk chunk))
+            if (_localChunks.TryGetValue(GetChunkID(position), out Chunk chunk))
                 return chunk;
 
             return null;
@@ -162,4 +163,3 @@ namespace LichLord.World
         }
     }
 }
-

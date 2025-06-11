@@ -8,7 +8,11 @@ namespace LichLord.Props
     public class Prop : DWDObjectPoolObject, IHitTarget
     {
         protected PropManager _propManager;
+
+        [SerializeField]
         protected PropRuntimeState _propRuntimeState;
+
+        public PropRuntimeState RuntimeState => _propRuntimeState;
 
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
@@ -53,32 +57,6 @@ namespace LichLord.Props
 
         public void ProcessHit(ref FHitUtilityData hit)
         {
-            if (_propManager == null || _propRuntimeState == null)
-            {
-                Debug.LogWarning($"[Prop] Cannot process hit: PropManager or PropRuntimeState is null for guid {_propRuntimeState?.guid}.");
-                return;
-            }
-
-            NetworkRunner runner = _propManager.Runner;
-
-            Debug.Log($"[Prop] Processing hit for guid {_propRuntimeState.guid} with damage 9001");
-
-            foreach (PlayerRef player in runner.ActivePlayers)
-            {
-                NetworkObject playerObj = runner.GetPlayerObject(player);
-                if (playerObj != null)
-                {
-                    /// How do i just send this to the masterclient player?
-                    RelayPlayer relayPlayer = playerObj.GetComponent<RelayPlayer>();
-
-                    relayPlayer.RaiseEvent(new PropDamageEvent
-                    {
-                        guid = _propRuntimeState.guid,
-                        impulse = Vector3.zero,
-                        damage = 9001
-                    });
-                }
-            }
         }
     }
 }
