@@ -1,0 +1,62 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Stackable "True"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Toggle(_DETAILNMAO_ON)] _EnableDetailNMAO("Enable Detail NMAO?", float) = 0.0
+	[HideUnless(_DETAILNMAO_ON)] [KeywordEnum(Overlay,Replace)] _DetailNMAOMode("Mode", float) = 0.0
+	[HideUnless(_DETAILNMAO_ON)] _DetailNMAOVertexMask ("Vert Col Mask", Vector) = (1,1,1,1)
+	[HideUnless(_DETAILNMAO_ON)] _DetailNMAO("Detail NMAO", 2D) = "grey" {}
+	[HideUnless(_DETAILNMAO_ON)] _NMAOIntensity("Intensity", Range(0,2)) = 0.3
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _NMAOIntensity;
+	uniform float4 _DetailNMAO_ST;
+	half4 _DetailNMAOVertexMask;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma shader_feature __ _DETAILNMAO_ON
+	#pragma shader_feature _DETAILNMAOMODE_OVERLAY _DETAILNMAOMODE_REPLACE
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+	
+	#if _DETAILNMAO_ON
+		TEXTURE2D(_DetailNMAO);
+		SAMPLER(sampler_DetailNMAO);
+	#endif
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		#if _DETAILNMAO_ON
+			half mask = dot(d.vertexColor, _DetailNMAOVertexMask) * _NMAOIntensity;
+			half2 uv = d.texcoord0.xy * _DetailNMAO_ST.xy + _DetailNMAO_ST.zw;
+			half4 data = SAMPLE_TEXTURE2D(_DetailNMAO, sampler_DetailNMAO, uv).rgba;
+			half2 n = data.rg;
+			half3 uNormal = UnpackNormal(half4(n.x, n.y, 1.0.x, 1.0.x)).rgb;
+			#if _DETAILNMAOMODE_OVERLAY
+				o.Normal = lerp(o.Normal, ApplyOverlay(o.Normal, uNormal), mask);
+				o.Smoothness = lerp(o.Smoothness, data.b * o.Smoothness, mask);
+				o.Occlusion = lerp(o.Occlusion, o.Occlusion * data.a, mask);
+			#else
+				o.Normal = lerp(o.Normal, uNormal, mask);
+				o.Smoothness = lerp(o.Smoothness, data.b, mask);
+			o.Occlusion = lerp(o.Occlusion, data.a, mask);
+			#endif
+
+		#endif
+	}
+
+END_CODE
+

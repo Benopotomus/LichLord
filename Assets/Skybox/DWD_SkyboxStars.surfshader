@@ -1,0 +1,73 @@
+//© Dicewrench Designs LLC 2022-2024
+//Licensed for use in 'Music Visualizer' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+   [Toggle] _Stars("Enable Stars?", float) = 0.0
+   [HideUnless(_STARS_ON)] [NoScaleOffset] _StarsTex ("Stars R Lum, G Phase, B Color Var)", Cube) = "black" {}
+   [HideUnless(_STARS_ON)] [HDR] _ColorOne ("Color One", Color) = (0.5,0.5,0.5,0.5)
+   [HideUnless(_STARS_ON)] [HDR] _ColorTwo("Color Two", Color) = (0.6,0.6,0.8,0.8)
+   [HideUnless(_STARS_ON)] _TwinkleFreq("Twinkle Ramp Frequency", float) = 1.0
+   [HideUnless(_STARS_ON)] _TwinkleRate("Twinkle Rate", float) = 1.0
+   [HideUnless(_STARS_ON)] _TwinklePow("Twinkle Pow", float) = 1.0
+   [HideUnless(_STARS_ON)] _TwinkleBoost("Twinkle Boost", float) = 1.0
+   [Space]
+   [HideUnless(_STARS_ON)] _StarDepthCutoff("Depth Cutoff", Range(-1,1)) = 0
+   [HideUnless(_STARS_ON)] _StarDepthPow("Depth Pow", float) = 0.5
+   [HideUnless(_STARS_ON)] _StarDepthBoost("Depth Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _TwinkleFreq, _TwinkleRate, _TwinklePow, _TwinkleBoost;
+	half4 _ColorOne, _ColorTwo;
+    half _StarDepthCutoff, _StarDepthPow, _StarDepthBoost;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma multi_compile _ _STARS_ON
+
+    #ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+
+	#if _STARS_ON
+        TEXTURECUBE(_StarsTex);
+        SAMPLER(sampler_StarsTex);
+    #endif
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+        #if _STARS_ON
+          v.texcoord2.xyz = v.vertex.xyz;
+          float t = _Time.x; 
+          v.texcoord0.w = t;
+        #endif
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		#if _STARS_ON
+            half3 stars = SAMPLE_TEXTURECUBE_LOD(_StarsTex, sampler_StarsTex, d.texcoord2.xyz, 0).rgb;
+            half3 starColor = lerp(_ColorOne.rgb, _ColorTwo.rgb, stars.b);
+            half twinkle = saturate(pow(ZeroOneZero(frac(d.texcoord0.w * _TwinkleRate + (stars.g * _TwinkleFreq))), _TwinklePow) * _TwinkleBoost);
+            starColor *= twinkle.xxx;
+            starColor *= stars.rrr;
+            starColor *= stars.rrr;
+
+            half starDepth = saturate(saturate(d.extraV2F0.r) - _StarDepthCutoff);
+            starDepth = saturate(pow(starDepth, _StarDepthPow) * _StarDepthBoost);
+            starColor *= starDepth.xxx;
+
+            o.Albedo = max(o.Albedo, starColor);
+            o.Emission += starColor;
+        #endif
+	}
+
+END_CODE
+

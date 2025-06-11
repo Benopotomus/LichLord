@@ -1,0 +1,57 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Environment Alpha Emissive"
+	Workflow "Metallic"
+	Stackable "False"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	_Color ("Main Color", Color) = (0, 1, 0, 1)
+	[NoScaleOffset] _Albedo ("RGB Albedo, A Emissive Mask", 2D) = "grey" {}
+	[NoScaleOffset] _Data("Data: RG N, B M, A AO", 2D) = "bump" {}
+	_NormalIntensity ("Normal Intensity", Range(0,2)) = 1.0
+    _Metalness ("Metalness", Range(0,1)) = 0.0
+    _Smoothness ("Smoothness", Range(0,1)) = 1.0
+    _Occlusion ("Occlusion", Range(0,1)) = 1.0
+	[HDR] _EmissiveColor("Emissive Color", Color) = (1,1,1,1)
+END_PROPERTIES
+
+
+BEGIN_CBUFFER
+	half4 _Color, _EmissiveColor;
+	half _NormalIntensity, _Metalness, _Smoothness, _Occlusion;
+END_CBUFFER
+
+BEGIN_DEFINES
+#ifndef _EMISSION
+	#define _EMISSION 1
+#endif
+END_DEFINES
+
+
+BEGIN_CODE
+	TEXTURE2D(_Albedo);
+	SAMPLER(sampler_Albedo);
+	TEXTURE2D(_Data);
+	SAMPLER(sampler_Data);
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 data = SAMPLE_TEXTURE2D(_Data, sampler_Data, d.texcoord0.xy);
+		half4 albedo = SAMPLE_TEXTURE2D(_Albedo, sampler_Albedo, d.texcoord0.xy); 
+		o.Albedo = albedo.rgb * _Color.rgb;
+		half2 n = saturate(lerp(0.5.xx, data.rg, _NormalIntensity));
+		o.Normal = UnpackNormal(half4(n.x, n.y, 1.0.x, 1.0.x));
+		o.Smoothness = data.b * _Smoothness;
+        o.Metallic = _Metalness;
+		o.Occlusion = lerp(1.0.x, data.a, _Occlusion);
+		o.Alpha = 1.0;
+		o.Emission = _EmissiveColor.rgb * albedo.aaa;
+	}
+
+END_CODE
+

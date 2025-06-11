@@ -1,0 +1,98 @@
+//© Dicewrench Designs LLC 2020-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Tags{"RenderType" = "Opaque"}
+END_OPTIONS
+
+BEGIN_SUBSHADERS
+	"DWD_SimpleSkyboxFunctions.surfshader"
+END_SUBSHADERS
+
+BEGIN_PROPERTIES
+	[Header(Water Surface)]
+	_NoiseScale("Normal Scale", Range(0,1)) = 1.0
+	_WaterColor ("Water Color", Color) = (0, 1, 0, 1)
+	_DeepColor ("Deep Color", Color) = (1,0,0,1)
+	[Space]
+	_BlendPow("Blend Pow", float) = 1.0
+	_BlendBoost("Blend Boost", float) = 1.0
+	[Space]
+	_UVScale ("Scale", float) = 0.001
+	[Space]
+	_SampleOneST ("Scale Offset One", Vector) = (1,1,0,0)
+	_SampleOneScrollX("Scroll X", float) = 1.0
+	_SampleOneScrollY("Scroll Y", float) = 1.0
+	[Space]
+	_SampleTwoST ("Scale Offset Two", Vector) = (1,1,0,0)
+	_SampleTwoScrollX("Scroll X", float) = 1.0
+	_SampleTwoScrollY("Scroll Y", float) = 1.0
+	[Space]
+	_FoamColor("Foam Color", Color) = (1,1,1,1)
+	_FoamSmoothness("Foam Smoothness", Range(0,1)) = 0.1
+	_FoamCutoff("Cutoff", Range(0,1)) = 0.3
+	_FoamPower ("Pow", float) = 1.0
+	_FoamBoost("Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _NoiseScale;
+	half4 _WaterColor, _DeepColor;
+	half _BlendPow, _BlendBoost;
+	half4 _SampleOneST, _SampleTwoST;
+	half _UVScale;
+	half _SampleOneScrollX, _SampleOneScrollY, _SampleTwoScrollX, _SampleTwoScrollY;
+	half4 _FoamColor;
+	half _FoamPower, _FoamBoost, _FoamCutoff, _FoamSmoothness;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASNOISE
+		#include "DWD_NoiseFunctions.cginc" 
+		#define HASNOISE 1
+	#endif
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		float t = _Time.x;
+		float2 sOneOffset = float2(_SampleOneScrollX, _SampleOneScrollY) * t.xx;
+		float2 sTwoOffset = float2(_SampleTwoScrollX, _SampleTwoScrollY) * t.xx;
+		float2 baseUV = v.vertex.xz * _UVScale;
+		v.texcoord0.xy = baseUV * _SampleOneST.xy + _SampleOneST.zw + sOneOffset;
+		v.texcoord0.zw = baseUV * _SampleTwoST.xy + _SampleTwoST.zw + sTwoOffset;
+		v.texcoord1 = v.texcoord1;
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{		
+		half2 noiseOne = Noise(d.texcoord0.xy);
+		half2 noiseTwo = Noise(d.texcoord0.zw);
+
+		half2 noiseBlend = noiseOne * noiseTwo * 2.0.xx - 1.0.xx;
+		half3 noiseMod = half3(noiseBlend, noiseOne.x * noiseTwo.y);
+
+		noiseMod *= _NoiseScale.xxx;
+
+		half foamMask = saturate( ((d.vertexColor.r - _FoamCutoff) + pow(saturate(d.vertexColor.r - _FoamCutoff), _FoamCutoff + 1.0))  * noiseMod.z);
+		foamMask = saturate( pow(foamMask, _FoamPower) * _FoamBoost);
+		half invMask = saturate(1.0 - foamMask);
+		o.Normal = o.Normal + noiseMod.xyz;
+		o.Albedo = lerp(_DeepColor.rgb, _WaterColor.rgb, saturate( (pow(abs(noiseMod.x * noiseMod.y), _BlendPow) * _BlendBoost) + d.vertexColor.r) );
+		o.Albedo = lerp(o.Albedo, _FoamColor.rgb, foamMask);
+		o.Smoothness = lerp(o.Smoothness, _FoamSmoothness, foamMask);
+		o.Occlusion = o.Occlusion + invMask.x;
+		o.Alpha = 1.0;
+	}
+
+END_CODE
+

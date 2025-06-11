@@ -1,0 +1,46 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Vertex Rotation)] 
+	_RotationRate("Rotation Rate", float) = 1.0
+	_PhaseScalar("Vertex A Phase Scalar", float) = 0.3
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _RotationRate, _PhaseScalar;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+	
+   float3 RotateAroundYInDegrees (float3 vertex, float degrees, float3 pivot)
+   {
+      float alpha = degrees * 3.1415926 / 180.0;
+      float sina, cosa;
+      sincos(alpha, sina, cosa);
+      float2x2 m = float2x2(cosa, -sina, sina, cosa);
+	   vertex -= pivot;
+	   float3 newVertex = float3(mul(m,vertex.xz).xy, vertex.y).xzy;
+	   return newVertex + pivot;
+   }
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+		float3 pivot = float3(v.texcoord1.x, v.texcoord1.y, v.texcoord2.x);
+		float phase = v.texcoord2.y * _PhaseScalar;
+		float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+		float3 spun = RotateAroundYInDegrees(worldPos, ThreeSixtyAngle(_RotationRate * _Time.y) + phase, pivot);
+		v.vertex.xyz = mul(unity_WorldToObject, float4(spun,1)).xyz;
+	}
+
+END_CODE
+

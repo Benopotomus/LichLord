@@ -1,0 +1,23 @@
+//© Dicewrench Designs LLC 2018-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_SUBSHADERS
+   "StackableSkyParameters.surfshader"   
+END_SUBSHADERS
+
+BEGIN_PROPERTIES
+   [Header(Cloud Settings)]
+   _CloudCutoff ("Cutoff", Range(0,1)) = 0.2
+   [Space]
+   [HDR] _Cloud ("Cloud", Color) = (0.8, 0.8, 0.8, 1.0)
+   [HDR] _LitCloud("Lit Cloud", Color) = (1.0, 1.0, 0.8, 1.0)
+END_PROPERTIES 
+
+BEGIN_CBUFFER
+   half4 _Cloud, _LitCloud;
+   half4 _Shadow;
+   half _LightWrap;
+   half _CloudCutoff;   
+END_CBUFFER

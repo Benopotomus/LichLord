@@ -1,0 +1,169 @@
+﻿//© Dicewrench Designs LLC 2020-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Crystal Base"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[HDR] _Color ("Main Color", Color) = (0, 0, 1, 1)
+	[HDR] _InnerColor("Inner Color", Color) = (1,0,1,1)
+	_CrystalTex("Crystal Mix", 2D) = "black" {}
+	[NoScaleOffset] _DataTex("Data Tex; RG Norm, B S, A Trans", 2D) = "bump" {}
+	[Header(UV)]
+	_Depth("Depth", float) = 1.0
+	_DepthScalar("Depth Scalar", float) = 1.0
+	[Header(Transmission)]
+	_TransPow("Pow", float) = 1.0
+	_TransBoost("Boost", float) = 1.0
+	_TransCutoff("Cutoff", float) = 0.0
+	_TransWrap("Wrap", float) = 1.0
+	[Header(Light Scatter)]
+	_ScatterColor("Scatter Color Mix", Range(0,1)) = 0.5
+	_ScatterPow("Pow", float) = 1.0
+	_ScatterBoost("Boost", float) = 1.0
+	_ScatterCutoff("Cutoff", float) = 0.1
+	_FacetPow("Facet Pow", float) = 1.0
+	_FacetBoost("Facet Boost", float) = 1.0
+	[Header(PBR)]
+	_Metalness("Metallic", Range(0,1)) = 0.0
+	_Smoothness("Smoothness", Range(0,1)) = 1.0
+	[Header(Caustic)]
+	_CausticMix("Mix", Vector) = (1,0,0,0)
+	_CausticPow("Pow", float) = 1.0
+	_CausticBoost("Boost", float) = 1.0
+	_CausticDot("Dot", Range(-1,1)) = 1.0
+	[Header(Core)]
+	[HDR] _CoreColor("Color", Color) = (1,1,1,1)
+	_CoreMix("Mix", Vector) = (1,1,1,1)
+	_CoreRate("Rate", float) = 1.0
+	_CoreCutoff("Cutoff", float) = 1.0
+	_CorePow("Pow", float) = 1.0
+	_CoreBoost("Boost", float) = 1.0
+	[Header(Damage)]
+	[HDR] _DamageColor("Damage", Color) =  (1,1,0,0)
+	_DamageMix("Mix", Vector) = (0,0,1,0)
+	_DamagePow("Pow", float) = 1.0
+	_DamageBoost("Boost", float) = 1.0
+	_DamageFresnelBlend("Damage Fresnel Blend", Range(0,1)) = 0.0
+	[HideInInspector] _Opacity("Opacity", Range(0,1)) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _Color, _InnerColor;
+	uniform float4 _CrystalTex_ST;
+	half _Depth, _DepthScalar;
+	half _Smoothness, _Metalness;
+	half _TransPow, _TransBoost, _TransCutoff, _TransWrap;
+	half _ScatterColor, _ScatterPow, _ScatterCutoff, _ScatterBoost;
+	half _FacetPow, _FacetBoost;
+	half4 _CausticMix;
+	half _CausticPow, _CausticBoost, _CausticDot;
+	half4 _CoreMix, _CoreColor;
+	half _CoreCutoff, _CoreRate, _CorePow, _CoreBoost;
+	half4 _DamageColor, _DamageMix;
+	half _DamagePow, _DamageBoost, _DamageFresnelBlend;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+
+	#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+   #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+END_DEFINES
+
+BEGIN_CODE
+
+	TEXTURE2D(_CrystalTex);
+	SAMPLER(sampler_CrystalTex);
+	TEXTURE2D(_DataTex);
+	SAMPLER(sampler_DataTex);
+
+	half LightDot(float3 lightDir, half3 surfaceNormal, ShaderData d)
+	{
+		float3 normalDirection = TangentToWorldSpace(d, surfaceNormal);
+		return dot(normalDirection, lightDir);
+	}
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		float t = _Time.x;
+		v.texcoord0.xy = v.texcoord0.xy;
+		v.texcoord0.zw = v.texcoord0.xy * _CrystalTex_ST.xy + _CrystalTex_ST.zw;
+
+		v.texcoord1.xyz = mul(unity_ObjectToWorld, float4(1.0,0.0,0.0, 1.0)).xyz;
+		v.texcoord2.xyz = mul(unity_ObjectToWorld, float4(0.0,1.0,0.0, 1.0)).xyz;
+
+		v.texcoord3.xyz = mul(unity_ObjectToWorld, normalize(half3(0,0,0) - v.vertex.xyz)).xyz;
+		v.texcoord3.w = Noise(t.xx * _CoreRate);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		float2 offset = half2(0.5,0.5);
+		float angleDot = ((dot(d.worldSpaceViewDir, d.texcoord2.xyz)) * _DepthScalar);
+		float vertDot = ((dot(d.worldSpaceViewDir, d.texcoord3.xyz)) * _DepthScalar);
+
+		offset.x += angleDot * _Depth;
+		offset.y += vertDot * _Depth;
+
+		half4 data = SAMPLE_TEXTURE2D(_DataTex, sampler_DataTex, d.texcoord0.xy);
+		half4 noise = SAMPLE_TEXTURE2D(_CrystalTex, sampler_CrystalTex, d.texcoord0.zw + offset);
+
+		half rimbase = Rim(o.Normal.xyz, d.tangentSpaceViewDir.xyz);
+		half rim = saturate(rimbase * (_TransWrap * data.a));
+		rim = saturate(pow(saturate(rim - _TransCutoff), _TransPow) * _TransBoost);
+
+		float3 lightDir;
+        float3 lightColor;
+		GetSun(lightDir, lightColor);
+		half rawLight = LightDot(lightDir, d.texcoord3.xyz, d);
+		half light = saturate(rawLight); 
+		half softRim = smoothstep(0,1,Rim(d.texcoord3.xyz, d.worldSpaceViewDir.xyz));
+		half lightCore = softRim;
+		half scatterbase = rawLight * 0.5 + 0.5;
+		half scatter = saturate(pow(saturate(scatterbase - _ScatterCutoff), _ScatterPow) * _ScatterBoost);
+		
+		half3 internalNorm = half3(data.r, data.g, 1.0) * 2.0.xxx - 1.0.xxx;
+		half internalLight = saturate(LightDot(lightDir, -internalNorm, d));
+		internalLight = saturate(internalLight - data.a - rim);
+		internalLight = saturate(pow(internalLight, _FacetPow) * _FacetBoost);
+		scatter = saturate(scatter + internalLight);
+		half3 scatterColor = lerp(lightColor.rgb, _InnerColor.rgb, _ScatterColor) * scatter.xxx;
+
+		half invTrans = saturate(1.0 - data.a);
+
+		half caustic = dot(rawLight, _CausticDot);
+		half causticMix = GetMix(noise, _CausticMix);
+		caustic *= causticMix;
+		caustic = saturate(pow(caustic, _CausticPow) * _CausticBoost) * invTrans * rimbase;
+
+		half core = 1.0 - rimbase;
+		half coreMix = GetMix(noise, _CoreMix);
+		core = saturate(pow(saturate(core * invTrans - _CoreCutoff), _CorePow) * _CoreBoost);
+		core *= ZeroOneZero(frac(coreMix + d.texcoord3.w));
+		half3 coreColor = _CoreColor.rgb * core.xxx;
+
+		half damage = rim;
+		half damageMix = GetMix(noise, _DamageMix);
+		damage = pow(damage + damageMix, 2);
+		damage = saturate(pow(damage * _DamageFresnelBlend, _DamagePow) * _DamageBoost); 
+		half3 damageColor = _DamageColor.rgb * damage.xxx ;
+
+		o.Albedo = _Color.rgb;
+		o.Emission = saturate(max(_InnerColor.rgb * max(rim, data.a).xxx, scatterColor) + (_InnerColor.rgb * caustic));
+		o.Emission += coreColor;
+		o.Emission += damageColor;
+
+		o.Smoothness = data.b * _Smoothness;
+		o.Metallic = _Metalness;
+		o.Alpha = _Color.a;
+	}
+
+END_CODE
+

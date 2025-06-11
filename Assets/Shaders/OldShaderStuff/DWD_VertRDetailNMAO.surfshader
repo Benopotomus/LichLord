@@ -1,0 +1,47 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	_DetailTex("Detail Tex", 2D) = "grey" {}
+	[NoScaleOffset] _DetailNMAO("Detail NMAO", 2D) = "bump" {}
+	_DetailNormalIntensity ("Normal Intensity", Range(0,2)) = 1.0
+    _DetailMetalness ("Metalness", Range(0,1)) = 0.0
+    _DetailSmoothness ("Smoothness", Range(0,1)) = 1.0
+    _DetailOcclusion ("Occlusion", Range(0,1)) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _DetailNormalIntensity, _DetailMetalness, _DetailSmoothness, _DetailOcclusion;
+	uniform float4 _DetailTex_ST;
+END_CBUFFER
+
+
+BEGIN_CODE
+	TEXTURE2D(_DetailTex);
+	SAMPLER(sampler_DetailTex);
+	TEXTURE2D(_DetailNMAO);
+	SAMPLER(sampler_DetailNMAO);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+		v.texcoord2.xy = v.texcoord0.xy * _DetailTex_ST.xy + _DetailTex_ST.zw;
+    }
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half mask = d.vertexColor.r;
+		half4 data = SAMPLE_TEXTURE2D(_DetailNMAO, sampler_DetailNMAO, d.texcoord2.xy);
+		half3 albedo = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, d.texcoord2.xy).rgb; 
+		o.Albedo = lerp(o.Albedo, albedo, mask);
+		half2 n = saturate(lerp(0.5.xx, data.rg, _DetailNormalIntensity));
+		o.Normal = lerp(o.Normal,UnpackNormal(half4(n.x, n.y, 1.0.x, 1.0.x)), mask);
+		o.Smoothness = lerp(o.Smoothness, data.b * _DetailSmoothness, mask);
+        o.Metallic = lerp(o.Metallic, _DetailMetalness, mask);
+		o.Occlusion = lerp(o.Occlusion, lerp(1.0.x, data.a, _DetailOcclusion), mask);
+		o.Alpha = 1.0;
+	}
+
+END_CODE
+

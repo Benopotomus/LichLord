@@ -1,0 +1,113 @@
+﻿//© Dicewrench Designs LLC 2020-2024
+//Licensed for use in 'Music Visualizer' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Stackable "False"
+	Workflow "Unlit"
+	Alpha "Add"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Scrolling FX)]
+	[NoScaleOffset] _MainTex ("Main Tex", 2D) = "black" {}
+	[Toggle(_USE_RIM)] _UseRim("Apply Rim To Scroll FX?", float) = 0.0
+	[Space]
+	_FXMixOne("Mix One", Vector) = (1,0,0,0)
+	_ScaleOffsetOne ("Scale Offset One", Vector) = (1,1,0,0)
+	_XScrollOne ("X Scroll One", float) = 0.2
+	_YScrollOne ("Y Scroll One", float) = 0.03
+	[Space]
+	_FXMixTwo("Mix Two", Vector) = (0,1,0,0)
+	_ScaleOffsetTwo ("Scale Offset Two", Vector) = (1,1,0,0)
+	_XScrollTwo ("X Scroll Two", float) = 0.2
+	_YScrollTwo ("Y Scroll Two", float) = 0.03
+	[Space]
+	[HDR] _FarColor("Far Color", Color) = (1,1,1,1)
+	_FXAlphaFadePow("Alpha Fade Pow", float) = 4
+	_FXContrast("Contrast", float) = 1.0
+	_RawAdd("Raw Rim Add", float) = 1.0
+	[Space]
+	_VertMulMix("Vert Color Mix", Vector) = (0,0,0,1)
+	_MultiplyVertColor("Vert Color Mul", Range(0,3)) = 0.0
+	_CoreMask("Core Mask", Range(0,1)) = 0.2
+	_CoreContrast("Core Contrast", float) = 1.5
+	_CorePow("Core Pow", float) = 1.0
+	[Space]
+	_CutoffBoost ("Cutoff Boost", float) = 10.0
+	_CutoffPow("Cutoff Pow", float) = 1.0
+	_CutoffOffset ("Cutoff Offset", float) = 3.0
+END_PROPERTIES
+
+BEGIN_PASS
+	Cull [_Cull]
+	Blend One One
+	ZWrite Off
+END_PASS
+
+BEGIN_CBUFFER
+	half4 _FarColor, _FXMixOne, _FXMixTwo;
+	half _FXAlphaFadePow, _FXContrast, _CutoffBoost, _CutoffOffset, _CutoffPow, _RawAdd;
+	half _CoreMask, _CoreContrast, _CorePow, _MultiplyVertColor;
+	half4 _VertMulMix;
+	half4 _ScaleOffsetOne;
+	half _XScrollOne, _YScrollOne;
+	half4 _ScaleOffsetTwo;
+	half _XScrollTwo, _YScrollTwo;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef _HAS_FUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define _HAS_FUNC 1
+	#endif
+	#pragma multi_compile __ _USE_RIM
+END_DEFINES
+
+BEGIN_CODE
+	
+	//#ifndef HASMAINTEX
+		//#define HASMAINTEX 1
+		TEXTURE2D(_MainTex);
+		SAMPLER(sampler_MainTex);
+	//#endif
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		float t = _Time.x;
+		v.texcoord0.zw = (((v.texcoord0.xy) * _ScaleOffsetOne.xy) + _ScaleOffsetOne.zw) + float2(t * _XScrollOne, t * _YScrollOne);
+		v.texcoord0.xy = (((v.texcoord0.xy) * _ScaleOffsetTwo.xy) + _ScaleOffsetTwo.zw) + float2(t * _XScrollTwo, t * _YScrollTwo);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 sampleOne = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord0.zw);
+		half4 sampleTwo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord0.xy); 
+		half rim = 1.0;
+
+		#if _USE_RIM
+			rim = 1.0 - Rim(o.Normal, d.tangentSpaceViewDir);
+		#endif
+		fixed one = GetMix(sampleOne, _FXMixOne) * rim;
+		fixed two = GetMix(sampleTwo, _FXMixTwo) * rim;
+		#if _USE_RIM
+			fixed cutoff = saturate(pow(abs(1.0 - _CoreMask), _CorePow) * _CoreContrast);
+			one *= cutoff;
+			two *= cutoff;
+		#endif
+		fixed mask = saturate(pow(saturate((one * two) - _CutoffOffset), _CutoffPow) * _CutoffBoost);
+
+		#if _USE_RIM
+			fixed rimOut = (pow(abs(rim),_FXAlphaFadePow + 0.00001)) * _FXContrast * _RawAdd;	
+			mask = saturate(mask + rimOut);
+		#endif
+		half vertMask = GetMix(d.vertexColor, _VertMulMix);
+		mask = lerp(mask, mask * vertMask, _MultiplyVertColor);
+		float4 lerpColor = (_FarColor * mask.xxxx);
+
+		o.Albedo += lerpColor.rgb;
+	}
+
+END_CODE
+

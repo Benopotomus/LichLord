@@ -1,0 +1,106 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Skybox Dome (Base)"
+	Workflow "Unlit"
+	Stackable "False"
+END_OPTIONS
+
+BEGIN_SUBSHADERS
+   "DWD_SimpleSkyboxFunctions.surfshader"  
+END_SUBSHADERS
+
+
+BEGIN_PROPERTIES
+	[Header(Mtns and Sky)]
+	_NearColor ("Near Color", Color) = (0, 1, 0, 1)
+	_FarColor ("Far Color", Color) = (0.3, 0.3, 0.7, 1.0)
+	[NoScaleOffset] _Dome ("Dome: R Lum, G Nx, B Clouds, A Ny", 2D) = "grey" {}
+	_LightCreep("Light", Range(0,1)) = 0.5
+	_LightBoost("Light Boost", float) = 1.5
+	_LightDir("Light Dir", Vector) = (0.2, 1.0, 0.0,0)
+	[Space]
+	_CloudSpinRate("Cloud Spin Rate", float) = 1.0
+	[Vec2] _CloudNoise("Cloud Noise", Vector) = (0.1, 0.2,0,0)
+END_PROPERTIES
+
+BEGIN_PASS
+	Tags 
+	   { 
+		  "Queue"="Background" 
+		  //"RenderType"="Background" 
+		  "PreviewType"="Skybox" 
+	   }
+	Cull Front
+	ZWrite Off
+END_PASS
+
+
+BEGIN_CBUFFER
+	half4 _NearColor, _FarColor;
+	half _LightCreep, _LightBoost;
+	half4 _LightDir;
+	half _CloudSpinRate;
+	half4 _CloudNoise;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+	TEXTURE2D(_Dome);
+	SAMPLER(sampler_Dome);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		float t = _Time.x;
+
+		//texcoord0 is base UV for mtns
+		//texcoord1 is spinning uv for wormhole
+
+		v.texcoord0.xyzw = v.texcoord0.xyzw;
+		v.texcoord0.z += v.texcoord0.x + (t * _CloudSpinRate);
+		float posNoise =  (Noise(v.vertex.xy + (t * _CloudNoise.y)) * _CloudNoise.x);
+		v.texcoord0.w = v.texcoord0.y + posNoise;
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 dome = SAMPLE_TEXTURE2D(_Dome, sampler_Dome, d.texcoord0.xy);
+		half skyMask = saturate(pow(abs(dome.r), 4.0) * 10.0);
+
+		half3 n = UnpackNormal(half4(dome.g, dome.a, 1.0.x, 1.0.x));
+		half lDot = dot(n, _LightDir.xyz);
+		half lRamp = saturate(lDot - _LightCreep);
+
+		half clouds = SAMPLE_TEXTURE2D(_Dome, sampler_Dome, d.texcoord0.zw).b;
+
+		half4 cloudColor = lerp(_Cloud, _LitCloud, clouds);
+
+		half s = d.texcoord0.y * _SkyScale;
+		half skyRamp = saturate(s * 2.0);
+		half4 col = lerp(_SkyColor, _ZenithColor, skyRamp);
+		half h = 1.0 - saturate(distance((1.0 - s) - _HorizonHeight, 0.0) * _HorizonContrast);
+		col = lerp(col, _HorizonColor, h);
+
+		half cloudMask = saturate(clouds - _CloudCutoff);
+
+        col.rgb = lerp(col.rgb, ApplyOverlay(col.rgb,cloudColor.rgb), cloudMask);    
+
+		o.Albedo = lerp(_NearColor, _FarColor, dome.r).rgb;
+		o.Albedo = lerp(o.Albedo, col.rgb, skyMask);
+		o.Alpha = skyMask;
+
+		unity_FogParams = half4(0,0,0,1);
+	}
+
+END_CODE
+

@@ -1,0 +1,80 @@
+//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Maia Geo Glow"
+	Alpha "Add"
+	Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	_Transition("Transition", Range(0,1)) = 0.0
+	[Header(Geo Glow)]
+	[Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
+	[HDR] _GlowColor ("Glow Color", Color) = (0, 1, 0, 1)
+	[HDR] _SacronGlow("Sacron Glow", Color) = (1,0,0,1)
+	[Toggle] _BlendVertColor("Multiply with Vertex Color?", float) = 0.0
+	[Toggle] _BlendVertAlpha("Multiply with Vertex Alpha?", float) = 1.0
+	[Toggle] _AlphaVertColor("Use Vert Color Mask Only?", float) = 0.0
+	[Toggle] _FlipNormal ("Flip Normals?", float) = 0.0
+	[Header(Alpha Settings)]
+	_AlphaFadePow("Rim Fade Pow", Float) = 4
+    [Space]
+	_Contrast("Contrast", Float) = 1.0
+	_Sub("Sub", Float) = 0.0
+
+    [Header(Vertex Settings)]
+	_Offset("Vertex Offset",Float) = 0.0
+
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Transition;
+	half4 _GlowColor, _SacronGlow;
+	half _FlipNormal;
+	half _BlendVertColor, _AlphaVertColor, _BlendVertAlpha;
+	half _AlphaFadePow;
+	half _Offset, _Sub, _Contrast;
+END_CBUFFER
+
+BEGIN_PASS
+	Cull [_Cull]
+	Blend One One
+	ZWrite Off
+	ZTest LEqual
+END_PASS
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.vertex.xyz += (v.normal * _Offset);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half nScalar = lerp(1, -1, _FlipNormal);
+		half mask = 1.0 - Rim(o.Normal * nScalar, d.tangentSpaceViewDir);
+		mask = lerp(mask, mask * d.vertexColor.a, _BlendVertAlpha);
+		mask = lerp(mask, d.vertexColor.a, _AlphaVertColor);
+
+      mask = saturate(pow(saturate(mask - _Sub), _AlphaFadePow) * _Contrast);
+			
+      half4 col = saturate(lerp(_GlowColor, _SacronGlow, _Transition) * mask.xxxx);
+		col = lerp(col, col * d.vertexColor, _BlendVertColor);
+		o.Albedo *= col.rgb;
+		o.Alpha = mask;
+	}
+
+END_CODE
+

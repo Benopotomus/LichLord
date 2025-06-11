@@ -1,0 +1,162 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Skybox Dome"
+	Workflow "Unlit"
+	Stackable "False"
+END_OPTIONS
+
+BEGIN_SUBSHADERS
+   "DWD_SimpleSkyboxFunctions.surfshader"  
+END_SUBSHADERS
+
+
+BEGIN_PROPERTIES
+	[Header(Mtns and Sky)]
+	_NearColor ("Near Color", Color) = (0, 1, 0, 1)
+	_FarColor ("Far Color", Color) = (0.3, 0.3, 0.7, 1.0)
+	[NoScaleOffset] _Dome ("Dome: R Lum, G Nx, B Clouds, A Ny", 2D) = "grey" {}
+	_LightCreep("Light", Range(0,1)) = 0.5
+	_LightBoost("Light Boost", float) = 1.5
+	_LightDir("Light Dir", Vector) = (0.2, 1.0, 0.0,0)
+	[Space]
+	_CloudSpinRate("Cloud Spin Rate", float) = 1.0
+	[Vec2] _CloudNoise("Cloud Noise", Vector) = (0.1, 0.2,0,0)
+	[Header(Wormhole)]
+	[NoScaleOffset] _Worm ("Worm: RGB Channel Pack", 2D) = "grey" {}
+	_WormHeight("Worm Size", float) = 0.7
+	_WormContrast ("Size Contrast", float) = 2.0
+	_WormPow("Pow", float) = 1
+	_WormBoost("Boost", float) = 1
+	[HDR] _CoreColor ("Core Color", Color) = (1,1,1,1)
+	_CoreCutoff("Core Cutoff", Range(0,1)) = 0.7
+	_CorePow("Core Pow", float) = 1
+	_CoreBoost("Core Boost", float) = 1
+	[HDR] _OneColor ("Color One", Color) = (1,0,0,1)
+	[HDR] _ZeroColor ("Color Zero", Color) = (0,0,1,1)
+	[Space]
+	[Vec3] _SampleOneMix ("Worm Mix One", Vector) = (1,0,0,0)
+	_SampleOneST ("Sample One ST", Vector) = (1,1,0,0)
+	[Vec2] _SampleOneScroll("Worm Scroll One", Vector) = (0.3, -1.0,0,0)
+	[Space]
+	[Vec3] _SampleTwoMix ("Worm Mix Two", Vector) = (1,0,0,0)
+	_SampleTwoST ("Sample Two ST", Vector) = (1,1,0,0)
+	[Vec2] _SampleTwoScroll("Worm Scroll Two", Vector) = (0.3, -1.0,0,0)
+END_PROPERTIES
+
+BEGIN_PASS
+	Tags 
+	   { 
+		  "Queue"="Background" 
+		  //"RenderType"="Background" 
+		  "PreviewType"="Skybox" 
+	   }
+	Cull Front
+	ZWrite Off
+	ZTest LEqual
+END_PASS
+
+
+BEGIN_CBUFFER
+	half4 _NearColor, _FarColor;
+	half _LightCreep, _LightBoost;
+	half4 _LightDir;
+	half _CloudSpinRate;
+	half4 _CloudNoise;
+	half _WormPow, _WormBoost, _WormHeight, _WormContrast;
+	half _CoreCutoff, _CorePow, _CoreBoost;
+	half4 _CoreColor, _OneColor, _ZeroColor;
+	half4 _SampleOneMix, _SampleOneST, _SampleOneScroll;
+	half4 _SampleTwoMix, _SampleTwoST, _SampleTwoScroll;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+	TEXTURE2D(_Dome);
+	SAMPLER(sampler_Dome);
+	TEXTURE2D(_Worm);
+	SAMPLER(sampler_Worm);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		float t = _Time.x;
+
+		//texcoord0 is base UV for mtns
+		//texcoord1 is spinning uv for wormhole
+
+		v.texcoord0.xyzw = v.texcoord0.xyzw;
+		v.texcoord0.z += v.texcoord0.x + (t * _CloudSpinRate);
+		float posNoise =  (Noise(v.vertex.xy + (t * _CloudNoise.y)) * _CloudNoise.x);
+		v.texcoord0.w = v.texcoord0.y + posNoise;
+		float2 baseWormUV = v.texcoord0.xy;
+		v.texcoord1.xy = baseWormUV * _SampleOneST.xy + _SampleOneST.zw;
+		v.texcoord1.xy += _SampleOneScroll.xy * t.xx;
+		v.texcoord1.y += posNoise;
+		v.texcoord1.zw = baseWormUV * _SampleTwoST.xy + _SampleTwoST.zw;
+		v.texcoord1.zw += _SampleTwoScroll.xy * t.xx;
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 dome = SAMPLE_TEXTURE2D(_Dome, sampler_Dome, d.texcoord0.xy);
+		half skyMask = saturate(pow(abs(dome.r), 4.0) * 10.0);
+
+		half3 n = UnpackNormal(half4(dome.g, dome.a, 1.0.x, 1.0.x));
+		half lDot = dot(n, _LightDir.xyz);
+		half lRamp = saturate(lDot - _LightCreep);
+
+		half clouds = SAMPLE_TEXTURE2D(_Dome, sampler_Dome, d.texcoord0.zw).b;
+
+		half4 cloudColor = lerp(_Cloud, _LitCloud, clouds);
+
+		half s = d.texcoord0.y * _SkyScale;
+		half skyRamp = saturate(s * 2.0);
+		half4 col = lerp(_SkyColor, _ZenithColor, skyRamp);
+		half h = 1.0 - saturate(distance((1.0 - s) - _HorizonHeight, 0.0) * _HorizonContrast);
+		col = lerp(col, _HorizonColor, h);
+
+		half cloudMask = saturate(clouds - _CloudCutoff);
+
+        col.rgb = lerp(col.rgb, ApplyOverlay(col.rgb,cloudColor.rgb), cloudMask);    
+
+		half wormHeight = saturate(pow(saturate(d.texcoord0.y - _WormHeight), _WormContrast) * _WormContrast);
+
+		half3 wormOne = SAMPLE_TEXTURE2D(_Worm, sampler_Worm, d.texcoord1.xy).rgb; 
+		half3 wormTwo = SAMPLE_TEXTURE2D(_Worm, sampler_Worm, d.texcoord1.zw).rgb;
+		half wormOneMix = GetMix(wormOne, _SampleOneMix);
+		half wormTwoMix = GetMix(wormTwo, _SampleTwoMix);
+		half wormMerge = abs(wormOneMix * wormTwoMix);
+		half wormCombo = saturate(pow(wormMerge, _WormPow) * _WormBoost);
+
+		half coreSize = saturate(d.texcoord0.y - _CoreCutoff);
+		coreSize = saturate(lerp(pow(wormCombo, _CorePow) * coreSize * coreSize, coreSize, coreSize));
+		half core = saturate(pow(coreSize, _CorePow) * _CoreBoost);
+		half4 coreColor = _CoreColor * core.xxxx;
+
+		half4 wormColor = lerp(_ZeroColor, _OneColor, wormCombo);
+		wormColor *= wormMerge;
+		
+
+		half3 lightOnMtns = wormColor.rgb * lRamp.xxx * (1.0 - dome.rrr) * _LightBoost.xxx;
+
+		wormColor *= skyMask * wormHeight;
+
+		o.Albedo = lerp(_NearColor, _FarColor, dome.r).rgb;
+		o.Albedo = lerp(o.Albedo, col.rgb, skyMask);
+		o.Albedo += wormColor.rgb;
+		o.Albedo += coreColor.rgb;
+		o.Albedo += lightOnMtns;
+	}
+
+END_CODE
+

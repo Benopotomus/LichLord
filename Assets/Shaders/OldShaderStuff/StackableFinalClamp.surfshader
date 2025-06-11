@@ -1,0 +1,35 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Toggle(_FINALCLAMP_ON)] _EnableFinalClamp("Enable Final Clamp?", float) = 0.0
+	[HideUnless(_FINALCLAMP_ON)]
+	[Header(Final Color MinMax)]
+	[HideUnless(_FINALCLAMP_ON)] _ClampIntensity("Clamp Intensity", Range(0,1)) = 1.0
+	[HideUnless(_FINALCLAMP_ON)] [HDR] _ClampZero ("Min Color", Color) = (1, 1, 1, 1)
+	[HideUnless(_FINALCLAMP_ON)] [HDR] _ClampOne ("Max Color", Color) = (0, 0, 0, 1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _ClampIntensity;
+	half4 _ClampZero, _ClampOne;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma shader_feature __ _FINALCLAMP_ON
+END_DEFINES
+
+BEGIN_CODE
+
+	void FinalColorForward(Surface o, ShaderData d, inout half4 color)
+	{
+		#if _FINALCLAMP_ON
+			half4 result = min(max(color, _ClampOne), _ClampZero);
+			color = lerp(color, result, _ClampIntensity);
+		#endif
+	}
+
+END_CODE
+

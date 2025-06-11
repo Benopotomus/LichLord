@@ -1,0 +1,27 @@
+//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
+	[Enum(UnityEngine.Rendering.CompareFunction)] _ZTest("Z Test", float) = 4
+	[Enum(UnityEngine.Rendering.BlendMode)] _BlendSrc("Blend Src", float) = 1
+	[Enum(UnityEngine.Rendering.BlendMode)] _BlendTarget("Blend Target", float) = 0
+	[Toggle]_ZWrite("Z Write", float) = 1
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Cull, _ZTest;
+	half _BlendSrc, _BlendTarget;
+	half _ZWrite;
+END_CBUFFER
+
+
+BEGIN_PASS
+	Cull [_Cull]
+	Blend [_BlendSrc] [_BlendTarget]
+	ZTest [_ZTest]
+	ZWrite [_ZWrite]
+END_PASS
+

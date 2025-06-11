@@ -1,0 +1,57 @@
+//© Dicewrench Designs LLC 2024
+//Licensed for use in 'Music Visualizer' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Depth)]
+	[Toggle]_Depth ("Enable Depth Offset?", float) = 1.0
+	[HideUnless(_DEPTH_ON)] _DepthTex("Depth Tex", 2D) = "black" {}
+	[HideUnless(_DEPTH_ON)] _DepthLOD("Depth LOD", float) = 0.0
+	[HideUnless(_DEPTH_ON)] _DepthPow("Depth Pow", float) = 1.0
+	[HideUnless(_DEPTH_ON)] _DepthBoost("Depth Boost", float) = 1.0
+	[HideUnless(_DEPTH_ON)] _DepthScale("Depth Scale", float) = 1.0
+	[HideUnless(_DEPTH_ON)] _DepthPoleMask("Pole Masking", Range(0,1)) = 0
+	[HideUnless(_DEPTH_ON)] _DepthPoleDot("Pole Dot", Range(0,1)) = 1
+	[HideUnless(_DEPTH_ON)] _DepthPoleCutoff("Pole Cutoff", Range(0,1)) = 0.3
+	[HideUnless(_DEPTH_ON)] _DepthPolePow("Pole Pow", float) = 0.5
+	[HideUnless(_DEPTH_ON)] _DepthPoleBoost("Pole Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	uniform float4 _DepthTex_ST;
+	half _DepthLOD, _DepthScale;
+	half _DepthPow, _DepthBoost;
+	half _DepthPoleMask, _DepthPoleDot, _DepthPoleCutoff, _DepthPolePow, _DepthPoleBoost;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma multi_compile _ _DEPTH_ON
+END_DEFINES
+
+BEGIN_CODE
+	TEXTURE2D(_DepthTex);
+	SAMPLER(sampler_DepthTex);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{	
+		half3 norm = (0.0 - v.vertex.xyz);
+		half pole = saturate(abs(dot(norm.y, _DepthPoleDot)) - _DepthPoleCutoff);
+		pole = saturate(pow(pole, _DepthPolePow) * _DepthPoleBoost);
+		pole = pole;
+		half offset = 0.0;
+
+		#if _DEPTH_ON
+			half2 uv = v.texcoord0.xy * _DepthTex_ST.xy + _DepthTex_ST.zw;
+			uv.y = 1.0 - uv.y;
+			offset = 1.0 - SAMPLE_TEXTURE2D_LOD(_DepthTex, sampler_DepthTex, uv, _DepthLOD).r;				
+			offset = pow(abs(offset), _DepthPow) * _DepthBoost;	
+			offset = lerp(offset, 0.0, pole * _DepthPoleMask);
+			v.vertex.xyz -= (offset * _DepthScale) * norm;
+		#endif
+
+		d.extraV2F0.r = offset;
+		d.extraV2F0.g = pole;		
+	}
+END_CODE
+

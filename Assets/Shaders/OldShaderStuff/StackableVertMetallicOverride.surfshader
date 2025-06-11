@@ -1,0 +1,33 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Vert Col Metallic)]
+	[Toggle(_VERTMETAL_ON)] _EnableVertMetallic("Enable VertCol Metallic?", float) = 0.0
+	_VertGMetallic("Metalness", Range(0,1)) = 1.0
+	[HideUnless(_VertMetal_ON)] _VertMetallicVertexMask ("Vert Col Mask", Vector) = (1,1,1,1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _VertGMetallic;
+	half4 _VertMetallicVertexMask;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma shader_feature __ _VERTMETAL_ON
+END_DEFINES
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		#if _VERTMETAL_ON
+			half mask = dot(d.vertexColor, _VertMetallicVertexMask);
+			o.Metallic = lerp(o.Metallic, _VertGMetallic, mask);
+		#endif
+	}
+
+END_CODE
+

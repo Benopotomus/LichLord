@@ -1,0 +1,54 @@
+//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Light Wrap Settings)]
+	_Wrap ("Wrap", Range(0,1)) = 0.2
+	_WrapIntensity("Intensity", Range(0,1)) = 0.2
+	[HDR] _SSColor("SS Color", Color) = (1.0, 0.3, 0.1, 1.0)
+	_SSWrap ("SS Wrap", Range(0,1)) = 0.4
+	_ShadowMin("Shadow Min", Range(0,1)) = 0.3
+	[HDR] _ShadowColor("Shadow Color", Color) = (0.2, 0.05, 0.3, 1.0)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _SSColor, _ShadowColor;
+	half _Wrap, _WrapIntensity, _SSWrap, _ShadowMin;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+
+	#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+   #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+END_DEFINES
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		float3 lightDir;
+      float3 lightColor;
+		GetSun(lightDir, lightColor);
+
+		half rawLight = dot(lightDir, d.worldSpaceNormal);
+
+		half wrap = saturate(rawLight + _Wrap);
+		half ss = saturate((rawLight + _SSWrap) - wrap);
+		half shadow = 1.0 - saturate(wrap + ss);
+
+		half3 lightWrap = wrap.xxx * lightColor * _WrapIntensity.xxx;
+		lightWrap += ss.xxx * _SSColor.rgb;
+		lightWrap += _ShadowColor.rgb * shadow.xxx * _ShadowMin.xxx;
+		lightWrap *= o.Albedo;
+
+		o.Emission += lightWrap;
+	}
+
+END_CODE
+

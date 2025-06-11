@@ -1,0 +1,62 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Stackable "False"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Flame Wiggle)]
+	_WiggleIntensity("Wiggle Intensity", Range(0,1)) = 1.0
+    _PhaseScale("Vert R Phase Scale", float) = 1.0
+    [Space]
+    [Vec3] _WiggleScale("Amplitude By Axis", Vector) = (1,0,1, 0)
+    _WiggleFrequency ("Frequency", float) = 1.0
+    _WigglePow("Pow", float) = 1.0
+    _WiggleBoost("Boost", float) = 1.0
+    [Space]
+    _WiggleHeightScale("Wiggle Height Scale", float) = 1.0
+    _WiggleDamp("Dampen", float) = 0.2
+
+
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _WiggleIntensity, _WiggleFrequency, _WigglePow, _WiggleBoost;
+    half _WiggleHeightScale, _WiggleDamp, _PhaseScale;
+    half4 _WiggleScale;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASNOISE
+		#include "DWD_NoiseFunctions.cginc" 
+		#define HASNOISE 1
+	#endif
+END_DEFINES
+
+BEGIN_PASS("All")
+    Tags { "Disable Batching" = "True" }
+END_PASS
+
+
+BEGIN_CODE
+    
+    
+
+   void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+   {
+      half3 vertPos = v.vertex.xyz;
+      half vec = vertPos.z;
+
+      half t = _Time.x + (v.vertexColor.r * _PhaseScale);
+      half ramp = saturate((vec / _WiggleHeightScale) - _WiggleDamp);
+      half noise = Noise(vec.xx + (t * _WiggleFrequency));
+      noise = saturate(pow(abs(noise), _WigglePow) * _WiggleBoost) * 2.0 - 1.0;
+
+      v.vertex.xyz = vertPos + (_WiggleScale.xyz * noise.xxx * ramp.xxx * _WiggleIntensity.xxx);
+   }
+
+END_CODE
+

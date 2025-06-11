@@ -1,0 +1,40 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Vert Col Occlusion)]
+	
+	[Toggle(_VERTOCCLUSION_ON)] _EnableVertOcclusion("Enable VertCol Occlusion?", float) = 0.0
+	[HideUnless(_VERTOCCLUSION_ON)] [KeywordEnum(Constant, Baked)] _VertOcclusionMode("Mode", float) = 0.0
+	[HideUnless(_VERTOCCLUSION_ON)] _VertOcclusion("Occlusion", Range(0,1)) = 1.0
+	[HideUnless(_VERTOCCLUSION_ON)] _VertOcclusionVertexMask ("Vert Col Mask", Vector) = (1,1,1,1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _VertOcclusion;
+	half4 _VertOcclusionVertexMask;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma shader_feature __ _VERTOCCLUSION_ON
+	#pragma shader_feature _VERTOCCLUSIONMODE_CONSTANT _VERTOCCLUSIONMODE_BAKED
+END_DEFINES
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		#if _VERTOCCLUSION_ON
+			half mask = dot(d.vertexColor, _VertOcclusionVertexMask);
+			#if _VERTOCCLUSIONMODE_CONSTANT
+				o.Occlusion = lerp(o.Occlusion, _VertOcclusion, mask);
+			#else
+				o.Occlusion = lerp(o.Occlusion, mask, _VertOcclusion);
+			#endif
+		#endif
+	}
+
+END_CODE
+

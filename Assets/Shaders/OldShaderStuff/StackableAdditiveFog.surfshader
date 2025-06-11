@@ -1,0 +1,95 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Toggle(_ADDITIVEFOG_ON)] _EnableAdditiveFog("Enable Additive Fog?", float) = 0.0
+	[HideUnless(_ADDITIVEFOG_ON)] 
+	[Header(Vertex Fog)]
+	[HDR] _SourceColor("Source Color", Color) = (1,1,1,1)
+	[HideUnless(_ADDITIVEFOG_ON)] [HDR] _FalloffColor("Falloff Color", Color) = (0,0,0,0)
+	[Space]
+	[HideUnless(_ADDITIVEFOG_ON)] _VertFogCutoff("Cutoff", Range(0,1)) = 0.01
+	[HideUnless(_ADDITIVEFOG_ON)] _VertFogPow("Vert Fog Pow", float) = 1.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VertFogBoost("Vert Fog Boost", float) = 2.0
+	[Space]
+	[HideUnless(_ADDITIVEFOG_ON)] _VDistFalloffPoint("Local Source Point", Vector) = (0,0,0,0)
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogDistCutoff("Cutoff", float) = 1.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogDist("Distance Scale", float) = 30.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogDistPow("Dist Pow", float) = 1.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogDistBoost("Dist Boost", float) = 2.0
+	[Space]
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogScale ("Scale", float) = 0.001
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogCutoff("Cutoff", float) = 0.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogCutoffNudge("Cutoff Nudge", Range(-1,1)) = 0.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogPower("Power", float) = 1.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogBoost("Boost", float) = 1.0
+	[Header(Fog Blend)]
+	[HideUnless(_ADDITIVEFOG_ON)] _ApplyFinal ("Final Color", Range(0,1)) = 0.0
+	[HideUnless(_ADDITIVEFOG_ON)] _ApplyEmissive("Emissive", Range(0,1)) = 1.0
+	[Header(Fog Noise)]
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogNoiseIntensity("Noise Intensity", Range(0,1)) = 0.5
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogNoiseRate("Noise Rate", float) = 20.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogNoise("Noise Scale", float) = 1.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogNoisePow("Noise Pow", float) = 1.0
+	[HideUnless(_ADDITIVEFOG_ON)] _VFogNoiseBoost("Noise Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _SourceColor, _FalloffColor;
+	half _VertFogCutoff, _VertFogPow, _VertFogBoost;
+	half _ApplyFinal, _ApplyEmissive;
+	half4 _VDistFalloffPoint;
+	half _VFogScale, _VFogCutoff, _VFogPower, _VFogBoost, _VFogCutoffNudge;
+	half _VFogDist, _VFogDistPow, _VFogDistBoost, _VFogDistCutoff;
+	half _VFogNoiseRate, _VFogNoise, _VFogNoisePow, _VFogNoiseBoost, _VFogNoiseIntensity;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma shader_feature __ _ADDITIVEFOG_ON
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+	
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		#if _ADDITIVEFOG_ON
+			float3 worldSpacePos = mul(unity_ObjectToWorld, v.vertex).xyz;
+			half depth = 1.0 - saturate(saturate(distance(_VDistFalloffPoint.xyz, v.vertex.xyz)/_VFogDist) - _VFogDistCutoff);
+
+			depth = saturate(pow(abs(depth), _VFogDistPow) * _VFogDistBoost);
+			half vertical = saturate(pow( (1.0 - saturate(worldSpacePos.y / _VFogScale) - _VFogCutoff), _VFogPower) * _VFogBoost + _VFogCutoffNudge);
+
+			half nRate = _Time.x * _VFogNoiseRate;
+			half noise = saturate(pow(Noise( Noise(worldSpacePos.xy * _VFogNoise) + nRate.xx), _VFogNoisePow) * _VFogNoiseBoost);
+			noise = lerp(1.0, noise, _VFogNoiseIntensity);
+
+			half fogMask = saturate(pow(saturate(v.vertexColor.r - _VertFogCutoff), _VertFogPow) * _VertFogBoost);
+			fogMask = saturate(fogMask + saturate(depth * vertical * noise));
+
+			d.extraV2F0.a = fogMask;
+			d.extraV2F0.rgb = lerp(_FalloffColor.rgb, _SourceColor.rgb, fogMask);	
+		#endif
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		#if _ADDITIVEFOG_ON
+			o.Emission += (d.extraV2F0.rgb * _ApplyEmissive.xxx);
+		#endif
+	}
+
+	void FinalColorForward(Surface o, ShaderData d, inout half4 color)
+	{
+		#if _ADDITIVEFOG_ON
+			color.rgb = lerp(color.rgb, d.extraV2F0.rgb, _ApplyFinal * d.extraV2F0.a); 
+		#endif
+	}
+
+END_CODE
+

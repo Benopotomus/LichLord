@@ -1,0 +1,65 @@
+//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+    ShaderName "DWD/Skybox w Sun"
+    //Tags{"RenderType" = "Opaque"}
+    Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_SUBSHADERS
+    "DWD_SkyboxFunctions.surfshader"  
+END_SUBSHADERS
+
+BEGIN_PASS
+    Tags 
+    { 
+        "Queue"="Background" 
+        "RenderType"="Background" 
+        "PreviewType"="Skybox" 
+    }
+    Cull Off
+    ZWrite Off
+END_PASS
+
+BEGIN_DEFINES
+    #pragma multi_compile __ _STARSON_ON
+END_DEFINES
+
+BEGIN_CODE
+
+   void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+      float t = _Time.x;
+      v.texcoord2.xyz = v.vertex.xyz;
+      v.texcoord1.xyzw = v.texcoord1.xyzw;
+      v.texcoord0.xyz = Spin(v.vertex.xyz, t, _SpinRate, _Rotation);      
+      v.texcoord0.w = t;
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 tex = SAMPLE_TEXTURECUBE_LOD(_Tex, sampler_Tex, d.texcoord0.xyz, _LOD);
+        #if _STARSON_ON
+            half3 stars = SAMPLE_TEXTURECUBE_LOD(_Stars, sampler_Stars, d.texcoord2.xyz, 0).rgb;
+            half3 starColor = lerp(_ColorOne.rgb, _ColorTwo.rgb, stars.b);
+            half twinkle = saturate(pow(ZeroOneZero(frac(d.texcoord0.w * _TwinkleRate + (stars.g * _TwinkleFreq))), _TwinklePow) * _TwinkleBoost);
+            starColor *= twinkle.xxx;
+            starColor *= stars.rrr;
+            starColor *= stars.rrr;
+        #endif
+
+        half4 sky = SkyboxResult(tex, d);
+        o.Albedo = sky.rgb;
+        #if _STARSON_ON
+            o.Albedo = max(o.Albedo, starColor * sky.aaa);
+        #endif
+        o.Alpha = 1.0;
+
+        unity_FogParams = half4(0,0,0,1);
+	}
+
+END_CODE
+

@@ -1,0 +1,186 @@
+//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Simon Slam"
+	Alpha "Blend"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(PBR Settings)]
+	_Smoothness ("Smoothness", Range(0,1)) = 0.8
+	_Metalness ("Metalness", Range(0,1)) = 0.2
+	_Occlusion ("Occlusion", Range(0,1)) = 1.0
+	_Opacity("Opacity", Range(0,1)) = 0.6
+	_Emission("Emission", Range(0,3)) = 0.8
+	[Space]
+	[Toggle(_BILLBOARD_ON)] _Billboard("Enable Billboard?", float) = 0.0
+	_TileScale("Scale Multiplier", float) = 1.0
+	[HDR] _VertColor("Base Color", Color) = (0.6,0.6,0.6,1.0)
+	[HDR] _Color ("Main Color", Color) = (0, 1, 0, 1)
+	[HDR] _BillboardColor("Billboard Color", Color) = (1,1,1,1)
+	[Space]
+	_ColorPow("Pow", float) = 1.0
+	_ColorBoost("Boost", float) = 2.0
+	[Space]
+	[NoScaleOffset] _BaseTex("Base Tex", 2D) = "black" {}
+	[Toggle(_RIM)] _Rim("Enable Rimlight?", float) = 1.0
+	[HDR] _RimColor ("Rim Color", Color) = (1,1,1,1)
+	_RimPower("Rim Power", float) = 1.0
+	[Space]
+	[Toggle(_GLASS_ON)] _Glass("Enable Glass?", float) = 0.0
+	_GlassLOD("Glass LOD", float) = 0.0
+	_GlassIntensity("Glass Intensity", Range(0,3)) = 1.0
+	_GlassFalloff("Glass Falloff 2", Range(0,1)) = 0.3
+
+	[Header(Core)]
+	[Toggle(_CORE_ON)] _Core ("Enable Core?", float) = 1.0
+	[HDR] _CoreColor("Color", Color) = (1,1,1,1)
+	_Depth("Depth", float) = 1.0
+	_DepthScalar("Depth Scalar", float) = 1.0
+	_CoreRate("Rate", float) = 1.0
+	_CoreCutoff("Cutoff", float) = 1.0
+	_CorePow("Pow", float) = 1.0
+	_CoreBoost("Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Smoothness, _Metalness, _Occlusion, _Opacity, _Emission;
+	half _Billboard;
+	half _TileScale;
+	half4 _Color, _VertColor, _BillboardColor;
+	half _ColorPow, _ColorBoost;
+	half4 _RimColor;
+	half _RimPower;
+	half _GlassIntensity, _GlassFalloff, _GlassLOD;
+
+	half4 _CoreColor;
+	half _Depth, _DepthScalar;
+	half _CoreRate, _CoreCutoff, _CorePow, _CoreBoost;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+
+	#pragma multi_compile __ _RIM
+	#pragma multi_compile __ _BILLBOARD_ON
+	#pragma multi_compile __ _GLASS_ON
+	#pragma multi_compile __ _CORE_ON
+END_DEFINES
+
+BEGIN_PASS("All")
+	ZWrite Off
+	Blend SrcAlpha OneMinusSrcAlpha
+	Cull Back
+	ZTest LEqual
+END_PASS
+
+BEGIN_CODE
+	
+	TEXTURE2D(_BaseTex);
+	SAMPLER(sampler_BaseTex);
+
+	void BillboardYAxis(inout float4 pos, inout float3 normal)
+	{
+		float3 worldPivot = unity_ObjectToWorld._m03_m13_m23;
+		#ifdef UNITY_SINGLE_PASS_STEREO
+			float3 camPos = (unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1]) * 0.5;
+        #else
+			float3 camPos = _WorldSpaceCameraPos;
+        #endif
+
+		pos.xy *= float2(length(unity_ObjectToWorld._m00_m10_m20), length(unity_ObjectToWorld._m01_m11_m21)).xy;
+		float3 f = normalize(worldPivot - camPos);
+        float3 u = float3(0.0,1.0,0.0);
+        float3 r = normalize(cross(u, f));
+        u = -normalize(cross(r, f));
+        float3x3 billboardRotation = float3x3(u,f,r); //float3x3(r, u, f);
+
+		pos.xyz = mul(pos.xyz, billboardRotation);
+		normal = mul(normal.xyz, billboardRotation).xyz;
+
+		pos.xyz = mul((float3x3)unity_WorldToObject, pos.xyz).xyz;
+		normal = mul(normal, (float3x3)unity_ObjectToWorld).xyz;
+	}
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d) 
+	{	
+		v.vertex.xyz *= (_TileScale).xxx;
+		#if _BILLBOARD_ON
+			BillboardYAxis(v.vertex, v.normal);
+		#endif
+
+		#if _CORE_ON
+			v.texcoord0.z =  Noise(_Time.xx * _CoreRate.xx);
+			v.texcoord1.xyz = mul(unity_ObjectToWorld, float4(1.0,0.0,0.0, 1.0)).xyz;
+			v.texcoord2.xyz = mul(unity_ObjectToWorld, float4(0.0,1.0,0.0, 1.0)).xyz;
+		#endif
+	} 
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 sample = SAMPLE_TEXTURE2D(_BaseTex, sampler_BaseTex, d.texcoord0.xy);
+		half4 baseColor = d.vertexColor;
+		baseColor.a = 1.0;
+		baseColor *= _VertColor;
+		half4 billColor = lerp(_Color, _BillboardColor, _Billboard) * d.vertexColor;
+		half4 combo = lerp(baseColor, billColor, sample.g * d.vertexColor.a);
+		half4 result = saturate(pow(d.vertexColor * combo, _ColorPow) * _ColorBoost);
+		o.Albedo = result.rgb;
+		o.Alpha = combo.a;
+
+		half mask = Rim(o.Normal, d.tangentSpaceViewDir);
+		
+		#if _GLASS_ON
+			float4 glass = SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, -d.worldSpaceViewDir, _GlassLOD);
+			float3 glassHDR = 0.0.xxx;
+			#if defined(UNITY_USE_NATIVE_HDR)
+				glassHDR.rgb = glass.rgb;
+			#else
+				 glassHDR = DecodeHDREnvironment(glass, unity_SpecCube0_HDR);
+			#endif
+
+			glassHDR *= _GlassIntensity.xxx;
+			half glassMask = saturate((1.0 - mask) - _GlassFalloff);
+
+			o.Albedo = lerp(o.Albedo, o.Albedo * glassHDR.rgb, glassMask);
+		#endif
+
+		half rimMask = 0.0;
+		#if _RIM
+			rimMask = saturate(pow(mask, _RimPower));
+			o.Albedo += (_RimColor.rgb * baseColor * rimMask.xxx);
+		#endif
+
+		#if _CORE_ON
+			float2 offset = half2(0.5,0.5);
+			float angleDot = ((dot(d.worldSpaceViewDir, d.texcoord2.xyz)) * _DepthScalar);
+			float vertDot = ((dot(d.worldSpaceViewDir, d.texcoord3.xyz)) * _DepthScalar);
+
+			offset.x += angleDot * _Depth;
+			offset.y += vertDot * _Depth;
+
+			half noise = SAMPLE_TEXTURE2D(_BaseTex, sampler_BaseTex, d.texcoord0.xy + offset).b;
+
+			half core = 1.0.x - rimMask;
+			core = saturate(pow(saturate(core - _CoreCutoff), _CorePow) * _CoreBoost);
+			core *= ZeroOneZero(frac(noise + d.texcoord0.z));
+			half3 coreColor = (_CoreColor.rgb * baseColor)  * core.xxx;
+
+			o.Albedo += coreColor;
+		#endif
+
+		o.Smoothness = _Smoothness;
+		o.Metallic = _Metalness;
+		o.Occlusion = _Occlusion;
+		o.Alpha = saturate(o.Alpha) * _Opacity;
+		o.Emission = saturate(o.Albedo) * o.Alpha * _Emission.xxx;
+	}
+
+END_CODE
+

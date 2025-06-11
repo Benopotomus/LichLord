@@ -1,0 +1,57 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Workflow "Metallic"  
+	Fallback "Diffuse"   
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[NoScaleOffset] _Tex("Tex", 2D) = "grey" {}
+END_PROPERTIES
+
+BEGIN_CBUFFER
+END_CBUFFER
+
+BEGIN_DEFINES
+	#define SHADER_TARGET 45
+	#define UNITY_INSTANCING_ENABLED
+END_DEFINES
+
+
+BEGIN_CODE
+
+	half4 _TintColor[1023];
+
+	TEXTURE2D(_Tex);
+	SAMPLER(sampler_Tex);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		UNITY_SETUP_INSTANCE_ID(v);
+	}
+
+	half LightDot(float3 lightDir, half3 surfaceNormal, ShaderData d)
+    {
+	    float3 normalDirection = TangentToWorldSpace(d, surfaceNormal);
+	    return dot(normalDirection, lightDir);
+    }
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		o.Albedo = SAMPLE_TEXTURE2D(_Tex, sampler_Tex, d.texcoord0.xy).xyz * _TintColor[unity_InstanceID].rgb;
+		float3 lightDir;
+        float3 lightColor;
+	    GetSun(lightDir, lightColor);
+
+        half nl = max(0.0, LightDot(lightDir, o.Normal, d));
+
+		o.Emission = lightColor * nl.xxx * o.Albedo;
+
+		o.Alpha = 1.0;
+	}
+
+END_CODE
+

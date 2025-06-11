@@ -1,0 +1,10 @@
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		o.Emission *= o.Alpha;
+	}
+
+END_CODE
+

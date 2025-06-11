@@ -1,0 +1,104 @@
+﻿//© Dicewrench Designs LLC 2020-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Effects/Scrolling Mix Fade"
+	Stackable "False"
+	Workflow "Unlit"
+	Alpha "Blend"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Scrolling FX)]
+	[NoScaleOffset] _MainTex ("Main Tex", 2D) = "black" {}
+	[Space]
+	_FXMixOne("Mix One", Vector) = (1,0,0,0)
+	_ScaleOffsetOne ("Scale Offset One", Vector) = (1,1,0,0)
+	_XScrollOne ("X Scroll One", float) = 0.2
+	_YScrollOne ("Y Scroll One", float) = 0.03
+	[Space]
+	_FXMixTwo("Mix Two", Vector) = (0,1,0,0)
+	_ScaleOffsetTwo ("Scale Offset Two", Vector) = (1,1,0,0)
+	_XScrollTwo ("X Scroll Two", float) = 0.2
+	_YScrollTwo ("Y Scroll Two", float) = 0.03
+	[Space]
+	[HDR] _FarColor("Far Color", Color) = (1,1,1,1)
+	[Space]
+	_CutoffBoost ("Cutoff Boost", float) = 10.0
+	_CutoffPow("Cutoff Pow", float) = 1.0
+	_CutoffOffset ("Cutoff Offset", float) = 3.0
+	[Header(Mul Layer)]
+	_FXMixMul("Mix Mul", Vector) = (1,0,0,0)
+	_ScaleOffsetMul ("Scale Offset Mul", Vector) = (1,1,0,0)
+	[Space]
+	_MulBoost ("Mul Boost", float) = 10.0
+	_MulPow("Mul Pow", float) = 1.0
+	_MulOffset ("Mul Offset", float) = 3.0
+END_PROPERTIES
+
+BEGIN_PASS
+	Cull [_Cull]
+	Blend SrcAlpha OneMinusSrcAlpha
+	ZWrite Off
+END_PASS
+
+BEGIN_CBUFFER
+	half4 _FarColor, _FXMixOne, _FXMixTwo;
+	half _CutoffBoost, _CutoffOffset, _CutoffPow;
+	half4 _ScaleOffsetOne;
+	half _XScrollOne, _YScrollOne;
+	half4 _ScaleOffsetTwo;
+	half _XScrollTwo, _YScrollTwo;
+
+	half4 _FXMixMul;
+	half _MulBoost, _MulOffset, _MulPow;
+	half4 _ScaleOffsetMul;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+	
+	#ifndef HASMAINTEX
+		#define HASMAINTEX 1
+		TEXTURE2D(_MainTex);
+		SAMPLER(sampler_MainTex);
+	#endif
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.texcoord1.xy = v.texcoord0.xy * _ScaleOffsetMul.xy + _ScaleOffsetMul.zw;
+		float t = _Time.x;
+		v.texcoord0.zw = (((v.texcoord0.xy) * _ScaleOffsetOne.xy) + _ScaleOffsetOne.zw) + float2(t * _XScrollOne, t * _YScrollOne);
+		v.texcoord0.xy = (((v.texcoord0.xy) * _ScaleOffsetTwo.xy) + _ScaleOffsetTwo.zw) + float2(t * _XScrollTwo, t * _YScrollTwo);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 sampleOne = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord0.zw);
+		half4 sampleTwo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord0.xy); 
+
+		fixed one = GetMix(sampleOne, _FXMixOne);
+		fixed two = GetMix(sampleTwo, _FXMixTwo);
+
+		half4 sampleMul = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord1.xy);
+
+		fixed mulMix = GetMix(sampleMul, _FXMixMul);
+		fixed mask = saturate(pow(abs(mulMix  - _MulOffset), _MulPow) * _MulBoost);
+		mask = saturate(pow(abs(one * two * mask - _CutoffOffset), _CutoffPow) * _CutoffBoost);
+
+		half4 color = _FarColor.rgba * d.vertexColor.rgba * mask.xxxx;
+
+		o.Albedo = color.rgb;
+		o.Alpha = color.a;
+	}
+
+END_CODE
+

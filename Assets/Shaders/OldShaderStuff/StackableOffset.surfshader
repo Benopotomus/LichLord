@@ -1,0 +1,21 @@
+﻿
+//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Offset)]
+	_OffsetA("Offset Factor", Range(-10,10)) = 0
+	_OffsetB("Offset Units", Range(-10,10)) = 0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	float _OffsetA, _OffsetB;
+END_CBUFFER
+
+
+BEGIN_PASS
+	Offset [_OffsetA], [_OffsetB]
+END_PASS
+

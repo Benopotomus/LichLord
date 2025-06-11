@@ -1,0 +1,18 @@
+
+BEGIN_PROPERTIES
+	_Opacity("Opacity", Range(0,1)) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Opacity;
+END_CBUFFER
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		o.Alpha *= _Opacity;
+	}
+
+END_CODE
+

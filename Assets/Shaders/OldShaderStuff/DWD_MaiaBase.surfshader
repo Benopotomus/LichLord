@@ -1,0 +1,75 @@
+
+BEGIN_OPTIONS
+	Workflow "Metallic"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	_Transition("Transition", Range(0,1)) = 0.0
+	[Header(Textures)]
+	_ColorPack("R: Body Colors, G: Emis 1, B: Emis 2, A: Panels", 2D) = "black" {}
+	_DataPack("R: Metalness, G: AO, B: Smoothness", 2D) = "white" {}
+
+	[Header(PBR Settings)]
+	_Smoothness("Smoothness", Range(0,1)) = 1.0
+	_Metalness("Metalness", Range(0,1)) = 1.0
+	_Occlusion("Occlusion", Range(0,1)) = 1.0
+
+	[Header(Maia Colors)]
+	_MaiaBodyOne("Body One", Color) = (0,0,0,1)
+	_MaiaBodyTwo("Body Two", Color) = (0.8, 0.8, 0.8, 1.0)
+	_MaiaPanelOne("Panel One", Color) = (0.3, 0.7, 1.0, 1.0)
+	_MaiaPanelTwo("Panel Two", Color) = (0.6, 0.0, 0.8, 1.0)
+	[HDR] _MaiaEmOne("Emissive One", Color) = (0.3, 0.7, 1.0, 1.0)
+	[HDR] _MaiaEmTwo("Emissive Two", Color) = (0.6, 0.0, 0.8, 1.0)
+
+	[Header(Sacron Colors)]
+	_SacronBodyOne("Body One", Color) = (0,0,0,1)
+	_SacronBodyTwo("Body Two", Color) = (0.8, 0.8, 0.8, 1.0)
+	_SacronPanelOne("Panel One", Color) = (0.3, 0.7, 1.0, 1.0)
+	_SacronPanelTwo("Panel Two", Color) = (0.6, 0.0, 0.8, 1.0)
+	[HDR] _SacronEmOne("Emissive One", Color) = (0.3, 0.7, 1.0, 1.0)
+	[HDR] _SacronEmTwo("Emissive Two", Color) = (0.6, 0.0, 0.8, 1.0)
+
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Transition, _Smoothness, _Metalness, _Occlusion;
+
+	half4 _MaiaBodyOne, _MaiaBodyTwo, _MaiaPanelOne, _MaiaPanelTwo, _MaiaEmOne, _MaiaEmTwo;
+	half4 _SacronBodyOne, _SacronBodyTwo, _SacronPanelOne, _SacronPanelTwo, _SacronEmOne, _SacronEmTwo;
+END_CBUFFER
+
+
+BEGIN_CODE
+	TEXTURE2D(_ColorPack);
+	SAMPLER(sampler_ColorPack);
+	TEXTURE2D(_DataPack);
+	SAMPLER(sampler_DataPack);
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 colorPack = SAMPLE_TEXTURE2D(_ColorPack, sampler_ColorPack, d.texcoord0.xy);
+		half3 dataPack = SAMPLE_TEXTURE2D(_DataPack, sampler_DataPack, d.texcoord0.xy).rgb;
+
+		//pbr
+		o.Smoothness = dataPack.b * _Smoothness;
+		o.Metallic = dataPack.r * _Metalness;
+		o.Occlusion = lerp(dataPack.g, 1.0, 1.0 - _Occlusion);
+
+		half3 maiaBody = lerp(_MaiaBodyOne.rgb, _MaiaBodyTwo.rgb, colorPack.b);
+		half3 maiaPanels = lerp(_MaiaPanelOne.rgb, _MaiaPanelTwo.rgb, saturate((colorPack.a - 0.1) * 1.1));
+		maiaBody = lerp(maiaBody, maiaPanels, saturate(colorPack.a * 20.0));
+		half3 maiaEmission = (_MaiaEmOne.rgb * colorPack.rrr) + (_MaiaEmTwo.rgb * colorPack.ggg);
+
+		half3 sacronBody = lerp(_SacronBodyOne.rgb, _SacronBodyTwo.rgb, colorPack.b);
+		half3 sacronPanels = lerp(_SacronPanelOne.rgb, _SacronPanelTwo.rgb, saturate((colorPack.a - 0.1) * 1.1));
+		sacronBody = lerp(sacronBody, sacronPanels, saturate(colorPack.a * 20.0));
+		half3 sacronEmission = (_SacronEmOne.rgb * colorPack.rrr) + (_SacronEmTwo.rgb * colorPack.ggg);
+
+		o.Albedo = lerp(maiaBody, sacronBody, _Transition);
+		o.Emission = lerp(maiaEmission, sacronEmission, _Transition);
+		o.Alpha = 1.0;
+	}
+
+END_CODE
+

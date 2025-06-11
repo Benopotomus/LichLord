@@ -1,0 +1,51 @@
+﻿//© Dicewrench Designs LLC 2023
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(World Pos Fog)]
+	[HDR] _PosColor("Pos Color", Color) = (1,1,1,1)
+	[Vec3] _WorldPos ("World Pos", Vector) = (0,0,0,0)
+	[Vec3] _AxisMask("Axis Mask", Vector) = (1,0,1,0)
+	[Space]
+	_PosScale("Scale", float) = 0.01
+	_PosCutoff("Cutoff", float) = 20
+	_PosPow("Power", float) = 1.0
+	_PosBoost("Boost", float) = 1.0
+
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _PosColor;
+	half4 _WorldPos, _AxisMask;
+	half _PosScale, _PosCutoff, _PosPow, _PosBoost;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+
+	void FinalColorForward(Surface o, ShaderData d, inout half4 color)
+	{
+		half x = distance(d.worldSpacePosition.x, _WorldPos.x) * _PosScale;
+		half y = distance(d.worldSpacePosition.y, _WorldPos.y) * _PosScale;
+		half z = distance(d.worldSpacePosition.z, _WorldPos.z) * _PosScale;
+
+		half mix = saturate(GetMix(half3(x,y,z), _AxisMask) - _PosCutoff);
+		mix = saturate(pow(mix, _PosPow) * _PosBoost);
+
+		color.rgb = lerp(color.rgb, _PosColor.rgb, mix * _PosColor.a);
+	}
+
+END_CODE
+

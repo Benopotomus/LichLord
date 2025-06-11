@@ -1,0 +1,28 @@
+//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Workflow "Metallic"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[HDR] _Color ("Main Color", Color) = (0, 1, 0, 1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _Color;
+END_CBUFFER
+
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		o.Albedo = _Color.rgb;
+		o.Alpha = 1.0;
+	}
+
+END_CODE
+

@@ -1,0 +1,188 @@
+//© Dicewrench Designs LLC 2018-2022
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_SUBSHADERS
+   "StackableSkyParameters.surfshader"   
+   //"/../../Character/SubShaders/SSApproximation.surfshader"
+END_SUBSHADERS
+
+BEGIN_PROPERTIES
+	_Tint ("Tint Color", Color) = (.5, .5, .5, .5)
+   [Gamma] _Exposure ("Exposure", Range(0, 8)) = 1.0
+   _Rotation ("Rotation", Range(0, 360)) = 0
+   _SpinRate("Spin Rate", float) = 1.0
+   [NoScaleOffset] _Tex ("Cubemap (RGB Normal, A Height)", Cube) = "grey" {}
+   _LOD("Lod", float) = 0.0
+   [Header(Cloud Settings)]
+   _CloudCutoff ("Cutoff", Range(0,1)) = 0.2
+   [Space]
+   [HDR] _Cloud ("Cloud", Color) = (0.8, 0.8, 0.8, 1.0)
+   [HDR] _LitCloud("Lit Cloud", Color) = (1.0, 1.0, 0.8, 1.0)
+   [Space]
+   _LightWrap("Light Wrap", float) = 1.0
+   [Space]
+   [HDR] _Shadow("Shadow", Color) = (0,0,0,1)
+   _ShadowPow("Pow", float) = 1.0
+   _ShadowBoost("Boost", float) = 1.0
+   [HDR] _BackLit("Back Lit", Color) = (1,1,1,1)
+   _EdgeSize("Edge Size", Range(0,1)) = 0.0
+   _Falloff("Falloff", Range(0,1)) = 0.3
+   _Inner("Inner", Range(0,3)) = 1.2
+   _Density("Density", float) = 1.0
+   [Header(Sun Settings)]
+   [HDR] _SunColor("Sun", Color) = (1,1,1,1)
+   _SunSize("Size", float) = 1.0
+   _SunPow("Power", float) = 1.0
+   _SunContrast("Contrast", float) = 10.0
+   [Space]
+   [HDR] _HaloColor("Halo", Color) = (1,1,1,1)
+   _HaloSize("Size", float) = 1.0
+   _HaloPow("Power", float) = 1.0
+   _HaloContrast("Contrast", float) = 10.0
+   [Toggle] _StarsOn("Enable Stars?", float) = 0.0
+   [NoScaleOffset] _Stars ("Stars R Lum, G Phase, B Color Var)", Cube) = "black" {}
+   [HDR] _ColorOne ("Color One", Color) = (0.5,0.5,0.5,0.5)
+   [HDR] _ColorTwo("Color Two", Color) = (0.6,0.6,0.8,0.8)
+   _TwinkleFreq("Twinkle Ramp Frequency", float) = 1.0
+   _TwinkleRate("Twinkle Rate", float) = 1.0
+   _TwinklePow("Twinkle Pow", float) = 1.0
+   _TwinkleBoost("Twinkle Boost", float) = 1.0
+END_PROPERTIES 
+
+BEGIN_CBUFFER
+	half4 _Tex_HDR;
+    half4 _Tint;
+    half4 _Cloud, _LitCloud, _SunColor, _HaloColor;
+    half4 _Shadow, _BackLit;
+    half _LightWrap;
+    half _Density, _EdgeSize, _Falloff, _ShadowPow, _ShadowBoost, _Inner;
+    half _LOD, _Exposure, _SpinRate, _CloudCutoff;   
+    half _SunSize, _SunPow, _SunContrast;
+    half _HaloSize, _HaloPow, _HaloContrast;
+    float _Rotation;
+    #if _STARSON_ON
+        half4 _ColorOne, _ColorTwo;
+        half _TwinkleRate, _TwinklePow, _TwinkleBoost, _TwinkleFreq;
+    #endif
+END_CBUFFER
+
+BEGIN_DEFINES
+    #ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+    
+    TEXTURECUBE(_Tex);
+    SAMPLER(sampler_Tex);
+    #if _STARSON_ON
+        TEXTURECUBE(_Stars);
+        SAMPLER(sampler_Stars);
+    #endif
+
+    half LightDot(float3 lightDir, half3 surfaceNormal, ShaderData d)
+    {
+	    float3 normalDirection = TangentToWorldSpace(d, surfaceNormal);
+	    return dot(normalDirection, lightDir);
+    }
+
+    float3 RotateAroundYInDegrees (float3 vertex, float degrees)
+    {
+        float alpha = degrees * 3.1415926 / 180.0;
+        float sina, cosa;
+        sincos(alpha, sina, cosa);
+        float2x2 m = float2x2(cosa, -sina, sina, cosa);
+        return float3(mul(m, vertex.xz).xy, vertex.y).xzy;
+    }
+
+    float3 Spin(float3 vertPos, float time, float rate, float rotation)
+	{
+	   float spin = time * rate;
+       return RotateAroundYInDegrees(vertPos, rotation + spin);
+	}
+
+    VertexData ConstructTangentSpaceMatrix(VertexData v, float time, float rate, float rotation)
+    {
+        float spin = time * rate;
+        half4 tangent = v.tangent;
+        tangent.xyz = RotateAroundYInDegrees(v.tangent.xyz, rotation + spin);
+        half3 wNormal = mul((float3x3)unity_ObjectToWorld, v.normal.xyz).xyz;
+        half3 wTangent = mul((float3x3)unity_ObjectToWorld, tangent.xyz).xyz;
+        half tangentSign = tangent.w * unity_WorldTransformParams.w;
+        half3 wBitangent = cross(wNormal, wTangent) * tangentSign;
+        v.texcoord1.xyz = half3(wTangent.x, wBitangent.x, wNormal.x);
+        v.texcoord2.xyz = half3(wTangent.y, wBitangent.y, wNormal.y);
+        v.texcoord3.xyz = half3(wTangent.z, wBitangent.z, wNormal.z);
+        return v;
+    }
+
+    half3 WorldNormalFromTangentMap(ShaderData d, half3 tangentNormal)
+    {
+        half3 worldNormal;
+        worldNormal.x = dot(d.texcoord1.xyz, tangentNormal);
+        worldNormal.y = dot(d.texcoord2.xyz, tangentNormal);
+        worldNormal.z = dot(d.texcoord3.xyz, tangentNormal);
+        return worldNormal;
+    }
+
+    half SunMask(float3 lightDir, float3 normal, half size, half power, half boost)
+    {
+        half sunSize = size * 0.01;
+        half sunPow = power * 0.01;
+        half sunSpot = smoothstep(0.0, 1.0, saturate(dot(normal, -lightDir)) - sunSize);
+        return saturate(pow(sunSpot, sunPow) * boost);
+    }
+
+    half4 SkyboxResult(half4 sampledTex, ShaderData d)
+    {
+        half4 tex = sampledTex;
+
+        half3 tNormal = tex.rgb * 2.0.xxx - 1.0.xxx;
+        tNormal.r *= -1;
+        float3 lightDir;
+        float3 lightColor;
+	    GetSun(lightDir, lightColor);
+        lightDir = -lightDir;
+        half nl = max(0.0, LightDot(lightDir, tNormal, d));
+        nl = Wrap(nl, _LightWrap);
+
+        half4 cloudColor = lerp(_Cloud, _LitCloud, nl);
+
+        half sunSpot = SunMask(lightDir, d.worldSpaceNormal, _SunSize, _SunPow, _SunContrast);
+        half haloSpot = SunMask(lightDir, d.worldSpaceNormal, _HaloSize, _HaloPow, _HaloContrast);
+
+        half s = d.localSpacePosition.y * _SkyScale;
+        half skyRamp = saturate(s * 2.0);
+        half4 col = lerp(_SkyColor, _ZenithColor, skyRamp);
+        half h = 1.0 - saturate(distance(s - _HorizonHeight, 0.0) * _HorizonContrast);
+        col = lerp(col, _HorizonColor, h);
+
+        half cloudMask = saturate(tex.a - _CloudCutoff);
+        half invClouds = saturate(tex.a - _EdgeSize);
+        half powInvClouds =  saturate(tex.a - _Falloff);
+
+        half backLightMask = haloSpot * saturate(saturate(invClouds - powInvClouds) * saturate((1.0 - tex.a) * _Inner));
+        half4 backLighting = _BackLit * backLightMask;
+
+        half shadowMask = saturate(pow(haloSpot, _ShadowPow) * _ShadowBoost);
+        cloudColor = lerp(cloudColor, _Shadow, shadowMask);
+      
+        half sunBlockers = saturate((cloudMask - _Inner + invClouds) * _Density);
+        half3 sunResult = saturate(saturate(sunSpot - sunBlockers) * _SunColor.rgb);
+        half3 haloResult = saturate(saturate(haloSpot * (1.0 - backLightMask)) * _HaloColor.rgb);      
+
+        col.rgb = saturate(col.rgb + sunResult + haloResult);
+        col = lerp(col, cloudColor, saturate(cloudMask));    
+        col = saturate(col + backLighting);
+        col.rgb *= _Tint.rgb;
+        col *= _Exposure.xxxx;
+        col.a = 1.0 - sunBlockers;
+        return col;
+    }
+
+END_CODE
+

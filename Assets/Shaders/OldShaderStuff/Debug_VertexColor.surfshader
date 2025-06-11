@@ -1,0 +1,25 @@
+﻿
+BEGIN_OPTIONS
+	ShaderName "DWD/Debug/Vertex Color"
+	Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	_Alpha("Show Alpha?", Range(0,1)) = 0.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Alpha;
+END_CBUFFER
+
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		o.Albedo = lerp(d.vertexColor.rgb, d.vertexColor.aaa, _Alpha);
+		o.Alpha = 1.0;
+	}
+
+END_CODE
+

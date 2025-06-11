@@ -1,0 +1,47 @@
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Hands"
+	Workflow "Metallic"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Textures)]
+	[NoScaleOffset] _EmLum("Emission, Lum A", 2D) = "black" {}
+	[NoScaleOffset] _Data("NRM RG, AO B, S A", 2D) = "bump" {}
+	[Header(Settings)]
+	[HDR] _TintColor("Albedo Tint", Color) = (1,1,1,1)
+	[HDR] _EmissionColor("Emisison Color", Color) = (1,1,1,1)
+	_Smoothness("Smoothness", Range(0,1)) = 1.0
+	_Metallic ("Metallic", Range(0,1)) = 0.1
+	_Occlusion ("Occlusion", Range(0,1)) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _TintColor, _EmissionColor;
+	half _Smoothness, _Metallic, _Occlusion;
+END_CBUFFER
+
+
+BEGIN_CODE
+	
+	TEXTURE2D(_EmLum);
+	SAMPLER(sampler_EmLum);
+	TEXTURE2D(_Data);
+	SAMPLER(sampler_Data);
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 data = SAMPLE_TEXTURE2D(_Data, sampler_Data, d.texcoord0.xy);
+		half4 emLum = SAMPLE_TEXTURE2D(_EmLum, sampler_EmLum, d.texcoord0.xy);
+
+		o.Albedo = _TintColor.rgb * emLum.aaa;
+		o.Alpha = 1.0;
+		o.Emission = emLum.rgb * _EmissionColor.rgb;
+		o.Normal = half3(data.rgb * 2.0.xxx - 1.0.xxx);
+		o.Smoothness = data.a * _Smoothness;
+		o.Metallic = _Metallic;
+		o.Occlusion = data.b * _Occlusion;
+	}
+
+END_CODE
+

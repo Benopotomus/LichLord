@@ -1,0 +1,28 @@
+
+BEGIN_OPTIONS
+	Stackable "False"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[GroupRollout(Slider PBR)]
+	[Group(Slider PBR)] _Metalness ("Metalness", Range(0,1)) = 0.0
+    [Group(Slider PBR)] _Smoothness ("Smoothness", Range(0,1)) = 1.0
+    [Group(Slider PBR)] _Occlusion ("Occlusion", Range(0,1)) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Metalness, _Smoothness, _Occlusion;
+END_CBUFFER
+
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		o.Occlusion = 1.0 - _Occlusion;
+        o.Smoothness = _Smoothness;
+        o.Metallic = _Metalness;
+	}
+
+END_CODE
+

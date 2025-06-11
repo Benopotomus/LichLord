@@ -1,0 +1,28 @@
+//© Dicewrench Designs LLC 2022-2024
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Alpha To Color)]
+	_AlphaColor ("Alpha Color", Color) = (0, 1, 0, 1)
+	_AlphaPow("Alpha Pow", float) = 0.5
+	_AlphaBoost("Alpha Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _AlphaColor;
+	half _AlphaPow, _AlphaBoost;
+END_CBUFFER
+
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half mask = saturate(pow(abs(o.Alpha), _AlphaPow) * _AlphaBoost);
+		o.Albedo = lerp(_AlphaColor.rgb, o.Albedo.rgb, mask);
+	}
+
+END_CODE
+

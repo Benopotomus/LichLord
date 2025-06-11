@@ -1,0 +1,33 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Vert Col Smoothness)]
+	[Toggle(_VERTSMOOTHNESS_ON)] _EnableVertSmoothness("Enable VertCol Smoothness?", float) = 0.0
+	_VertSmoothness("Metalness", Range(0,1)) = 1.0
+	[HideUnless(_VertMetal_ON)] _VertSmoothnessVertexMask ("Vert Col Mask", Vector) = (1,1,1,1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _VertSmoothness;
+	half4 _VertSmoothnessVertexMask;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma shader_feature __ _VERTSMOOTHNESS_ON
+END_DEFINES
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		#if _VERTSMOOTHNESS_ON
+			half mask = dot(d.vertexColor, _VertSmoothnessVertexMask);
+			o.Smoothness = lerp(o.Smoothness, _VertSmoothness, mask);
+		#endif
+	}
+
+END_CODE
+

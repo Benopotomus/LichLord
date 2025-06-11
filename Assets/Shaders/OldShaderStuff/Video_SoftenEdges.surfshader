@@ -1,0 +1,150 @@
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Holo Video"
+	Alpha "Blend"
+	Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(FX)]
+	_DissolveAmount("Dissolve", Range(0,1)) = 0.0
+
+	[Header(Color Settings)]
+	_BGColor("Background Color", Color) = (0.5, 0.2, 0.5, 1)
+	_MidColor("Mid Color", Color) = (0.5, 0.7, 0.9, 1)
+	_Color ("Main Color", Color) = (1, 1, 1, 1)
+	[Space]
+	[HDR] _EmissionColor("Emission Color", Color) = (1,1,1,1)
+
+	[Header(Cutoff Settings)]
+	_BGPow("BG Pow", float) = 0.5
+	_MidPow("Mid Pow", float) = 1.0
+	_Pow("Pow", float) = 2.0
+
+	[Header(Texture Settings)]
+	_BaseTex("Base Tex", 2D) = "grey" {}
+
+	[Header(Edge Soften Mask)]
+	_SoftSize("Size", float) = 0.0
+	_SoftBoost("Boost", float) = 1.0
+	_SoftPow("Pow", float) = 0.5
+
+	[Header(Vignette Settings)]
+	[HDR] _VignetteColor("Color", Color) = (0.2,0.05,0.2,1.0)
+	_VignetteSize("Size", float) = 0.0
+	_VignetteBoost("Boost", float) = 1.0
+	_VignettePow("Pow", float) = 0.5
+
+	[Header(Shift Settings)]
+	_XShift("Max X Shift", Range(0,1)) = 0.1
+	_YShift("Max Y Shift", Range(0,1)) = 0.1
+	_ClampScalar("Clamp Range", float) = 0.2
+	[Space]
+	_XRate("X Rate", float) = 1.0
+	_YRate("Y Rate", float) = 0.3
+
+	[Header(Scan Lines)]
+	_LineFreq("Frequency", float) = 50.0
+   _LineHeight("Line Height", float) = 0.2
+	_ScanRate("Rate", float) = 3.0
+   [HDR] _LineColorOne("Line One", Color) = (1,1,1,1)
+   [HDR] _LineColorTwo("Line Two", Color) = (0,0,0,1)
+	_LineSize("Size", Range(0,1)) = 0.3
+	_LineBoost("Boost", float) = 1.0
+	_LinePow("Pow", float) = 1.5
+
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _DissolveAmount;
+	half4 _BGColor, _MidColor, _Color, _EmissionColor, _VignetteColor;
+	half _BGPow, _MidPow, _Pow;
+	half _SoftSize, _SoftBoost, _SoftPow;
+	half _VignetteSize, _VignetteBoost, _VignettePow;
+	half _XShift, _YShift, _ClampScalar;
+	half _LineHeight, _LineFreq, _ScanRate;
+	half4 _LineColorOne, _LineColorTwo;
+	half _LineSize, _LineBoost, _LinePow;
+	half _XRate, _YRate;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_PASS("All")
+	Tags{"DisableBatching"="True"}
+	Blend SrcAlpha OneMinusSrcAlpha 
+   ZWrite Off
+   Lighting Off
+   Cull Back
+END_PASS
+
+BEGIN_CODE
+
+	TEXTURE2D(_BaseTex);
+	SAMPLER(sampler_BaseTex);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.texcoord0.xy = v.texcoord0.xy;
+		float t = _Time.x;
+		v.texcoord0.z = t * _ScanRate;
+		//v.texcoord2.xyz = mul(GetObjectToWorldMatrix(), float4(1.0,0.0,0.0, 1.0)).xyz;
+		//v.texcoord3.xyz = mul(GetObjectToWorldMatrix(), float4(0.0,1.0,0.0, 1.0)).xyz;
+		float xNoise = Noise(t.xx * _XRate.xx) * 2.0 - 1.0;
+		float yNoise = Noise(t.xx * _YRate.xx) * 2.0 - 1.0;
+		v.texcoord2.xy = float2(xNoise, yNoise);
+	}
+
+	half4 LayerSample(half4 baseColor, float2 uv, float xAngle, float yAngle, float scalar, half4 layerColor, half layerPow)
+	{
+		float2 layerUV = uv;
+		layerUV.x += (xAngle * scalar * _XShift);
+		layerUV.y += (yAngle * scalar * _YShift);
+
+		half4 layer = SAMPLE_TEXTURE2D(_BaseTex, sampler_BaseTex, layerUV);
+		
+		half vig = 1.0 - VignetteBoxMask(layerUV, 1.0, _VignetteSize, _VignettePow, _VignetteBoost, _VignetteColor.a);
+		layer.rgb = lerp(layer.rgb, layer.rgb * _VignetteColor.rgb, vig);
+
+		layer *= layerColor;
+		layer = pow(abs(layer), layerPow);
+
+		return saturate(baseColor + layer);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		float2 uv = d.texcoord0.xy;
+		float2 wobble = d.texcoord2.xy;
+		//float angleDot = ((dot(d.worldSpaceViewDir, d.texcoord2.xyz)) * _ClampScalar);
+		//float vertDot = ((dot(d.worldSpaceViewDir, d.texcoord3.xyz)) * _ClampScalar);
+
+		half4 color = 0.0.xxxx;
+
+		color = LayerSample(color, uv, wobble.x, wobble.y, -1.0, _BGColor, _BGPow);
+		color = LayerSample(color, uv, wobble.x, wobble.y, 0.0, _MidColor, _MidPow);
+		color = LayerSample(color, uv, wobble.x, wobble.y, 1.0, _Color, _Pow);
+
+		half mask = VignetteBoxMask(uv, 1.0, _SoftSize, _SoftPow, _SoftBoost, 1.0);
+		color.a *= mask;
+
+		color.rgb *= _EmissionColor.rgb;
+
+		half lineSize = max(_LineSize,_DissolveAmount);
+		half lineMask = 1.0 - VignetteBoxMask(uv, 1.0, lineSize, _LinePow, _LineBoost, 1.0);
+		half lines = saturate(pow(frac((uv.y + d.texcoord0.z) * _LineFreq), _LineHeight) * _LineHeight * 6.0);
+		half4 lineColor = lerp(_LineColorOne.rgba, _LineColorTwo.rgba, lines);
+		
+		color.rgb = lerp(color.rgb, color.rgb * lineColor.rgb, lineMask * lineColor.a);
+
+		o.Albedo = color.rgb;
+		o.Alpha = saturate(color.a - _DissolveAmount);
+	}
+
+END_CODE
+

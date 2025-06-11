@@ -1,0 +1,18 @@
+﻿
+BEGIN_PROPERTIES
+	[Toggle] _NormalUp("Normal Up?", float) = 0.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _NormalUp;
+END_CBUFFER
+
+BEGIN_CODE
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.normal = lerp(v.normal, half3(0,1,0), _NormalUp);
+	}
+
+END_CODE
+

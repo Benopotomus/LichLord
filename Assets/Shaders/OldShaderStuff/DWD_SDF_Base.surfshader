@@ -1,0 +1,130 @@
+﻿//© Dicewrench Designs LLC 2017-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/SDF Base"
+	Alpha "Add"
+	Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
+	[Space]
+    [Toggle]_Invert("Invert SDF", Float) = 0.0
+
+    [Space]
+    _MainTex ("Sprite Texture", 2D) = "white" {}
+
+    [Header(SDF Settings)]
+    _Threshold("Threshold", Range(0,1)) = 1.0
+    _Softness("Softness", Range(0,0.1)) = 0.002
+    [Space]
+    [HDR]_Color ("Tint", Color) = (1,1,1,1)
+
+    [Header(Outer Glow Settings)]
+    _GlowThreshold("Glow Threshold", Range(0,1)) = 1.0
+    _GlowSoftness("Glow Softness", Range(0,1)) = 0.002
+    [Space]
+    [HDR]_GlowColor ("Glow Tint", Color) = (1,1,1,1)
+
+    [Header(Inner Glow Settings)]
+    _InnerThreshold("Glow Threshold", Range(0,1)) = 1.0
+    _InnerSoftness("Glow Softness", Range(0,1)) = 0.002
+    [Space]
+    [HDR] _InnerGlowColor ("Glow Tint", Color) = (1,1,1,1)
+
+    [Header(Pulse Settings)]
+    _PulseMaxThreshold("Max Threshold", Range(0,2)) = 1.0
+    _PulseMinThreshold("Min Threshold", Range(0,2)) = 0.9
+    _Width("Pulse Width", Range(0,1)) = 0.3
+    _Intensity("Pulse Intensity", Range(0,10)) = 4.0
+    _PulseSoftness("Pulse Softness", Range(0,1)) = 0.5
+    _Rate("Pulse Rate", Range(-2,2)) = 0.3
+    [Space]
+    [HDR] _PulseColor("Pulse Color", Color) = (1,1,1,1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _Color;
+	half _Invert;
+	half _Threshold, _Softness;
+	half _GlowThreshold, _GlowSoftness;
+	half4 _GlowColor;
+	half _InnerThreshold, _InnerSoftness;
+	half4 _InnerGlowColor;
+	half _PulseMaxThreshold, _PulseMinThreshold, _Width, _Intensity, _PulseSoftness;
+	half _Rate;
+	half4 _PulseColor;
+	uniform float4 _MainTex_ST;
+END_CBUFFER
+
+BEGIN_PASS
+	Cull [_Cull]
+	Lighting Off
+	Blend One One
+	ZWrite Off
+	ZTest LEqual
+END_PASS
+
+BEGIN_CODE
+
+	TEXTURE2D(_MainTex);
+	SAMPLER(sampler_MainTex);
+
+	half SDFSample(half sample, half threshold, half softness)
+	{
+	   half bottom = threshold - softness; 
+	   half top = threshold + softness;
+	   return saturate(smoothstep(bottom, top, sample));
+	}
+
+	//there is a lot of inverting numbers to make things sensible to humans
+	half DoPulse(half sample, half maxThreshold, half minThreshold, half width, half softness, float t)
+	{
+	   float movingThreshold = lerp(minThreshold, maxThreshold, t);
+
+	   half alpha = SDFSample(sample, movingThreshold - (1.0 - width), softness);
+	   half outerAlpha = SDFSample(sample, movingThreshold, softness);
+	   outerAlpha *= (1.0 - alpha);
+	   outerAlpha *= saturate(sample * 3.0);
+
+	   return saturate(outerAlpha * (1.0 - t));
+	}
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+		v.texcoord0.xy = v.texcoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+		v.texcoord0.z = frac(_Time.y * _Rate);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		//sample our alpha 8
+        half sample = abs(_Invert - SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord0.xy).a);
+
+        //cutoff base shape sdf
+        half sdf = SDFSample(sample, 1.0 - _Threshold, _Softness);
+        half4 color = sdf.xxxx * _Color.rgba;
+
+        //add outer glow sdf
+        half glowSDF = SDFSample(sample, 1.0 - _GlowThreshold, _GlowSoftness) - sdf; 
+        color += saturate(glowSDF.xxxx * _GlowColor);
+
+        //add inner glow sdf
+        half innerSDF = SDFSample(sample, 1.0 - _InnerThreshold, _InnerSoftness) * sdf;
+        color += saturate(innerSDF.xxxx * _InnerGlowColor);
+
+        //add pulse sdf
+        half pulse = saturate(DoPulse(sample,_PulseMaxThreshold,_PulseMinThreshold,_Width,_PulseSoftness,d.texcoord0.z) * _Intensity) - sdf;
+        color += saturate(_PulseColor * pulse.xxxx);
+
+		color.rgb *= color.aaa;
+
+		o.Albedo = saturate(color.rgb);
+		o.Alpha = saturate(color.a);
+	}
+
+END_CODE
+
