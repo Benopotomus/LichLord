@@ -57,6 +57,7 @@ BEGIN_CODE
             o.Albedo = max(o.Albedo, starColor * sky.aaa);
         #endif
         o.Alpha = 1.0;
+        o.Emission = max(0, o.Albedo - 1.0.xxx);
 
         unity_FogParams = half4(0,0,0,1);
 	}
