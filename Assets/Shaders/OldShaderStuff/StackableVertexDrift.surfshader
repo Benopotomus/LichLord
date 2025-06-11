@@ -1,0 +1,66 @@
+//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+
+END_OPTIONS
+
+BEGIN_PROPERTIES
+    [Toggle(_VERTEXDRIFT_ON)] _EnableVertexDrif("Enable Drift?", float) = 0.0
+	[HideUnless(_VERTEXDRIFT_ON)] [Header(Drift Settings)]
+    [HideUnless(_VERTEXDRIFT_ON)] _DriftAmp("Drift Amplitude (xyz), Scale(w)", Vector) = (1,1,1,0)
+    [HideUnless(_VERTEXDRIFT_ON)] _DriftFreq("Drift Frequency (xyz), Rate(w)", Vector) = (1,1,1,0)
+    [HideUnless(_VERTEXDRIFT_ON)] [Toggle(_USE_ID)] _useID("Add Phase from ID?", float) = 0.0
+    [HideUnless(_VERTEXDRIFT_ON)] _IdPhaseScale("ID Phase Scale", float) = 1023.0
+    [HideUnless(_VERTEXDRIFT_ON)] _PhaseOffset("Phase", float) = 0.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _DriftAmp, _DriftFreq;
+    half _PhaseOffset;
+    half _IdPhaseScale;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASNOISE
+		#include "DWD_NoiseFunctions.cginc" 
+		#define HASNOISE 1
+	#endif
+    #pragma shader_feature __ _VERTEXDRIFT_ON
+    #pragma shader_feature __ _USE_ID
+    #if _USE_ID
+        #define UNITY_INSTANCING_ENABLED
+    #endif
+END_DEFINES
+
+BEGIN_CODE
+
+    void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+        #if _VERTEXDRIFT_ON
+            half3 worldPos = mul((float3x3)unity_ObjectToWorld, v.vertex.xyz).xyz;
+            half3 pivot = mul((float3x3)unity_ObjectToWorld, float3(0,0,0)).xyz;
+            half phase = (pivot.x * pivot.z + pivot.y) * _DriftAmp.w + _PhaseOffset;
+
+            #if _USE_ID
+                UNITY_SETUP_INSTANCE_ID(v); 
+                phase += Noise((unity_InstanceID/_IdPhaseScale).xx);
+            #endif
+
+            half3 t = _DriftFreq.xyz * (_Time.x * _DriftFreq.w).xxx + phase.xxx;
+
+            t.x = Noise(float2(phase, t.x));
+            t.y = Noise(float2(phase, t.y));
+            t.z = Noise(float2(phase, t.z));
+
+            half3 drift = _DriftAmp.xyz * (t * 2.0.xxx - 1.0.xxx);
+            worldPos += drift;
+      
+            v.vertex.xyz = mul((float3x3)unity_WorldToObject, worldPos.xyz).xyz;
+        #endif
+    }
+
+END_CODE
+

@@ -1,0 +1,26 @@
+
+BEGIN_PROPERTIES
+	[Header(Emission Overlay)]
+	[HDR] _EmissiveOverlayColor ("Main Color", Color) = (0, 1, 0, 1)
+	_EmissiveMulAlbedo ("Mul Albedo?", Range(0,1)) = 0.7
+	_EmissiveMax("Exponent", float) = 10
+	_EmissionPower("Intensity", Range(0,1)) = 0.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _EmissiveOverlayColor;
+	half _EmissiveMin, _EmissiveMax, _EmissionPower;
+	half _EmissiveMulAlbedo;
+END_CBUFFER
+
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half range = saturate(pow(_EmissionPower, _EmissiveMax));
+		o.Emission += (lerp(_EmissiveOverlayColor.rgb, _EmissiveOverlayColor.rgb * o.Albedo, _EmissiveMulAlbedo) * range.xxx);
+	}
+
+END_CODE
+

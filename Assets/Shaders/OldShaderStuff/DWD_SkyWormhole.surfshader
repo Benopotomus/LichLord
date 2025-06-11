@@ -1,0 +1,100 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Stackable "False"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Wormhole)]
+	[NoScaleOffset] _Worm ("Worm: RGB Channel Pack", 2D) = "grey" {}
+	[Toggle] _UVONE("Use UV 1 instead?", float) = 0.0
+	_WormHeight("Worm Size", float) = 0.7
+	_WormContrast ("Size Contrast", float) = 2.0
+	_WormPow("Pow", float) = 1
+	_WormBoost("Boost", float) = 1
+	[HDR] _CoreColor ("Core Color", Color) = (1,1,1,1)
+	_CoreScale("Scale", float) = 1.0
+	_CoreCutoff("Core Cutoff", Range(0,1)) = 0.7
+	_CorePow("Core Pow", float) = 1
+	_CoreBoost("Core Boost", float) = 1
+	[HDR] _OneColor ("Color One", Color) = (1,0,0,1)
+	[HDR] _ZeroColor ("Color Zero", Color) = (0,0,1,1)
+	[Space]
+	[Vec3] _SampleOneMix ("Worm Mix One", Vector) = (1,0,0,0)
+	_SampleOneST ("Sample One ST", Vector) = (1,1,0,0)
+	[Vec2] _SampleOneScroll("Worm Scroll One", Vector) = (0.3, -1.0,0,0)
+	[Space]
+	[Vec3] _SampleTwoMix ("Worm Mix Two", Vector) = (1,0,0,0)
+	_SampleTwoST ("Sample Two ST", Vector) = (1,1,0,0)
+	[Vec2] _SampleTwoScroll("Worm Scroll Two", Vector) = (0.3, -1.0,0,0)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _WormPow, _WormBoost, _WormHeight, _WormContrast;
+	half _CoreCutoff, _CorePow, _CoreBoost, _CoreScale;
+	half4 _CoreColor, _OneColor, _ZeroColor;
+	half4 _SampleOneMix, _SampleOneST, _SampleOneScroll;
+	half4 _SampleTwoMix, _SampleTwoST, _SampleTwoScroll;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma multi_compile __ _UVONE_ON
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+
+	TEXTURE2D(_Worm);
+	SAMPLER(sampler_Worm);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		float t = _Time.x;
+		v.texcoord0.xyzw = v.texcoord0.xyzw;
+
+		float2 baseWormUV = v.texcoord0.xy;
+		#if _UVONE_ON
+			baseWormUV = v.texcoord1.xy;
+		#endif
+		v.texcoord1.xy = baseWormUV * _SampleOneST.xy + _SampleOneST.zw;
+		v.texcoord1.xy += _SampleOneScroll.xy * t.xx;
+		//v.texcoord1.y += (v.texcoord0.w - v.texcoord0.y); //this gives us just the position noise from
+		//the base dome, but without redoing the noise hash
+		v.texcoord1.zw = baseWormUV * _SampleTwoST.xy + _SampleTwoST.zw;
+		v.texcoord1.zw += _SampleTwoScroll.xy * t.xx;
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half scale = d.texcoord0.y * _CoreScale;
+		half wormHeight = saturate(pow(saturate(scale - _WormHeight), _WormContrast) * _WormContrast);
+
+		half3 wormOne = SAMPLE_TEXTURE2D(_Worm, sampler_Worm, d.texcoord1.xy).rgb; 
+		half3 wormTwo = SAMPLE_TEXTURE2D(_Worm, sampler_Worm, d.texcoord1.zw).rgb;
+		half wormOneMix = GetMix(wormOne, _SampleOneMix);
+		half wormTwoMix = GetMix(wormTwo, _SampleTwoMix);
+		half wormMerge = abs(wormOneMix * wormTwoMix);
+		half wormCombo = saturate(pow(wormMerge, _WormPow) * _WormBoost);
+
+		half coreSize = saturate(scale - _CoreCutoff);
+		coreSize = saturate(max(pow(wormCombo * coreSize, _CorePow), coreSize * coreSize));
+		half core = saturate(pow(coreSize, _CorePow) * _CoreBoost);
+		half4 coreColor = _CoreColor;// * core.xxxx;
+
+		half4 wormColor = lerp(_ZeroColor, _OneColor, wormMerge) * wormHeight;
+		wormColor *= wormCombo;
+
+		o.Albedo += (lerp(wormColor.rgb, coreColor.rgb, core) * o.Alpha.xxx);
+		//o.Albedo += (coreColor.rgb * o.Alpha.xxx);
+		//o.Albedo = half3(d.texcoord1.xy,0.0);
+		unity_FogParams = half4(0,0,0,1);
+	}
+
+END_CODE
+

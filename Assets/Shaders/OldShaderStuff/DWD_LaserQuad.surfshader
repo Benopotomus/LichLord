@@ -1,0 +1,87 @@
+﻿//© Dicewrench Designs LLC 2018-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Environment/Laser Quad"
+	Workflow "Unlit"
+	Alpha "Add"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[HDR] _Color ("Main Color", Color) = (0, 1, 0, 1)
+	[HDR] _ZeroColor("Zero Color", Color) = (1,1,0.4,1)
+	[Header(Laser Settings)]
+	_TopCutoff("Top Cutoff", Range(0,1)) = 0.25
+	_TopPow("Top Pow", float) = 1.0
+	_TopBoost("Top Boost", float) = 1.0
+	[Space]
+	_BottomCutoff("Bottom Cutoff", Range(0,1)) = 0.2
+	_BottomPow("Bottom Pow", float) = 1.0
+	_BottomBoost("Bottom Boost", float) = 1.0
+	[Space]
+	_WidthCutoff("Width Cutoff", Range(0,1)) = 0.5
+	_WidthPow("Width Pow", float) = 1.0
+	_WidthBoost("Width Boost", float) = 1.0
+	[Header(Shine Settings)]
+	_ShineRate("Shine Rate", float) = 1.0
+	_ShineFreq("Shine Frequency", float) = 1.0
+	_ShineSize("Shine Cutoff", Range(0,1)) = 0.3
+	_ShinePow("Shine Pow", float) = 1.0
+	_ShineBoost("Shine Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _Color, _ZeroColor;
+	half _TopCutoff, _TopPow, _TopBoost;
+	half _BottomCutoff, _BottomPow, _BottomBoost;
+	half _WidthCutoff, _WidthPow, _WidthBoost;
+	half _ShineRate, _ShineSize, _ShinePow, _ShineBoost, _ShineFreq;
+END_CBUFFER
+
+BEGIN_PASS
+	Blend One One
+	ZTest LEqual
+	ZWrite Off
+END_PASS
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+
+	half CalculateShine(half uv, half width, half frequency, half rate)
+	{
+	   half gradient = saturate(sin((uv * frequency) + (_Time.y * rate)) - width);
+	   return gradient;
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half vertical = d.texcoord0.y;
+		half horizontal = ZeroOneZero(d.texcoord0.x);
+		half width = saturate(pow(saturate(horizontal - _WidthCutoff), _WidthPow) * _WidthBoost);
+		
+		half top = saturate(pow(saturate((1.0 - vertical) - _TopCutoff), _TopPow) * _TopBoost);
+		half bottom = saturate(pow(saturate(vertical - _BottomCutoff), _BottomPow) * _BottomBoost);
+		half ramp = top * width * bottom;
+
+		half shine = CalculateShine(vertical, _ShineSize, _ShineFreq, _ShineRate);
+		half shineWidth = saturate(horizontal - _ShineSize);
+		shine = saturate(pow(shine * shineWidth * ramp, _ShinePow) * _ShineBoost);
+		
+
+		ramp = saturate(ramp + shine);
+
+		half4 colors = lerp(_ZeroColor, _Color, ramp) * ramp.xxxx;
+		o.Albedo = colors.rgb * colors.aaa;
+		o.Alpha = colors.a;
+	}
+
+END_CODE
+

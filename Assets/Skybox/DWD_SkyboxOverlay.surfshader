@@ -1,0 +1,90 @@
+//© Dicewrench Designs LLC 2024
+//Licensed for use in 'Music Visualizer' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+   [Header(Overlay)]
+   [Toggle] _Overlay("Enable Overlay?", float) = 0.0
+   [HideUnless(_OVERLAY_ON)] _OverlayRotation ("Rotation", Range(0, 360)) = 0
+   [HideUnless(_OVERLAY_ON)] _OverlaySpinRate("Spin Rate", float) = 1.0
+   [HideUnless(_OVERLAY_ON)] _OverlayTex ("Cubemap (RGB Normal, A Height)", 2D) = "grey" {}
+   [HideUnless(_OVERLAY_ON)] _OverlayLOD("Lod", float) = 0.0
+   [Space]
+   [HideUnless(_OVERLAY_ON)] [HDR] _OverlayTint("Tint", Color) = (1,1,1,1)
+   [HideUnless(_OVERLAY_ON)] _OverlayPow("Pow", float) = 0.5
+   [HideUnless(_OVERLAY_ON)] _OverlayBoost("Boost", float) = 1.0
+   [Space]
+   [HideUnless(_OVERLAY_ON)] _PoleMask("Pole Mask", Range(-1, 1)) = 0.5
+   [HideUnless(_OVERLAY_ON)] _PoleMaskPow("Pow", float) = 0.5
+   [HideUnless(_OVERLAY_ON)] _PoleMaskBoost("Boost", float) = 1.0
+   [Space]
+   [HideUnless(_OVERLAY_ON)] _DepthMask("Depth Mask", Range(-1, 1)) = 0.5
+   [HideUnless(_OVERLAY_ON)] _MaskPow("Pow", float) = 0.5
+   [HideUnless(_OVERLAY_ON)] _MaskBoost("Boost", float) = 1.0
+   [Space]
+   [HideUnless(_OVERLAY_ON)] _AlbedoMask("Alb Mask", Range(-1, 1)) = 0.5
+   [HideUnless(_OVERLAY_ON)] _AlbMaskPow("Pow", float) = 0.5
+   [HideUnless(_OVERLAY_ON)] _AlbMaskBoost("Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	uniform float4 _OverlayTex_ST;
+	half _OverlayLOD, _OverlaySpinRate, _OverlayRotation;
+	half4 _OverlayTint;
+	half _OverlayPow, _OverlayBoost;
+
+	half _PoleMask, _DepthMask, _MaskPow, _MaskBoost;
+	half _PoleMaskPow, _PoleMaskBoost;
+	half _AlbedoMask, _AlbMaskPow, _AlbMaskBoost;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma multi_compile _ _OVERLAY_ON
+    #ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+
+	TEXTURE2D(_OverlayTex);
+	SAMPLER(sampler_OverlayTex);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		#if _OVERLAY_ON
+			float t = _Time.x;
+			v.texcoord1.xy = v.texcoord1.xy * _OverlayTex_ST.xy + _OverlayTex_ST.zw;
+			v.texcoord1.x += _OverlayRotation * 0.0027777; // 1/360th
+			v.texcoord1.x += (t * _OverlaySpinRate);
+		#endif
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		#if _OVERLAY_ON
+			half4 overlay = SAMPLE_TEXTURE2D_LOD(_OverlayTex, sampler_OverlayTex, d.texcoord1.xy, _OverlayLOD);
+			overlay *= _OverlayTint;
+			overlay = pow(abs(overlay), _OverlayPow) * _OverlayBoost;
+			
+			half mask = saturate(1.0 - d.extraV2F0.g * 3) - _PoleMask;
+			mask = saturate(pow(abs(mask), _PoleMaskPow) * _PoleMaskBoost);
+
+			half dmask = saturate(1.0 - d.extraV2F0.r) - _DepthMask;
+			dmask = saturate(pow(abs(dmask), _MaskPow) * _MaskBoost);
+
+			half amask = (o.Albedo.r + o.Albedo.g + o.Albedo.b) * 0.33;
+			amask = saturate(amask) - _AlbedoMask;
+			amask = saturate(pow(abs(amask), _AlbMaskPow) * _AlbMaskBoost);
+
+			mask = (mask * dmask * amask);
+			overlay *= mask.xxxx;
+
+			o.Albedo = lerp(o.Albedo, o.Albedo * overlay.rgb, mask);
+		#endif
+	}
+
+END_CODE
+

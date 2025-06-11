@@ -1,0 +1,94 @@
+//© Dicewrench Designs LLC 2017-2022
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+
+END_OPTIONS
+
+BEGIN_PROPERTIES
+    [Toggle(_WIND_ON)] _EnableVertexWind("Enable Vertex Wind?", float) = 0.0
+	[Header(Wind Settings)]
+    [HideUnless(_WIND_ON)] _WindDir    ("XYZ Wind Dir, W Power", Vector) = (0,0,0,1)
+    [HideUnless(_WIND_ON)] _SinAmp     ("Sin Amp", Float) = 1.0
+    [HideUnless(_WIND_ON)] _SinFreq    ("Sin Freq", Float) = 1.0
+    [HideUnless(_WIND_ON)] _SinPhase   ("Sin Phase", Float) = 1.0
+    [HideUnless(_WIND_ON)] _TurbAmp    ("Turb Amp", Float) = 0.1
+    [HideUnless(_WIND_ON)] _TurbFreq   ("Turb Freq", Float) = 8.0
+    [HideUnless(_WIND_ON)] _HeightFalloff("Height Falloff", float) = 1.0
+END_PROPERTIES
+
+BEGIN_PASS
+	Cull Off
+END_PASS
+
+BEGIN_CBUFFER
+    half4 _WindDir;
+    half  _SinFreq;
+    half  _SinAmp;
+    half  _SinPhase;
+    half  _TurbAmp;
+    half  _TurbFreq;
+    half _HeightFalloff;
+END_CBUFFER
+
+BEGIN_DEFINES
+    #pragma shader_feature __ _WIND_ON
+	#ifndef HASNOISE
+		#include "DWD_NoiseFunctions.cginc" 
+		#define HASNOISE 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+
+   float3 RotateAroundYInDegrees (float3 vertex, float degrees)
+   {
+      float alpha = degrees * 3.1415926 / 180.0;
+      float sina, cosa;
+      sincos(alpha, sina, cosa);
+      float2x2 m = float2x2(cosa, -sina, sina, cosa);
+      return float3(mul(m, vertex.xz).xy, vertex.y).xzy;
+   }
+
+    void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+        #if _WIND_ON
+            half3 worldPos = mul((float3x3)unity_ObjectToWorld, v.vertex.xyz).xyz;
+            half3 pivot = mul((float3x3)unity_ObjectToWorld, float3(0,0,0)).xyz;
+            half phase = (pivot.x * pivot.z) * _SinPhase;
+
+            half t = _WindDir.w * _Time.x + phase;
+            half2 roughPos = (worldPos.xz * _SinFreq.xx) + t.xx;
+
+            float2 posSin, posCos;
+            sincos(roughPos, posSin, posCos);
+
+            // Make sure it is masked by the wind scale, then lerp between the minimum and maximum wave offset to apply
+            float waveScale = posSin.x * posCos.y;
+            float waveMask = _SinAmp * lerp( 0.18, 0.24, _WindDir.y - _WindDir.z );
+            float waveAmt = waveScale * waveMask;
+
+            // Mask the effect by the height
+            float height = max( 0.0, worldPos.y - pivot.y);
+            float hMask = height / _HeightFalloff;
+            waveAmt *= hMask;
+
+            // Use the wind direction to apply the wave in a consistent direction
+            float3 waveDirection = normalize( _WindDir.xyz ) * waveAmt;
+            worldPos += waveDirection;
+
+            // Mask by the scale and velocity, increase when acceleration is applied
+            float turbMask = waveScale * _TurbFreq * _WindDir.y * ( 1.0 + _WindDir.w );
+            float edgeMask = distance(worldPos.xz, pivot.xz)/_HeightFalloff;
+            float turbAmt = _TurbAmp * turbMask * edgeMask * hMask;
+
+            // Apply to height only
+            worldPos.y += turbAmt;
+
+            v.vertex.xyz = mul((float3x3)unity_WorldToObject, worldPos.xyz).xyz;
+        #endif
+    }
+
+END_CODE
+

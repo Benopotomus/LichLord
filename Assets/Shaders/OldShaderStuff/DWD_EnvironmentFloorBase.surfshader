@@ -1,0 +1,189 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Environment Floor Base"
+	Workflow "Metallic"
+	Stackable "False"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	_Color ("Main Color", Color) = (0, 1, 0, 1)
+	[Header(Noise Settings)]
+	_NoiseScale("Scale", float) = 1.0
+	_NoisePow("Pow", float) = 1.0
+	_NoiseBoost("Boost", float) = 1.0
+
+	[Header(BlendSetting)]
+	_Blend("Blend", Range(-1,1)) = 0.3
+
+	[Header(PBR)]
+	_NormalIntensity ("Normal Intensity", Range(0,1)) = 1.0
+	_Occlusion ("Occlusion", Range(0,1)) = 1.0
+
+	[Header(Main Surface Samples)]
+	[Toggle(_USE_BASEUV)] _UseBaseUV ("Use Base UV?", float) = 0.0
+	_DataOne("R Lum, G Nx, B H, A Ny", 2D) = "grey" {}
+	_OneContrast("Contrast", float) = 1.5
+	_OneColorOne("Color One", Color) = (1,1,1,1)
+	_OneColorTwo("Color Two", Color) = (0,0,0,0)
+	
+    _Metalness ("Metalness", Range(0,1)) = 0.0
+    _Smoothness ("Smoothness", Range(0,1)) = 1.0
+    
+	[Space]
+	_DataTwo("R Lum, G Nx, B H, A Ny", 2D) = "grey" {}
+	_TwoContrast("Contrast", float) = 1.5
+	_TwoColorOne("Color One", Color) = (1,1,1,1)
+	_TwoColorTwo("Color Two", Color) = (0,0,0,0)
+
+	_MetalnessTwo ("Metalness Two", Range(0,1)) = 0.0
+    _SmoothnessTwo ("Smoothness Two", Range(0,1)) = 0.0
+
+	[Header(Edge Surface)]
+	_Edge("R Lum, G Nx, B H, A Ny", 2D) = "grey" {}
+	_EdgeContrast("Contrast", float) = 1.5
+	_EdgeColorOne("Color One", Color) = (1,1,1,1)
+	_EdgeColorTwo("Color Two", Color) = (0,0,0,0)
+	[Space]
+	_EdgePow("Pow", float) = 1.0
+	_EdgeBoost("Boost", float) = 1.0
+	_EdgeNoise("Noise", Range(0,1)) = 0.0
+	_MetalnessEdge ("Metalness Two", Range(0,1)) = 0.0
+    _SmoothnessEdge ("Smoothness Two", Range(0,1)) = 0.0
+
+	[Header(Emission)]
+	[Toggle(_EMISSION)] _DoEmission("Emission?", float) = 0.0
+	[HDR] _VertBlue("VertBlue Color", Color) = (1,1,1,1)
+	[HDR] _VertAlpha("VertAlpha Color", Color) = (1,1,1,1)
+
+	[NoScaleOffset] _EmMap("Emissive Mask", 2D) = "black" {}
+	_PulseRate("Pulse Rate", float) = 1.0
+	_EmPow("Pow", float) = 1.0
+	_EmBoost("Boost", float) = 2.0
+	_EmNoise("Noise Scale", float) = 3.0
+	_EmNoiseIntensity("Noise Intensity", Range(0,1)) = 0.5
+
+	[Header(Occlusion)]
+	_DiffuseOcclusion("Lerp in Occlusion?", Range(0,1)) = 0.0
+	_OcclusionColor("Color", Color) = (0,0,0,0)
+END_PROPERTIES
+
+
+BEGIN_CBUFFER
+	half4 _Color;
+	half _Blend, _BlendPow, _BlendBoost, _DiffuseOcclusion;
+	half _NoiseScale, _NoisePow, _NoiseBoost;
+	half4 _VertBlue, _VertAlpha, _OcclusionColor;
+	half4 _OneColorOne, _OneColorTwo, _TwoColorOne, _TwoColorTwo, _EdgeColorOne, _EdgeColorTwo;
+	half _EdgePow, _EdgeBoost, _EdgeNoise;
+	half _OneContrast, _TwoContrast, _EdgeContrast;
+	half _PulseRate, _EmPow, _EmBoost, _EmNoise, _EmNoiseIntensity;
+	half _NormalIntensity, _Metalness, _Smoothness, _Occlusion;
+	half _MetalnessTwo, _SmoothnessTwo, _MetalnessEdge, _SmoothnessEdge;
+	uniform float4 _DataOne_ST, _DataTwo_ST, _Edge_ST;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma shader_feature __ _USE_BASEUV
+	#pragma shader_feature __ _EMISSION
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+	TEXTURE2D(_DataOne);
+	SAMPLER(sampler_DataOne);
+	TEXTURE2D(_DataTwo);
+	SAMPLER(sampler_DataTwo);
+	TEXTURE2D(_Edge);
+	SAMPLER(sampler_Edge);
+	TEXTURE2D(_EmMap);
+	SAMPLER(sampler_EmMap);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.texcoord3.xy = v.texcoord0.xy;
+
+		float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+		float2 baseUV = worldPos.xz;
+		#if _USE_BASEUV
+			baseUV = v.texcoord0.xy;
+		#endif
+		v.texcoord0.xy = baseUV * _DataOne_ST.xy + _DataOne_ST.zw;
+		v.texcoord0.zw = worldPos.xz * _DataTwo_ST.xy + _DataTwo_ST.zw;
+
+		v.texcoord2.xy = worldPos.xz * _Edge_ST.xy + _Edge_ST.zw;
+		v.texcoord2.z = pow(abs(Noise(worldPos.xz * _NoiseScale)), _NoisePow) * _NoiseBoost;
+		v.texcoord3.z = abs(Noise(worldPos.xz * _NoiseScale * Hash(_EdgeNoise.xx)));
+
+		float emRate = _Time.x * _PulseRate;
+		v.texcoord2.w = lerp(ZeroOneZero(frac(emRate)), Noise(worldPos.xz * _EmNoise.xx + emRate.xx), _EmNoiseIntensity);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 dataOne = SAMPLE_TEXTURE2D(_DataOne, sampler_DataOne, d.texcoord0.xy);
+		half4 dataTwo = SAMPLE_TEXTURE2D(_DataTwo, sampler_DataTwo, d.texcoord0.zw);
+		half4 edge = SAMPLE_TEXTURE2D(_Edge, sampler_Edge, d.texcoord2.xy);
+
+		half oneH = dataOne.b;
+		half twoH = dataTwo.b;
+		half edgeH = saturate(pow(edge.b, _EdgePow) * _EdgeBoost); 
+
+		half4 dataOneColor = lerp(_OneColorOne, _OneColorTwo, saturate(pow(abs(dataOne.r), _OneContrast) * _OneContrast));
+		half4 dataTwoColor = lerp(_TwoColorOne, _TwoColorTwo, saturate(pow(abs(dataTwo.r), _TwoContrast) * _TwoContrast));
+		half4 edgeColor = lerp(_EdgeColorOne, _EdgeColorTwo, saturate(pow(abs(edge.r), _EdgeContrast) * _EdgeContrast));
+
+		half3 dataOneNorm = half3(dataOne.g, dataOne.a, 1.0) * 2.0.xxx - 1.0.xxx;
+		half3 dataTwoNorm = half3(dataTwo.g, dataTwo.a, 1.0) * 2.0.xxx - 1.0.xxx;
+		half3 edgeNorm = half3(edge.g, edge.a, 1.0) * 2.0.xxx - 1.0.xxx;
+
+		half edgeNoise = saturate(pow(d.vertexColor.g + (d.texcoord3.z * _EdgeNoise), _EdgePow) * _EdgeBoost);
+		half2 oneTwoMask = 0.0.xx;
+		half2 twoEdgeMask = 0.0.xx;
+
+		half4 dataColor = BlendHeight(dataOneColor.rgb, oneH, dataTwoColor.rgb, twoH, d.texcoord2.z, _Blend, oneTwoMask);
+		dataColor = BlendHeight(dataColor.rgb, dataColor.a, edgeColor.rgb, edgeH, edgeNoise, _Blend, twoEdgeMask);
+		dataColor = lerp(dataColor, dataColor * _OcclusionColor, _DiffuseOcclusion * d.vertexColor.r);
+
+		oneTwoMask = saturate(oneTwoMask/_Blend);
+		twoEdgeMask = saturate(twoEdgeMask/_Blend); 
+
+		o.Albedo = dataColor.rgb;
+
+		half3 dataNorm = lerp(dataOneNorm, dataTwoNorm, oneTwoMask.y);
+		dataNorm = lerp(dataNorm, edgeNorm, twoEdgeMask.y);
+		half normalMask = 0.0;
+		half occlusionMask = 0.0;
+		
+		#if _EMISSION
+			normalMask = d.vertexColor.b;
+			occlusionMask = d.vertexColor.a;
+		#endif
+
+		o.Normal = lerp(o.Normal, dataNorm.rgb, saturate(_NormalIntensity - normalMask));
+
+		o.Smoothness = lerp(lerp(_Smoothness, _SmoothnessTwo, oneTwoMask.y), _SmoothnessEdge, twoEdgeMask.y);
+      o.Metallic = lerp(lerp(_Metalness, _MetalnessTwo, oneTwoMask.y), _MetalnessEdge, twoEdgeMask.y);
+		o.Occlusion = lerp((1.0 - occlusionMask), 1.0, _Occlusion);
+
+		#if _EMISSION
+			half3 em = SAMPLE_TEXTURE2D(_EmMap, sampler_EmMap, d.texcoord3.xy).rgb;
+			half pulse = saturate(pow(abs(em.b * d.texcoord2.w), _EmPow)) * _EmBoost;
+			half bMask = em.g + d.vertexColor.b + (pulse * em.g);
+			half aMask = em.r + d.vertexColor.a + (pulse * em.r);
+
+			o.Emission = saturate((_VertBlue.rgb * bMask.xxx * _VertBlue.aaa) + (_VertAlpha.rgb * aMask.xxx * _VertAlpha.aaa));
+		#endif
+		o.Alpha = 1.0;
+		
+	}
+
+END_CODE
+

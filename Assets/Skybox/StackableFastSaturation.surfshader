@@ -1,0 +1,34 @@
+//© Dicewrench Designs LLC 2022-2024
+//Licensed for use in 'Music Visualizer' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+	[Header(Saturation Settings)]
+    _Saturation("Saturation", Range(0,3)) = 1.0
+	_AlbedoMask("Albedo Sat Intensity", Range(0,1)) = 1.0
+	_EmissionMask("Emission Sat Intensity", Range(0,1)) = 0.0
+END_PROPERTIES
+
+BEGIN_DEFINES
+	#ifndef _HAS_FUNC
+        #define _HAS_FUNC 1
+        #include "DWD_ShaderFunctions.cginc"
+    #endif
+END_DEFINES
+
+BEGIN_CBUFFER
+	half _Saturation;
+	half _AlbedoMask, _EmissionMask;
+END_CBUFFER
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		o.Albedo = lerp(o.Albedo, Saturation(o.Albedo, _Saturation), _AlbedoMask);
+		o.Emission = lerp(o.Emission, Saturation(o.Emission, _Saturation), _EmissionMask);
+	}
+
+END_CODE
+

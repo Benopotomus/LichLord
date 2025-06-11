@@ -1,0 +1,12 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Alpha "Blend"
+END_OPTIONS
+
+BEGIN_PASS
+	Blend SrcAlpha OneMinusSrcAlpha
+END_PASS

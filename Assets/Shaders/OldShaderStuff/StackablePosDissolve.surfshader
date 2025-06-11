@@ -1,0 +1,57 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Alpha "Blend"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	//[Header(Dissolve)]
+	[Toggle(_DISSOLVE_ON)] _Dissolve("Enable Dissolve?", float) = 0.0
+	[HDR] _EdgeColor("Edge Color", Color) = (0, 0.5, 1.0, 1.0)
+	_EdgeWidth("Edge Width", Range(0,1)) = 0.085
+	_DissolveScale("Dissolve Scale", float) = 8.0
+	_DissolveBlend("Dissolve Blend", Range(0,1)) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _EdgeColor;
+	half _EdgeWidth;
+	half _DissolveScale, _DissolveBlend;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma multi_compile __ _DISSOLVE_ON
+
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_PASS
+	Cull Off
+	Blend SrcAlpha OneMinusSrcAlpha
+	ZWrite On
+END_PASS
+
+
+BEGIN_CODE
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half baseRamp = saturate(Noise((d.worldSpacePosition.xy + d.worldSpacePosition.zx) * _DissolveScale.xx) + 0.25);
+		half ramp = saturate( (baseRamp - (1.0 - _DissolveBlend)) * 6.0);
+		
+		half edge = saturate( (baseRamp - _EdgeWidth - (1.0 - _DissolveBlend)) * 13.0);
+		edge = saturate((ramp - edge) * 2.0);
+
+		o.Albedo = o.Albedo;
+		o.Emission += _EdgeColor.rgb * edge.xxx;
+		o.Alpha *= ramp;
+	}
+
+END_CODE
+

@@ -1,0 +1,41 @@
+﻿//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Add Tex"
+	Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[HDR] _Color ("Main Color", Color) = (0, 1, 0, 1)
+	[NoScaleOffset] _BaseTex("Base Tex", 2D) = "black" {}
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _Color;
+END_CBUFFER
+
+BEGIN_PASS("All")
+	ZWrite On
+	Blend One One
+	Cull Back
+	ZTest LEqual
+END_PASS
+
+
+BEGIN_CODE
+
+	TEXTURE2D(_BaseTex);
+	SAMPLER(sampler_BaseTex);
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 result = SAMPLE_TEXTURE2D(_BaseTex, sampler_BaseTex, d.texcoord0.xy) * _Color;
+		o.Albedo = result.rgb;
+		o.Alpha = result.a;
+	}
+
+END_CODE
+

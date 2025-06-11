@@ -1,0 +1,89 @@
+//© Dicewrench Designs LLC 2022-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Add Geo Glow"
+	Alpha "Add"
+	Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Geo Glow)]
+	[Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
+	[HDR] _GlowColor ("Glow Color", Color) = (0, 1, 0, 1)
+	[Toggle] _BlendVertColor("Multiply with Vertex Color?", float) = 0.0
+	[Toggle] _BlendVertAlpha("Multiply with Vertex Alpha?", float) = 1.0
+	[Toggle] _AlphaVertColor("Use Vert Color Mask Only?", float) = 0.0
+	[Toggle] _FlipNormal ("Flip Normals?", float) = 0.0
+	[Header(Alpha Settings)]
+	_AlphaFadePow("Rim Fade Pow", Float) = 4
+    [Space]
+	_Contrast("Contrast", Float) = 1.0
+	_Sub("Sub", Float) = 0.0
+    [Space]
+	[Toggle] _UseLengthVertexMask("Use Length Mask?", float) = 0.0
+    _HeightTop("Height Fade Top", Float) = 4.0
+    _HeightBottom("Height Fade Bottom", Float) = 0.0
+
+    [Header(Vertex Settings)]
+	[Vec3] _OffsetDir ("Offset Dir", Vector) = (0,0,1,1)
+	_Offset("Vertex Offset",Float) = 0.0
+	[Space]
+	_Length("Length", float) = 0.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _OffsetDir;
+	half4 _GlowColor;
+	half _FlipNormal;
+	half _BlendVertColor, _AlphaVertColor, _BlendVertAlpha;
+	half _AlphaFadePow;
+	half _Length, _UseLengthVertexMask;
+	half _Offset, _Sub, _Contrast;
+	half _HeightTop, _HeightBottom;
+END_CBUFFER
+
+BEGIN_PASS
+	Cull [_Cull]
+	Blend One One
+	ZWrite Off
+	ZTest LEqual
+END_PASS
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.vertex.xyz += (v.normal * _Offset);
+		v.vertex.xyz += _OffsetDir.xyz * _Length.xxx * v.vertexColor.bbb;
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half nScalar = lerp(1, -1, _FlipNormal);
+		half upDir = lerp(d.localSpacePosition.y, 1.0 - d.vertexColor.b, _UseLengthVertexMask) / max(_Length,1.0);
+		half mask = 1.0 - Rim(o.Normal * nScalar, d.tangentSpaceViewDir);
+		mask = lerp(mask, mask * d.vertexColor.a, _BlendVertAlpha);
+		mask = lerp(mask, d.vertexColor.a, _AlphaVertColor);
+
+        half height = saturate(1.0 - ((_HeightTop - upDir) / (_HeightTop - _HeightBottom)));
+        mask = saturate(pow(saturate(mask - _Sub), _AlphaFadePow) * _Contrast  * height);
+			
+        half4 col = saturate(_GlowColor * mask.xxxx);
+		col = lerp(col, col * d.vertexColor, _BlendVertColor);
+		o.Albedo *= col.rgb;
+		o.Alpha = mask;
+	}
+
+END_CODE
+

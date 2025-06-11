@@ -1,0 +1,76 @@
+﻿//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Stackable "True"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Twinkle Emissive)]
+	_EmissiveTex("Emissive Mask R, Twinkle Ramp G", 2D) = "black" {}
+	[HDR] _EmissiveTwinkleColor("Emissive Color", Color) = (1,1,1,1)
+	_EmissiveTwinkleRate("Twinkle Rate", float) = 1.0
+	_EmissiveTwinkleCutoff("Cutoff", Range(0,1)) = 0.0
+	_EmissiveTwinklePow("Pow", float) = 1.0
+	_EmissiveTwinkleBoost("Boost", float) = 1.0
+	[Space]
+	_3DPosOffset("Use Pos Offset?", Range(0,1)) = 0.0
+	_PosScale ("Pos Scale", float) = 1.0
+	_PosPow("Pos Pow", float) = 1.0
+	_PosBoost("Pos Boost", float) = 2.0
+	[Space]
+	[Toggle] _TwinkleRim("Use Rim Mask?", float) = 0.0
+	[Toggle] _TwinkleRimFlip("Flip?", float) = 0.0
+	_TwinkleRimMask("Rim Mask", float) = 1.0
+	_TwinkleRimPow("Rim Pow", float) = 1.0
+	_TwinkleRimBoost("Rim Boost", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _EmissiveTwinkleColor;
+	half _EmissiveTwinkleRate, _EmissiveTwinkleCutoff, _EmissiveTwinklePow, _EmissiveTwinkleBoost;
+	uniform float4 _EmissiveTex_ST;
+	half _3DPosOffset, _PosScale, _PosPow, _PosBoost;
+	half _TwinkleRim, _TwinkleRimMask, _TwinkleRimPow, _TwinkleRimBoost, _TwinkleRimFlip;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+	
+	TEXTURE2D(_EmissiveTex);
+	SAMPLER(sampler_EmissiveTex);
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+		half3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+		worldPos *= _PosScale;
+		half posRamp = saturate(pow(Noise(half2(worldPos.x + worldPos.y, worldPos.z - worldPos.x)), _PosPow) * _PosBoost);
+		half phase = lerp(0.0, posRamp, _3DPosOffset);
+		half t = frac(_Time.x * _EmissiveTwinkleRate + phase);
+		v.texcoord3.xy = v.texcoord0.xy * _EmissiveTex_ST.xy + _EmissiveTex_ST.zw;
+		v.texcoord3.z = ZeroOneZero(t);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half rimMask = Rim(o.Normal, d.tangentSpaceViewDir);
+		rimMask = lerp(rimMask, 1.0 - rimMask, _TwinkleRimFlip) - _TwinkleRimMask;
+		rimMask = saturate(pow(saturate(rimMask), _TwinkleRimPow) * _TwinkleRimBoost);
+		rimMask = lerp(1.0, rimMask, _TwinkleRim);
+		half2 uv = d.texcoord3.xy;
+		half4 emissive = SAMPLE_TEXTURE2D(_EmissiveTex, sampler_EmissiveTex, uv).rgba * _EmissiveTwinkleColor;
+		half ramp = saturate(pow(saturate(frac(emissive.a + d.texcoord3.z) - _EmissiveTwinkleCutoff), _EmissiveTwinklePow) * _EmissiveTwinkleBoost) * saturate(emissive.a * 10.0f);		
+
+		o.Emission += emissive.rgb * (ramp * rimMask).xxx;
+	}
+
+END_CODE
+

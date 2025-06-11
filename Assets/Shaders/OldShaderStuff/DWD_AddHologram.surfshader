@@ -1,0 +1,147 @@
+﻿//© Dicewrench Designs LLC 2020-2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Add Hologram"
+	Alpha "Add"
+	Workflow "Unlit"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	_MainTex ("Sprite Texture", 2D) = "white" {}
+   _Color ("Tint", Color) = (1,1,1,1)
+   _Alpha ("Alpha", Range(0,3)) = 1.0
+
+   [Header(Scan FX)]
+   _Distortion("Distortion", Range(0,1)) = 0.03
+
+   //Hologram Properties
+   [Header(Hologram)]
+   _Intensity("Hologram Intensity", Range(0.0,2.0)) = 1.0
+   _ScreenUVScale("Screen UV Scale", float) = 1.0
+
+   [Header(Color Fade)]
+   [HDR]_ColorFade ("Color Fade", Color) = (0.2,0.6,1.0,1.0)
+   _Contrast("Contrast", Float) = 1.0
+   _Cutoff("Cutoff", Float) = 0.0
+
+   [Header(Scan Data)]
+   _ScanTex ("Scan Data Tex", 2D) = "black" {}
+
+   [Header(Scan Lines)]
+   _LineHeight("Line Height", Range(0,1)) = 0.2
+   [HDR] _LineColorOne("Line One", Color) = (1,1,1,1)
+   [HDR] _LineColorTwo("Line Two", Color) = (0,0,0,1)
+
+   [Header(Scan FX Rates)]
+   _ScanRate("Scan Rate", Float) = 1.0
+   _NoiseRate("Noise Rate", Float) = 1.0
+
+   [Header(Noise Settings)]
+   _Noise("Noise Intensity", Range(0,1)) = 0.3
+   _CorruptionIntensity("Corruption Intensity", Range(0,1)) = 0.7
+   [HDR] _OverlayBand("Color Overlay Band", Color) = (0.2,0.6,1.0,1.0)
+   [HDR] _OverlayBandTwo("Color Overlay Band Two", Color) = (0.1,0.8,0.7,1.0)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	uniform float4 _MainTex_ST;
+   uniform float4 _MainTex_TexelSize;
+   half4 _Color;
+   half _Distortion;
+   half _Alpha, _ScreenUVScale, _StaticScale, _StaticRate;
+   half _Intensity, _LineHeight;
+   half4 _LineColorOne, _LineColorTwo;
+   half _ScanRate, _NoiseRate;
+   half _Noise, _CorruptionIntensity;
+   half4 _OverlayBand, _OverlayBandTwo;
+   half4 _ColorFade;
+   half _Contrast, _Cutoff;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+
+   TEXTURE2D(_MainTex);
+	SAMPLER(sampler_MainTex);
+
+   TEXTURE2D(_ScanTex);
+	SAMPLER(sampler_ScanTex);
+
+   half4 Scanlines(half4 color, half rMask, float time, float screenHeight, half offset, half4 lineColorOne, half4 lineColorTwo, float height, float intensity, float scanRate, float noise)
+   {
+      float rate = time * scanRate;
+      float scanlineMask = saturate( (frac( (screenHeight + rate + offset) * ( 1.0 + (1.0/height) ) ) - height) * 100.0f);
+      half4 scanlines = lerp( half4(1,1,1,1), lerp(lineColorOne, lineColorTwo, scanlineMask), intensity);
+      color *= scanlines;
+      color.rgb *= lerp(1.0, saturate(rMask + 0.75), noise);
+      color.a = color.a * saturate((rMask + 0.6 - noise) * 40.0f);
+      return color;
+   }
+
+   half4 InversionCorruption(half4 color, half gMask, float intensity)
+   {
+      color.rgb = lerp(color.rgb, 1.0.xxx - color.rgb, gMask * intensity);
+      return color;
+   } 
+
+   half4 OverlayColor(half4 color, half rMask, half bMask, half4 colorOne, half4 colorTwo)
+   {
+      half4 overlayColor = lerp(colorTwo, colorOne, rMask) * 2.0.xxxx;
+      color.rgb = lerp(color.rgb, color.rgb * overlayColor.rgb, bMask * saturate(overlayColor.a));
+      return color;
+   }
+
+   half4 ColorFade(half4 color, half4 fadeColor, float screenHeight, float cutoff, float intensity)
+   {
+      color.rgb = saturate(color.rgb + (saturate( (screenHeight - cutoff) * fadeColor.a * intensity).xxx * fadeColor.rgb));
+      return color;         
+   }
+
+
+   half4 HologramEffects(half4 color, float offset, float4 screenUV, float time)
+   {
+      half3 scan = SAMPLE_TEXTURE2D(_ScanTex, sampler_ScanTex, screenUV.zw ).rgb * _Intensity.xxx;
+
+      color = Scanlines(color, scan.r, time, screenUV.z, offset, _LineColorOne, _LineColorTwo, _LineHeight, _Intensity, _ScanRate, _Noise);
+
+      color = InversionCorruption(color, scan.g, _CorruptionIntensity);
+    
+      color = OverlayColor(color, scan.r, scan.b, _OverlayBand, _OverlayBandTwo);
+
+      color = ColorFade(color, _ColorFade, screenUV.z, _Cutoff, _Contrast * _Intensity);
+
+      return color;
+   }
+
+   void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		float t = _Time.x;
+      
+      v.texcoord0.xy = v.texcoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+      v.texcoord0.z = v.texcoord0.y * _ScreenUVScale + t;
+      v.texcoord0.w = t;
+   }
+
+   
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+      half4 main = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord0.xy) * _Color;
+      half4 holo = HologramEffects(main, 0.0, d.texcoord0.yxzw, d.texcoord0.z);
+      holo.a *= _Alpha;
+      o.Albedo = holo.rgb * holo.aaa;
+      o.Alpha = holo.a;
+	}
+
+END_CODE
+

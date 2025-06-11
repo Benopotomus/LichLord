@@ -1,0 +1,106 @@
+//© Dicewrench Designs LLC 2022-2023
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+
+END_OPTIONS
+
+BEGIN_SUBSHADERS
+	"StackableSkyParameters.surfshader"
+END_SUBSHADERS
+
+BEGIN_PROPERTIES
+	[Header(Fog Settings)]
+	_Scale ("Scale", float) = 0.001
+	_Cutoff("Cutoff", float) = 0.0
+	_CutoffNudge("Cutoff Nudge", Range(-1,1)) = 0.0
+	_Power("Power", float) = 1.0
+	_Boost("Boost", float) = 1.0
+	[Header(Fog Visuals)]
+	_FogColor ("Main Color", Color) = (0, 1, 0, 1)
+	_FogSecondary ("Secondary Color", Color) = (1,0,0,1)
+	[Space]
+	[KeywordEnum(Planar, Height)]_Coordinates("Coordinate System", float) = 1.0
+	_FogNoiseScaleX("X Scale", float) = 1.0
+	_FogNoiseScaleY("Y Scale", float) = 1.0
+	[Space]
+	_NoiseRate ("Rate", float) = 1.0
+	[Space]
+	_HCutoff("Horizon Cutoff", float) = 0.0
+	_HDistCutoff("H Dist Cutoff", float) = 0.0
+	_HDistFactor("H Dist Factor", float) = 0.0
+	_HPower("Horizon Power", float) = 1.0
+	_HBoost("Horizon Boost", float) = 1.0
+	[Header(Sky Visuals)]
+	_SkyHeight ("Height", float) = 50.0
+	_SkyPower("Power", float) = 1.0
+	_SkyBoost ("Boost", float) = 1.0
+	[Header(VertColor Mask)]
+	_UseMaxMask("Use Mask for Max Value?", float) = 0.0
+	_MaxVertColorMask ("Max Vert Mask", Vector) = (1,1,1,1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Scale, _Cutoff, _Power, _Boost, _CutoffNudge;
+	half4 _FogColor, _FogSecondary;
+	half _FogNoiseScaleX, _FogNoiseScaleY, _NoiseRate;
+	half _HCutoff, _HPower, _HBoost;
+	half _HDistCutoff, _HDistFactor;
+	half _SkyHeight, _SkyPower, _SkyBoost;
+	half4 _MaxVertColorMask;
+	half _UseMaxMask;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma multi_compile _COORDINATES_PLANAR _COORDINATES_HEIGHT
+	#ifndef HASNOISE
+		#include "DWD_NoiseFunctions.cginc" 
+		#define HASNOISE 1
+	#endif
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		d.extraV2F3.x = (_Time.x * _NoiseRate);
+	}
+
+	void FinalColorForward(Surface o, ShaderData d, inout half4 color)
+   {
+		d.worldSpacePosition.y -= _SkyHeight;
+		half depth = d.screenPos.w;
+		half mask = saturate( pow( saturate((depth * _Scale) - (_Cutoff + _CutoffNudge)), _Power) * _Boost);
+		half mixMask = GetMix(_MaxVertColorMask, d.vertexColor);
+		mask = lerp(mask, max(mixMask, mask), _UseMaxMask);
+
+		half noiseScale = saturate( 1.0 - mask ) + 1.0;
+		half2 nScale = half2(_FogNoiseScaleX, _FogNoiseScaleY);
+		half offset = d.extraV2F3.x;
+		float2 noiseUV = 0.0.xx;
+
+		#if _COORDINATES_HEIGHT
+			noiseUV = float2(d.worldSpacePosition.x + d.worldSpacePosition.z, d.worldSpacePosition.y);
+		#elif _COORDINATES_PLANAR
+			noiseUV = float2(d.worldSpacePosition.x, d.worldSpacePosition.z); 
+		#endif
+		half noise = saturate(Noise((noiseUV * nScale) + offset.xx));
+
+		half sky = saturate(smoothstep(0.0, 1.0, d.worldSpacePosition.y * _SkyScale));
+		sky = saturate( pow(sky, _SkyPower) * _SkyBoost);
+
+		half baseHorizonRamp = distance(d.worldSpacePosition.y, _HorizonHeight);
+		half horizon = baseHorizonRamp/(lerp(_HCutoff, _HDistCutoff, saturate(depth * _Scale * _HDistFactor)));
+		horizon = 1.0 - saturate(pow(saturate(horizon), _HPower) * _HBoost);
+
+		half4 fogColor = lerp(lerp(lerp(_FogColor, _FogSecondary, saturate(noise - horizon)), _SkyColor, sky), _HorizonColor, horizon);
+		color.rgb = lerp(saturate(color.rgb), fogColor.rgb, mask * fogColor.a); 
+   }
+
+END_CODE
+

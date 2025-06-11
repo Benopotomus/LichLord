@@ -1,0 +1,42 @@
+//© Dicewrench Designs LLC 2023
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Dist Fog Settings)]
+	_DistFogScale ("Scale", float) = 0.001
+	_DistFogCutoff("Cutoff", float) = 0.0
+	_DistFogCutoffNudge("Cutoff Nudge", Range(-1,1)) = 0.0
+	_DistFogPower("Power", float) = 1.0
+	_DistFogBoost("Boost", float) = 1.0
+	[Header(Vertical Fog Visuals)]
+	_DistFogColor ("Main Color", Color) = (0, 1, 0, 1)
+	_DistFogSecondary ("Secondary Color", Color) = (1,0,0,1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _DistFogScale, _DistFogCutoff, _DistFogPower, _DistFogBoost, _DistFogCutoffNudge;
+	half4 _DistFogColor, _DistFogSecondary;
+END_CBUFFER
+
+
+BEGIN_CODE
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		half dist = distance(mul(unity_ObjectToWorld, v.vertex).xyz, _WorldSpaceCameraPos);
+		v.texcoord2.x = pow(saturate(dist * _DistFogScale - _DistFogCutoff), _DistFogPower) * _DistFogBoost + _DistFogCutoffNudge;
+	}
+
+	void FinalColorForward(Surface o, ShaderData d, inout half4 color)
+   {
+		half depth = saturate(d.texcoord2.x);
+		half4 fogColor = lerp(_DistFogColor, _DistFogSecondary, depth);
+		color.rgb = lerp(color.rgb, fogColor.rgb, depth * fogColor.a); 
+   }
+
+END_CODE
+

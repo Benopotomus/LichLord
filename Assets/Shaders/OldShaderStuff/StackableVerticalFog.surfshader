@@ -1,0 +1,41 @@
+//© Dicewrench Designs LLC 2023
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Vertical Fog Settings)]
+	_VFogScale ("Scale", float) = 0.001
+	_VFogCutoff("Cutoff", float) = 0.0
+	_VFogCutoffNudge("Cutoff Nudge", Range(-1,1)) = 0.0
+	_VFogPower("Power", float) = 1.0
+	_VFogBoost("Boost", float) = 1.0
+	[Header(Vertical Fog Visuals)]
+	_VFogColor ("Main Color", Color) = (0, 1, 0, 1)
+	_VFogSecondary ("Secondary Color", Color) = (1,0,0,1)
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _VFogScale, _VFogCutoff, _VFogPower, _VFogBoost, _VFogCutoffNudge;
+	half4 _VFogColor, _VFogSecondary;
+END_CBUFFER
+
+
+BEGIN_CODE
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.texcoord2.x = pow(abs(v.vertex.y * _VFogScale - _VFogCutoff), _VFogPower) * _VFogBoost + _VFogCutoffNudge;
+	}
+
+	void FinalColorForward(Surface o, ShaderData d, inout half4 color)
+   {
+		half depth = saturate(d.texcoord2.x);
+		half4 fogColor = lerp(_VFogColor, _VFogSecondary, depth);
+		color.rgb = lerp(color.rgb, fogColor.rgb, depth * fogColor.a); 
+   }
+
+END_CODE
+

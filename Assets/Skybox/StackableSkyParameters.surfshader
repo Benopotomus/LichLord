@@ -1,0 +1,20 @@
+//© Dicewrench Designs LLC 2022-2024
+//Licensed for use in 'Music Visualizer' App
+//All Rights Reserved, used with permission
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_PROPERTIES
+   [Header(Sky Colors)]
+   [HDR] _ZenithColor("Zenith", Color) = (0,0,1,0)
+   [HDR] _SkyColor("Sky", Color) = (0.25,0.25,1,0)
+   [HDR] _HorizonColor("Horizon", Color) = (0.6,0.6,1,0)
+   [Space]
+   _SkyScale("Sky Scale", float) = 0.02
+   _HorizonHeight ("Horizon Height", float) = 1.0
+   _HorizonContrast("Horizon Contrast", float) = 1.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+   half4 _ZenithColor, _SkyColor, _HorizonColor;
+   half _SkyScale, _HorizonContrast, _HorizonHeight;
+END_CBUFFER

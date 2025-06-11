@@ -1,0 +1,93 @@
+//© Dicewrench Designs LLC 2023
+//Licensed for use in 'Black Box VR' App
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Billboard Candle"
+	Workflow "Unlit"
+	Alpha "Add"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[NoScaleOffset] _BaseTex("Base Tex", 2D) = "white" {}
+	[HDR] _Color ("Main Color", Color) = (0, 1, 0, 1)
+	[Header(UV Wobble)]
+	_WobbleRate ("Rate", float) = 1.0
+	_WobbleFrequency ("Frequency", float) = 1.0
+	_WobbleAmp ("Amplitude", float) = 0.1
+	_VerticalMaskPow("Mask Pow", float) = 1.0
+	_VerticalMaskBoost("Mask Boost", float) = 1.0
+	_VerticalMaskCutoff("Mask Cutoff", float) = 0.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _Color;
+	half _WobbleRate, _WobbleFrequency, _WobbleAmp;
+	half _VerticalMaskPow, _VerticalMaskBoost, _VerticalMaskCutoff;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+BEGIN_CODE
+	TEXTURE2D(_BaseTex);
+	SAMPLER(sampler_BaseTex);
+
+	void Billboard(inout float4 pos, inout float3 normal)
+	{
+		pos.xy *= float2(length(unity_ObjectToWorld._m00_m10_m20), length(unity_ObjectToWorld._m01_m11_m21)).xy;
+		// get the camera basis vectors
+
+		//ORIGINAL VALUES
+		float3 forward = -normalize(UNITY_MATRIX_V._m20_m21_m22); 
+		float3 up = normalize(UNITY_MATRIX_V._m10_m11_m12);
+		float3 right = normalize(UNITY_MATRIX_V._m00_m01_m02);
+
+		// rotate to face camera
+		float4x4 rotationMatrix = 
+			float4x4
+				(
+					right, 0.0,
+					up, 0.0,
+					forward, 0.0,
+					0.0, 0.0, 0.0, 1
+				);
+		
+		
+		pos = mul(pos, rotationMatrix);
+		normal = mul(normal.xyz, (float3x3)rotationMatrix).xyz;
+		pos.xyz = mul((float3x3)unity_WorldToObject, pos.xyz).xyz;
+		normal = mul(normal, (float3x3)unity_ObjectToWorld).xyz;
+	}
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+	{
+		v.texcoord0.xy = v.texcoord0.xy;
+		v.texcoord0.z = _Time.x * _WobbleRate;
+		Billboard(v.vertex, v.normal);
+	}
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half2 uv = d.texcoord0.xy;
+		half ramp = (uv.y * _WobbleFrequency) - d.texcoord0.z;
+		half noise = Noise(half2(ramp, d.texcoord0.z)) * 2.0 - 1.0;
+		uv.x += (noise * _WobbleAmp);
+		
+		half mask = d.texcoord0.y;
+		mask = saturate(pow(saturate(mask - _VerticalMaskCutoff), _VerticalMaskPow) * _VerticalMaskBoost);
+
+		uv = lerp(d.texcoord0.xy, uv, mask);
+
+		half4 sample = SAMPLE_TEXTURE2D(_BaseTex, sampler_BaseTex, uv);
+		o.Albedo = sample.rgb;// * _Color.rgb;
+		o.Alpha = 1.0;
+	}
+
+END_CODE
+
