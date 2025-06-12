@@ -112,7 +112,9 @@ namespace LichLord.Props
                         state.position = deltaState.position;
                         state.rotation = deltaState.rotation;
                         state.definitionId = deltaState.definitionId;
-                        state.stateData = deltaState.stateData;
+
+                        FPropData otherData = deltaState.Data;
+                        state.CopyData(ref otherData);
                     }
                 }
             }
@@ -151,7 +153,9 @@ namespace LichLord.Props
                 changedState.position = deltaState.position;
                 changedState.rotation = deltaState.rotation;
                 changedState.definitionId = deltaState.definitionId;
-                changedState.stateData = deltaState.stateData;
+
+                FPropData changedData = deltaState.Data;
+                changedState.CopyData(ref changedData);
             }
 
             int propReplicatorCount = (_deltaStates.Count + PropConstants.MAX_PROP_REPS - 1) / PropConstants.MAX_PROP_REPS;
@@ -218,7 +222,8 @@ namespace LichLord.Props
                     continue;
                 }
 
-                //Debug.Log(guid + " " + usedState.guid + " " + usedState.stateData);
+               // if(!hasAuthority)
+                //    Debug.Log("GUID: " + usedState.guid + ", Health: " + usedState.GetHealth() + ", State: " + usedState.GetState());
 
                 if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState))
                 {
@@ -241,10 +246,7 @@ namespace LichLord.Props
                 }
                 else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
                 {
-                    if(hasAuthority)
-                        propLoadState.Prop.AuthorityUpdate(renderDeltaTime);
-                    else
-                        propLoadState.Prop.RemoteUpdate(renderDeltaTime);
+                     propLoadState.Prop.OnRender(usedState, renderDeltaTime);
                 }
                 else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
                 {
@@ -283,15 +285,18 @@ namespace LichLord.Props
 
             EnsureEmptyReplicator();
 
+            // Create a snapshot to safely iterate
+            var snapshot = new Dictionary<int, PropRuntimeState>(_authorityRuntimePropStates);
 
-            // Run through the loaded runtime states
-            // and update it with authority
-            foreach (var propState in _authorityRuntimePropStates)
+            foreach (var propState in snapshot)
             {
                 PropRuntimeState runtimeState = propState.Value;
-                if (runtimeState.UpdateState(deltaTime))
-                { 
-                    //ReplicateStateChange(runtimeState);
+
+                if (runtimeState.AuthorityUpdate(deltaTime))
+                {
+                    // If changed, assign to dictionary and update the network data
+                    _authorityRuntimePropStates[propState.Key] = runtimeState;
+                    ReplicateAuthorityData(runtimeState);
                 }
             }
         }

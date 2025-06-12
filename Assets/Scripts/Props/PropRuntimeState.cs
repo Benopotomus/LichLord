@@ -8,7 +8,6 @@ namespace LichLord.Props
     {
         public int guid; // Unique identifier
         public int definitionId; // PropDefinition.TableID
-        public int stateData; // Custom runtime data (like FPropData.Data)
 
         // Not replicated
         public Vector3 position; // World position
@@ -43,38 +42,32 @@ namespace LichLord.Props
             PropDataDefinition dataDefinition = definition.PropDataDefinition;
 
             dataDefinition.InitializeData(ref _data, definition);
-            this.stateData = _data.StateData; 
+            
         }
 
         public PropRuntimeState(int guid,
             Vector3 position,
             Quaternion rotation,
             int definitionId,
-            int stateData)
+            FPropData propData)
         {
             this.guid = guid;
             this.definitionId = definitionId;
-            this.stateData = stateData;
             this.position = position;
             this.rotation = rotation;
 
-            _data.StateData = stateData;
+            _data.Copy(ref propData);
         }
 
         public PropRuntimeState(PropRuntimeState other)
         {
             this.guid = other.guid;
             this.definitionId = other.definitionId;
-            this.stateData = other.stateData;
             this.position = other.position;
             this.rotation = other.rotation;
 
-            _data.StateData = other.stateData;
-        }
-
-        public bool UpdateState(float deltaTime)
-        {
-            return false;
+            FPropData otherData = other.Data;
+            _data.Copy(ref otherData);
         }
 
         public EPropState GetState()
@@ -83,16 +76,75 @@ namespace LichLord.Props
             return dataDefinition.GetState(ref _data);
         }
 
+        public int GetHealth()
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+            return dataDefinition.GetHealth(ref _data);
+        }
+
         public void ApplyDamage(int damage)
         {
-            PropDefinition definition = Global.Tables.PropTable.TryGetDefinition(definitionId);
-            PropDataDefinition dataDefinition = definition.PropDataDefinition;
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
 
             // Create a propdata and set its state data to get current health
             dataDefinition.ApplyDamage(ref _data, damage);
 
-            // Set the stateData back locally
-            stateData = _data.StateData;
+            _hitReactTimer = _hitReactTimeMax;
+        }
+
+        public void CopyData(ref FPropData propData)
+        { 
+            _data.Copy(ref propData);
+        }
+
+        // Runtime Updates
+
+        // Runtime Values
+
+        EPropState _currentState;
+        float _hitReactTimeMax = 0.25f;
+        float _hitReactTimer = 0.25f;
+
+        float _deadTimeMax = 3.0f;
+        float _deadTimer = 3.0f;
+
+        // Updates on the server if the RuntimePropState is loaded
+        // Does not require the monobehaviour to exist
+        public bool AuthorityUpdate(float networkDeltaTime)
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+            _currentState = dataDefinition.GetState(ref _data);
+
+            switch (_currentState)
+            {
+                case EPropState.HitReact:
+
+                    Debug.Log("HitReactTimer: " + _hitReactTimer);
+
+                    _hitReactTimer -= networkDeltaTime;
+                    if (_hitReactTimer < 0f)
+                    {
+
+                        _currentState = EPropState.Idle;
+                        dataDefinition.SetState( _currentState, ref _data);
+
+                        Debug.Log("State Set: " + dataDefinition.GetState(ref _data));
+                        return true;
+                    }
+                    break;
+                case EPropState.Destroyed:
+
+                    _deadTimer -= networkDeltaTime;
+                    if (_deadTimer < 0f)
+                    {
+                        _currentState = EPropState.Inactive;
+                        dataDefinition.SetState(_currentState, ref _data);
+                        return true;
+                    }
+                    break;
+            }
+
+            return false;
         }
     }
 }

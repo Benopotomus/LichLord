@@ -25,7 +25,7 @@ namespace LichLord.Props
             {
                 var newPredictedState= new PropRuntimeState(authorityState);
                 newPredictedState.ApplyDamage(damage);
-                Debug.Log("Creating Predicted Data: " + newPredictedState.stateData);
+                //Debug.Log("Creating Predicted Data");
                 _predictedStates.Add(guid, newPredictedState);
             }
         }
@@ -50,6 +50,9 @@ namespace LichLord.Props
 
             usedState = authorityState;
 
+            //if (!hasAuthority)
+            //    Debug.Log("GUID: " + usedState.guid + ", Health: " + usedState.GetHealth() + ", State: " + usedState.GetState());
+
             // If we are the authority, we dont need to handle prediction
             if (hasAuthority)
                 return true;
@@ -61,12 +64,12 @@ namespace LichLord.Props
             // If there's no local state for this guid, create one and return
             if (!hasLocalState)
             { 
-                _localRuntimePropStates[guid] = authorityState;
+                _localRuntimePropStates[guid] = new PropRuntimeState(authorityState);
                 return true;
             }
 
             // Check for if local data has changed
-            if (localState.stateData != authorityState.stateData)
+            if (localState.Data.StateData != authorityState.Data.StateData)
             {
                 // remove predicted states for any changes
                 if (hasPredictedState)
@@ -76,13 +79,18 @@ namespace LichLord.Props
                 }
 
                 // update the local state data
-                localState.stateData = authorityState.stateData;
+                FPropData authorityData = authorityState.Data;
+                localState.CopyData(ref authorityData);
+                _localRuntimePropStates[guid] = localState;
+
+               // Debug.Log("Local State Changed");
             }
 
             // if we still have a predicted state after checking authority changes
             // use that state
             if (hasPredictedState)
             {
+               // Debug.Log("Using Predicted State");
                 usedState = predictedState;
             }
 
@@ -97,8 +105,10 @@ namespace LichLord.Props
             {
                 runtimeState.guid = outData.GUID;
                 runtimeState.definitionId = outData.DefinitionID;
-                runtimeState.stateData = outData.StateData;
+                runtimeState.CopyData(ref outData);
             }
+
+            //Debug.Log("Replication Data State " + runtimeState.GetState());
         }
 
         public void GetPropReplicationData(PropRuntimeState runtimeState, out PropReplicator replicator, out FPropData outData)
@@ -121,9 +131,20 @@ namespace LichLord.Props
 
         public void ApplyDamage(int guid, int damage)
         {
+            Debug.Log("Authority Apply Damage " + guid);
+
             // Find the state
             PropRuntimeState authorityState = _authorityRuntimePropStates[guid];
 
+            // Apply the damage
+            authorityState.ApplyDamage(damage);
+
+            // Replicate the data
+            ReplicateAuthorityData(authorityState);
+        }
+
+        public void ReplicateAuthorityData(PropRuntimeState authorityState)
+        {
             // Update the state in a replicator
             GetPropReplicationData(authorityState, out PropReplicator replicator, out FPropData outData);
 
@@ -136,18 +157,20 @@ namespace LichLord.Props
                 outData = new FPropData();
                 outData.Copy(authorityState);
             }
-            
-            // Apply the damage
-            authorityState.ApplyDamage(damage);
 
             // Copy out the state data after applying damage
-            outData.StateData = authorityState.stateData;
+            outData.Copy(authorityState);
 
-            replicator.UpdatePropData(guid, outData);
+            replicator.UpdatePropData(authorityState.guid, outData);
+
+            replicator.TryGetPropData(authorityState.guid, out var postWriteData);
+
+            EPropState postWriteState = authorityState.Definition.PropDataDefinition.GetState(ref postWriteData);
+            Debug.Log("Post Write State " + postWriteState);
 
             // Add to the saved states
-            _authorityRuntimePropStates[guid] = authorityState;
-            _deltaStates[guid] = authorityState;
+            _authorityRuntimePropStates[authorityState.guid] = authorityState;
+            _deltaStates[authorityState.guid] = authorityState;
         }
     }
 }

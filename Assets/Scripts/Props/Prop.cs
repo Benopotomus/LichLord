@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using DG.Tweening;
 using DWD.Pooling;
-using Fusion;
 
 namespace LichLord.Props
 {
@@ -35,13 +33,11 @@ namespace LichLord.Props
             CachedTransform.rotation = _propRuntimeState.rotation;
         }
 
-        public virtual void AuthorityUpdate(float renderDeltaTime)
+        // This is the visuals for authority and client.
+        // Read only - no logic should update here.
+        public virtual void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
         {
-            _propStateComponent.UpdateState(_propRuntimeState.GetState());
-        }
-        
-        public virtual void RemoteUpdate(float renderDeltaTime)
-        {
+            _propRuntimeState = propRuntimeState;
             _propStateComponent.UpdateState(_propRuntimeState.GetState());
         }
 

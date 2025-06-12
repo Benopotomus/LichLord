@@ -40,7 +40,7 @@ namespace LichLord.Props
             {
                 GUID = propRuntimeState.guid,
                 DefinitionID = propRuntimeState.definitionId,
-                StateData = propRuntimeState.stateData
+                StateData = propRuntimeState.Data.StateData
             };
 
             _propDatas.Add(propRuntimeState.guid, data);

@@ -111,17 +111,21 @@ namespace LichLord.Props
             switch (newState)
             {
                 case EPropState.Inactive:
+                    SetState(newState, ref propData);
                     return newState;
                 case EPropState.HitReact:
                     switch (currentState)
                     {
                         case EPropState.Destroyed:
                         case EPropState.Inactive:
+
+                            SetState(currentState, ref propData);
                             return currentState;
                     }
                     break;
             }
 
+            SetState(currentState, ref propData);
             return newState;
         }
     }

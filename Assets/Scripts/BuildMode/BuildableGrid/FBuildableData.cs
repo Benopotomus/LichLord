@@ -46,16 +46,6 @@
             return true;
         }
 
-        public bool IsEqualToRuntimeData(PropRuntimeState other)
-        {
-            if (_definitionId != other.definitionId)
-                return false;
-
-            if (StateData != other.stateData)
-                return false;
-
-            return true;
-        }
 
         public bool IsPackedDataEqual(ref FBuildableData other)
         {

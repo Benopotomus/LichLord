@@ -38,11 +38,18 @@
             return DefinitionID != 0;
         }
 
+        public void Copy(ref FPropData other)
+        {
+            _propGUID = other._propGUID;
+            _definitionId = other._definitionId;
+            _stateData = other._stateData;
+        }
+
         public void Copy(PropRuntimeState state)
         {
             _propGUID = state.guid;
             _definitionId = (ushort)state.definitionId;
-            _stateData = state.stateData;
+            _stateData = state.Data.StateData;
         }
 
         public bool IsPropDataEqual(ref FPropData other)
@@ -61,7 +68,7 @@
             if (_definitionId != other.definitionId)
                 return false;
 
-            if (StateData != other.stateData)
+            if (StateData != other.Data.StateData)
                 return false;
 
             return true;

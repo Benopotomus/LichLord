@@ -37,12 +37,14 @@ namespace LichLord.Props
                                 propLoadStates.Add(new PropManager.PropLoadState());
                             }
 
+                            FPropData propData = new FPropData();
+                            propData.StateData = entry.stateData;
                             PropRuntimeState runtimeState = new PropRuntimeState(
                                 guid,
                                 entry.position,
                                 entry.rotation,
                                 entry.definitionId,
-                                entry.stateData);
+                                propData);
 
                             runtimePropStates[guid] = runtimeState;
                             deltaStates[guid] = runtimeState;
@@ -65,12 +67,13 @@ namespace LichLord.Props
                 {
                     if (state != null)
                     {
+
                         entries.Add(new PropSaveState(
                             state.guid,
                             state.position,
                             state.rotation,
                             state.definitionId,
-                            state.stateData
+                            state.Data.StateData
                         ));
                     }
                 }
