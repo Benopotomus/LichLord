@@ -7,12 +7,18 @@ namespace LichLord.Props
 {
     public class Prop : DWDObjectPoolObject, IHitTarget
     {
+        [SerializeField]
+        private PropStateComponent _propStateComponent;
+        public PropStateComponent StateComponent => _propStateComponent;
+
         protected PropManager _propManager;
 
         [SerializeField]
         protected PropRuntimeState _propRuntimeState;
-
         public PropRuntimeState RuntimeState => _propRuntimeState;
+
+        [SerializeField] 
+        protected PropDefinition _propDefinition;
 
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
@@ -23,28 +29,21 @@ namespace LichLord.Props
         {
             _propRuntimeState = propRuntimeState;
             _propManager = propManager;
+            _propDefinition = propRuntimeState.Definition;
 
             CachedTransform.position = _propRuntimeState.position;
             CachedTransform.rotation = _propRuntimeState.rotation;
         }
 
-        public virtual void UpdateRuntimeState()
-        { 
-        
-        }
-
-        public virtual void UpdateProp(PropRuntimeState propState, float renderDeltaTime)
+        public virtual void AuthorityUpdate(float renderDeltaTime)
         {
-            if (propState.stateData == 1)
-            {
-                gameObject.SetActive(false);
-            }
-            else
-                gameObject.SetActive(true);
-
+            _propStateComponent.UpdateState(_propRuntimeState.GetState());
         }
-
-        protected virtual void UpdateAllStates() { }
+        
+        public virtual void RemoteUpdate(float renderDeltaTime)
+        {
+            _propStateComponent.UpdateState(_propRuntimeState.GetState());
+        }
 
         public void StartRecycle()
         {

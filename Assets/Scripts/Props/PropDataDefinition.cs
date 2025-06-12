@@ -9,6 +9,10 @@ namespace LichLord.Props
         private int _maxHealth = 100;
         public int MaxHealth => _maxHealth;
 
+        [SerializeField]
+        private EPropState _startingState = EPropState.Idle;
+        public EPropState StartingState => _startingState;
+
         // Bit size constants (matching PropDataDefinition)
         private const int STATE_BITS = 4;           // 0-15
         private const int STATUS_BITS = 4;          // 0-15
@@ -22,15 +26,14 @@ namespace LichLord.Props
         private const int STATUS_MASK = (1 << STATUS_BITS) - 1;
         private const int HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        public void InitializeData(ref FPropData propData, PropDefinition definition, int guid)
+        public void InitializeData(ref FPropData propData, PropDefinition definition)
         {
             // Initialize fields
-            propData.GUID = guid;
             propData.DefinitionID = definition.GetInstanceID(); // Assuming definition has an ID
             propData.StateData = 0;
 
             // Set initial values
-            SetState(EPropState.Inactive, ref propData);
+            SetState(StartingState, ref propData);
             SetStatus(EPropStatus.Neutral, ref propData);
             SetHealth(MaxHealth, ref propData); // Default health, adjust as needed
         }
@@ -83,7 +86,7 @@ namespace LichLord.Props
         }
 
         // Handle damage application
-        public void ApplyDamage(ref FPropData propData, PropDefinition definition, int damage)
+        public void ApplyDamage(ref FPropData propData, int damage)
         {
             int currentHealth = GetHealth(ref propData);
             SetHealth(currentHealth - damage, ref propData);
@@ -96,7 +99,7 @@ namespace LichLord.Props
             }
             else
             {
-                SetState(TryAssignState(ref propData, EPropState.Damaged), ref propData);
+                SetState(TryAssignState(ref propData, EPropState.HitReact), ref propData);
             }
         }
 
@@ -109,7 +112,7 @@ namespace LichLord.Props
             {
                 case EPropState.Inactive:
                     return newState;
-                case EPropState.Damaged:
+                case EPropState.HitReact:
                     switch (currentState)
                     {
                         case EPropState.Destroyed:
@@ -127,9 +130,9 @@ namespace LichLord.Props
     {
         Inactive,    // Not in the world
         Idle,        // Default active state
-        Damaged,     // After taking damage
+        HitReact,     // After taking damage
         Destroyed,   // Health <= 0
-        Active,      // Performing an action
+        Action_1,      // Performing an action
     }
 
     public enum EPropStatus : byte

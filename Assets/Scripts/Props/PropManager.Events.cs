@@ -124,9 +124,6 @@ namespace LichLord.Props
             // Find the state
             PropRuntimeState authorityState = _authorityRuntimePropStates[guid];
 
-            // Apply the damage
-            authorityState.ApplyDamage(damage);
-
             // Update the state in a replicator
             GetPropReplicationData(authorityState, out PropReplicator replicator, out FPropData outData);
 
@@ -139,9 +136,12 @@ namespace LichLord.Props
                 outData = new FPropData();
                 outData.Copy(authorityState);
             }
+            
+            // Apply the damage
+            authorityState.ApplyDamage(damage);
 
-            outData.StateData = 1;
-            authorityState.stateData = 1;
+            // Copy out the state data after applying damage
+            outData.StateData = authorityState.stateData;
 
             replicator.UpdatePropData(guid, outData);
 

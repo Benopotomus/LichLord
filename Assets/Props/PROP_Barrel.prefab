@@ -178,6 +178,7 @@ GameObject:
   - component: {fileID: 3250597500166225624}
   - component: {fileID: 8546807908320132942}
   - component: {fileID: 6629033338036438909}
+  - component: {fileID: 7120471587053415041}
   m_Layer: 0
   m_Name: PROP_Barrel
   m_TagString: Untagged
@@ -214,6 +215,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e195bcef408773640a28a2036703db9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _propStateComponent: {fileID: 7120471587053415041}
+  _propRuntimeState:
+    guid: 0
+    definitionId: 0
+    stateData: 0
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+  _propDefinition: {fileID: 0}
   _transform: {fileID: 3250597500166225624}
   Hurtbox: {fileID: 3862204457948869884}
 --- !u!114 &6629033338036438909
@@ -243,3 +252,17 @@ MonoBehaviour:
   wallAvoidFalloff: 1
   priority: 0.5
   debug: 0
+--- !u!114 &7120471587053415041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6272355397201178900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f071b7371d7000d488f9d4173eab6200, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prop: {fileID: 8546807908320132942}
+  _currentState: 0

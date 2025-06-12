@@ -81,8 +81,7 @@ namespace LichLord.Props
                     propMarkupData.guid,
                     propMarkupData.position,
                     propMarkupData.rotation,
-                    propMarkupData.propDefinition.TableID,
-                    0);
+                    propMarkupData.propDefinition.TableID);
 
                 Debug.Log($"Loaded PropRuntimeState for GUID {propMarkupData.guid} in chunk {chunkCoord} at position {propMarkupData.position}.", this);
 
@@ -242,7 +241,10 @@ namespace LichLord.Props
                 }
                 else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
                 {
-                    propLoadState.Prop.UpdateProp(usedState, renderDeltaTime);
+                    if(hasAuthority)
+                        propLoadState.Prop.AuthorityUpdate(renderDeltaTime);
+                    else
+                        propLoadState.Prop.RemoteUpdate(renderDeltaTime);
                 }
                 else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
                 {
