@@ -41,8 +41,9 @@ namespace LichLord.Props
             PropDefinition definition = Global.Tables.PropTable.TryGetDefinition(definitionId);
             PropDataDefinition dataDefinition = definition.PropDataDefinition;
 
+            _data.GUID = guid;
+            _data.DefinitionID = definitionId;
             dataDefinition.InitializeData(ref _data, definition);
-            
         }
 
         public PropRuntimeState(int guid,
@@ -57,6 +58,8 @@ namespace LichLord.Props
             this.rotation = rotation;
 
             _data.Copy(ref propData);
+            _data.GUID = guid;
+            _data.DefinitionID = definitionId;
         }
 
         public PropRuntimeState(PropRuntimeState other)
@@ -68,6 +71,8 @@ namespace LichLord.Props
 
             FPropData otherData = other.Data;
             _data.Copy(ref otherData);
+            _data.GUID = guid;
+            _data.DefinitionID = definitionId;
         }
 
         public EPropState GetState()
@@ -119,7 +124,7 @@ namespace LichLord.Props
             {
                 case EPropState.HitReact:
 
-                    Debug.Log("HitReactTimer: " + _hitReactTimer);
+                    //Debug.Log("HitReactTimer: " + _hitReactTimer);
 
                     _hitReactTimer -= networkDeltaTime;
                     if (_hitReactTimer < 0f)
@@ -128,7 +133,7 @@ namespace LichLord.Props
                         _currentState = EPropState.Idle;
                         dataDefinition.SetState( _currentState, ref _data);
 
-                        Debug.Log("State Set: " + dataDefinition.GetState(ref _data));
+                        //Debug.Log("State Set: " + dataDefinition.GetState(ref _data));
                         return true;
                     }
                     break;

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DWD.DOTweenSequencer;
+using DWD.Pooling;
 using UnityEngine;
 
 namespace LichLord.Props
@@ -14,6 +11,9 @@ namespace LichLord.Props
 
         [SerializeField] private EPropState _currentState = EPropState.Inactive;
         public EPropState CurrentState => _currentState;
+
+        [SerializeField]
+        private VisualEffectBase _hitReactPrefab;
 
         public void UpdateState(EPropState newState)
         {
@@ -28,6 +28,11 @@ namespace LichLord.Props
                     break;
                 case EPropState.Idle:
                     gameObject.SetActive(true);
+                    break;
+                case EPropState.HitReact:
+                    var effectInstance = DWDObjectPool.Instance.SpawnAt(_hitReactPrefab, 
+                        Prop.CachedTransform.position, Prop.CachedTransform.rotation) as VisualEffectBase;
+                    effectInstance.Initialize();
                     break;
             }
 

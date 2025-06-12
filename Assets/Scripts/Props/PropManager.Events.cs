@@ -131,8 +131,6 @@ namespace LichLord.Props
 
         public void ApplyDamage(int guid, int damage)
         {
-            Debug.Log("Authority Apply Damage " + guid);
-
             // Find the state
             PropRuntimeState authorityState = _authorityRuntimePropStates[guid];
 
@@ -162,11 +160,6 @@ namespace LichLord.Props
             outData.Copy(authorityState);
 
             replicator.UpdatePropData(authorityState.guid, outData);
-
-            replicator.TryGetPropData(authorityState.guid, out var postWriteData);
-
-            EPropState postWriteState = authorityState.Definition.PropDataDefinition.GetState(ref postWriteData);
-            Debug.Log("Post Write State " + postWriteState);
 
             // Add to the saved states
             _authorityRuntimePropStates[authorityState.guid] = authorityState;

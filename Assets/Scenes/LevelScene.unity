@@ -1242,7 +1242,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1116348376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1819,7 +1819,7 @@ TerrainCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_TerrainData: {fileID: 15600000, guid: d9b7c33080766bc46a4faf131f056e2d, type: 2}
+  m_TerrainData: {fileID: 15600000, guid: bb4252d2fcb747a4aa1ae53a25256c3f, type: 2}
   m_EnableTreeColliders: 1
 --- !u!218 &1519233110
 Terrain:
@@ -1830,7 +1830,7 @@ Terrain:
   m_GameObject: {fileID: 1519233107}
   m_Enabled: 1
   serializedVersion: 6
-  m_TerrainData: {fileID: 15600000, guid: d9b7c33080766bc46a4faf131f056e2d, type: 2}
+  m_TerrainData: {fileID: 15600000, guid: bb4252d2fcb747a4aa1ae53a25256c3f, type: 2}
   m_TreeDistance: 5000
   m_TreeBillboardDistance: 50
   m_TreeCrossFadeLength: 5
@@ -1838,13 +1838,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -2615,8 +2615,8 @@ MonoBehaviour:
   - {fileID: 0}
   _cameraData:
     position:
-    - {x: 0, y: 0, z: 0, w: 0}
-    - {x: 16.031292, y: 2.0232239, z: 120.32655, w: 0}
+    - {x: 0, y: 0.25, z: 1.1102231e-19, w: 0}
+    - {x: 42.249176, y: 30.849846, z: 86.05307, w: 0}
     fov:
     - 0.57735026
     - 0.57735026
@@ -2624,11 +2624,11 @@ MonoBehaviour:
     - e00: 0.97427857
       e01: 1.1002368e-22
       e02: 1.3845331e-14
-      e03: 0
+      e03: -2.750592e-23
       e10: -1.9559773e-22
       e11: 1.7320508
       e12: 6.1534805e-15
-      e13: 0
+      e13: -0.4330127
       e20: -1.4219383e-14
       e21: -3.5548457e-15
       e22: 1.0006001
@@ -2636,44 +2636,44 @@ MonoBehaviour:
       e30: -1.4210855e-14
       e31: -3.5527137e-15
       e32: 1
-      e33: 0
-    - e00: 0.87181
-      e01: -0.00000003508546
-      e02: -0.3563267
-      e03: 28.899324
-      e10: 0.21283998
-      e11: 1.6381459
-      e12: 0.5207467
-      e13: -69.38609
-      e20: 0.35783067
-      e21: -0.32479957
-      e22: 0.8754897
-      e23: -110.73035
-      e30: 0.35782713
-      e31: -0.32479635
-      e32: 0.87548107
-      e33: -110.42291
+      e33: 8.880674e-16
+    - e00: 0.8746334
+      e01: 0.0000138868245
+      e02: 0.34933904
+      e03: -67.01466
+      e10: -0.16443749
+      e11: 1.6743712
+      e12: 0.41163248
+      e13: -80.12898
+      e20: -0.3585678
+      e21: -0.25591987
+      e22: 0.89774954
+      e23: -54.823105
+      e30: -0.35856423
+      e31: -0.2559173
+      e32: 0.89774054
+      e33: -54.20927
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
-    - {x: 0.69783515, y: -2.5446606e-15, z: 0.71625835, w: 0}
-    - {x: 0.89513505, y: -0.236441, z: 0.37792715, w: -59.34647}
+    - {x: 0.69783515, y: -2.5446606e-15, z: 0.71625835, w: 6.3608564e-16}
+    - {x: 0.37568122, y: -0.18628919, z: 0.90783256, w: -88.247}
     frustumPlane1:
-    - {x: -0.69783515, y: -2.5446608e-15, z: 0.71625835, w: 0}
-    - {x: -0.3741625, y: -0.23644096, z: 0.89671516, w: -101.42197}
+    - {x: -0.69783515, y: -2.5446608e-15, z: 0.71625835, w: 6.3608574e-16}
+    - {x: -0.89772695, y: -0.18630943, z: 0.39921808, w: 9.321901}
     frustumPlane2:
-    - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: 0.28533354, y: 0.6566748, z: 0.6981139, w: -89.9045}
+    - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: -0.21650635}
+    - {x: -0.26150087, y: 0.70922697, z: 0.6546865, w: -67.16913}
     frustumPlane3:
-    - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: 0.072493576, y: -0.9814711, z: 0.17736718, w: -20.51841}
+    - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0.21650635}
+    - {x: -0.09706337, y: -0.9651443, z: 0.24305403, w: 12.959856}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.3}
-    - {x: 0.35782713, y: -0.32479632, z: 0.875481, w: -110.57607}
+    - {x: -0.35856423, y: -0.2559173, z: 0.89774054, w: -54.515915}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1000.1341}
-    - {x: -0.35892087, y: 0.32574332, z: -0.8746811, w: 31113.842}
+    - {x: 0.35697848, y: 0.25583458, z: -0.89839584, w: 61271.973}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -8360,7 +8360,7 @@ Transform:
   m_GameObject: {fileID: 8944336656349189697}
   serializedVersion: 2
   m_LocalRotation: {x: 1.7763568e-15, y: -7.1054274e-15, z: 5.646419e-23, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.25, z: 1.1102231e-19}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

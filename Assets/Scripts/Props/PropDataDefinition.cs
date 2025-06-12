@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace LichLord.Props
 {
@@ -29,7 +30,7 @@ namespace LichLord.Props
         public void InitializeData(ref FPropData propData, PropDefinition definition)
         {
             // Initialize fields
-            propData.DefinitionID = definition.GetInstanceID(); // Assuming definition has an ID
+            propData.DefinitionID = definition.TableID; // Assuming definition has an ID
             propData.StateData = 0;
 
             // Set initial values
@@ -91,7 +92,7 @@ namespace LichLord.Props
             int currentHealth = GetHealth(ref propData);
             SetHealth(currentHealth - damage, ref propData);
 
-            Debug.Log($"Apply Damage Health: {GetHealth(ref propData)}");
+            Debug.Log($"Apply Damage " + propData.GUID + ", Health: " + GetHealth(ref propData));
 
             if (GetHealth(ref propData) <= 0)
             {
