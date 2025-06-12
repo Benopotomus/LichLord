@@ -42,6 +42,7 @@ namespace LichLord.Props
 
         public void AuthorityUpdate(float renderDeltaTime)
         {
+            /*
             switch (_currentState)
             {
                 case EPropState.HitReact:
@@ -63,6 +64,7 @@ namespace LichLord.Props
                     }
                     break;
             }
+            */
         }
     }
 }
