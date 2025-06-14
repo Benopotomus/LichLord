@@ -47,19 +47,19 @@ namespace LichLord.NonPlayerCharacters
             // We don't want to update the target during this
             // since we need to wait for the hit event from animation
             // but we do want to rotate to the target
-            if (GetManeuverFromState(NPC.State.CurrentState) != null)
-            {
-                if (_attackTarget != null)
-                {
-                    NPC.Movement.SetFollowerEnabled(false);
-                    RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
-                }
-            }
-            
+
+            UpdateExecutingManeuver(ref data, renderDeltaTime);
+
+
             // We only tick if we're idle and ready
-            if (NPC.State.CurrentState != ENonPlayerState.Idle)
+            if (data.State != ENonPlayerState.Idle)
                 return;
 
+            UpdateBrain(ref data, renderDeltaTime);
+        }
+
+        private void UpdateBrain(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        {
             UpdateSenses(renderDeltaTime);
             SelectManeuver(renderDeltaTime);
             UpdateActiveManeuver(ref data, renderDeltaTime);
@@ -73,6 +73,7 @@ namespace LichLord.NonPlayerCharacters
 
             NPC.Movement.AIFollower.stopDistance = 0.2f;
             NPC.Movement.SetFollowerEnabled(true);
+            NPC.Movement.SetFollowUpdateRotation(true);
 
             if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
             {
@@ -91,7 +92,7 @@ namespace LichLord.NonPlayerCharacters
             for (int i = 0; i < _maneuvers.Count; i++)
             {
                 _maneuvers[i].UpdateCooldownTimer(renderDeltaTime);
-                _maneuvers[i].UpdateStateTimer(NPC, ref data, renderDeltaTime);
+                _activeManeuver.UpdateStateTimer(NPC, ref data, renderDeltaTime);
             }
         }
 
@@ -118,6 +119,40 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
+        // Runs when active meneuver is executed (in state)
+        private void UpdateExecutingManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        {
+            if (_activeManeuver == null)
+                return;
+
+            if (_activeManeuver.HasExpired())
+            {
+                if (_attackTarget == null || !_attackTarget.IsAttackable)
+                {
+                    // Refresh target
+                    _findTimer = 0;
+                    UpdateSenses(renderDeltaTime);
+                }
+
+                data.State = ENonPlayerState.Idle;
+                NPC.Replicator.UpdateNPCData(data);
+            }
+            else
+            {
+                if (_attackTarget != null)
+                {
+                    Vector3 delta = NPC.Movement.AIFollower.destination - NPC.CachedTransform.position;
+                    if (delta.sqrMagnitude > 0.01f)
+                    {
+                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
+                    }
+
+                    NPC.Movement.SetFollowUpdateRotation(false);
+                    RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
+                }
+            }
+        }
+
         private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
             if (_activeManeuver == null)
@@ -132,6 +167,8 @@ namespace LichLord.NonPlayerCharacters
                 if (distance < _activeManeuver.Definition.MovementStopRange)
                 {
                     NPC.Movement.SetFollowerEnabled(false);
+                    NPC.Movement.SetFollowUpdateRotation(false);
+
                     RotateTowardTarget(attackTargetPosition, renderDeltaTime);
                     float angle = GetAngleToTarget(attackTargetPosition);
 
@@ -174,6 +211,9 @@ namespace LichLord.NonPlayerCharacters
                 for (int i = 0; i < trackables.Count; i++)
                 {
                     IChunkTrackable trackable = trackables[i];
+
+                    if (!trackable.IsAttackable)
+                        continue;
 
                     if (trackable is NonPlayerCharacter targetNPC)
                     {
@@ -295,7 +335,7 @@ namespace LichLord.NonPlayerCharacters
                 NonPlayerCharacter npc = _attackTarget as NonPlayerCharacter;
                 if(npc != null) 
                 {
-                    npc.Replicator.ApplyDamage(npc.GUID, 25);
+                    npc.Replicator.ApplyDamage(npc.GUID, 21);
                 }
             }
         }

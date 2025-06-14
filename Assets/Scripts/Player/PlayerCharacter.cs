@@ -49,6 +49,7 @@ namespace LichLord
         private Chunk _chunk;
         public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
         public Vector3 Position => CachedTransform.position;
+        public bool IsAttackable { get { return true; } }
 
         // Cached list of PropRuntimeState for current and neighboring chunks
         private List<PropRuntimeState> _cachedPropStates = new List<PropRuntimeState>();
@@ -122,6 +123,9 @@ namespace LichLord
         {
             base.Despawned(runner, hasState);
             Context.NetworkGame.OnPlayerDespawned(this);
+
+            if(CurrentChunk != null)
+                CurrentChunk.RemoveObject(this);
         }
 
         public override void Render()

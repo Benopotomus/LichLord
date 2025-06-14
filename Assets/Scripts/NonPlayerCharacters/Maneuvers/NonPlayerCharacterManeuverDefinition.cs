@@ -21,13 +21,4 @@ namespace LichLord.NonPlayerCharacters
         public List<FAnimationTrigger> AnimationTriggers => _animationTriggers;
     }
 
-    [Serializable]
-    public struct FAnimationTrigger
-    {
-        public int Action;
-        public int Weapon;
-        public int TriggerNumber;
-        public bool IsMoving;
-        public bool IsBlocking;
-    }
 }

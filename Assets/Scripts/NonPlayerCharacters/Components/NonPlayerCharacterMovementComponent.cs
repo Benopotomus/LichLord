@@ -27,6 +27,8 @@ namespace LichLord.NonPlayerCharacters
         private int _animIDMoving = Animator.StringToHash("Moving");
 
         bool _followerEnabled = true;
+        bool _followerUpdateRotation = true;
+        bool _followerLocalAvoidance = true;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
@@ -44,9 +46,11 @@ namespace LichLord.NonPlayerCharacters
                 case ENonPlayerState.HitReact:
                 case ENonPlayerState.Dead:
                     SetFollowerEnabled(false);
+                    SetFollowLocalAvoidance(false);
                     return;
                 default:
                     SetFollowerEnabled(true);
+                    SetFollowLocalAvoidance(true);
                     break;
             }
 
@@ -154,14 +158,31 @@ namespace LichLord.NonPlayerCharacters
             if (newEnabled == _followerEnabled)
                 return;
 
-            _follower.enableLocalAvoidance = newEnabled;
             _follower.updatePosition = newEnabled;
             _follower.updateRotation = newEnabled;
             _follower.canMove = newEnabled;
-            NPC.Movement.AIFollower.updateRotation = newEnabled;
-            NPC.Movement.AIFollower.updatePosition = newEnabled;
 
             _followerEnabled = newEnabled;
+        }
+
+        public void SetFollowUpdateRotation(bool newEnabled)
+        {
+            if(_followerUpdateRotation == newEnabled) 
+                return;
+
+            _follower.updateRotation = newEnabled;
+
+            _followerUpdateRotation = newEnabled;
+        }
+
+        public void SetFollowLocalAvoidance(bool newEnabled)
+        {
+            if (_followerLocalAvoidance == newEnabled)
+                return;
+
+            _follower.enableLocalAvoidance = newEnabled;
+
+            _followerLocalAvoidance = newEnabled;
         }
 
         public void StartRecycle()

@@ -11,8 +11,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private ENonPlayerState _currentState = ENonPlayerState.Inactive;
         public ENonPlayerState CurrentState => _currentState;
 
-        float _hitReactTimeMax = 0.5f;
-        float _hitReactTimer = 0.5f;
+        [SerializeField] private int _currentAnimIndex;
+        public int CurrentAnimIndex => _currentAnimIndex;
 
         float _deadTimeMax = 15.0f;
         float _deadTimer = 15.0f;
@@ -26,7 +26,8 @@ namespace LichLord.NonPlayerCharacters
             ENonPlayerState newState = data.State;
             int animIndex = data.AnimationIndex;
 
-            if (_currentState == newState)
+            if (_currentState == newState &&
+                _currentAnimIndex == animIndex)
                 return;
 
             switch (newState)
@@ -46,24 +47,18 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     break;
                 case ENonPlayerState.HitReact:
-                    //12 flinch
-                    //26 knockback
-                    //20 dead
-                    //Debug.Log("Trigger Hit React");
-                    _hitReactTimer = _hitReactTimeMax;
-                    NPC.Animator.SetBool("Moving", false);
-                    NPC.Animator.SetInteger("Action", 1);
-                    NPC.Animator.SetInteger("Weapon", 0);
-                    NPC.Animator.SetBool("Blocking", false);
-                    NPC.Animator.SetInteger("TriggerNumber", 12);
-                    NPC.Animator.SetTrigger("Trigger");
+                    NPC.HitReact.StartHitReact(newState, animIndex);
                     break;
 
                 case ENonPlayerState.Maneuver_1:
+                case ENonPlayerState.Maneuver_2:
+                case ENonPlayerState.Maneuver_3:
+                case ENonPlayerState.Maneuver_4:
                     NPC.Brain.SetAnimationForManeuver(newState, animIndex);
                     break;
             }
 
+            _currentAnimIndex = animIndex;
             _currentState = newState;
         }
 
@@ -72,14 +67,7 @@ namespace LichLord.NonPlayerCharacters
             switch (_currentState)
             {
                 case ENonPlayerState.HitReact:
-
-                    //Debug.Log(_hitReactTimer);
-                    _hitReactTimer -= renderDeltaTime;
-                    if (_hitReactTimer < 0f)
-                    {
-                        data.State = ENonPlayerState.Idle;
-                        NPC.Replicator.UpdateNPCData(data);
-                    }
+                    NPC.HitReact.UpdateHitReactState(ref data, renderDeltaTime);
                     break;
                 case ENonPlayerState.Dead:
 

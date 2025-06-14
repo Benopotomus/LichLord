@@ -38,17 +38,20 @@ namespace LichLord.NonPlayerCharacters
             CooldownTimer -= renderDeltaTime;
         }
 
-        public void UpdateStateTimer(NonPlayerCharacter npc, ref FNonPlayerCharacterData data, float renderDeltaTime)
+        public bool HasExpired()
+        { 
+            return ManeuverAnimationTimer < 0;
+        }
+
+        // has expired
+        public bool UpdateStateTimer(NonPlayerCharacter npc, ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
             if (npc.State.CurrentState == ActiveState)
             {
                 ManeuverAnimationTimer -= renderDeltaTime;
-                if (ManeuverAnimationTimer < 0)
-                {
-                    data.State = ENonPlayerState.Idle;
-                    npc.Replicator.UpdateNPCData(data);
-                }
             }
+
+            return false;
         }
 
         public bool ExecuteManeuver(NonPlayerCharacter npc, ref FNonPlayerCharacterData data)
@@ -60,7 +63,7 @@ namespace LichLord.NonPlayerCharacters
                 return false;
 
             data.State = ActiveState;
-            data.AnimationIndex = UnityEngine.Random.Range(0, Definition.AnimationTriggers.Count);
+            data.AnimationIndex = UnityEngine.Random.Range(0, Definition.AnimationTriggers.Count + 1);
             npc.Replicator.UpdateNPCData(data);
             CooldownTimer = Definition.Cooldown;
             ManeuverAnimationTimer = Definition.StateTime;

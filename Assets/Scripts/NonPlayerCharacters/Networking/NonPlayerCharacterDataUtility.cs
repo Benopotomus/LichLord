@@ -169,7 +169,7 @@
             int currentHealth = GetHealth(ref npcData);
             SetHealth(currentHealth - damage, ref npcData);
 
-            Debug.Log("Apply Damage Health " + GetHealth(ref npcData));
+            //Debug.Log("Apply Damage Health " + GetHealth(ref npcData));
             // Determine what happens when health is reduced
             if (GetHealth(ref npcData) == 0)
             {
@@ -178,6 +178,15 @@
             else
             {
                 SetNPCState(TryAssignState(ref npcData, ENonPlayerState.HitReact), ref npcData);
+                int currentAnimIndex = npcData.AnimationIndex;
+                int newAnimIndex = UnityEngine.Random.Range(0, 4);
+
+                // If the new index is the same as the current, increment and wrap around
+                if (newAnimIndex == currentAnimIndex)
+                {
+                    newAnimIndex = (currentAnimIndex + 1) % 4;
+                }
+                npcData.AnimationIndex = newAnimIndex;
             }
         }
 

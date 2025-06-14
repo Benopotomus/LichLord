@@ -193,13 +193,9 @@ namespace LichLord.NonPlayerCharacters
 
         public override void FixedUpdateNetwork()
         {
-            if (!Runner.IsForward)
-                return;
-
-            if (!Runner.IsFirstTick)
-                return;
-
-            if (!Context.IsGameplayActive())
+            if (!Runner.IsForward || 
+                !Runner.IsFirstTick ||
+                !Context.IsGameplayActive())
                 return;
 
             int tick = Runner.Tick;

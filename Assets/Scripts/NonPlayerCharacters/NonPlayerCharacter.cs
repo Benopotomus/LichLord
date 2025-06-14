@@ -26,6 +26,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterBrainComponent _brainComponent;
         public NonPlayerCharacterBrainComponent Brain => _brainComponent;
 
+        [SerializeField] private NonPlayerCharacterHitReactComponent _hitReactComponent;
+        public NonPlayerCharacterHitReactComponent HitReact => _hitReactComponent;
+
         [SerializeField] private Animator _animator;
         public Animator Animator => _animator;
 
@@ -44,11 +47,24 @@ namespace LichLord.NonPlayerCharacters
         private ETeamID _teamId;
         public ETeamID TeamID => _teamId;
 
+        // IChunkTrackable
         private Chunk _chunk;
         public Chunk CurrentChunk { get => _chunk; set => _chunk = value; }
         public Vector3 Position => CachedTransform.position;
-
-
+        public bool IsAttackable 
+        { 
+            get 
+            {
+                switch (State.CurrentState)
+                {
+                    case ENonPlayerState.Dead:
+                    case ENonPlayerState.Inactive:
+                        return false;
+                    default:
+                        return true;
+                }
+            } 
+        }
 
         [SerializeField]
         private GameObject redHat;
@@ -90,9 +106,9 @@ namespace LichLord.NonPlayerCharacters
 
             _movementComponent.AuthorityUpdate(ref data, renderDeltaTime);
 
-            _brainComponent.AuthorityUpdate(ref data, renderDeltaTime);
-
             _stateComponent.AuthorityUpdate(ref data, renderDeltaTime);
+
+            _brainComponent.AuthorityUpdate(ref data, renderDeltaTime);
         }
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
