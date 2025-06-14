@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using LichLord.World;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -7,8 +10,25 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacter _npc;
         public NonPlayerCharacter NPC => _npc;
 
-        public Vector3 _moveTarget;
-        public Transform _attackTarget;
+        [SerializeField]
+        private Vector3 _moveTarget;
+        public Vector3 MoveTarget => _moveTarget;
+
+        [SerializeField]
+        private IChunkTrackable _attackTarget;
+        public IChunkTrackable AttackTarget => _attackTarget;
+
+        private float _findTimeMax = 0.5f;
+        private float _findTimer;
+
+        private float _destinationRefreshTime = 0.5f;
+        private float _destinationRefreshTimer;
+
+        [SerializeField]
+        private List<NonPlayerCharacterManeuverState> _maneuvers = new List<NonPlayerCharacterManeuverState>();
+
+        [SerializeField]
+        private NonPlayerCharacterManeuverState _activeManeuver = null;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
@@ -16,10 +36,270 @@ namespace LichLord.NonPlayerCharacters
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            //find closest enemy
-            //if (_attackTarget == null)
-              //  _attackTarget = findCurrentTarget();
+            if (NPC.State.CurrentState == ENonPlayerState.Inactive ||
+                NPC.State.CurrentState == ENonPlayerState.Dead ||
+                NPC.State.CurrentState == ENonPlayerState.HitReact)
+                return;
+
+            UpdateManeuverTimers(ref data, renderDeltaTime);
+
+            // Detect if an active state is running 
+            // We don't want to update the target during this
+            // since we need to wait for the hit event from animation
+            // but we do want to rotate to the target
+            if (GetManeuverFromState(NPC.State.CurrentState) != null)
+            {
+                if (_attackTarget != null)
+                {
+                    NPC.Movement.SetFollowerEnabled(false);
+                    RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
+                }
+            }
+            
+            // We only tick if we're idle and ready
+            if (NPC.State.CurrentState != ENonPlayerState.Idle)
+                return;
+
+            UpdateSenses(renderDeltaTime);
+            SelectManeuver(renderDeltaTime);
+            UpdateActiveManeuver(ref data, renderDeltaTime);
+            UpdateWanderMovement();
         }
+
+        private void UpdateWanderMovement()
+        {
+            if (_activeManeuver != null)
+                return;
+
+            NPC.Movement.AIFollower.stopDistance = 0.2f;
+            NPC.Movement.SetFollowerEnabled(true);
+
+            if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
+            {
+                _moveTarget = new Vector3(
+                    UnityEngine.Random.Range(-20f, 20f),
+                    0f, // Keep Y fixed
+                    UnityEngine.Random.Range(-20f, 20f)
+                );
+
+                NPC.Movement.AIFollower.destination = _moveTarget;
+            }
+        }
+
+        private void UpdateManeuverTimers(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        {
+            for (int i = 0; i < _maneuvers.Count; i++)
+            {
+                _maneuvers[i].UpdateCooldownTimer(renderDeltaTime);
+                _maneuvers[i].UpdateStateTimer(NPC, ref data, renderDeltaTime);
+            }
+        }
+
+        private void SelectManeuver(float renderDeltaTime)
+        {
+            // Check if the active maneuver is no longer valid
+            if (_activeManeuver != null)
+            { 
+                if(!_activeManeuver.CanBeSelected(this))
+                    _activeManeuver = null;
+            }
+
+            // if there is no active maneuver, select another
+            if (_activeManeuver == null)
+            {
+                for (int i = 0; i < _maneuvers.Count; i++)
+                { 
+                    var currentManeuver = _maneuvers[i];
+                    if (currentManeuver.CanBeSelected(this))
+                    { 
+                        _activeManeuver = currentManeuver;
+                    }
+                }
+            }
+        }
+
+        private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        {
+            if (_activeManeuver == null)
+                return;
+
+            if (_attackTarget != null)
+            {
+                Vector3 attackTargetPosition = _attackTarget.Position;
+
+                float distance = Vector3.Distance(NPC.CachedTransform.position, attackTargetPosition);
+
+                if (distance < _activeManeuver.Definition.MovementStopRange)
+                {
+                    NPC.Movement.SetFollowerEnabled(false);
+                    RotateTowardTarget(attackTargetPosition, renderDeltaTime);
+                    float angle = GetAngleToTarget(attackTargetPosition);
+
+                    if (angle < 5f)
+                    {
+                        _activeManeuver.ExecuteManeuver(NPC, ref data);
+                    }
+                }
+                else
+                {
+                    UpdateDestination(renderDeltaTime, attackTargetPosition);
+                }
+            }
+        }
+
+        private void UpdateDestination(float renderDeltaTime, Vector3 newDestination)
+        {
+            NPC.Movement.SetFollowerEnabled(true);
+
+            _destinationRefreshTime -= renderDeltaTime;
+            if (_destinationRefreshTime < 0f)
+            {
+                NPC.Movement.AIFollower.destination = newDestination;
+                _destinationRefreshTime = _destinationRefreshTimer;
+            }
+        }
+
+        private IChunkTrackable FindCurrentTarget()
+        {
+            // Get current + nearby chunks
+            List<Chunk> chunks = NPC.Manager.Context.ChunkManager.GetNearbyChunks(NPC.CurrentChunk.ChunkID);
+
+            float closestDistance = Mathf.Infinity;
+            IChunkTrackable currentTarget = null;
+
+            foreach (var chunk in chunks)
+            {
+                var trackables = chunk.Trackables;
+
+                for (int i = 0; i < trackables.Count; i++)
+                {
+                    IChunkTrackable trackable = trackables[i];
+
+                    if (trackable is NonPlayerCharacter targetNPC)
+                    {
+                        if (targetNPC.State.CurrentState == ENonPlayerState.Inactive ||
+                            targetNPC.State.CurrentState == ENonPlayerState.Dead)
+                            continue;
+
+                        if (targetNPC.TeamID == NPC.TeamID)
+                            continue;
+                    }
+
+                    float distance = Vector3.Distance(NPC.CachedTransform.position, trackable.Position);
+
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        currentTarget = trackable;
+                    }
+                }
+            }
+
+            return currentTarget;
+        }
+
+        private void RotateTowardTarget(Vector3 targetPosition, float renderDeltaTime)
+        {
+            Vector3 directionToTarget = targetPosition - NPC.CachedTransform.position;
+            directionToTarget.y = 0f; // Zero out vertical component to keep it on the XZ plane
+
+            if (directionToTarget.sqrMagnitude > 0.01f) // Avoid zero-length direction
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget.normalized);
+                Quaternion currentRotation = NPC.CachedTransform.rotation;
+
+                // Optionally smooth with Lerp or Slerp
+                NPC.CachedTransform.rotation = Quaternion.RotateTowards(
+                    currentRotation,
+                    targetRotation,
+                    360f * renderDeltaTime // Adjust speed (degrees per second)
+                );
+            }
+        }
+
+        private float GetAngleToTarget(Vector3 targetPosition)
+        {
+            Vector3 directionToTarget = targetPosition - NPC.CachedTransform.position;
+            directionToTarget.y = 0f; // Flatten to horizontal plane
+            float unsignedAngle = 180;
+            if (directionToTarget.sqrMagnitude > 0.001f)
+            {
+                Vector3 forward = NPC.CachedTransform.forward;
+                forward.y = 0f;
+
+                unsignedAngle = Vector3.Angle(forward, directionToTarget);
+                //Debug.Log("Unsigned yaw angle to target: " + unsignedAngle);
+            }
+
+            return unsignedAngle;
+        }
+
+        private void UpdateSenses(float renderDeltaTime)
+        {
+            _findTimer -= renderDeltaTime;
+            if (_findTimer < 0)
+            {
+                _attackTarget = FindCurrentTarget();
+
+                if (_attackTarget != null)
+                {
+                    if (_attackTarget is NonPlayerCharacter npc)
+                    {
+                        _moveTarget = npc.CachedTransform.position;
+                        NPC.Movement.AIFollower.destination = _moveTarget;
+                    }
+                }
+                //Debug.Log(_attackTarget.ToString());
+
+                _findTimer = _findTimeMax;
+            }
+        }
+
+        public void SetAnimationForManeuver(ENonPlayerState state, int animIndex) 
+        {
+            var maneuverState = GetManeuverFromState(state);
+            if (maneuverState != null)
+            {
+                var animationTriggers = maneuverState.Definition.AnimationTriggers;
+
+                if (animIndex > animationTriggers.Count)
+                    return;
+
+                var animationTrigger = animationTriggers[animIndex];
+
+                NPC.Animator.SetBool("Moving", animationTrigger.IsMoving);
+                NPC.Animator.SetBool("Blocking", animationTrigger.IsBlocking);
+                NPC.Animator.SetInteger("Action", animationTrigger.Action);
+                NPC.Animator.SetInteger("Weapon", animationTrigger.Weapon);
+                NPC.Animator.SetInteger("TriggerNumber", animationTrigger.TriggerNumber);
+                NPC.Animator.SetTrigger("Trigger");
+            }
+
+        }
+
+        public NonPlayerCharacterManeuverState GetManeuverFromState(ENonPlayerState state)
+        {
+            for (int i = 0; i < _maneuvers.Count; i++)
+            {
+                if(_maneuvers[i].ActiveState == state)
+                    return _maneuvers[i];
+            }
+
+            return null;
+        }
+
+        public void OnHitFromAnimation()
+        {
+            if (_attackTarget != null)
+            { 
+                NonPlayerCharacter npc = _attackTarget as NonPlayerCharacter;
+                if(npc != null) 
+                {
+                    npc.Replicator.ApplyDamage(npc.GUID, 25);
+                }
+            }
+        }
+
         /*
         public Transform findCurrentTarget()
         {

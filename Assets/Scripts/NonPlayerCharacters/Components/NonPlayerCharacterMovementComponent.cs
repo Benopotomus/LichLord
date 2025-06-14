@@ -18,8 +18,6 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private bool _isGrounded;
         public bool IsGrounded => _isGrounded;
 
-        [SerializeField] private Vector3 _moveTarget = Vector3.zero;
-
         private Vector3 _lastPosition;
         private float _speedPercent;
         Vector3 _localVelocity;
@@ -35,7 +33,7 @@ namespace LichLord.NonPlayerCharacters
             _lastPosition = spawnParams.position;
             _follower.updatePosition = true;
             _follower.updateRotation = true;
-            _follower.destination = _moveTarget;
+            _follower.destination = NPC.Brain.MoveTarget;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -56,16 +54,6 @@ namespace LichLord.NonPlayerCharacters
             
             UpdateVelocity(ref data, renderDeltaTime);
             UpdateAnimator(ref data, renderDeltaTime);
-
-            if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
-            {
-                _moveTarget = new Vector3(
-                   Random.Range(-20f, 20f),
-                   0f, // Keep Y fixed
-                   Random.Range(-20f, 20f)
-               );
-                _follower.destination = _moveTarget;
-            }
         }
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
@@ -158,10 +146,10 @@ namespace LichLord.NonPlayerCharacters
                 data.Yaw = yawA;
             }
 
-            NPC.Replicator.UpdateNPCData(data);
+            //NPC.Replicator.UpdateNPCData(data);
         }
 
-        private void SetFollowerEnabled(bool newEnabled)
+        public void SetFollowerEnabled(bool newEnabled)
         {
             if (newEnabled == _followerEnabled)
                 return;
@@ -170,6 +158,8 @@ namespace LichLord.NonPlayerCharacters
             _follower.updatePosition = newEnabled;
             _follower.updateRotation = newEnabled;
             _follower.canMove = newEnabled;
+            NPC.Movement.AIFollower.updateRotation = newEnabled;
+            NPC.Movement.AIFollower.updatePosition = newEnabled;
 
             _followerEnabled = newEnabled;
         }
@@ -180,6 +170,8 @@ namespace LichLord.NonPlayerCharacters
             _follower.updatePosition = false;
             _follower.updateRotation = false;
             _follower.canMove = false;
+            NPC.Movement.AIFollower.updateRotation = false;
+            NPC.Movement.AIFollower.updatePosition = false;
         }
     }
 }

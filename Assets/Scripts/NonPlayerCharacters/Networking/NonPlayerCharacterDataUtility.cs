@@ -9,8 +9,11 @@
         private const int INDEX_BITS = 9;                // 0-511
         private const int DEFINITION_BITS = 5;           // 0-31
         private const int TEAM_BITS = 2;                // 0-3
+
         private const int NPC_STATE_BITS = 4;           // 0-15
-        private const int STATUS_BITS = 4;              // 0-15
+        private const int STATUS_BITS = 2;              // 0-3
+        private const int ANIMATION_INDEX_BITS = 2;      // 0-3
+
         private const int HEALTH_BITS = 12;             // 0-4095
 
         // Bit shifts and masks for Configuration (ushort)
@@ -24,8 +27,10 @@
         // Bit shifts and masks for Condition (byte)
         private const int NPC_STATE_SHIFT = 0;
         private const int STATUS_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
+        private const int ANIMATION_INDEX_SHIFT = STATUS_SHIFT + STATUS_BITS;
         private const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
         private const byte STATUS_MASK = (1 << STATUS_BITS) - 1;
+        private const byte ANIMATION_INDEX_MASK = (1 << ANIMATION_INDEX_BITS) - 1;
 
         // Bit shifts and masks for Events (ushort)
         private const int HEALTH_SHIFT = 0;
@@ -50,6 +55,7 @@
             npcData.Condition = 0;
             SetNPCState(ENonPlayerState.Idle, ref npcData);
             SetStatus(ENPCStatus.Neutral, ref npcData);
+            SetAnimationIndex(0, ref npcData);
         }
 
         // Index
@@ -136,6 +142,20 @@
             npcData.Condition = condition;
         }
 
+        // AnimationState
+        public static int GetAnimationIndex(ref FNonPlayerCharacterData npcData)
+        {
+            return ((npcData.Condition >> ANIMATION_INDEX_SHIFT) & ANIMATION_INDEX_MASK);
+        }
+
+        public static void SetAnimationIndex(int animationState, ref FNonPlayerCharacterData npcData)
+        {
+            byte condition = npcData.Condition;
+            int stateValue = Mathf.Clamp(animationState, 0, ANIMATION_INDEX_MASK);
+            condition = (byte)((condition & ~(ANIMATION_INDEX_MASK << ANIMATION_INDEX_SHIFT)) | (stateValue << ANIMATION_INDEX_SHIFT));
+            npcData.Condition = condition;
+        }
+
         public static bool IsActive(FNonPlayerCharacterData npcData)
         {
             return GetNPCState(ref npcData) != ENonPlayerState.Inactive;
@@ -184,15 +204,12 @@
         }
     }
 
+    // Existing enums (unchanged, included for completeness)
     public enum ENonPlayerState : byte
     {
         Inactive,    // Not in the world at all
         Idle,
-        Walking,
-        Running,
         Dead,
-        Jump,
-        Falling,
         HitReact,
         Maneuver_1,
         Maneuver_2,
@@ -211,4 +228,5 @@
         Searching,      // Looking for target
         Disabled,       // Temporarily out of action
     }
+
 }

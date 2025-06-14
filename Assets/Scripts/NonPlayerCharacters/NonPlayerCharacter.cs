@@ -1,5 +1,5 @@
 ﻿using DWD.Pooling;
-using Fusion;
+using LichLord.World;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -9,7 +9,7 @@ namespace LichLord.NonPlayerCharacters
     // Because its always networked and updating, it should be processed
     // on the master client no matter what.
     
-    public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor
+    public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor, IChunkTrackable
     {
         protected NonPlayerCharacterManager _manager;
         public NonPlayerCharacterManager Manager => _manager;
@@ -23,6 +23,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterStateComponent _stateComponent;
         public NonPlayerCharacterStateComponent State => _stateComponent;
 
+        [SerializeField] private NonPlayerCharacterBrainComponent _brainComponent;
+        public NonPlayerCharacterBrainComponent Brain => _brainComponent;
+
         [SerializeField] private Animator _animator;
         public Animator Animator => _animator;
 
@@ -33,18 +36,46 @@ namespace LichLord.NonPlayerCharacters
         public HurtboxComponent Hurtbox => _hurtbox;
 
         public INetActor NetActor => this;
-        private FNetObjectID _netObjectId = new FNetObjectID();
-        public FNetObjectID NetObjectID => _netObjectId;
+        public FNetObjectID NetObjectID => new FNetObjectID();
 
+        private int _guid;
+        public int GUID => _guid;
+
+        private ETeamID _teamId;
+        public ETeamID TeamID => _teamId;
+
+        private Chunk _chunk;
+        public Chunk CurrentChunk { get => _chunk; set => _chunk = value; }
+        public Vector3 Position => CachedTransform.position;
+
+
+
+        [SerializeField]
+        private GameObject redHat;
+
+        [SerializeField]
+        private GameObject blueHat;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacterManager manager, NonPlayerCharacterReplicator replicator)
         {
             _manager = manager;
             _replicator = replicator;
-            _netObjectId.networkId = _manager.Object.Id;
-            _netObjectId.index = (byte)spawnParams.index;
             _movementComponent.OnSpawned(ref spawnParams);
             _stateComponent.OnSpawned(ref spawnParams);
+            _brainComponent.OnSpawned(ref spawnParams);
+            _teamId = spawnParams.teamId;
+            _guid = spawnParams.index;
+            UpdateChunk(Manager.Context.ChunkManager);
+
+            switch (spawnParams.teamId)
+            {
+                case ETeamID.EnemiesTeamA:
+                    redHat.SetActive(false);
+                    break;
+                case ETeamID.EnemiesTeamB:
+                    blueHat.SetActive(false);
+                    break;
+            }
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -53,19 +84,26 @@ namespace LichLord.NonPlayerCharacters
             if (definition == null)
                 return;
 
-            _stateComponent.UpdateState(data.State);
+            UpdateChunk(Manager.Context.ChunkManager);
+
+            _stateComponent.UpdateState(ref data);
+
+            _movementComponent.AuthorityUpdate(ref data, renderDeltaTime);
+
+            _brainComponent.AuthorityUpdate(ref data, renderDeltaTime);
 
             _stateComponent.AuthorityUpdate(ref data, renderDeltaTime);
-            _movementComponent.AuthorityUpdate(ref data, renderDeltaTime);
         }
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
+            UpdateChunk(Manager.Context.ChunkManager);
+
             var definition = GetDefinition(ref data);
             if (definition == null)
                 return;
 
-            _stateComponent.UpdateState(data.State);
+            _stateComponent.UpdateState(ref data);
             _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
         }
 
@@ -73,8 +111,6 @@ namespace LichLord.NonPlayerCharacters
         {
             _movementComponent.OnFixedUpdate(ref data, tick);
         }
-
-        
 
         public void ProcessHit(ref FHitUtilityData hit)
         {
@@ -91,10 +127,29 @@ namespace LichLord.NonPlayerCharacters
 
         }
 
+
+        public void UpdateChunk(ChunkManager chunkManager)
+        {
+            var lastChunk = CurrentChunk;
+            var newChunk = chunkManager.GetChunkAtPosition(CachedTransform.position);
+
+            if (lastChunk != newChunk)
+            {
+                CurrentChunk = newChunk;
+
+                if (lastChunk != null)
+                    lastChunk.RemoveObject(this);
+
+                if (newChunk != null)
+                    newChunk.AddObject(this);
+            }
+        }
+
         public void StartRecycle()
         {
             _movementComponent.StartRecycle();
             DWDObjectPool.Instance.Recycle(this);
+            UpdateChunk(Manager.Context.ChunkManager);
         }
 
         private NonPlayerCharacterDefinition _definition;

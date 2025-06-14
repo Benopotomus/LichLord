@@ -5,7 +5,7 @@ using UnityEngine;
 namespace LichLord
 {
 
-    [CreateAssetMenu(fileName = "ActionData", menuName = "LichLord/ActionData", order = 1)]
+    [CreateAssetMenu(fileName = "Maneuver", menuName = "LichLord/Maneuvers/ManeuverDefinition", order = 1)]
     public class ManeuverDefinition : TableObject
     {
         public string ActionName;

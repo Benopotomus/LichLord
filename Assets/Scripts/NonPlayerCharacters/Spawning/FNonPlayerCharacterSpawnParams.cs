@@ -8,7 +8,7 @@ namespace LichLord.NonPlayerCharacters
         public int definitionId; // NonPlayerCharacterDefinition.TableID
         public Vector3 position; // World position
         public Quaternion rotation; // World rotation
-        public ETeamID teamID; // Team identifier
+        public ETeamID teamId; // Team identifier
 
         public void Copy(FNonPlayerCharacterSpawnParams other)
         {
@@ -16,7 +16,7 @@ namespace LichLord.NonPlayerCharacters
             definitionId = other.definitionId;
             position = other.position;
             rotation = other.rotation;
-            teamID = other.teamID;
+            teamId = other.teamId;
         }
     }
 }

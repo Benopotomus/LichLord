@@ -106,7 +106,7 @@ namespace LichLord.NonPlayerCharacters
         public void UpdateNPCData(FNonPlayerCharacterData updatedData)
         {
             int index = NonPlayerCharacterDataUtility.GetGUID(ref updatedData);
-            var currentData = _npcDatas.GetRef(index);
+            ref FNonPlayerCharacterData currentData = ref _npcDatas.GetRef(index);
             bool wasActive = NonPlayerCharacterDataUtility.IsActive(currentData);
             bool willBeActive = NonPlayerCharacterDataUtility.IsActive(updatedData);
 
@@ -128,7 +128,7 @@ namespace LichLord.NonPlayerCharacters
             NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(spawnParams.definitionId);
             if (definition != null)
             {
-                NonPlayerCharacterDataUtility.InitializeData(ref data, definition, spawnParams.index, spawnParams.teamID);
+                NonPlayerCharacterDataUtility.InitializeData(ref data, definition, spawnParams.index, spawnParams.teamId);
                 data.Position = spawnParams.position;
                 data.Rotation = spawnParams.rotation;
                 _npcDatas.Set(spawnParams.index, data);
@@ -193,20 +193,21 @@ namespace LichLord.NonPlayerCharacters
 
         public override void FixedUpdateNetwork()
         {
+            if (!Runner.IsForward)
+                return;
+
+            if (!Runner.IsFirstTick)
+                return;
+
             if (!Context.IsGameplayActive())
                 return;
 
-            if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter playerCreature))
-                return;
-
             int tick = Runner.Tick;
-
-            float ping = (float)Runner.GetPlayerRtt(playerCreature.Object.StateAuthority);
             bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                FNonPlayerCharacterData data = _npcDatas.Get(i);
+                ref FNonPlayerCharacterData data = ref _npcDatas.GetRef(i);
                 NPCLoadState loadState = _loadStates[i];
 
                 if (loadState.LoadState == ELoadState.Loaded)

@@ -95,6 +95,9 @@ namespace LichLord.Props
             dataDefinition.ApplyDamage(ref _data, damage);
 
             _hitReactTimer = _hitReactTimeMax;
+
+            if (GetState() == EPropState.Destroyed)
+                _deadTimer = _deadTimeMax;
         }
 
         public void CopyData(ref FPropData propData)
@@ -124,16 +127,11 @@ namespace LichLord.Props
             {
                 case EPropState.HitReact:
 
-                    //Debug.Log("HitReactTimer: " + _hitReactTimer);
-
                     _hitReactTimer -= networkDeltaTime;
                     if (_hitReactTimer < 0f)
                     {
-
                         _currentState = EPropState.Idle;
                         dataDefinition.SetState( _currentState, ref _data);
-
-                        //Debug.Log("State Set: " + dataDefinition.GetState(ref _data));
                         return true;
                     }
                     break;

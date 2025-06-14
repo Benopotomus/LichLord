@@ -8,13 +8,13 @@
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
-        private FWorldTransform _transform; // 9 bytes: Position (8) + Rotation (1)
-        [FieldOffset(9)]
-        private byte _condition; // 1 byte: NPCState (4 bits) + NPCStatus (4 bits)
-        [FieldOffset(10)]
         private ushort _configuration; // 2 bytes: Index (9 bits) + DefinitionID (5 bits) + TeamID (2 bits)
+        [FieldOffset(2)]
+        private FWorldTransform _transform; // 9 bytes: Position (8) + Rotation (1)
+        [FieldOffset(11)]
+        private byte _condition; // 1 byte: NPCState (4 bits) + NPCStatus (4 bits)
         [FieldOffset(12)]
-        private ushort _events; // 2 bytes: Health (12 bits) + Status (4 bits)
+        private ushort _events; // 2 bytes: Health (12 bits)
         // Total: 14 bytes
 
         public int DefinitionID
@@ -38,6 +38,12 @@
         {
             get => NonPlayerCharacterDataUtility.GetNPCState(ref this);
             set => NonPlayerCharacterDataUtility.SetNPCState(value, ref this);
+        }
+
+        public int AnimationIndex
+        {
+            get => NonPlayerCharacterDataUtility.GetAnimationIndex(ref this);
+            set => NonPlayerCharacterDataUtility.SetAnimationIndex(value, ref this);
         }
 
         public FWorldTransform Transform

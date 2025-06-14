@@ -8,8 +8,11 @@ namespace LichLord.World
     [System.Serializable]
     public class Chunk
     {
-        public List<GameObject> ObjectsInChunk = new List<GameObject>();
-        public List<PropRuntimeState> PropStates = new List<PropRuntimeState>(); // Store prop states
+        private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
+        public List<IChunkTrackable> Trackables => _trackablesInChunk;
+
+        private List<PropRuntimeState> _propStatesInChunk = new List<PropRuntimeState>(); // Store prop states
+        public List<PropRuntimeState> PropStates => _propStatesInChunk;
 
         public Vector2Int ChunkID { get; set; }
         public Bounds Bounds { get; set; }
@@ -29,26 +32,26 @@ namespace LichLord.World
             Bounds = new Bounds(new Vector3(center.x, 0, center.y), new Vector3(chunkSize, 1000, chunkSize));
         }
 
-        public void AddObject(GameObject objId)
+        public void AddObject(IChunkTrackable objId)
         {
-            if (!ObjectsInChunk.Contains(objId))
-                ObjectsInChunk.Add(objId);
+            if (!_trackablesInChunk.Contains(objId))
+                _trackablesInChunk.Add(objId);
         }
 
-        public void RemoveObject(GameObject objId)
+        public void RemoveObject(IChunkTrackable objId)
         {
-            ObjectsInChunk.Remove(objId);
+            _trackablesInChunk.Remove(objId);
         }
 
         public void AddObject(PropRuntimeState propState)
         {
-            if (!PropStates.Contains(propState))
-                PropStates.Add(propState);
+            if (!_propStatesInChunk.Contains(propState))
+                _propStatesInChunk.Add(propState);
         }
 
         public void RemoveObject(PropRuntimeState propState)
         {
-            PropStates.Remove(propState);
+            _propStatesInChunk.Remove(propState);
         }
     }
 }

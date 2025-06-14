@@ -27,12 +27,26 @@ namespace LichLord.NonPlayerCharacters
                 for (int i = 0; i < _debugSpawnCount; i++)
                 {
                     Vector3 randomPosition = new Vector3(
-                        Random.Range(-0f, 10f),
+                        Random.Range(-10f, 10f),
                         1f, // Keep Y fixed
-                        Random.Range(-0f, 10f)
+                        Random.Range(-10f, 10f)
                     );
 
+                    randomPosition += new Vector3(35, 0, 0);
                     SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamA);
+                }
+
+                for (int i = 0; i < _debugSpawnCount; i++)
+                {
+                    Vector3 randomPosition = new Vector3(
+                        Random.Range(-10f, 10f),
+                        1f, // Keep Y fixed
+                        Random.Range(-10f, 10f)
+                    );
+
+                    randomPosition += new Vector3(-35, 0, 0);
+
+                    SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamB);
                 }
             }
         }
@@ -62,6 +76,7 @@ namespace LichLord.NonPlayerCharacters
 
                 FNonPlayerCharacterData data = new FNonPlayerCharacterData();
                 NonPlayerCharacterDataUtility.InitializeData(ref data, definition, freeIndex, teamID);
+
                 data.Position = spawnPos;
                 data.Rotation = Quaternion.identity;
 

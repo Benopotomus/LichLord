@@ -25,6 +25,7 @@ namespace LichLord.Props
             {
                 var newPredictedState= new PropRuntimeState(authorityState);
                 newPredictedState.ApplyDamage(damage);
+
                 //Debug.Log("Creating Predicted Data");
                 _predictedStates.Add(guid, newPredictedState);
             }

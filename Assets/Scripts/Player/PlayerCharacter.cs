@@ -9,6 +9,7 @@ using LichLord.NonPlayerCharacters;
 using LichLord.World;
 using LichLord.Props;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace LichLord
 {
@@ -47,6 +48,7 @@ namespace LichLord
 
         private Chunk _chunk;
         public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
+        public Vector3 Position => CachedTransform.position;
 
         // Cached list of PropRuntimeState for current and neighboring chunks
         private List<PropRuntimeState> _cachedPropStates = new List<PropRuntimeState>();
@@ -166,10 +168,10 @@ namespace LichLord
         {
             if (hit.target is NonPlayerCharacter npc)
             {
-                npc.Replicator.RPC_DealDamageToNPC(npc.NetObjectID.index, hit.damageData.damageValue);
+                npc.Replicator.RPC_DealDamageToNPC(npc.GUID, hit.damageData.damageValue);
 
                 if (!Runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.NetObjectID.index, hit.damageData.damageValue);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.GUID, hit.damageData.damageValue);
             }
 
             if (hit.target is Prop prop)
@@ -199,10 +201,10 @@ namespace LichLord
                 CurrentChunk = newChunk;
 
                 if (lastChunk != null)
-                    lastChunk.RemoveObject(gameObject);
+                    lastChunk.RemoveObject(this);
 
                 if (newChunk != null)
-                    newChunk.AddObject(gameObject);
+                    newChunk.AddObject(this);
 
                 // Update cached prop states on chunk change
                 UpdateVisibilePropStates(chunkManager);

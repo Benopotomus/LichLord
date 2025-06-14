@@ -41,7 +41,7 @@ namespace FusionHelpers
 	{
 		// Theoretical maximum number of events you'll ever send with each relay in a single tick.
 		// In reality this needs to be a couple of times larger than that to avoid loosing events due to package drops.
-		const int MAX_EVENTS = 20;
+		const int MAX_EVENTS = 10;
 		
 		// The maximum size of any event sent with the relay (in bytes).
 		const int MAX_EVENT_SIZE = 24;

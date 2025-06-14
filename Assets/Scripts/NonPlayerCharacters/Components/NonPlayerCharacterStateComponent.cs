@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Data;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -10,18 +11,21 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private ENonPlayerState _currentState = ENonPlayerState.Inactive;
         public ENonPlayerState CurrentState => _currentState;
 
-        float _hitReactTimeMax = 0.25f;
-        float _hitReactTimer = 0.25f;
+        float _hitReactTimeMax = 0.5f;
+        float _hitReactTimer = 0.5f;
 
-        float _deadTimeMax = 3.0f;
-        float _deadTimer = 3.0f;
+        float _deadTimeMax = 15.0f;
+        float _deadTimer = 15.0f;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
         }
 
-        public void UpdateState(ENonPlayerState newState)
+        public void UpdateState(ref FNonPlayerCharacterData data)
         {
+            ENonPlayerState newState = data.State;
+            int animIndex = data.AnimationIndex;
+
             if (_currentState == newState)
                 return;
 
@@ -56,7 +60,7 @@ namespace LichLord.NonPlayerCharacters
                     break;
 
                 case ENonPlayerState.Maneuver_1:
-
+                    NPC.Brain.SetAnimationForManeuver(newState, animIndex);
                     break;
             }
 
@@ -69,6 +73,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 case ENonPlayerState.HitReact:
 
+                    //Debug.Log(_hitReactTimer);
                     _hitReactTimer -= renderDeltaTime;
                     if (_hitReactTimer < 0f)
                     {

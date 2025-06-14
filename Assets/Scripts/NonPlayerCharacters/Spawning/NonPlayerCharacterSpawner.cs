@@ -18,7 +18,7 @@ namespace LichLord.NonPlayerCharacters
                 definitionId = NonPlayerCharacterDataUtility.GetDefinitionID(ref data),
                 position = data.Position,
                 rotation = data.Rotation,
-                teamID = NonPlayerCharacterDataUtility.GetTeamID(ref data)
+                teamId = NonPlayerCharacterDataUtility.GetTeamID(ref data)
             };
 
             NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(spawnParams.definitionId);
