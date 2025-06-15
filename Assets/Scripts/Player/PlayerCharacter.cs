@@ -9,7 +9,6 @@ using LichLord.NonPlayerCharacters;
 using LichLord.World;
 using LichLord.Props;
 using System.Collections.Generic;
-using UnityEngine.UIElements;
 
 namespace LichLord
 {
@@ -20,18 +19,14 @@ namespace LichLord
         public PlayerCharacterMovementComponent Movement;
         public PlayerCameraController CameraController;
         public PlayerCharacterInput Input;
-        public CreatureManeuvers Actions;
+        public PlayerCharacterManeuvers Actions;
         public PlayerProjectilePool ProjectilePool;
         public HurtboxComponent Hurtbox;
         public Animator Animator;
-        public Transform CameraPivot;
+
         public UINameplate Nameplate;
         public Renderer[] HeadRenderers;
         public GameObject[] FirstPersonOverlayObjects;
-
-        [Header("Animation Setup")]
-        public Transform ChestTargetPosition;
-        public Transform ChestBone;
 
         [Networked, HideInInspector, Capacity(24), OnChangedRender(nameof(OnNicknameChanged))]
         public string Nickname { get; set; }
@@ -46,6 +41,7 @@ namespace LichLord
 
         INetActor IHitInstigator.NetActor => this;
 
+        // IChunkTrackable
         private Chunk _chunk;
         public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
         public Vector3 Position => CachedTransform.position;
@@ -110,7 +106,7 @@ namespace LichLord
             // Ensure ActionManager is assigned
             if (Actions == null)
             {
-                Actions = GetComponent<CreatureManeuvers>();
+                Actions = GetComponent<PlayerCharacterManeuvers>();
                 if (Actions == null)
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }
@@ -136,24 +132,11 @@ namespace LichLord
 
             // Change the chunk and tell the server we've changed chunks
             UpdateChunk(Context.ChunkManager);
-
-            // Update 
         }
 
-        private void LateUpdate()
-        {
-            if (Health.IsAlive == false)
-                return;
+        private Quaternion _lastRotation; // Store the original rotation
+        private bool wasUpperBodyActive;         // Track state to detect transitions
 
-            // IK after animations
-            var pitchRotation = Movement.WorldTransform.Pitch;
-            CameraPivot.localRotation = Quaternion.Euler(pitchRotation, 0, 0);
-
-            // Dummy IK solution: snap chest bone to ChestTargetPosition
-            float blendAmount = HasStateAuthority ? 0.05f : 0.2f;
-            ChestBone.position = Vector3.Lerp(ChestTargetPosition.position, ChestBone.position, blendAmount);
-            ChestBone.rotation = Quaternion.Lerp(ChestTargetPosition.rotation, ChestBone.rotation, blendAmount);
-        }
 
         private void Respawn(Vector3 position)
         {

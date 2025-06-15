@@ -23,5 +23,20 @@ namespace LichLord.NonPlayerCharacters
             Debug.Log("Hit");
             _npc.Brain.OnHitFromAnimation();
         }
+
+        public void Land()
+        { }
+
+        public void Shoot()
+        { }
+
+        public void Shoot(float shooting, int shooting1, object shootObject)
+        { }
+
+        public void Shoot(object shootObject)
+        { }
+
+        public void Shoot(int shooting)
+        { }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -12,7 +11,6 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private List<NonPlayerCharacterHitReactState> _hitReacts = new List<NonPlayerCharacterHitReactState>();
 
-        float _hitReactTimeMax = 0.5f;
         float _hitReactTimer = 0.5f;
 
         public void UpdateHitReactState(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -42,15 +40,6 @@ namespace LichLord.NonPlayerCharacters
             _npc.Animator.SetBool("Blocking", animTrigger.IsBlocking);
             _npc.Animator.SetInteger("TriggerNumber", animTrigger.TriggerNumber);
             _npc.Animator.SetTrigger("Trigger");
-
-            /*
-            _npc.Animator.SetBool("Moving", hitReact.AnimationTrigger.);
-            _npc.Animator.SetInteger("Action", 1);
-            _npc.Animator.SetInteger("Weapon", 0);
-            _npc.Animator.SetBool("Blocking", false);
-            _npc.Animator.SetInteger("TriggerNumber", 12);
-            _npc.Animator.SetTrigger("Trigger");
-            */
         }
     }
 }

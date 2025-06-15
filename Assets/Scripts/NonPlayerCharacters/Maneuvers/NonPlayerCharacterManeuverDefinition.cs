@@ -10,10 +10,13 @@ namespace LichLord.NonPlayerCharacters
         public string ActionName;
         public int Damage = 10;
         public float Cooldown = 1f;
-        public float MovementStopRange = 3f;
+        public float MovementStopRange = 2.5f;
+        public float AttackRange = 3f;
         public float StateTime = 1f;
 
         public bool RequiresEnemyTarget;
+
+        public float MovementStopRangeSqrt => MovementStopRange * MovementStopRange;
 
         [Header("Animations")]
         [SerializeField]

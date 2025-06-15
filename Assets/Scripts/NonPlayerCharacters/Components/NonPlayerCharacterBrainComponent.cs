@@ -141,11 +141,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 if (_attackTarget != null)
                 {
-                    Vector3 delta = NPC.Movement.AIFollower.destination - NPC.CachedTransform.position;
-                    if (delta.sqrMagnitude > 0.01f)
-                    {
-                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
-                    }
+                    UpdateDestination(renderDeltaTime, NPC.CachedTransform.position);
 
                     NPC.Movement.SetFollowUpdateRotation(false);
                     RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
@@ -162,9 +158,9 @@ namespace LichLord.NonPlayerCharacters
             {
                 Vector3 attackTargetPosition = _attackTarget.Position;
 
-                float distance = Vector3.Distance(NPC.CachedTransform.position, attackTargetPosition);
+                float sqrDist = (NPC.CachedTransform.position - attackTargetPosition).sqrMagnitude;
 
-                if (distance < _activeManeuver.Definition.MovementStopRange)
+                if (sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt)
                 {
                     NPC.Movement.SetFollowerEnabled(false);
                     NPC.Movement.SetFollowUpdateRotation(false);
@@ -187,6 +183,11 @@ namespace LichLord.NonPlayerCharacters
         private void UpdateDestination(float renderDeltaTime, Vector3 newDestination)
         {
             NPC.Movement.SetFollowerEnabled(true);
+
+            // If our current destination hasn't changed much, we early out
+            Vector3 delta = NPC.Movement.AIFollower.destination - newDestination;
+            if (delta.sqrMagnitude < 0.01f)
+                return;
 
             _destinationRefreshTime -= renderDeltaTime;
             if (_destinationRefreshTime < 0f)
