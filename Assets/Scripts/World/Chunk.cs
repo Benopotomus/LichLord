@@ -14,19 +14,19 @@ namespace LichLord.World
         private List<PropRuntimeState> _propStatesInChunk = new List<PropRuntimeState>(); // Store prop states
         public List<PropRuntimeState> PropStates => _propStatesInChunk;
 
-        public Vector2Int ChunkID { get; set; }
+        public FChunkPosition ChunkID { get; set; }
         public Bounds Bounds { get; set; }
 
         public ELoadState LoadState { get; set; }
 
-        public Chunk(Vector2Int chunkID, Vector2 worldOrigin)
+        public Chunk(FChunkPosition chunkID, Vector2 worldOrigin)
         {
             ChunkID = chunkID;
 
             float chunkSize = WorldConstants.CHUNK_SIZE;
             Vector2 center = new Vector2(
-                worldOrigin.x + chunkID.x * chunkSize + chunkSize / 2,
-                worldOrigin.y + chunkID.y * chunkSize + chunkSize / 2
+                worldOrigin.x + chunkID.X * chunkSize + chunkSize / 2,
+                worldOrigin.y + chunkID.Y * chunkSize + chunkSize / 2
             );
 
             Bounds = new Bounds(new Vector3(center.x, 0, center.y), new Vector3(chunkSize, 1000, chunkSize));

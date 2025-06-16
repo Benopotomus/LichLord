@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using System;
+using LichLord.World;
 
 namespace LichLord.Props
 {
     public class ChunkPropsMarkupData : ScriptableObject
     {
-        public Vector2Int ChunkCoord;
+        public FChunkPosition ChunkCoord;
         public PropMarkupData[] propMarkupDatas = new PropMarkupData[0];
     }
 }

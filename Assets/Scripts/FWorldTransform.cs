@@ -33,53 +33,53 @@ namespace LichLord
         public static implicit operator Int24(int value) => new Int24(value);
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 10)]
+    [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct FWorldTransform : INetworkStruct
     {
-        [FieldOffset(0)] private Int24 _positionX; // 3 bytes
-        [FieldOffset(3)] private short _positionYCompressed; // 2 bytes
-        [FieldOffset(5)] private Int24 _positionZ; // 3 bytes
-        [FieldOffset(8)] private byte _compressedYaw; // 1 byte
-        [FieldOffset(9)] private byte _compressedPitch; // 1 byte
-        // Total: 10 bytes
+        [FieldOffset(0)] private short _positionX; // 2 bytes
+        [FieldOffset(2)] private short _positionYCompressed; // 2 bytes
+        [FieldOffset(4)] private short _positionZ; // 2 bytes
+        [FieldOffset(6)] private byte _compressedYaw; // 1 byte
+        [FieldOffset(7)] private byte _compressedPitch; // 1 byte
+        // Total: 8 bytes
 
-        private const float SCALE_FACTOR = 100f; // For two decimal places
-        private const float X_Z_MIN = -83886.08f; // -8,388,608 / 100
-        private const float X_Z_MAX = 83886.07f; // 8,388,607 / 100
+        private const float SCALE_FACTOR = 20f; // For 0.05 precision (1 / 0.05)
+        private const float X_Z_MIN = -1638.35f; // -32767 / 20
+        private const float X_Z_MAX = 1638.35f; // 32767 / 20
         private const float Y_MIN = -327.68f; // -32,768 / 100
         private const float Y_MAX = 327.67f; // 32,767 / 100
         private const float TWO_PI = 2 * Mathf.PI;
 
         public float PositionX
         {
-            get => (int)_positionX / SCALE_FACTOR;
-            set => _positionX = (int)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
+            get => _positionX / SCALE_FACTOR;
+            set => _positionX = (short)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
         }
 
         public float PositionY
         {
-            get => _positionYCompressed / SCALE_FACTOR;
-            set => _positionYCompressed = (short)(Mathf.Clamp(value, Y_MIN, Y_MAX) * SCALE_FACTOR);
+            get => _positionYCompressed / 100f; // Y still uses 0.01 precision
+            set => _positionYCompressed = (short)(Mathf.Clamp(value, Y_MIN, Y_MAX) * 100f);
         }
 
         public float PositionZ
         {
-            get => (int)_positionZ / SCALE_FACTOR;
-            set => _positionZ = (int)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
+            get => _positionZ / SCALE_FACTOR;
+            set => _positionZ = (short)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
         }
 
         public Vector3 Position
         {
             get => new Vector3(
-                (int)_positionX / SCALE_FACTOR,
-                _positionYCompressed / SCALE_FACTOR,
-                (int)_positionZ / SCALE_FACTOR
+                _positionX / SCALE_FACTOR,
+                _positionYCompressed / 100f,
+                _positionZ / SCALE_FACTOR
             );
             set
             {
-                _positionX = (int)(Mathf.Clamp(value.x, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
-                _positionYCompressed = (short)(Mathf.Clamp(value.y, Y_MIN, Y_MAX) * SCALE_FACTOR);
-                _positionZ = (int)(Mathf.Clamp(value.z, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
+                _positionX = (short)(Mathf.Clamp(value.x, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
+                _positionYCompressed = (short)(Mathf.Clamp(value.y, Y_MIN, Y_MAX) * 100f);
+                _positionZ = (short)(Mathf.Clamp(value.z, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
             }
         }
 
@@ -106,12 +106,12 @@ namespace LichLord
 
         public Quaternion Rotation
         {
-            get => Quaternion.Euler(Pitch * Mathf.Rad2Deg, Yaw * Mathf.Rad2Deg, 0);
+            get => Quaternion.Euler(Pitch, Yaw, 0);
             set
             {
                 Vector3 euler = value.eulerAngles;
-                Yaw = euler.y * Mathf.Deg2Rad; // Set yaw in radians
-                Pitch = euler.x * Mathf.Deg2Rad; // Set pitch in radians
+                Yaw = euler.y; // Yaw in degrees
+                Pitch = euler.x; // Pitch in degrees
             }
         }
 
@@ -143,8 +143,8 @@ namespace LichLord
 
         public string DebugString()
         {
-            return $"Position: ({(int)_positionX / SCALE_FACTOR:F2}, {_positionYCompressed / SCALE_FACTOR:F2}, {(int)_positionZ / SCALE_FACTOR:F2}), " +
-                   $"Yaw: {Yaw * Mathf.Rad2Deg:F2}°, Pitch: {Pitch * Mathf.Rad2Deg:F2}° (bytes: {_compressedYaw}, {_compressedPitch})";
+            return $"Position: ({_positionX / SCALE_FACTOR:F2}, {_positionYCompressed / 100f:F2}, {_positionZ / SCALE_FACTOR:F2}), " +
+                   $"Yaw: {Yaw:F2}°, Pitch: {Pitch:F2}° (bytes: {_compressedYaw}, {_compressedPitch})";
         }
     }
 }

@@ -17,7 +17,7 @@ namespace LichLord.Props
         [SerializeField] private List<PropReplicator> _propReplicators;
 
         private Dictionary<int, PropLoadState> _propLoadStates = new Dictionary<int, PropLoadState>();
-        private HashSet<Vector2Int> _loadedChunks = new HashSet<Vector2Int>(); // Track loaded chunks
+        private HashSet<FChunkPosition> _loadedChunks = new HashSet<FChunkPosition>(); // Track loaded chunks
         private HashSet<int> _usedGuids = new HashSet<int>(); // Track GUIDs to detect duplicates
 
         public override void Spawned()
@@ -35,12 +35,12 @@ namespace LichLord.Props
             Debug.Log($"Post-cleanup _runtimePropStates count: {_authorityRuntimePropStates.Count}, _propLoadStates count: {_propLoadStates.Count}");
         }
 
-        public void LoadPropsForChunk(Vector2Int chunkCoord)
+        public void LoadPropsForChunk(FChunkPosition chunkCoord)
         {
             ChunkPropsMarkupData markupData = worldSettings.PropMarkupDatas.Find(data => data != null && data.ChunkCoord == chunkCoord);
             if (markupData == null || markupData.propMarkupDatas == null || markupData.propMarkupDatas.Length == 0)
             {
-                Debug.Log($"No props found for chunk {chunkCoord}.", this);
+                Debug.Log($"No props found for chunk {chunkCoord.X }, {chunkCoord.Y}.", this);
                 _loadedChunks.Add(chunkCoord); // Mark as loaded
                 return;
             }
@@ -92,7 +92,7 @@ namespace LichLord.Props
             }
 
             _loadedChunks.Add(chunkCoord);
-            Debug.Log($"Loaded {validProps} props for chunk {chunkCoord}. Total states: {_authorityRuntimePropStates.Count} (added {validProps} from {initialStateCount}).", this);
+            Debug.Log($"Loaded {validProps} props for chunk ({chunkCoord.X},{chunkCoord.Y}) . Total states: {_authorityRuntimePropStates.Count} (added {validProps} from {initialStateCount}).", this);
 
             // Apply delta states for newly loaded props
             if (HasStateAuthority)

@@ -1,7 +1,8 @@
 ﻿using Fusion;
 using System.Collections.Generic;
 using UnityEngine;
-using LichLord.Props;
+using System.Runtime.InteropServices;
+using System;
 
 namespace LichLord.World
 {
@@ -13,9 +14,9 @@ namespace LichLord.World
         [SerializeField]
         private bool drawChunkBounds = true; // Toggle for gizmo drawing
 
-        [Networked, Capacity(512)]
-        public NetworkDictionary<Vector2Int, ELoadState> _networkChunks { get; }
-        private Dictionary<Vector2Int, Chunk> _localChunks = new Dictionary<Vector2Int, Chunk>();
+        [Networked, Capacity(WorldConstants.CHUNK_COUNT_MAX)]
+        public NetworkDictionary<FChunkPosition, ELoadState> _networkChunks { get; }
+        private Dictionary<FChunkPosition, Chunk> _localChunks = new Dictionary<FChunkPosition, Chunk>();
 
         public override void Spawned()
         {
@@ -30,11 +31,17 @@ namespace LichLord.World
                 Mathf.CeilToInt(_worldSettings.WorldSize.y / WorldConstants.CHUNK_SIZE)
                 );
 
+            Debug.Log(chunkGridSize.ToString());
+
             for (int x = 0; x < chunkGridSize.x; x++)
             {
                 for (int y = 0; y < chunkGridSize.y; y++)
                 {
-                    Vector2Int chunkID = new Vector2Int(x, y);
+                    FChunkPosition chunkID = new FChunkPosition 
+                    { 
+                        X = (sbyte)x, 
+                        Y = (sbyte)y
+                    };
 
                     _localChunks[chunkID] = new Chunk(chunkID, _worldSettings.WorldOrigin);
 
@@ -51,7 +58,7 @@ namespace LichLord.World
             base.FixedUpdateNetwork();
 
             var activePlayers = Context.NetworkGame.ActivePlayers;
-            var chunksToMark = new HashSet<Vector2Int>();
+            var chunksToMark = new HashSet<FChunkPosition>();
 
             // Collect all nearby chunk IDs to mark as Loaded
             for (int i = 0; i < activePlayers.Count; i++)
@@ -61,7 +68,7 @@ namespace LichLord.World
                     continue;
 
                 var centerID = player.CurrentChunk.ChunkID;
-                var nearby = GetNearbyChunks(centerID, radius: 2);
+                var nearby = GetNearbyChunks(centerID, radius: 3);
 
                 for (int j = 0; j < nearby.Count; j++)
                 {
@@ -115,15 +122,16 @@ namespace LichLord.World
             return null;
         }
 
-        private Vector2Int GetChunkID(Vector3 position)
+        private FChunkPosition GetChunkID(Vector3 position)
         {
-            return new Vector2Int(
-                Mathf.FloorToInt((position.x - _worldSettings.WorldOrigin.x) / WorldConstants.CHUNK_SIZE),
-                Mathf.FloorToInt((position.z - _worldSettings.WorldOrigin.y) / WorldConstants.CHUNK_SIZE)
-            );
+            return new FChunkPosition 
+            {
+                X = (sbyte)Mathf.FloorToInt((position.x - _worldSettings.WorldOrigin.x) / WorldConstants.CHUNK_SIZE),
+                Y = (sbyte)Mathf.FloorToInt((position.z - _worldSettings.WorldOrigin.y) / WorldConstants.CHUNK_SIZE)
+            };
         }
 
-        public List<Chunk> GetNearbyChunks(Vector2Int centerChunkID, int radius = 1)
+        public List<Chunk> GetNearbyChunks(FChunkPosition centerChunkID, int radius = 1)
         {
             List<Chunk> nearbyChunks = new List<Chunk>();
 
@@ -131,7 +139,12 @@ namespace LichLord.World
             {
                 for (int dy = -radius; dy <= radius; dy++)
                 {
-                    Vector2Int checkID = new Vector2Int(centerChunkID.x + dx, centerChunkID.y + dy);
+                    FChunkPosition checkID = new FChunkPosition
+                    {
+                        X = (sbyte)(centerChunkID.X + dx),
+                        Y = (sbyte)(centerChunkID.Y + dy)
+                    };
+
                     if (_localChunks.TryGetValue(checkID, out Chunk chunk))
                     {
                         nearbyChunks.Add(chunk);

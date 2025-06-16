@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using LichLord.Props;
 using System.IO;
 using System.Linq;
+using LichLord.World;
 
 [CustomEditor(typeof(LevelEditor))]
 public class LevelEditorEditor : Editor
@@ -89,6 +90,15 @@ public class LevelEditorEditor : Editor
             else
             {
                 EditorUtility.DisplayDialog("Info", "PropSaveData.json does not exist.", "OK");
+            }
+        }
+
+        if (GUILayout.Button(new GUIContent("Remove All Markup Data", "Removes all ChunkPropsMarkupData ScriptableObjects from WorldSettings and deletes their sub-assets.")))
+        {
+            if (EditorUtility.DisplayDialog("Confirm Removal", "Are you sure you want to remove all ChunkPropsMarkupData ScriptableObjects? This will delete their sub-assets and cannot be undone without asset recovery.", "Yes", "No"))
+            {
+                manager.WorldSettings.RemoveAllMarkupData();
+                EditorUtility.DisplayDialog("Success", "ChunkPropsMarkupData removal complete. Check console for details.", "OK");
             }
         }
     }
@@ -206,7 +216,7 @@ public class LevelEditorEditor : Editor
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 // Calculate chunk coordinate
-                Vector2Int chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
+                FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
                 ChunkPropsMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
 
                 Undo.RecordObject(markupData, "Add Prop Point");
