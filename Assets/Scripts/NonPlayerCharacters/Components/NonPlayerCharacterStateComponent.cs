@@ -14,8 +14,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private int _currentAnimIndex;
         public int CurrentAnimIndex => _currentAnimIndex;
 
-        float _deadTimeMax = 15.0f;
-        float _deadTimer = 15.0f;
+        float _deadTimeMax = 5.0f;
+        float _deadTimer = 5.0f;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
@@ -33,6 +33,9 @@ namespace LichLord.NonPlayerCharacters
             switch (newState)
             {
                 case ENonPlayerState.Idle:
+                    NPC.Animator.SetInteger("Weapon", 0);
+                    NPC.Animator.SetInteger("TriggerNumber", 25);
+                    NPC.Animator.SetTrigger("Trigger");
                     NPC.Hurtbox.SetHitBoxesActive(true);
                     break;
 
@@ -58,6 +61,14 @@ namespace LichLord.NonPlayerCharacters
                     break;
             }
 
+            switch (_currentState)
+            {
+                case ENonPlayerState.Dead:
+                case ENonPlayerState.Inactive:
+                    NPC.CachedTransform.position = data.Position;
+                    NPC.CachedTransform.rotation = data.Rotation;
+                    break;
+            }
             _currentAnimIndex = animIndex;
             _currentState = newState;
         }

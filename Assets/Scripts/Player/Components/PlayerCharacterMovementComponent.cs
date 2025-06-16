@@ -6,6 +6,7 @@ namespace LichLord
 {
     public enum EMovementState : byte
     {
+        None,
         Grounded,
         Jumping,
         Flying
@@ -22,6 +23,7 @@ namespace LichLord
 
         [Networked]
         private EMovementState CurrentMovementState { get; set; }
+        [SerializeField]
         private EMovementState _lastState;
 
         [Header("References")]
@@ -95,6 +97,7 @@ namespace LichLord
         {
             base.Spawned();
             CurrentMovementState = EMovementState.Grounded;
+            OnRep_CurrentMovementState();
             _jumpCount = 0;
             _localVelocity = Vector3.zero;
             _jumpBufferTimer = 0f;
@@ -122,6 +125,7 @@ namespace LichLord
             if (CurrentMovementState != _lastState)
             {
                 OnRep_CurrentMovementState();
+                _lastState = CurrentMovementState;
             }
             
             if (!HasStateAuthority)
@@ -134,8 +138,6 @@ namespace LichLord
             ScalingRoot.localScale = Vector3.Lerp(ScalingRoot.localScale, Vector3.one, deltaTime * 8f);
 
             var emission = DustParticles.emission;
-            emission.enabled = _isGrounded && _speed > 1f;
-            _lastState = CurrentMovementState;
         }
 
         private void UpdateAnimator(float deltaTime)

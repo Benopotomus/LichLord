@@ -13,6 +13,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private Dictionary<int, FNonPlayerCharacterData> _deltaStates = new Dictionary<int, FNonPlayerCharacterData>();
 
         [SerializeField] private int _debugSpawnCount = 0;
+        [SerializeField] private bool _debugStreamRevive;
+
         public void AddReplicator(NonPlayerCharacterReplicator replicator)
         {
             _replicator = replicator;
@@ -48,6 +50,51 @@ namespace LichLord.NonPlayerCharacters
 
                     SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamB);
                 }
+            }
+        }
+
+        bool flip = false;
+        public override void FixedUpdateNetwork()
+        {
+            base.FixedUpdateNetwork();
+
+            if (!_debugStreamRevive)
+                return;
+
+            if (Runner.Tick % 10 != 0)
+                return;
+
+            if (flip)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+
+                    Vector3 randomPosition = new Vector3(
+                        Random.Range(-10f, 10f),
+                        1f, // Keep Y fixed
+                        Random.Range(-10f, 10f)
+                    );
+
+                    randomPosition += new Vector3(35, 0, 0);
+                    SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamA);
+                }
+                flip = false;
+            }
+            else
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Vector3 randomPosition = new Vector3(
+                        Random.Range(-10f, 10f),
+                        1f, // Keep Y fixed
+                        Random.Range(-10f, 10f)
+                    );
+
+                    randomPosition += new Vector3(-35, 0, 0);
+
+                    SpawnNPC(randomPosition, Global.Tables.NonPlayerCharacterTable.TryGetDefinition(1), ETeamID.EnemiesTeamB);
+                }
+                flip = true;
             }
         }
 

@@ -80,9 +80,9 @@ namespace LichLord.NonPlayerCharacters
             // Keep existing pitch and roll
             Vector3 currentEuler = NPC.CachedTransform.eulerAngles;
             NPC.CachedTransform.rotation = Quaternion.Euler(
-                currentEuler.x,
+                0,
                 lerpedYaw,
-                currentEuler.z
+                0
             );
 
             UpdateVelocity(ref data, renderDeltaTime);

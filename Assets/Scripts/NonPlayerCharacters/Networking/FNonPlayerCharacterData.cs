@@ -106,6 +106,12 @@
             set => _configuration = value;
         }
 
+        public ETeamID Team
+        { 
+            get => NonPlayerCharacterDataUtility.GetTeamID(ref this);
+            set => NonPlayerCharacterDataUtility.SetTeamID(value, ref this);
+        }
+
         public ushort Events
         {
             get => _events;

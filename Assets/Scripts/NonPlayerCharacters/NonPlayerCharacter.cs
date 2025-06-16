@@ -47,6 +47,8 @@ namespace LichLord.NonPlayerCharacters
         private ETeamID _teamId;
         public ETeamID TeamID => _teamId;
 
+        private ushort _configuration;
+
         // IChunkTrackable
         private Chunk _chunk;
         public Chunk CurrentChunk { get => _chunk; set => _chunk = value; }
@@ -79,19 +81,9 @@ namespace LichLord.NonPlayerCharacters
             _movementComponent.OnSpawned(ref spawnParams);
             _stateComponent.OnSpawned(ref spawnParams);
             _brainComponent.OnSpawned(ref spawnParams);
-            _teamId = spawnParams.teamId;
             _guid = spawnParams.index;
             UpdateChunk(Manager.Context.ChunkManager);
-
-            switch (spawnParams.teamId)
-            {
-                case ETeamID.EnemiesTeamA:
-                    redHat.SetActive(false);
-                    break;
-                case ETeamID.EnemiesTeamB:
-                    blueHat.SetActive(false);
-                    break;
-            }
+            
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -101,6 +93,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             UpdateChunk(Manager.Context.ChunkManager);
+            UpdateTeam(ref data);
 
             _stateComponent.UpdateState(ref data);
 
@@ -114,6 +107,7 @@ namespace LichLord.NonPlayerCharacters
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
             UpdateChunk(Manager.Context.ChunkManager);
+            UpdateTeam(ref data);
 
             var definition = GetDefinition(ref data);
             if (definition == null)
@@ -121,6 +115,28 @@ namespace LichLord.NonPlayerCharacters
 
             _stateComponent.UpdateState(ref data);
             _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
+        }
+
+        private void UpdateTeam(ref FNonPlayerCharacterData data)
+        {
+            ETeamID newTeam = data.Team;
+
+            if (_teamId == newTeam)
+                return;
+
+            switch (newTeam)
+            {
+                case ETeamID.EnemiesTeamA:
+                    redHat.SetActive(false);
+                    blueHat.SetActive(true);
+                    break;
+                case ETeamID.EnemiesTeamB:
+                    blueHat.SetActive(false);
+                    redHat.SetActive(true);
+                    break;
+            }
+
+            _teamId = newTeam;
         }
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
