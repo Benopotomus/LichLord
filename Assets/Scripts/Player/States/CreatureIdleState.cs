@@ -23,7 +23,9 @@ namespace LichLord
 
         protected override void OnRender()
         {
-            fsmRef.Creature.Movement.OnRender();
+            float deltaTime = Time.deltaTime;
+
+            fsmRef.Creature.Movement.OnRender(deltaTime);
             fsmRef.Creature.Actions.OnRender();
         }
     }

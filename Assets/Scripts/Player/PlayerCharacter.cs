@@ -112,7 +112,7 @@ namespace LichLord
             }
 
             // Initialize cached prop states
-            UpdateChunk(Context.ChunkManager);
+            UpdateChunk();
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -131,7 +131,7 @@ namespace LichLord
             Hurtbox.enabled = Health.IsAlive;
 
             // Change the chunk and tell the server we've changed chunks
-            UpdateChunk(Context.ChunkManager);
+            UpdateChunk();
         }
 
         private Quaternion _lastRotation; // Store the original rotation
@@ -178,10 +178,10 @@ namespace LichLord
         {
         }
 
-        public void UpdateChunk(ChunkManager chunkManager)
+        public void UpdateChunk()
         {
             var lastChunk = CurrentChunk;
-            var newChunk = chunkManager.GetChunkAtPosition(CachedTransform.position);
+            var newChunk = Context.ChunkManager.GetChunkAtPosition(CachedTransform.position);
 
             if (lastChunk != newChunk)
             {
@@ -194,20 +194,20 @@ namespace LichLord
                     newChunk.AddObject(this);
 
                 // Update cached prop states on chunk change
-                UpdateVisibilePropStates(chunkManager);
-                Debug.Log($"Player chunk changed from ({lastChunk?.ChunkID.X}, {lastChunk?.ChunkID.Y}) to ({newChunk?.ChunkID.X}, {newChunk?.ChunkID.Y}). Cached {CachedPropStates.Count} prop states.", this);
+                UpdateVisibilePropStates();
+                //Debug.Log($"Player chunk changed from ({lastChunk?.ChunkID.X}, {lastChunk?.ChunkID.Y}) to ({newChunk?.ChunkID.X}, {newChunk?.ChunkID.Y}). Cached {CachedPropStates.Count} prop states.", this);
             }
         }
 
         public HashSet<int> _visibileGuids = new HashSet<int>();
 
-        private void UpdateVisibilePropStates(ChunkManager chunkManager)
+        public void UpdateVisibilePropStates()
         {
             if (CurrentChunk == null)
                 return;
 
             // Get current and neighboring chunks (radius = 1)
-            List<Chunk> nearbyChunks = chunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
+            List<Chunk> nearbyChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
             _cachedPropStates.Clear();
 
             HashSet<int> newGuids = new HashSet<int>();

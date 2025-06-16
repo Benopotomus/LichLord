@@ -12,7 +12,7 @@ namespace LichLord.Props
         [SerializeField] private EPropState _currentState = EPropState.Inactive;
         public EPropState CurrentState => _currentState;
 
-        [SerializeField]
+        [SerializeField] 
         private VisualEffectBase _hitReactPrefab;
 
         public void UpdateState(EPropState newState)

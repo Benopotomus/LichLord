@@ -40,7 +40,7 @@ namespace LichLord.Props
             ChunkPropsMarkupData markupData = worldSettings.PropMarkupDatas.Find(data => data != null && data.ChunkCoord == chunkCoord);
             if (markupData == null || markupData.propMarkupDatas == null || markupData.propMarkupDatas.Length == 0)
             {
-                Debug.Log($"No props found for chunk {chunkCoord.X }, {chunkCoord.Y}.", this);
+               // Debug.Log($"No props found for chunk {chunkCoord.X }, {chunkCoord.Y}.", this);
                 _loadedChunks.Add(chunkCoord); // Mark as loaded
                 return;
             }
@@ -83,7 +83,7 @@ namespace LichLord.Props
                     propMarkupData.rotation,
                     propMarkupData.propDefinition.TableID);
 
-                Debug.Log($"Loaded PropRuntimeState for GUID {propMarkupData.guid} in chunk {chunkCoord} at position {propMarkupData.position}.", this);
+                //Debug.Log($"Loaded PropRuntimeState for GUID {propMarkupData.guid} in chunk {chunkCoord} at position {propMarkupData.position}.", this);
 
                 _authorityRuntimePropStates.Add(propMarkupData.guid, propRuntimeState);
                 _propLoadStates.Add(propMarkupData.guid, new PropLoadState());
@@ -92,7 +92,7 @@ namespace LichLord.Props
             }
 
             _loadedChunks.Add(chunkCoord);
-            Debug.Log($"Loaded {validProps} props for chunk ({chunkCoord.X},{chunkCoord.Y}) . Total states: {_authorityRuntimePropStates.Count} (added {validProps} from {initialStateCount}).", this);
+            //Debug.Log($"Loaded {validProps} props for chunk ({chunkCoord.X},{chunkCoord.Y}) . Total states: {_authorityRuntimePropStates.Count} (added {validProps} from {initialStateCount}).", this);
 
             // Apply delta states for newly loaded props
             if (HasStateAuthority)
@@ -108,7 +108,7 @@ namespace LichLord.Props
 
                     if (_deltaStates.TryGetValue(state.guid, out PropRuntimeState deltaState))
                     {
-                        Debug.Log($"Applying delta state for GUID {state.guid} in chunk {chunkCoord}.", this);
+                        //Debug.Log($"Applying delta state for GUID {state.guid} in chunk {chunkCoord}.", this);
                         state.position = deltaState.position;
                         state.rotation = deltaState.rotation;
                         state.definitionId = deltaState.definitionId;

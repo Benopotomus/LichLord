@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Runtime.InteropServices;
 using System;
+using UnityEngine.Playables;
 
 namespace LichLord.World
 {
@@ -30,8 +31,6 @@ namespace LichLord.World
                 Mathf.CeilToInt(_worldSettings.WorldSize.x / WorldConstants.CHUNK_SIZE),
                 Mathf.CeilToInt(_worldSettings.WorldSize.y / WorldConstants.CHUNK_SIZE)
                 );
-
-            Debug.Log(chunkGridSize.ToString());
 
             for (int x = 0; x < chunkGridSize.x; x++)
             {
@@ -109,9 +108,22 @@ namespace LichLord.World
                 return;
             }
 
-            //Debug.Log("LoadChunk " + chunkToLoad.ChunkID);
-            chunkToLoad.LoadState = ELoadState.Loaded;
-            Context.PropManager.LoadPropsForChunk(chunkToLoad.ChunkID);
+            //Get the local player's chunk and do a refresh if its closer
+            if (PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter character))
+            {
+                FChunkPosition currentChunkId = character.CurrentChunk.ChunkID;
+                FChunkPosition loadedChunkId = chunkToLoad.ChunkID;
+
+                //Debug.Log("LoadChunk " + chunkToLoad.ChunkID);
+                chunkToLoad.LoadState = ELoadState.Loaded;
+                Context.PropManager.LoadPropsForChunk(chunkToLoad.ChunkID);
+
+                if (Math.Abs(currentChunkId.X - loadedChunkId.X) <= 2 &&
+                    Math.Abs(currentChunkId.Y - loadedChunkId.Y) <= 2)
+                {
+                    character.UpdateVisibilePropStates();
+                }
+            }
         }
 
         public Chunk GetChunkAtPosition(Vector3 position)

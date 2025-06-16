@@ -7,12 +7,12 @@ namespace LichLord
     public enum EMovementState : byte
     {
         None,
-        Grounded,
+        Walking,
         Jumping,
         Flying
     }
 
-    public class PlayerCharacterMovementComponent : NetworkBehaviour
+    public class PlayerCharacterMovementComponent : ContextBehaviour
     {
         [SerializeField]
         private PlayerCharacter _pc;
@@ -22,7 +22,9 @@ namespace LichLord
         private CharacterController CC;
 
         [Networked]
-        private EMovementState CurrentMovementState { get; set; }
+        private EMovementState _currentMoveState { get; set; }
+        public EMovementState CurrentMoveState => _currentMoveState;
+
         [SerializeField]
         private EMovementState _lastState;
 
@@ -96,8 +98,10 @@ namespace LichLord
         public override void Spawned()
         {
             base.Spawned();
-            CurrentMovementState = EMovementState.Grounded;
-            OnRep_CurrentMovementState();
+
+            if (HasStateAuthority)
+                _currentMoveState = EMovementState.Walking;
+
             _jumpCount = 0;
             _localVelocity = Vector3.zero;
             _jumpBufferTimer = 0f;
@@ -106,33 +110,11 @@ namespace LichLord
             _currentMoveSpeed = WalkSpeed;
         }
 
-        public void Respawn()
+        public void OnRender(float deltaTime)
         {
-            _localVelocity = Vector3.zero;
-            CurrentMovementState = EMovementState.Grounded;
-            _jumpCount = 0;
-            _jumpBufferTimer = 0f;
-            _jumpInputBuffered = false;
-            _castSpeedMultiplier = 1f;
-            _currentMoveSpeed = WalkSpeed;
-        }
-
-        public void OnRender()
-        {
-            float deltaTime = Time.deltaTime;
+            UpdateMovementState();
             UpdateAnimator(deltaTime);
-
-            if (CurrentMovementState != _lastState)
-            {
-                OnRep_CurrentMovementState();
-                _lastState = CurrentMovementState;
-            }
-            
-            if (!HasStateAuthority)
-            {
-                CC.transform.position = Vector3.Lerp(CC.transform.position, _worldTransform.Position, deltaTime * 8);
-                CC.transform.rotation = Quaternion.Lerp(CC.transform.rotation, Quaternion.Euler(0f, _worldTransform.Yaw, 0f), deltaTime * 8f);
-            }
+            UpdateRemotePosition(deltaTime);
 
             FootstepSound.enabled = _isGrounded && _speed > 1f;
             ScalingRoot.localScale = Vector3.Lerp(ScalingRoot.localScale, Vector3.one, deltaTime * 8f);
@@ -140,14 +122,29 @@ namespace LichLord
             var emission = DustParticles.emission;
         }
 
+        private void UpdateRemotePosition(float deltaTime)
+        {
+            if (!HasStateAuthority)
+            {
+                Vector3 lastPos = CC.transform.position;
+
+                float x = Mathf.Lerp(lastPos.x, _worldTransform.PositionX, deltaTime * 5f);
+                float y = Mathf.Lerp(lastPos.y, _worldTransform.PositionY, deltaTime * 10f);
+                float z = Mathf.Lerp(lastPos.z, _worldTransform.PositionZ, deltaTime * 5f);
+                CC.transform.position = new Vector3(x, y, z);
+
+                CC.transform.rotation = Quaternion.Lerp(CC.transform.rotation, Quaternion.Euler(0f, _worldTransform.Yaw, 0f), deltaTime * 8f);
+            }
+        }
+
         private void UpdateAnimator(float deltaTime)
         {
             var horiziontalVelocity = new Vector3(_worldVelocity.Velocity.x , 0, _worldVelocity.Velocity.z);
             var moveSpeed = transform.InverseTransformVector(horiziontalVelocity).normalized;
 
-            switch (CurrentMovementState)
+            switch (_currentMoveState)
             {
-                case EMovementState.Grounded:
+                case EMovementState.Walking:
                     PC.Animator.SetBool(_animIDMoving, true);
                     PC.Animator.SetFloat(_animIDSpeedX, moveSpeed.x, 0.1f, deltaTime);
                     PC.Animator.SetFloat(_animIDSpeedZ, moveSpeed.z, 0.1f, deltaTime);
@@ -178,12 +175,16 @@ namespace LichLord
             SetLookRotation(input);
 
             _isGrounded = CC.isGrounded;
+
+            if (_isGrounded)
+                _currentMoveState = EMovementState.Walking;
+
             float gravity = DownGravity;
 
             var moveDirection = CC.transform.rotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
 
             float targetSpeed = input.Sprint ? SprintSpeed : WalkSpeed;
-            if (CurrentMovementState == EMovementState.Flying)
+            if (_currentMoveState == EMovementState.Flying)
                 targetSpeed = FlyHorizontalSpeed;
 
             float lerpSpeed = Mathf.Lerp(_currentMoveSpeed, targetSpeed, deltaTime / SprintAccelerationTime);
@@ -217,10 +218,11 @@ namespace LichLord
                 }
             }
 
-            switch (CurrentMovementState)
+            switch (_currentMoveState)
             {
-                case EMovementState.Grounded:
-                    gravity = isRising ? UpGravity : DownGravity;
+                
+                 case EMovementState.Walking:
+                    gravity = DownGravity;
                     _verticalInput = 0;
                     _jumpCount = 0;
 
@@ -228,7 +230,7 @@ namespace LichLord
                     {
                         _localVelocity.y = JumpImpulse; // Apply jump here
                         _jumpCount = 1;
-                        CurrentMovementState = EMovementState.Jumping;
+                        _currentMoveState = EMovementState.Jumping;
                         _jumpInputBuffered = false;
                         if (JumpAudioClip != null)
                             FootstepSound.PlayOneShot(JumpAudioClip);
@@ -248,7 +250,7 @@ namespace LichLord
                     {
                         _localVelocity.y = JumpImpulse; // Apply double jump here
                         _jumpCount = 2;
-                        CurrentMovementState = EMovementState.Flying;
+                        _currentMoveState = EMovementState.Flying;
                         _verticalInput = FlyAscendSpeed;
                         _jumpInputBuffered = false;
                         gravity = 0;
@@ -260,7 +262,7 @@ namespace LichLord
 
                     if (_isGrounded)
                     {
-                        CurrentMovementState = EMovementState.Grounded;
+                        _currentMoveState = EMovementState.Walking;
                         _localVelocity.y = 0f;
                         _jumpCount = 0;
                         _jumpInputBuffered = false;
@@ -294,7 +296,7 @@ namespace LichLord
 
                     if (_isGrounded)
                     {
-                        CurrentMovementState = EMovementState.Grounded;
+                        _currentMoveState = EMovementState.Walking;
                         _localVelocity.y = 0f;
                         _jumpCount = 0;
                         _jumpInputBuffered = false;
@@ -312,16 +314,16 @@ namespace LichLord
 
         private void WriteData()
         {
-
             // Update the runtime state
             // Update position only if the change is significant
-            const float POSITION_THRESHOLD = 0.1f;
+            const float POSITION_THRESHOLD = 0.05f;
             if (Mathf.Abs(PC.CachedTransform.position.x - _worldTransform.PositionX) > POSITION_THRESHOLD)
             {
                 _worldTransform.PositionX = PC.CachedTransform.position.x;
             }
 
-            if (Mathf.Abs(PC.CachedTransform.position.y - _worldTransform.PositionY) > POSITION_THRESHOLD)
+            const float POSITION_THRESHOLD_Y = 0.01f;
+            if (Mathf.Abs(PC.CachedTransform.position.y - _worldTransform.PositionY) > POSITION_THRESHOLD_Y)
             {
                 _worldTransform.PositionY = PC.CachedTransform.position.y;
             }
@@ -335,11 +337,14 @@ namespace LichLord
             _worldVelocity.Velocity = CC.velocity;
         }
 
-        private void OnRep_CurrentMovementState()
+        private void UpdateMovementState()
         {
-            switch (CurrentMovementState)
+            if (_currentMoveState == _lastState)
+                return;
+
+            switch (_currentMoveState)
             {
-                case EMovementState.Grounded:
+                case EMovementState.Walking:
                     Debug.Log("Jump Land");
                     PC.Animator.SetBool(_animIDMoving, true);
                     PC.Animator.SetFloat(_animIDSpeedX, 0f);
@@ -368,11 +373,8 @@ namespace LichLord
                     PC.Animator.SetTrigger("Trigger");
                     break;
             }
-        }
 
-        private void OnRep_JumpCount()
-        {
+            _lastState = _currentMoveState;
         }
-
     }
 }
