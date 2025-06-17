@@ -17,6 +17,10 @@ namespace LichLord.NonPlayerCharacters
         float _deadTimeMax = 5.0f;
         float _deadTimer = 5.0f;
 
+        private int _animIDWeapon = Animator.StringToHash("Weapon");
+        private int _animIDTriggerNumber = Animator.StringToHash("TriggerNumber");
+        private int _animIDTrigger = Animator.StringToHash("Trigger");
+
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
         }
@@ -33,9 +37,9 @@ namespace LichLord.NonPlayerCharacters
             switch (newState)
             {
                 case ENonPlayerState.Idle:
-                    NPC.Animator.SetInteger("Weapon", 0);
-                    NPC.Animator.SetInteger("TriggerNumber", 25);
-                    NPC.Animator.SetTrigger("Trigger");
+                    NPC.Animator.SetInteger(_animIDWeapon, 0);
+                    NPC.Animator.SetInteger(_animIDTriggerNumber, 25);
+                    NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(true);
                     break;
 
@@ -44,9 +48,9 @@ namespace LichLord.NonPlayerCharacters
                     break;
                 case ENonPlayerState.Dead:
                     _deadTimer = _deadTimeMax;
-                    NPC.Animator.SetInteger("Weapon", 0);
-                    NPC.Animator.SetInteger("TriggerNumber", 20);
-                    NPC.Animator.SetTrigger("Trigger");
+                    NPC.Animator.SetInteger(_animIDWeapon, 0);
+                    NPC.Animator.SetInteger(_animIDTriggerNumber, 20);
+                    NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.Collider.enabled = false;
                     break;

@@ -92,8 +92,10 @@ namespace LichLord.NonPlayerCharacters
             for (int i = 0; i < _maneuvers.Count; i++)
             {
                 _maneuvers[i].UpdateCooldownTimer(renderDeltaTime);
-                _activeManeuver.UpdateStateTimer(NPC, ref data, renderDeltaTime);
             }
+
+            if(_activeManeuver != null)
+                _activeManeuver.UpdateStateTimer(NPC, ref data, renderDeltaTime);
         }
 
         private void SelectManeuver(float renderDeltaTime)

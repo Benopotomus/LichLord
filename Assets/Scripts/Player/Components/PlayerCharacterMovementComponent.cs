@@ -70,11 +70,8 @@ namespace LichLord
         private int _animIDSpeedX = Animator.StringToHash("Velocity X");
         private int _animIDSpeedZ = Animator.StringToHash("Velocity Z");
         private int _animIDMoving = Animator.StringToHash("Moving");
-        private int _animIDPitch = Animator.StringToHash("Pitch");
-        private int _animIDGrounded = Animator.StringToHash("Grounded");
         private int _animIDJump = Animator.StringToHash("Jumping");
         private int _animIDTriggerNumber = Animator.StringToHash("TriggerNumber");
-        private int _animIDFreeFall = Animator.StringToHash("FreeFall");
 
         public AudioSource FootstepSound;
         public AudioClip JumpAudioClip;

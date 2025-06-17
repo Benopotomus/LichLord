@@ -15,13 +15,14 @@ namespace LichLord
         public float Cooldown = 1f;
 
         public AudioClip ActionSound; // Sound played when performing action (e.g., FireSound for gun)
+        
+        
         public VisualEffectBase ActionEffect; // VFX played when performing action (e.g., MuzzleParticle for gun)
 
         [Header ("Animation")]
         public bool Fullbody; // Animator trigger (e.g., "Shoot" for gun)
         public int AnimationTriggerNumber;
         public float AnimationSpeed = 1f;
-
 
         public float MovementSpeedMultiplier = 1f; // Scales movement speed during action
 
