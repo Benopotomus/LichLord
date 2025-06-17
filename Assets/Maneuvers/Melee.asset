@@ -12,19 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: Melee
   m_EditorClassIdentifier: 
-  ActionName: 
-  Type: 1
-  Damage: 10
+  _tableID: 4
+  ManeuverName: 
+  Duration: 1
   Cooldown: 1
-  ProjectilePrefab: {fileID: 0}
-  ProjectileSpeed: 20
-  Range: 100
   ActionSound: {fileID: 0}
   ActionEffect: {fileID: 0}
-  ImpactPrefab: {fileID: 0}
-  HitMask:
-    serializedVersion: 2
-    m_Bits: 0
-  AnimationTrigger: 
-  AnimationDuration: 1
+  Fullbody: 0
+  AnimationTriggerNumber: 0
+  AnimationSpeed: 1
   MovementSpeedMultiplier: 1
+  _timedProjectiles: []
+  _sustainedProjectiles: []

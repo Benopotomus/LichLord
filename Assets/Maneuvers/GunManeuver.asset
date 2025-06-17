@@ -12,23 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed33cfafc47aac745b01fd0ef1cc87d3, type: 3}
   m_Name: GunManeuver
   m_EditorClassIdentifier: 
-  _tableID: -1
-  ActionName: Gun Maneuver
-  Damage: 10
+  _tableID: 3
+  ManeuverName: 
+  Duration: 1
   Cooldown: 0.5
-  ProjectilePrefab: {fileID: 0}
-  ProjectileSpeed: 20
-  Range: 100
   ActionSound: {fileID: 8300000, guid: 4bf4f7f783a5af94fbc3dce27a76d5f9, type: 3}
   ActionEffect: {fileID: 3681557076833651950, guid: f4a7a072bf85824429cd9cc4bed96bd7,
     type: 3}
-  ImpactPrefab: {fileID: 0}
-  HitMask:
-    serializedVersion: 2
-    m_Bits: 1
-  AnimationTrigger: Shoot
-  AnimationDuration: 0.5
+  Fullbody: 0
+  AnimationTriggerNumber: 0
+  AnimationSpeed: 1
   MovementSpeedMultiplier: 1
-  gunModelPrefab: {fileID: 0}
+  _timedProjectiles: []
+  _sustainedProjectiles: []
   projectileDefinition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99,
     type: 2}

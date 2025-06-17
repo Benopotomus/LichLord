@@ -38,6 +38,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private HurtboxComponent _hurtbox;
         public HurtboxComponent Hurtbox => _hurtbox;
 
+        [SerializeField] private CapsuleCollider _collider;
+        public CapsuleCollider Collider => _collider;
+
         public INetActor NetActor => this;
         public FNetObjectID NetObjectID => new FNetObjectID();
 

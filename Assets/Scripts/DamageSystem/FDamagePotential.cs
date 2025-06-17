@@ -1,17 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
 namespace LichLord
 {
+    [Serializable]
     public struct FDamagePotential
     {
         public int DamageValue;
         public EDamageType DamageType;
-        public float CriticalChance;
-        public float CriticalMultiplier;
         public int StaggerRating;
         public float KnockbackStrength;
         public int ArmorPenetration;
-        public EDamageSource DamageSource;
 
         public void ApplyChargeScalar(float damageScalar)
         {
@@ -23,12 +21,9 @@ namespace LichLord
             // Copy the remaining fields
             DamageValue = other.DamageValue;
             DamageType = other.DamageType;
-            CriticalChance = other.CriticalChance;
-            CriticalMultiplier = other.CriticalMultiplier;
             StaggerRating = other.StaggerRating;
             KnockbackStrength = other.KnockbackStrength;
             ArmorPenetration = other.ArmorPenetration;
-            DamageSource = other.DamageSource;
         }
     }
 

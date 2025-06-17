@@ -7,10 +7,7 @@ namespace LichLord
     [CreateAssetMenu(fileName = "GunManeuverDefinition", menuName = "LichLord/Maneuvers/GunManeuverDefinition", order = 2)]
     public class GunManeuverDefinition : ManeuverDefinition
     {
-        [SerializeField] private GameObject gunModelPrefab; // Prefab for the gun model to spawn
         [SerializeField] private ProjectileDefinition projectileDefinition; // For ProjectileManager
-
-        private GameObject spawnedGunModel; // Runtime reference to the spawned gun
 
         public override void SelectAction(PlayerCharacter playerCreature, NetworkRunner runner)
         {
@@ -20,10 +17,10 @@ namespace LichLord
         {
         }
 
-        public override void Execute(PlayerCharacter playerCreature, NetworkRunner runner)
+        public override void StartExecute(PlayerCharacter playerCreature, NetworkRunner runner)
         {
             // Get the action spawn point
-            Transform spawnPoint = playerCreature.Actions.ActionSpawnPoint != null ? playerCreature.Actions.ActionSpawnPoint : playerCreature.transform;
+            Transform spawnPoint = playerCreature.Maneuvers.ActionSpawnPoint != null ? playerCreature.Maneuvers.ActionSpawnPoint : playerCreature.transform;
             Vector3 hitPosition = Vector3.zero;
             Vector3 hitNormal = Vector3.zero;
 
@@ -56,15 +53,15 @@ namespace LichLord
                 }
                 else
                 {
-                    Debug.LogWarning($"[GunActionData] Cannot fire projectile for {ActionName}: ProjectileManager not found.");
+                    Debug.LogWarning($"[GunActionData] Cannot fire projectile for {ManeuverName}: ProjectileManager not found.");
                 }
             }
 
 
             // Trigger RPC via CreatureActions
-            if (playerCreature.Actions != null)
+            if (playerCreature.Maneuvers != null)
             {
-                playerCreature.Actions.RPC_ExecuteGunAction(playerCreature.Object.Id, TableID, spawnPoint.position, targetPos, hitPosition, hitNormal);
+                playerCreature.Maneuvers.RPC_ExecuteGunAction(playerCreature.Object.Id, TableID, spawnPoint.position, targetPos, hitPosition, hitNormal);
             }
             
         }

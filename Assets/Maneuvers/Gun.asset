@@ -12,19 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: Gun
   m_EditorClassIdentifier: 
-  ActionName: Gun
-  Type: 2
-  Damage: 10
+  _tableID: 2
+  ManeuverName: 
+  Duration: 1
   Cooldown: 0.1
-  ProjectilePrefab: {fileID: 0}
-  ProjectileSpeed: 20
-  Range: 100
   ActionSound: {fileID: 8300000, guid: 4bf4f7f783a5af94fbc3dce27a76d5f9, type: 3}
   ActionEffect: {fileID: 0}
-  ImpactPrefab: {fileID: 0}
-  HitMask:
-    serializedVersion: 2
-    m_Bits: 0
-  AnimationTrigger: Shoot
-  AnimationDuration: 0
+  Fullbody: 0
+  AnimationTriggerNumber: 0
+  AnimationSpeed: 1
   MovementSpeedMultiplier: 1
+  _timedProjectiles: []
+  _sustainedProjectiles: []

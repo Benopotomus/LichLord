@@ -19,7 +19,7 @@ namespace LichLord
         public PlayerCharacterMovementComponent Movement;
         public PlayerCameraController CameraController;
         public PlayerCharacterInput Input;
-        public PlayerCharacterManeuvers Actions;
+        public PlayerCharacterManeuvers Maneuvers;
         public PlayerProjectilePool ProjectilePool;
         public HurtboxComponent Hurtbox;
         public Animator Animator;
@@ -33,6 +33,9 @@ namespace LichLord
 
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
+
+        [SerializeField] private Transform _handBoneLeft;
+        [SerializeField] private Transform _handBoneRight;
 
         public FNetObjectID NetObjectID
         {
@@ -77,8 +80,12 @@ namespace LichLord
         {
             base.Spawned();
 
-            Context.LocalPlayerCreature = this;
-            Context.LocalPlayerRef = Object.StateAuthority;
+            if (HasStateAuthority)
+            {
+                Context.LocalPlayerCharacter = this;
+                Context.LocalPlayerRef = Object.StateAuthority;
+            }
+
             Context.NetworkGame.OnPlayerSpawned(this);
 
             Runner.SetPlayerObject(Runner.LocalPlayer, Object);
@@ -104,10 +111,10 @@ namespace LichLord
             }
 
             // Ensure ActionManager is assigned
-            if (Actions == null)
+            if (Maneuvers == null)
             {
-                Actions = GetComponent<PlayerCharacterManeuvers>();
-                if (Actions == null)
+                Maneuvers = GetComponent<PlayerCharacterManeuvers>();
+                if (Maneuvers == null)
                     Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
             }
 
@@ -253,6 +260,22 @@ namespace LichLord
             }
         }
 
+        public Vector3 GetMuzzlePosition(EMuzzle muzzle)
+        {
+            switch (muzzle)
+            {
+                case EMuzzle.LeftHand:
+                    return _handBoneLeft.position;
+
+                case EMuzzle.RightHand:
+                    return _handBoneLeft.position;
+
+                case EMuzzle.LeftHand_RightHand_Blend:
+                    return Vector3.Lerp(_handBoneLeft.position, _handBoneRight.position, 0.5f); 
+            }
+
+            return _cachedTransform.position;
+        }
 
     }
 }

@@ -20,7 +20,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void Hit()
         {
-            Debug.Log("Hit");
+            //Debug.Log("Hit");
             _npc.Brain.OnHitFromAnimation();
         }
 

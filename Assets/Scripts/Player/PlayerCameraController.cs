@@ -30,7 +30,7 @@ namespace LichLord
             }
         }
 
-        public void ProcessInput(FGameplayInput input)
+        public void OnFixedUpdate(ref FGameplayInput input)
         {
             if (!HasStateAuthority)
                 return;

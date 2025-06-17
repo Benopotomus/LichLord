@@ -2,7 +2,7 @@
 
 namespace LichLord
 {
-    [CreateAssetMenu(menuName = "LichLord/Actions/ActionTable")]
+    [CreateAssetMenu(menuName = "LichLord/Maneuvers/ManeuverTable")]
     public class ManeuverTable : ObjectTable<ManeuverDefinition>
     {
 

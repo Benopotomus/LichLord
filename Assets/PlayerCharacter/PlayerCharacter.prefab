@@ -1107,7 +1107,7 @@ MonoBehaviour:
   Movement: {fileID: 1776246608945052242}
   CameraController: {fileID: 4625314071529301451}
   Input: {fileID: 5761594593767146104}
-  Actions: {fileID: 576985687314793959}
+  Maneuvers: {fileID: 0}
   ProjectilePool: {fileID: 4081789406591363571}
   Hurtbox: {fileID: 1365664862452816086}
   Animator: {fileID: 5514988164510602711}
@@ -1116,6 +1116,8 @@ MonoBehaviour:
   FirstPersonOverlayObjects: []
   _Nickname: 
   _cachedTransform: {fileID: 1142867646521763857}
+  _handBoneLeft: {fileID: 6662322938502261286}
+  _handBoneRight: {fileID: 3196159177451331618}
   item: {fileID: 11400000, guid: 4eba0e5163d14e34dbb7062775f3c910, type: 2}
 --- !u!114 &7362189930313428062
 MonoBehaviour:
@@ -1158,12 +1160,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8648bbd4493d628428de4afb43facc2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableActions:
-  - {fileID: 11400000, guid: ab2eaa20b9837d04b8ecbc24c9441efc, type: 2}
-  - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
-  - {fileID: 11400000, guid: 6ae0811a92740524bac81d96653a2a22, type: 2}
-  ActionSpawnPoint: {fileID: 3591005714103112523}
   _pc: {fileID: 2971398371087610287}
+  _availableManeuvers:
+  - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
+  ActionSpawnPoint: {fileID: 3591005714103112523}
   gunModel: {fileID: 4223813532148550129}
   gunMuzzleParticle: {fileID: 2310922988817635306}
 --- !u!114 &4625314071529301451
@@ -1343,6 +1343,8 @@ MonoBehaviour:
   _pc: {fileID: 2971398371087610287}
   ChestTargetTransform: {fileID: 536988984119202717}
   ChestBone: {fileID: 21714211774228274}
+  SpineBoneTop: {fileID: 116876280019120312}
+  SpineBoneBottom: {fileID: 4211059689725419787}
   CameraPivot: {fileID: 4348685969970783698}
   HeadTargetTransform: {fileID: 1044241402898733276}
   NeckBone: {fileID: 8657120584833113597}

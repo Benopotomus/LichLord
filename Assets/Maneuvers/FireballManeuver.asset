@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
+  m_Name: FireballManeuver
+  m_EditorClassIdentifier: 
+  _tableID: 1
+  ManeuverName: Fireball
+  Duration: 0.7
+  Cooldown: 0
+  ActionSound: {fileID: 0}
+  ActionEffect: {fileID: 0}
+  Fullbody: 0
+  AnimationTriggerNumber: 0
+  AnimationSpeed: 1
+  MovementSpeedMultiplier: 1
+  _timedProjectiles:
+  - SpawnTick: 10
+    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
+    SpawnsOnAnimationNotify: 1
+    Muzzle: 3
+    Damage:
+      DamageValue: 35
+      DamageType: 2
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+  - SpawnTick: 13
+    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
+    SpawnsOnAnimationNotify: 1
+    Muzzle: 3
+    Damage:
+      DamageValue: 35
+      DamageType: 2
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+  - SpawnTick: 16
+    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
+    SpawnsOnAnimationNotify: 1
+    Muzzle: 3
+    Damage:
+      DamageValue: 35
+      DamageType: 2
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+  _sustainedProjectiles: []

@@ -2,24 +2,40 @@
 using Fusion;
 using System.Collections.Generic;
 using DWD.Pooling;
+using Pathfinding.RVO;
+using System;
 
 namespace LichLord
 {
     public class PlayerCharacterManeuvers : NetworkBehaviour
     {
-        [Header("Action Setup")]
-        [SerializeField] private List<ManeuverDefinition> availableActions = new List<ManeuverDefinition>();
-        [SerializeField] public Transform ActionSpawnPoint; // Where actions originate
         [SerializeField] private PlayerCharacter _pc;
 
-        [Networked] private int SelectedActionIndex { get; set; }
-        [Networked] private TickTimer CooldownTimer { get; set; }
-        [Networked] private TickTimer AnimationTimer { get; set; }
+        [Header("Action Setup")]
+        [SerializeField] private List<ManeuverDefinition> _availableManeuvers = new List<ManeuverDefinition>();
+        public List<ManeuverDefinition> AvailableManeuvers => _availableManeuvers;
+        
+        [SerializeField] public Transform ActionSpawnPoint; // Where actions originate
+
+        [Networked] private sbyte _selectedIndex { get; set; }
+        [Networked] private sbyte _activeManeuverIndex { get; set; }
+
+        [Networked]
+        private TickTimer _activeManeuverTimer { get; set; }
+        private int _activeManeuverTick;
+
+        [Networked, Capacity(8)]
+        private NetworkDictionary<sbyte, TickTimer> _maneuverCooldownTimers { get; }
 
         [SerializeField] private GameObject gunModel; // Gun model to toggle visibility
         [SerializeField] private ParticleSystem gunMuzzleParticle; // ParticleSystem on gunModel for muzzle flash
 
-        private bool _hasInitializedSelection;
+        private int _animIDTriggerNumber = Animator.StringToHash("UpperBodyTriggerNumber");
+        private int _animIDUpperBodyTrigger = Animator.StringToHash("UpperBodyTrigger");
+        private int _animIDUpperBodyBlend = Animator.StringToHash("UpperBodyBlend");
+
+        // Current upper body blend amount
+        private float _upperBodyBlend = 0f;
 
         public override void Spawned()
         {
@@ -27,63 +43,124 @@ namespace LichLord
 
             if (HasStateAuthority)
             {
-                if (availableActions.Count > 0)
+                if (_availableManeuvers.Count > 0)
                 {
-                    SelectedActionIndex = 0;
-                    _hasInitializedSelection = true;
-                    availableActions[0].SelectAction(_pc, Runner);
-                    RPC_LogActionSelection(0);
-                    Debug.Log($"[ActionManager] Automatically selected action: {availableActions[0].ActionName} (Index: 0)");
+                    _selectedIndex = 0;
+                    _availableManeuvers[0].SelectAction(_pc, Runner);
+                    Debug.Log($"[ActionManager] Automatically selected action: {_availableManeuvers[0].ManeuverName} (Index: 0)");
                 }
                 else
                 {
-                    SelectedActionIndex = -1;
+                    _selectedIndex = -1;
                     Debug.LogWarning("[ActionManager] No actions available, no initial selection set.");
                 }
 
-                CooldownTimer = TickTimer.None;
-                AnimationTimer = TickTimer.None;
+                for (int i = 0; i < _availableManeuvers.Count; i++)
+                {
+                    _activeManeuverTimer = TickTimer.None;
+                    _maneuverCooldownTimers.Set((sbyte)i, TickTimer.None);
+                }
             }
         }
 
-        public void ProcessInput(FGameplayInput input)
+        public void OnFixedUpdate(ref FGameplayInput input)
         {
-            if (!HasStateAuthority) return;
+            if (!HasStateAuthority) 
+                return;
 
-            ProcessActionSelection(input);
+            ProcessActionSelection(ref input);
+            ProcessManeuverActivation(ref input);
+            ProcessActiveManeuver(ref input);
+        }
+
+        private void ProcessActiveManeuver(ref FGameplayInput input)
+        {
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+            if (activeManeuver == null)
+                return;
+
+            if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+                return;
+
+            int ticksSinceStart = Runner.Tick - _activeManeuverTick;
+            activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
+
+            //Debug.Log(ticksSinceStart);
+        }
+
+        private void ProcessManeuverActivation(ref FGameplayInput input)
+        {
+            // if the selected index is out of range, early out
+            if (_selectedIndex < 0 || _selectedIndex >= _availableManeuvers.Count)
+                return;
+ 
+            // Cache current selected maneuver
+            ManeuverDefinition selectedManeuver = _availableManeuvers[_selectedIndex];
+
+            // if the cooldown timer doesn't exist for this selected index, early out
+            if (!_maneuverCooldownTimers.TryGet(_selectedIndex, out var cooldownTimer))
+            {
+                Debug.Log("Maneuver cooldown timer doesn't exist for index " + _selectedIndex);
+                return;
+            }
+
+            // If the event is on cooldown, early out
+            if (!cooldownTimer.ExpiredOrNotRunning(Runner))
+            {
+                //Debug.Log("Maneuver cooldown timer is running for " + _selectedIndex);
+                return;
+            }
+
+            // Cache current selected maneuver
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+
+            if (activeManeuver != null)
+                return;
 
             if (input.Fire)
             {
-                //Debug.Log("Fire Pressed");
+                Debug.Log("Fire Pressed");
 
-                if (SelectedActionIndex < 0 || SelectedActionIndex >= availableActions.Count)
-                {
-                    //Debug.Log("[ActionManager] Fire input (LMB) ignored: No action selected or invalid index.");
-                    return;
-                }
-
-                if (!CooldownTimer.ExpiredOrNotRunning(Runner))
-                {
-                    //Debug.Log($"[ActionManager] Fire input (LMB) ignored: Action {availableActions[SelectedActionIndex].ActionName} on cooldown.");
-                    return;
-                }
-
-                ManeuverDefinition selectedAction = availableActions[SelectedActionIndex];
                 //Debug.Log($"[ActionManager] Executing action: {selectedAction.ActionName} (Index: {SelectedActionIndex})");
-                selectedAction.Execute(_pc, Runner);
-                CooldownTimer = TickTimer.CreateFromSeconds(Runner, selectedAction.Cooldown);
-                AnimationTimer = TickTimer.CreateFromSeconds(Runner, selectedAction.AnimationDuration);
-                RPC_NotifyActionExecution(selectedAction.ActionName, selectedAction.AnimationTrigger);
+
+                _activeManeuverTick = Runner.Tick;
+                _activeManeuverIndex = _selectedIndex;
+                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Duration);
+
+                cooldownTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Cooldown);
+                _maneuverCooldownTimers.Set(_selectedIndex, cooldownTimer);
+
+                activeManeuver = GetActiveManeuver();
+                activeManeuver.StartExecute(_pc, Runner);
             }
 
-            if (CooldownTimer.ExpiredOrNotRunning(Runner))
+            if (cooldownTimer.ExpiredOrNotRunning(Runner))
             {
                 _pc.Movement.SetCastSpeedMultiplier(1f);
             }
             else
             {
-                _pc.Movement.SetCastSpeedMultiplier(availableActions[SelectedActionIndex].MovementSpeedMultiplier);
+                _pc.Movement.SetCastSpeedMultiplier(_availableManeuvers[_selectedIndex].MovementSpeedMultiplier);
             }
+        }
+
+        private ManeuverDefinition GetActiveManeuver()
+        {
+            if(_activeManeuverIndex < 0)
+                return null;
+
+            if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+                return null;
+
+            return _availableManeuvers[_activeManeuverIndex];
+        }
+
+        private ManeuverDefinition GetSelectedManeuver()
+        {
+            if (_selectedIndex < 0)
+                return null;
+
+            return _availableManeuvers[_selectedIndex];
         }
 
         public void OnRender()
@@ -93,11 +170,11 @@ namespace LichLord
             UpdateAnimation(deltaTime);
         }
 
-        private float _upperBodyBlend = 0f;
 
         private void UpdateAnimation(float deltaTime)
         {
-            if (!AnimationTimer.ExpiredOrNotRunning(Runner))
+
+            if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
             {
                 _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend + (deltaTime * 4f));
             }
@@ -106,13 +183,13 @@ namespace LichLord
                 _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend - (deltaTime * 4f));
             }
 
-            _pc.Animator.SetFloat("UpperBodyBlend", _upperBodyBlend);
+            _pc.Animator.SetFloat(_animIDUpperBodyBlend, _upperBodyBlend);
 
         }
 
         public void UpdateWeaponModel()
         {
-            ManeuverDefinition selectedAction = availableActions[SelectedActionIndex];
+            ManeuverDefinition selectedAction = GetSelectedManeuver();
             if (selectedAction is GunManeuverDefinition gunActionData)
             {
                 if (gunModel != null)
@@ -127,13 +204,13 @@ namespace LichLord
             }
         }
 
-        private void ProcessActionSelection(FGameplayInput input)
+        private void ProcessActionSelection(ref FGameplayInput input)
         {
             int newIndex = -1;
-            if (input.ScrollDelta != 0 && availableActions.Count > 1)
+            if (input.ScrollDelta != 0 && _availableManeuvers.Count > 1)
             {
                 int delta = input.ScrollDelta > 0 ? 1 : -1;
-                newIndex = (SelectedActionIndex + delta + availableActions.Count) % availableActions.Count;
+                newIndex = (_selectedIndex + delta + _availableManeuvers.Count) % _availableManeuvers.Count;
                 //Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
             }
 
@@ -143,7 +220,7 @@ namespace LichLord
                 newIndex = input.ActionSelection - 1;
             }
 
-            if (newIndex >= availableActions.Count)
+            if (newIndex >= _availableManeuvers.Count)
             {
                 //Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (exceeds availableActions.Count={availableActions.Count})");
                 return;
@@ -152,7 +229,7 @@ namespace LichLord
             if (newIndex < 0)
                 return;
 
-            if (newIndex == SelectedActionIndex)
+            if (newIndex == _selectedIndex)
                 return;
 
             UpdateActionSelection(newIndex);
@@ -162,23 +239,20 @@ namespace LichLord
         {
             if (HasStateAuthority)
             {
-                if (SelectedActionIndex >= 0 && SelectedActionIndex < availableActions.Count)
+                if (_selectedIndex >= 0 && _selectedIndex < _availableManeuvers.Count)
                 {
-                    availableActions[SelectedActionIndex].DeselectAction(_pc, Runner);
+                    _availableManeuvers[_selectedIndex].DeselectAction(_pc, Runner);
                 }
 
-                SelectedActionIndex = newIndex;
-                _hasInitializedSelection = newIndex >= 0;
-                if (newIndex >= 0 && newIndex < availableActions.Count)
+                _selectedIndex = (sbyte)newIndex;
+                if (newIndex >= 0 && newIndex < _availableManeuvers.Count)
                 {
-                    availableActions[newIndex].SelectAction(_pc, Runner);
+                    _availableManeuvers[newIndex].SelectAction(_pc, Runner);
                 }
 
-                RPC_LogActionSelection(newIndex);
-
-                if (newIndex >= 0 && newIndex < availableActions.Count)
+                if (newIndex >= 0 && newIndex < _availableManeuvers.Count)
                 {
-                    Debug.Log($"[ActionManager] Selected action: {availableActions[newIndex].ActionName} (Index: {newIndex})");
+                    Debug.Log($"[ActionManager] Selected action: {_availableManeuvers[newIndex].ManeuverName} (Index: {newIndex})");
                 }
                 else
                 {
@@ -188,32 +262,23 @@ namespace LichLord
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_LogActionSelection(int actionIndex)
+        public void RPC_NotifyActionExecution(ushort maneuverDefinitionID)
         {
-            if (actionIndex == -1)
-            {
-                Debug.Log("[ActionManager] Player cleared action selection");
-            }
-            else if (availableActions.Count > actionIndex)
-            {
-                Debug.Log($"[ActionManager] Player selected action: {availableActions[actionIndex].ActionName} (Index: {actionIndex})");
-            }
-        }
+            ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(maneuverDefinitionID);
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyActionExecution(string actionName, string animationTrigger)
-        {
-            //Debug.Log($"[ActionManager] Player executed action: {actionName}");
-            if (_pc.Animator != null && !string.IsNullOrEmpty(animationTrigger))
+            _pc.Animator.SetInteger(_animIDTriggerNumber, maneuver.AnimationTriggerNumber);
+
+            if (!maneuver.Fullbody)
             {
-               // _pc.Animator.SetTrigger(animationTrigger);
+                _pc.Animator.SetFloat(_animIDUpperBodyBlend, 0.01f);
+                _pc.Animator.SetTrigger(_animIDUpperBodyTrigger);
             }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         public void RPC_ExecuteGunAction(NetworkId playerId, int maneuverID, Vector3 spawnPosition, Vector3 targetPosition, Vector3 hitPosition, Vector3 hitNormal)
         {
-            ManeuverDefinition maneuver = availableActions[SelectedActionIndex];
+            ManeuverDefinition maneuver = _availableManeuvers[_selectedIndex];
 
             Vector3 direction = (targetPosition - spawnPosition).normalized;
             Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
@@ -233,7 +298,7 @@ namespace LichLord
                 AudioSource.PlayClipAtPoint(maneuver.ActionSound, spawnPosition);
             }
 
-            if (_pc.Animator != null && !string.IsNullOrEmpty(maneuver.AnimationTrigger))
+            if (_pc.Animator != null)
             {
                 _pc.Animator.SetTrigger("UpperBodyTrigger");
                 
@@ -242,7 +307,7 @@ namespace LichLord
 
         public int GetAvailableActionsCount()
         {
-            return availableActions.Count;
+            return _availableManeuvers.Count;
         }
     }
 }

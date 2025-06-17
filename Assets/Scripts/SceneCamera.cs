@@ -78,7 +78,7 @@ namespace LichLord
 
         protected override void OnTick()
         {
-            PlayerCharacter localPlayerCreature = Context.LocalPlayerCreature;
+            PlayerCharacter localPlayerCreature = Context.LocalPlayerCharacter;
 
             if(localPlayerCreature != null ) 
                 RaycastFromCameraCenter(localPlayerCreature.gameObject);

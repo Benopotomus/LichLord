@@ -14,9 +14,10 @@ namespace LichLord
         protected override void OnFixedUpdate()
         {
             FGameplayInput input = fsmRef.Creature.Input.CurrentInput;
-            fsmRef.Creature.Movement.ProcessInput(input);
-            fsmRef.Creature.Actions.ProcessInput(input);
-            fsmRef.Creature.CameraController.ProcessInput(input);
+
+            fsmRef.Creature.Movement.OnFixedUpdate(ref input);
+            fsmRef.Creature.Maneuvers.OnFixedUpdate(ref input);
+            fsmRef.Creature.CameraController.OnFixedUpdate(ref input);
 
             fsmRef.Creature.Input.ResetInput();
         }
@@ -26,7 +27,7 @@ namespace LichLord
             float deltaTime = Time.deltaTime;
 
             fsmRef.Creature.Movement.OnRender(deltaTime);
-            fsmRef.Creature.Actions.OnRender();
+            fsmRef.Creature.Maneuvers.OnRender();
         }
     }
 }

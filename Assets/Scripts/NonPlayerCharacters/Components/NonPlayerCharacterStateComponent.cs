@@ -48,6 +48,7 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Animator.SetInteger("TriggerNumber", 20);
                     NPC.Animator.SetTrigger("Trigger");
                     NPC.Hurtbox.SetHitBoxesActive(false);
+                    NPC.Collider.enabled = false;
                     break;
                 case ENonPlayerState.HitReact:
                     NPC.HitReact.StartHitReact(newState, animIndex);
@@ -67,6 +68,7 @@ namespace LichLord.NonPlayerCharacters
                 case ENonPlayerState.Inactive:
                     NPC.CachedTransform.position = data.Position;
                     NPC.CachedTransform.rotation = data.Rotation;
+                    NPC.Collider.enabled = true;
                     break;
             }
             _currentAnimIndex = animIndex;

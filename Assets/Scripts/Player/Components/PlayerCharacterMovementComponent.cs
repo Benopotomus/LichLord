@@ -168,7 +168,7 @@ namespace LichLord
             CC.transform.rotation = Quaternion.Euler(0f, input.LookRotation.y, 0f);
         }
 
-        public void ProcessInput(FGameplayInput input)
+        public void OnFixedUpdate(ref FGameplayInput input)
         {
             float deltaTime = Runner.DeltaTime;
 
