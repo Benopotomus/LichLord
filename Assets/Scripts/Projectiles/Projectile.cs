@@ -20,6 +20,8 @@ namespace LichLord.Projectiles
         public Quaternion Rotation { get; set; }
         public Vector3 Velocity { get; set; }
 
+        public int ImpactTick { get; set; }
+
         protected List<IHitTarget> AffectedActors = new List<IHitTarget>();
 
         FProjectileCollisionEvent _collisionEvent = new FProjectileCollisionEvent();

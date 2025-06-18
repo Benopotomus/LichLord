@@ -150,7 +150,9 @@ namespace LichLord.Projectiles
             ref FPhysicsHitData impactHit,
             int tick)
         {
-            data.IsFinished = true;
+            data.HasImpacted = true;
+            projectile.ImpactTick = tick;
+
             projectile.Position = impactHit.ProjectilePosition;
             
             SpawnImpactEffect(projectile, ref data, ref impactHit, tick);

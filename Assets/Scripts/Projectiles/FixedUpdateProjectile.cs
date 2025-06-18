@@ -17,6 +17,7 @@ namespace LichLord.Projectiles
         public float Lifetime { get; set; }
         public bool IsDataSet { get; set;}
 
+
         // FIXED UPDATE
 
         public void ActivateFixedUpdate(ref FProjectileData data, 
@@ -43,6 +44,7 @@ namespace LichLord.Projectiles
         {
             data.IsFinished = true;
             data.IsHoming = false;
+            data.HasImpacted = false;
             data.FireTick = Runner.Tick;
         }
 
@@ -56,15 +58,24 @@ namespace LichLord.Projectiles
             if (data.IsFinished)
                 return;
 
+
             if (!IsDataSet) 
                 SetData(ref data);
 
             if (Definition == null)
                 return;
 
-            if (Runner.SimulationTime >= (data.FireTick * deltaTime) + Definition.Lifetime)
+            if (simulationTime >= (data.FireTick * deltaTime) + Definition.Lifetime)
             {
                 OnLifetimeExpired(ref data);
+            }
+
+            if (data.HasImpacted)
+            {
+                if (simulationTime >= + (ImpactTick * deltaTime) + Definition.PostImpactLifetime)
+                    data.IsFinished = true;
+
+                return;
             }
 
             ProjectileMovement projectileMovement = Definition.ProjectileMovement;

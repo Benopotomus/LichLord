@@ -58,6 +58,9 @@ namespace LichLord.Projectiles
             float simulationTime, 
             float deltaTime)
         {
+            if (data.HasImpacted)
+                return;
+
             ProjectileDefinition definition = projectile.Definition;
 
             float lastTimeSinceFired = ((tick - data.FireTick) - 1) * deltaTime;
@@ -73,6 +76,7 @@ namespace LichLord.Projectiles
                 data.TargetPosition,
                 data.Position,
                 projectile.Velocity);
+
 
             ProjectilePhysicsUtility.CheckAndHandleCollision(projectile, 
                 ref data, 
