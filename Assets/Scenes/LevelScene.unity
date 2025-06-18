@@ -455,6 +455,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4904701396938525325, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.0121
+      objectReference: {fileID: 0}
+    - target: {fileID: 4904701396938525325, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.014
+      objectReference: {fileID: 0}
     - target: {fileID: 5687183472605052142, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
         type: 3}
       propertyPath: m_Name
@@ -469,6 +479,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_MaterialTemplate
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6252592856124638336, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: mode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6529796582532722323, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 6529796582532722323, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.055
+      objectReference: {fileID: 0}
+    - target: {fileID: 7484083569730638305, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 7943097840914004322, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
         type: 3}
@@ -520,8 +550,39 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8389972425259021191, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8389972425259021191, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.023
+      objectReference: {fileID: 0}
+    - target: {fileID: 8389972425259021191, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.017
+      objectReference: {fileID: 0}
+    - target: {fileID: 8558777066654575136, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.194
+      objectReference: {fileID: 0}
+    - target: {fileID: 8558777066654575136, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.093
+      objectReference: {fileID: 0}
+    - target: {fileID: 8948543944769115663, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.501
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8313747583443995783, guid: 75ac96b2759e84447ac3e40bcb02a6e5, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 75ac96b2759e84447ac3e40bcb02a6e5, type: 3}
@@ -1474,7 +1535,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 1, z: 100}
+  m_LocalScale: {x: 300, y: 1, z: 300}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1327619677}
@@ -2383,10 +2444,13 @@ MonoBehaviour:
   maxGraphicsBufferCaches: 8
   _cullingCameras:
   - {fileID: 8944336656349189699}
+  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 35.71, z: 0, w: 0}
+    - {x: -222.20547, y: 318.09238, z: -582.45605, w: 0}
     fov:
+    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: -0.81529963
@@ -2405,20 +2469,43 @@ MonoBehaviour:
       e31: 0.41103712
       e32: -0.7626356
       e33: -14.678135
+    - e00: 0.83381045
+      e01: 0.00056274916
+      e02: -0.43195102
+      e03: -66.494255
+      e10: 0.37047052
+      e11: 1.5324744
+      e12: 0.7171289
+      e13: 12.548184
+      e20: 0.40723556
+      e21: -0.4660237
+      e22: 0.7854942
+      e23: 691.85364
+      e30: 0.40723148
+      e31: -0.46601903
+      e32: 0.78548634
+      e33: 696.2374
     calibration:
+    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: -0.22620752, y: 0.2943658, z: -0.9285359, w: -10.511802}
+    - {x: 0.9046846, y: -0.3393045, z: 0.25771728, w: 459.06503}
     frustumPlane1:
     - {x: 0.94155234, y: 0.2943658, z: -0.16379282, w: -10.511802}
+    - {x: -0.31096402, y: -0.34012496, z: 0.8874775, w: 556.0099}
     frustumPlane2:
     - {x: 0.054698296, y: 0.9950035, z: -0.083524086, w: -35.531574}
+    - {x: 0.388851, y: 0.5332277, z: 0.7513076, w: 354.3928}
     frustumPlane3:
     - {x: 0.4447369, y: -0.5839663, z: -0.6791115, w: 20.853436}
+    - {x: 0.018380478, y: -0.9992467, z: 0.034178734, w: 341.84464}
     frustumPlane4:
     - {x: 0.4994352, y: 0.41103715, z: -0.7626356, w: -14.978136}
+    - {x: 0.4072315, y: -0.46601903, z: 0.78548634, w: 694.04205}
     frustumPlane5:
     - {x: -0.4994536, y: -0.41105473, z: 0.7626141, w: 1014.8126}
+    - {x: -0.407345, y: 0.46681142, z: -0.78495675, w: 437362.3}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:

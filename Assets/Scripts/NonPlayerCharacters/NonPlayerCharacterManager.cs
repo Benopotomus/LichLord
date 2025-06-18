@@ -61,7 +61,7 @@ namespace LichLord.NonPlayerCharacters
             if (!_debugStreamRevive)
                 return;
 
-            if (Runner.Tick % 10 != 0)
+            if (Runner.Tick % 64 != 0)
                 return;
 
             if (flip)
