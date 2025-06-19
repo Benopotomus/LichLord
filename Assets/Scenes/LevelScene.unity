@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.050729632, g: 0.25619048, b: 0.8490566, a: 1}
+  m_AmbientSkyColor: {r: 0.101459265, g: 0.51238096, b: 1.6981132, a: 1}
   m_AmbientEquatorColor: {r: 0.10224175, g: 0.2015563, b: 0.17464745, a: 1}
   m_AmbientGroundColor: {r: 0.57232696, g: 0.25998133, b: 0.07019097, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 1
+  m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
@@ -295,7 +295,7 @@ MonoBehaviour:
   _replicatorPrefab: {fileID: 3957007118019067033, guid: 29fc895c602f8fd4084d2ff263237ec3,
     type: 3}
   _replicator: {fileID: 0}
-  _debugSpawnCount: 64
+  _debugSpawnCount: 0
   _debugStreamRevive: 0
 --- !u!4 &111939069
 Transform:
@@ -473,7 +473,7 @@ PrefabInstance:
     - target: {fileID: 5687183472605052142, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5789541908197324390, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
         type: 3}
@@ -583,6 +583,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 8313747583443995783, guid: 75ac96b2759e84447ac3e40bcb02a6e5, type: 3}
+    - {fileID: 6220089564983401298, guid: 75ac96b2759e84447ac3e40bcb02a6e5, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 75ac96b2759e84447ac3e40bcb02a6e5, type: 3}
@@ -1228,7 +1229,7 @@ PrefabInstance:
     - target: {fileID: 2974832083088023365, guid: 60ab23c72bc62254b8894529605f1dfb,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1628,7 +1629,7 @@ PrefabInstance:
     - target: {fileID: 1365393382906794919, guid: f60c86ac1add3534aa5882673d56c1c1,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1365393382906794919, guid: f60c86ac1add3534aa5882673d56c1c1,
         type: 3}
@@ -1720,7 +1721,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1327619677
 Transform:
   m_ObjectHideFlags: 0
@@ -2448,14 +2449,14 @@ MonoBehaviour:
   _cameraData:
     position:
     - {x: 0, y: 35.71, z: 0, w: 0}
-    - {x: -222.20547, y: 318.09238, z: -582.45605, w: 0}
+    - {x: -523.45667, y: 268.40448, z: 685.5531, w: 0}
     fov:
     - 0.57735026
     - 0.57735026
     viewProjection:
-    - e00: -0.81518865
+    - e00: -0.81529963
       e01: 0
-      e02: -0.5338511
+      e02: -0.5339238
       e03: 0
       e10: -0.3900386
       e11: 1.5789697
@@ -2469,43 +2470,43 @@ MonoBehaviour:
       e31: 0.41103712
       e32: -0.7626356
       e33: -14.678135
-    - e00: 0.8330777
-      e01: 0.00056225463
-      e02: -0.43157142
-      e03: -66.43582
-      e10: 0.37047052
-      e11: 1.5324744
-      e12: 0.7171289
-      e13: 12.548184
-      e20: 0.40723556
-      e21: -0.4660237
-      e22: 0.7854942
-      e23: 691.85364
-      e30: 0.40723148
-      e31: -0.46601903
-      e32: 0.78548634
-      e33: 696.2374
+    - e00: -0.74806243
+      e01: 0.0009350865
+      e02: -0.5706084
+      e03: -0.6468895
+      e10: 0.3105218
+      e11: 1.6553109
+      e12: -0.40437865
+      e13: -4.5251203
+      e20: 0.5793869
+      e21: -0.29436266
+      e22: -0.7600534
+      e23: 894.3193
+      e30: 0.5793811
+      e31: -0.2943597
+      e32: -0.76004577
+      e33: 903.3401
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
-    - {x: -0.22614305, y: 0.2943853, z: -0.9285454, w: -10.5125}
-    - {x: 0.9045229, y: -0.33944464, z: 0.25810027, w: 459.29675}
+    - {x: -0.22620752, y: 0.2943658, z: -0.9285359, w: -10.511802}
+    - {x: -0.12285397, y: -0.21370701, z: -0.96914196, w: 657.44946}
     frustumPlane1:
-    - {x: 0.94153523, y: 0.29438528, z: -0.16385575, w: -10.512499}
-    - {x: -0.31055778, y: -0.3402647, z: 0.8875662, w: 556.1963}
+    - {x: 0.94155234, y: 0.2943658, z: -0.16379282, w: -10.511802}
+    - {x: 0.96680367, y: -0.21506909, z: -0.13797103, w: 658.3918}
     frustumPlane2:
     - {x: 0.054698296, y: 0.9950035, z: -0.083524086, w: -35.531574}
-    - {x: 0.388851, y: 0.5332277, z: 0.7513076, w: 354.3928}
+    - {x: 0.44495153, y: 0.68047565, z: -0.58221227, w: 449.40753}
     frustumPlane3:
     - {x: 0.4447369, y: -0.5839663, z: -0.6791115, w: 20.853436}
-    - {x: 0.018380478, y: -0.9992467, z: 0.034178734, w: 341.84464}
+    - {x: 0.13442966, y: -0.9748354, z: -0.17783357, w: 453.93268}
     frustumPlane4:
     - {x: 0.4994352, y: 0.41103715, z: -0.7626356, w: -14.978136}
-    - {x: 0.4072315, y: -0.46601903, z: 0.78548634, w: 694.04205}
+    - {x: 0.5793812, y: -0.29435977, z: -0.76004595, w: 898.82544}
     frustumPlane5:
     - {x: -0.4994536, y: -0.41105473, z: 0.7626141, w: 1014.8126}
-    - {x: -0.407345, y: 0.46681142, z: -0.78495675, w: 437362.3}
+    - {x: -0.57718414, y: 0.29454243, z: 0.7616451, w: 900550.9}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
