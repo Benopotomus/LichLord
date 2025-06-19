@@ -114,7 +114,7 @@ namespace LichLord
             UpdateRemotePosition(deltaTime);
 
             FootstepSound.enabled = _isGrounded && _speed > 1f;
-            ScalingRoot.localScale = Vector3.Lerp(ScalingRoot.localScale, Vector3.one, deltaTime * 8f);
+            //ScalingRoot.localScale = Vector3.Lerp(ScalingRoot.localScale, Vector3.one, deltaTime * 8f);
 
             var emission = DustParticles.emission;
         }
@@ -153,7 +153,7 @@ namespace LichLord
             }
         }
 
-        public void SetCastSpeedMultiplier(float multiplier)
+        public void SetManeuverSpeedMultiplier(float multiplier)
         {
             _castSpeedMultiplier = multiplier;
         }

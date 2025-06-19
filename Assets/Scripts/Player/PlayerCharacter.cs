@@ -24,7 +24,6 @@ namespace LichLord
         public HurtboxComponent Hurtbox;
         public Animator Animator;
 
-        public UINameplate Nameplate;
         public Renderer[] HeadRenderers;
         public GameObject[] FirstPersonOverlayObjects;
 
@@ -155,7 +154,6 @@ namespace LichLord
             if (HasStateAuthority)
                 return; // Do not show nickname for local player
 
-            Nameplate.SetNickname(Nickname);
         }
 
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)

@@ -11,17 +11,23 @@ namespace LichLord
     {
         public string ManeuverName;
 
-        public float Duration = 1f;
+        [SerializeField] private float _duration = 1f;
+        public float Duration => _duration;
+
         public float Cooldown = 1f;
 
         public AudioClip ActionSound; // Sound played when performing action (e.g., FireSound for gun)
-        
-        
+
+        [SerializeField] private EInputType _inputType;
+        public EInputType InputType => _inputType;
+
         public VisualEffectBase ActionEffect; // VFX played when performing action (e.g., MuzzleParticle for gun)
 
         [Header ("Animation")]
         public bool Fullbody; // Animator trigger (e.g., "Shoot" for gun)
-        public int AnimationTriggerNumber;
+        public int UpperbodyTriggerNumber;
+        public int UpperbodyTriggerDuration;
+
         public float AnimationSpeed = 1f;
 
         public float MovementSpeedMultiplier = 1f; // Scales movement speed during action
@@ -30,7 +36,13 @@ namespace LichLord
         private List<FManeuverProjectile> _timedProjectiles = new List<FManeuverProjectile>();
 
         [SerializeField]
-        private List<FManeuverProjectile> _sustainedProjectiles = new List<FManeuverProjectile>();
+        private List<FManeuverProjectile> _cycleProjectiles = new List<FManeuverProjectile>();
+
+        [SerializeField]
+        private int _projectileCycleDelayTicks;
+
+        [SerializeField]
+        private int _projectileTicksPerCycle;
 
         public virtual void SelectAction(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
@@ -38,11 +50,19 @@ namespace LichLord
 
         public virtual void StartExecute(PlayerCharacter playerCharacter, NetworkRunner runner) 
         {
-            playerCharacter.Maneuvers.RPC_NotifyActionExecution((ushort)TableID);
+            playerCharacter.Maneuvers.RPC_NotifyStartExecute((ushort)TableID);
         }
 
         public virtual void SustainExecute(PlayerCharacter playerCharacter, NetworkRunner runner, int ticksSinceStart)
         {
+            if (_inputType == EInputType.Pressed)
+            {
+                if (ticksSinceStart > UpperbodyTriggerDuration)
+                {
+                    playerCharacter.Maneuvers.SetUpperBodyTriggerNumber(0);
+                }
+            }
+
             for (int i = 0; i < _timedProjectiles.Count; i++)
             { 
                 var projectile  = _timedProjectiles[i];
@@ -51,9 +71,29 @@ namespace LichLord
                     SpawnProjectile(playerCharacter, ref projectile, runner.Tick);
                 }
             }
+
+            // Handle cyclic projectiles after delay
+            if (ticksSinceStart < _projectileCycleDelayTicks || _projectileTicksPerCycle <= 0)
+                return;
+
+            // Calculate tick within the current cycle
+            int cycleTicksElapsed = ticksSinceStart - _projectileCycleDelayTicks;
+            int currentCycleTick = cycleTicksElapsed % _projectileTicksPerCycle;
+
+            for (int i = 0; i < _cycleProjectiles.Count; i++)
+            {
+                var projectile = _cycleProjectiles[i];
+                if (projectile.SpawnTick == currentCycleTick)
+                {
+                    SpawnProjectile(playerCharacter, ref projectile, runner.Tick);
+                }
+            }
         }
 
-        public virtual void EndExecute(PlayerCharacter playerCreature, NetworkRunner runner) { }
+        public virtual void EndExecute(PlayerCharacter playerCharacter, NetworkRunner runner) 
+        {
+            playerCharacter.Maneuvers.RPC_NotifyEndExecute((ushort)TableID);
+        }
 
         private void SpawnProjectile(PlayerCharacter playerCharacter, ref FManeuverProjectile projectileData, int tick)
         {
@@ -82,5 +122,11 @@ namespace LichLord
             var projectile = projectileManager.SpawnProjectile(fireEvent);
             //Debug.Log($"[GunActionData] Fired projectile with {ActionName} using ProjectileManager");
         }
+    }
+
+    public enum EInputType
+    { 
+        Pressed,
+        Held,
     }
 }

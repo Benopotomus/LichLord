@@ -12,15 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: HarvestManeuver
   m_EditorClassIdentifier: 
-  _tableID: 1
-  ManeuverName: Fireball
-  Duration: 0.7
+  _tableID: 4
+  ManeuverName: Harvest
+  _duration: 0.25
   Cooldown: 0
   ActionSound: {fileID: 0}
+  _inputType: 1
   ActionEffect: {fileID: 0}
   Fullbody: 0
-  AnimationTriggerNumber: 0
+  UpperbodyTriggerNumber: 1
+  UpperbodyTriggerDuration: 4
   AnimationSpeed: 1
-  MovementSpeedMultiplier: 1
+  MovementSpeedMultiplier: 0.65
   _timedProjectiles: []
-  _sustainedProjectiles: []
+  _cycleProjectiles:
+  - SpawnTick: 5
+    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
+    SpawnsOnAnimationNotify: 0
+    Muzzle: 2
+    Damage:
+      DamageValue: 0
+      DamageType: 0
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+  _projectileCycleDelayTicks: 10
+  _projectileTicksPerCycle: 10

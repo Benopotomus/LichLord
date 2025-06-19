@@ -12,15 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: Melee
   m_EditorClassIdentifier: 
-  _tableID: 4
+  _tableID: 5
   ManeuverName: 
-  Duration: 1
+  _duration: 1
   Cooldown: 1
   ActionSound: {fileID: 0}
+  _inputType: 0
   ActionEffect: {fileID: 0}
   Fullbody: 0
-  AnimationTriggerNumber: 0
+  UpperbodyTriggerNumber: 0
+  UpperbodyTriggerDuration: 0
   AnimationSpeed: 1
   MovementSpeedMultiplier: 1
   _timedProjectiles: []
-  _sustainedProjectiles: []
+  _cycleProjectiles: []
+  _projectileCycleDelayTicks: 0
+  _projectileTicksPerCycle: 0

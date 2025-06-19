@@ -14,14 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _tableID: 1
   ManeuverName: Fireball
-  Duration: 0.7
-  Cooldown: 0
+  _duration: 0.5
+  Cooldown: 0.25
   ActionSound: {fileID: 0}
+  _inputType: 0
   ActionEffect: {fileID: 0}
   Fullbody: 0
-  AnimationTriggerNumber: 0
+  UpperbodyTriggerNumber: 2
+  UpperbodyTriggerDuration: 10
   AnimationSpeed: 1
-  MovementSpeedMultiplier: 1
+  MovementSpeedMultiplier: 0.65
   _timedProjectiles:
   - SpawnTick: 10
     Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
@@ -33,4 +35,6 @@ MonoBehaviour:
       StaggerRating: 0
       KnockbackStrength: 0
       ArmorPenetration: 0
-  _sustainedProjectiles: []
+  _cycleProjectiles: []
+  _projectileCycleDelayTicks: 0
+  _projectileTicksPerCycle: 0

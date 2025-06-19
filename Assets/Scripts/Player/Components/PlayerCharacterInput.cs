@@ -45,6 +45,7 @@ namespace LichLord
             _input.Jump = false;
             _input.Crouch = false;
             _input.Fire = false;
+            _input.FireHeld = false;
             _input.Sprint = false;
             _input.ToggleCameraView = false;
             _input.ScrollDelta = 0f;
@@ -70,7 +71,7 @@ namespace LichLord
             _input.Crouch |= _controls.Gameplay.Crouch.WasPressedThisFrame();
             _input.CrouchHeld = _controls.Gameplay.Crouch.IsPressed();
             _input.Fire |= _controls.Gameplay.Fire.WasPressedThisFrame();
-
+            _input.FireHeld |= _controls.Gameplay.Fire.IsPressed();
             _input.Sprint = _controls.Gameplay.Sprint.IsPressed();
             _input.ToggleCameraView |= _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
 

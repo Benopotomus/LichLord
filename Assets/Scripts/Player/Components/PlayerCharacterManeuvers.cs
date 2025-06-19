@@ -24,18 +24,22 @@ namespace LichLord
         private TickTimer _activeManeuverTimer { get; set; }
         private int _activeManeuverTick;
 
+        [Networked]
+        private sbyte _activeUpperBodyTriggerNumber { get; set; }
+
         [Networked, Capacity(8)]
         private NetworkDictionary<sbyte, TickTimer> _maneuverCooldownTimers { get; }
 
         [SerializeField] private GameObject gunModel; // Gun model to toggle visibility
         [SerializeField] private ParticleSystem gunMuzzleParticle; // ParticleSystem on gunModel for muzzle flash
 
-        private int _animIDTriggerNumber = Animator.StringToHash("UpperBodyTriggerNumber");
+        private int _animIDUpperBodyTriggerNumber = Animator.StringToHash("UpperBodyTriggerNumber");
         private int _animIDUpperBodyTrigger = Animator.StringToHash("UpperBodyTrigger");
         private int _animIDUpperBodyBlend = Animator.StringToHash("UpperBodyBlend");
 
         // Current upper body blend amount
         private float _upperBodyBlend = 0f;
+        private float _moveSpeedMultiplier = 1f;
 
         public override void Spawned()
         {
@@ -60,6 +64,7 @@ namespace LichLord
                     _activeManeuverTimer = TickTimer.None;
                     _maneuverCooldownTimers.Set((sbyte)i, TickTimer.None);
                 }
+
             }
         }
 
@@ -79,13 +84,21 @@ namespace LichLord
             if (activeManeuver == null)
                 return;
 
+
+            if (activeManeuver.InputType == EInputType.Held &&
+                input.FireHeld)
+            { 
+                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+            }
+
             if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+            {
+                activeManeuver.EndExecute(_pc, Runner);
                 return;
+            }
 
             int ticksSinceStart = Runner.Tick - _activeManeuverTick;
             activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
-
-            //Debug.Log(ticksSinceStart);
         }
 
         private void ProcessManeuverActivation(ref FGameplayInput input)
@@ -119,37 +132,20 @@ namespace LichLord
 
             if (input.Fire)
             {
-                Debug.Log("Fire Pressed");
-
                 //Debug.Log($"[ActionManager] Executing action: {selectedAction.ActionName} (Index: {SelectedActionIndex})");
 
                 _activeManeuverTick = Runner.Tick;
                 _activeManeuverIndex = _selectedIndex;
                 _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Duration);
 
-                cooldownTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Cooldown);
-                _maneuverCooldownTimers.Set(_selectedIndex, cooldownTimer);
-
                 activeManeuver = GetActiveManeuver();
                 activeManeuver.StartExecute(_pc, Runner);
-            }
-
-            if (cooldownTimer.ExpiredOrNotRunning(Runner))
-            {
-                _pc.Movement.SetCastSpeedMultiplier(1f);
-            }
-            else
-            {
-                _pc.Movement.SetCastSpeedMultiplier(_availableManeuvers[_selectedIndex].MovementSpeedMultiplier);
             }
         }
 
         private ManeuverDefinition GetActiveManeuver()
         {
             if(_activeManeuverIndex < 0)
-                return null;
-
-            if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
                 return null;
 
             return _availableManeuvers[_activeManeuverIndex];
@@ -166,17 +162,17 @@ namespace LichLord
         public void OnRender()
         {
             float deltaTime = Time.deltaTime;
+
+            UpdateMoveSpeed(deltaTime);
             UpdateWeaponModel();
             UpdateAnimation(deltaTime);
         }
 
-
         private void UpdateAnimation(float deltaTime)
         {
-
             if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
             {
-                _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend + (deltaTime * 4f));
+                _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend + (deltaTime * 8f));
             }
             else
             {
@@ -184,7 +180,22 @@ namespace LichLord
             }
 
             _pc.Animator.SetFloat(_animIDUpperBodyBlend, _upperBodyBlend);
+        }
 
+        private void UpdateMoveSpeed(float deltaTime)
+        {
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+
+            if (activeManeuver != null)
+            {
+                _moveSpeedMultiplier = Mathf.Lerp(_moveSpeedMultiplier, activeManeuver.MovementSpeedMultiplier, deltaTime * 4f);
+            }
+            else
+            {
+                _moveSpeedMultiplier = Mathf.Lerp(_moveSpeedMultiplier, 1, deltaTime * 4f);
+            }
+
+            _pc.Movement.SetManeuverSpeedMultiplier(_moveSpeedMultiplier);
         }
 
         public void UpdateWeaponModel()
@@ -261,18 +272,45 @@ namespace LichLord
             }
         }
 
+        public void SetUpperBodyTriggerNumber(sbyte newTriggerNumber)
+        {
+            _activeUpperBodyTriggerNumber = newTriggerNumber;
+        }
+
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        public void RPC_NotifyActionExecution(ushort maneuverDefinitionID)
+        public void RPC_NotifyStartExecute(ushort maneuverDefinitionID)
         {
             ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(maneuverDefinitionID);
-
-            _pc.Animator.SetInteger(_animIDTriggerNumber, maneuver.AnimationTriggerNumber);
 
             if (!maneuver.Fullbody)
             {
                 _pc.Animator.SetFloat(_animIDUpperBodyBlend, 0.01f);
+                _activeUpperBodyTriggerNumber = (sbyte)maneuver.UpperbodyTriggerNumber;
+                _pc.Animator.SetInteger(_animIDUpperBodyTriggerNumber, _activeUpperBodyTriggerNumber);
                 _pc.Animator.SetTrigger(_animIDUpperBodyTrigger);
             }
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        public void RPC_NotifyEndExecute(ushort maneuverDefinitionID)
+        {
+            ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(maneuverDefinitionID);
+
+            if (!maneuver.Fullbody)
+            {
+                _pc.Animator.SetFloat(_animIDUpperBodyBlend, 0.00f);
+                _activeUpperBodyTriggerNumber = 0;
+                _pc.Animator.SetInteger(_animIDUpperBodyTriggerNumber, _activeUpperBodyTriggerNumber);
+                _pc.Animator.SetTrigger(_animIDUpperBodyTrigger);
+            }
+
+            if (_maneuverCooldownTimers.TryGet(_activeManeuverIndex, out TickTimer cooldownTimer))
+            {
+                cooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
+                _maneuverCooldownTimers.Set(_selectedIndex, cooldownTimer);
+            }
+            
+            _activeManeuverIndex = -1;
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
