@@ -19,12 +19,15 @@ namespace LichLord.Projectiles
         public Vector3 Position { get; set; }
         public Quaternion Rotation { get; set; }
         public Vector3 Velocity { get; set; }
+        public Vector3 TargetPosition { get; set; }
 
         public int ImpactTick { get; set; }
 
         protected List<IHitTarget> AffectedActors = new List<IHitTarget>();
 
-        FProjectileCollisionEvent _collisionEvent = new FProjectileCollisionEvent();
+        private FProjectileCollisionEvent _collisionEvent = new FProjectileCollisionEvent();
+        public FProjectilePayload Payload = new FProjectilePayload();
+        public FProjectilePayload Payload_SpawnedProjectile = new FProjectilePayload();
 
         public void UpdateAffectedActors(ref FProjectileData data, List<FPhysicsHitData> hitDatas, int tick)
         {

@@ -1,9 +1,7 @@
 ﻿
 namespace LichLord.Projectiles
 {
-    using Codice.CM.Client.Gui;
     using UnityEngine;
-
     
     public static class ProjectileImpactUtility
     {
@@ -32,7 +30,7 @@ namespace LichLord.Projectiles
             IHitTarget hitActor = collisionEvent.hitTarget;
             //FDamageData damageData = DamageUtility.GetDamageToActor(ref damagePotential, hitActor);
             FDamageData damageData = new FDamageData();
-            damageData.damageValue = 35;
+            damageData.damageValue = projectile.Payload.damagePotential.DamageValue;
 
             FHitUtilityData hit = new FHitUtilityData
             {

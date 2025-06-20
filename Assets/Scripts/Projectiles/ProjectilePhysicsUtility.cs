@@ -19,7 +19,6 @@
             Quaternion oldRotation,
             Quaternion newRotation)
         {
-
             float simTimeSinceFired = simulationTime - (data.FireTick * projectile.Runner.DeltaTime);
 
             if (IsCollidingActive(projectile.Definition, simTimeSinceFired))
@@ -34,7 +33,6 @@
                         oldRotation, newRotation);
                 }
             }
-
         }
 
         private static void PerformCollisionChecks(Projectile projectile,
@@ -89,15 +87,15 @@
             Quaternion rotation,
             ref List<FPhysicsHitData> hitDatas,
             ref FPhysicsHitData impactHit)
-                {
-                    ProjectileDefinition definition = projectile.Definition;
+        {
+            ProjectileDefinition definition = projectile.Definition;
 
-                    FQueryShape _currentQueryShape = new FQueryShape();
+            FQueryShape _currentQueryShape = new FQueryShape();
 
-                    _currentQueryShape.position = position;
-                    _currentQueryShape.rotation = rotation;
-                    _currentQueryShape.shapeType = definition.Shape;
-                    _currentQueryShape.shapeExtents = definition.Extents * GetScaleAtTime(definition, simTimeSinceFired);
+            _currentQueryShape.position = position;
+            _currentQueryShape.rotation = rotation;
+            _currentQueryShape.shapeType = definition.Shape;
+            _currentQueryShape.shapeExtents = definition.Extents * GetScaleAtTime(definition, simTimeSinceFired);
 
             GetValidHits(projectile, ref data, ref _currentQueryShape, ref hitDatas, ref impactHit);
         }
@@ -109,11 +107,17 @@
             ref FPhysicsHitData impactHit)
         {
 
-            List<FOverlapHit> hitResults;
-            if(projectile.Position != queryShape.position) 
-                hitResults = GetCastHits(projectile, ref queryShape);
-            else
-                hitResults = GetOverlapHits(projectile, ref queryShape);
+            List<FOverlapHit> hitResults = new List<FOverlapHit>();
+
+            switch (projectile.Definition.PhysicsSweep)
+            { 
+                case EPhysicsSweep.Overlap:
+                    hitResults = GetOverlapHits(projectile, ref queryShape);
+                    break;
+                case EPhysicsSweep.Cast:
+                    hitResults = GetCastHits(projectile, ref queryShape);
+                    break;
+            }
 
             LayerMask impactLayer = projectile.Definition.ImpactCollisionLayer;
             LayerMask overlapLayer = projectile.Definition.OverlapCollisionLayer;
@@ -185,18 +189,20 @@
         public static List<FOverlapHit> GetOverlapHits(Projectile projectile, ref FQueryShape queryShape)
         {
             ProjectileDefinition definition = projectile.Definition;
-            Vector3 position = queryShape.position; // Changed to Vector3 for 3D
+            Vector3 position = queryShape.position;
             Quaternion rotation = queryShape.rotation;
 
             List<FOverlapHit> hitResults = new List<FOverlapHit>();
+            
+            float maxDistance = Vector3.Distance(position, projectile.TargetPosition);
 
             switch (queryShape.shapeType)
             {
                 case EShapeType.Raycast:
                     RaycastHit[] rayHits = Physics.RaycastAll(
                         position,
-                        rotation * Vector3.forward, // Changed to Vector3.forward for 3D
-                        queryShape.shapeExtents.x,
+                        rotation * Vector3.forward,
+                        Mathf.Min(queryShape.shapeExtents.x, maxDistance),
                         definition.OverlapCollisionLayer);
 
                     foreach (var hit in rayHits)
@@ -212,9 +218,35 @@
                     }
                     break;
 
-                case EShapeType.Sphere:
+                case EShapeType.Capsule:
                     // Use NonAlloc to avoid allocations; assume reasonable max hits
-                    Collider[] collidersHit = new Collider[definition.CollisionCheckNumber]; // Adjust size as needed
+                    RaycastHit[] capsuleHits = Physics.SphereCastAll(
+                        position,
+                        queryShape.shapeExtents.x,
+                        rotation * Vector3.forward,
+                        Mathf.Min(queryShape.shapeExtents.y, maxDistance),
+                        definition.OverlapCollisionLayer);
+
+                    foreach (var hit in capsuleHits)
+                    {
+                        hitResults.Add(new FOverlapHit
+                        {
+                            GameObject = hit.collider.gameObject,
+                            Collider = hit.collider,
+                            HitPoint = hit.point,
+                            Normal = hit.normal,
+                            Distance = hit.distance
+                        });
+                    }
+                    break;
+                case EShapeType.Sphere:
+                    // Cone angle half in degrees
+                    float coneAngleDegreesHalf = queryShape.shapeExtents.y;
+                    float coneAngleCos = Mathf.Cos(coneAngleDegreesHalf * Mathf.Deg2Rad);
+                    Vector3 coneForward = rotation * Vector3.forward;
+
+                    // Use NonAlloc to avoid allocations; assume reasonable max hits
+                    Collider[] collidersHit = new Collider[definition.CollisionCheckNumber];
                     int hitCount = Physics.OverlapSphereNonAlloc(
                         position,
                         queryShape.shapeExtents.x,
@@ -227,6 +259,8 @@
                         Vector3 hitPoint;
                         Vector3 normal;
                         float distance;
+
+                        Debug.Log("Collider Hit " + hit.gameObject);
 
                         // Check if collider supports ClosestPoint
                         bool supportsClosestPoint = hit is BoxCollider || hit is SphereCollider || hit is CapsuleCollider ||
@@ -249,9 +283,37 @@
                             }
                         }
 
-                        // Calculate normal and distance
-                        normal = (hitPoint - position).normalized;
-                        distance = Vector3.Distance(position, hitPoint);
+                        // Calculate vector from position to hit point
+                        Vector3 toHit = hitPoint - position;
+                        distance = toHit.magnitude;
+
+                        // Handle zero-distance case
+                        Vector3 toHitNormalized;
+                        if (distance < Mathf.Epsilon)
+                        {
+                            // Fallback for zero-distance hits
+                            toHitNormalized = coneForward; // Assume hit is along cone axis
+                            distance = 0.0001f; // Small non-zero distance to avoid issues
+                            normal = coneForward; // Use cone forward as normal
+                        }
+                        else
+                        {
+                            // Normalize the vector for angle check
+                            toHitNormalized = toHit / distance;
+                            normal = toHitNormalized;
+                        }
+
+                        // Apply cone check if cone angle is valid
+                        if (queryShape.shapeExtents.y > 0)
+                        {
+                            // Check if hit is within the cone
+                            float cosAngle = Vector3.Dot(coneForward, toHitNormalized);
+                            if (cosAngle < coneAngleCos)
+                                continue; // Hit is outside the cone
+                        }
+
+                        // Calculate normal
+                        normal = toHitNormalized;
 
                         hitResults.Add(new FOverlapHit
                         {

@@ -16,7 +16,7 @@ namespace LichLord.Projectiles
             int tick)
         {
             Vector2 lastPosition = projectile.Position;
-            projectile.Position = toData.Position;
+            projectile.Position = toData.Position.Position;
             projectile.Velocity = Vector2.zero;
             projectile.Rotation = GetRotation(projectile.Definition, projectile.Position, projectile.Position, projectile.Velocity);
         }
@@ -25,15 +25,15 @@ namespace LichLord.Projectiles
         {
             float simTimeSinceFired = simulationTime - (data.FireTick * projectile.Runner.DeltaTime);
 
-            Vector3 newPosition = data.Position;
+            Vector3 newPosition = data.Position.Position;
 
             Vector3 newVelocity = Vector3.zero;
 
             Quaternion oldRotation = projectile.Rotation;
             Quaternion newRotation = GetRotation(
                 projectile.Definition,
-                data.TargetPosition,
-                data.Position,
+                data.TargetPosition.Position,
+                data.Position.Position,
                 projectile.Velocity);
 
             ProjectilePhysicsUtility.CheckAndHandleCollision(projectile,

@@ -106,6 +106,11 @@ namespace LichLord
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
             FProjectilePayload payload = new FProjectilePayload();
             FProjectilePayload payload_spawnedProjectile = new FProjectilePayload();
+            payload.damagePotential.DamageValue = projectileData.Damage.DamageValue;
+            payload.damagePotential.DamageType = projectileData.Damage.DamageType;
+
+            payload_spawnedProjectile.damagePotential.DamageValue = projectileData.Damage.DamageValue;
+            payload_spawnedProjectile.damagePotential.DamageType = projectileData.Damage.DamageType;
 
             ProjectileManager.CreateProjectileFireEvent(
                 ref fireEvent,

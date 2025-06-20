@@ -68,16 +68,16 @@ namespace LichLord.Projectiles
         public bool AffectsEachCast => _affectsEachCast;
 
         [SerializeField]
+        protected EPhysicsSweep _physicsSweep;
+        public EPhysicsSweep PhysicsSweep => _physicsSweep;
+
+        [SerializeField]
         protected Vector2 _collisionCheckTrim; // the time after spawn where it wont check. Second value is from the lifetime end.
         public Vector2 CollisionCheckTrim => _collisionCheckTrim;
 
         [SerializeField]
         protected int _collisionCheckRate; // ticks it will check at
         public int CollisionCheckRate => _collisionCheckRate;
-
-        [SerializeField]
-        protected int _collisionSweepsPerTick = 1; // how many sweeps a projectile makes per tick, cast from last position to new
-        public int CollisionSweepsPerTick => _collisionSweepsPerTick;
 
         [SerializeField]
         protected int _collisionCheckNumber = 4; // the amount of colliders this can affect each collision check
@@ -106,16 +106,19 @@ namespace LichLord.Projectiles
         //public ImpactDefinition ImpactDefinition => _impactDefinition;
 
         [SerializeField]
-        protected float _height; // Offset the height from its actual location off the ground
-        public float Height => _height;
-
-        [SerializeField]
         protected bool _impactSticksToHitActor; // Offset the height from its actual location off the ground
         public bool ImpactSticksToHitActor => _impactSticksToHitActor;
 
         [SerializeField]// if this range is exceeded. do something
         protected bool _homesAtApex;
         public bool HomesAtApex => _homesAtApex;
+    }
+
+    public enum EPhysicsSweep
+    { 
+        None,
+        Overlap,
+        Cast,
     }
 }
 

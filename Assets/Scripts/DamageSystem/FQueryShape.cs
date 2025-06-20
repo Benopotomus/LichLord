@@ -16,6 +16,7 @@ namespace LichLord
         None,
         Sphere,
         Raycast,
+        Capsule,
     }
 
     public struct QueryTransform

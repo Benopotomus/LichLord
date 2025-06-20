@@ -21,18 +21,18 @@ MonoBehaviour:
   ActionEffect: {fileID: 0}
   Fullbody: 0
   UpperbodyTriggerNumber: 1
-  UpperbodyTriggerDuration: 4
+  UpperbodyTriggerDuration: 0
   AnimationSpeed: 1
   MovementSpeedMultiplier: 0.65
   _timedProjectiles: []
   _cycleProjectiles:
   - SpawnTick: 5
-    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
+    Definition: {fileID: 11400000, guid: 8937ddf06cce60644ab8b9e5d080bbd2, type: 2}
     SpawnsOnAnimationNotify: 0
-    Muzzle: 2
+    Muzzle: 3
     Damage:
-      DamageValue: 0
-      DamageType: 0
+      DamageValue: 10
+      DamageType: 5
       StaggerRating: 0
       KnockbackStrength: 0
       ArmorPenetration: 0

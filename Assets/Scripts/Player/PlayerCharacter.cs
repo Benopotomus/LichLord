@@ -4,7 +4,6 @@ using UnityEngine.Rendering;
 using Starter.Shooter;
 using Starter;
 using LichLord.Projectiles;
-using SoulGames.EasyGridBuilderPro;
 using LichLord.NonPlayerCharacters;
 using LichLord.World;
 using LichLord.Props;
@@ -52,9 +51,6 @@ namespace LichLord
         // Cached list of PropRuntimeState for current and neighboring chunks
         private List<PropRuntimeState> _cachedPropStates = new List<PropRuntimeState>();
         public IReadOnlyList<PropRuntimeState> CachedPropStates => _cachedPropStates.AsReadOnly();
-
-        [SerializeField]
-        private BuildableGridObjectTypeSO item;
 
         public static bool TryGetLocalPlayer(NetworkRunner runner, out PlayerCharacter playerCreature)
         {

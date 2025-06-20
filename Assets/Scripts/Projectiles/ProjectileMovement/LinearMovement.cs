@@ -28,7 +28,7 @@ namespace LichLord.Projectiles
 
             projectile.Position = lerpPosition;
             projectile.Velocity = projectile.Position - lastPosition;
-            projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition, toData.Position, projectile.Velocity);
+            projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition.Position, toData.Position.Position, projectile.Velocity);
         }
 
         private Vector3 GetLinearMovePosition(ProjectileDefinition definition, 
@@ -37,10 +37,10 @@ namespace LichLord.Projectiles
         {
             
             if (timeSinceFired <= 0f)
-                return toData.Position;
+                return toData.Position.Position;
 
-            Vector3 velocity = Vector3CompressedExtensions.SubtractAndNormalize(toData.TargetPosition, toData.Position) * definition.Speed;
-            return toData.Position + (velocity * timeSinceFired);
+            Vector3 velocity = Vector3CompressedExtensions.SubtractAndNormalize(toData.TargetPosition.Position, toData.Position.Position) * definition.Speed;
+            return toData.Position.Position + (velocity * timeSinceFired);
         }
 
         public override Vector3 GetInitialVelocity(ProjectileDefinition definition, 
@@ -73,8 +73,8 @@ namespace LichLord.Projectiles
             Quaternion oldRotation = projectile.Rotation;
             Quaternion newRotation = GetRotation(
                 projectile.Definition,
-                data.TargetPosition,
-                data.Position,
+                data.TargetPosition.Position,
+                data.Position.Position,
                 projectile.Velocity);
 
 

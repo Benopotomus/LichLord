@@ -13,12 +13,6 @@ namespace LichLord.Projectiles
     {
         public bool IsFinished { get; private set; }
 
-        public Vector2 SpawnPosition { get; private set; }
-        public Vector2 TargetPosition { get; private set; }
-
-        public INetActor EncircleAttachedActor { get; set; }
-        public Vector2 EncircleDirection { get; set; }
-
         // Visuals
         private AssetBundleLoader PrefabLoader;
         public DWDObjectPoolObject VisualsPrefab { get; private set; }
@@ -37,10 +31,11 @@ namespace LichLord.Projectiles
             InterpolationTime = 0f;
 
             IsFinished = false;
+            Instigator = data.InstigatorID.GetHitInstigator(Runner);
             Definition = Global.Tables.ProjectileTable.TryGetDefinition(data.DefinitionID);
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;
-            
+
             if (Definition != null)
             {
                 Definition.ProjectileMovement.ActivateRender(this, ref data);
@@ -52,11 +47,10 @@ namespace LichLord.Projectiles
 
         public void DeactivateRenderProjectile()
         {
+            Instigator = null;
             Definition = null;
             Timestamp = 0f;
             FireTick = 0;
-            SpawnPosition = Vector3.zero;
-            TargetPosition = Vector3.zero;
             Rotation = Quaternion.identity;
 
             ClearVisuals();

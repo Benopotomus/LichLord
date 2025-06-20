@@ -11,9 +11,9 @@ namespace LichLord.Projectiles
         public virtual void ActivateRender(RenderProjectile projectile, 
             ref FProjectileData data)
         {
-            projectile.Position = data.Position;
-            projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition, data.Position);
-            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition, data.Position, projectile.Velocity);
+            projectile.Position = data.Position.Position;
+            projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition.Position, data.Position.Position);
+            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity);
         }
 
         public virtual void OnRender(RenderProjectile projectile,
@@ -31,13 +31,16 @@ namespace LichLord.Projectiles
             ref FProjectileData fromData, 
             float alpha)
         {
-            return toData.Position;
+            return toData.Position.Position;
         }
 
         // FIXED UPDATE
         public virtual void ActivateFixedUpdate(FixedUpdateProjectile projectile, 
             ref FProjectileData data)
-        { 
+        {
+            projectile.Position = data.Position.Position;
+            projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition.Position, data.Position.Position);
+            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity);
         }
 
         public virtual void OnFixedUpdate(FixedUpdateProjectile projectile, 
@@ -56,7 +59,7 @@ namespace LichLord.Projectiles
             float currentTick,
             float deltaTime)
         {
-            return toData.Position;
+            return toData.Position.Position;
         }
 
         public virtual Vector3 GetInitialVelocity(ProjectileDefinition definition,
@@ -83,7 +86,7 @@ namespace LichLord.Projectiles
                     if (direction.sqrMagnitude < 0.0001f)
                         return Quaternion.identity;
 
-                    return Quaternion.LookRotation(velocity.normalized);
+                    return Quaternion.LookRotation(direction);
 
                 default:
                     return Quaternion.identity;

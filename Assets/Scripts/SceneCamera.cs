@@ -61,7 +61,6 @@ namespace LichLord
         public void SetCameraView(bool firstPerson)
         {
             isFirstPerson = firstPerson;
-            _minRaycastDistance = isFirstPerson ? 0f : 5f;
 
             if (firstPersonCam != null && thirdPersonCam != null)
             {
@@ -102,9 +101,11 @@ namespace LichLord
                 _cachedRaycastHit.position = Vector3.zero;
             }
 
+            float minDistance = isFirstPerson ? 0 : _minRaycastDistance;
+
             Transform cameraTransform = mainCamera.transform;
             // Calculate ray from camera center
-            Vector3 rayOrigin = cameraTransform.position + (cameraTransform.forward * _minRaycastDistance);
+            Vector3 rayOrigin = cameraTransform.position + (cameraTransform.forward * minDistance);
             Vector3 rayDirection = cameraTransform.forward;
 
             // Perform raycast with all hits

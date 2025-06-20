@@ -111,6 +111,9 @@ namespace LichLord.World
             //Get the local player's chunk and do a refresh if its closer
             if (PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter character))
             {
+                if (character.CurrentChunk == null)
+                    return;
+
                 FChunkPosition currentChunkId = character.CurrentChunk.ChunkID;
                 FChunkPosition loadedChunkId = chunkToLoad.ChunkID;
 

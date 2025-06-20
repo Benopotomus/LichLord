@@ -84,11 +84,16 @@ namespace LichLord
             if (activeManeuver == null)
                 return;
 
-
-            if (activeManeuver.InputType == EInputType.Held &&
-                input.FireHeld)
-            { 
-                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+            if (activeManeuver.InputType == EInputType.Held)
+            {
+                if (input.FireHeld)
+                {
+                    _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                }
+                else
+                {
+                    _activeUpperBodyTriggerNumber = 0;
+                }
             }
 
             if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))

@@ -273,8 +273,8 @@ namespace LichLord.Projectiles
             data.IsFinished = false;
             data.DefinitionID = (ushort)definition.TableID;
             data.FireTick = fireEvent.fireTick;
-            data.Position = fireEvent.spawnPosition;
-            data.TargetPosition = fireEvent.targetPosition;
+            data.Position.CopyPosition(fireEvent.spawnPosition);
+            data.TargetPosition.CopyPosition(fireEvent.targetPosition);
 
             ProjectileMovement projectileMovement = definition.ProjectileMovement;
 
@@ -314,9 +314,39 @@ namespace LichLord.Projectiles
                 {
                     case EShapeType.Sphere:
                         Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x * scale);
+                        Gizmos.DrawRay(Vector3.zero, Vector3.forward * 10);
+                        break;
+                    case EShapeType.Capsule:
+                        // Calculate the direction and distance to the target
+                        Vector3 directionToTarget = (projectile.TargetPosition - projectile.Position).normalized;
+                        float distanceToTarget = Vector3.Distance(projectile.Position, projectile.TargetPosition);
+
+                        // Clamp the distance to Extents.y
+                        float clampedDistance = Mathf.Min(distanceToTarget, projectile.Definition.Extents.y);
+
+                        // Compute the position of the second sphee, limited to Extents.y
+                        Vector3 secondSpherePosition = projectile.Position + directionToTarget * clampedDistance;
+
+                        // Calculate rotation for the capsule based on the direction
+                        Quaternion capsuleRotation = directionToTarget.sqrMagnitude > 0.0001f
+                            ? Quaternion.LookRotation(directionToTarget)
+                            : Quaternion.identity;
+
+                        // Set the matrix to the projectile's position with the capsule's rotation
+                        Gizmos.matrix = Matrix4x4.TRS(projectile.Position, capsuleRotation, Vector3.one);
+
+                        // Draw the first sphere at the projectile's position (local zero)
+                        Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x * scale);
+
+                        // Temporarily reset the matrix to draw the second sphere in world space
+                        Gizmos.matrix = Matrix4x4.identity;
+                        Gizmos.DrawWireSphere(secondSpherePosition, projectile.Definition.Extents.x * scale);
+
+                        // Optional: Draw a line to visualize the capsule's orientation
+                        Gizmos.DrawLine(projectile.Position, secondSpherePosition);
                         break;
                     case EShapeType.Raycast:
-                        Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x);
+                        Gizmos.DrawRay(Vector3.zero, Vector3.forward * projectile.Definition.Extents.x);
                         break;
                 }
 

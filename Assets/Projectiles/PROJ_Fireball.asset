@@ -32,9 +32,9 @@ MonoBehaviour:
   _extents: {x: 0.05, y: 0, z: 0}
   _onlyAffectsOnce: 0
   _affectsEachCast: 0
+  _physicsSweep: 2
   _collisionCheckTrim: {x: 0, y: 0}
   _collisionCheckRate: 0
-  _collisionSweepsPerTick: 5
   _collisionCheckNumber: 4
   _onlyAffectImpactTarget: 0
   _lineOfSightLayer:
@@ -44,6 +44,5 @@ MonoBehaviour:
   _visualsPrefab:
     _name: PROJ_VIS_Fireball
     _bundle: proj_vis_fireball
-  _height: 0
   _impactSticksToHitActor: 0
   _homesAtApex: 0

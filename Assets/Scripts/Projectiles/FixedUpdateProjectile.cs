@@ -7,16 +7,11 @@ namespace LichLord.Projectiles
 
     public class FixedUpdateProjectile : Projectile
     {
-        
         public int Index { get; set; }
         public PlayerRef StateAuthority { get; set; }
 
-        public FProjectilePayload Payload = new FProjectilePayload();
-        public FProjectilePayload Payload_SpawnedProjectile = new FProjectilePayload();
-
         public float Lifetime { get; set; }
         public bool IsDataSet { get; set;}
-
 
         // FIXED UPDATE
 
@@ -28,20 +23,28 @@ namespace LichLord.Projectiles
             Payload.Copy(ref payload);
             Payload_SpawnedProjectile.Copy(ref payload_spawnedProjectile);
             AffectedActors.Clear();
+            
+            if (Definition != null)
+            {
+                Definition.ProjectileMovement.ActivateFixedUpdate(this, ref data);
+            }
         }
 
         public void SetData(ref FProjectileData data)
         {
+            Instigator = data.InstigatorID.GetHitInstigator(Runner);
             Definition = Global.Tables.ProjectileTable.TryGetDefinition(data.DefinitionID);
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;
-            Instigator = data.InstigatorID.GetHitInstigator(Runner);
-            Position = data.Position;
+            Position = data.Position.Position;
+            TargetPosition = data.TargetPosition.Position;
             IsDataSet = true;
         }
 
         public void DeactivateFixedUpdate(ref FProjectileData data)
         {
+            Instigator = null;
+            Definition = null;
             data.IsFinished = true;
             data.IsHoming = false;
             data.HasImpacted = false;
@@ -58,7 +61,6 @@ namespace LichLord.Projectiles
             if (data.IsFinished)
                 return;
 
-
             if (!IsDataSet) 
                 SetData(ref data);
 
@@ -68,6 +70,7 @@ namespace LichLord.Projectiles
             if (simulationTime >= (data.FireTick * deltaTime) + Definition.Lifetime)
             {
                 OnLifetimeExpired(ref data);
+                return;
             }
 
             if (data.HasImpacted)
@@ -84,7 +87,6 @@ namespace LichLord.Projectiles
 
             projectileMovement.OnFixedUpdate(this, ref data, tick, simulationTime, deltaTime);
         }
-
 
         public void HandleActorCollision(IHitTarget collidedActor, 
             ref FProjectileData data, 
@@ -140,7 +142,7 @@ namespace LichLord.Projectiles
                     Instigator,
                     new FNetObjectID(),
                     impactHit.ProjectilePosition,
-                    impactHit.ProjectilePosition + Vector3CompressedExtensions.SubtractAndNormalize(data.TargetPosition, data.Position), 
+                    impactHit.ProjectilePosition + Vector3CompressedExtensions.SubtractAndNormalize(data.TargetPosition.Position, data.Position.Position), 
                     OwningPool.Runner.Tick,
                     ref Payload_SpawnedProjectile,
                     ref Payload_SpawnedProjectile);

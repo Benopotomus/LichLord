@@ -20,15 +20,15 @@ namespace LichLord.Projectiles
         [FieldOffset(1)]
         public FNetObjectID InstigatorID;
 
-        [FieldOffset(6)]
+        [FieldOffset(7)]
         public ushort DefinitionID;
-        [FieldOffset(8)]
+        [FieldOffset(9)]
         public int FireTick;
-        [FieldOffset(12)]
-        public Vector3Compressed Position;
-        [FieldOffset(24)]
-        public Vector3Compressed TargetPosition;
-        [FieldOffset(36)]
+        [FieldOffset(13)]
+        public FWorldPosition Position;
+        [FieldOffset(19)]
+        public FWorldPosition TargetPosition;
+        [FieldOffset(25)]
 
         // Custom Data
         public FBounceData BounceData;
