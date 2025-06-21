@@ -31,6 +31,12 @@ namespace LichLord
         protected BundleObject _muzzleEffectPrefab;
         public BundleObject MuzzleEffectPrefab => _muzzleEffectPrefab;
 
+        //UI
+        [BundleObject(typeof(Sprite))]
+        [SerializeField]
+        protected BundleObject _icon;
+        public BundleObject Icon => _icon;
+
         [Header ("Animation")]
         public bool Fullbody; // Animator trigger (e.g., "Shoot" for gun)
         public int UpperbodyTriggerNumber;
