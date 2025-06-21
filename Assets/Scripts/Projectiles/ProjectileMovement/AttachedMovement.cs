@@ -19,7 +19,6 @@ namespace LichLord.Projectiles
         {
 
             projectile.Position = MuzzleUtility.GetMuzzlePosition(projectile.Instigator.NetActor, _attachment);
-            Debug.Log(projectile.Position);
             projectile.Velocity = Vector2.zero;
             projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition.Position, toData.Position.Position, projectile.Velocity);
         }
@@ -39,6 +38,8 @@ namespace LichLord.Projectiles
                 newPosition,
                 projectile.Velocity);
 
+             GetInstigatorTargetPosition(projectile, ref data);
+
             ProjectilePhysicsUtility.CheckAndHandleCollision(projectile,
                 ref data,
                 tick,
@@ -55,6 +56,19 @@ namespace LichLord.Projectiles
             projectile.Position = newPosition;
             projectile.Velocity = newVelocity;
             projectile.Rotation = newRotation;
-        }      
+        }
+
+        public void GetInstigatorTargetPosition(Projectile projectile, ref FProjectileData data)
+        {
+            INetActor actor = projectile.Instigator.NetActor;
+
+            if (actor == null)
+                return;
+
+            if (actor is PlayerCharacter pc)
+            {
+                data.TargetPosition.CopyPosition(pc.Context.Camera.CachedRaycastHit.position);
+            }
+        }
     }
 }

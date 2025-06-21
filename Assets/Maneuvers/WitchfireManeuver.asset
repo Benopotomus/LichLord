@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
-  m_Name: HarvestManeuver
+  m_Name: WitchfireManeuver
   m_EditorClassIdentifier: 
   _tableID: 4
   ManeuverName: Harvest
@@ -18,7 +18,10 @@ MonoBehaviour:
   Cooldown: 0
   ActionSound: {fileID: 0}
   _inputType: 1
-  ActionEffect: {fileID: 0}
+  _muzzle: 0
+  _muzzleEffectPrefab:
+    _name: 
+    _bundle: 
   Fullbody: 0
   UpperbodyTriggerNumber: 1
   UpperbodyTriggerDuration: 0
@@ -26,12 +29,12 @@ MonoBehaviour:
   MovementSpeedMultiplier: 0.65
   _timedProjectiles: []
   _cycleProjectiles:
-  - SpawnTick: 5
+  - SpawnTick: 0
     Definition: {fileID: 11400000, guid: 8937ddf06cce60644ab8b9e5d080bbd2, type: 2}
     SpawnsOnAnimationNotify: 0
     Muzzle: 3
     Damage:
-      DamageValue: 10
+      DamageValue: 20
       DamageType: 5
       StaggerRating: 0
       KnockbackStrength: 0

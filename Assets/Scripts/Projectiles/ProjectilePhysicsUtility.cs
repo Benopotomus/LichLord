@@ -260,8 +260,6 @@
                         Vector3 normal;
                         float distance;
 
-                        Debug.Log("Collider Hit " + hit.gameObject);
-
                         // Check if collider supports ClosestPoint
                         bool supportsClosestPoint = hit is BoxCollider || hit is SphereCollider || hit is CapsuleCollider ||
                                                    (hit is MeshCollider meshCollider && meshCollider.convex);

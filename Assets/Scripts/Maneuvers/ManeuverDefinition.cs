@@ -1,4 +1,5 @@
-﻿using Fusion;
+﻿using DWD.Utility.Loading;
+using Fusion;
 using LichLord.Projectiles;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +22,14 @@ namespace LichLord
         [SerializeField] private EInputType _inputType;
         public EInputType InputType => _inputType;
 
-        public VisualEffectBase ActionEffect; // VFX played when performing action (e.g., MuzzleParticle for gun)
+        [SerializeField] private EMuzzle _muzzle;
+        public EMuzzle Muzzle => _muzzle;
+
+        //Visuals
+        [BundleObject(typeof(GameObject))]
+        [SerializeField]
+        protected BundleObject _muzzleEffectPrefab;
+        public BundleObject MuzzleEffectPrefab => _muzzleEffectPrefab;
 
         [Header ("Animation")]
         public bool Fullbody; // Animator trigger (e.g., "Shoot" for gun)

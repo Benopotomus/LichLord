@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DWD.Pooling;
 using Pathfinding.RVO;
 using System;
+using DWD.Utility.Loading;
 
 namespace LichLord
 {
@@ -329,12 +330,14 @@ namespace LichLord
             if (maneuver.TableID != maneuverID)
                 return;
 
+            /*
             // Play muzzle effect
             if (maneuver.ActionEffect != null)
             {
                 var effectInstance = DWDObjectPool.Instance.SpawnAt(maneuver.ActionEffect, spawnPosition, rotation) as VisualEffectBase;
                 effectInstance.Initialize();
             }
+            */
 
             if (maneuver.ActionSound != null)
             {
@@ -352,5 +355,7 @@ namespace LichLord
         {
             return _availableManeuvers.Count;
         }
+
+       
     }
 }
