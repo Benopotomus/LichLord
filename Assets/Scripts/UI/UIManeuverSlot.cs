@@ -17,9 +17,21 @@ namespace LichLord.UI
         [SerializeField]
         private Image _iconImage;
 
+        [SerializeField]
+        private Image _cooldownImage;
+
+        [SerializeField]
+        private Color _unselectedColor;
+
+        [SerializeField]
+        private Color _selectedColor;
+
+        [SerializeField]
+        private Color _activeColor;
+
         private ManeuverDefinition _definition;
 
-        private AssetBundleLoader IconLoader;
+        private IconLoader _iconLoader = new IconLoader();
 
         protected override void OnTick()
         {
@@ -32,12 +44,35 @@ namespace LichLord.UI
 
             _text.text = _slot.ToString();
 
-            ManeuverDefinition definition = pc.Maneuvers.AvailableManeuvers[_slot - 1];
+            ManeuverDefinition slotDefinition = pc.Maneuvers.AvailableManeuvers[_slot - 1];
 
             // Check if the definitin has changed. Load icon if it has
-            if (_definition == null || definition.TableID != _definition.TableID)
+            if (_definition == null || slotDefinition.TableID != _definition.TableID)
             {
-                LoadDefinition(definition);
+                LoadDefinition(slotDefinition);
+            }
+
+            
+            _cooldownImage.fillAmount = pc.Maneuvers.GetCooldownPercent(_slot-1);
+
+            _iconImage.color = _unselectedColor;
+
+            if (_definition == null)
+                return;
+
+            ManeuverDefinition selectedDefinition = pc.Maneuvers.GetSelectedManeuver();
+            if (selectedDefinition.TableID == _definition.TableID)
+            {
+                _iconImage.color = _selectedColor;
+            }
+
+            ManeuverDefinition activeDefinition = pc.Maneuvers.GetActiveManeuver();
+            if (activeDefinition == null)
+                return;
+
+            if (activeDefinition.TableID == _definition.TableID)
+            {
+                _iconImage.color = _activeColor;
             }
         }
 
@@ -49,42 +84,17 @@ namespace LichLord.UI
 
         // VISUALS
 
+        // VISUALS
+
         private void LoadIcon(BundleObject prefabBundle)
         {
-            if (prefabBundle.Ready == false)
-            {
-                Debug.LogWarning("Cannot spawn Icon for " + _definition.ManeuverName + ". Bundle is not ready.");
-                return;
-            }
-
-            IconLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            if (IconLoader != null)
-            {
-                if (IconLoader.IsLoaded)
-                    SpawnLoadedIcon(IconLoader);
-                else
-                    IconLoader.OnLoadComplete += OnVisualsPrefabLoaded;
-            }
+            _iconLoader.OnLoaded += OnIconLoaded;
+            _iconLoader.LoadIcon(prefabBundle);
         }
 
-        private void OnVisualsPrefabLoaded(ILoader clipLoader)
+        private void OnIconLoaded(IconLoader iconLoader, Sprite sprite)
         {
-            if (IconLoader != null)
-                IconLoader.OnLoadComplete -= OnVisualsPrefabLoaded;
-
-            SpawnLoadedIcon(clipLoader);
-        }
-
-        private void SpawnLoadedIcon(ILoader clipLoader)
-        {
-            AssetBundleLoader loader = clipLoader as AssetBundleLoader;
-            Sprite sprite = loader.GetAssetWithin<Sprite>();
-
-            if (_definition == null)
-            {
-                return;
-            }
-
+            _iconLoader.OnLoaded -= OnIconLoaded;
             _iconImage.sprite = sprite;
         }
     }

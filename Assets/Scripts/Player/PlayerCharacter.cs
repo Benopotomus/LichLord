@@ -20,6 +20,7 @@ namespace LichLord
         public PlayerCharacterInput Input;
         public PlayerCharacterManeuvers Maneuvers;
         public PlayerProjectilePool ProjectilePool;
+        public PlayerCurrencyComponent Currency;
         public HurtboxComponent Hurtbox;
         public Animator Animator;
 

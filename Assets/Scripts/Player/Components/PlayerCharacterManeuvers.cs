@@ -149,7 +149,7 @@ namespace LichLord
             }
         }
 
-        private ManeuverDefinition GetActiveManeuver()
+        public ManeuverDefinition GetActiveManeuver()
         {
             if(_activeManeuverIndex < 0)
                 return null;
@@ -157,12 +157,35 @@ namespace LichLord
             return _availableManeuvers[_activeManeuverIndex];
         }
 
-        private ManeuverDefinition GetSelectedManeuver()
+        public ManeuverDefinition GetSelectedManeuver()
         {
             if (_selectedIndex < 0)
                 return null;
 
             return _availableManeuvers[_selectedIndex];
+        }
+
+        public float GetCooldownPercent(int slot)
+        {
+            // if the cooldown timer doesn't exist for this selected index, early out
+            if (!_maneuverCooldownTimers.TryGet((sbyte)slot, out TickTimer cooldownTimer))
+            {
+                return 0f;
+            }
+
+            ManeuverDefinition definition = _availableManeuvers[slot];
+            if (definition.Cooldown == 0)
+                return 0;
+
+            float? remainingTime = cooldownTimer.RemainingTime(Runner); // Use float? to accept nullable float
+
+            // Handle the nullable case
+            if (!remainingTime.HasValue)
+            {
+                return 0f; // Or another default value, depending on your requirements
+            }
+
+            return (remainingTime.Value / definition.Cooldown);
         }
 
         public void OnRender()

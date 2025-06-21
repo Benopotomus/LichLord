@@ -1995,6 +1995,7 @@ GameObject:
   - component: {fileID: 4804172155013043321}
   - component: {fileID: 6155389979576705781}
   - component: {fileID: 8911782388783612553}
+  - component: {fileID: 6479483160014541239}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -2046,6 +2047,7 @@ MonoBehaviour:
   Input: {fileID: 5761594593767146104}
   Maneuvers: {fileID: 576985687314793959}
   ProjectilePool: {fileID: 4081789406591363571}
+  Currency: {fileID: 6479483160014541239}
   Hurtbox: {fileID: 1365664862452816086}
   Animator: {fileID: 3816291510956059953}
   HeadRenderers: []
@@ -2054,7 +2056,6 @@ MonoBehaviour:
   _cachedTransform: {fileID: 1142867646521763857}
   _handBoneLeft: {fileID: 5362074393791706597}
   _handBoneRight: {fileID: 3423735672707374332}
-  item: {fileID: 11400000, guid: 4eba0e5163d14e34dbb7062775f3c910, type: 2}
 --- !u!114 &7362189930313428062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2195,6 +2196,7 @@ MonoBehaviour:
   - {fileID: 1776246608945052242}
   - {fileID: 4081789406591363571}
   - {fileID: 4804172155013043321}
+  - {fileID: 6479483160014541239}
   - {fileID: 5077866948997885989}
   - {fileID: 7904855827506051427}
   - {fileID: 7134053186718281712}
@@ -2265,6 +2267,18 @@ MonoBehaviour:
   wallAvoidFalloff: 1
   priority: 0.5
   debug: 0
+--- !u!114 &6479483160014541239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcf035b9fd5a53048adc242dc5c05c92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0
