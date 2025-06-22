@@ -1,9 +1,8 @@
 ﻿using Fusion;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Runtime.InteropServices;
 using System;
-using UnityEngine.Playables;
+using LichLord.Props;
 
 namespace LichLord.World
 {
@@ -11,18 +10,26 @@ namespace LichLord.World
     {
         [SerializeField]
         private WorldSettings _worldSettings;
+        public WorldSettings WorldSettings => _worldSettings;
 
         [SerializeField]
         private bool drawChunkBounds = true; // Toggle for gizmo drawing
 
         [Networked, Capacity(WorldConstants.CHUNK_COUNT_MAX)]
         public NetworkDictionary<FChunkPosition, ELoadState> _networkChunks { get; }
-        private Dictionary<FChunkPosition, Chunk> _localChunks = new Dictionary<FChunkPosition, Chunk>();
+        
+        private Dictionary<FChunkPosition, Chunk> _worldChunks = new Dictionary<FChunkPosition, Chunk>();
+        public Dictionary<FChunkPosition, Chunk> WorldChunks => _worldChunks;
 
         public override void Spawned()
         {
             base.Spawned();
             InitializeWorldChunks();
+
+            if (HasStateAuthority)
+            {
+                Context.WorldSaveLoadManager.LoadChunks();
+            }
         }
 
         private void InitializeWorldChunks()
@@ -42,7 +49,7 @@ namespace LichLord.World
                         Y = (sbyte)y
                     };
 
-                    _localChunks[chunkID] = new Chunk(chunkID, _worldSettings.WorldOrigin);
+                    _worldChunks[chunkID] = new Chunk(chunkID, _worldSettings.WorldOrigin);
 
                     if (!_networkChunks.ContainsKey(chunkID))
                     {
@@ -71,13 +78,43 @@ namespace LichLord.World
 
                 for (int j = 0; j < nearby.Count; j++)
                 {
-                    chunksToMark.Add(nearby[j].ChunkID);
+                    FChunkPosition chunkPosition = nearby[j].ChunkID;
+
+                    if (_networkChunks.Get(chunkPosition) == ELoadState.None)
+                    {
+                        chunksToMark.Add(chunkPosition);
+                    }
                 }
             }
 
             // Set them in the network dictionary
-            foreach (var chunkID in chunksToMark)
+            foreach (FChunkPosition chunkID in chunksToMark)
             {
+                var loadedChunks = Context.WorldSaveLoadManager.LoadedChunks;
+                if(loadedChunks.TryGetValue(chunkID, out FChunkSaveData saveData))
+                {
+                    Chunk chunk = GetChunk(chunkID);
+                    foreach (var savedProp in saveData.props)
+                    {
+                        // Copy the data
+                        FPropData savedData = new FPropData();
+                        savedData.StateData = savedProp.stateData;
+
+                        // write out the props into the chunk itself
+                        PropRuntimeState propRuntimeState = new PropRuntimeState(
+
+                            savedProp.guid,
+                            savedProp.position,
+                            savedProp.rotation,
+                            savedProp.definitionId,
+                            savedData
+                        );
+
+                        Context.PropManager.ReplicateAuthorityData(propRuntimeState);
+                    }
+                    
+                }
+
                 _networkChunks.Set(chunkID, ELoadState.Loaded);
             }
         }
@@ -89,7 +126,7 @@ namespace LichLord.World
             foreach (var networkChunk in _networkChunks)
             {
                 // Get the local chunk for that value
-                if (_localChunks.TryGetValue(networkChunk.Key, out Chunk localChunk))
+                if (_worldChunks.TryGetValue(networkChunk.Key, out Chunk localChunk))
                 {
                     if (localChunk.LoadState == ELoadState.None &&
                         networkChunk.Value == ELoadState.Loaded)
@@ -119,7 +156,7 @@ namespace LichLord.World
 
                 //Debug.Log("LoadChunk " + chunkToLoad.ChunkID);
                 chunkToLoad.LoadState = ELoadState.Loaded;
-                Context.PropManager.LoadPropsForChunk(chunkToLoad.ChunkID);
+                Context.PropManager.LoadPropsForChunk(chunkToLoad);
 
                 if (Math.Abs(currentChunkId.X - loadedChunkId.X) <= 2 &&
                     Math.Abs(currentChunkId.Y - loadedChunkId.Y) <= 2)
@@ -129,12 +166,17 @@ namespace LichLord.World
             }
         }
 
-        public Chunk GetChunkAtPosition(Vector3 position)
+        public Chunk GetChunk(FChunkPosition position)
         {
-            if (_localChunks.TryGetValue(GetChunkID(position), out Chunk chunk))
+            if (_worldChunks.TryGetValue(position, out Chunk chunk))
                 return chunk;
 
             return null;
+        }
+
+        public Chunk GetChunkAtPosition(Vector3 position)
+        {
+            return GetChunk(GetChunkID(position));
         }
 
         private FChunkPosition GetChunkID(Vector3 position)
@@ -160,7 +202,7 @@ namespace LichLord.World
                         Y = (sbyte)(centerChunkID.Y + dy)
                     };
 
-                    if (_localChunks.TryGetValue(checkID, out Chunk chunk))
+                    if (_worldChunks.TryGetValue(checkID, out Chunk chunk))
                     {
                         nearbyChunks.Add(chunk);
                     }
@@ -170,11 +212,16 @@ namespace LichLord.World
             return nearbyChunks;
         }
 
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            base.Despawned(runner, hasState);
+        }
+
         void OnDrawGizmos()
         {
             if (!drawChunkBounds) return;
 
-            foreach (var pair in _localChunks)
+            foreach (var pair in _worldChunks)
             {
                 if (pair.Value.LoadState == ELoadState.Loaded)
                     Gizmos.color = Color.green;

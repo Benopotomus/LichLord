@@ -15,7 +15,7 @@ namespace LichLord.Props
         public override void Spawned()
         {
             base.Spawned();
-            Context.PropManager.AddReplicator(this);
+            Context.PropManager.AddReplicatorCallback(this);
         }
 
         public bool TryGetPropData(int guid, out FPropData data)

@@ -1,6 +1,7 @@
 ﻿using Fusion;
 using UnityEngine;
 using System.Collections.Generic;
+using LichLord.World;
 
 namespace LichLord.Props
 {
@@ -51,9 +52,6 @@ namespace LichLord.Props
 
             usedState = authorityState;
 
-            //if (!hasAuthority)
-            //    Debug.Log("GUID: " + usedState.guid + ", Health: " + usedState.GetHealth() + ", State: " + usedState.GetState());
-
             // If we are the authority, we dont need to handle prediction
             if (hasAuthority)
                 return true;
@@ -102,14 +100,23 @@ namespace LichLord.Props
         {
             GetPropReplicationData(runtimeState, out PropReplicator replicator, out FPropData outData);
 
-            if (outData.IsValid())
-            {
-                runtimeState.guid = outData.GUID;
-                runtimeState.definitionId = outData.DefinitionID;
-                runtimeState.CopyData(ref outData);
-            }
+            if (!outData.IsValid())
+                return;
 
-            //Debug.Log("Replication Data State " + runtimeState.GetState());
+            FPropData runtimeData = runtimeState.Data;
+
+            // if the data is already equal, we don't need to update anything or save
+            if (outData.IsPropDataEqual(ref runtimeData))
+                return;
+
+            runtimeState.guid = outData.GUID;
+            runtimeState.definitionId = outData.DefinitionID;
+            runtimeState.CopyData(ref outData);
+
+            // if the replication data is valid, we need to get it into the save state
+            Chunk chunk = Context.ChunkManager.GetChunkAtPosition(runtimeState.position);
+            chunk.AddOrUpdateDeltaState(runtimeState);
+            
         }
 
         public void GetPropReplicationData(PropRuntimeState runtimeState, out PropReplicator replicator, out FPropData outData)
@@ -130,6 +137,7 @@ namespace LichLord.Props
             outData = new FPropData();
         }
 
+        // This happens on the authority only
         public void ApplyDamage(int guid, int damage)
         {
             // Find the state
@@ -138,10 +146,15 @@ namespace LichLord.Props
             // Apply the damage
             authorityState.ApplyDamage(damage);
 
+            // Because we modified it, we add it to the saves
+            Chunk chunk = Context.ChunkManager.GetChunkAtPosition(authorityState.position);
+            chunk.AddOrUpdateDeltaState(authorityState);
+
             // Replicate the data
             ReplicateAuthorityData(authorityState);
         }
 
+        // This adds to the delta states when the authority data changes
         public void ReplicateAuthorityData(PropRuntimeState authorityState)
         {
             // Update the state in a replicator
@@ -161,10 +174,13 @@ namespace LichLord.Props
             outData.Copy(authorityState);
 
             replicator.UpdatePropData(authorityState.guid, outData);
+        }
 
-            // Add to the saved states
-            _authorityRuntimePropStates[authorityState.guid] = authorityState;
-            _deltaStates[authorityState.guid] = authorityState;
+        private void SetupRuntimePropState(Chunk chunk, PropRuntimeState state)
+        {
+            _authorityRuntimePropStates[state.guid] = state;
+            _usedGuids.Add(state.guid);
+            chunk.AddObject(state); // Add to chunk's PropStates
         }
     }
 }

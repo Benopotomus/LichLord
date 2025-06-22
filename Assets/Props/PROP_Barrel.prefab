@@ -179,6 +179,7 @@ GameObject:
   - component: {fileID: 8546807908320132942}
   - component: {fileID: 6629033338036438909}
   - component: {fileID: 7120471587053415041}
+  - component: {fileID: 5192144284826553988}
   m_Layer: 0
   m_Name: PROP_Barrel
   m_TagString: Untagged
@@ -215,7 +216,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e195bcef408773640a28a2036703db9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _propStateComponent: {fileID: 7120471587053415041}
+  _stateComponent: {fileID: 7120471587053415041}
+  _healthComponent: {fileID: 5192144284826553988}
   _propRuntimeState:
     guid: 0
     definitionId: 0
@@ -267,3 +269,17 @@ MonoBehaviour:
   _currentState: 0
   _hitReactPrefab: {fileID: 3681557076833651950, guid: dfdf42c475b86fc46964c54ac300c264,
     type: 3}
+--- !u!114 &5192144284826553988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6272355397201178900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d53f7faea48ee624985e7f17ff837daf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prop: {fileID: 8546807908320132942}
+  _currentHealth: 0

@@ -136,7 +136,7 @@ namespace LichLord.Props
                     }
                     break;
                 case EPropState.Destroyed:
-
+                    /*
                     _deadTimer -= networkDeltaTime;
                     if (_deadTimer < 0f)
                     {
@@ -144,6 +144,7 @@ namespace LichLord.Props
                         dataDefinition.SetState(_currentState, ref _data);
                         return true;
                     }
+                     */
                     break;
             }
 

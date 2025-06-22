@@ -167,7 +167,7 @@ namespace LichLord
             {
                 Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
 
-                if (!Runner.IsSharedModeMasterClient)
+                if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
             }
         }

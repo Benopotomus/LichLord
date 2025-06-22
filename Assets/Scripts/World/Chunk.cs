@@ -14,6 +14,9 @@ namespace LichLord.World
         private List<PropRuntimeState> _propStatesInChunk = new List<PropRuntimeState>(); // Store prop states
         public List<PropRuntimeState> PropStates => _propStatesInChunk;
 
+        private Dictionary<int, PropRuntimeState> _deltaPropStates = new Dictionary<int, PropRuntimeState>();
+        public Dictionary<int, PropRuntimeState> DeltaPropStates => _deltaPropStates;
+
         public FChunkPosition ChunkID { get; set; }
         public Bounds Bounds { get; set; }
 
@@ -52,6 +55,11 @@ namespace LichLord.World
         public void RemoveObject(PropRuntimeState propState)
         {
             _propStatesInChunk.Remove(propState);
+        }
+
+        public void AddOrUpdateDeltaState(PropRuntimeState propState)
+        {
+            _deltaPropStates[propState.guid] = propState;
         }
     }
 }

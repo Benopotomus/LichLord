@@ -1666,7 +1666,7 @@ Transform:
   m_GameObject: {fileID: 920916316}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.2554564, y: 6.1557403, z: 10.985481}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1759,6 +1759,7 @@ MonoBehaviour:
     ProjectileManager: {fileID: 805418401}
     PropManager: {fileID: 1239710300}
     BuildableManager: {fileID: 0}
+    WorldSaveLoadManager: {fileID: 1887427404}
     NonPlayerCharacterManager: {fileID: 111939068}
     ChunkManager: {fileID: 1265232217}
     Camera: {fileID: 35686577}
@@ -1787,6 +1788,7 @@ Transform:
   - {fileID: 117824877}
   - {fileID: 111939069}
   - {fileID: 1265232218}
+  - {fileID: 1887427403}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &969338787
@@ -1813,6 +1815,7 @@ MonoBehaviour:
   - {fileID: 1239710300}
   - {fileID: 111939068}
   - {fileID: 1265232217}
+  - {fileID: 1887427404}
   ForceRemoteRenderTimeframe: 0
 --- !u!1 &1028513131
 GameObject:
@@ -2497,10 +2500,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _propSpawner: {fileID: 1239710301}
-  worldSettings: {fileID: 11400000, guid: 69caa64b7d43d3b4d99a78918b7cd20e, type: 2}
   propReplicationPrefab: {fileID: -4379536383621625491, guid: 71a3c1d4b1a5d7e468142df35f3096d7,
     type: 3}
-  saveLoadManager: {fileID: 1239710302}
   _propReplicators: []
 --- !u!114 &1239710301
 MonoBehaviour:
@@ -2527,6 +2528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveFileName: PropSaveData.json
+  saveFilePath: 
 --- !u!1 &1259447159
 GameObject:
   m_ObjectHideFlags: 3
@@ -4522,10 +4524,13 @@ MonoBehaviour:
   maxGraphicsBufferCaches: 8
   _cullingCameras:
   - {fileID: 8944336656349189699}
+  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 35.71, z: 0, w: 0}
+    - {x: -11.753857, y: 14.241339, z: -3.6419742, w: 0}
     fov:
+    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: -0.8152526
@@ -4544,20 +4549,43 @@ MonoBehaviour:
       e31: 0.41103712
       e32: -0.7626356
       e33: -14.678135
+    - e00: 0.025695147
+      e01: 0.0037006952
+      e02: -0.81995004
+      e03: -2.7369227
+      e10: 1.0840439
+      e11: 1.3502754
+      e12: 0.040065534
+      e13: -6.3421164
+      e20: 0.7793038
+      e21: -0.62629044
+      e22: 0.021594742
+      e23: 18.068817
+      e30: 0.7792959
+      e31: -0.6262841
+      e32: 0.021594524
+      e33: 18.157505
     calibration:
+    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: -0.22618018, y: 0.29437405, z: -0.92853993, w: -10.512097}
+    - {x: 0.62236345, y: -0.4813385, z: -0.61723334, w: 11.922129}
     frustumPlane1:
     - {x: 0.941545, y: 0.29437405, z: -0.16381948, w: -10.512097}
+    - {x: 0.58263206, y: -0.4870607, z: 0.6506241, w: 16.154127}
     frustumPlane2:
     - {x: 0.054698296, y: 0.9950035, z: -0.083524086, w: -35.531574}
+    - {x: 0.9316699, y: 0.36199564, z: 0.03083003, w: 5.9076943}
     frustumPlane3:
     - {x: 0.4447369, y: -0.5839663, z: -0.6791115, w: 20.853436}
+    - {x: -0.15237397, y: -0.98827976, z: -0.009235505, w: 12.249811}
     frustumPlane4:
     - {x: 0.49943516, y: 0.4110371, z: -0.7626355, w: -14.978134}
+    - {x: 0.77929586, y: -0.62628406, z: 0.021594523, w: 18.113068}
     frustumPlane5:
     - {x: -0.49945915, y: -0.41108567, z: 0.7625937, w: 4013.1685}
+    - {x: -0.77953315, y: 0.6259887, z: -0.021592183, w: 8787.087}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -4898,6 +4926,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1887427402
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1887427403}
+  - component: {fileID: 1887427404}
+  m_Layer: 0
+  m_Name: WorldSaveLoadManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1887427403
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1887427402}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 969338786}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1887427404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1887427402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16edc23d0cb6fd941a55fe7e56a37092, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveFileName: WorldSaveData.json
 --- !u!1001 &1892462725
 PrefabInstance:
   m_ObjectHideFlags: 0

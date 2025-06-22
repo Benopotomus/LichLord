@@ -75,7 +75,7 @@ namespace LichLord.Props
             }
 
             var instance = DWDObjectPool.Instance.SpawnAt(poolObject, runtimeState.position, runtimeState.rotation);
-
+            
             Prop spawnedProp = instance.GetComponent<Prop>();
 
             if (spawnedProp == null)

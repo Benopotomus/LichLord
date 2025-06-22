@@ -23,6 +23,18 @@ public class WorldSettings : ScriptableObject
     private List<ChunkPropsMarkupData> _propMarkupDatas = new List<ChunkPropsMarkupData>();
     public List<ChunkPropsMarkupData> PropMarkupDatas => _propMarkupDatas;
 
+    public ChunkPropsMarkupData GetMarkupData(FChunkPosition chunkCoord)
+    {
+        // First, check the PropMarkupDatas list
+        ChunkPropsMarkupData markupData = _propMarkupDatas.Find(data => data != null && data.ChunkCoord == chunkCoord);
+        if (markupData != null)
+        {
+            return markupData;
+        }
+
+        return null;
+    }
+
     // Get or create a LevelPropsMarkupData for a specific chunk coordinate
     public ChunkPropsMarkupData GetOrCreateMarkupData(FChunkPosition chunkCoord)
     {

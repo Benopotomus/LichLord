@@ -27,6 +27,7 @@ namespace LichLord
         public ProjectileManager ProjectileManager;
         public PropManager PropManager;
         public BuildableManager BuildableManager;
+        public WorldSaveLoadManager WorldSaveLoadManager;
         public NonPlayerCharacterManager NonPlayerCharacterManager;
         public ChunkManager ChunkManager;
         public SceneCamera Camera;

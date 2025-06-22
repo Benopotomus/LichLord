@@ -342,7 +342,7 @@ namespace LichLord
             switch (_currentMoveState)
             {
                 case EMovementState.Walking:
-                    Debug.Log("Jump Land");
+                    //Debug.Log("Jump Land");
                     PC.Animator.SetBool(_animIDMoving, true);
                     PC.Animator.SetFloat(_animIDSpeedX, 0f);
                     PC.Animator.SetFloat(_animIDSpeedZ, 0f);
@@ -351,7 +351,7 @@ namespace LichLord
                     break;
 
                 case EMovementState.Jumping:
-                    Debug.Log("Jump Hit");
+                    //Debug.Log("Jump Hit");
                     PC.Animator.SetInteger("Weapon", 0);
                     PC.Animator.SetBool(_animIDMoving, false);
                     PC.Animator.SetBool("Swimming", false);
@@ -361,7 +361,7 @@ namespace LichLord
 
                     break;
                 case EMovementState.Flying:
-                    Debug.Log("Jump Hit");
+                    //Debug.Log("Jump Hit");
                     PC.Animator.SetInteger("Weapon", 0);
                     PC.Animator.SetBool(_animIDMoving, false);
                     PC.Animator.SetBool("Swimming", false);
