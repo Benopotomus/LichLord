@@ -19,7 +19,8 @@ namespace LichLord
         public PlayerCharacter PC => _pc;
 
         [SerializeField]
-        private CharacterController CC;
+        private CharacterController _cc;
+        public CharacterController CC => _cc;
 
         [Networked]
         private EMovementState _currentMoveState { get; set; }
@@ -92,7 +93,7 @@ namespace LichLord
 
         private float _speed => _worldVelocity.Velocity.magnitude;
 
-        public override void Spawned()
+        public void OnSpawned()
         {
             base.Spawned();
 
@@ -105,6 +106,11 @@ namespace LichLord
             _jumpInputBuffered = false;
             _castSpeedMultiplier = 1f;
             _currentMoveSpeed = WalkSpeed;
+        }
+
+        public void OnDisable()
+        {
+            _lastState = EMovementState.None;
         }
 
         public void OnRender(float deltaTime)
@@ -121,17 +127,27 @@ namespace LichLord
 
         private void UpdateRemotePosition(float deltaTime)
         {
-            if (!HasStateAuthority)
-            {
-                Vector3 lastPos = CC.transform.position;
+            if (HasStateAuthority)
+                return;
 
+            Vector3 lastPos = CC.transform.position;
+
+            Vector3 newPosition = _worldTransform.Position;
+
+            if ((newPosition - lastPos).sqrMagnitude > 36f)
+            {
+                CC.transform.position = newPosition;
+            }
+            else
+            {
                 float x = Mathf.Lerp(lastPos.x, _worldTransform.PositionX, deltaTime * 5f);
                 float y = Mathf.Lerp(lastPos.y, _worldTransform.PositionY, deltaTime * 10f);
                 float z = Mathf.Lerp(lastPos.z, _worldTransform.PositionZ, deltaTime * 5f);
                 CC.transform.position = new Vector3(x, y, z);
-
-                CC.transform.rotation = Quaternion.Lerp(CC.transform.rotation, Quaternion.Euler(0f, _worldTransform.Yaw, 0f), deltaTime * 8f);
             }
+            
+            CC.transform.rotation = Quaternion.Lerp(CC.transform.rotation, Quaternion.Euler(0f, _worldTransform.Yaw, 0f), deltaTime * 8f);
+            
         }
 
         private void UpdateAnimator(float deltaTime)
@@ -168,7 +184,6 @@ namespace LichLord
         public void OnFixedUpdate(ref FGameplayInput input)
         {
             float deltaTime = Runner.DeltaTime;
-
             SetLookRotation(input);
 
             _isGrounded = CC.isGrounded;
@@ -217,7 +232,6 @@ namespace LichLord
 
             switch (_currentMoveState)
             {
-                
                  case EMovementState.Walking:
                     gravity = DownGravity;
                     _verticalInput = 0;
@@ -334,19 +348,12 @@ namespace LichLord
             _worldVelocity.Velocity = CC.velocity;
         }
 
+        // Called from spawn parameters
         public void SetMovementState(EMovementState movementState)
         {
             _currentMoveState = movementState;
         }
         
-        public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
-        { 
-            _worldTransform.Rotation = rotation;
-            _worldTransform.Position = position;
-            CC.transform.position = _worldTransform.Position;
-            PC.CachedTransform.SetPositionAndRotation(position, rotation);
-        }
-
         private void UpdateMovementState()
         {
             if (_currentMoveState == _lastState)

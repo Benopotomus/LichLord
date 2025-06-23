@@ -16,7 +16,13 @@ namespace LichLord
 
         private SpawnPoint[] _spawnPoints;
 
-        public override void Spawned()
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            // Clear reference to avoid UI access after despawn
+            LocalPlayer = null;
+        }
+
+        public void SpawnLocalPlayer(PlayerRef playerRef)
         {
             // Find spawn points
             _spawnPoints = FindObjectsOfType<SpawnPoint>();
@@ -26,29 +32,16 @@ namespace LichLord
             }
 
             // Spawn the local player
-            if (Runner.IsPlayerValid(Runner.LocalPlayer))
-            {
-                SpawnLocalPlayer(Runner.LocalPlayer);
-            }
-            else
-            {
+            if (!Runner.IsPlayerValid(Runner.LocalPlayer))
+            { 
                 Debug.LogWarning("LocalPlayer is invalid, cannot spawn player!");
+                return;
             }
-        }
 
-        public override void Despawned(NetworkRunner runner, bool hasState)
-        {
-            // Clear reference to avoid UI access after despawn
-            LocalPlayer = null;
-        }
-
-        public void SpawnLocalPlayer(PlayerRef playerRef)
-        {
             // Default spawn position and rotation
             Vector3 spawnPosition = GetSpawnPosition();
             Quaternion spawnRotation = Quaternion.identity;
             EMovementState moveState = EMovementState.Walking;
-
 
             if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
             {
@@ -73,7 +66,7 @@ namespace LichLord
                             spawnPosition = savedData.position;
                             spawnRotation = savedData.rotation;
                             moveState = savedData.moveState;
-                            Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world {worldId} with key {playerKey}.");
+                            //Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world {worldId} with key {playerKey}.");
                         }
                         else
                         {
@@ -103,8 +96,8 @@ namespace LichLord
             Runner.SetPlayerObject(playerRef, LocalPlayer.Object);
 
             // Spawn player with InputAuthority
-            LocalPlayer.Movement.SetMovementState(moveState);
-            LocalPlayer.Movement.SetPositionAndRotation(spawnPosition, spawnRotation);
+
+            LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState);
 
             // Set the unique nickname
             LocalPlayer.Nickname = nickname;
@@ -130,7 +123,7 @@ namespace LichLord
                 var randomPositionOffset = Random.insideUnitCircle * spawnPoint.Radius;
                 return spawnPoint.transform.position + new Vector3(randomPositionOffset.x, 0f, randomPositionOffset.y);
             }
-            Debug.Log("No spawn points available, using default position (0,0,0)");
+            //Debug.Log("No spawn points available, using default position (0,0,0)");
             return Vector3.zero;
         }
     }

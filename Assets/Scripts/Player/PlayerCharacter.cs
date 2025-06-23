@@ -76,19 +76,21 @@ namespace LichLord
         public override void Spawned()
         {
             base.Spawned();
-            
-            Nickname = "Steve " + GetProjectName();
-
-            if (HasStateAuthority)
-            {
-                Context.LocalPlayerCharacter = this;
-                Context.LocalPlayerRef = Object.StateAuthority;
-            }
-
-            Context.NetworkGame.OnPlayerSpawned(this);
 
             Runner.SetPlayerObject(Runner.LocalPlayer, Object);
             Runner.SetPlayerAlwaysInterested(Runner.LocalPlayer, Object, true);
+
+            if (HasStateAuthority)
+            {
+                Nickname = "Steve " + GetProjectName();
+                Context.LocalPlayerCharacter = this;
+                Context.LocalPlayerRef = Object.StateAuthority;
+                Input.OnSpawned();
+            }
+
+            Movement.OnSpawned();
+
+            Context.NetworkGame.OnPlayerSpawned(this);
 
             // In case the nickname is already changed, trigger the change manually
             OnNicknameChanged();
@@ -109,16 +111,15 @@ namespace LichLord
                 }
             }
 
-            // Ensure ActionManager is assigned
-            if (Maneuvers == null)
-            {
-                Maneuvers = GetComponent<PlayerCharacterManeuvers>();
-                if (Maneuvers == null)
-                    Debug.LogError("[PlayerCharacter] Missing ActionManager component.");
-            }
-
             // Initialize cached prop states
             UpdateChunk();
+        }
+
+        public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState)
+        {
+            Movement.CC.Move(position);
+            Movement.SetMovementState(moveState);
+            Input.SetLookRotation(rotation);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -152,6 +153,8 @@ namespace LichLord
 
         private void OnNicknameChanged()
         {
+            gameObject.name = Nickname;
+
             if (HasStateAuthority)
                 return; // Do not show nickname for local player
 

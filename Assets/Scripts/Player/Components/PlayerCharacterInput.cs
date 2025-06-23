@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace LichLord
 {
-    public class PlayerCharacterInput : MonoBehaviour
+    public class PlayerCharacterInput : ContextBehaviour
     {
         public FGameplayInput CurrentInput => _input;
         public FGameplayInput PreviousInput { get; private set; }
@@ -11,11 +11,11 @@ namespace LichLord
         private FGameplayInput _input;
         private PlayerControls _controls;
 
-        private void Awake()
+        public void OnSpawned()
         {
             _controls = new PlayerControls();
             _input = new FGameplayInput { ActionSelection = 0 }; // Default to 0 per reset requirement
-            Debug.Log($"[PlayerCharacterInput] Initialized ActionSelection={_input.ActionSelection}");
+            //Debug.Log($"[PlayerCharacterInput] Initialized ActionSelection={_input.ActionSelection}");
 
             // Bind Action1 to Action9 dynamically
             InputAction[] actions = new[]
@@ -31,13 +31,21 @@ namespace LichLord
                 actions[i].performed += _ =>
                 {
                     _input.ActionSelection = actionIndex;
-                    Debug.Log($"[PlayerCharacterInput] Action{actionIndex} performed, ActionSelection={_input.ActionSelection}");
+                    //Debug.Log($"[PlayerCharacterInput] Action{actionIndex} performed, ActionSelection={_input.ActionSelection}");
                 };
             }
+
+            _controls.Enable();
         }
 
-        private void OnEnable() => _controls.Enable();
-        private void OnDisable() => _controls.Disable();
+        //private void OnEnable() => _controls.Enable();
+        //private void OnDisable() => _controls.Disable();
+
+        // Called from the save/load
+        public void SetLookRotation(Quaternion rotation)
+        {
+            _input.LookRotation = new Vector2(0, rotation.eulerAngles.y);
+        }
 
         public void ResetInput()
         {
@@ -54,6 +62,9 @@ namespace LichLord
 
         private void Update()
         {
+            if (!HasStateAuthority)
+                return;
+
             if (Cursor.lockState != CursorLockMode.Locked)
                 return;
 
