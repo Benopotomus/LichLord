@@ -3,37 +3,33 @@ using System.IO;
 using Fusion;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
 namespace LichLord.World
 {
     public class WorldSaveLoadManager : ContextBehaviour
     {
-        [SerializeField] private string saveFileName = "WorldSaveData.json";
-        private string saveFilePath;
-
         private Dictionary<FChunkPosition, FChunkSaveData> _loadedChunks = new Dictionary<FChunkPosition, FChunkSaveData>();
         public Dictionary<FChunkPosition, FChunkSaveData> LoadedChunks => _loadedChunks;
 
-        private void Awake()
-        {
-            saveFilePath = Path.Combine(Application.persistentDataPath, saveFileName);
-        }
-
-        public void DeleteSavedChunkData()
-        {
-
-        }
-
         private void SaveChunks()
         {
+            if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
+            {
+                Debug.LogWarning("No active session; cannot save chunks.");
+                return;
+            }
+
             try
             {
+                string sessionName = Runner.SessionInfo.Name;
+                string saveFilePath = GetSaveFilePath(sessionName);
+
                 // Get all the world chunks
                 var worldChunks = Context.ChunkManager.WorldChunks;
 
-                // Hold onto a list of chunksavedatas. Add to this list for saving
+                // Hold onto a dictionary of chunk save datas
                 Dictionary<FChunkPosition, FChunkSaveData> chunkSaveDatas = new Dictionary<FChunkPosition, FChunkSaveData>();
+                int totalPropCount = 0; // Manual counter for props
 
                 foreach (var chunkPair in worldChunks)
                 {
@@ -44,7 +40,7 @@ namespace LichLord.World
                         continue;
                     }
 
-                    List <FPropSaveState> propList = new List<FPropSaveState>();
+                    List<FPropSaveState> propList = new List<FPropSaveState>();
                     foreach (var deltaState in chunk.DeltaPropStates.Values)
                     {
                         if (deltaState == null)
@@ -76,41 +72,68 @@ namespace LichLord.World
 
                         // Reassign to dictionary to persist changes
                         chunkSaveDatas[chunkCoord] = chunkSaveData;
+                        totalPropCount += propList.Count; // Increment prop counter
                     }
                 }
 
                 // Convert to WorldSaveData for serialization
                 FWorldSaveData saveData = new FWorldSaveData
                 {
-                    chunks = chunkSaveDatas.Values.ToArray()
+                    chunks = new FChunkSaveData[chunkSaveDatas.Count]
                 };
+                int index = 0;
+                foreach (var chunkData in chunkSaveDatas.Values)
+                {
+                    saveData.chunks[index] = chunkData;
+                    index++;
+                }
 
-                // Serialize to JSON
+                // Serialize to JSON and store in SaveLoadManager
                 string json = JsonUtility.ToJson(saveData, true);
+                SaveLoadManager.instance.SetWorldData(sessionName, json);
                 File.WriteAllText(saveFilePath, json);
-                Debug.Log($"Saved {chunkSaveDatas.Count} chunks with {chunkSaveDatas.Values.Sum(chunk => chunk.props?.Length ?? 0)} props to {saveFilePath}.");
+                Debug.Log($"Saved {chunkSaveDatas.Count} chunks with {totalPropCount} props for session {sessionName} to {saveFilePath}.");
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to save chunk states to {saveFilePath}: {e.Message}");
+                Debug.LogError($"Failed to save chunk states for session: {e.Message}");
             }
         }
 
         public void LoadChunks()
         {
-            if (!File.Exists(saveFilePath))
+            _loadedChunks.Clear();
+
+            if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
             {
-                Debug.Log($"No save file found at {saveFilePath}. Returning empty chunk dictionary.");
+                Debug.LogWarning("No active session; cannot load chunks.");
                 return;
             }
 
             try
             {
-                string json = File.ReadAllText(saveFilePath);
+                string sessionName = Runner.SessionInfo.Name;
+                string saveFilePath = GetSaveFilePath(sessionName);
+
+                string json;
+                // Try to get JSON from SaveLoadManager first
+                if (!SaveLoadManager.instance.TryGetWorldData(sessionName, out json))
+                {
+                    // Fallback to file system if not in SaveLoadManager
+                    if (!File.Exists(saveFilePath))
+                    {
+                        Debug.Log($"No save file found for session {sessionName} at {saveFilePath}. Clearing loaded chunks.");
+                        return;
+                    }
+
+                    json = File.ReadAllText(saveFilePath);
+                    SaveLoadManager.instance.SetWorldData(sessionName, json); // Cache in SaveLoadManager
+                }
+
                 FWorldSaveData saveData = JsonUtility.FromJson<FWorldSaveData>(json);
                 if (saveData.chunks == null || saveData.chunks.Length == 0)
                 {
-                    Debug.Log($"No chunk data found in {saveFilePath}.");
+                    Debug.Log($"No chunk data found for session {sessionName}.");
                     return;
                 }
 
@@ -118,7 +141,7 @@ namespace LichLord.World
                 foreach (var chunkData in saveData.chunks)
                 {
                     FChunkPosition chunkCoord = chunkData.chunkCoord;
-                    Debug.Log($"Loading data for Chunk {chunkCoord.X}/{chunkCoord.Y}");
+                    Debug.Log($"Loading data for Chunk {chunkCoord.X}/{chunkCoord.Y} in session {sessionName}");
 
                     if (chunkData.props != null && chunkData.props.Length > 0)
                     {
@@ -128,14 +151,17 @@ namespace LichLord.World
                     }
                 }
 
-                Debug.Log($"Loaded {_loadedChunks.Count} chunks with {totalPropCount} prop states from {saveFilePath}.");
-                return;
+                Debug.Log($"Loaded {_loadedChunks.Count} chunks with {totalPropCount} prop states for session {sessionName}.");
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to load chunk states from {saveFilePath}: {e.Message}");
-                return;
+                Debug.LogError($"Failed to load chunk states for session: {e.Message}");
             }
+        }
+
+        private string GetSaveFilePath(string sessionName)
+        {
+            return SaveLoadManager.instance.GetWorldSaveFilePath(sessionName);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)

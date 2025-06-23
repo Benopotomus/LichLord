@@ -95,11 +95,11 @@ namespace LichLord.Props
                     continue;
                 }
 
+                // if we have no loader for guid, create one
                 if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState))
                 {
-                    _propLoadStates[guid] = new PropLoadState();
-                    Debug.LogWarning($"Null or missing PropLoadState for GUID {guid} in Render.", this);
-                    continue;
+                    propLoadState = new PropLoadState();
+                    _propLoadStates[guid] = propLoadState;
                 }
 
                 // Get the chunk for this prop's position

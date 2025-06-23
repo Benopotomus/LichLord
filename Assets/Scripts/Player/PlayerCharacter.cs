@@ -122,6 +122,7 @@ namespace LichLord
         {
             base.Despawned(runner, hasState);
             Context.NetworkGame.OnPlayerDespawned(this);
+            //Context.WorldSaveLoadManager.OnPlayerDespawned(this);
 
             if(CurrentChunk != null)
                 CurrentChunk.RemoveObject(this);

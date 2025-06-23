@@ -653,6 +653,141 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
+--- !u!1 &330450291
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 330450293}
+  - component: {fileID: 330450292}
+  m_Layer: 0
+  m_Name: SaveLoadManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &330450292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330450291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0397e15d78ae58c44a28055082ac3236, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _worldSavesLoaded:
+    _serializedList:
+    - Key: LichLord
+      Value: "{\n    \"chunks\": [\n        {\n            \"chunkCoord\": {\n               
+        \"X\": 19,\n                \"Y\": 22\n            },\n            \"props\":
+        [\n                {\n                    \"guid\": 16,\n                   
+        \"position\": {\n                        \"x\": -4.21606969833374,\n                       
+        \"y\": -1.1798584965739942e-17,\n                        \"z\": 159.40829467773438\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                }\n           
+        ],\n            \"npcs\": []\n        },\n        {\n            \"chunkCoord\":
+        {\n                \"X\": 20,\n                \"Y\": 20\n            },\n           
+        \"props\": [\n                {\n                    \"guid\": 1,\n                   
+        \"position\": {\n                        \"x\": 4.428799152374268,\n                       
+        \"y\": -2.648274824273807e-19,\n                        \"z\": 3.578030824661255\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                },\n               
+        {\n                    \"guid\": 2,\n                    \"position\": {\n                       
+        \"x\": 5.463613986968994,\n                        \"y\": -9.383866707070802e-19,\n                       
+        \"z\": 12.678354263305664\n                    },\n                    \"rotation\":
+        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
+        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
+        \"definitionId\": 1,\n                    \"stateData\": 3\n               
+        },\n                {\n                    \"guid\": 3,\n                   
+        \"position\": {\n                        \"x\": 13.399998664855957,\n                       
+        \"y\": -1.6737807375518097e-18,\n                        \"z\": 22.614112854003908\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                },\n               
+        {\n                    \"guid\": 4,\n                    \"position\": {\n                       
+        \"x\": 9.082327842712403,\n                        \"y\": -2.00557942485908e-18,\n                       
+        \"z\": 27.09697914123535\n                    },\n                    \"rotation\":
+        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
+        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
+        \"definitionId\": 1,\n                    \"stateData\": 3\n               
+        },\n                {\n                    \"guid\": 5,\n                   
+        \"position\": {\n                        \"x\": 4.444918632507324,\n                       
+        \"y\": -1.958641888180371e-18,\n                        \"z\": 26.462814331054689\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                },\n               
+        {\n                    \"guid\": 6,\n                    \"position\": {\n                       
+        \"x\": 3.4516069889068605,\n                        \"y\": -2.6841557995960377e-18,\n                       
+        \"z\": 36.26509094238281\n                    },\n                    \"rotation\":
+        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
+        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
+        \"definitionId\": 1,\n                    \"stateData\": 3\n               
+        },\n                {\n                    \"guid\": 7,\n                   
+        \"position\": {\n                        \"x\": 2.7819600105285646,\n                       
+        \"y\": -4.4109488882451459e-18,\n                        \"z\": 59.59544372558594\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                },\n               
+        {\n                    \"guid\": 8,\n                    \"position\": {\n                       
+        \"x\": 3.5602476596832277,\n                        \"y\": -4.573440247775062e-18,\n                       
+        \"z\": 61.79083251953125\n                    },\n                    \"rotation\":
+        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
+        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
+        \"definitionId\": 1,\n                    \"stateData\": 3\n               
+        }\n            ],\n            \"npcs\": []\n        },\n        {\n           
+        \"chunkCoord\": {\n                \"X\": 20,\n                \"Y\": 21\n           
+        },\n            \"props\": [\n                {\n                    \"guid\":
+        9,\n                    \"position\": {\n                        \"x\": 2.501012086868286,\n                       
+        \"y\": -5.663758593709784e-18,\n                        \"z\": 76.52189636230469\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                },\n               
+        {\n                    \"guid\": 14,\n                    \"position\": {\n                       
+        \"x\": 4.617565631866455,\n                        \"y\": -9.92485792372666e-18,\n                       
+        \"z\": 134.09275817871095\n                    },\n                    \"rotation\":
+        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
+        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
+        \"definitionId\": 1,\n                    \"stateData\": 3\n               
+        },\n                {\n                    \"guid\": 15,\n                   
+        \"position\": {\n                        \"x\": 5.713507175445557,\n                       
+        \"y\": -1.0312450770531246e-17,\n                        \"z\": 139.32945251464845\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                }\n           
+        ],\n            \"npcs\": []\n        }\n    ],\n    \"players\": []\n}"
+  _playerSavesLoaded:
+    _serializedList: []
+--- !u!4 &330450293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330450291}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.828136, y: 8.675457, z: -3.4500606}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &338156615 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 712800245793677823, guid: 7a621b70184c5d944bad83fe4a5efec9,
@@ -1302,6 +1437,50 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7a621b70184c5d944bad83fe4a5efec9, type: 3}
+--- !u!1 &513087585
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 513087586}
+  - component: {fileID: 513087587}
+  m_Layer: 0
+  m_Name: PlayerSaveLoadManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &513087586
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513087585}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 969338786}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &513087587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513087585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16c0e3a68d9408949a27b732a5f36e2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &567730217
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1760,6 +1939,7 @@ MonoBehaviour:
     PropManager: {fileID: 1239710300}
     BuildableManager: {fileID: 0}
     WorldSaveLoadManager: {fileID: 1887427404}
+    PlayerSaveLoadManager: {fileID: 513087587}
     NonPlayerCharacterManager: {fileID: 111939068}
     ChunkManager: {fileID: 1265232217}
     Camera: {fileID: 35686577}
@@ -1789,6 +1969,7 @@ Transform:
   - {fileID: 111939069}
   - {fileID: 1265232218}
   - {fileID: 1887427403}
+  - {fileID: 513087586}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &969338787
@@ -1816,6 +1997,7 @@ MonoBehaviour:
   - {fileID: 111939068}
   - {fileID: 1265232217}
   - {fileID: 1887427404}
+  - {fileID: 513087587}
   ForceRemoteRenderTimeframe: 0
 --- !u!1 &1028513131
 GameObject:
@@ -2464,7 +2646,6 @@ GameObject:
   - component: {fileID: 1239710298}
   - component: {fileID: 1239710300}
   - component: {fileID: 1239710301}
-  - component: {fileID: 1239710302}
   m_Layer: 0
   m_Name: PropManager
   m_TagString: Untagged
@@ -2515,20 +2696,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3b2c1e8ccf26684eb9c3837831eff6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1239710302
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239710297}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d85eac8015f82b343b7abb4b2b1236e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  saveFileName: PropSaveData.json
-  saveFilePath: 
 --- !u!1 &1259447159
 GameObject:
   m_ObjectHideFlags: 3
@@ -4528,7 +4695,7 @@ MonoBehaviour:
   _cameraData:
     position:
     - {x: 0, y: 35.71, z: 0, w: 0}
-    - {x: -11.753857, y: 14.241339, z: -3.6419742, w: 0}
+    - {x: -80.26056, y: 57.24528, z: 250.5858, w: 0}
     fov:
     - 0.57735026
     - 0.57735026
@@ -4552,40 +4719,40 @@ MonoBehaviour:
     - e00: 0.025695147
       e01: 0.0037006952
       e02: -0.81995004
-      e03: -2.7369227
+      e03: 207.3183
       e10: 1.0840439
       e11: 1.3502754
       e12: 0.040065534
-      e13: -6.3421164
+      e13: -0.33078533
       e20: 0.7793038
       e21: -0.62629044
       e22: 0.021594742
-      e23: 18.068817
+      e23: 92.15103
       e30: 0.7792959
       e31: -0.6262841
       e32: 0.021594524
-      e33: 18.157505
+      e33: 92.98726
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: -0.22618018, y: 0.29437405, z: -0.92853993, w: -10.512097}
-    - {x: 0.62236345, y: -0.4813385, z: -0.61723334, w: 11.922129}
+    - {x: 0.62236345, y: -0.4813385, z: -0.61723334, w: 232.17549}
     frustumPlane1:
     - {x: 0.941545, y: 0.29437405, z: -0.16381948, w: -10.512097}
-    - {x: 0.58263206, y: -0.4870607, z: 0.6506241, w: 16.154127}
+    - {x: 0.58263206, y: -0.4870607, z: 0.6506241, w: -88.39286}
     frustumPlane2:
     - {x: 0.054698296, y: 0.9950035, z: -0.083524086, w: -35.531574}
-    - {x: 0.9316699, y: 0.36199564, z: 0.03083003, w: 5.9076943}
+    - {x: 0.9316699, y: 0.36199564, z: 0.03083003, w: 46.328236}
     frustumPlane3:
     - {x: 0.4447369, y: -0.5839663, z: -0.6791115, w: 20.853436}
-    - {x: -0.15237397, y: -0.98827976, z: -0.009235505, w: 12.249811}
+    - {x: -0.15237397, y: -0.98827976, z: -0.009235505, w: 46.659023}
     frustumPlane4:
     - {x: 0.49943516, y: 0.4110371, z: -0.7626355, w: -14.978134}
-    - {x: 0.77929586, y: -0.62628406, z: 0.021594523, w: 18.113068}
+    - {x: 0.77929586, y: -0.62628406, z: 0.021594523, w: 92.56867}
     frustumPlane5:
     - {x: -0.49945915, y: -0.41108567, z: 0.7625937, w: 4013.1685}
-    - {x: -0.77953315, y: 0.6259887, z: -0.021592183, w: 8787.087}
+    - {x: -0.77953315, y: 0.6259887, z: -0.021592183, w: 82852.375}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -4970,7 +5137,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16edc23d0cb6fd941a55fe7e56a37092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  saveFileName: WorldSaveData.json
 --- !u!1001 &1892462725
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5995,3 +6161,4 @@ SceneRoots:
   - {fileID: 1305537430}
   - {fileID: 567730217}
   - {fileID: 97066510}
+  - {fileID: 330450293}
