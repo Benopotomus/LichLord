@@ -7,7 +7,6 @@ namespace LichLord.World
     public struct FWorldSaveData
     {
         public FChunkSaveData[] chunks;
-        public FPlayerSaveState[] players; // Players
     }
 
     [Serializable]
@@ -55,22 +54,6 @@ namespace LichLord.World
             this.definitionId = definitionId;
             this.health = health;
             this.aiState = aiState;
-        }
-    }
-
-    [Serializable]
-    public struct FPlayerSaveState
-    {
-        public string playerName;
-        public Vector3 position;
-        public Quaternion rotation;
-
-        public FPlayerSaveState(string playerName, Vector3 position, Quaternion rotation)
-        {
-            this.playerName = playerName;
-            this.position = position;
-            this.rotation = rotation;
-
         }
     }
 }

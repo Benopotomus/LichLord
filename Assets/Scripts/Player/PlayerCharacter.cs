@@ -8,6 +8,7 @@ using LichLord.NonPlayerCharacters;
 using LichLord.World;
 using LichLord.Props;
 using System.Collections.Generic;
+using System.IO;
 
 namespace LichLord
 {
@@ -75,6 +76,8 @@ namespace LichLord
         public override void Spawned()
         {
             base.Spawned();
+            
+            Nickname = "Steve " + GetProjectName();
 
             if (HasStateAuthority)
             {
@@ -273,5 +276,12 @@ namespace LichLord
             return _cachedTransform.position;
         }
 
+        private string GetProjectName()
+        {
+            // Extract project name from Application.dataPath (e.g., "C:/Projects/MyGame_clone_0/Assets")
+            string path = Application.dataPath;
+            string projectName = Path.GetFileName(Path.GetDirectoryName(path));
+            return string.IsNullOrEmpty(projectName) ? "DefaultInstance" : projectName;
+        }
     }
 }

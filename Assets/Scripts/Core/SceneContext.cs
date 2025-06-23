@@ -30,6 +30,7 @@ namespace LichLord
         public WorldSaveLoadManager WorldSaveLoadManager;
         public PlayerSaveLoadManager PlayerSaveLoadManager;
         public NonPlayerCharacterManager NonPlayerCharacterManager;
+        public WorldManager WorldManager;
         public ChunkManager ChunkManager;
         public SceneCamera Camera;
         public SceneUI UI;

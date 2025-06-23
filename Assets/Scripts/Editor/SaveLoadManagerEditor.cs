@@ -36,7 +36,7 @@ public class SaveLoadManagerEditor : Editor
         }
 
         // Add a text field for the session/player ID
-        EditorGUILayout.LabelField("Session/Player ID");
+        EditorGUILayout.LabelField("Session/Player Key");
         key = EditorGUILayout.TextField(key);
 
         // Add a button to populate save data
@@ -96,7 +96,7 @@ public class SaveLoadManagerEditor : Editor
             {
                 if (string.IsNullOrEmpty(key))
                 {
-                    Debug.LogWarning("Player ID is empty. Please enter a valid player ID.");
+                    Debug.LogWarning("Player key is empty. Please enter a valid player key (e.g., sessionName_instanceId).");
                     return;
                 }
 
@@ -107,11 +107,11 @@ public class SaveLoadManagerEditor : Editor
                 if (File.Exists(saveFilePath))
                 {
                     File.Delete(saveFilePath);
-                    Debug.Log($"Successfully deleted player save file for player {key} at {saveFilePath} via Editor button.");
+                    Debug.Log($"Successfully deleted player save file for key {key} at {saveFilePath} via Editor button.");
                 }
                 else
                 {
-                    Debug.Log($"No player save file found for player {key} at {saveFilePath}. Removed from SaveLoadManager if present.");
+                    Debug.Log($"No player save file found for key {key} at {saveFilePath}. Removed from SaveLoadManager if present.");
                 }
 
                 // Mark the SaveLoadManager as dirty to ensure Inspector updates
@@ -119,7 +119,7 @@ public class SaveLoadManagerEditor : Editor
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Failed to delete player save file for player {key} via Editor button: {e.Message}");
+                Debug.LogError($"Failed to delete player save file for key {key} via Editor button: {e.Message}");
             }
         }
     }

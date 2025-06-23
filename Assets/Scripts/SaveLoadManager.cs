@@ -15,7 +15,7 @@ namespace LichLord
         private SerializedDictionary<string, string> _worldSavesLoaded;
 
         [SerializeField]
-        [SerializedDictionary("WorldID", "PlayerSavedData")]
+        [SerializedDictionary("PlayerKey", "PlayerSavedData")]
         private SerializedDictionary<string, string> _playerSavesLoaded;
 
         private readonly string worldSaveFilePrefix = "WorldSaveData_"; // For world saves
@@ -89,23 +89,24 @@ namespace LichLord
                     }
                 }
 
-                // Load player save data files (placeholder implementation)
+                // Load player save data files
                 string[] playerFiles = Directory.GetFiles(directory, $"{playerSaveFilePrefix}*.json");
                 foreach (string file in playerFiles)
                 {
-                    // Extract player ID from file name
+                    // Extract player key from file name
                     string fileName = Path.GetFileNameWithoutExtension(file);
-                    string playerId = fileName.Substring(playerSaveFilePrefix.Length);
+                    string playerKey = fileName.Substring(playerSaveFilePrefix.Length);
 
-                    if (!string.IsNullOrEmpty(playerId))
+                    if (!string.IsNullOrEmpty(playerKey))
                     {
                         try
                         {
                             string json = File.ReadAllText(file);
-                            // Validate JSON (structure TBD; assuming string for now)
+                            // Validate JSON
                             if (!string.IsNullOrEmpty(json))
                             {
-                                _playerSavesLoaded[playerId] = json;
+                                JsonUtility.FromJson<FPlayerSaveData>(json); // Throws if invalid
+                                _playerSavesLoaded[playerKey] = json;
                                 loadedPlayerFiles++;
                             }
                             else
@@ -168,28 +169,28 @@ namespace LichLord
             }
         }
 
-        public bool TryGetPlayerData(string playerId, out string json)
+        public bool TryGetPlayerData(string playerKey, out string json)
         {
             json = null;
-            if (string.IsNullOrEmpty(playerId))
+            if (string.IsNullOrEmpty(playerKey))
             {
-                playerId = "default";
+                playerKey = "default";
             }
-            return _playerSavesLoaded.TryGetValue(playerId, out json);
+            return _playerSavesLoaded.TryGetValue(playerKey, out json);
         }
 
-        public void SetPlayerData(string playerId, string json)
+        public void SetPlayerData(string playerKey, string json)
         {
-            if (string.IsNullOrEmpty(playerId))
+            if (string.IsNullOrEmpty(playerKey))
             {
-                playerId = "default";
+                playerKey = "default";
             }
-            _playerSavesLoaded[playerId] = json;
+            _playerSavesLoaded[playerKey] = json;
         }
 
-        public void ClearPlayerData(string playerId = null)
+        public void ClearPlayerData(string playerKey = null)
         {
-            if (string.IsNullOrEmpty(playerId))
+            if (string.IsNullOrEmpty(playerKey))
             {
                 int clearedCount = _playerSavesLoaded.Count;
                 _playerSavesLoaded.Clear();
@@ -197,13 +198,13 @@ namespace LichLord
             }
             else
             {
-                if (_playerSavesLoaded.Remove(playerId))
+                if (_playerSavesLoaded.Remove(playerKey))
                 {
-                    Debug.Log($"Cleared player save data for player {playerId} from SaveLoadManager.");
+                    Debug.Log($"Cleared player save data for player {playerKey} from SaveLoadManager.");
                 }
                 else
                 {
-                    Debug.Log($"No player save data found for player {playerId} in SaveLoadManager.");
+                    Debug.Log($"No player save data found for player {playerKey} in SaveLoadManager.");
                 }
             }
         }

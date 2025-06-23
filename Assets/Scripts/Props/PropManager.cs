@@ -29,7 +29,7 @@ namespace LichLord.Props
                 return;
             }
 
-            ChunkPropsMarkupData baseMarkupData = Context.ChunkManager.WorldSettings.GetMarkupData(chunk.ChunkID);
+            ChunkPropsMarkupData baseMarkupData = Context.WorldManager.WorldSettings.GetMarkupData(chunk.ChunkID);
 
             if (baseMarkupData == null)
                 return;

@@ -9,10 +9,6 @@ namespace LichLord.World
     public class ChunkManager : ContextBehaviour
     {
         [SerializeField]
-        private WorldSettings _worldSettings;
-        public WorldSettings WorldSettings => _worldSettings;
-
-        [SerializeField]
         private bool drawChunkBounds = true; // Toggle for gizmo drawing
 
         [Networked, Capacity(WorldConstants.CHUNK_COUNT_MAX)]
@@ -21,22 +17,13 @@ namespace LichLord.World
         private Dictionary<FChunkPosition, Chunk> _worldChunks = new Dictionary<FChunkPosition, Chunk>();
         public Dictionary<FChunkPosition, Chunk> WorldChunks => _worldChunks;
 
-        public override void Spawned()
+        public void InitializeWorldChunks()
         {
-            base.Spawned();
-            InitializeWorldChunks();
+            WorldSettings worldSettings = Context.WorldManager.WorldSettings;
 
-            if (HasStateAuthority)
-            {
-                Context.WorldSaveLoadManager.LoadChunks();
-            }
-        }
-
-        private void InitializeWorldChunks()
-        {
             var chunkGridSize = new Vector2Int(
-                Mathf.CeilToInt(_worldSettings.WorldSize.x / WorldConstants.CHUNK_SIZE),
-                Mathf.CeilToInt(_worldSettings.WorldSize.y / WorldConstants.CHUNK_SIZE)
+                Mathf.CeilToInt(worldSettings.WorldSize.x / WorldConstants.CHUNK_SIZE),
+                Mathf.CeilToInt(worldSettings.WorldSize.y / WorldConstants.CHUNK_SIZE)
                 );
 
             for (int x = 0; x < chunkGridSize.x; x++)
@@ -49,7 +36,7 @@ namespace LichLord.World
                         Y = (sbyte)y
                     };
 
-                    _worldChunks[chunkID] = new Chunk(chunkID, _worldSettings.WorldOrigin);
+                    _worldChunks[chunkID] = new Chunk(chunkID, worldSettings.WorldOrigin);
 
                     if (!_networkChunks.ContainsKey(chunkID))
                     {
@@ -181,10 +168,12 @@ namespace LichLord.World
 
         private FChunkPosition GetChunkID(Vector3 position)
         {
+            WorldSettings worldSettings = Context.WorldManager.WorldSettings;
+
             return new FChunkPosition 
             {
-                X = (sbyte)Mathf.FloorToInt((position.x - _worldSettings.WorldOrigin.x) / WorldConstants.CHUNK_SIZE),
-                Y = (sbyte)Mathf.FloorToInt((position.z - _worldSettings.WorldOrigin.y) / WorldConstants.CHUNK_SIZE)
+                X = (sbyte)Mathf.FloorToInt((position.x - worldSettings.WorldOrigin.x) / WorldConstants.CHUNK_SIZE),
+                Y = (sbyte)Mathf.FloorToInt((position.z - worldSettings.WorldOrigin.y) / WorldConstants.CHUNK_SIZE)
             };
         }
 

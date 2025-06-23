@@ -334,6 +334,19 @@ namespace LichLord
             _worldVelocity.Velocity = CC.velocity;
         }
 
+        public void SetMovementState(EMovementState movementState)
+        {
+            _currentMoveState = movementState;
+        }
+        
+        public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+        { 
+            _worldTransform.Rotation = rotation;
+            _worldTransform.Position = position;
+            CC.transform.position = _worldTransform.Position;
+            PC.CachedTransform.SetPositionAndRotation(position, rotation);
+        }
+
         private void UpdateMovementState()
         {
             if (_currentMoveState == _lastState)

@@ -157,6 +157,7 @@ namespace LichLord.Props
         // This adds to the delta states when the authority data changes
         public void ReplicateAuthorityData(PropRuntimeState authorityState)
         {
+            EnsureEmptyReplicator();
             // Update the state in a replicator
             GetPropReplicationData(authorityState, out PropReplicator replicator, out FPropData outData);
 

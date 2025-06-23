@@ -5,6 +5,7 @@ using Fusion;
 using Starter.Shooter;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using System.IO;
 
 namespace LichLord
 {
@@ -41,28 +42,84 @@ namespace LichLord
             LocalPlayer = null;
         }
 
-        private void SpawnLocalPlayer(PlayerRef playerRef)
+        public void SpawnLocalPlayer(PlayerRef playerRef)
         {
-            if (LocalPlayer != null)
-            {
-                Debug.LogWarning($"Player for {playerRef} is already spawned!");
-                return;
-            }
-
-            // Select a spawn position
+            // Default spawn position and rotation
             Vector3 spawnPosition = GetSpawnPosition();
             Quaternion spawnRotation = Quaternion.identity;
+            EMovementState moveState = EMovementState.Walking;
+
+
+            if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
+            {
+                Debug.LogWarning("No active session; cannot check for saved player data.");
+            }
+
+            // Generate unique nickname based on project name
+            string nickname = GetInstanceId();
+
+            // Check SaveLoadManager for saved player data
+            if (SaveLoadManager.instance != null && Runner != null && !string.IsNullOrEmpty(Runner.SessionInfo.Name))
+            {
+                string worldId = Runner.SessionInfo.Name;
+                string playerKey = $"{worldId}_{nickname}"; // Composite key
+                if (SaveLoadManager.instance.TryGetPlayerData(playerKey, out string json))
+                {
+                    try
+                    {
+                        FPlayerSaveData savedData = JsonUtility.FromJson<FPlayerSaveData>(json);
+                        if (!string.IsNullOrEmpty(savedData.playerName))
+                        {
+                            spawnPosition = savedData.position;
+                            spawnRotation = savedData.rotation;
+                            moveState = savedData.moveState;
+                            Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world {worldId} with key {playerKey}.");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Saved player data for key {playerKey} has invalid playerName; using default spawn.");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"Failed to deserialize player save data for key {playerKey}: {e.Message}; using default spawn.");
+                    }
+                }
+                else
+                {
+                    Debug.Log($"No saved player data found for key {playerKey}; using default spawn.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("SaveLoadManager instance not found or no active session; using default spawn.");
+            }
+
+            if (LocalPlayer == null)
+            {
+                LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
+            }
+
+            Runner.SetPlayerObject(playerRef, LocalPlayer.Object);
 
             // Spawn player with InputAuthority
-            var player = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
+            LocalPlayer.Movement.SetMovementState(moveState);
+            LocalPlayer.Movement.SetPositionAndRotation(spawnPosition, spawnRotation);
 
-            Runner.SetPlayerObject(playerRef, player.Object);
+            // Set the unique nickname
+            LocalPlayer.Nickname = nickname;
 
-            LocalPlayer = player;
+            Debug.Log($"Spawned local player for {playerRef}, Nickname: {LocalPlayer.Nickname ?? "Unknown"}, " +
+                      $"InputAuthority: {LocalPlayer.Object.InputAuthority}, " +
+                      $"StateAuthority: {LocalPlayer.Object.StateAuthority}, Position: {spawnPosition}");
+        }
 
-            Debug.Log($"Spawned local player for {playerRef}, Nickname: {player.Nickname}, " +
-                $"InputAuthority: {player.Object.InputAuthority}, " +
-                $"StateAuthority: {player.Object.StateAuthority}, Position: {spawnPosition}");
+        private string GetInstanceId()
+        {
+            // Extract project name from Application.dataPath (e.g., "C:/Projects/MyGame_clone_0/Assets")
+            string path = Application.dataPath;
+            string projectName = Path.GetFileName(Path.GetDirectoryName(path));
+            return string.IsNullOrEmpty(projectName) ? "DefaultInstance" : projectName;
         }
 
         private Vector3 GetSpawnPosition()
@@ -76,11 +133,5 @@ namespace LichLord
             Debug.Log("No spawn points available, using default position (0,0,0)");
             return Vector3.zero;
         }
-
-        public void SpawnNPC()
-        { 
-        
-        }
-
     }
 }
