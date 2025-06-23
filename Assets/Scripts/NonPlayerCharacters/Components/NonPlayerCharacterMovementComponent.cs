@@ -42,6 +42,13 @@ namespace LichLord.NonPlayerCharacters
         {
             switch (NPC.State.CurrentState)
             {
+                case ENonPlayerState.Maneuver_1:
+                case ENonPlayerState.Maneuver_2:
+                case ENonPlayerState.Maneuver_3:
+                case ENonPlayerState.Maneuver_4:
+                    SetFollowerEnabled(false);
+                    SetFollowLocalAvoidance(true);
+                    break;
                 case ENonPlayerState.Inactive:
                 case ENonPlayerState.HitReact:
                 case ENonPlayerState.Dead:

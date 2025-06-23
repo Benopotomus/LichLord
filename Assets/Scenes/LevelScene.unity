@@ -302,8 +302,8 @@ MonoBehaviour:
   _replicatorPrefab: {fileID: 3957007118019067033, guid: 29fc895c602f8fd4084d2ff263237ec3,
     type: 3}
   _replicator: {fileID: 0}
-  _debugSpawnCount: 0
-  _debugStreamRevive: 0
+  _debugSpawnCount: 16
+  _debugStreamRevive: 1
 --- !u!4 &111939069
 Transform:
   m_ObjectHideFlags: 0
@@ -631,13 +631,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -821,7 +821,7 @@ PrefabInstance:
     - target: {fileID: 5687183472605052142, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5789541908197324390, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
         type: 3}
@@ -1247,13 +1247,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -2319,13 +2319,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -3069,7 +3069,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1327619677
 Transform:
   m_ObjectHideFlags: 0
@@ -3257,13 +3257,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -3451,13 +3451,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -3614,7 +3614,7 @@ MonoBehaviour:
     FieldOfView: 60.000004
     OrthographicSize: 5
     NearClipPlane: 0.3
-    FarClipPlane: 1000
+    FarClipPlane: 1500
     Dutch: 0
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
@@ -3894,13 +3894,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -4445,13 +4445,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -4639,13 +4639,13 @@ Terrain:
   m_DetailObjectDistance: 80
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 1
-  m_SplatMapDistance: 512
+  m_SplatMapDistance: 99999
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
   m_DrawInstanced: 1
-  m_DrawTreesAndFoliage: 1
+  m_DrawTreesAndFoliage: 0
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
@@ -4700,13 +4700,10 @@ MonoBehaviour:
   maxGraphicsBufferCaches: 8
   _cullingCameras:
   - {fileID: 8944336656349189699}
-  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
-    - {x: -15.585918, y: 12.525682, z: -0.4318902, w: 0}
     fov:
-    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: 0.9745748
@@ -4717,51 +4714,28 @@ MonoBehaviour:
       e11: 1.7320508
       e12: 6.1534805e-15
       e13: 0
-      e20: -1.4219383e-14
-      e21: -3.5548457e-15
-      e22: 1.0006001
-      e23: -0.60018003
+      e20: -1.4216542e-14
+      e21: -3.5541354e-15
+      e22: 1.0004002
+      e23: -0.60012007
       e30: -1.4210855e-14
       e31: -3.5527137e-15
       e32: 1
       e33: 0
-    - e00: 0.02555786
-      e01: 0.003680923
-      e02: -0.81556916
-      e03: 0.00000036477044
-      e10: 1.0840439
-      e11: 1.3502754
-      e12: 0.040065534
-      e13: 0.0000016518123
-      e20: 0.7793037
-      e21: -0.6262904
-      e22: 0.02159474
-      e23: 19.800205
-      e30: 0.7792959
-      e31: -0.6262841
-      e32: 0.021594524
-      e33: 20.000006
     calibration:
-    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.697944, y: -2.544284e-15, z: 0.7161523, w: 0}
-    - {x: 0.6235955, y: -0.48238885, z: -0.61516637, w: 15.495873}
     frustumPlane1:
     - {x: -0.697944, y: -2.5442841e-15, z: 0.7161523, w: 0}
-    - {x: 0.5839913, y: -0.4880928, z: 0.64862895, w: 15.495873}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: 0.9316699, y: 0.36199564, z: 0.03083003, w: 10.000004}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: -0.15237397, y: -0.98827976, z: -0.009235505, w: 10.000002}
     frustumPlane4:
-    - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.3}
-    - {x: 0.77929586, y: -0.626284, z: 0.021594523, w: 19.900003}
+    - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
     frustumPlane5:
-    - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1000.1341}
-    - {x: -0.78010553, y: 0.62527543, z: -0.02158689, w: 19961.746}
+    - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -4934,7 +4908,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1073741824
   data:
-    dataString: UEsDBBQAAAgIAACAn+vGqTI3agIAANgEAAALACQAZ3JhcGgxLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQF1VMtu2zAQ/BVD5ybQI/Gjx9ppesijsAw0SNHDmlpLRCjSJSk7TpB/zy4ly0ofJ8GzO7Pc4dCvkajAgvBol1DIxkWfR/H55adRJIz2prG38HxlrbGEp4yiUrl8wdCWct8e1BOsFX5DWVa+azuCcyXrdS9Zw3OuzJbJWdz+vipKvEFd+oqZAZR6iaU0uhuTEYaF9MaupMIOTNIpwb4DHv5CHnukccg83svbBgnZor2BA9pbU8iNFOBpFpd//qJiIWvUjhCq8qBocQSyRUT1NYin0ppGFysLO7QO1lJJf+DWH93S3GdR4Q60v7awrfLGbkBgL2nujF/i70ba0CuMUij4GDl6L3XJp3kdwEdiOLZjyrY6OClcLlBzRTdK/YGmixOuwrrgnlh3FO1ANcw6S0Zv7BmUXS04YMFRGMjDOc2XBQ/sretrt+iq4OkGlPtQWaG1IPU/OCuLw2vwbWMbmxq2C7PXDuqtIgO+UiBD5LLOHj7H8ii0QA9S8Q1T1eh561N/JF6a97LGh7ttl37mFBJ66L4v/A37b4wVWHzhO3Vz1DRjwDiPs9kkzrJJR03i8yyZTdP/KnQB7fhJHJPEZHaRdPw0oVczG18k406BO4KIq8yed7hvPFmAJ6O4cEcJmBut2zwMjT/SuoydaBrBovM5fUR1r9Xh4XFAQ81JvYNdTdx5E2J34paNLD5mJcouYQxxMb7IpvF6Cng2yYo0m25Esh6LbDyJo7CF1NJLUN9JX/mj1/TkB4HQUAfFJQq60VF4IZzpwsL+Wr7UZhASqTcmFxQcfd9q9GtTEkCR18VV+G8YvJzo9S16ewdQSwMEFAAACAgAAICf67GgGLVzAAAAhQAAAAkAJABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGrVipLLSrOzM9TslIw1TPWM9dRUEovSizIKAYKGIE4pZkpIHZ0XmlODpBvbJpolmiQYmZibGGQZJGYqmtunGJkbJGWbJhklmxsZm6gFAtUVVJZkOqXmJuKrDMgsSQjLTMvJTMvXS8oNTmxuMQdZJFSbC0AUEsBAi0AFAAACAgAAICf68apMjdqAgAA2AQAAAsAJAAAAAAAAAAAAAAAAAAAAGdyYXBoMS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsBAi0AFAAACAgAAICf67GgGLVzAAAAhQAAAAkAJAAAAAAAAAAAAAAAtwIAAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLBQYAAAAAAgACALgAAAB1AwAAAAA=
+    dataString: UEsDBBQAAAgIAACAn+vwkHAcXwIAAMwEAAALACQAZ3JhcGgxLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQF1VNtu2kAQ/RXk5wYZDIT0sZCmD7lUGKlRqj4M68Fesd6lu2sIifLvnVlfcJr2yeLMnLmcOctrJAqwIDzaFWSyctHnQTycfhpEwmhvKnsHz9fWGkv4mFFUKpUvGNLGnHcEtYONwm8o88I3aS24ULLcdCVLeE6V2TM5ievf11mOt6hzXzAzgFKvMJdGN20SwjCT3ti1VNiAo/GcYN8Ajx+Qpw6pHDKP9/K2QkL2aG/hhPbOZHIrBXjqxeGfvyiYyRK1I4Si3ChatkCyjCi+AbHLral0trZwQOtgI5X0J0790SzNeRYVHkD7Gwv7Iq3sFgR2Jc298Sv8XUkbcoVRCgWPkaL3Uuc8zWsPbolhbMeUfXFyUrhUoOaIrpT6Cx0vz7gK64Lbcd1BdABVMetiNHhjzSBvYkEBC47MQBouqL/MuGEnXRe7Q1cETbeg3LvIGq0Fqf/BWVvsn8HXibVtStgvzVE7KPeKBPhKhgyWSxp5eI5VW2iJHqTiC1PU6EWtUzcSL817WePDbeuln9mFhJ6a7wt/w/5bYwVmX/imboGaenxkXEyH8SyejEaT6X+5jTUbZhLHLXlyNby6nF3Nx6OGy7FAd4U58twPlae18SwOB+7p6gujde2BvtgtrfHVmaYRLDqf0kcUD1qdHp96NNTszns4lMRdVMFqZ25eyey9P6JkCjOIs9kkmcebOeDFZZKNk/lWjDYzkcwu4yhsIbX0EtR3qq98qy89854JNJSh4goFXXEQXgX7OLNwvJEvpekZQ+qtSQWZRT/UNbq16fqgSOXsOvwf9F5L9PoWvf0BUEsDBBQAAAgIAACAn+uxoBi1cwAAAIUAAAAJACQAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0Bq1YqSy0qzszPU7JSMNUz1jPXUVBKL0osyCgGChiBOKWZKSB2dF5pTg6Qb2yaaJZokGJmYmxhkGSRmKprbpxiZGyRlmyYZJZsbGZuoBQLVFVSWZDql5ibiqwzILEkIy0zLyUzL10vKDU5sbjEHWSRUmwtAFBLAQItABQAAAgIAACAn+vwkHAcXwIAAMwEAAALACQAAAAAAAAAAAAAAAAAAABncmFwaDEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLAQItABQAAAgIAACAn+uxoBi1cwAAAIUAAAAJACQAAAAAAAAAAAAAAKwCAABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwUGAAAAAAIAAgC4AAAAagMAAAAA
     file_cachedStartup: {fileID: 4900000, guid: e1c199691e410cc45bb24ce1748e3198,
       type: 3}
     cacheStartup: 0
@@ -5311,7 +5285,7 @@ MonoBehaviour:
     FieldOfView: 60.000004
     OrthographicSize: 5
     NearClipPlane: 0.3
-    FarClipPlane: 1000
+    FarClipPlane: 1500
     Dutch: 0
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
@@ -5961,7 +5935,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 1500
   field of view: 60.000004
   orthographic: 0
   orthographic size: 5

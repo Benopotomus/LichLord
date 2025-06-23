@@ -184,7 +184,7 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateDestination(float renderDeltaTime, Vector3 newDestination)
         {
-            NPC.Movement.SetFollowerEnabled(true);
+            //NPC.Movement.SetFollowerEnabled(true);
 
             // If our current destination hasn't changed much, we early out
             Vector3 delta = NPC.Movement.AIFollower.destination - newDestination;
