@@ -10,32 +10,45 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4aa7cb0ed381fd848aeb8a42745d6d45, type: 3}
-  m_Name: NPCManeuver_Melee
+  m_Name: NPCManeuver_SwordSwing
   m_EditorClassIdentifier: 
-  ActionName: Melee
+  ActionName: Kick
   Damage: 10
   Cooldown: 0
-  MovementStopRange: 2
+  MovementStopRange: 2.5
+  AttackRange: 3.5
   StateTime: 1.5
   RequiresEnemyTarget: 1
   _animationTriggers:
-  - Action: 1
+  - Action: 8
     Weapon: 0
-    TriggerNumber: 5
+    TriggerNumber: 4
+    Side: 2
+    Jumping: 0
+    RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
-  - Action: 2
+  - Action: 9
     Weapon: 0
-    TriggerNumber: 5
+    TriggerNumber: 4
+    Side: 2
+    Jumping: 0
+    RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
-  - Action: 3
+  - Action: 10
     Weapon: 0
-    TriggerNumber: 5
+    TriggerNumber: 4
+    Side: 2
+    Jumping: 0
+    RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
-  - Action: 4
+  - Action: 11
     Weapon: 0
-    TriggerNumber: 5
+    TriggerNumber: 4
+    Side: 2
+    Jumping: 0
+    RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0

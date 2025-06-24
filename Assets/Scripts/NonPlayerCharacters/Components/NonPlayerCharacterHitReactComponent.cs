@@ -33,13 +33,7 @@ namespace LichLord.NonPlayerCharacters
             var animTrigger = hitReact.AnimationTrigger;
 
             _hitReactTimer = hitReact.StateTime;
-
-            _npc.Animator.SetBool("Moving", animTrigger.IsMoving);
-            _npc.Animator.SetInteger("Action", animTrigger.Action);
-            _npc.Animator.SetInteger("Weapon", animTrigger.Weapon);
-            _npc.Animator.SetBool("Blocking", animTrigger.IsBlocking);
-            _npc.Animator.SetInteger("TriggerNumber", animTrigger.TriggerNumber);
-            _npc.Animator.SetTrigger("Trigger");
+            _npc.AnimationController.SetAnimationForTrigger(animTrigger);
         }
     }
 }

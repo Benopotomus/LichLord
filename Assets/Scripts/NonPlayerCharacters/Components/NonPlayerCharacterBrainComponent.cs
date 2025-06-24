@@ -30,6 +30,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private NonPlayerCharacterManeuverState _activeManeuver = null;
 
+
+
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
         }
@@ -306,14 +308,8 @@ namespace LichLord.NonPlayerCharacters
 
                 var animationTrigger = animationTriggers[animIndex];
 
-                NPC.Animator.SetBool("Moving", animationTrigger.IsMoving);
-                NPC.Animator.SetBool("Blocking", animationTrigger.IsBlocking);
-                NPC.Animator.SetInteger("Action", animationTrigger.Action);
-                NPC.Animator.SetInteger("Weapon", animationTrigger.Weapon);
-                NPC.Animator.SetInteger("TriggerNumber", animationTrigger.TriggerNumber);
-                NPC.Animator.SetTrigger("Trigger");
+                NPC.AnimationController.SetAnimationForTrigger(animationTrigger);
             }
-
         }
 
         public NonPlayerCharacterManeuverState GetManeuverFromState(ENonPlayerState state)

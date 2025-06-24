@@ -100,6 +100,8 @@ GameObject:
   - component: {fileID: 5813864165240207391}
   - component: {fileID: 2073302252260987663}
   - component: {fileID: -5226509248368517820}
+  - component: {fileID: 8245235728932067376}
+  - component: {fileID: 6470708934419270937}
   m_Layer: 10
   m_Name: NPC_Base
   m_TagString: Untagged
@@ -139,6 +141,8 @@ MonoBehaviour:
   _stateComponent: {fileID: 5813864165240207391}
   _brainComponent: {fileID: 2073302252260987663}
   _hitReactComponent: {fileID: -5226509248368517820}
+  _weaponsComponent: {fileID: 8245235728932067376}
+  _animationController: {fileID: 6470708934419270937}
   _animator: {fileID: 0}
   _transform: {fileID: 682064007814798227}
   _hurtbox: {fileID: 2611734871992470391}
@@ -304,6 +308,9 @@ MonoBehaviour:
       Action: 1
       Weapon: 0
       TriggerNumber: 12
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
   - StateTime: 0.75
@@ -311,6 +318,9 @@ MonoBehaviour:
       Action: 2
       Weapon: 0
       TriggerNumber: 12
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
   - StateTime: 1.5
@@ -318,6 +328,9 @@ MonoBehaviour:
       Action: 1
       Weapon: 0
       TriggerNumber: 14
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
   - StateTime: 1.5
@@ -325,6 +338,9 @@ MonoBehaviour:
       Action: 1
       Weapon: 0
       TriggerNumber: 26
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
   - StateTime: 1.5
@@ -332,5 +348,39 @@ MonoBehaviour:
       Action: 2
       Weapon: 0
       TriggerNumber: 26
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
+--- !u!114 &8245235728932067376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7301654162607387296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b5161cc43135c4088a03476b472842, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weaponIndex: 0
+  _leftHandItem: {fileID: 0}
+  _rightHandItem: {fileID: 0}
+  _leftHandBone: {fileID: 0}
+  _rightHandBone: {fileID: 0}
+--- !u!114 &6470708934419270937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7301654162607387296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a267c859a71c4fa4f95f1cc9380e4460, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 174069171961541429}
+  _animator: {fileID: 0}

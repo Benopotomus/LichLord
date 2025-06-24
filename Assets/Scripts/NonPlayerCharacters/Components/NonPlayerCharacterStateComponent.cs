@@ -37,7 +37,7 @@ namespace LichLord.NonPlayerCharacters
             switch (newState)
             {
                 case ENonPlayerState.Idle:
-                    NPC.Animator.SetInteger(_animIDWeapon, 0);
+                    NPC.Animator.SetInteger(_animIDWeapon, NPC.Weapons.GetWeaponID());
                     NPC.Animator.SetInteger(_animIDTriggerNumber, 25);
                     NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(true);
@@ -61,7 +61,7 @@ namespace LichLord.NonPlayerCharacters
                     break;
                 case ENonPlayerState.Dead:
                     _deadTimer = _deadTimeMax;
-                    NPC.Animator.SetInteger(_animIDWeapon, 0);
+                    NPC.Animator.SetInteger(_animIDWeapon, NPC.Weapons.GetWeaponID());
                     NPC.Animator.SetInteger(_animIDTriggerNumber, 20);
                     NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(false);

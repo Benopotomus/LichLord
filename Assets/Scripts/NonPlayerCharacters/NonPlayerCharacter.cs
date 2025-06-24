@@ -4,11 +4,7 @@ using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
-    // This is just the visual representation of an NPC
-    // It updates while active. 
-    // Because its always networked and updating, it should be processed
-    // on the master client no matter what.
-    
+
     public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor, IChunkTrackable
     {
         protected NonPlayerCharacterManager _manager;
@@ -28,6 +24,12 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private NonPlayerCharacterHitReactComponent _hitReactComponent;
         public NonPlayerCharacterHitReactComponent HitReact => _hitReactComponent;
+
+        [SerializeField] private NonPlayerCharacterWeaponsComponent _weaponsComponent;
+        public NonPlayerCharacterWeaponsComponent Weapons => _weaponsComponent;
+
+        [SerializeField] private NonPlayerCharacterAnimationController _animationController;
+        public NonPlayerCharacterAnimationController AnimationController => _animationController;
 
         [SerializeField] private Animator _animator;
         public Animator Animator => _animator;

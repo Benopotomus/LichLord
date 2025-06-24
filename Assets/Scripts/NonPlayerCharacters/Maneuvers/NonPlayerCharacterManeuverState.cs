@@ -63,7 +63,18 @@ namespace LichLord.NonPlayerCharacters
                 return false;
 
             data.State = ActiveState;
-            data.AnimationIndex = UnityEngine.Random.Range(0, Definition.AnimationTriggers.Count + 1);
+
+            int currentAnimIndex = data.AnimationIndex;
+            int newAnimIndex = UnityEngine.Random.Range(0, 4);
+
+            // If the new index is the same as the current, increment and wrap around
+            if (newAnimIndex == currentAnimIndex)
+            {
+                newAnimIndex = (currentAnimIndex + 1) % 4;
+            }
+
+            data.AnimationIndex = newAnimIndex;
+
             npc.Replicator.UpdateNPCData(data);
             CooldownTimer = Definition.Cooldown;
             ManeuverAnimationTimer = Definition.StateTime;
