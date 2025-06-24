@@ -1,4 +1,5 @@
 ﻿using Pathfinding;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -18,6 +19,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private bool _isGrounded;
         public bool IsGrounded => _isGrounded;
 
+        [SerializeField] private LayerMask _layerMask;
+
         private Vector3 _lastPosition;
         private float _speedPercent;
         Vector3 _localVelocity;
@@ -29,38 +32,15 @@ namespace LichLord.NonPlayerCharacters
         bool _followerEnabled = true;
         bool _followerUpdateRotation = true;
         bool _followerLocalAvoidance = true;
+        bool _followerCanMove = true;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
             _lastPosition = spawnParams.position;
-            _follower.updatePosition = true;
-            _follower.updateRotation = true;
-            _follower.destination = NPC.Brain.MoveTarget;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            switch (NPC.State.CurrentState)
-            {
-                case ENonPlayerState.Maneuver_1:
-                case ENonPlayerState.Maneuver_2:
-                case ENonPlayerState.Maneuver_3:
-                case ENonPlayerState.Maneuver_4:
-                    SetFollowerEnabled(false);
-                    SetFollowLocalAvoidance(true);
-                    break;
-                case ENonPlayerState.Inactive:
-                case ENonPlayerState.HitReact:
-                case ENonPlayerState.Dead:
-                    SetFollowerEnabled(false);
-                    SetFollowLocalAvoidance(false);
-                    return;
-                default:
-                    SetFollowerEnabled(true);
-                    SetFollowLocalAvoidance(true);
-                    break;
-            }
-
             _speedPercent = _follower.velocity.magnitude / _npc.GetDefinition(ref data).WalkSpeed;
             
             UpdateVelocity(ref data, renderDeltaTime);
@@ -70,6 +50,8 @@ namespace LichLord.NonPlayerCharacters
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
             SetFollowerEnabled(false);
+            SetFollowerCanMove(false);
+            SetFollowerLocalAvoidance(false);
 
             // Smooth position
             NPC.CachedTransform.position = Vector3.Lerp(
@@ -156,8 +138,6 @@ namespace LichLord.NonPlayerCharacters
             {
                 data.Yaw = yawA;
             }
-
-            //NPC.Replicator.UpdateNPCData(data);
         }
 
         public void SetFollowerEnabled(bool newEnabled)
@@ -167,12 +147,21 @@ namespace LichLord.NonPlayerCharacters
 
             _follower.updatePosition = newEnabled;
             _follower.updateRotation = newEnabled;
-            _follower.canMove = newEnabled;
 
             _followerEnabled = newEnabled;
         }
 
-        public void SetFollowUpdateRotation(bool newEnabled)
+        public void SetFollowerCanMove(bool newCanMove)
+        {
+            if (newCanMove == _followerCanMove)
+                return;
+
+            _follower.canMove = newCanMove;
+
+            _followerCanMove = newCanMove;
+        }
+
+        public void SetFollowerUpdateRotation(bool newEnabled)
         {
             if(_followerUpdateRotation == newEnabled) 
                 return;
@@ -182,7 +171,7 @@ namespace LichLord.NonPlayerCharacters
             _followerUpdateRotation = newEnabled;
         }
 
-        public void SetFollowLocalAvoidance(bool newEnabled)
+        public void SetFollowerLocalAvoidance(bool newEnabled)
         {
             if (_followerLocalAvoidance == newEnabled)
                 return;
@@ -194,12 +183,6 @@ namespace LichLord.NonPlayerCharacters
 
         public void StartRecycle()
         {
-            _follower.enableLocalAvoidance = false;
-            _follower.updatePosition = false;
-            _follower.updateRotation = false;
-            _follower.canMove = false;
-            NPC.Movement.AIFollower.updateRotation = false;
-            NPC.Movement.AIFollower.updatePosition = false;
         }
     }
 }

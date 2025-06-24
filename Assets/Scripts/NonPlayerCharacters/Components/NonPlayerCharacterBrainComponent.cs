@@ -50,7 +50,6 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateExecutingManeuver(ref data, renderDeltaTime);
 
-
             // We only tick if we're idle and ready
             if (data.State != ENonPlayerState.Idle)
                 return;
@@ -73,7 +72,7 @@ namespace LichLord.NonPlayerCharacters
 
             NPC.Movement.AIFollower.stopDistance = 0.2f;
             NPC.Movement.SetFollowerEnabled(true);
-            NPC.Movement.SetFollowUpdateRotation(true);
+            NPC.Movement.SetFollowerUpdateRotation(true);
 
             if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
             {
@@ -143,9 +142,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 if (_attackTarget != null)
                 {
-                    UpdateDestination(renderDeltaTime, NPC.CachedTransform.position);
-
-                    NPC.Movement.SetFollowUpdateRotation(false);
+                    NPC.Movement.SetFollowerUpdateRotation(false);
                     RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
                 }
             }
@@ -158,16 +155,16 @@ namespace LichLord.NonPlayerCharacters
 
             if (_attackTarget != null)
             {
+
                 Vector3 attackTargetPosition = _attackTarget.Position;
 
                 float sqrDist = (NPC.CachedTransform.position - attackTargetPosition).sqrMagnitude;
 
                 if (sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt)
                 {
-                    NPC.Movement.SetFollowerEnabled(false);
-                    NPC.Movement.SetFollowUpdateRotation(false);
-
+                    NPC.Movement.SetFollowerUpdateRotation(false);
                     RotateTowardTarget(attackTargetPosition, renderDeltaTime);
+
                     float angle = GetAngleToTarget(attackTargetPosition);
 
                     if (angle < 5f)
@@ -177,6 +174,7 @@ namespace LichLord.NonPlayerCharacters
                 }
                 else
                 {
+                    NPC.Movement.SetFollowerUpdateRotation(true);
                     UpdateDestination(renderDeltaTime, attackTargetPosition);
                 }
             }
@@ -184,8 +182,6 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateDestination(float renderDeltaTime, Vector3 newDestination)
         {
-            //NPC.Movement.SetFollowerEnabled(true);
-
             // If our current destination hasn't changed much, we early out
             Vector3 delta = NPC.Movement.AIFollower.destination - newDestination;
             if (delta.sqrMagnitude < 0.01f)
@@ -194,12 +190,13 @@ namespace LichLord.NonPlayerCharacters
             _destinationRefreshTime -= renderDeltaTime;
             if (_destinationRefreshTime < 0f)
             {
-                NPC.Movement.AIFollower.destination = newDestination;
+                _moveTarget = newDestination;
+                NPC.Movement.AIFollower.destination = _moveTarget;
                 _destinationRefreshTime = _destinationRefreshTimer;
             }
         }
 
-        private IChunkTrackable FindCurrentTarget()
+        public void FindCurrentTarget()
         {
             // Get current + nearby chunks
             List<Chunk> chunks = NPC.Manager.Context.ChunkManager.GetNearbyChunks(NPC.CurrentChunk.ChunkID);
@@ -238,7 +235,7 @@ namespace LichLord.NonPlayerCharacters
                 }
             }
 
-            return currentTarget;
+            _attackTarget = currentTarget;
         }
 
         private void RotateTowardTarget(Vector3 targetPosition, float renderDeltaTime)
@@ -282,14 +279,13 @@ namespace LichLord.NonPlayerCharacters
             _findTimer -= renderDeltaTime;
             if (_findTimer < 0)
             {
-                _attackTarget = FindCurrentTarget();
+                FindCurrentTarget();
 
                 if (_attackTarget != null)
                 {
                     if (_attackTarget is NonPlayerCharacter npc)
                     {
                         _moveTarget = npc.CachedTransform.position;
-                        NPC.Movement.AIFollower.destination = _moveTarget;
                     }
                 }
                 //Debug.Log(_attackTarget.ToString());

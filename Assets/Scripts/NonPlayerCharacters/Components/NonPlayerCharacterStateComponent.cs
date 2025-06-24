@@ -25,7 +25,7 @@ namespace LichLord.NonPlayerCharacters
         {
         }
 
-        public void UpdateState(ref FNonPlayerCharacterData data)
+        public void UpdateState(ref FNonPlayerCharacterData data, bool hasAuthority)
         {
             ENonPlayerState newState = data.State;
             int animIndex = data.AnimationIndex;
@@ -41,10 +41,23 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Animator.SetInteger(_animIDTriggerNumber, 25);
                     NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(true);
+                    if (hasAuthority)
+                    {
+                        NPC.Movement.AIFollower.rvoSettings.locked = false;
+                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        NPC.Movement.SetFollowerEnabled(true);
+                        NPC.Movement.SetFollowerLocalAvoidance(true);
+                        NPC.Movement.SetFollowerCanMove(true);
+                    }
                     break;
 
                 case ENonPlayerState.Inactive:
                     NPC.Hurtbox.SetHitBoxesActive(false);
+                    if (hasAuthority)
+                    {
+                        NPC.Movement.SetFollowerEnabled(false);
+                        NPC.Movement.SetFollowerLocalAvoidance(false);
+                    }
                     break;
                 case ENonPlayerState.Dead:
                     _deadTimer = _deadTimeMax;
@@ -53,9 +66,22 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.Collider.enabled = false;
+                    if (hasAuthority)
+                    {
+                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        NPC.Movement.SetFollowerEnabled(false);
+                        NPC.Movement.SetFollowerLocalAvoidance(false);
+                        NPC.Movement.SetFollowerCanMove(false);
+                    }
                     break;
                 case ENonPlayerState.HitReact:
                     NPC.HitReact.StartHitReact(newState, animIndex);
+                    if (hasAuthority)
+                    {
+                        NPC.Movement.AIFollower.rvoSettings.locked = false;
+                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        NPC.Movement.SetFollowerEnabled(false);
+                    }
                     break;
 
                 case ENonPlayerState.Maneuver_1:
@@ -63,9 +89,16 @@ namespace LichLord.NonPlayerCharacters
                 case ENonPlayerState.Maneuver_3:
                 case ENonPlayerState.Maneuver_4:
                     NPC.Brain.SetAnimationForManeuver(newState, animIndex);
+                    if (hasAuthority)
+                    {
+                        NPC.Movement.AIFollower.rvoSettings.locked = true;
+                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
+                        NPC.Movement.AIFollower.rvoSettings.priority = 1;
+                    }
                     break;
             }
 
+            // last state
             switch (_currentState)
             {
                 case ENonPlayerState.Dead:
@@ -75,6 +108,7 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Collider.enabled = true;
                     break;
             }
+
             _currentAnimIndex = animIndex;
             _currentState = newState;
         }

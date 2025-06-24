@@ -50,8 +50,6 @@ namespace LichLord.NonPlayerCharacters
         private ETeamID _teamId;
         public ETeamID TeamID => _teamId;
 
-        private ushort _configuration;
-
         // IChunkTrackable
         private Chunk _chunk;
         public Chunk CurrentChunk { get => _chunk; set => _chunk = value; }
@@ -98,7 +96,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(Manager.Context.ChunkManager);
             UpdateTeam(ref data);
 
-            _stateComponent.UpdateState(ref data);
+            _stateComponent.UpdateState(ref data, true);
 
             _movementComponent.AuthorityUpdate(ref data, renderDeltaTime);
 
@@ -116,7 +114,7 @@ namespace LichLord.NonPlayerCharacters
             if (definition == null)
                 return;
 
-            _stateComponent.UpdateState(ref data);
+            _stateComponent.UpdateState(ref data, false);
             _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
         }
 
