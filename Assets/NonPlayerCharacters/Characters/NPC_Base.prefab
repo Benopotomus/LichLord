@@ -279,16 +279,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 174069171961541429}
   _moveTarget: {x: 0, y: 0, z: 0}
+  _isInMovementStopRange: 0
+  _isInFaceTargetRange: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
     ActiveState: 4
     CooldownTimer: 0
     ManeuverAnimationTimer: 0
-  _activeManeuver:
-    Definition: {fileID: 0}
-    ActiveState: 8
-    CooldownTimer: 0
-    ManeuverAnimationTimer: 0
+  targetGO: {fileID: 0}
 --- !u!114 &-5226509248368517820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -303,7 +301,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 174069171961541429}
   _hitReacts:
-  - StateTime: 0.75
+  - StateTime: 0.5
     _animationTrigger:
       Action: 1
       Weapon: 0
@@ -313,7 +311,7 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
-  - StateTime: 0.75
+  - StateTime: 0.5
     _animationTrigger:
       Action: 2
       Weapon: 0
@@ -323,7 +321,7 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
-  - StateTime: 1.5
+  - StateTime: 0.5
     _animationTrigger:
       Action: 1
       Weapon: 0
@@ -343,7 +341,7 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
-  - StateTime: 1.5
+  - StateTime: 0.5
     _animationTrigger:
       Action: 2
       Weapon: 0

@@ -17,10 +17,6 @@ namespace LichLord.NonPlayerCharacters
         float _deadTimeMax = 5.0f;
         float _deadTimer = 5.0f;
 
-        private int _animIDWeapon = Animator.StringToHash("Weapon");
-        private int _animIDTriggerNumber = Animator.StringToHash("TriggerNumber");
-        private int _animIDTrigger = Animator.StringToHash("Trigger");
-
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
         }
@@ -34,20 +30,20 @@ namespace LichLord.NonPlayerCharacters
                 _currentAnimIndex == animIndex)
                 return;
 
+            NPC.AnimationController.SetAnimationForState(newState);
+
             switch (newState)
             {
                 case ENonPlayerState.Idle:
-                    NPC.Animator.SetInteger(_animIDWeapon, NPC.Weapons.GetWeaponID());
-                    NPC.Animator.SetInteger(_animIDTriggerNumber, 25);
-                    NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(true);
                     if (hasAuthority)
                     {
                         NPC.Movement.AIFollower.rvoSettings.locked = false;
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.SetFollowerEnabled(true);
+                        NPC.Movement.SetFollowerUpdatePosition(true);
                         NPC.Movement.SetFollowerLocalAvoidance(true);
                         NPC.Movement.SetFollowerCanMove(true);
+                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
                     }
                     break;
 
@@ -55,32 +51,32 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     if (hasAuthority)
                     {
-                        NPC.Movement.SetFollowerEnabled(false);
+                        NPC.Movement.SetFollowerUpdatePosition(false);
                         NPC.Movement.SetFollowerLocalAvoidance(false);
                     }
                     break;
                 case ENonPlayerState.Dead:
                     _deadTimer = _deadTimeMax;
-                    NPC.Animator.SetInteger(_animIDWeapon, NPC.Weapons.GetWeaponID());
-                    NPC.Animator.SetInteger(_animIDTriggerNumber, 20);
-                    NPC.Animator.SetTrigger(_animIDTrigger);
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.Collider.enabled = false;
                     if (hasAuthority)
                     {
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.SetFollowerEnabled(false);
+                        NPC.Movement.SetFollowerUpdatePosition(false);
                         NPC.Movement.SetFollowerLocalAvoidance(false);
                         NPC.Movement.SetFollowerCanMove(false);
                     }
                     break;
                 case ENonPlayerState.HitReact:
                     NPC.HitReact.StartHitReact(newState, animIndex);
+
                     if (hasAuthority)
                     {
                         NPC.Movement.AIFollower.rvoSettings.locked = false;
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.SetFollowerEnabled(false);
+                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
+                        NPC.Movement.SetFollowerUpdateRotation(false);
+                        NPC.Movement.SetFollowerUpdatePosition(false);
                     }
                     break;
 

@@ -41,7 +41,7 @@ namespace LichLord.Projectiles
         [FieldOffset(25)]
         public FBeamData BeamData;
 
-        //33
+        //30
 
         [StructLayout(LayoutKind.Explicit)]
         public struct FDyamicSpeedData : INetworkStruct

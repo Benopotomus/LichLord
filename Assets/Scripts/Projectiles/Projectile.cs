@@ -9,6 +9,7 @@ namespace LichLord.Projectiles
         public ProjectilePool OwningPool { get; set; }
         public SceneContext Context { get; set; }
         public NetworkRunner Runner => OwningPool.Runner;
+        public bool IsNPCProjectile { get; set; }
 
         public ProjectileDefinition Definition { get; protected set; }
         public IHitInstigator Instigator { get; set; }
@@ -28,6 +29,8 @@ namespace LichLord.Projectiles
         private FProjectileCollisionEvent _collisionEvent = new FProjectileCollisionEvent();
         public FProjectilePayload Payload = new FProjectilePayload();
         public FProjectilePayload Payload_SpawnedProjectile = new FProjectilePayload();
+
+
 
         public void UpdateAffectedActors(ref FProjectileData data, List<FPhysicsHitData> hitDatas, int tick)
         {

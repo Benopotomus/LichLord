@@ -358,10 +358,36 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
+      propertyPath: _maneuvers.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
       propertyPath: _maneuvers.Array.data[0].Definition
       value: 
       objectReference: {fileID: 11400000, guid: 6eebe11c58b399840b32a8dd33e6af67,
         type: 2}
+    - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _maneuvers.Array.data[1].Definition
+      value: 
+      objectReference: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2,
+        type: 2}
+    - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _maneuvers.Array.data[1].ActiveState
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _maneuvers.Array.data[0].CooldownTimer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _maneuvers.Array.data[1].CooldownTimer
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6470708934419270937, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
       propertyPath: _animator

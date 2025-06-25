@@ -13,10 +13,12 @@ namespace LichLord.NonPlayerCharacters
         public float MovementStopRange = 2.5f;
         public float AttackRange = 3f;
         public float StateTime = 1f;
+        public float FaceTargetRange = 5f;
 
         public bool RequiresEnemyTarget;
 
         public float MovementStopRangeSqrt => MovementStopRange * MovementStopRange;
+        public float FaceTargetRangeSqrt => FaceTargetRange * FaceTargetRange;
 
         [Header("Animations")]
         [SerializeField]

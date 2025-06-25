@@ -145,6 +145,8 @@ namespace LichLord.NonPlayerCharacters
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
         {
             _movementComponent.OnFixedUpdate(ref data, tick);
+
+            _brainComponent.OnFixedUpdate(ref data, tick);
         }
 
         public void ProcessHit(ref FHitUtilityData hit)

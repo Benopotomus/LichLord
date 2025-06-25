@@ -1,5 +1,4 @@
 ﻿using LichLord.World;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,19 +17,20 @@ namespace LichLord.NonPlayerCharacters
         private IChunkTrackable _attackTarget;
         public IChunkTrackable AttackTarget => _attackTarget;
 
-        private float _findTimeMax = 0.5f;
-        private float _findTimer;
+        // Modulus of ticks x/32
+        private int _updateSensesTick = 16;
+        private int _updateDestinationTick = 8;
 
-        private float _destinationRefreshTime = 0.5f;
-        private float _destinationRefreshTimer;
+        [SerializeField]
+        private bool _isInMovementStopRange = false;
+
+        [SerializeField]
+        private bool _isInFaceTargetRange = false;
 
         [SerializeField]
         private List<NonPlayerCharacterManeuverState> _maneuvers = new List<NonPlayerCharacterManeuverState>();
 
-        [SerializeField]
         private NonPlayerCharacterManeuverState _activeManeuver = null;
-
-
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
@@ -38,12 +38,12 @@ namespace LichLord.NonPlayerCharacters
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
+            UpdateManeuverTimers(ref data, renderDeltaTime);
+
             if (NPC.State.CurrentState == ENonPlayerState.Inactive ||
                 NPC.State.CurrentState == ENonPlayerState.Dead ||
                 NPC.State.CurrentState == ENonPlayerState.HitReact)
                 return;
-
-            UpdateManeuverTimers(ref data, renderDeltaTime);
 
             // Detect if an active state is running 
             // We don't want to update the target during this
@@ -52,36 +52,72 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateExecutingManeuver(ref data, renderDeltaTime);
 
+            if (NPC.State.CurrentState != ENonPlayerState.Idle)
+                return;
+
+            UpdateActiveManeuver(ref data, renderDeltaTime);
+        }
+
+        private void UpdateBrain(ref FNonPlayerCharacterData data, int tick)
+        {
+            UpdateSenses(tick);
+            SelectManeuver();
+            UpdateWanderMovement();
+        }
+
+        public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
+        {
+            tick += data.GUID;
+
+            // Update if we're in attack range
+            UpdateRanges();
+
+            UpdateMoveSpeed(ref data, tick);
+
+            if (_attackTarget != null)
+            {
+                UpdateDestination(_attackTarget.Position, tick);
+            }
+
             // We only tick if we're idle and ready
             if (data.State != ENonPlayerState.Idle)
                 return;
 
-            UpdateBrain(ref data, renderDeltaTime);
+            UpdateBrain(ref data, tick);
         }
 
-        private void UpdateBrain(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        private void UpdateMoveSpeed(ref FNonPlayerCharacterData data, int tick)
         {
-            UpdateSenses(renderDeltaTime);
-            SelectManeuver(renderDeltaTime);
-            UpdateActiveManeuver(ref data, renderDeltaTime);
-            UpdateWanderMovement();
+            if (tick % _updateDestinationTick != 0)
+                return;
+
+            if (!_isInFaceTargetRange)
+            {
+                NPC.Movement.SetFollowerUpdateRotation(true);
+                NPC.Movement.SetFollowerMaxSpeed(NPC.GetDefinition(ref data).WalkSpeed);
+            }
+            else
+            {
+                NPC.Movement.SetFollowerUpdateRotation(false);
+                NPC.Movement.SetFollowerMaxSpeed(NPC.GetDefinition(ref data).WalkSpeed * 0.6f);
+            }
         }
 
         private void UpdateWanderMovement()
         {
-            if (_activeManeuver != null)
+            if (_attackTarget != null)
                 return;
 
             NPC.Movement.AIFollower.stopDistance = 0.2f;
-            NPC.Movement.SetFollowerEnabled(true);
+            NPC.Movement.SetFollowerUpdatePosition(true);
             NPC.Movement.SetFollowerUpdateRotation(true);
 
             if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
             {
                 _moveTarget = new Vector3(
-                    UnityEngine.Random.Range(-20f, 20f),
+                    Random.Range(-20f, 20f),
                     0f, // Keep Y fixed
-                    UnityEngine.Random.Range(-20f, 20f)
+                    Random.Range(-20f, 20f)
                 );
 
                 NPC.Movement.AIFollower.destination = _moveTarget;
@@ -95,18 +131,22 @@ namespace LichLord.NonPlayerCharacters
                 _maneuvers[i].UpdateCooldownTimer(renderDeltaTime);
             }
 
-            if(_activeManeuver != null)
+            if (_activeManeuver != null)
                 _activeManeuver.UpdateStateTimer(NPC, ref data, renderDeltaTime);
         }
 
-        private void SelectManeuver(float renderDeltaTime)
+
+        // Only called when in idle
+        private void SelectManeuver()
         {
             // Check if the active maneuver is no longer valid
             if (_activeManeuver != null)
             { 
                 if(!_activeManeuver.CanBeSelected(this))
-                    _activeManeuver = null;
+                    SetActiveManuever(null);
             }
+
+            List<NonPlayerCharacterManeuverState> availableStates = new List<NonPlayerCharacterManeuverState>();
 
             // if there is no active maneuver, select another
             if (_activeManeuver == null)
@@ -115,26 +155,43 @@ namespace LichLord.NonPlayerCharacters
                 { 
                     var currentManeuver = _maneuvers[i];
                     if (currentManeuver.CanBeSelected(this))
-                    { 
-                        _activeManeuver = currentManeuver;
+                    {
+                        availableStates.Add(currentManeuver);
                     }
                 }
+
+                if (availableStates.Count == 0)
+                {
+                    SetActiveManuever(null);
+                    return;
+                }
+
+                int selectedIndex = Random.Range(0, availableStates.Count);
+                SetActiveManuever(availableStates[selectedIndex]);
             }
+        }
+
+        private void SetActiveManuever(NonPlayerCharacterManeuverState newManeuver)
+        {
+            //Debug.Log("Set New Maneuver " + newManeuver);
+            _activeManeuver = newManeuver;
         }
 
         // Runs when active meneuver is executed (in state)
         private void UpdateExecutingManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            if (_activeManeuver == null)
+            var executingManuever = GetManeuverFromState(data.State);
+
+            if (executingManuever == null)
                 return;
 
-            if (_activeManeuver.HasExpired())
+            if (executingManuever.HasExpired())
             {
-                if (_attackTarget == null || !_attackTarget.IsAttackable)
+                // if the target is no longer valid, search for a new one
+                if (!IsTargetValid(_attackTarget))
                 {
-                    // Refresh target
-                    _findTimer = 0;
-                    UpdateSenses(renderDeltaTime);
+                    FindCurrentTarget();
+                    SelectManeuver();
                 }
 
                 data.State = ENonPlayerState.Idle;
@@ -150,52 +207,54 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        private void UpdateRanges()
         {
-            if (_activeManeuver == null)
+            if (_activeManeuver == null ||
+                _attackTarget == null)
                 return;
 
-            if (_attackTarget != null)
-            {
+            float sqrDist = (NPC.CachedTransform.position - _attackTarget.Position).sqrMagnitude;
+            _isInMovementStopRange = sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt;
+            _isInFaceTargetRange = sqrDist < _activeManeuver.Definition.FaceTargetRangeSqrt;
+        }
 
+        private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        {
+            if (_activeManeuver == null ||
+                !IsTargetValid(_attackTarget))
+                return;
+
+            if (_isInFaceTargetRange)
+            { 
                 Vector3 attackTargetPosition = _attackTarget.Position;
 
-                float sqrDist = (NPC.CachedTransform.position - attackTargetPosition).sqrMagnitude;
+                NPC.Movement.SetFollowerUpdateRotation(false);
+                RotateTowardTarget(attackTargetPosition, renderDeltaTime);
 
-                if (sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt)
+                float angle = GetAngleToTarget(attackTargetPosition);
+
+                if (_isInMovementStopRange)
                 {
-                    NPC.Movement.SetFollowerUpdateRotation(false);
-                    RotateTowardTarget(attackTargetPosition, renderDeltaTime);
-
-                    float angle = GetAngleToTarget(attackTargetPosition);
-
                     if (angle < 5f)
                     {
                         _activeManeuver.ExecuteManeuver(NPC, ref data);
                     }
                 }
-                else
-                {
-                    NPC.Movement.SetFollowerUpdateRotation(true);
-                    UpdateDestination(renderDeltaTime, attackTargetPosition);
-                }
             }
         }
 
-        private void UpdateDestination(float renderDeltaTime, Vector3 newDestination)
+        private void UpdateDestination(Vector3 newDestination, int tick)
         {
+            if (tick % _updateDestinationTick != 0)
+                return;
+
             // If our current destination hasn't changed much, we early out
             Vector3 delta = NPC.Movement.AIFollower.destination - newDestination;
             if (delta.sqrMagnitude < 0.01f)
                 return;
 
-            _destinationRefreshTime -= renderDeltaTime;
-            if (_destinationRefreshTime < 0f)
-            {
-                _moveTarget = newDestination;
-                NPC.Movement.AIFollower.destination = _moveTarget;
-                _destinationRefreshTime = _destinationRefreshTimer;
-            }
+            _moveTarget = newDestination;
+            NPC.Movement.AIFollower.destination = _moveTarget;
         }
 
         public void FindCurrentTarget()
@@ -214,18 +273,8 @@ namespace LichLord.NonPlayerCharacters
                 {
                     IChunkTrackable trackable = trackables[i];
 
-                    if (!trackable.IsAttackable)
+                    if (!IsTargetValid(trackable))
                         continue;
-
-                    if (trackable is NonPlayerCharacter targetNPC)
-                    {
-                        if (targetNPC.State.CurrentState == ENonPlayerState.Inactive ||
-                            targetNPC.State.CurrentState == ENonPlayerState.Dead)
-                            continue;
-
-                        if (targetNPC.TeamID == NPC.TeamID)
-                            continue;
-                    }
 
                     float distance = Vector3.Distance(NPC.CachedTransform.position, trackable.Position);
 
@@ -237,7 +286,31 @@ namespace LichLord.NonPlayerCharacters
                 }
             }
 
-            _attackTarget = currentTarget;
+            SetAttackTarget(currentTarget);           
+        }
+
+        [SerializeField]
+        GameObject targetGO;
+
+        private bool IsTargetValid(IChunkTrackable trackable)
+        {
+            if (trackable == null) 
+                return false;
+
+            if (!trackable.IsAttackable)
+                return false;
+
+            if (trackable is NonPlayerCharacter targetNPC)
+            {
+                if (targetNPC.State.CurrentState == ENonPlayerState.Inactive ||
+                    targetNPC.State.CurrentState == ENonPlayerState.Dead)
+                    return false;
+
+                if (targetNPC.TeamID == NPC.TeamID)
+                    return false;
+            }
+
+            return true;
         }
 
         private void RotateTowardTarget(Vector3 targetPosition, float renderDeltaTime)
@@ -276,10 +349,9 @@ namespace LichLord.NonPlayerCharacters
             return unsignedAngle;
         }
 
-        private void UpdateSenses(float renderDeltaTime)
+        private void UpdateSenses(int tick)
         {
-            _findTimer -= renderDeltaTime;
-            if (_findTimer < 0)
+            if (tick % _updateSensesTick == 0)
             {
                 FindCurrentTarget();
 
@@ -290,9 +362,6 @@ namespace LichLord.NonPlayerCharacters
                         _moveTarget = npc.CachedTransform.position;
                     }
                 }
-                //Debug.Log(_attackTarget.ToString());
-
-                _findTimer = _findTimeMax;
             }
         }
 
@@ -333,6 +402,28 @@ namespace LichLord.NonPlayerCharacters
                     npc.Replicator.ApplyDamage(npc.GUID, 21);
                 }
             }
+        }
+
+        private void SetAttackTarget(IChunkTrackable target)
+        {
+            //Debug.Log("Set Attack Target " + target);
+            _attackTarget = target;
+
+            if (_attackTarget == null)
+            {
+                targetGO = null;
+                return;
+            }
+
+            if (_attackTarget is NonPlayerCharacter npc)
+                targetGO = npc.gameObject;
+
+            if (_attackTarget is PlayerCharacter pc)
+                targetGO = pc.gameObject;
+
+            _moveTarget = _attackTarget.Position;
+            NPC.Movement.AIFollower.destination = _moveTarget;
+            UpdateRanges();
         }
 
         /*

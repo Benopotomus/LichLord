@@ -1,6 +1,4 @@
 ﻿using Pathfinding;
-using System;
-using TMPro;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -25,14 +23,11 @@ namespace LichLord.NonPlayerCharacters
         private float _speedPercent;
         Vector3 _localVelocity;
 
-        private int _animIDSpeedX = Animator.StringToHash("Velocity X");
-        private int _animIDSpeedZ = Animator.StringToHash("Velocity Z");
-        private int _animIDMoving = Animator.StringToHash("Moving");
-
-        bool _followerEnabled = true;
+        bool _followerUpdatePosition = true;
         bool _followerUpdateRotation = true;
         bool _followerLocalAvoidance = true;
         bool _followerCanMove = true;
+        float _followerMaxSpeed = 5f;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
@@ -44,12 +39,12 @@ namespace LichLord.NonPlayerCharacters
             _speedPercent = _follower.velocity.magnitude / _npc.GetDefinition(ref data).WalkSpeed;
             
             UpdateVelocity(ref data, renderDeltaTime);
-            UpdateAnimator(ref data, renderDeltaTime);
+            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, renderDeltaTime);
         }
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
-            SetFollowerEnabled(false);
+            SetFollowerUpdatePosition(false);
             SetFollowerCanMove(false);
             SetFollowerLocalAvoidance(false);
 
@@ -75,7 +70,7 @@ namespace LichLord.NonPlayerCharacters
             );
 
             UpdateVelocity(ref data, renderDeltaTime);
-            UpdateAnimator(ref data, renderDeltaTime);
+            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, renderDeltaTime);
         }
 
         private void UpdateVelocity(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -83,19 +78,6 @@ namespace LichLord.NonPlayerCharacters
             _velocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
             _lastPosition = NPC.CachedTransform.position;
             _localVelocity = NPC.CachedTransform.InverseTransformDirection(_velocity);
-        }
-
-        private void UpdateAnimator(ref FNonPlayerCharacterData data, float renderDeltaTime)
-        {
-            bool isMoving = _velocity.magnitude > 0.1f;
-
-            if (NPC.State.CurrentState != ENonPlayerState.Idle)
-                isMoving = false;
-
-            Vector3 animationVelocity = _localVelocity / NPC.GetDefinition(ref data).WalkSpeed;
-            NPC.Animator.SetBool(_animIDMoving, isMoving);
-            NPC.Animator.SetFloat(_animIDSpeedX, animationVelocity.x, 0.1f, renderDeltaTime);
-            NPC.Animator.SetFloat(_animIDSpeedZ, animationVelocity.z, 0.1f, renderDeltaTime);
         }
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
@@ -110,7 +92,6 @@ namespace LichLord.NonPlayerCharacters
 
         private void WriteData(ref FNonPlayerCharacterData data)
         {
-
             // Update the runtime state
             // Update position only if the change is significant
             const float POSITION_THRESHOLD = 0.1f;
@@ -140,15 +121,24 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public void SetFollowerEnabled(bool newEnabled)
+        public void SetFollowerUpdatePosition(bool newEnabled)
         {
-            if (newEnabled == _followerEnabled)
+            if (newEnabled == _followerUpdatePosition)
                 return;
 
             _follower.updatePosition = newEnabled;
+
+            _followerUpdatePosition = newEnabled;
+        }
+
+        public void SetFollowerUpdateRotation(bool newEnabled)
+        {
+            if (_followerUpdateRotation == newEnabled)
+                return;
+
             _follower.updateRotation = newEnabled;
 
-            _followerEnabled = newEnabled;
+            _followerUpdateRotation = newEnabled;
         }
 
         public void SetFollowerCanMove(bool newCanMove)
@@ -161,16 +151,6 @@ namespace LichLord.NonPlayerCharacters
             _followerCanMove = newCanMove;
         }
 
-        public void SetFollowerUpdateRotation(bool newEnabled)
-        {
-            if(_followerUpdateRotation == newEnabled) 
-                return;
-
-            _follower.updateRotation = newEnabled;
-
-            _followerUpdateRotation = newEnabled;
-        }
-
         public void SetFollowerLocalAvoidance(bool newEnabled)
         {
             if (_followerLocalAvoidance == newEnabled)
@@ -179,6 +159,16 @@ namespace LichLord.NonPlayerCharacters
             _follower.enableLocalAvoidance = newEnabled;
 
             _followerLocalAvoidance = newEnabled;
+        }
+
+        public void SetFollowerMaxSpeed(float newSpeed)
+        {
+            if (_followerMaxSpeed == newSpeed)
+                return;
+
+            _follower.maxSpeed = newSpeed;
+
+            _followerMaxSpeed = newSpeed;
         }
 
         public void StartRecycle()

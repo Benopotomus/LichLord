@@ -28,6 +28,11 @@
             get => Global.Tables.NonPlayerCharacterTable.TryGetDefinition(DefinitionID);
         }
 
+        public int GUID
+        {
+            get => NonPlayerCharacterDataUtility.GetGUID(ref this);
+        }
+
         public int Health
         {
             get => NonPlayerCharacterDataUtility.GetHealth(ref this);

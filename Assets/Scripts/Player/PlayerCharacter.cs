@@ -2,7 +2,6 @@ using UnityEngine;
 using Fusion;
 using UnityEngine.Rendering;
 using Starter.Shooter;
-using Starter;
 using LichLord.Projectiles;
 using LichLord.NonPlayerCharacters;
 using LichLord.World;

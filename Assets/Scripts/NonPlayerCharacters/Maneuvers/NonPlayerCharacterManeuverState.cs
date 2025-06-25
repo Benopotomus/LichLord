@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -10,6 +9,14 @@ namespace LichLord.NonPlayerCharacters
         public ENonPlayerState ActiveState = ENonPlayerState.Maneuver_1;
         public float CooldownTimer;
         public float ManeuverAnimationTimer;
+
+        public bool IsValid()
+        {
+            if (Definition == null)
+                return false;
+
+            return true;
+        }
 
         public bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent)
         {
