@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace LichLord.NonPlayerCharacters
+namespace LichLord
 {
-    public class NonPlayerCharacterAnimationController : MonoBehaviour
+    public class PlayerCharacterAnimationController : MonoBehaviour
     {
         private int _animIDMoving = Animator.StringToHash("Moving");
         private int _animIDBlocking = Animator.StringToHash("Blocking");
@@ -17,7 +17,7 @@ namespace LichLord.NonPlayerCharacters
         private int _animIDSpeedX = Animator.StringToHash("Velocity X");
         private int _animIDSpeedZ = Animator.StringToHash("Velocity Z");
 
-        [SerializeField] private NonPlayerCharacter _npc;
+        [SerializeField] private PlayerCharacter _pc;
         [SerializeField] private Animator _animator;
 
         public void SetAnimationForTrigger(FAnimationTrigger animationTrigger)
@@ -25,7 +25,7 @@ namespace LichLord.NonPlayerCharacters
             _animator.SetInteger(_animIDAction, animationTrigger.Action);
             _animator.SetBool(_animIDMoving, animationTrigger.IsMoving);
             _animator.SetBool(_animIDBlocking, animationTrigger.IsBlocking);
-            _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
+            _animator.SetInteger(_animIDWeapon, 0);
             _animator.SetInteger(_animIDRightWeapon, animationTrigger.RightWeapon);
             _animator.SetInteger(_animIDSide, animationTrigger.Side);
             _animator.SetInteger(_animIDJumping, animationTrigger.Jumping);
@@ -33,28 +33,10 @@ namespace LichLord.NonPlayerCharacters
             _animator.SetTrigger(_animIDTrigger);
         }
 
-        public void SetAnimationForState(ENonPlayerState state)
-        {
-            switch (state)
-            {
-                case ENonPlayerState.Idle:
-                    _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
-                    _animator.SetInteger(_animIDTriggerNumber, 25);
-                    _animator.SetTrigger(_animIDTrigger);
-                    break;
-
-                case ENonPlayerState.Dead:
-                    _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
-                    _animator.SetInteger(_animIDTriggerNumber, 20);
-                    _animator.SetTrigger(_animIDTrigger);
-                    break;
-            }
-        }
-
-        public void UpdateAnimatonForMovement(ref FNonPlayerCharacterData data, Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
+        public void UpdateAnimatonForMovement(Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
         {
             float speed = localVelocity.magnitude;
-            float walkSpeed = _npc.GetDefinition(ref data).WalkSpeed;
+            float walkSpeed = 5;
 
             // Determine if the character is moving
             bool isMoving = speed > 0.1f || Mathf.Abs(yawVelocity) > 1f;

@@ -146,7 +146,6 @@ namespace LichLord
             }
             
             CC.transform.rotation = Quaternion.Lerp(CC.transform.rotation, Quaternion.Euler(0f, _worldTransform.Yaw, 0f), deltaTime * 8f);
-            
         }
 
         private void UpdateAnimator(float deltaTime)

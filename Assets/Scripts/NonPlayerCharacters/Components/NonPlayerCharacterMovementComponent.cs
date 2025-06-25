@@ -20,8 +20,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private LayerMask _layerMask;
 
         private Vector3 _lastPosition;
-        private float _speedPercent;
-        Vector3 _localVelocity;
+        private Vector3 _localVelocity;
+        private float _lastYaw;
+        private float _yawVelocity;
 
         bool _followerUpdatePosition = true;
         bool _followerUpdateRotation = true;
@@ -36,10 +37,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            _speedPercent = _follower.velocity.magnitude / _npc.GetDefinition(ref data).WalkSpeed;
-            
             UpdateVelocity(ref data, renderDeltaTime);
-            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, renderDeltaTime);
+            UpdateYawVelocity();
+            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, _yawVelocity, renderDeltaTime);
         }
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
@@ -70,7 +70,8 @@ namespace LichLord.NonPlayerCharacters
             );
 
             UpdateVelocity(ref data, renderDeltaTime);
-            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, renderDeltaTime);
+            UpdateYawVelocity();
+            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, _yawVelocity, renderDeltaTime);
         }
 
         private void UpdateVelocity(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -78,6 +79,13 @@ namespace LichLord.NonPlayerCharacters
             _velocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
             _lastPosition = NPC.CachedTransform.position;
             _localVelocity = NPC.CachedTransform.InverseTransformDirection(_velocity);
+        }
+
+        private void UpdateYawVelocity()
+        {
+            float currentYaw = NPC.CachedTransform.eulerAngles.y;
+            _yawVelocity= Mathf.DeltaAngle(_lastYaw, currentYaw);
+            _lastYaw = currentYaw;
         }
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
