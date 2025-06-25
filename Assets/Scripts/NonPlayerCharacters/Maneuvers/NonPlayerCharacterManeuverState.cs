@@ -7,8 +7,8 @@ namespace LichLord.NonPlayerCharacters
     {
         public NonPlayerCharacterManeuverDefinition Definition;
         public ENonPlayerState ActiveState = ENonPlayerState.Maneuver_1;
-        public float CooldownTimer;
-        public float ManeuverAnimationTimer;
+        public float CooldownExpirationTick;
+        public float ActivationExpirationTick;
 
         public bool IsValid()
         {
@@ -18,12 +18,12 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        public bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent)
+        public bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
             if(Definition == null) 
                 return false;
             
-            if (IsOnCooldown())
+            if (IsOnCooldown(tick))
                 return false;
 
             if(Definition.RequiresEnemyTarget && brainComponent.AttackTarget == null)
@@ -32,41 +32,24 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        public bool IsOnCooldown()
+        public bool IsOnCooldown(int tick)
         {
-            return CooldownTimer > 0;
+            return CooldownExpirationTick > tick;
         }
 
-        public void UpdateCooldownTimer(float renderDeltaTime)
-        {
-            if(!IsOnCooldown()) 
-                return;
-
-            CooldownTimer -= renderDeltaTime;
-        }
-
-        public bool HasExpired()
+        public bool HasExpired(int tick)
         { 
-            return ManeuverAnimationTimer < 0;
+            return ActivationExpirationTick < tick;
         }
 
-        // has expired
-        public bool UpdateStateTimer(NonPlayerCharacter npc, ref FNonPlayerCharacterData data, float renderDeltaTime)
-        {
-            if (npc.State.CurrentState == ActiveState)
-            {
-                ManeuverAnimationTimer -= renderDeltaTime;
-            }
-
-            return false;
-        }
-
-        public bool ExecuteManeuver(NonPlayerCharacter npc, ref FNonPlayerCharacterData data)
+        public bool ExecuteManeuver(NonPlayerCharacter npc, 
+            ref FNonPlayerCharacterData data, 
+            int tick)
         {
             if (data.State != ENonPlayerState.Idle)
                 return false;
 
-            if(IsOnCooldown()) 
+            if(IsOnCooldown(tick)) 
                 return false;
 
             data.State = ActiveState;
@@ -83,8 +66,8 @@ namespace LichLord.NonPlayerCharacters
             data.AnimationIndex = newAnimIndex;
 
             npc.Replicator.UpdateNPCData(data);
-            CooldownTimer = Definition.Cooldown;
-            ManeuverAnimationTimer = Definition.StateTime;
+            CooldownExpirationTick = tick + Definition.CooldownTicks;
+            ActivationExpirationTick = tick + Definition.StateTicks;
             return true;
         }
     }

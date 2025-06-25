@@ -14,8 +14,8 @@ namespace LichLord.NonPlayerCharacters
         private int Damage = 10;
 
         [SerializeField]
-        private float _cooldown = 1f;
-        public float Cooldown => _cooldown;
+        private int _cooldownTicks = 32;
+        public int CooldownTicks => _cooldownTicks;
 
         [SerializeField]
         private float MovementStopRange = 2.5f;
@@ -24,8 +24,8 @@ namespace LichLord.NonPlayerCharacters
         private float AttackRange = 3f;
 
         [SerializeField]
-        private float _stateTime = 1f;
-        public float StateTime => _stateTime;
+        private int _stateTicks = 32;
+        public int StateTicks => _stateTicks;
 
         [SerializeField]
         private float FaceTargetRange = 5f;

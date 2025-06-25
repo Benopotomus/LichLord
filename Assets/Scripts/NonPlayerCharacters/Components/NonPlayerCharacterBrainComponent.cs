@@ -1,4 +1,5 @@
-﻿using LichLord.World;
+﻿using JetBrains.Annotations;
+using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,10 +39,8 @@ namespace LichLord.NonPlayerCharacters
         {
         }
 
-        public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, int tick)
         {
-            UpdateManeuverTimers(ref data, renderDeltaTime);
-
             if (NPC.State.CurrentState == ENonPlayerState.Inactive ||
                 NPC.State.CurrentState == ENonPlayerState.Dead ||
                 NPC.State.CurrentState == ENonPlayerState.HitReact)
@@ -57,11 +56,13 @@ namespace LichLord.NonPlayerCharacters
             if (NPC.State.CurrentState != ENonPlayerState.Idle)
                 return;
 
-            UpdateActiveManeuver(ref data, renderDeltaTime);
+            UpdateActiveManeuver(ref data, renderDeltaTime, tick);
         }
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
         {
+            UpdateExecutingTimer(ref data, tick);
+
             // Modify the tick by the GUID so not everyone updates at once
             tick += data.GUID;
 
@@ -74,10 +75,30 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             UpdateSenses(tick);
-            SelectManeuver();
+            SelectManeuver(tick);
             UpdateWanderMovement();
         }
 
+        public void UpdateExecutingTimer(ref FNonPlayerCharacterData data, int tick)
+        {
+            var executingManuever = GetManeuverFromState(data.State);
+
+            if (executingManuever == null)
+                return;
+
+            if (executingManuever.HasExpired(tick))
+            {
+                // if the target is no longer valid, search for a new one
+                FindCurrentTarget();
+
+                // Im removing this maneuver immediatly 
+                SetActiveManuever(null);
+                SelectManeuver(tick);
+
+                data.State = ENonPlayerState.Idle;
+                NPC.Replicator.UpdateNPCData(data);
+            }
+        }
         private void UpdateRangesTick(int tick)
         {
             if (tick % _updateRangesTick != 0)
@@ -124,25 +145,13 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private void UpdateManeuverTimers(ref FNonPlayerCharacterData data, float renderDeltaTime)
-        {
-            for (int i = 0; i < _maneuvers.Count; i++)
-            {
-                _maneuvers[i].UpdateCooldownTimer(renderDeltaTime);
-            }
-
-            if (_activeManeuver != null)
-                _activeManeuver.UpdateStateTimer(NPC, ref data, renderDeltaTime);
-        }
-
-
         // Only called when in idle
-        private void SelectManeuver()
+        private void SelectManeuver(int tick)
         {
             // Check if the active maneuver is no longer valid
             if (_activeManeuver != null)
             { 
-                if(!_activeManeuver.CanBeSelected(this))
+                if(!_activeManeuver.CanBeSelected(this, tick))
                     SetActiveManuever(null);
             }
 
@@ -154,7 +163,7 @@ namespace LichLord.NonPlayerCharacters
                 for (int i = 0; i < _maneuvers.Count; i++)
                 { 
                     var currentManeuver = _maneuvers[i];
-                    if (currentManeuver.CanBeSelected(this))
+                    if (currentManeuver.CanBeSelected(this, tick))
                     {
                         availableStates.Add(currentManeuver);
                     }
@@ -185,23 +194,10 @@ namespace LichLord.NonPlayerCharacters
             if (executingManuever == null)
                 return;
 
-            if (executingManuever.HasExpired())
+            if (_attackTarget != null)
             {
-                // if the target is no longer valid, search for a new one
-
-                FindCurrentTarget();
-                SelectManeuver();
-
-                data.State = ENonPlayerState.Idle;
-                NPC.Replicator.UpdateNPCData(data);
-            }
-            else
-            {
-                if (_attackTarget != null)
-                {
-                    NPC.Movement.SetFollowerUpdateRotation(false);
-                    RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
-                }
+                NPC.Movement.SetFollowerUpdateRotation(false);
+                RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
             }
         }
 
@@ -216,7 +212,7 @@ namespace LichLord.NonPlayerCharacters
             _isInFaceTargetRange = sqrDist < _activeManeuver.Definition.FaceTargetRangeSqrt;
         }
 
-        private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime, int tick)
         {
             if (_activeManeuver == null ||
                 !IsTargetValid(_attackTarget))
@@ -235,7 +231,7 @@ namespace LichLord.NonPlayerCharacters
                 {
                     if (angle < 5f)
                     {
-                        _activeManeuver.ExecuteManeuver(NPC, ref data);
+                        _activeManeuver.ExecuteManeuver(NPC, ref data, tick);
                     }
                 }
             }

@@ -161,6 +161,7 @@ namespace LichLord.NonPlayerCharacters
 
             Vector3 viewPosition = playerCreature.transform.position;
             float renderDeltaTime = Time.deltaTime;
+            int tick = Runner.Tick;
             float ping = (float)Runner.GetPlayerRtt(playerCreature.Object.StateAuthority);
             bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
 
@@ -180,7 +181,7 @@ namespace LichLord.NonPlayerCharacters
                 else if (shouldBeActive && loadState.LoadState == ELoadState.Loaded)
                 {
                     if (hasAuthority)
-                        loadState.NPC.AuthorityUpdate(ref usedData, renderDeltaTime);
+                        loadState.NPC.AuthorityUpdate(ref usedData, renderDeltaTime, tick);
                     else
                         loadState.NPC.RemoteUpdate(ref usedData, renderDeltaTime, ping);
                 }

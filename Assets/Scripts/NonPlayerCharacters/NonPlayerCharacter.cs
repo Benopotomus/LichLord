@@ -89,7 +89,9 @@ namespace LichLord.NonPlayerCharacters
             
         }
 
-        public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        public void AuthorityUpdate(ref FNonPlayerCharacterData data, 
+            float renderDeltaTime, 
+            int tick)
         {
             var definition = GetDefinition(ref data);
             if (definition == null)
@@ -104,7 +106,7 @@ namespace LichLord.NonPlayerCharacters
 
             _stateComponent.AuthorityUpdate(ref data, renderDeltaTime);
 
-            _brainComponent.AuthorityUpdate(ref data, renderDeltaTime);
+            _brainComponent.AuthorityUpdate(ref data, renderDeltaTime, tick);
         }
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
