@@ -72,11 +72,11 @@ namespace LichLord.NonPlayerCharacters
 
                     if (hasAuthority)
                     {
-                        NPC.Movement.AIFollower.rvoSettings.locked = false;
+                        NPC.Movement.AIFollower.rvoSettings.locked = true;
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
                         NPC.Movement.SetFollowerUpdateRotation(false);
-                        NPC.Movement.SetFollowerUpdatePosition(false);
+                        NPC.Movement.SetFollowerUpdatePosition(true);
                     }
                     break;
 

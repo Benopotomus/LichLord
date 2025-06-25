@@ -31,6 +31,12 @@ namespace LichLord.NonPlayerCharacters
         private bool _isInFaceTargetRange = false;
 
         [SerializeField]
+        private ENonPlayerState _activeManeuverState = ENonPlayerState.Inactive;
+
+        [SerializeField]
+        private bool _hasAttackTarget = false;
+
+        [SerializeField]
         private List<NonPlayerCharacterManeuverState> _maneuvers = new List<NonPlayerCharacterManeuverState>();
 
         private NonPlayerCharacterManeuverState _activeManeuver = null;
@@ -126,7 +132,7 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateWanderMovement()
         {
-            if (_attackTarget != null)
+            if (_hasAttackTarget)
                 return;
 
             NPC.Movement.AIFollower.stopDistance = 0.2f;
@@ -149,7 +155,7 @@ namespace LichLord.NonPlayerCharacters
         private void SelectManeuver(int tick)
         {
             // Check if the active maneuver is no longer valid
-            if (_activeManeuver != null)
+            if (HasActiveManeuver())
             { 
                 if(!_activeManeuver.CanBeSelected(this, tick))
                     SetActiveManuever(null);
@@ -182,7 +188,11 @@ namespace LichLord.NonPlayerCharacters
 
         private void SetActiveManuever(NonPlayerCharacterManeuverState newManeuver)
         {
-            //Debug.Log("Set New Maneuver " + newManeuver);
+            if (newManeuver == null)
+                _activeManeuverState = ENonPlayerState.Inactive;
+            else
+                _activeManeuverState = newManeuver.ActiveState;
+
             _activeManeuver = newManeuver;
         }
 
@@ -203,8 +213,8 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateRanges()
         {
-            if (_activeManeuver == null ||
-                _attackTarget == null)
+            if (!HasActiveManeuver() ||
+                !_hasAttackTarget)
                 return;
 
             float sqrDist = (NPC.CachedTransform.position - _attackTarget.Position).sqrMagnitude;
@@ -214,7 +224,8 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime, int tick)
         {
-            if (_activeManeuver == null ||
+            if (!HasActiveManeuver() ||
+                !_hasAttackTarget ||
                 !IsTargetValid(_attackTarget))
                 return;
 
@@ -242,7 +253,7 @@ namespace LichLord.NonPlayerCharacters
             if (tick % _updateDestinationTick != 0)
                 return;
 
-            if (_attackTarget == null)
+            if (!_hasAttackTarget)
                 return;
 
             Vector3 targetPosition = _attackTarget.Position;
@@ -354,7 +365,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 FindCurrentTarget();
 
-                if (_attackTarget != null)
+                if (_hasAttackTarget)
                 {
                     if (_attackTarget is NonPlayerCharacter npc)
                     {
@@ -362,6 +373,11 @@ namespace LichLord.NonPlayerCharacters
                     }
                 }
             }
+        }
+
+        private bool HasActiveManeuver()
+        {
+            return _activeManeuverState != ENonPlayerState.Inactive;
         }
 
         public void SetAnimationForManeuver(ENonPlayerState state, int animIndex) 
@@ -393,7 +409,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnHitFromAnimation()
         {
-            if (_attackTarget != null)
+            if (_hasAttackTarget)
             { 
                 NonPlayerCharacter npc = _attackTarget as NonPlayerCharacter;
                 if(npc != null) 
@@ -405,14 +421,16 @@ namespace LichLord.NonPlayerCharacters
 
         private void SetAttackTarget(IChunkTrackable target)
         {
-            //Debug.Log("Set Attack Target " + target);
-            _attackTarget = target;
-
-            if (_attackTarget == null)
+            if (target == null)
             {
+                _hasAttackTarget = false;
                 targetGO = null;
                 return;
             }
+
+            _hasAttackTarget = true;
+
+            _attackTarget = target;
 
             if (_attackTarget is NonPlayerCharacter npc)
                 targetGO = npc.gameObject;
@@ -425,90 +443,5 @@ namespace LichLord.NonPlayerCharacters
             UpdateRanges();
         }
 
-        /*
-        public Transform findCurrentTarget()
-        {
-            //find all potential targets (enemies of this character)
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag(attackTag);
-            if (enemies.Length == 0)
-                return null;
-
-            Transform target = null;
-
-            //if we want this character to communicate with his allies
-            if (spread)
-            {
-                //get all enemies
-                List<GameObject> availableEnemies = enemies.ToList();
-                int count = 0;
-
-                //make sure it doesn't get stuck in an infinite loop
-                while (count < 300)
-                {
-                    //for all enemies
-                    for (int i = 0; i < enemies.Length; i++)
-                    {
-                        //distance between character and its nearest enemy
-                        float closestDistance = Mathf.Infinity;
-
-                        foreach (GameObject potentialTarget in availableEnemies)
-                        {
-                            //check if there are enemies left to attack and check per enemy if its closest to this character
-                            if (Vector3.Distance(transform.position, potentialTarget.transform.position) < closestDistance && potentialTarget != null)
-                            {
-                                //if this enemy is closest to character, set closest distance to distance between character and enemy
-                                closestDistance = Vector3.Distance(transform.position, potentialTarget.transform.position);
-                                target = potentialTarget.transform;
-                            }
-                        }
-
-                        //if it is valid, return this target
-                        if (target && canAttack(target))
-                        {
-                            return target;
-                        }
-                        else
-                        {
-                            //if it's not, remove it from the list and try again
-                            availableEnemies.Remove(target.gameObject);
-                        }
-                    }
-
-                    //after checking all enemies, allow one more ally to also attack the same enemy and try again
-                    maxAlliesPerEnemy++;
-                    availableEnemies.Clear();
-                    availableEnemies = enemies.ToList();
-
-                    count++;
-                }
-
-                //show a loop error
-                Debug.LogError("Infinite loop");
-            }
-            else
-            {
-                //if we're using the simple method:
-                float closestDistance = Mathf.Infinity;
-
-                foreach (GameObject potentialTarget in enemies)
-                {
-                    //check if there are enemies left to attack and check per enemy if its closest to this character
-                    if (Vector3.Distance(transform.position, potentialTarget.transform.position) < closestDistance && potentialTarget != null)
-                    {
-                        //if this enemy is closest to character, set closest distance to distance between character and enemy
-                        closestDistance = Vector3.Distance(transform.position, potentialTarget.transform.position);
-                        target = potentialTarget.transform;
-                    }
-                }
-
-                //check if there's a target and return it
-                if (target)
-                    return target;
-            }
-
-            //otherwise return null
-            return null;
-        }
-        */
     }
 }
