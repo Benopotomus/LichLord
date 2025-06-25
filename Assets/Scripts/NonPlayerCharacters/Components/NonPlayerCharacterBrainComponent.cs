@@ -20,6 +20,8 @@ namespace LichLord.NonPlayerCharacters
         // Modulus of ticks x/32
         private int _updateSensesTick = 16;
         private int _updateDestinationTick = 8;
+        private int _updateSpeedTick = 8;
+        private int _updateRangesTick = 8;
 
         [SerializeField]
         private bool _isInMovementStopRange = false;
@@ -58,37 +60,35 @@ namespace LichLord.NonPlayerCharacters
             UpdateActiveManeuver(ref data, renderDeltaTime);
         }
 
-        private void UpdateBrain(ref FNonPlayerCharacterData data, int tick)
-        {
-            UpdateSenses(tick);
-            SelectManeuver();
-            UpdateWanderMovement();
-        }
-
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
         {
+            // Modify the tick by the GUID so not everyone updates at once
             tick += data.GUID;
 
-            // Update if we're in attack range
-            UpdateRanges();
-
-            UpdateMoveSpeed(ref data, tick);
-
-            if (_attackTarget != null)
-            {
-                UpdateDestination(_attackTarget.Position, tick);
-            }
+            UpdateRangesTick(tick);
+            UpdateMoveSpeedTick(ref data, tick);
+            UpdateDestinationTick(tick);
 
             // We only tick if we're idle and ready
             if (data.State != ENonPlayerState.Idle)
                 return;
 
-            UpdateBrain(ref data, tick);
+            UpdateSenses(tick);
+            SelectManeuver();
+            UpdateWanderMovement();
         }
 
-        private void UpdateMoveSpeed(ref FNonPlayerCharacterData data, int tick)
+        private void UpdateRangesTick(int tick)
         {
-            if (tick % _updateDestinationTick != 0)
+            if (tick % _updateRangesTick != 0)
+                return;
+
+            UpdateRanges();
+        }
+
+        private void UpdateMoveSpeedTick(ref FNonPlayerCharacterData data, int tick)
+        {
+            if (tick % _updateSpeedTick != 0)
                 return;
 
             if (!_isInFaceTargetRange)
@@ -188,11 +188,9 @@ namespace LichLord.NonPlayerCharacters
             if (executingManuever.HasExpired())
             {
                 // if the target is no longer valid, search for a new one
-                if (!IsTargetValid(_attackTarget))
-                {
-                    FindCurrentTarget();
-                    SelectManeuver();
-                }
+
+                FindCurrentTarget();
+                SelectManeuver();
 
                 data.State = ENonPlayerState.Idle;
                 NPC.Replicator.UpdateNPCData(data);
@@ -243,17 +241,22 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private void UpdateDestination(Vector3 newDestination, int tick)
+        private void UpdateDestinationTick(int tick)
         {
             if (tick % _updateDestinationTick != 0)
                 return;
 
+            if (_attackTarget == null)
+                return;
+
+            Vector3 targetPosition = _attackTarget.Position;
+
             // If our current destination hasn't changed much, we early out
-            Vector3 delta = NPC.Movement.AIFollower.destination - newDestination;
+            Vector3 delta = NPC.Movement.AIFollower.destination - targetPosition;
             if (delta.sqrMagnitude < 0.01f)
                 return;
 
-            _moveTarget = newDestination;
+            _moveTarget = targetPosition;
             NPC.Movement.AIFollower.destination = _moveTarget;
         }
 
