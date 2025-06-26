@@ -1,4 +1,6 @@
 ﻿using DWD.Pooling;
+using Fusion;
+using LichLord.Props;
 using LichLord.World;
 using UnityEngine;
 
@@ -7,9 +9,6 @@ namespace LichLord.NonPlayerCharacters
 
     public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor, IChunkTrackable
     {
-        protected NonPlayerCharacterManager _manager;
-        public NonPlayerCharacterManager Manager => _manager;
-
         protected NonPlayerCharacterReplicator _replicator;
         public NonPlayerCharacterReplicator Replicator => _replicator;
 
@@ -31,6 +30,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterAnimationController _animationController;
         public NonPlayerCharacterAnimationController AnimationController => _animationController;
 
+        [SerializeField] private MuzzleComponent _muzzleComponent;
+        public MuzzleComponent Muzzle => _muzzleComponent;
+
         [SerializeField] private Animator _animator;
         public Animator Animator => _animator;
 
@@ -43,8 +45,13 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private CapsuleCollider _collider;
         public CapsuleCollider Collider => _collider;
 
+        private SceneContext _context;
+        public SceneContext Context => _context;
+
         public INetActor NetActor => this;
-        public FNetObjectID NetObjectID => new FNetObjectID();
+
+        private FNetObjectID _netObjectID = new FNetObjectID();
+        public FNetObjectID NetObjectID => _netObjectID;
 
         private int _guid;
         public int GUID => _guid;
@@ -77,16 +84,18 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private GameObject blueHat;
 
-        public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacterManager manager, NonPlayerCharacterReplicator replicator)
+        public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacterReplicator replicator)
         {
-            _manager = manager;
+            _context = replicator.Context;
             _replicator = replicator;
             _movementComponent.OnSpawned(ref spawnParams);
             _stateComponent.OnSpawned(ref spawnParams);
             _brainComponent.OnSpawned(ref spawnParams);
             _guid = spawnParams.index;
-            UpdateChunk(Manager.Context.ChunkManager);
-            
+            UpdateChunk(_context.ChunkManager);
+
+            _netObjectID.networkId = _replicator.Object.Id;
+            _netObjectID.index = (ushort)spawnParams.index;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, 
@@ -97,7 +106,7 @@ namespace LichLord.NonPlayerCharacters
             if (definition == null)
                 return;
 
-            UpdateChunk(Manager.Context.ChunkManager);
+            UpdateChunk(_context.ChunkManager);
             UpdateTeam(ref data);
 
             _stateComponent.UpdateState(ref data, true);
@@ -111,7 +120,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
-            UpdateChunk(Manager.Context.ChunkManager);
+            UpdateChunk(_context.ChunkManager);
             UpdateTeam(ref data);
 
             var definition = GetDefinition(ref data);
@@ -161,11 +170,25 @@ namespace LichLord.NonPlayerCharacters
 
         }
 
-        public void HitPerformed(ref FHitUtilityData hit)
+        void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
         {
+            NetworkRunner runner = Context.Runner;
+            if (hit.target is NonPlayerCharacter npc)
+            {
+                npc.Replicator.RPC_DealDamageToNPC(npc.GUID, hit.damageData.damageValue);
 
+                if (!runner.IsSharedModeMasterClient)
+                    npc.Replicator.Predict_DealDamageToNPC(npc.GUID, hit.damageData.damageValue);
+            }
+
+            if (hit.target is Prop prop)
+            {
+                Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
+
+                if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
+                    Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
+            }
         }
-
 
         public void UpdateChunk(ChunkManager chunkManager)
         {
@@ -188,7 +211,7 @@ namespace LichLord.NonPlayerCharacters
         {
             _movementComponent.StartRecycle();
             DWDObjectPool.Instance.Recycle(this);
-            UpdateChunk(Manager.Context.ChunkManager);
+            UpdateChunk(Context.ChunkManager);
         }
 
         private NonPlayerCharacterDefinition _definition;

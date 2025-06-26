@@ -10,6 +10,7 @@ namespace LichLord.Projectiles
         public SceneContext Context { get; set; }
         public NetworkRunner Runner => OwningPool.Runner;
         public bool IsNPCProjectile { get; set; }
+        public int Index { get; set; }
 
         public ProjectileDefinition Definition { get; protected set; }
         public IHitInstigator Instigator { get; set; }

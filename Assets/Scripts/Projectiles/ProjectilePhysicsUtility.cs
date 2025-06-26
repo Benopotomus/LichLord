@@ -76,7 +76,6 @@
             {
                 ProjectileImpactUtility.HandleImpact(projectile, ref data, ref impactHit, tick);
             }
-            
         }
 
         public static void CheckShapeCollisions(Projectile projectile,
@@ -469,6 +468,15 @@
 
             if (hitTarget == projectile.Instigator)
                 return false;
+
+            // Check if im an NPC projectile
+            if (projectile.IsNPCProjectile)
+            {
+                if (hitTarget is PlayerCharacter pc)
+                {
+                    //return false;
+                }
+            }
 
             return true;
         }

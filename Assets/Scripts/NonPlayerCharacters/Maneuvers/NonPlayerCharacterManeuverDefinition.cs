@@ -11,38 +11,43 @@ namespace LichLord.NonPlayerCharacters
         private string ActionName;
 
         [SerializeField]
-        private int Damage = 10;
+        private int _damage = 10;
+        public int Damage => _damage;
 
         [SerializeField]
         private int _cooldownTicks = 32;
         public int CooldownTicks => _cooldownTicks;
 
         [SerializeField]
-        private float MovementStopRange = 2.5f;
+        private float _movementStopRange = 2.5f;
 
         [SerializeField]
-        private float AttackRange = 3f;
+        private float _attackRange = 3f;
+        public float AttackRange => _attackRange;
 
         [SerializeField]
         private int _stateTicks = 32;
         public int StateTicks => _stateTicks;
 
         [SerializeField]
-        private float FaceTargetRange = 5f;
+        private float _faceTargetRange = 5f;
 
         [SerializeField]
         private bool _requiresEnemyTarget;
         public bool RequiresEnemyTarget => _requiresEnemyTarget;
 
-        public float MovementStopRangeSqrt => MovementStopRange * MovementStopRange;
-        public float FaceTargetRangeSqrt => FaceTargetRange * FaceTargetRange;
+        public float MovementStopRangeSqrt => _movementStopRange * _movementStopRange;
+        public float FaceTargetRangeSqrt => _faceTargetRange * _faceTargetRange;
 
         [Header("Animations")]
         [SerializeField]
         private List<FAnimationTrigger> _animationTriggers = new List<FAnimationTrigger>();
         public List<FAnimationTrigger> AnimationTriggers => _animationTriggers;
 
-        List<FManeuverProjectile> maneuverProjectiles = new List<FManeuverProjectile>();
+        [Header("Projectiles")]
+        [SerializeField]
+        private List<FManeuverProjectile> _maneuverProjectiles = new List<FManeuverProjectile>();
+        public List<FManeuverProjectile> ManeuverProjectiles => _maneuverProjectiles;
     }
 
 }

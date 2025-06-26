@@ -7,7 +7,6 @@ namespace LichLord.Projectiles
 
     public class FixedUpdateProjectile : Projectile
     {
-        public int Index { get; set; }
         public PlayerRef StateAuthority { get; set; }
 
         public float Lifetime { get; set; }
@@ -28,6 +27,8 @@ namespace LichLord.Projectiles
             {
                 Definition.ProjectileMovement.ActivateFixedUpdate(this, ref data);
             }
+
+            data.IsActive = true;
         }
 
         public void SetData(ref FProjectileData data)
@@ -49,6 +50,7 @@ namespace LichLord.Projectiles
             data.IsHoming = false;
             data.HasImpacted = false;
             data.FireTick = Runner.Tick;
+            data.IsActive = false;
         }
 
         public void OnLifetimeExpired(ref FProjectileData data)
@@ -58,6 +60,9 @@ namespace LichLord.Projectiles
 
         public void OnFixedUpdate(ref FProjectileData data, int tick, float simulationTime, float deltaTime)
         {
+            if (!data.IsActive)
+                return;
+
             if (data.IsFinished)
                 return;
 
@@ -75,8 +80,10 @@ namespace LichLord.Projectiles
 
             if (data.HasImpacted)
             {
-                if (simulationTime >= + (ImpactTick * deltaTime) + Definition.PostImpactLifetime)
-                    data.IsFinished = true;
+                if (simulationTime >= +(ImpactTick * deltaTime) + Definition.PostImpactLifetime)
+                {
+                    DeactivateFixedUpdate(ref data);
+                }
 
                 return;
             }

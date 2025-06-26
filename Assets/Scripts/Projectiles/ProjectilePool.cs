@@ -79,7 +79,7 @@ namespace LichLord.Projectiles
             }
         }
 
-        protected void SetupFixedUpdateProjectiles(int count)
+        protected virtual void SetupFixedUpdateProjectiles(int count)
         {
             _fixedUpdateProjectiles = new FixedUpdateProjectile[count];
             for (int i = 0; i < count; i++)
@@ -191,8 +191,7 @@ namespace LichLord.Projectiles
                 if (projectile == null)
                     continue;
 
-                projectile.OwningPool = this;
-                projectile.ActivateRender(ref data);
+                SetupRenderProjectile(ref data, projectile, bufferIndex);
 
                 ViewEntry newEntry = ProjectileViewPool.Get<ViewEntry>();
                 newEntry.Projectile = projectile;
@@ -216,16 +215,11 @@ namespace LichLord.Projectiles
                     var toData = toDataBuffer[bufferIndex];
                     var fromData = fromDataBuffer[bufferIndex];
 
-                    //if (HasInputAuthority)
-                    //   Debug.Log("Key: " + pair.Key + " toData Finished: " + toData.IsFinished +  " fromData Finished: " + fromData.IsFinished + " RT: " + Runner.LocalRenderTime);
-
                     projectile.OnRender(ref toData, ref fromData, bufferAlpha, renderTime, networkDeltaTime, localDeltaTime, tick);
                     pair.Value.LastData = toData;
                 }
                 else
                 {
-
-                    //Debug.Log("First Render " + Runner.SimulationTime);
                     // Use last data to Render when there are no data available in the buffer
                     projectile.OnRender(ref pair.Value.LastData, ref pair.Value.LastData, 0f, renderTime, networkDeltaTime, localDeltaTime, tick);
                 }
@@ -281,10 +275,17 @@ namespace LichLord.Projectiles
             return data;
         }
 
+        protected virtual void SetupRenderProjectile(ref FProjectileData data, RenderProjectile projectile, int index)
+        {
+            projectile.OwningPool = this;
+            projectile.Index = index;
+            projectile.ActivateRender(ref data);
+        }
+
         void OnDrawGizmos()
         {
-            
-            if (_fixedUpdateProjectiles == null) return;
+            if (_fixedUpdateProjectiles == null)
+                return;
 
             for (int i = 0; i < MAX_PROJECTILE_COUNT; i++)
             {

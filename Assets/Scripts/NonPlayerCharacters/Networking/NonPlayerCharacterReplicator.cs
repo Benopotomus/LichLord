@@ -19,6 +19,7 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
 
         private List<NPCLoadState> _loadStates = new List<NPCLoadState>();
+        public List<NPCLoadState> LoadStates => _loadStates;
 
         private HashSet<int> _freeIndices = new HashSet<int>();
 
@@ -229,7 +230,7 @@ namespace LichLord.NonPlayerCharacters
             NPCLoadState loadState = _loadStates[spawnParams.index];
             loadState.NPC = character;
             loadState.LoadState = ELoadState.Loaded;
-            character.OnSpawned(ref spawnParams, Context.NonPlayerCharacterManager, this);
+            character.OnSpawned(ref spawnParams, this);
         }
 
         public void ApplyDamage(int index, int damage)

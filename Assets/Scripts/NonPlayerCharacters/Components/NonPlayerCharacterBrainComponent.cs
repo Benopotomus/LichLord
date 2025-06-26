@@ -103,8 +103,12 @@ namespace LichLord.NonPlayerCharacters
 
                 data.State = ENonPlayerState.Idle;
                 NPC.Replicator.UpdateNPCData(data);
+                return;
             }
+
+            executingManuever.UpdateManeuverTick(_npc, ref data, tick);
         }
+
         private void UpdateRangesTick(int tick)
         {
             if (tick % _updateRangesTick != 0)
@@ -204,7 +208,7 @@ namespace LichLord.NonPlayerCharacters
             if (executingManuever == null)
                 return;
 
-            if (_attackTarget != null)
+            if (_hasAttackTarget)
             {
                 NPC.Movement.SetFollowerUpdateRotation(false);
                 RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
@@ -270,7 +274,7 @@ namespace LichLord.NonPlayerCharacters
         public void FindCurrentTarget()
         {
             // Get current + nearby chunks
-            List<Chunk> chunks = NPC.Manager.Context.ChunkManager.GetNearbyChunks(NPC.CurrentChunk.ChunkID);
+            List<Chunk> chunks = NPC.Context.ChunkManager.GetNearbyChunks(NPC.CurrentChunk.ChunkID);
 
             float closestDistance = Mathf.Infinity;
             IChunkTrackable currentTarget = null;
@@ -409,12 +413,13 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnHitFromAnimation()
         {
-            if (_hasAttackTarget)
+            if (_hasAttackTarget &&
+                HasActiveManeuver())
             { 
                 NonPlayerCharacter npc = _attackTarget as NonPlayerCharacter;
                 if(npc != null) 
                 {
-                    npc.Replicator.ApplyDamage(npc.GUID, 21);
+                    npc.Replicator.ApplyDamage(npc.GUID, _activeManeuver.Definition.Damage);
                 }
             }
         }

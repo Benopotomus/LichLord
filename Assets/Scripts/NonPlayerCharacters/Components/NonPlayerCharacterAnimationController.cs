@@ -35,6 +35,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetAnimationForState(ENonPlayerState state)
         {
+
             switch (state)
             {
                 case ENonPlayerState.Idle:
@@ -53,6 +54,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void UpdateAnimatonForMovement(ref FNonPlayerCharacterData data, Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
         {
+            if (data.State != ENonPlayerState.Idle)
+                return;
+
             float speed = localVelocity.magnitude;
             float walkSpeed = _npc.GetDefinition(ref data).WalkSpeed;
 

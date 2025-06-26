@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: NPCManeuver_BowShoot
   m_EditorClassIdentifier: 
   ActionName: BowShoot
-  Damage: 10
-  _cooldown: 1
-  MovementStopRange: 20
-  AttackRange: 30
-  _stateTime: 1
-  FaceTargetRange: 30
+  _damage: 10
+  _cooldownTicks: 32
+  _movementStopRange: 20
+  _attackRange: 30
+  _stateTicks: 32
+  _faceTargetRange: 25
   _requiresEnemyTarget: 0
   _animationTriggers:
-  - Action: 8
+  - Action: 1
     Weapon: 0
     TriggerNumber: 4
     Side: 2
@@ -29,27 +29,14 @@ MonoBehaviour:
     RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
-  - Action: 9
-    Weapon: 0
-    TriggerNumber: 4
-    Side: 2
-    Jumping: 0
-    RightWeapon: 9
-    IsMoving: 0
-    IsBlocking: 0
-  - Action: 10
-    Weapon: 0
-    TriggerNumber: 4
-    Side: 2
-    Jumping: 0
-    RightWeapon: 9
-    IsMoving: 0
-    IsBlocking: 0
-  - Action: 11
-    Weapon: 0
-    TriggerNumber: 4
-    Side: 2
-    Jumping: 0
-    RightWeapon: 9
-    IsMoving: 0
-    IsBlocking: 0
+  _maneuverProjectiles:
+  - SpawnTick: 12
+    Definition: {fileID: 11400000, guid: 1d5d7ce428d0ac145a2c9609625a65d6, type: 2}
+    SpawnsOnAnimationNotify: 0
+    Muzzle: 1
+    Damage:
+      DamageValue: 12
+      DamageType: 1
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0

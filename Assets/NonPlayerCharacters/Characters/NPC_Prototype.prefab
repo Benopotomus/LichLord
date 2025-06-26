@@ -85,6 +85,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1396656066499201824}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &3578672705104977993 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2506275834461907817, guid: 05de2cda76e50af439d834d99a10064c,
+    type: 3}
+  m_PrefabInstance: {fileID: 1396656066499201824}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4721924574023871053 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5973547903282913645, guid: 05de2cda76e50af439d834d99a10064c,
+    type: 3}
+  m_PrefabInstance: {fileID: 1396656066499201824}
+  m_PrefabAsset: {fileID: 0}
 --- !u!95 &5871526850355729852 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 4763174278638821020, guid: 05de2cda76e50af439d834d99a10064c,
@@ -170,6 +182,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 752641511422403372, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _handBoneLeft
+      value: 
+      objectReference: {fileID: 4721924574023871053}
+    - target: {fileID: 752641511422403372, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _handBoneRight
+      value: 
+      objectReference: {fileID: 3578672705104977993}
     - target: {fileID: 6470708934419270937, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
       propertyPath: _animator

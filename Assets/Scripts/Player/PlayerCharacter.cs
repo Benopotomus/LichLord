@@ -24,6 +24,9 @@ namespace LichLord
         public HurtboxComponent Hurtbox;
         public Animator Animator;
 
+        [SerializeField] private MuzzleComponent _muzzleComponent;
+        public MuzzleComponent Muzzle => _muzzleComponent;
+
         public Renderer[] HeadRenderers;
         public GameObject[] FirstPersonOverlayObjects;
 
@@ -32,9 +35,6 @@ namespace LichLord
 
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
-
-        [SerializeField] private Transform _handBoneLeft;
-        [SerializeField] private Transform _handBoneRight;
 
         public FNetObjectID NetObjectID
         {
@@ -261,22 +261,7 @@ namespace LichLord
             }
         }
 
-        public Vector3 GetMuzzlePosition(EMuzzle muzzle)
-        {
-            switch (muzzle)
-            {
-                case EMuzzle.LeftHand:
-                    return _handBoneLeft.position;
 
-                case EMuzzle.RightHand:
-                    return _handBoneLeft.position;
-
-                case EMuzzle.LeftHand_RightHand_Blend:
-                    return Vector3.Lerp(_handBoneLeft.position, _handBoneRight.position, 0.5f); 
-            }
-
-            return _cachedTransform.position;
-        }
 
         private string GetProjectName()
         {

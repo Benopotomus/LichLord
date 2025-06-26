@@ -1,5 +1,5 @@
 ﻿using Fusion;
-using UnityEngine;
+using LichLord.NonPlayerCharacters;
 
 namespace LichLord
 {
@@ -46,7 +46,21 @@ namespace LichLord
 
         public IHitInstigator GetHitInstigator(NetworkRunner runner)
         {
-            return GetComponent<IHitInstigator>(runner);
+            var netObject = GetNetObject(runner);
+            if (netObject == null)
+                return null;
+
+            // Use TryGetComponent if using Unity 2020.3+ for performance
+            if (netObject.TryGetComponent<NonPlayerCharacterReplicator>(out var npcReplicator))
+            {
+                if (npcReplicator.LoadStates[index].LoadState != ELoadState.Loaded)
+                    return null;
+             
+                return npcReplicator.LoadStates[index].NPC;
+            }
+
+            // Fallback: direct component lookup
+            return netObject.GetComponent<IHitInstigator>();
         }
 
         public IHitTarget GetHitTarget(NetworkRunner runner)

@@ -1,4 +1,5 @@
-﻿using LichLord.Projectiles;
+﻿using LichLord.NonPlayerCharacters;
+using LichLord.Projectiles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,12 @@ namespace LichLord
         {
             if (actor is PlayerCharacter pc)
             {
-                return pc.GetMuzzlePosition(muzzle);
+                return pc.Muzzle.GetMuzzlePosition(muzzle);
+            }
+
+            if (actor is NonPlayerCharacter npc)
+            {
+                return npc.Muzzle.GetMuzzlePosition(muzzle);
             }
 
             return Vector3.zero;

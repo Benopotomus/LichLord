@@ -109,13 +109,13 @@ namespace LichLord
             playerCharacter.Maneuvers.RPC_NotifyEndExecute((ushort)TableID);
         }
 
-        private void SpawnProjectile(PlayerCharacter playerCharacter, ref FManeuverProjectile projectileData, int tick)
+        private void SpawnProjectile(PlayerCharacter pc, ref FManeuverProjectile projectileData, int tick)
         {
-            ProjectileManager projectileManager = playerCharacter.Context.ProjectileManager;
+            ProjectileManager projectileManager = pc.Context.ProjectileManager;
             if (projectileManager == null)
                 return;
 
-            Vector3 targetPos = playerCharacter.Context.Camera.CachedRaycastHit.position;
+            Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;
 
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
             FProjectilePayload payload = new FProjectilePayload();
@@ -129,9 +129,9 @@ namespace LichLord
             ProjectileManager.CreateProjectileFireEvent(
                 ref fireEvent,
                 projectileData.Definition,
-                playerCharacter,
+                pc,
                 new FNetObjectID(),
-                playerCharacter.GetMuzzlePosition(projectileData.Muzzle),
+                MuzzleUtility.GetMuzzlePosition(pc, projectileData.Muzzle),
                 targetPos,
                 tick,
                 ref payload,

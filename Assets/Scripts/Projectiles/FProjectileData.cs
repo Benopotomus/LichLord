@@ -8,12 +8,13 @@ namespace LichLord.Projectiles
     public struct FProjectileData : INetworkStruct
     {
         // When the projectile has completed its lifetime until it becomes inactive.
-        public bool IsFinished { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
-        public bool HasStopped { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
-        public bool IsHoming { get { return IsBitSet(ref _state, 3); } set { SetBit(ref _state, 3, value); } }
-        public bool HasImpacted { get { return IsBitSet(ref _state, 4); } set { SetBit(ref _state, 4, value); } }
-        public bool InstigatorEffectApplied { get { return IsBitSet(ref _state, 5); } set { SetBit(ref _state, 5, value); } }
-        public bool IsReflected { get { return IsBitSet(ref _state, 6); } set { SetBit(ref _state, 6, value); } }
+        public bool IsActive { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
+        public bool IsFinished { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
+        public bool HasStopped { get { return IsBitSet(ref _state, 3); } set { SetBit(ref _state, 3, value); } }
+        public bool IsHoming { get { return IsBitSet(ref _state, 4); } set { SetBit(ref _state, 4, value); } }
+        public bool HasImpacted { get { return IsBitSet(ref _state, 5); } set { SetBit(ref _state, 5, value); } }
+        public bool InstigatorEffectApplied { get { return IsBitSet(ref _state, 6); } set { SetBit(ref _state, 6, value); } }
+        public bool IsReflected { get { return IsBitSet(ref _state, 7); } set { SetBit(ref _state, 7, value); } }
 
         [FieldOffset(0)]
         private byte _state;

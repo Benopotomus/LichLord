@@ -241,6 +241,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 752641511422403372, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _handBoneLeft
+      value: 
+      objectReference: {fileID: 880012112042857268}
+    - target: {fileID: 752641511422403372, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _handBoneRight
+      value: 
+      objectReference: {fileID: 7627982238889114157}
     - target: {fileID: 4703270737596821085, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
       propertyPath: managedState.rvoSettings.locked
@@ -369,9 +379,21 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ee4e9b1d7909286409319ca5270a9c27, type: 3}
+--- !u!4 &880012112042857268 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7965493324807436971, guid: ee4e9b1d7909286409319ca5270a9c27,
+    type: 3}
+  m_PrefabInstance: {fileID: 7114970133147117983}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4391844849113490280 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6795795758671366903, guid: ee4e9b1d7909286409319ca5270a9c27,
+    type: 3}
+  m_PrefabInstance: {fileID: 7114970133147117983}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7627982238889114157 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 820071631673496498, guid: ee4e9b1d7909286409319ca5270a9c27,
     type: 3}
   m_PrefabInstance: {fileID: 7114970133147117983}
   m_PrefabAsset: {fileID: 0}

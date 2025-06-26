@@ -1996,6 +1996,7 @@ GameObject:
   - component: {fileID: 6155389979576705781}
   - component: {fileID: 8911782388783612553}
   - component: {fileID: 6479483160014541239}
+  - component: {fileID: 5886866483268230399}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -2050,12 +2051,11 @@ MonoBehaviour:
   Currency: {fileID: 6479483160014541239}
   Hurtbox: {fileID: 1365664862452816086}
   Animator: {fileID: 3816291510956059953}
+  _muzzleComponent: {fileID: 5886866483268230399}
   HeadRenderers: []
   FirstPersonOverlayObjects: []
   _Nickname: 
   _cachedTransform: {fileID: 1142867646521763857}
-  _handBoneLeft: {fileID: 5362074393791706597}
-  _handBoneRight: {fileID: 3423735672707374332}
 --- !u!114 &7362189930313428062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2280,6 +2280,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcf035b9fd5a53048adc242dc5c05c92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5886866483268230399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12c05af24cb5a254f97a252501c15f73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _handBoneLeft: {fileID: 5362074393791706597}
+  _handBoneRight: {fileID: 3423735672707374332}
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0
