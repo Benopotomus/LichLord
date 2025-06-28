@@ -7,6 +7,8 @@
 
         NonPlayerCharacterDefinition cachedDefinition;
 
+        public int PredictionTick;
+
         public NonPlayerCharacterState(ref FNonPlayerCharacterData data)
         {
             CopyData(ref data);

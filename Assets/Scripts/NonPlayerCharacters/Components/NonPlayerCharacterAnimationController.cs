@@ -33,10 +33,12 @@ namespace LichLord.NonPlayerCharacters
             _animator.SetTrigger(_animIDTrigger);
         }
 
-        public void SetAnimationForState(ENonPlayerState state)
+        public void SetAnimationForState(ENonPlayerState oldState, ENonPlayerState newState)
         {
+            if (oldState == newState)
+                return;
 
-            switch (state)
+            switch (newState)
             {
                 case ENonPlayerState.Idle:
                     _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
@@ -45,6 +47,7 @@ namespace LichLord.NonPlayerCharacters
                     break;
 
                 case ENonPlayerState.Dead:
+
                     _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
                     _animator.SetInteger(_animIDTriggerNumber, 20);
                     _animator.SetTrigger(_animIDTrigger);

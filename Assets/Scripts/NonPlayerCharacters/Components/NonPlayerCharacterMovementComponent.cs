@@ -48,6 +48,7 @@ namespace LichLord.NonPlayerCharacters
         public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
         {
             SetFollowerUpdatePosition(false);
+            SetFollowerUpdateRotation(false);
             SetFollowerCanMove(false);
             SetFollowerLocalAvoidance(false);
 

@@ -26,29 +26,47 @@ namespace LichLord.NonPlayerCharacters
         // Prediction
         private Dictionary<int, NonPlayerCharacterState> _predictedStates = new Dictionary<int, NonPlayerCharacterState>();
         private List<FNonPlayerCharacterData> _localNpcDatas = new List<FNonPlayerCharacterData>();
+        [SerializeField]
+        private int _predictedStatesCount = 0;
 
         public void Predict_DealDamageToNPC(int guid, int damage, int hitReactIndex)
         {
             var targetData = _npcDatas.Get(guid);
 
-            if (_predictedStates.TryGetValue(guid, out var predictedData))
+            if (_predictedStates.TryGetValue(guid, out NonPlayerCharacterState predictedState))
             {
-                predictedData.ApplyDamage(damage, hitReactIndex);
+                predictedState.ApplyDamage(damage, hitReactIndex);
+
+                float ping = (float)Runner.GetPlayerRtt(Context.LocalPlayerRef);
+
+                int removalTick = (Runner.Tick + Runner.TickRate);
+                predictedState.PredictionTick = removalTick;
+                Debug.Log("ping " + ping);
+                Debug.Log("Tick: " + Runner.Tick + ", Removal Tick " + removalTick);
+                /*
                 Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
                     predictedData.Data.State +
                     " Anim " + predictedData.Data.AnimationIndex +
                     ", tick: " + Runner.Tick);
+                */
             }
             else
             {
-                var newPredictedData = new NonPlayerCharacterState(ref targetData);
-                newPredictedData.ApplyDamage(damage, hitReactIndex);
+                NonPlayerCharacterState newPredictedState = new NonPlayerCharacterState(ref targetData);
+                newPredictedState.ApplyDamage(damage, hitReactIndex);
+
+                float ping = (float)Runner.GetPlayerRtt(Context.LocalPlayerRef);
+                int removalTick = (Runner.Tick + Runner.TickRate);
+                newPredictedState.PredictionTick = removalTick;
+                Debug.Log("ping " + ping);
+                Debug.Log("Tick: " + Runner.Tick + ", Removal Tick " + removalTick);
+                /*
                 Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
                     newPredictedData.Data.State +
                     " Anim " + newPredictedData.Data.AnimationIndex +
                     ", tick: " + Runner.Tick);
-
-                _predictedStates.Add(guid, newPredictedData);
+                */
+                _predictedStates.Add(guid, newPredictedState);
             }
         }
 
@@ -158,6 +176,19 @@ namespace LichLord.NonPlayerCharacters
             return -1;
         }
 
+        private void TimeoutPredictedStates(int tick, float ping)
+        {
+            var keysToRemove = _predictedStates
+                .Where(kvp => tick > kvp.Value.PredictionTick)
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            foreach (var key in keysToRemove)
+            {
+                _predictedStates.Remove(key);
+            }
+        }
+
         public override void Render()
         {
             base.Render();
@@ -168,11 +199,15 @@ namespace LichLord.NonPlayerCharacters
             if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter playerCreature))
                 return;
 
+            _predictedStatesCount = _predictedStates.Count;
+
             Vector3 viewPosition = playerCreature.transform.position;
             float renderDeltaTime = Time.deltaTime;
             int tick = Runner.Tick;
             float ping = (float)Runner.GetPlayerRtt(playerCreature.Object.StateAuthority);
             bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
+
+            TimeoutPredictedStates(tick, ping);
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
@@ -268,27 +303,33 @@ namespace LichLord.NonPlayerCharacters
 
             // Check for if local data has changed
             if (localData.State != authorityData.State ||
-                localData.Health != authorityData.Health ||
                 localData.AnimationIndex != authorityData.AnimationIndex)
             {
-                Debug.Log("Local Health: " + localData.Health + 
+                /*
+                Debug.Log("GUID: " + localData.GUID +  
+                    " Local Health: " + localData.Health + 
                     ", Master Health: " + authorityData.Health +
                     ", Local State: " + localData.State + 
                     ", Master State: " + authorityData.State);
-                
-                // local data changed
+                */
+
+                // check if the new state is our predicted state. If it is, we can clear the predicted state
                 if (hasPredictedData)
                 {
-                    hasPredictedData = false;
-                    _predictedStates.Remove(index);
-                    Debug.Log("Guid: " + predictedState.Data.GUID + ", Clearing Predicted State " + predictedState.Data.State + 
-                        " Anim " + predictedState.Data.AnimationIndex +
-                        ", tick: " + Runner.Tick);
+                    if (authorityData.State == predictedState.Data.State) // &&
+                    //    authorityData.AnimationIndex == predictedState.Data.AnimationIndex)
+                    {
+                        hasPredictedData = false;
+                        _predictedStates.Remove(index);
+                        /*
+                        Debug.Log("Guid: " + predictedState.Data.GUID + ", Clearing Predicted State " + predictedState.Data.State +
+                            " Anim " + predictedState.Data.AnimationIndex +
+                            ", tick: " + Runner.Tick);
+                        */
+                    }
                 }
 
-                localData.Health = _renderWriteData.Health;
-                localData.State = _renderWriteData.State;
-                localData.AnimationIndex = _renderWriteData.AnimationIndex;
+                localData.Copy(ref authorityData);
 
                 _localNpcDatas[index] = localData;
             }

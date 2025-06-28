@@ -30,17 +30,20 @@ namespace LichLord.NonPlayerCharacters
                 _currentAnimIndex == animIndex)
                 return;
 
-            NPC.AnimationController.SetAnimationForState(newState);
+            NPC.AnimationController.SetAnimationForState(_currentState, newState);
 
             switch (newState)
             {
                 case ENonPlayerState.Idle:
+                    NPC.Collider.enabled = true;
                     NPC.Hurtbox.SetHitBoxesActive(true);
+
                     if (hasAuthority)
                     {
                         NPC.Movement.AIFollower.rvoSettings.locked = false;
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.SetFollowerUpdatePosition(true);
+                        NPC.Movement.SetFollowerUpdateRotation(true);
                         NPC.Movement.SetFollowerLocalAvoidance(true);
                         NPC.Movement.SetFollowerCanMove(true);
                         //NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
@@ -63,11 +66,13 @@ namespace LichLord.NonPlayerCharacters
                     {
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.SetFollowerUpdatePosition(false);
+                        NPC.Movement.SetFollowerUpdateRotation(false);
                         NPC.Movement.SetFollowerLocalAvoidance(false);
                         NPC.Movement.SetFollowerCanMove(false);
                     }
                     break;
                 case ENonPlayerState.HitReact:
+                    NPC.Collider.enabled = true;
                     NPC.HitReact.StartHitReact(newState, animIndex);
 
                     if (hasAuthority)
@@ -84,6 +89,7 @@ namespace LichLord.NonPlayerCharacters
                 case ENonPlayerState.Maneuver_2:
                 case ENonPlayerState.Maneuver_3:
                 case ENonPlayerState.Maneuver_4:
+                    NPC.Collider.enabled = true;
                     NPC.Brain.SetAnimationForManeuver(newState, animIndex);
 
                     if (hasAuthority)
@@ -92,17 +98,6 @@ namespace LichLord.NonPlayerCharacters
                         //NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
                         NPC.Movement.AIFollower.rvoSettings.priority = 1;
                     }
-                    break;
-            }
-
-            // last state
-            switch (_currentState)
-            {
-                case ENonPlayerState.Dead:
-                case ENonPlayerState.Inactive:
-                    NPC.CachedTransform.position = data.Position;
-                    NPC.CachedTransform.rotation = data.Rotation;
-                    NPC.Collider.enabled = true;
                     break;
             }
 

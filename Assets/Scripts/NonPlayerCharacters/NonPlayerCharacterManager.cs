@@ -68,7 +68,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (flip)
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 1; i++)
                 {
 
                     Vector3 randomPosition = new Vector3(
@@ -84,7 +84,7 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     Vector3 randomPosition = new Vector3(
                         Random.Range(-10f, 10f),

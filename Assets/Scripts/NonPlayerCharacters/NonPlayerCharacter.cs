@@ -134,7 +134,16 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             _stateComponent.UpdateState(ref data, false);
-            _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
+
+            switch (_stateComponent.CurrentState)
+            {
+                case ENonPlayerState.Dead:
+                case ENonPlayerState.Inactive:
+                    break;
+                default:
+                    _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
+                    break;
+            }
         }
 
         private void UpdateTeam(ref FNonPlayerCharacterData data)
