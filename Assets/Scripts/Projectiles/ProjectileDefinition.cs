@@ -15,8 +15,8 @@ namespace LichLord.Projectiles
 
         //Definitions
         [SerializeField]
-        protected float _postImpactLifetime = 0.2f;
-        public float PostImpactLifetime => _postImpactLifetime;
+        protected float _postImpactTicks = 16;
+        public float PostImpactTicks => _postImpactTicks;
 
         [SerializeField]
         protected List<ProjectileDefinition> _deactivationSpawnedProjectiles = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);

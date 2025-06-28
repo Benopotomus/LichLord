@@ -25,16 +25,15 @@ namespace LichLord.World
                 string saveFilePath = GetSaveFilePath(sessionName);
 
                 // Get all the world chunks
-                var worldChunks = Context.ChunkManager.WorldChunks;
+                var deltaChunks = Context.ChunkManager.DeltaChunks;
 
                 // Hold onto a dictionary of chunk save datas
                 Dictionary<FChunkPosition, FChunkSaveData> chunkSaveDatas = new Dictionary<FChunkPosition, FChunkSaveData>();
                 int totalPropCount = 0; // Manual counter for props
 
-                foreach (var chunkPair in worldChunks)
+                foreach (var chunk in deltaChunks)
                 {
-                    FChunkPosition chunkCoord = chunkPair.Key;
-                    Chunk chunk = chunkPair.Value;
+                    FChunkPosition chunkCoord = chunk.ChunkID;
                     if (chunk.DeltaPropStates == null || chunk.DeltaPropStates.Count == 0)
                     {
                         continue;

@@ -20,7 +20,6 @@ namespace LichLord.Projectiles
         private byte _state;
         [FieldOffset(1)]
         public FNetObjectID InstigatorID;
-
         [FieldOffset(7)]
         public ushort DefinitionID;
         [FieldOffset(9)]

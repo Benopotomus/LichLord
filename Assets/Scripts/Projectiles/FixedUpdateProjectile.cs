@@ -60,9 +60,6 @@ namespace LichLord.Projectiles
 
         public void OnFixedUpdate(ref FProjectileData data, int tick, float simulationTime, float deltaTime)
         {
-            if (!data.IsActive)
-                return;
-
             if (data.IsFinished)
                 return;
 
@@ -80,7 +77,7 @@ namespace LichLord.Projectiles
 
             if (data.HasImpacted)
             {
-                if (simulationTime >= +(ImpactTick * deltaTime) + Definition.PostImpactLifetime)
+                if (tick >= ImpactTick + Definition.PostImpactTicks)
                 {
                     DeactivateFixedUpdate(ref data);
                 }

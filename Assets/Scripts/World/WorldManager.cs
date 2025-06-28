@@ -24,6 +24,11 @@ namespace LichLord.World
 
             Context.ChunkManager.InitializeWorldChunks();
 
+            if (HasStateAuthority)
+            {
+                Context.ChunkManager.LoadChunkFromSaves();
+            }
+
             Context.SpawnManager.SpawnLocalPlayer(Runner.LocalPlayer);
         }
     }

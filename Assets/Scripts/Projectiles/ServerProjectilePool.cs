@@ -88,6 +88,10 @@ namespace LichLord.Projectiles
 
         public override void FixedUpdateNetwork()
         {
+            if (!Runner.IsForward
+                || !Runner.IsFirstTick)
+                return;
+
             if (IsProxy)
                 return;
 

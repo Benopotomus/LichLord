@@ -4,11 +4,19 @@
     using Fusion;
     using System.Collections.Generic;
     using UnityEngine;
+    using UnityEngine.Pool;
 
     public static class ProjectilePhysicsUtility
     {
-        // This needs to be on the render thread since we want projectiles that are not from players
-        // to affect players from their point of view
+        // Static pools for arrays and HashSet to avoid allocations
+        private static readonly RaycastHit[] rayHitsPool = new RaycastHit[maxCollisionCheckNumber]; // Define maxCollisionCheckNumber (e.g., 32)
+        private static readonly RaycastHit[] sphereHitsPool = new RaycastHit[maxCollisionCheckNumber];
+        private static readonly Collider[] collidersPool = new Collider[maxCollisionCheckNumber];
+        private static readonly HashSet<GameObject> seenGameObjectsPool = new HashSet<GameObject>();
+
+        // Adjust this value based on the maximum expected CollisionCheckNumber
+        private const int maxCollisionCheckNumber = 32;
+
         public static void CheckAndHandleCollision(Projectile projectile,
             ref FProjectileData data,
             int tick,
@@ -47,9 +55,7 @@
             ProjectileDefinition definition = projectile.Definition;
 
             FPhysicsHitData impactHit = new FPhysicsHitData();
-            List<FPhysicsHitData> hitDatas = new List<FPhysicsHitData>();
-
-            data.IsReflected = false;
+            List<FPhysicsHitData> hitDatas = ListPool<FPhysicsHitData>.Get();
 
             // Perform the shape collision check
             CheckShapeCollisions(projectile,
@@ -63,8 +69,10 @@
 
             if (definition.OnlyAffectImpactTarget && impactHit.IsAssigned)
             {
-                hitDatas = new List<FPhysicsHitData> { impactHit };
-                projectile.UpdateAffectedActors(ref data, hitDatas, tick);
+                List<FPhysicsHitData> singleHitData = ListPool<FPhysicsHitData>.Get();
+                singleHitData.Add(impactHit);
+                projectile.UpdateAffectedActors(ref data, singleHitData, tick);
+                ListPool<FPhysicsHitData>.Release(singleHitData);
             }
             else
             {
@@ -76,6 +84,9 @@
             {
                 ProjectileImpactUtility.HandleImpact(projectile, ref data, ref impactHit, tick);
             }
+
+            // Release the hitDatas list
+            ListPool<FPhysicsHitData>.Release(hitDatas);
         }
 
         public static void CheckShapeCollisions(Projectile projectile,
@@ -89,12 +100,13 @@
         {
             ProjectileDefinition definition = projectile.Definition;
 
-            FQueryShape _currentQueryShape = new FQueryShape();
-
-            _currentQueryShape.position = position;
-            _currentQueryShape.rotation = rotation;
-            _currentQueryShape.shapeType = definition.Shape;
-            _currentQueryShape.shapeExtents = definition.Extents * GetScaleAtTime(definition, simTimeSinceFired);
+            FQueryShape _currentQueryShape = new FQueryShape
+            {
+                position = position,
+                rotation = rotation,
+                shapeType = definition.Shape,
+                shapeExtents = definition.Extents * GetScaleAtTime(definition, simTimeSinceFired)
+            };
 
             GetValidHits(projectile, ref data, ref _currentQueryShape, ref hitDatas, ref impactHit);
         }
@@ -105,11 +117,10 @@
             ref List<FPhysicsHitData> hitDatas,
             ref FPhysicsHitData impactHit)
         {
-
-            List<FOverlapHit> hitResults = new List<FOverlapHit>();
+            List<FOverlapHit> hitResults = ListPool<FOverlapHit>.Get();
 
             switch (projectile.Definition.PhysicsSweep)
-            { 
+            {
                 case EPhysicsSweep.Overlap:
                     hitResults = GetOverlapHits(projectile, ref queryShape);
                     break;
@@ -131,7 +142,7 @@
 
                 if (gameObjectHit.tag == "Hurtbox")
                 {
-                        HurtboxOwner hitboxOwnerComp = gameObjectHit.GetComponent<HurtboxOwner>();
+                    HurtboxOwner hitboxOwnerComp = gameObjectHit.GetComponent<HurtboxOwner>();
                     if (hitboxOwnerComp == null)
                         continue;
 
@@ -140,7 +151,7 @@
                     if (!IsImpactObjectValid(projectile, gameObjectHit, hitTarget))
                         continue;
                 }
-                
+
                 // Check for impact layer
                 if ((impactLayer.value & (1 << gameObjectHit.layer)) != 0)
                 {
@@ -150,7 +161,6 @@
                         impactHit.HitObject = gameObjectHit;
                         impactHit.HitTarget = hitTarget;
                         impactHit.ProjectilePosition = queryShape.position;
-                        //impactHit.ImpactVelocity = projectile.FixedUpdateVelocity;
                         impactHit.ImpactPoint = hitResult.HitPoint;
                         impactHit.HitNormal = hitResult.Normal;
 
@@ -159,21 +169,25 @@
                     }
                 }
 
-                // Check for to for overlap layer
+                // Check for overlap layer
                 if ((overlapLayer.value & (1 << gameObjectHit.layer)) != 0)
                 {
-                    FPhysicsHitData hitData = new FPhysicsHitData();
-                    hitData.IsAssigned = true;
-                    hitData.HitObject = gameObjectHit;
-                    hitData.HitTarget = hitTarget;
-                    hitData.ProjectilePosition = queryShape.position;
-                    //hitData.ImpactVelocity = projectile.FixedUpdateVelocity;
-                    hitData.ImpactPoint = hitResult.HitPoint;
-                    impactHit.HitNormal = hitResult.Normal;
+                    FPhysicsHitData hitData = new FPhysicsHitData
+                    {
+                        IsAssigned = true,
+                        HitObject = gameObjectHit,
+                        HitTarget = hitTarget,
+                        ProjectilePosition = queryShape.position,
+                        ImpactPoint = hitResult.HitPoint,
+                        HitNormal = hitResult.Normal
+                    };
 
                     hitDatas.Add(hitData);
                 }
             }
+
+            // Release hitResults
+            ListPool<FOverlapHit>.Release(hitResults);
         }
 
         public struct FOverlapHit
@@ -191,21 +205,24 @@
             Vector3 position = queryShape.position;
             Quaternion rotation = queryShape.rotation;
 
-            List<FOverlapHit> hitResults = new List<FOverlapHit>();
-            
+            List<FOverlapHit> hitResults = ListPool<FOverlapHit>.Get();
+
             float maxDistance = Vector3.Distance(position, projectile.TargetPosition);
 
             switch (queryShape.shapeType)
             {
                 case EShapeType.Raycast:
-                    RaycastHit[] rayHits = Physics.RaycastAll(
+                    int rayHitCount = Physics.RaycastNonAlloc(
                         position,
                         rotation * Vector3.forward,
+                        rayHitsPool,
                         Mathf.Min(queryShape.shapeExtents.x, maxDistance),
                         definition.OverlapCollisionLayer);
 
-                    foreach (var hit in rayHits)
+                    hitResults.Capacity = Mathf.Max(hitResults.Capacity, rayHitCount);
+                    for (int i = 0; i < rayHitCount; i++)
                     {
+                        var hit = rayHitsPool[i];
                         hitResults.Add(new FOverlapHit
                         {
                             GameObject = hit.collider.gameObject,
@@ -218,16 +235,18 @@
                     break;
 
                 case EShapeType.Capsule:
-                    // Use NonAlloc to avoid allocations; assume reasonable max hits
-                    RaycastHit[] capsuleHits = Physics.SphereCastAll(
+                    int capsuleHitCount = Physics.SphereCastNonAlloc(
                         position,
                         queryShape.shapeExtents.x,
                         rotation * Vector3.forward,
+                        sphereHitsPool,
                         Mathf.Min(queryShape.shapeExtents.y, maxDistance),
                         definition.OverlapCollisionLayer);
 
-                    foreach (var hit in capsuleHits)
+                    hitResults.Capacity = Mathf.Max(hitResults.Capacity, capsuleHitCount);
+                    for (int i = 0; i < capsuleHitCount; i++)
                     {
+                        var hit = sphereHitsPool[i];
                         hitResults.Add(new FOverlapHit
                         {
                             GameObject = hit.collider.gameObject,
@@ -238,78 +257,66 @@
                         });
                     }
                     break;
+
                 case EShapeType.Sphere:
-                    // Cone angle half in degrees
                     float coneAngleDegreesHalf = queryShape.shapeExtents.y;
                     float coneAngleCos = Mathf.Cos(coneAngleDegreesHalf * Mathf.Deg2Rad);
                     Vector3 coneForward = rotation * Vector3.forward;
 
-                    // Use NonAlloc to avoid allocations; assume reasonable max hits
-                    Collider[] collidersHit = new Collider[definition.CollisionCheckNumber];
                     int hitCount = Physics.OverlapSphereNonAlloc(
                         position,
                         queryShape.shapeExtents.x,
-                        collidersHit,
+                        collidersPool,
                         definition.OverlapCollisionLayer);
 
+                    hitResults.Capacity = Mathf.Max(hitResults.Capacity, hitCount);
                     for (int i = 0; i < hitCount; i++)
                     {
-                        Collider hit = collidersHit[i];
+                        Collider hit = collidersPool[i];
                         Vector3 hitPoint;
                         Vector3 normal;
                         float distance;
 
-                        // Check if collider supports ClosestPoint
                         bool supportsClosestPoint = hit is BoxCollider || hit is SphereCollider || hit is CapsuleCollider ||
                                                    (hit is MeshCollider meshCollider && meshCollider.convex);
 
                         if (supportsClosestPoint)
                         {
-                            // Use ClosestPoint for supported colliders
                             hitPoint = hit.ClosestPoint(position);
                         }
                         else
                         {
-                            // Fallback for unsupported colliders
                             Bounds bounds = hit.bounds;
                             hitPoint = bounds.ClosestPoint(position);
                             if (Vector3.Distance(hitPoint, position) < Mathf.Epsilon)
                             {
-                                // If bounds.ClosestPoint is invalid, use bounds center
                                 hitPoint = bounds.center;
                             }
                         }
 
-                        // Calculate vector from position to hit point
                         Vector3 toHit = hitPoint - position;
                         distance = toHit.magnitude;
 
-                        // Handle zero-distance case
                         Vector3 toHitNormalized;
                         if (distance < Mathf.Epsilon)
                         {
-                            // Fallback for zero-distance hits
-                            toHitNormalized = coneForward; // Assume hit is along cone axis
-                            distance = 0.0001f; // Small non-zero distance to avoid issues
-                            normal = coneForward; // Use cone forward as normal
+                            toHitNormalized = coneForward;
+                            distance = 0.0001f;
+                            normal = coneForward;
                         }
                         else
                         {
-                            // Normalize the vector for angle check
                             toHitNormalized = toHit / distance;
                             normal = toHitNormalized;
                         }
 
-                        // Apply cone check if cone angle is valid
                         if (queryShape.shapeExtents.y > 0)
                         {
-                            // Check if hit is within the cone
                             float cosAngle = Vector3.Dot(coneForward, toHitNormalized);
                             if (cosAngle < coneAngleCos)
-                                continue; // Hit is outside the cone
+                                continue;
                         }
 
-                        // Calculate normal
                         normal = toHitNormalized;
 
                         hitResults.Add(new FOverlapHit
@@ -325,23 +332,25 @@
             }
 
             if (hitResults.Count == 0)
-                return hitResults;
+                return hitResults; // Caller must release
 
-            // Filter hitResults to keep only the first hit per GameObject
-            List<FOverlapHit> filteredHits = new List<FOverlapHit>(hitResults.Count);
-            HashSet<GameObject> seenGameObjects = new HashSet<GameObject>();
-
-            foreach (FOverlapHit hit in hitResults)
+            // In-place filtering to keep only the first hit per GameObject
+            hitResults.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+            seenGameObjectsPool.Clear();
+            int writeIndex = 0;
+            for (int i = 0; i < hitResults.Count; i++)
             {
-                GameObject gameObjectHit = hit.GameObject;
-                if (gameObjectHit != null && !seenGameObjects.Contains(gameObjectHit))
+                GameObject gameObjectHit = hitResults[i].GameObject;
+                if (gameObjectHit != null && !seenGameObjectsPool.Contains(gameObjectHit))
                 {
-                    filteredHits.Add(hit);
-                    seenGameObjects.Add(gameObjectHit);
+                    hitResults[writeIndex] = hitResults[i];
+                    seenGameObjectsPool.Add(gameObjectHit);
+                    writeIndex++;
                 }
             }
+            hitResults.RemoveRange(writeIndex, hitResults.Count - writeIndex);
 
-            return filteredHits;
+            return hitResults; // Caller must release
         }
 
         public static List<FOverlapHit> GetCastHits(Projectile projectile, ref FQueryShape queryShape)
@@ -353,10 +362,10 @@
             Vector3 direction = nextPosition - lastPosition;
             float distance = direction.magnitude;
 
-            List<FOverlapHit> hitResults = new List<FOverlapHit>();
+            List<FOverlapHit> hitResults = ListPool<FOverlapHit>.Get();
 
             if (distance < Mathf.Epsilon)
-                return hitResults; // Skip if no movement
+                return hitResults; // Caller must release
 
             Vector3 directionNormalized = direction.normalized;
 
@@ -364,17 +373,16 @@
             {
                 case EShapeType.Raycast:
                     Ray ray = new Ray(lastPosition, directionNormalized);
-                    RaycastHit[] rayHits = new RaycastHit[definition.CollisionCheckNumber];
-
                     int raycastHitCount = Physics.RaycastNonAlloc(
                         ray,
-                        rayHits,
+                        rayHitsPool,
                         distance,
                         definition.OverlapCollisionLayer);
 
+                    hitResults.Capacity = Mathf.Max(hitResults.Capacity, raycastHitCount);
                     for (int i = 0; i < raycastHitCount; i++)
                     {
-                        RaycastHit hit = rayHits[i];
+                        RaycastHit hit = rayHitsPool[i];
                         Collider hitCollider = hit.collider;
 
                         hitResults.Add(new FOverlapHit
@@ -389,18 +397,18 @@
                     break;
 
                 case EShapeType.Sphere:
-                    RaycastHit[] sphereHits = new RaycastHit[definition.CollisionCheckNumber];
                     int hitCount = Physics.SphereCastNonAlloc(
                         lastPosition,
                         queryShape.shapeExtents.x,
                         directionNormalized,
-                        sphereHits,
+                        sphereHitsPool,
                         distance,
                         definition.OverlapCollisionLayer);
 
+                    hitResults.Capacity = Mathf.Max(hitResults.Capacity, hitCount);
                     for (int i = 0; i < hitCount; i++)
                     {
-                        RaycastHit hit = sphereHits[i];
+                        RaycastHit hit = sphereHitsPool[i];
                         Collider hitCollider = hit.collider;
 
                         hitResults.Add(new FOverlapHit
@@ -416,23 +424,25 @@
             }
 
             if (hitResults.Count == 0)
-                return hitResults;
+                return hitResults; // Caller must release
 
-            // Filter hitResults to keep only the first hit per GameObject
-            List<FOverlapHit> filteredHits = new List<FOverlapHit>(hitResults.Count);
-            HashSet<GameObject> seenGameObjects = new HashSet<GameObject>();
-
-            foreach (FOverlapHit hit in hitResults)
+            // In-place filtering to keep only the first hit per GameObject
+            hitResults.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+            seenGameObjectsPool.Clear();
+            int writeIndex = 0;
+            for (int i = 0; i < hitResults.Count; i++)
             {
-                GameObject gameObjectHit = hit.GameObject;
-                if (gameObjectHit != null && !seenGameObjects.Contains(gameObjectHit))
+                GameObject gameObjectHit = hitResults[i].GameObject;
+                if (gameObjectHit != null && !seenGameObjectsPool.Contains(gameObjectHit))
                 {
-                    filteredHits.Add(hit);
-                    seenGameObjects.Add(gameObjectHit);
+                    hitResults[writeIndex] = hitResults[i];
+                    seenGameObjectsPool.Add(gameObjectHit);
+                    writeIndex++;
                 }
             }
+            hitResults.RemoveRange(writeIndex, hitResults.Count - writeIndex);
 
-            return filteredHits;
+            return hitResults; // Caller must release
         }
 
         public static float GetScaleAtTime(ProjectileDefinition definition, float timeSinceFire)
@@ -444,46 +454,28 @@
             if (animationCurveDefinition == null)
                 return 1f;
 
-            // Ensure that lifetime is greater than zero to avoid division by zero
             if (definition.Lifetime <= 0f)
                 return 1f;
 
-            // Calculate the percentage of the lifetime that has expired
-            float percentLifetimeExpired = timeSinceFire / definition.Lifetime;
-
-            // Clamp the value between 0 and 1 to ensure valid percentage
-            percentLifetimeExpired = Mathf.Clamp01(percentLifetimeExpired);
-
+            float percentLifetimeExpired = Mathf.Clamp01(timeSinceFire / definition.Lifetime);
             return animationCurveDefinition.Curve.Evaluate(percentLifetimeExpired);
         }
 
         public static bool IsImpactObjectValid(Projectile projectile, GameObject hitObject, IHitTarget hitTarget)
         {
-            // Early exit for untagged or irrelevant objects
-            if (projectile == null)
+            if (projectile == null || projectile.Instigator == null || hitTarget == projectile.Instigator)
                 return false;
 
-            if (projectile.Instigator == null)
-                return false;
-
-            if (hitTarget == projectile.Instigator)
-                return false;
-
-            // Check if im an NPC projectile
-            if (projectile.IsNPCProjectile)
+            if (projectile.IsNPCProjectile && hitTarget is PlayerCharacter)
             {
-                if (hitTarget is PlayerCharacter pc)
-                {
-                    //return false;
-                }
+                return false;
             }
 
             return true;
         }
-        
+
         public static bool IsCollidingActive(ProjectileDefinition definition, float simTimeSinceFired)
         {
-            // See if it can collide yet.
             if (definition.CollisionCheckTrim.x != 0.0f && definition.CollisionCheckTrim.x > simTimeSinceFired)
                 return false;
 

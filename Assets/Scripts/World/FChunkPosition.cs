@@ -13,27 +13,14 @@ namespace LichLord.World
         [FieldOffset(1)]
         public sbyte Y;
 
-        // Equality operator
-        public static bool operator ==(FChunkPosition a, FChunkPosition b)
-        {
-            return a.X == b.X && a.Y == b.Y;
+        public bool IsEqual(ref FChunkPosition other)
+        { 
+            if(X != other.X || Y != other.Y)
+                return false;
+
+            return true;
         }
 
-        // Inequality operator
-        public static bool operator !=(FChunkPosition a, FChunkPosition b)
-        {
-            return !(a == b);
-        }
-
-        // Override Equals for object comparison
-        public override bool Equals(object obj)
-        {
-            if (obj is FChunkPosition other)
-            {
-                return this == other;
-            }
-            return false;
-        }
 
         // Override GetHashCode for consistency with Equals
         public override int GetHashCode()

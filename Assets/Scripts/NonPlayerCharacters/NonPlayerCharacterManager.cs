@@ -130,7 +130,7 @@ namespace LichLord.NonPlayerCharacters
                 data.Rotation = Quaternion.identity;
 
                 _deltaStates[freeIndex] = data; // Store full state for persistence
-                _replicator.UpdateNPCData(data);
+                _replicator.UpdateNPCData(ref data);
             }
         }
 

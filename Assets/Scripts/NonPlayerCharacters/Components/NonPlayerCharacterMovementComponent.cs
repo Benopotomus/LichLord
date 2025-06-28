@@ -30,9 +30,12 @@ namespace LichLord.NonPlayerCharacters
         bool _followerCanMove = true;
         float _followerMaxSpeed = 5f;
 
+        private Transform _transform;
+
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
             _lastPosition = spawnParams.position;
+            _transform = transform;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
@@ -83,8 +86,9 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateYawVelocity()
         {
-            float currentYaw = NPC.CachedTransform.eulerAngles.y;
-            _yawVelocity= Mathf.DeltaAngle(_lastYaw, currentYaw);
+            Vector3 forward = _transform.forward;
+            float currentYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+            _yawVelocity = currentYaw - _lastYaw;
             _lastYaw = currentYaw;
         }
 

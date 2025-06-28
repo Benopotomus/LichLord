@@ -11,127 +11,115 @@ namespace LichLord.World
         [SerializeField]
         private bool drawChunkBounds = true; // Toggle for gizmo drawing
 
-        [Networked, Capacity(WorldConstants.CHUNK_COUNT_MAX)]
-        public NetworkDictionary<FChunkPosition, ELoadState> _networkChunks { get; }
-        
-        private Dictionary<FChunkPosition, Chunk> _worldChunks = new Dictionary<FChunkPosition, Chunk>();
-        public Dictionary<FChunkPosition, Chunk> WorldChunks => _worldChunks;
+        private Chunk[,] _worldChunks = new Chunk[40, 40];
+        public Chunk[,] WorldChunks => _worldChunks;
+
+        public HashSet<Chunk> _deltaChunks = new HashSet<Chunk>();
+        public HashSet<Chunk> DeltaChunks => _deltaChunks;
+
+        private int _arrayOffsetX;  // Offset to handle negative X coordinates
+        private int _arrayOffsetY;  // Offset to handle negative Y coordinates
 
         public void InitializeWorldChunks()
         {
             WorldSettings worldSettings = Context.WorldManager.WorldSettings;
 
+            // Calculate chunk grid size based on world size and chunk size
             var chunkGridSize = new Vector2Int(
                 Mathf.CeilToInt(worldSettings.WorldSize.x / WorldConstants.CHUNK_SIZE),
                 Mathf.CeilToInt(worldSettings.WorldSize.y / WorldConstants.CHUNK_SIZE)
-                );
+            );
 
-            for (int x = 0; x < chunkGridSize.x; x++)
+            // Define min/max coordinates to handle negative sbyte values
+            int minX = -chunkGridSize.x / 2; // Center the world around (0,0)
+            int maxX = chunkGridSize.x / 2 - 1;
+            int minY = -chunkGridSize.y / 2;
+            int maxY = chunkGridSize.y / 2 - 1;
+
+            // Set offsets to map negative coordinates to array indices
+            _arrayOffsetX = -minX;
+            _arrayOffsetY = -minY;
+
+            // Initialize the chunk array
+            _worldChunks = new Chunk[chunkGridSize.x, chunkGridSize.y];
+
+            // Populate the chunk array and dictionaries
+            for (int x = minX; x <= maxX; x++)
             {
-                for (int y = 0; y < chunkGridSize.y; y++)
+                for (int y = minY; y <= maxY; y++)
                 {
-                    FChunkPosition chunkID = new FChunkPosition 
-                    { 
-                        X = (sbyte)x, 
+                    FChunkPosition chunkID = new FChunkPosition
+                    {
+                        X = (sbyte)x,
                         Y = (sbyte)y
                     };
 
-                    _worldChunks[chunkID] = new Chunk(chunkID, worldSettings.WorldOrigin);
+                    // Map chunk coordinates to array indices
+                    int arrayX = x + _arrayOffsetX;
+                    int arrayY = y + _arrayOffsetY;
 
-                    if (!_networkChunks.ContainsKey(chunkID))
-                    {
-                        _networkChunks.Set(chunkID, ELoadState.None);
-                    }
+                    // Initialize chunk and store in array
+                    _worldChunks[arrayX, arrayY] = new Chunk(chunkID, worldSettings.WorldOrigin, this);
+                }
+            }
+        }
+
+        public void LoadChunkFromSaves()
+        {
+            Dictionary<FChunkPosition, FChunkSaveData> loadedChunks =
+                       Context.WorldSaveLoadManager.LoadedChunks;
+
+            foreach(var chunkSaveData in loadedChunks.Values)
+            {
+                Chunk chunk = GetChunk(chunkSaveData.chunkCoord);
+                foreach (var savedProp in chunkSaveData.props)
+                {
+                    // Copy the data
+                    FPropData savedData = new FPropData();
+                    savedData.StateData = savedProp.stateData;
+
+                    // write out the props into the chunk itself
+                    PropRuntimeState propRuntimeState = new PropRuntimeState(
+
+                        savedProp.guid,
+                        savedProp.position,
+                        savedProp.rotation,
+                        savedProp.definitionId,
+                        savedData
+                    );
+
+                    Context.PropManager.ReplicateAuthorityData(propRuntimeState);
                 }
             }
         }
 
         public override void FixedUpdateNetwork()
         {
+            if (!Runner.IsForward 
+                || !Runner.IsFirstTick)
+                return;
+
             base.FixedUpdateNetwork();
-
-            var activePlayers = Context.NetworkGame.ActivePlayers;
-            var chunksToMark = new HashSet<FChunkPosition>();
-
-            // Collect all nearby chunk IDs to mark as Loaded
-            for (int i = 0; i < activePlayers.Count; i++)
-            {
-                var player = activePlayers[i];
-                if (player.CurrentChunk == null)
-                    continue;
-
-                var centerID = player.CurrentChunk.ChunkID;
-                var nearby = GetNearbyChunks(centerID, radius: 3);
-
-                for (int j = 0; j < nearby.Count; j++)
-                {
-                    FChunkPosition chunkPosition = nearby[j].ChunkID;
-
-                    if (_networkChunks.Get(chunkPosition) == ELoadState.None)
-                    {
-                        chunksToMark.Add(chunkPosition);
-                    }
-                }
-            }
-
-            // Set them in the network dictionary
-            foreach (FChunkPosition chunkID in chunksToMark)
-            {
-                var loadedChunks = Context.WorldSaveLoadManager.LoadedChunks;
-                if(loadedChunks.TryGetValue(chunkID, out FChunkSaveData saveData))
-                {
-                    Chunk chunk = GetChunk(chunkID);
-                    foreach (var savedProp in saveData.props)
-                    {
-                        // Copy the data
-                        FPropData savedData = new FPropData();
-                        savedData.StateData = savedProp.stateData;
-
-                        // write out the props into the chunk itself
-                        PropRuntimeState propRuntimeState = new PropRuntimeState(
-
-                            savedProp.guid,
-                            savedProp.position,
-                            savedProp.rotation,
-                            savedProp.definitionId,
-                            savedData
-                        );
-
-                        Context.PropManager.ReplicateAuthorityData(propRuntimeState);
-                    }
-                    
-                }
-
-                _networkChunks.Set(chunkID, ELoadState.Loaded);
-            }
         }
 
         public override void Render()
         {
             base.Render();
 
-            foreach (var networkChunk in _networkChunks)
+            if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter character))
+                return;
+
+            foreach (Chunk chunk in character.CachedChunks)
             {
-                // Get the local chunk for that value
-                if (_worldChunks.TryGetValue(networkChunk.Key, out Chunk localChunk))
-                {
-                    if (localChunk.LoadState == ELoadState.None &&
-                        networkChunk.Value == ELoadState.Loaded)
-                    {
-                        LoadChunkIntoMemory(localChunk);
-                    }
-                }
+                if (chunk.LoadState != ELoadState.None)
+                    continue;
+
+                LoadChunkIntoMemory(chunk);
             }
         }
 
         private void LoadChunkIntoMemory(Chunk chunkToLoad)
         {
-            if (chunkToLoad.LoadState != ELoadState.None)
-            {
-                Debug.Log("Trying to load chunk but its not ready");
-                return;
-            }
-
             //Get the local player's chunk and do a refresh if its closer
             if (PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter character))
             {
@@ -155,14 +143,22 @@ namespace LichLord.World
 
         public Chunk GetChunk(FChunkPosition position)
         {
-            if (_worldChunks.TryGetValue(position, out Chunk chunk))
-                return chunk;
+            int arrayX = position.X + _arrayOffsetX;
+            int arrayY = position.Y + _arrayOffsetY;
 
-            return null;
+            // Check array bounds
+            if (arrayX >= 0 && arrayX < _worldChunks.GetLength(0) &&
+                arrayY >= 0 && arrayY < _worldChunks.GetLength(1))
+            {
+                return _worldChunks[arrayX, arrayY];
+            }
+
+            return null; // Return null if the chunk doesn't exist or is out of bounds
         }
 
         public Chunk GetChunkAtPosition(Vector3 position)
         {
+            //
             return GetChunk(GetChunkID(position));
         }
 
@@ -179,21 +175,24 @@ namespace LichLord.World
 
         public List<Chunk> GetNearbyChunks(FChunkPosition centerChunkID, int radius = 1)
         {
-            List<Chunk> nearbyChunks = new List<Chunk>();
+            List<Chunk> nearbyChunks = new List<Chunk>(capacity: (2 * radius + 1) * (2 * radius + 1));
 
             for (int dx = -radius; dx <= radius; dx++)
             {
                 for (int dy = -radius; dy <= radius; dy++)
                 {
-                    FChunkPosition checkID = new FChunkPosition
-                    {
-                        X = (sbyte)(centerChunkID.X + dx),
-                        Y = (sbyte)(centerChunkID.Y + dy)
-                    };
+                    int arrayX = centerChunkID.X + dx + _arrayOffsetX;
+                    int arrayY = centerChunkID.Y + dy + _arrayOffsetY;
 
-                    if (_worldChunks.TryGetValue(checkID, out Chunk chunk))
+                    // Clamp to array bounds
+                    if (arrayX >= 0 && arrayX < _worldChunks.GetLength(0) &&
+                        arrayY >= 0 && arrayY < _worldChunks.GetLength(1))
                     {
-                        nearbyChunks.Add(chunk);
+                        Chunk chunk = _worldChunks[arrayX, arrayY];
+                        if (chunk != null)
+                        {
+                            nearbyChunks.Add(chunk);
+                        }
                     }
                 }
             }
@@ -210,14 +209,17 @@ namespace LichLord.World
         {
             if (!drawChunkBounds) return;
 
-            foreach (var pair in _worldChunks)
+            foreach (var chunk in _worldChunks)
             {
-                if (pair.Value.LoadState == ELoadState.Loaded)
+                if(chunk == null) 
+                    continue;
+
+                if (chunk.LoadState == ELoadState.Loaded)
                     Gizmos.color = Color.green;
                 else
                     Gizmos.color = Color.red;
 
-                Bounds bounds = pair.Value.Bounds;
+                Bounds bounds = chunk.Bounds;
                 // Draw wireframe cube for chunk bounds (XZ plane, height ignored for visualization)
                 Gizmos.DrawWireCube(
                     new Vector3(bounds.center.x, 0, bounds.center.z),

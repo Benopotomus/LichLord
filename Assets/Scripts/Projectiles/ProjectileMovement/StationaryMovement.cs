@@ -18,7 +18,11 @@ namespace LichLord.Projectiles
             Vector2 lastPosition = projectile.Position;
             projectile.Position = toData.Position.Position;
             projectile.Velocity = Vector2.zero;
-            projectile.Rotation = GetRotation(projectile.Definition, projectile.Position, projectile.Position, projectile.Velocity);
+            projectile.Rotation = GetRotation(projectile.Definition, 
+                projectile.Position, 
+                projectile.Position, 
+                projectile.Velocity, 
+                projectile.Rotation);
         }
 
         public override void OnFixedUpdate(FixedUpdateProjectile projectile, ref FProjectileData data, int tick, float simulationTime, float deltaTime)
@@ -34,7 +38,8 @@ namespace LichLord.Projectiles
                 projectile.Definition,
                 data.TargetPosition.Position,
                 data.Position.Position,
-                projectile.Velocity);
+                projectile.Velocity,
+                projectile.Rotation);
 
             ProjectilePhysicsUtility.CheckAndHandleCollision(projectile,
                 ref data,

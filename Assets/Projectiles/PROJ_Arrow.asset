@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _tableID: 1
   _lifetime: 5
-  _postImpactLifetime: 0.2
+  _postImpactTicks: 12
   _deactivationSpawnedProjectiles: []
   _projectileMovement: {fileID: 11400000, guid: 339f033f4deb71d4e9d8f12a1f09c1af,
     type: 2}
@@ -25,10 +25,10 @@ MonoBehaviour:
   _overlapCollisionLayer:
     serializedVersion: 2
     m_Bits: 257
-  _shape: 1
+  _shape: 2
   _lineOfSightRequirement: 0
   _rotationType: 1
-  _extents: {x: 0.05, y: 0, z: 0}
+  _extents: {x: 0, y: 0, z: 0}
   _onlyAffectsOnce: 0
   _affectsEachCast: 0
   _physicsSweep: 2
@@ -41,7 +41,7 @@ MonoBehaviour:
     m_Bits: 0
   _scaleOverLifetime: {fileID: 0}
   _visualsPrefab:
-    _name: PROJ_VIS_Fireball
-    _bundle: proj_vis_fireball
+    _name: PROJ_VIS_Arrow
+    _bundle: proj_vis_arrow
   _impactSticksToHitActor: 0
   _homesAtApex: 0

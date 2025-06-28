@@ -148,7 +148,12 @@ namespace LichLord.Projectiles
             ref FPhysicsHitData impactHit,
             int tick)
         {
+
             data.HasImpacted = true;
+            data.TargetPosition.CopyPosition(impactHit.ImpactPoint);
+
+            //Debug.Log(projectile.Index +  " Impacted on fixed Update " + impactHit.ImpactPoint);
+
             projectile.ImpactTick = tick;
 
             projectile.Position = impactHit.ProjectilePosition;
@@ -158,7 +163,7 @@ namespace LichLord.Projectiles
             if (projectile is FixedUpdateProjectile fixedUpdateProjectile)
             {
                 fixedUpdateProjectile.SpawnDeactivationProjectiles(ref data, ref impactHit);
-                fixedUpdateProjectile.DeactivateFixedUpdate(ref data);
+                //fixedUpdateProjectile.DeactivateFixedUpdate(ref data);
             }
         }
 

@@ -156,7 +156,7 @@
             npcData.Condition = condition;
         }
 
-        public static bool IsActive(FNonPlayerCharacterData npcData)
+        public static bool IsActive(ref FNonPlayerCharacterData npcData)
         {
             return GetNPCState(ref npcData) != ENonPlayerState.Inactive;
         }

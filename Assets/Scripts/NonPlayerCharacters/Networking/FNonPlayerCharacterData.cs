@@ -130,7 +130,7 @@
 
         public bool IsActive()
         {
-            return NonPlayerCharacterDataUtility.IsActive(this);
+            return NonPlayerCharacterDataUtility.IsActive(ref this);
         }
 
         public void Copy(ref FNonPlayerCharacterData other)

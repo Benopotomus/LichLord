@@ -26,7 +26,7 @@ public class WorldSettings : ScriptableObject
     public ChunkPropsMarkupData GetMarkupData(FChunkPosition chunkCoord)
     {
         // First, check the PropMarkupDatas list
-        ChunkPropsMarkupData markupData = _propMarkupDatas.Find(data => data != null && data.ChunkCoord == chunkCoord);
+        ChunkPropsMarkupData markupData = _propMarkupDatas.Find(data => data != null && data.ChunkCoord.IsEqual(ref chunkCoord));
         if (markupData != null)
         {
             return markupData;
@@ -39,7 +39,7 @@ public class WorldSettings : ScriptableObject
     public ChunkPropsMarkupData GetOrCreateMarkupData(FChunkPosition chunkCoord)
     {
         // First, check the PropMarkupDatas list
-        ChunkPropsMarkupData markupData = _propMarkupDatas.Find(data => data != null && data.ChunkCoord == chunkCoord);
+        ChunkPropsMarkupData markupData = _propMarkupDatas.Find(data => data != null && data.ChunkCoord.IsEqual(ref chunkCoord));
         if (markupData != null)
         {
             return markupData;
@@ -53,7 +53,7 @@ public class WorldSettings : ScriptableObject
             Object[] subAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
             foreach (Object subAsset in subAssets)
             {
-                if (subAsset is ChunkPropsMarkupData existingMarkupData && existingMarkupData.ChunkCoord == chunkCoord)
+                if (subAsset is ChunkPropsMarkupData existingMarkupData && existingMarkupData.ChunkCoord.IsEqual(ref chunkCoord))
                 {
                     if (!_propMarkupDatas.Contains(existingMarkupData))
                     {

@@ -8,6 +8,8 @@ namespace LichLord.World
     [System.Serializable]
     public class Chunk
     {
+        private ChunkManager _manager;
+
         private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
         public List<IChunkTrackable> Trackables => _trackablesInChunk;
 
@@ -22,16 +24,26 @@ namespace LichLord.World
 
         public ELoadState LoadState { get; set; }
 
-        public Chunk(FChunkPosition chunkID, Vector2 worldOrigin)
+        public Chunk(FChunkPosition chunkID, Vector2 worldOrigin, ChunkManager manager)
         {
             ChunkID = chunkID;
+            _manager = manager;
 
             float chunkSize = WorldConstants.CHUNK_SIZE;
-            Vector2 center = new Vector2(
-                worldOrigin.x + chunkID.X * chunkSize + chunkSize / 2,
-                worldOrigin.y + chunkID.Y * chunkSize + chunkSize / 2
+
+            // Calculate the chunk's world position, accounting for worldOrigin as the center
+            Vector2 chunkCorner = new Vector2(
+                worldOrigin.x + chunkID.X * chunkSize,
+                worldOrigin.y + chunkID.Y * chunkSize
             );
 
+            // Set Bounds center at the middle of the chunk
+            Vector2 center = new Vector2(
+                chunkCorner.x + chunkSize / 2,
+                chunkCorner.y + chunkSize / 2
+            );
+
+            // Create Bounds with height 1000 (as in original) for 3D space
             Bounds = new Bounds(new Vector3(center.x, 0, center.y), new Vector3(chunkSize, 1000, chunkSize));
         }
 
@@ -60,6 +72,7 @@ namespace LichLord.World
         public void AddOrUpdateDeltaState(PropRuntimeState propState)
         {
             _deltaPropStates[propState.guid] = propState;
+            _manager.DeltaChunks.Add(this);
         }
     }
 }

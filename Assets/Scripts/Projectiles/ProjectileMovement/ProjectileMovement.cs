@@ -13,7 +13,7 @@ namespace LichLord.Projectiles
         {
             projectile.Position = data.Position.Position;
             projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition.Position, data.Position.Position);
-            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity);
+            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity, projectile.Rotation);
         }
 
         public virtual void OnRender(RenderProjectile projectile,
@@ -40,7 +40,7 @@ namespace LichLord.Projectiles
         {
             projectile.Position = data.Position.Position;
             projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition.Position, data.Position.Position);
-            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity);
+            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity, projectile.Rotation);
         }
 
         public virtual void OnFixedUpdate(FixedUpdateProjectile projectile, 
@@ -72,19 +72,22 @@ namespace LichLord.Projectiles
         public virtual Quaternion GetRotation(ProjectileDefinition definition, 
             Vector3 targetPosition, 
             Vector3 currentPosition, 
-            Vector3 velocity)
+            Vector3 velocity,
+            Quaternion oldRotation)
         {
+            // I need a way here that if the the rotation on this is going to be quaternion identy, use the old rrotation
+
             switch (definition.RotationType)
             {
                 case ERotationType.FaceVelocity:
                     if (velocity.sqrMagnitude < 0.0001f)
-                        return Quaternion.identity;
+                        return oldRotation;
 
                     return Quaternion.LookRotation(velocity.normalized);
                 case ERotationType.FaceTarget:
                     Vector3 direction = (targetPosition - currentPosition).normalized;
                     if (direction.sqrMagnitude < 0.0001f)
-                        return Quaternion.identity;
+                        return oldRotation;
 
                     return Quaternion.LookRotation(direction);
 

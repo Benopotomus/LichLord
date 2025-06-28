@@ -69,7 +69,7 @@ namespace LichLord.Projectiles
                 IsFinished = true;
                 return;
             }
-  
+
             if (Definition == null || VisualsInstance == null)
                 return;
 

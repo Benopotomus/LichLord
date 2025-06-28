@@ -95,14 +95,17 @@ namespace LichLord.NonPlayerCharacters
             if (executingManuever.HasExpired(tick))
             {
                 // if the target is no longer valid, search for a new one
-                FindCurrentTarget();
+                if (_hasAttackTarget && !IsTargetValid(_attackTarget))
+                {
+                    FindCurrentTarget();
+                }
 
                 // Im removing this maneuver immediatly 
                 SetActiveManuever(null);
                 SelectManeuver(tick);
 
                 data.State = ENonPlayerState.Idle;
-                NPC.Replicator.UpdateNPCData(data);
+                NPC.Replicator.UpdateNPCData(ref data);
                 return;
             }
 
@@ -263,7 +266,7 @@ namespace LichLord.NonPlayerCharacters
             Vector3 targetPosition = _attackTarget.Position;
 
             // If our current destination hasn't changed much, we early out
-            Vector3 delta = NPC.Movement.AIFollower.destination - targetPosition;
+            Vector3 delta = _moveTarget - targetPosition;
             if (delta.sqrMagnitude < 0.01f)
                 return;
 
@@ -273,13 +276,14 @@ namespace LichLord.NonPlayerCharacters
 
         public void FindCurrentTarget()
         {
+            if(NPC.CurrentChunk == null) return;
+
             // Get current + nearby chunks
-            List<Chunk> chunks = NPC.Context.ChunkManager.GetNearbyChunks(NPC.CurrentChunk.ChunkID);
 
             float closestDistance = Mathf.Infinity;
             IChunkTrackable currentTarget = null;
 
-            foreach (var chunk in chunks)
+            foreach (var chunk in _npc.CachedChunks)
             {
                 var trackables = chunk.Trackables;
 
@@ -316,11 +320,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (trackable is NonPlayerCharacter targetNPC)
             {
-                if (targetNPC.State.CurrentState == ENonPlayerState.Inactive ||
-                    targetNPC.State.CurrentState == ENonPlayerState.Dead)
-                    return false;
-
-                if (targetNPC.TeamID == NPC.TeamID)
+                if (targetNPC.TeamID == _npc.TeamID)
                     return false;
             }
 

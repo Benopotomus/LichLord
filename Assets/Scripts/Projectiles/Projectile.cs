@@ -31,8 +31,6 @@ namespace LichLord.Projectiles
         public FProjectilePayload Payload = new FProjectilePayload();
         public FProjectilePayload Payload_SpawnedProjectile = new FProjectilePayload();
 
-
-
         public void UpdateAffectedActors(ref FProjectileData data, List<FPhysicsHitData> hitDatas, int tick)
         {
             if (Definition.AffectsEachCast)

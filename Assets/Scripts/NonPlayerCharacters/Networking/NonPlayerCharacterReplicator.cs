@@ -7,7 +7,7 @@ namespace LichLord.NonPlayerCharacters
 {
     public class NonPlayerCharacterReplicator : ContextBehaviour, IStateAuthorityChanged
     {
-        public class NPCLoadState
+        public struct NPCLoadState
         {
             public NonPlayerCharacter NPC;
             public ELoadState LoadState;
@@ -18,8 +18,8 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
 
-        private List<NPCLoadState> _loadStates = new List<NPCLoadState>();
-        public List<NPCLoadState> LoadStates => _loadStates;
+        private NPCLoadState[] _loadStates = new NPCLoadState[NonPlayerCharacterConstants.MAX_NPC_REPS];
+        public NPCLoadState[] LoadStates => _loadStates;
 
         private HashSet<int> _freeIndices = new HashSet<int>();
 
@@ -57,7 +57,7 @@ namespace LichLord.NonPlayerCharacters
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
                 _localNpcDatas.Add(new FNonPlayerCharacterData());
-                _loadStates.Add(new NPCLoadState());
+                _loadStates[i] = new NPCLoadState();
                 _freeIndices.Add(i); // Initially, all indices are free
             }
 
@@ -91,7 +91,7 @@ namespace LichLord.NonPlayerCharacters
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
                 var data = _npcDatas.GetRef(i);
-                if (!NonPlayerCharacterDataUtility.IsActive(data))
+                if (!NonPlayerCharacterDataUtility.IsActive(ref data))
                 {
                     _freeIndices.Add(i);
                 }
@@ -104,12 +104,12 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        public void UpdateNPCData(FNonPlayerCharacterData updatedData)
+        public void UpdateNPCData(ref FNonPlayerCharacterData updatedData)
         {
             int index = NonPlayerCharacterDataUtility.GetGUID(ref updatedData);
             ref FNonPlayerCharacterData currentData = ref _npcDatas.GetRef(index);
-            bool wasActive = NonPlayerCharacterDataUtility.IsActive(currentData);
-            bool willBeActive = NonPlayerCharacterDataUtility.IsActive(updatedData);
+            bool wasActive = NonPlayerCharacterDataUtility.IsActive(ref currentData);
+            bool willBeActive = NonPlayerCharacterDataUtility.IsActive(ref updatedData);
 
             _npcDatas.Set(index, updatedData);
 
@@ -168,23 +168,24 @@ namespace LichLord.NonPlayerCharacters
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                GetRenderData(hasAuthority, i, out var usedData);
+                // write to the data "_renderWriteData"
+                GetRenderData(hasAuthority, i);
 
-                bool shouldBeActive = usedData.IsActive();
+                bool shouldBeActive = NonPlayerCharacterDataUtility.GetNPCState(ref _renderWriteData) != ENonPlayerState.Inactive;
 
-                NPCLoadState loadState = _loadStates[i];
+                ref NPCLoadState loadState = ref _loadStates[i];
 
                 if (shouldBeActive && loadState.LoadState == ELoadState.None)
                 {
                     loadState.LoadState = ELoadState.Loading;
-                    _spawner.SpawnNPC(ref usedData);
+                    _spawner.SpawnNPC(ref _renderWriteData);
                 }
                 else if (shouldBeActive && loadState.LoadState == ELoadState.Loaded)
                 {
                     if (hasAuthority)
-                        loadState.NPC.AuthorityUpdate(ref usedData, renderDeltaTime, tick);
+                        loadState.NPC.AuthorityUpdate(ref _renderWriteData, renderDeltaTime, tick);
                     else
-                        loadState.NPC.RemoteUpdate(ref usedData, renderDeltaTime, ping);
+                        loadState.NPC.RemoteUpdate(ref _renderWriteData, renderDeltaTime, ping);
                 }
                 else if (!shouldBeActive && loadState.LoadState == ELoadState.Loaded)
                 {
@@ -201,12 +202,11 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             int tick = Runner.Tick;
-            bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
                 ref FNonPlayerCharacterData data = ref _npcDatas.GetRef(i);
-                NPCLoadState loadState = _loadStates[i];
+                ref NPCLoadState loadState = ref _loadStates[i];
 
                 if (loadState.LoadState == ELoadState.Loaded)
                 {
@@ -217,7 +217,7 @@ namespace LichLord.NonPlayerCharacters
 
         private void DespawnNPC(int index)
         {
-            NPCLoadState loadState = _loadStates[index];
+            ref NPCLoadState loadState = ref _loadStates[index];
             if (loadState.LoadState == ELoadState.Loaded)
             {
                 loadState.NPC.StartRecycle();
@@ -227,7 +227,7 @@ namespace LichLord.NonPlayerCharacters
 
         private void OnNonPlayerCharacterSpawned(FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacter character)
         {
-            NPCLoadState loadState = _loadStates[spawnParams.index];
+            ref NPCLoadState loadState = ref _loadStates[spawnParams.index];
             loadState.NPC = character;
             loadState.LoadState = ELoadState.Loaded;
             character.OnSpawned(ref spawnParams, this);
@@ -239,14 +239,16 @@ namespace LichLord.NonPlayerCharacters
             {
                 //Debug.Log("Apply Damage " + damage);
                 NonPlayerCharacterDataUtility.ApplyDamage(ref data, data.Definition, damage);
-                UpdateNPCData(data);
+                UpdateNPCData(ref data);
             }
         }
 
-        public void GetRenderData(bool hasAuthority, int index, out FNonPlayerCharacterData usedData)
+        private FNonPlayerCharacterData _renderWriteData = new FNonPlayerCharacterData();
+
+        public void GetRenderData(bool hasAuthority, int index)
         {
-            var authorityData = _npcDatas.Get(index);
-            usedData = authorityData;
+            ref FNonPlayerCharacterData authorityData = ref _npcDatas.GetRef(index);
+            _renderWriteData.Copy(ref authorityData);
 
             // If we are the authority, we dont need to handle prediction
             if (hasAuthority)
@@ -257,15 +259,15 @@ namespace LichLord.NonPlayerCharacters
             FNonPlayerCharacterData localData = _localNpcDatas[index];
 
             // Check for if local data has changed
-            if (localData.Health != usedData.Health ||
-                localData.State != usedData.State)
+            if (localData.State != authorityData.State ||
+                localData.Health != authorityData.Health)
             {
-                /*
+                
                 Debug.Log("Local Health: " + localData.Health + 
-                    ", Master Health: " + usedData.Health +
+                    ", Master Health: " + authorityData.Health +
                     ", Local State: " + localData.State + 
-                    ", Master State: " + usedData.State);
-                */
+                    ", Master State: " + authorityData.State);
+                
                 // local data changed
                 if (hasPredictedData)
                 {
@@ -273,16 +275,16 @@ namespace LichLord.NonPlayerCharacters
                     _predictedStates.Remove(index);
                 }
 
-                localData.Health = usedData.Health;
-                localData.State = usedData.State;
+                localData.Health = _renderWriteData.Health;
+                localData.State = _renderWriteData.State;
 
                 _localNpcDatas[index] = localData;
             }
 
             if (hasPredictedData)
             {
-                //Debug.Log("Using Predicted State " + predictedState.Data.State);
-                var predictedData = predictedState.Data;
+                Debug.Log("Using Predicted State " + predictedState.Data.State);
+                FNonPlayerCharacterData predictedData = predictedState.Data;
 
                 // Keep the position updates consistent with the authority
                 predictedData.PositionX = authorityData.PositionX;
@@ -290,7 +292,7 @@ namespace LichLord.NonPlayerCharacters
                 predictedData.PositionZ =  authorityData.PositionZ;
                 predictedState.CopyData(ref predictedData);
 
-                usedData = predictedState.Data;
+                _renderWriteData.Copy(ref predictedData);
             }
         }
     }

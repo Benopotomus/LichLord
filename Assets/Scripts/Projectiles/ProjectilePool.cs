@@ -126,6 +126,9 @@ namespace LichLord.Projectiles
 
         public override void FixedUpdateNetwork()
         {
+            if (!Runner.IsForward || !Runner.IsFirstTick)
+                return;
+
             if (!Context.IsGameplayActive())
                 return;
 
@@ -142,6 +145,9 @@ namespace LichLord.Projectiles
 
         protected virtual void UpdateData(int index, ref FProjectileData data, int tick, float simulationTime, float deltaTime)
         {
+            if (data.IsActive == false)
+                return;
+
             FixedUpdateProjectile projectile = _fixedUpdateProjectiles[index];
             projectile.OnFixedUpdate(ref data, tick, simulationTime, deltaTime);
         }
@@ -153,7 +159,7 @@ namespace LichLord.Projectiles
 
             float renderTime = HasStateAuthority ? Runner.LocalRenderTime : Runner.RemoteRenderTime;
             int tick = Runner.Tick;
-            float localDeltaTime = Runner.LocalAlpha;
+            float localDeltaTime = Time.deltaTime;
             float networkDeltaTime = Runner.DeltaTime;
 
             if (TryGetSnapshotsBuffers(out var fromNetworkBuffer, out var toNetworkBuffer, out float bufferAlpha) == false)

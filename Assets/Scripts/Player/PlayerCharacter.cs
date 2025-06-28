@@ -53,6 +53,10 @@ namespace LichLord
         private List<PropRuntimeState> _cachedPropStates = new List<PropRuntimeState>();
         public IReadOnlyList<PropRuntimeState> CachedPropStates => _cachedPropStates.AsReadOnly();
 
+        // Cached list of Chunks for current and neighboring chunks
+        private List<Chunk> _cachedChunks = new List<Chunk>();
+        public IReadOnlyList<Chunk> CachedChunks => _cachedChunks.AsReadOnly();
+
         public static bool TryGetLocalPlayer(NetworkRunner runner, out PlayerCharacter playerCreature)
         {
             playerCreature = null;
@@ -201,6 +205,9 @@ namespace LichLord
                 if (newChunk != null)
                     newChunk.AddObject(this);
 
+                // Update cached nearby chunks
+                _cachedChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
+
                 // Update cached prop states on chunk change
                 UpdateVisibilePropStates();
                 //Debug.Log($"Player chunk changed from ({lastChunk?.ChunkID.X}, {lastChunk?.ChunkID.Y}) to ({newChunk?.ChunkID.X}, {newChunk?.ChunkID.Y}). Cached {CachedPropStates.Count} prop states.", this);
@@ -214,13 +221,11 @@ namespace LichLord
             if (CurrentChunk == null)
                 return;
 
-            // Get current and neighboring chunks (radius = 1)
-            List<Chunk> nearbyChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
             _cachedPropStates.Clear();
 
             HashSet<int> newGuids = new HashSet<int>();
             HashSet<int> oldGuids = _visibileGuids;
-            foreach (Chunk chunk in nearbyChunks)
+            foreach (Chunk chunk in _cachedChunks)
             {
                 if (chunk == null || chunk.PropStates == null)
                     continue;

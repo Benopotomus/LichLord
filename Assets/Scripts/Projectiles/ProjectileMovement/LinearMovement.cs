@@ -18,29 +18,32 @@ namespace LichLord.Projectiles
         {
             Vector3 lastPosition = projectile.Position;
             Vector3 newRenderTargetPosition = GetLinearMovePosition(projectile.Definition, ref toData, renderTimeSinceFired);
-            float interpolationProgress = 0f;
 
-            // Do not start interpolation until projectile should actually move
             projectile.InterpolationTime += Time.deltaTime;
-            interpolationProgress = Mathf.Clamp01(projectile.InterpolationTime / projectile.InterpolationDuration);
-            
+            float interpolationProgress = Mathf.Clamp01(projectile.InterpolationTime / projectile.InterpolationDuration);
             var lerpPosition = Vector3.Lerp(projectile.Position, newRenderTargetPosition, interpolationProgress);
 
             projectile.Position = lerpPosition;
             projectile.Velocity = projectile.Position - lastPosition;
-            projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition.Position, toData.Position.Position, projectile.Velocity);
+            projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition.Position, toData.Position.Position, projectile.Velocity, projectile.Rotation);
         }
 
         private Vector3 GetLinearMovePosition(ProjectileDefinition definition, 
             ref FProjectileData toData, 
             float timeSinceFired)
         {
-            
+            if (toData.HasImpacted)
+            {
+                return toData.TargetPosition.Position;
+            }
+
             if (timeSinceFired <= 0f)
                 return toData.Position.Position;
 
             Vector3 velocity = Vector3CompressedExtensions.SubtractAndNormalize(toData.TargetPosition.Position, toData.Position.Position) * definition.Speed;
-            return toData.Position.Position + (velocity * timeSinceFired);
+            Vector3 newPosition = toData.Position.Position + (velocity * timeSinceFired);
+            
+            return newPosition;
         }
 
         public override Vector3 GetInitialVelocity(ProjectileDefinition definition, 
@@ -75,7 +78,8 @@ namespace LichLord.Projectiles
                 projectile.Definition,
                 data.TargetPosition.Position,
                 data.Position.Position,
-                projectile.Velocity);
+                projectile.Velocity,
+                projectile.Rotation);
 
 
             ProjectilePhysicsUtility.CheckAndHandleCollision(projectile, 
@@ -87,9 +91,6 @@ namespace LichLord.Projectiles
                 newPosition,
                 oldRotation,
                 newRotation);
-
-            if (data.IsFinished)
-                return;
 
             projectile.Position = newPosition;
             projectile.Velocity = newVelocity;

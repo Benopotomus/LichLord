@@ -43,7 +43,7 @@ namespace LichLord.NonPlayerCharacters
                         NPC.Movement.SetFollowerUpdatePosition(true);
                         NPC.Movement.SetFollowerLocalAvoidance(true);
                         NPC.Movement.SetFollowerCanMove(true);
-                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
+                        //NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
                     }
                     break;
 
@@ -74,9 +74,9 @@ namespace LichLord.NonPlayerCharacters
                     {
                         NPC.Movement.AIFollower.rvoSettings.locked = true;
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
+                        //NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
                         NPC.Movement.SetFollowerUpdateRotation(false);
-                        NPC.Movement.SetFollowerUpdatePosition(true);
+                        NPC.Movement.SetFollowerUpdatePosition(false);
                     }
                     break;
 
@@ -85,10 +85,11 @@ namespace LichLord.NonPlayerCharacters
                 case ENonPlayerState.Maneuver_3:
                 case ENonPlayerState.Maneuver_4:
                     NPC.Brain.SetAnimationForManeuver(newState, animIndex);
+
                     if (hasAuthority)
                     {
                         NPC.Movement.AIFollower.rvoSettings.locked = true;
-                        NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
+                        //NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
                         NPC.Movement.AIFollower.rvoSettings.priority = 1;
                     }
                     break;
@@ -122,7 +123,7 @@ namespace LichLord.NonPlayerCharacters
                     if (_deadTimer < 0f)
                     {
                         data.State = ENonPlayerState.Inactive;
-                        NPC.Replicator.UpdateNPCData(data);
+                        NPC.Replicator.UpdateNPCData(ref data);
                     }
                     break;
             }

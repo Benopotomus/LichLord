@@ -2,6 +2,7 @@
 using Fusion;
 using LichLord.Props;
 using LichLord.World;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -59,15 +60,20 @@ namespace LichLord.NonPlayerCharacters
         private ETeamID _teamId;
         public ETeamID TeamID => _teamId;
 
+        // Cached list of Chunks for current and neighboring chunks
+        private List<Chunk> _cachedChunks = new List<Chunk>();
+        public IReadOnlyList<Chunk> CachedChunks => _cachedChunks.AsReadOnly();
+
         // IChunkTrackable
-        private Chunk _chunk;
-        public Chunk CurrentChunk { get => _chunk; set => _chunk = value; }
+        private Chunk _currentChunk;
+        public Chunk CurrentChunk { get => _currentChunk; set => _currentChunk = value; }
+
         public Vector3 Position => CachedTransform.position;
         public bool IsAttackable 
         { 
             get 
             {
-                switch (State.CurrentState)
+                switch (_stateComponent.CurrentState)
                 {
                     case ENonPlayerState.Dead:
                     case ENonPlayerState.Inactive:
@@ -197,7 +203,10 @@ namespace LichLord.NonPlayerCharacters
 
             if (lastChunk != newChunk)
             {
-                CurrentChunk = newChunk;
+                _currentChunk = newChunk;
+
+                if(_currentChunk != null)
+                    _cachedChunks = _context.ChunkManager.GetNearbyChunks(_currentChunk.ChunkID);
 
                 if (lastChunk != null)
                     lastChunk.RemoveObject(this);

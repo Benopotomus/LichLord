@@ -5156,7 +5156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _transform: {fileID: 8521941140526080342}
-  _recycleDelay: 0.5
+  _recycleDelay: 0
   _cameraShake: {fileID: 0}
 --- !u!114 &2489802706370600232
 MonoBehaviour:
@@ -5173,7 +5173,7 @@ MonoBehaviour:
   _visualEffectBase: {fileID: 9179539174441261589}
   _particleSystems:
   - {fileID: 7738148337321161155}
-  _clearSystemOnRecycleStart: 0
+  _clearSystemOnRecycleStart: 1
 --- !u!114 &5223798358542118145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5191,7 +5191,7 @@ MonoBehaviour:
   - {fileID: 7612142314371347954}
   - {fileID: 8687109966092926470}
   - {fileID: 8556540525802950836}
-  _clearSystemOnRecycleStart: 0
+  _clearSystemOnRecycleStart: 1
 --- !u!1 &9169222363549866992
 GameObject:
   m_ObjectHideFlags: 0
