@@ -41,8 +41,7 @@ namespace LichLord.NonPlayerCharacters
 
                 int removalTick = (Runner.Tick + Runner.TickRate);
                 predictedState.PredictionTick = removalTick;
-                Debug.Log("ping " + ping);
-                Debug.Log("Tick: " + Runner.Tick + ", Removal Tick " + removalTick);
+
                 /*
                 Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
                     predictedData.Data.State +
@@ -58,8 +57,7 @@ namespace LichLord.NonPlayerCharacters
                 float ping = (float)Runner.GetPlayerRtt(Context.LocalPlayerRef);
                 int removalTick = (Runner.Tick + Runner.TickRate);
                 newPredictedState.PredictionTick = removalTick;
-                Debug.Log("ping " + ping);
-                Debug.Log("Tick: " + Runner.Tick + ", Removal Tick " + removalTick);
+
                 /*
                 Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
                     newPredictedData.Data.State +

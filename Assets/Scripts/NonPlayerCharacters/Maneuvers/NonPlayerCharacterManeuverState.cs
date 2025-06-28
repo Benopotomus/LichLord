@@ -102,8 +102,15 @@ namespace LichLord.NonPlayerCharacters
             if (projectileManager == null)
                 return;
 
+            ProjectileDefinition definition = projectileData.Definition;
+
+
             Vector3 targetPos = npc.Brain.AttackTarget.Position;
             targetPos.y += 1f;
+
+            Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(npc, projectileData.Muzzle);
+
+            targetPos = GetProjectileTargetPosition(targetPos, muzzlePosition, definition);
 
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
             FProjectilePayload payload = new FProjectilePayload();
@@ -114,12 +121,13 @@ namespace LichLord.NonPlayerCharacters
             payload_spawnedProjectile.damagePotential.DamageValue = projectileData.Damage.DamageValue;
             payload_spawnedProjectile.damagePotential.DamageType = projectileData.Damage.DamageType;
 
+
             ProjectileManager.CreateProjectileFireEvent(
                 ref fireEvent,
-                projectileData.Definition,
+                definition,
                 npc,
                 new FNetObjectID(),
-                MuzzleUtility.GetMuzzlePosition(npc, projectileData.Muzzle),
+                muzzlePosition,
                 targetPos,
                 tick,
                 ref payload,
@@ -128,6 +136,18 @@ namespace LichLord.NonPlayerCharacters
 
             var projectile = projectileManager.SpawnProjectile(fireEvent);
             //Debug.Log($"[GunActionData] Fired projectile with {ActionName} using ProjectileManager");
+        }
+
+        private Vector3 GetProjectileTargetPosition(Vector3 currentTargetPos, Vector3 muzzlePosition, ProjectileDefinition definition)
+        { 
+            ProjectileMovement projectileMovement = definition.ProjectileMovement;
+
+            if (projectileMovement is ThrownMovement thrownMovement)
+            {
+                return thrownMovement.GetOffsetTargetPosition(muzzlePosition, currentTargetPos, definition.Speed);
+            }
+
+            return currentTargetPos;
         }
     }
 }
