@@ -167,10 +167,19 @@ namespace LichLord
         {
             if (hit.target is NonPlayerCharacter npc)
             {
-                npc.Replicator.RPC_DealDamageToNPC(npc.GUID, hit.damageData.damageValue);
+                int currentAnimIndex = npc.State.CurrentAnimIndex;
+                int hitReactIndex = UnityEngine.Random.Range(0, 4);
+
+                // If the new index is the same as the current, increment and wrap around
+                if (hitReactIndex == currentAnimIndex)
+                {
+                    hitReactIndex = (currentAnimIndex + 1) % 4;
+                }
+
+                npc.Replicator.RPC_DealDamageToNPC(npc.GUID, hit.damageData.damageValue, hitReactIndex);
 
                 if (!Runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.GUID, hit.damageData.damageValue);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.GUID, hit.damageData.damageValue, hitReactIndex);
             }
 
             if (hit.target is Prop prop)

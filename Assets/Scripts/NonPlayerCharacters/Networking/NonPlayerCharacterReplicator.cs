@@ -27,27 +27,35 @@ namespace LichLord.NonPlayerCharacters
         private Dictionary<int, NonPlayerCharacterState> _predictedStates = new Dictionary<int, NonPlayerCharacterState>();
         private List<FNonPlayerCharacterData> _localNpcDatas = new List<FNonPlayerCharacterData>();
 
-        public void Predict_DealDamageToNPC(int guid, int damage)
+        public void Predict_DealDamageToNPC(int guid, int damage, int hitReactIndex)
         {
             var targetData = _npcDatas.Get(guid);
 
             if (_predictedStates.TryGetValue(guid, out var predictedData))
             {
-                predictedData.ApplyDamage(damage);
+                predictedData.ApplyDamage(damage, hitReactIndex);
+                Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
+                    predictedData.Data.State +
+                    " Anim " + predictedData.Data.AnimationIndex +
+                    ", tick: " + Runner.Tick);
             }
             else
             {
                 var newPredictedData = new NonPlayerCharacterState(ref targetData);
-                newPredictedData.ApplyDamage(damage);
-                //Debug.Log("Creating Predicted Data: " + newPredictedData.Data.State);
+                newPredictedData.ApplyDamage(damage, hitReactIndex);
+                Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
+                    newPredictedData.Data.State +
+                    " Anim " + newPredictedData.Data.AnimationIndex +
+                    ", tick: " + Runner.Tick);
+
                 _predictedStates.Add(guid, newPredictedData);
             }
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_DealDamageToNPC(int guid, int damage)
+        public void RPC_DealDamageToNPC(int guid, int damage, int hitReactIndex)
         {
-            ApplyDamage(guid, damage);
+            ApplyDamage(guid, damage, hitReactIndex);
         }
 
         public override void Spawned()
@@ -233,12 +241,12 @@ namespace LichLord.NonPlayerCharacters
             character.OnSpawned(ref spawnParams, this);
         }
 
-        public void ApplyDamage(int index, int damage)
+        public void ApplyDamage(int index, int damage, int hitReactIndex)
         {
             if (TryGetNPCData(index, out FNonPlayerCharacterData data))
             {
                 //Debug.Log("Apply Damage " + damage);
-                NonPlayerCharacterDataUtility.ApplyDamage(ref data, data.Definition, damage);
+                NonPlayerCharacterDataUtility.ApplyDamage(ref data, data.Definition, damage, hitReactIndex);
                 UpdateNPCData(ref data);
             }
         }
@@ -260,9 +268,9 @@ namespace LichLord.NonPlayerCharacters
 
             // Check for if local data has changed
             if (localData.State != authorityData.State ||
-                localData.Health != authorityData.Health)
+                localData.Health != authorityData.Health ||
+                localData.AnimationIndex != authorityData.AnimationIndex)
             {
-                
                 Debug.Log("Local Health: " + localData.Health + 
                     ", Master Health: " + authorityData.Health +
                     ", Local State: " + localData.State + 
@@ -273,17 +281,20 @@ namespace LichLord.NonPlayerCharacters
                 {
                     hasPredictedData = false;
                     _predictedStates.Remove(index);
+                    Debug.Log("Guid: " + predictedState.Data.GUID + ", Clearing Predicted State " + predictedState.Data.State + 
+                        " Anim " + predictedState.Data.AnimationIndex +
+                        ", tick: " + Runner.Tick);
                 }
 
                 localData.Health = _renderWriteData.Health;
                 localData.State = _renderWriteData.State;
+                localData.AnimationIndex = _renderWriteData.AnimationIndex;
 
                 _localNpcDatas[index] = localData;
             }
 
             if (hasPredictedData)
             {
-                Debug.Log("Using Predicted State " + predictedState.Data.State);
                 FNonPlayerCharacterData predictedData = predictedState.Data;
 
                 // Keep the position updates consistent with the authority

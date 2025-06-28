@@ -415,13 +415,34 @@ namespace LichLord.NonPlayerCharacters
         {
             if (_hasAttackTarget &&
                 HasActiveManeuver())
-            { 
+            {
                 NonPlayerCharacter npc = _attackTarget as NonPlayerCharacter;
                 if(npc != null) 
                 {
-                    npc.Replicator.ApplyDamage(npc.GUID, _activeManeuver.Definition.Damage);
+                    ApplyHitToTarget(npc, _activeManeuver.Definition, _npc.Context.Runner.Tick);
                 }
             }
+        }
+
+        public void ApplyHitToTarget(IHitTarget hitTarget, NonPlayerCharacterManeuverDefinition definition, int tick)
+        {
+
+            FDamageData damageData = new FDamageData();
+            damageData.damageValue = definition.Damage;
+
+            FHitUtilityData hit = new FHitUtilityData
+            {
+                instigator = _npc,
+                target = hitTarget,
+                damageData = damageData,
+                staggerRating = 0,
+                knockbackStrength = 0,
+                impactRotation = Quaternion.identity,
+                impactPosition = Vector3.zero,
+                tick = tick,
+            };
+
+            HitUtility.ProcessHit(ref hit, _npc.Context);
         }
 
         private void SetAttackTarget(IChunkTrackable target)

@@ -164,7 +164,7 @@
         // Handle damage application by type
         public static void ApplyDamage(ref FNonPlayerCharacterData npcData,
             NonPlayerCharacterDefinition definition,
-            int damage)
+            int damage, int hitReactIndex)
         {
             int currentHealth = GetHealth(ref npcData);
             SetHealth(currentHealth - damage, ref npcData);
@@ -178,15 +178,7 @@
             else
             {
                 SetNPCState(TryAssignState(ref npcData, ENonPlayerState.HitReact), ref npcData);
-                int currentAnimIndex = npcData.AnimationIndex;
-                int newAnimIndex = UnityEngine.Random.Range(0, 4);
-
-                // If the new index is the same as the current, increment and wrap around
-                if (newAnimIndex == currentAnimIndex)
-                {
-                    newAnimIndex = (currentAnimIndex + 1) % 4;
-                }
-                npcData.AnimationIndex = newAnimIndex;
+                npcData.AnimationIndex = hitReactIndex;
             }
         }
 

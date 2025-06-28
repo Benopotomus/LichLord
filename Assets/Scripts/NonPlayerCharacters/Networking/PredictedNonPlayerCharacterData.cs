@@ -18,9 +18,9 @@
             cachedDefinition = other.Definition;
         }
 
-        public void ApplyDamage(int damage)
+        public void ApplyDamage(int damage, int hitReactIndex)
         {
-            NonPlayerCharacterDataUtility.ApplyDamage(ref _data, cachedDefinition, damage);
+            NonPlayerCharacterDataUtility.ApplyDamage(ref _data, cachedDefinition, damage, hitReactIndex);
         }
     }
 }

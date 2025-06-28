@@ -29,6 +29,9 @@ namespace LichLord.NonPlayerCharacters
             if (animIndex > _hitReacts.Count)
                 return;
 
+            Debug.Log("Guid: " + _npc.GUID + ", Starting Hit React " + animIndex +
+                ", tick: " + _npc.Context.Runner.Tick);
+
             var hitReact = _hitReacts[animIndex];
             var animTrigger = hitReact.AnimationTrigger;
 
