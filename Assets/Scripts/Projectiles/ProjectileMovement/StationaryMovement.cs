@@ -1,7 +1,6 @@
 ﻿
 namespace LichLord.Projectiles
 {
-    using System.Collections.Generic;
     using UnityEngine;
 
     [CreateAssetMenu(menuName = "LichLord/Projectiles/StationaryMovement")]
@@ -19,6 +18,7 @@ namespace LichLord.Projectiles
             projectile.Position = toData.Position.Position;
             projectile.Velocity = Vector2.zero;
             projectile.Rotation = GetRotation(projectile.Definition, 
+                ref toData,
                 projectile.Position, 
                 projectile.Position, 
                 projectile.Velocity, 
@@ -36,6 +36,7 @@ namespace LichLord.Projectiles
             Quaternion oldRotation = projectile.Rotation;
             Quaternion newRotation = GetRotation(
                 projectile.Definition,
+                ref data,
                 data.TargetPosition.Position,
                 data.Position.Position,
                 projectile.Velocity,

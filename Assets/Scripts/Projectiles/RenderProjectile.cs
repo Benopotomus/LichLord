@@ -25,6 +25,7 @@ namespace LichLord.Projectiles
         public float InterpolationDuration = 0.1f;
         public Ease InterpolationEase = Ease.OutSine;
         public float InterpolationTime;
+        public float RenderTimeSinceFired = 0;
 
         public void ActivateRender(ref FProjectileData data)
         {
@@ -35,6 +36,7 @@ namespace LichLord.Projectiles
             Definition = Global.Tables.ProjectileTable.TryGetDefinition(data.DefinitionID);
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;
+            RenderTimeSinceFired = 0;
 
             if (Definition != null)
             {
@@ -80,6 +82,7 @@ namespace LichLord.Projectiles
 
             Timestamp = toData.FireTick * networkDelta;
             float renderTimeSinceFired = renderTime - Timestamp;
+
             Definition.ProjectileMovement.OnRender(this, ref toData, ref fromData, bufferAlpha, localDelta, renderTimeSinceFired, tick);
 
             VisualsInstance.UpdateVisuals(this);

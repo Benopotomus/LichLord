@@ -1,6 +1,5 @@
 ﻿namespace LichLord.Projectiles
 {
-    using UnityEditor;
     using UnityEngine;
 
     [CreateAssetMenu(menuName = "LichLord/Projectiles/ThrownMovement")]
@@ -21,15 +20,37 @@
             int tick)
         {
             Vector3 lastPosition = projectile.Position;
-            Vector3 newRenderTargetPosition = GetLinearMovePosition(projectile.Definition, ref toData, renderTimeSinceFired);
 
-            projectile.InterpolationTime += Time.deltaTime;
-            float interpolationProgress = Mathf.Clamp01(projectile.InterpolationTime / projectile.InterpolationDuration);
-            var lerpPosition = Vector3.Lerp(projectile.Position, newRenderTargetPosition, interpolationProgress);
+            Vector3 newRenderTargetPosition = GetLinearMovePosition(
+                projectile.Definition,
+                ref toData,
+                renderTimeSinceFired);
 
-            projectile.Position = lerpPosition;
+            if (toData.HasImpacted)
+            {
+                newRenderTargetPosition = ClampToImpactPosition(lastPosition, 
+                    deltaTime, 
+                    ref toData, 
+                    projectile.Definition);
+            }
+
+            projectile.Position = newRenderTargetPosition;
             projectile.Velocity = (projectile.Position - lastPosition) / Time.deltaTime;
-            projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition.Position, toData.Position.Position, projectile.Velocity, projectile.Rotation);
+            projectile.Rotation = GetRotation(projectile.Definition,
+                ref toData,
+                toData.TargetPosition.Position,
+                toData.Position.Position,
+                projectile.Velocity,
+                projectile.Rotation);
+        }
+
+        private Vector3 ClampToImpactPosition(
+            Vector3 lastPosition,
+            float deltaTime,
+            ref FProjectileData toData,
+            ProjectileDefinition definition)
+        {
+            return Vector3.Lerp(lastPosition, toData.TargetPosition.Position, deltaTime * definition.Speed);
         }
 
         private Vector3 GetLinearMovePosition(ProjectileDefinition definition,
@@ -86,6 +107,7 @@
             Quaternion oldRotation = projectile.Rotation;
             Quaternion newRotation = GetRotation(
                 projectile.Definition,
+                ref data,
                 data.TargetPosition.Position,
                 data.Position.Position,
                 newVelocity,
@@ -121,9 +143,16 @@
 
             if (!found)
             {
-                // fallback to straight target if no solution
-                //Debug.LogWarning($"[ThrownMovement] No ballistic arc found to {originalTargetPosition}, using unmodified target.");
-                return originalTargetPosition;
+                // If no ballistic solution, try raising the target Y by a dynamic amount:
+                float distance = Vector3.Distance(shooterPosition, originalTargetPosition);
+
+                // Raise the apex proportionally to distance
+                float apexOffset = distance * 0.75f;
+
+                Vector3 fallbackTarget = originalTargetPosition;
+                fallbackTarget.y += apexOffset;
+
+                return fallbackTarget;
             }
 
             // Compute how long the *straight-line* travel would take to the true target

@@ -49,7 +49,7 @@ namespace LichLord.Projectiles
                         continue;
                     }
 
-                    projectile.OwningPool = this;
+                    SetupRenderProjectile(ref data, projectile, i);
                     projectile.ActivateRender(ref data);
 
                     // Create and store ViewEntry
@@ -73,7 +73,7 @@ namespace LichLord.Projectiles
 
             int dataIndex = _dataCount % MAX_PROJECTILE_COUNT;
 
-            FProjectileData spawnData = GetProjectileData(fireEvent);
+            FProjectileData spawnData = GetProjectileSpawnData(fireEvent);
             _projectileDatas.Set(dataIndex, spawnData);
 
             FixedUpdateProjectile projectile = _fixedUpdateProjectiles[dataIndex];

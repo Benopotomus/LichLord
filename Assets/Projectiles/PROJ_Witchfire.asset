@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
   m_Name: PROJ_Witchfire
   m_EditorClassIdentifier: 
-  _tableID: 4
+  _tableID: 5
   _lifetime: 0.4
-  _postImpactLifetime: 0
+  _postImpactTicks: 16
   _deactivationSpawnedProjectiles: []
   _projectileMovement: {fileID: 11400000, guid: 81fb74ccbd596fa448576dabda18f8f3,
     type: 2}
@@ -45,3 +45,6 @@ MonoBehaviour:
     _bundle: proj_vis_witchfire
   _impactSticksToHitActor: 0
   _homesAtApex: 0
+  _proximityDetonationRange: 0
+  _proximityDetonationTicks: 0
+  _proximityDetonationProjectile: []

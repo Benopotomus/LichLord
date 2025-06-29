@@ -1,7 +1,6 @@
 ﻿
 namespace LichLord.Projectiles
 {
-    using System.Collections.Generic;
     using UnityEngine;
     using Fusion;
 
@@ -11,6 +10,8 @@ namespace LichLord.Projectiles
 
         public float Lifetime { get; set; }
         public bool IsDataSet { get; set;}
+
+        public int FuseDetonationTick { get; set; }
 
         // FIXED UPDATE
 
@@ -63,11 +64,8 @@ namespace LichLord.Projectiles
             if (data.IsFinished)
                 return;
 
-            if (!IsDataSet) 
+            if (!IsDataSet)
                 SetData(ref data);
-
-            if (Definition == null)
-                return;
 
             if (simulationTime >= (data.FireTick * deltaTime) + Definition.Lifetime)
             {
@@ -75,6 +73,10 @@ namespace LichLord.Projectiles
                 return;
             }
 
+            Definition.UpdateProximityFuse(ref data, tick, this);
+            Definition.UpdateTimedFuse(ref data, tick, this);
+
+            // If impacted, stop movement and deactivate after a delay
             if (data.HasImpacted)
             {
                 if (tick >= ImpactTick + Definition.PostImpactTicks)
@@ -109,53 +111,23 @@ namespace LichLord.Projectiles
         */
         }
 
-        private List<GameObject> GetIgnoreGameObjects(INetActor currentActor)
+        public void SpawnProjectile(ref FProjectileData data, ProjectileDefinition definition, Vector3 position)
         {
-            List<GameObject> ignoredGameObjects = new List<GameObject>();
-            /*
-            if (Instigator.NetActor.ActorNode != null) // instigator can be null before this goes through
-            {
-                HitboxComponent ignoredHitBox = NetActorUtility.GetActorHitbox(Instigator.NetActor);
-
-                if (ignoredHitBox != null)
-                    ignoredGameObjects.Add(ignoredHitBox.gameObject);
-            }
-
-            if (currentActor.ActorNode != null)
-            {
-                ignoredGameObjects.Add(currentActor.ActorNode);
-
-                HitboxComponent ignoredHitBox = currentActor.ActorNode.GetComponent<HitboxComponent>();
-
-                if (ignoredHitBox != null)
-                    ignoredGameObjects.Add(ignoredHitBox.gameObject);
-            }
-            */
-            return ignoredGameObjects;
-        }
-
-        public void SpawnDeactivationProjectiles(ref FProjectileData data, ref FPhysicsHitData impactHit)
-        {
-            
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
-            for (int i = 0; i < Definition.DeactivationSpawnedProjectiles.Count; i++)
-            {
-                ProjectileManager.CreateProjectileFireEvent(
-                    ref fireEvent,
-                    Definition.DeactivationSpawnedProjectiles[i],
-                    Instigator,
-                    new FNetObjectID(),
-                    impactHit.ProjectilePosition,
-                    impactHit.ProjectilePosition + Vector3CompressedExtensions.SubtractAndNormalize(data.TargetPosition.Position, data.Position.Position), 
-                    OwningPool.Runner.Tick,
-                    ref Payload_SpawnedProjectile,
-                    ref Payload_SpawnedProjectile);
+            ProjectileManager.CreateProjectileFireEvent(
+                ref fireEvent,
+                definition,
+                Instigator,
+                new FNetObjectID(),
+                position,
+                position + Vector3CompressedExtensions.SubtractAndNormalize(data.TargetPosition.Position, data.Position.Position),
+                OwningPool.Runner.Tick,
+                ref Payload_SpawnedProjectile,
+                ref Payload_SpawnedProjectile);
 
-
-                OwningPool.SpawnProjectile(fireEvent);
-            }
-            
+            OwningPool.SpawnProjectile(fireEvent);
         }
-        
+
+
     }
 }

@@ -47,114 +47,13 @@ namespace LichLord.Projectiles
             HitUtility.ProcessHit(ref hit, projectile.Context);
         }
 
-        /*
-        public virtual void SpawnGameplayEffectsForInstigator(Projectile projectile,
-            ref FProjectileData data,
-            ref FProjectileCollisionEvent collisionEvent,
-            int tick)
-        {
-            INetActor instigator = projectile.Instigator.NetActor;
-            INetActor target = collisionEvent.hitTarget != null ? collisionEvent.hitTarget.NetActor : null;
-
-            Vector2 outPosition = collisionEvent.impactPosition;
-
-            if (projectile.Payload.instigatorGameplayEffects == null)
-                return;
-
-            foreach (var gpeDefinition in projectile.Payload.instigatorGameplayEffects)
-            {
-                GameplayEffectManager.CreateGameplayEffectEvent(ref projectile.GameplayEffectEvent,
-                    gpeDefinition,
-                    instigator,
-                    instigator,
-                    target,
-                    outPosition,
-                    tick);
-
-                projectile.Context.GameplayEffectManager.SpawnGameplayEffect(ref projectile.GameplayEffectEvent);
-            }
-        }
-
-        public virtual void SpawnGameplayEffectsForTarget(Projectile projectile,
-            ref FProjectileData data,
-            ref FProjectileCollisionEvent collisionEvent,
-            int tick)
-        {
-            if (collisionEvent.hitTarget == null)
-                return;
-
-            Vector2 direction = new Vector2(Mathf.Cos(collisionEvent.impactRotationRadians),
-                Mathf.Sin(collisionEvent.impactRotationRadians));
-            Vector2 outPosition = collisionEvent.impactPosition + (direction * 10f);
-
-            if (projectile.Payload.targetGameplayEffects == null)
-                return;
-
-            foreach (var gpeDefinition in projectile.Payload.targetGameplayEffects)
-            {
-                FGameplayEffectEvent effectEvent = new FGameplayEffectEvent();
-                GameplayEffectManager.CreateGameplayEffectEvent(ref effectEvent,
-                    gpeDefinition,
-                    projectile.Instigator.NetActor,
-                    collisionEvent.hitTarget.NetActor,
-                    null,
-                    outPosition,
-                    tick);
-
-                projectile.Context.GameplayEffectManager.SpawnGameplayEffect(ref effectEvent);
-            }
-        }
-
-        public bool HandleReflect(Projectile projectile,
-            ref FProjectileData data,
-            ref FProjectileCollisionEvent collisionEvent,
-            int tick)
-        {
-            if (!projectile.Definition.Reflectable)
-                return false;
-
-            // Check if Reflect
-            INetActor hitActor = collisionEvent.hitTarget.NetActor;
-
-            EffectSystemComponent effectSystem = hitActor.GetEffectSystemComponent();
-            if (effectSystem == null)
-                return false;
-
-            if (effectSystem.ReflectProjectilesAngle == 0)
-                return false;
-
-            float incomingAngle = Vector2.Angle(-projectile.FixedUpdateVelocity, hitActor.GetAimVector());
-            if (incomingAngle < effectSystem.ReflectProjectilesAngle)
-            {
-                Vector2 reflection = Vector2.Reflect(projectile.FixedUpdateVelocity, hitActor.GetAimVector());
-
-                data.Position = collisionEvent.impactPosition.ToShortVector();
-                data.TargetPosition = (collisionEvent.impactPosition + (reflection * 10f)).ToShortVector();
-                data.InstigatorID = hitActor.NetObjectID;
-                data.FireTick = tick;
-                data.IsReflected = true;
-                projectile.SetData(ref data);
-
-                return true;
-            }
-
-
-            return false;
-        }
-
-        */
         public static void HandleImpact(Projectile projectile,
+            ProjectileDefinition definition,
             ref FProjectileData data,
             ref FPhysicsHitData impactHit,
             int tick)
         {
-
-            data.HasImpacted = true;
-            data.TargetPosition.CopyPosition(impactHit.ImpactPoint);
-
-            //Debug.Log(projectile.Index +  " Impacted on fixed Update " + impactHit.ImpactPoint);
-
-            projectile.ImpactTick = tick;
+            projectile.SetImpactData(ref data, impactHit.ImpactPoint, tick);
 
             projectile.Position = impactHit.ProjectilePosition;
             
@@ -162,8 +61,7 @@ namespace LichLord.Projectiles
 
             if (projectile is FixedUpdateProjectile fixedUpdateProjectile)
             {
-                fixedUpdateProjectile.SpawnDeactivationProjectiles(ref data, ref impactHit);
-                //fixedUpdateProjectile.DeactivateFixedUpdate(ref data);
+                definition.SpawnImpactProjectiles(ref data, ref impactHit, fixedUpdateProjectile);
             }
         }
 

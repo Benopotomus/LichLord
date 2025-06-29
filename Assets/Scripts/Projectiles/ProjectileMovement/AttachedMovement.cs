@@ -20,7 +20,12 @@ namespace LichLord.Projectiles
 
             projectile.Position = MuzzleUtility.GetMuzzlePosition(projectile.Instigator.NetActor, _attachment);
             projectile.Velocity = Vector2.zero;
-            projectile.Rotation = GetRotation(projectile.Definition, toData.TargetPosition.Position, toData.Position.Position, projectile.Velocity, projectile.Rotation);
+            projectile.Rotation = GetRotation(projectile.Definition,
+                ref toData, 
+                toData.TargetPosition.Position,
+                toData.Position.Position,
+                projectile.Velocity,
+                projectile.Rotation);
         }
 
         public override void OnFixedUpdate(FixedUpdateProjectile projectile, ref FProjectileData data, int tick, float simulationTime, float deltaTime)
@@ -34,6 +39,7 @@ namespace LichLord.Projectiles
             Quaternion oldRotation = projectile.Rotation;
             Quaternion newRotation = GetRotation(
                 projectile.Definition,
+                ref data,
                 data.TargetPosition.Position,
                 newPosition,
                 projectile.Velocity,

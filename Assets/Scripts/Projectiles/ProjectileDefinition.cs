@@ -13,14 +13,6 @@ namespace LichLord.Projectiles
         protected float _lifetime;
         public float Lifetime => _lifetime;
 
-        //Definitions
-        [SerializeField]
-        protected float _postImpactTicks = 16;
-        public float PostImpactTicks => _postImpactTicks;
-
-        [SerializeField]
-        protected List<ProjectileDefinition> _deactivationSpawnedProjectiles = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);
-        public List<ProjectileDefinition> DeactivationSpawnedProjectiles => _deactivationSpawnedProjectiles;
 
         // Movement
         [SerializeField]
@@ -112,6 +104,135 @@ namespace LichLord.Projectiles
         [SerializeField]// if this range is exceeded. do something
         protected bool _homesAtApex;
         public bool HomesAtApex => _homesAtApex;
+
+        [Header("Impact")]
+
+        [SerializeField]
+        protected float _postImpactTicks = 16;
+        public float PostImpactTicks => _postImpactTicks;
+
+        [SerializeField]
+        protected List<ProjectileDefinition> _impactSpawnedProjectiles = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);
+        public List<ProjectileDefinition> ImpactSpawnedProjectiles => _impactSpawnedProjectiles;
+
+        public void SpawnImpactProjectiles(ref FProjectileData data, ref FPhysicsHitData impactHit, FixedUpdateProjectile projectile)
+        {
+            for (int i = 0; i < ImpactSpawnedProjectiles.Count; i++)
+            {
+                projectile.SpawnProjectile(ref data, ImpactSpawnedProjectiles[i], impactHit.ImpactPoint);
+            }
+        }
+
+        [Header("Proximity Detonation")]
+        [SerializeField]// if this range is exceeded. do something
+        protected float _proximityDetonationRange;
+        public float ProximityDetonationRange => _proximityDetonationRange;
+
+        [SerializeField]// if this range is exceeded. do something
+        protected int _proximityDetonationTicks;
+        public int ProximityDetonationTicks => _proximityDetonationTicks;
+
+        [SerializeField]
+        protected List<ProjectileDefinition> _proximityDetonationProjectile = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);
+        public List<ProjectileDefinition> ProximityDetonationProjectile => _proximityDetonationProjectile;
+
+        public void UpdateProximityFuse(ref FProjectileData data, int tick, FixedUpdateProjectile projectile)
+        {
+            if (ProximityDetonationRange > 0)
+            {
+                if (data.IsProximityFuseActive)
+                {
+                    if (tick > projectile.FuseDetonationTick)
+                    {
+                        if (!data.HasImpacted)
+                        {
+                            SpawnProximityDetonationProjectiles(ref data, projectile);
+                            projectile.SetImpactData(ref data, projectile.Position, tick);
+                        }
+                    }
+                }
+                else
+                {
+                    ProjectilePhysicsUtility.CheckProximityFuse(ref data, projectile, this, tick);
+                }
+            }
+        }
+
+        public void SpawnProximityDetonationProjectiles(ref FProjectileData data, FixedUpdateProjectile projectile)
+        {
+            for (int i = 0; i < ProximityDetonationProjectile.Count; i++)
+            {
+                projectile.SpawnProjectile(ref data, ProximityDetonationProjectile[i], projectile.Position);
+            }
+        }
+
+        [Header("Timed Fuse Detonation")]
+
+
+        [SerializeField]
+        protected bool _hasTimedFuse;
+        public bool HasTimedFuse => _hasTimedFuse;
+
+        // The minimum ticks and fuse ticks 
+        [SerializeField]
+        protected Vector2Int _timedFuseTickRange;
+        public Vector2Int TimedFuseTickRange => _timedFuseTickRange;
+
+        // The distance for min ticks and max ticks
+        [SerializeField]
+        protected Vector2 _timedFuseDistanceRange;
+        public Vector2 TimedFuseDistanceRange => _timedFuseDistanceRange;
+
+        [SerializeField]
+        protected List<ProjectileDefinition> _timedFuseDetonationProjectiles = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);
+        public List<ProjectileDefinition> TimedFuseDetonationProjectiles => _timedFuseDetonationProjectiles;
+
+        public void SetTimedFuseTick(ref FProjectileData data, ref FProjectileFireEvent fireEvent)
+        {
+            float distance = Vector3.Distance(fireEvent.spawnPosition, fireEvent.targetPosition);
+
+            // Clamp the distance to the allowed fuse distance range
+            float clampedDistance = Mathf.Clamp(distance, TimedFuseDistanceRange.x, TimedFuseDistanceRange.y);
+
+            // Calculate normalized distance percent (0 to 1)
+            float distancePercent = Mathf.InverseLerp(
+                TimedFuseDistanceRange.x,
+                TimedFuseDistanceRange.y,
+                clampedDistance
+            );
+
+            // Map percent to ticks
+            int fuseTicks = Mathf.RoundToInt(Mathf.Lerp(
+                TimedFuseTickRange.x,
+                TimedFuseTickRange.y,
+                distancePercent
+            ));
+
+            data.FuseData.FuseCompleteTick = fireEvent.fireTick + fuseTicks;
+        }
+
+        public void UpdateTimedFuse(ref FProjectileData data, int tick, FixedUpdateProjectile projectile)
+        {
+            if (!HasTimedFuse)
+                return;
+
+            if(data.HasImpacted)
+                return;
+
+            if (tick > data.FuseData.FuseCompleteTick)
+            { 
+                projectile.SetImpactData(ref data, projectile.Position, tick);
+                SpawnTimedFuseDetonationProjectiles(ref data, projectile);
+            }
+        }
+
+        public void SpawnTimedFuseDetonationProjectiles(ref FProjectileData data, FixedUpdateProjectile projectile)
+        {
+            for (int i = 0; i < TimedFuseDetonationProjectiles.Count; i++)
+            {
+                projectile.SpawnProjectile(ref data, TimedFuseDetonationProjectiles[i], projectile.Position);
+            }
+        }
     }
 
     public enum EPhysicsSweep

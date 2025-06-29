@@ -13,7 +13,12 @@ namespace LichLord.Projectiles
         {
             projectile.Position = data.Position.Position;
             projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition.Position, data.Position.Position);
-            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity, projectile.Rotation);
+            projectile.Rotation = GetRotation(projectile.Definition,
+                ref data,
+                data.TargetPosition.Position,
+                data.Position.Position, 
+                projectile.Velocity, 
+                projectile.Rotation);
         }
 
         public virtual void OnRender(RenderProjectile projectile,
@@ -40,7 +45,12 @@ namespace LichLord.Projectiles
         {
             projectile.Position = data.Position.Position;
             projectile.Velocity = GetInitialVelocity(projectile.Definition, data.TargetPosition.Position, data.Position.Position);
-            projectile.Rotation = GetRotation(projectile.Definition, data.TargetPosition.Position, data.Position.Position, projectile.Velocity, projectile.Rotation);
+            projectile.Rotation = GetRotation(projectile.Definition,
+                ref data, 
+                data.TargetPosition.Position, 
+                data.Position.Position,
+                projectile.Velocity,
+                projectile.Rotation);
         }
 
         public virtual void OnFixedUpdate(FixedUpdateProjectile projectile, 
@@ -70,11 +80,15 @@ namespace LichLord.Projectiles
         }
 
         public virtual Quaternion GetRotation(ProjectileDefinition definition, 
+            ref FProjectileData data,
             Vector3 targetPosition, 
             Vector3 currentPosition, 
             Vector3 velocity,
             Quaternion oldRotation)
         {
+            if (data.HasImpacted)
+                return oldRotation;
+
             // I need a way here that if the the rotation on this is going to be quaternion identy, use the old rrotation
 
             switch (definition.RotationType)

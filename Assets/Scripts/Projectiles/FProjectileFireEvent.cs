@@ -1,6 +1,6 @@
 ﻿namespace LichLord.Projectiles
 {
-    using Fusion;
+    using UnityEngine;
 
     public struct FProjectileFireEvent
     {
@@ -9,8 +9,8 @@
         public FNetObjectID targetId;
         public int fireTick;
 
-        public Vector3Compressed spawnPosition;
-        public Vector3Compressed targetPosition;
+        public Vector3 spawnPosition;
+        public Vector3 targetPosition;
 
         public FProjectilePayload payload;
         public FProjectilePayload payload_spawnedProjectile;

@@ -155,5 +155,12 @@ namespace LichLord.Projectiles
 
             return Quaternion.identity;
         }
+
+        public void SetImpactData(ref FProjectileData data, Vector3 impactPosition, int tick)
+        {
+            data.HasImpacted = true;
+            data.TargetPosition.CopyPosition(impactPosition);
+            ImpactTick = tick;
+        }
     }
 }

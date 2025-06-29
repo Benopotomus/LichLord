@@ -10,27 +10,28 @@ namespace LichLord.Projectiles
         // When the projectile has completed its lifetime until it becomes inactive.
         public bool IsActive { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
         public bool IsFinished { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
-        public bool HasStopped { get { return IsBitSet(ref _state, 3); } set { SetBit(ref _state, 3, value); } }
+        public bool HasImpacted { get { return IsBitSet(ref _state, 3); } set { SetBit(ref _state, 3, value); } }
         public bool IsHoming { get { return IsBitSet(ref _state, 4); } set { SetBit(ref _state, 4, value); } }
-        public bool HasImpacted { get { return IsBitSet(ref _state, 5); } set { SetBit(ref _state, 5, value); } }
+        public bool IsProximityFuseActive { get { return IsBitSet(ref _state, 5); } set { SetBit(ref _state, 5, value); } }
         public bool InstigatorEffectApplied { get { return IsBitSet(ref _state, 6); } set { SetBit(ref _state, 6, value); } }
-        public bool IsReflected { get { return IsBitSet(ref _state, 7); } set { SetBit(ref _state, 7, value); } }
 
         [FieldOffset(0)]
         private byte _state;
         [FieldOffset(1)]
-        public FNetObjectID InstigatorID;
-        [FieldOffset(7)]
         public ushort DefinitionID;
-        [FieldOffset(9)]
+        [FieldOffset(3)]
         public int FireTick;
-        [FieldOffset(13)]
+        [FieldOffset(7)]
         public FWorldPosition Position;
-        [FieldOffset(19)]
+        [FieldOffset(13)]
         public FWorldPosition TargetPosition;
+        [FieldOffset(19)]
+        public FNetObjectID InstigatorID;
         [FieldOffset(25)]
 
         // Custom Data
+        public FFuseData FuseData;
+        [FieldOffset(25)]
         public FBounceData BounceData;
         [FieldOffset(25)]
         public FEncircleData EncircleData;
@@ -42,6 +43,13 @@ namespace LichLord.Projectiles
         public FBeamData BeamData;
 
         //30
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct FFuseData : INetworkStruct
+        {
+            [FieldOffset(0)]
+            public int FuseCompleteTick;
+        }
 
         [StructLayout(LayoutKind.Explicit)]
         public struct FDyamicSpeedData : INetworkStruct

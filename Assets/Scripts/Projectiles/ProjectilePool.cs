@@ -65,7 +65,8 @@ namespace LichLord.Projectiles
                         continue;
                     }
 
-                    projectile.OwningPool = this;
+                    SetupRenderProjectile(ref data, projectile, i);
+                    
                     projectile.ActivateRender(ref data);
 
                     // Create and store ViewEntry
@@ -111,7 +112,7 @@ namespace LichLord.Projectiles
 
             int dataIndex = _dataCount % _projectileDatas.Length;
 
-            FProjectileData spawnData = GetProjectileData(fireEvent);
+            FProjectileData spawnData = GetProjectileSpawnData(fireEvent);
             _projectileDatas.Set(dataIndex, spawnData);
 
             FixedUpdateProjectile projectile = _fixedUpdateProjectiles[dataIndex];
@@ -263,20 +264,26 @@ namespace LichLord.Projectiles
         }
 
         // Sets data on the server
-        public FProjectileData GetProjectileData(FProjectileFireEvent fireEvent)
+        public FProjectileData GetProjectileSpawnData(FProjectileFireEvent fireEvent)
         {
             FProjectileData data = new FProjectileData();
             ProjectileDefinition definition = fireEvent.projectileDefinition;
 
-            data.InstigatorID = fireEvent.instigator.NetActor.NetObjectID;
-            data.HasStopped = false;
+            data.IsActive = false;
             data.IsFinished = false;
+            data.HasImpacted = false;
+            data.IsHoming = false;
+            data.IsProximityFuseActive = false;
+            data.InstigatorID = fireEvent.instigator.NetActor.NetObjectID;
             data.DefinitionID = (ushort)definition.TableID;
             data.FireTick = fireEvent.fireTick;
             data.Position.CopyPosition(fireEvent.spawnPosition);
             data.TargetPosition.CopyPosition(fireEvent.targetPosition);
 
-            ProjectileMovement projectileMovement = definition.ProjectileMovement;
+            if (definition.HasTimedFuse)
+            { 
+                definition.SetTimedFuseTick(ref data, ref fireEvent);
+            }
 
             return data;
         }

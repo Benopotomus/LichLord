@@ -86,6 +86,8 @@ namespace LichLord
 
         [Networked]
         private ref FVelocity _worldVelocity => ref MakeRef<FVelocity>();
+        private Vector3 _renderVelocity; 
+        public Vector3 Velocity => _renderVelocity;
 
         [Networked]
         private NetworkBool _isGrounded { get; set; }
@@ -114,6 +116,8 @@ namespace LichLord
 
         public void OnRender(float deltaTime)
         {
+            _renderVelocity = _worldVelocity.Velocity;
+
             UpdateMovementState();
             UpdateAnimator(deltaTime);
             UpdateRemotePosition(deltaTime);

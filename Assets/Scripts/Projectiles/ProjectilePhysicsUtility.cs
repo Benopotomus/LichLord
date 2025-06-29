@@ -1,10 +1,18 @@
 ﻿namespace LichLord.Projectiles
 {
     using DWD.AnimationCurveAsset;
-    using Fusion;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Pool;
+
+    public struct FOverlapHit
+    {
+        public GameObject GameObject;
+        public Collider Collider;
+        public Vector3 HitPoint;
+        public Vector3 Normal;
+        public float Distance;
+    }
 
     public static class ProjectilePhysicsUtility
     {
@@ -15,7 +23,7 @@
         private static readonly HashSet<GameObject> seenGameObjectsPool = new HashSet<GameObject>();
 
         // Adjust this value based on the maximum expected CollisionCheckNumber
-        private const int maxCollisionCheckNumber = 32;
+        private const int maxCollisionCheckNumber = 64;
 
         public static void CheckAndHandleCollision(Projectile projectile,
             ref FProjectileData data,
@@ -82,7 +90,11 @@
             // If there's an impact, handle it
             if (impactHit.IsAssigned)
             {
-                ProjectileImpactUtility.HandleImpact(projectile, ref data, ref impactHit, tick);
+                ProjectileImpactUtility.HandleImpact(projectile, 
+                    definition,
+                    ref data,
+                    ref impactHit, 
+                    tick);
             }
 
             // Release the hitDatas list
@@ -188,15 +200,6 @@
 
             // Release hitResults
             ListPool<FOverlapHit>.Release(hitResults);
-        }
-
-        public struct FOverlapHit
-        {
-            public GameObject GameObject;
-            public Collider Collider;
-            public Vector3 HitPoint;
-            public Vector3 Normal;
-            public float Distance;
         }
 
         public static List<FOverlapHit> GetOverlapHits(Projectile projectile, ref FQueryShape queryShape)
@@ -483,6 +486,45 @@
                 return false;
 
             return true;
+        }
+
+        public static void CheckProximityFuse(ref FProjectileData data, FixedUpdateProjectile projectile, ProjectileDefinition definition, int tick)
+        {
+            FQueryShape queryShape = new FQueryShape
+            {
+                position = projectile.Position,
+                rotation = projectile.Rotation,
+                shapeType = EShapeType.Sphere,
+                shapeExtents = new Vector3(definition.ProximityDetonationRange, 0f, 0f)
+            };
+
+            List<FOverlapHit> hitResults = ListPool<FOverlapHit>.Get();
+            hitResults = GetOverlapHits(projectile, ref queryShape);
+
+            // Check if the proximity target is valid (
+            foreach (var hitResult in hitResults)
+            {
+                GameObject gameObjectHit = hitResult.GameObject;
+
+                IHitTarget hitTarget = null;
+
+                if (gameObjectHit.tag == "Hurtbox")
+                {
+                    HurtboxOwner hitboxOwnerComp = gameObjectHit.GetComponent<HurtboxOwner>();
+                    if (hitboxOwnerComp == null)
+                        continue;
+
+                    hitTarget = hitboxOwnerComp.HitTarget;
+
+                    if (hitTarget is PlayerCharacter pc)
+                    { 
+                        data.IsProximityFuseActive = true;
+                        projectile.FuseDetonationTick = tick + definition.ProximityDetonationTicks;
+                    }
+                }
+            }
+
+            ListPool<FOverlapHit>.Release(hitResults);
         }
     }
 }
