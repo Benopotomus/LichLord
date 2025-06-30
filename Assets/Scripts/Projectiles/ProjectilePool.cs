@@ -39,45 +39,6 @@ namespace LichLord.Projectiles
             _dataCountReader = GetPropertyReader<int>(nameof(_dataCount));
 
             SetupFixedUpdateProjectiles(MAX_PROJECTILE_COUNT);
-
-            // For late-joining clients, spawn RenderProjectile instances for existing active projectiles
-            if (!HasStateAuthority) // Only clients need to sync visuals, as server manages data
-            {
-                int bufferLength = _projectileDatas.Length;
-                for (int i = 0; i < _dataCount; i++)
-                {
-                    int bufferIndex = i % bufferLength;
-                    FProjectileData data = _projectileDatas[bufferIndex];
-
-                    // Skip finished or invalid projectiles
-                    if (data.IsFinished || data.DefinitionID == 0)
-                        continue;
-
-                    // Skip if a view already exists (shouldn't happen, but for safety)
-                    if (_views.ContainsKey(i))
-                        continue;
-
-                    // Spawn a RenderProjectile for this projectile
-                    RenderProjectile projectile = ProjectileViewPool.Get<RenderProjectile>();
-                    if (projectile == null)
-                    {
-                        Debug.LogWarning($"[ProjectilePool] Failed to get RenderProjectile for index {i}");
-                        continue;
-                    }
-
-                    SetupRenderProjectile(ref data, projectile, i);
-                    
-                    projectile.ActivateRender(ref data);
-
-                    // Create and store ViewEntry
-                    ViewEntry newEntry = ProjectileViewPool.Get<ViewEntry>();
-                    newEntry.Projectile = projectile;
-                    newEntry.LastData = data;
-                    _views.Add(i, newEntry);
-                }
-
-                _viewCount = _dataCount; // Ensure view count matches data count
-            }
         }
 
         protected virtual void SetupFixedUpdateProjectiles(int count)

@@ -282,7 +282,7 @@ PrefabInstance:
     - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
       propertyPath: _maneuvers.Array.size
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
@@ -293,6 +293,12 @@ PrefabInstance:
     - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
       propertyPath: _maneuvers.Array.data[1].Definition
+      value: 
+      objectReference: {fileID: 11400000, guid: bc76080b6786e5444b143a411a2c0bd2,
+        type: 2}
+    - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _maneuvers.Array.data[2].Definition
       value: 
       objectReference: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2,
         type: 2}
@@ -305,6 +311,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _maneuvers.Array.data[1].ActiveState
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _maneuvers.Array.data[2].ActiveState
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 2073302252260987663, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}

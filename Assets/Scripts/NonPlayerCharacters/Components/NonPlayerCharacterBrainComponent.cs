@@ -94,6 +94,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (executingManuever.HasExpired(tick))
             {
+                /*
                 // if the target is no longer valid, search for a new one
                 if (_hasAttackTarget && !IsTargetValid(_attackTarget))
                 {
@@ -103,7 +104,7 @@ namespace LichLord.NonPlayerCharacters
                 // Im removing this maneuver immediatly 
                 SetActiveManuever(null);
                 SelectManeuver(tick);
-
+                */
                 data.State = ENonPlayerState.Idle;
                 NPC.Replicator.UpdateNPCData(ref data);
                 return;
@@ -171,7 +172,7 @@ namespace LichLord.NonPlayerCharacters
             List<NonPlayerCharacterManeuverState> availableStates = new List<NonPlayerCharacterManeuverState>();
 
             // if there is no active maneuver, select another
-            if (_activeManeuver == null)
+            if (!HasActiveManeuver())
             {
                 for (int i = 0; i < _maneuvers.Count; i++)
                 { 
@@ -195,12 +196,22 @@ namespace LichLord.NonPlayerCharacters
 
         private void SetActiveManuever(NonPlayerCharacterManeuverState newManeuver)
         {
+            if (newManeuver == _activeManeuver)
+                return;
+
             if (newManeuver == null)
+            {
                 _activeManeuverState = ENonPlayerState.Inactive;
+            }
             else
+            {
                 _activeManeuverState = newManeuver.ActiveState;
+            }
 
             _activeManeuver = newManeuver;
+
+            // Update ranges after assignment
+            UpdateRanges();
         }
 
         // Runs when active meneuver is executed (in state)
@@ -381,7 +392,13 @@ namespace LichLord.NonPlayerCharacters
 
         private bool HasActiveManeuver()
         {
-            return _activeManeuverState != ENonPlayerState.Inactive;
+            if (_activeManeuverState == ENonPlayerState.Inactive)
+                return false;
+
+            if (_activeManeuver == null)
+                return false;
+
+            return true;
         }
 
         public void SetAnimationForManeuver(ENonPlayerState state, int animIndex) 

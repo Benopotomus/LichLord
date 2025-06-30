@@ -30,7 +30,28 @@ namespace LichLord.NonPlayerCharacters
             if (IsOnCooldown(tick))
                 return false;
 
-            if(Definition.RequiresEnemyTarget && brainComponent.AttackTarget == null)
+            switch (Definition.ValidTargetTypes)
+            {
+                case EManeuverTarget.Both:
+                    if(brainComponent.AttackTarget == null)
+                        return false;
+                    break;
+                case EManeuverTarget.NPC:
+                    if(brainComponent.AttackTarget is not NonPlayerCharacter)
+                        return false;
+                    break;
+                case EManeuverTarget.PC:
+                    if (brainComponent.AttackTarget is not PlayerCharacter)
+                        return false;
+                    break;
+            }
+
+            float distanceToTarget = Vector3.Distance(
+                brainComponent.AttackTarget.Position, 
+                brainComponent.NPC.CachedTransform.position);
+
+            if(distanceToTarget < Definition.ValidTargetDistance.x ||
+                distanceToTarget > Definition.ValidTargetDistance.y)
                 return false;
 
             return true;

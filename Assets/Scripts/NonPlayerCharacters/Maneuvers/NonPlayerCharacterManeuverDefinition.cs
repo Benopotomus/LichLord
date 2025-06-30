@@ -32,12 +32,17 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private float _faceTargetRange = 5f;
 
-        [SerializeField]
-        private bool _requiresEnemyTarget;
-        public bool RequiresEnemyTarget => _requiresEnemyTarget;
-
         public float MovementStopRangeSqrt => _movementStopRange * _movementStopRange;
         public float FaceTargetRangeSqrt => _faceTargetRange * _faceTargetRange;
+
+        [Header("Targeting")]
+        [SerializeField]
+        private Vector2 _validTargetDistance = Vector2.zero;
+        public Vector2 ValidTargetDistance => _validTargetDistance;
+
+        [SerializeField]
+        private EManeuverTarget _validTargetTypes;
+        public EManeuverTarget ValidTargetTypes => _validTargetTypes;
 
         [Header("Animations")]
         [SerializeField]
@@ -48,6 +53,14 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private List<FManeuverProjectile> _maneuverProjectiles = new List<FManeuverProjectile>();
         public List<FManeuverProjectile> ManeuverProjectiles => _maneuverProjectiles;
+
     }
 
+    public enum EManeuverTarget
+    { 
+        None,
+        NPC,
+        PC,
+        Both
+    }
 }
