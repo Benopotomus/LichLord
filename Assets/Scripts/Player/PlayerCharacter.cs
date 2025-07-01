@@ -191,6 +191,11 @@ namespace LichLord
             }
         }
 
+        void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
+        {
+            Debug.Log("FireTick: " + data.FireTick + ", CurrentTick: " + Context.Runner.Tick);
+        }
+
         void IHitTarget.ProcessHit(ref FHitUtilityData hit)
         {
         }

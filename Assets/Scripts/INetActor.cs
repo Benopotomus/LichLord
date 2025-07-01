@@ -1,4 +1,6 @@
-﻿namespace LichLord
+﻿using LichLord.Projectiles;
+
+namespace LichLord
 {
     public interface INetActor
     {
@@ -6,5 +8,7 @@
         {
             get;
         }
+
+        void ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data);
     }
 }

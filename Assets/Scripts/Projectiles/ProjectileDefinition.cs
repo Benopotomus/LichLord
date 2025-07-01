@@ -187,7 +187,6 @@ namespace LichLord.Projectiles
 
         [Header("Timed Fuse Detonation")]
 
-
         [SerializeField]
         protected bool _hasTimedFuse;
         public bool HasTimedFuse => _hasTimedFuse;
@@ -252,6 +251,13 @@ namespace LichLord.Projectiles
                 projectile.SpawnProjectile(ref data, TimedFuseDetonationProjectiles[i], projectile.Position);
             }
         }
+
+        [Header("NPC Aiming")]
+
+        [SerializeField]
+        protected bool _forcesRemoteAiming;
+        public bool ForcesRemoteAiming => _forcesRemoteAiming;
+
     }
 
     public enum EPhysicsSweep

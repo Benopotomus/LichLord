@@ -10,12 +10,12 @@
         [FieldOffset(0)]
         private ushort _configuration; // 2 bytes: Index (9 bits) + DefinitionID (5 bits) + TeamID (2 bits)
         [FieldOffset(2)]
-        private FWorldTransform _transform; // 9 bytes: Position (8) + Rotation (1)
+        private FWorldTransform _transform; // 8 bytes: Position (6) + Rotation (2)
         [FieldOffset(10)]
         private byte _condition; // 1 byte: NPCState (4 bits) + NPCStatus (4 bits)
         [FieldOffset(11)]
         private ushort _events; // 2 bytes: Health (12 bits)
-        // Total: 14 bytes
+        // Total: 13 bytes
 
         public int DefinitionID
         {

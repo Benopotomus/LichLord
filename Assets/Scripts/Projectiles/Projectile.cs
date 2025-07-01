@@ -112,12 +112,6 @@ namespace LichLord.Projectiles
             {
                 if (pc == Context.LocalPlayerCharacter)
                 {
-                    Debug.Log("Instigator: " + Instigator.NetActor);
-                    if (Instigator.NetActor is NonPlayerCharacter npc)
-                    {
-
-                    }
-
                     pc.RPC_TakeProjectileHit(Index, Definition.Damage);
                 }
             }

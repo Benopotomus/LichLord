@@ -1,4 +1,5 @@
-﻿using Pathfinding;
+﻿using LichLord.Projectiles;
+using Pathfinding;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -33,6 +34,10 @@ namespace LichLord.NonPlayerCharacters
         private Transform _transform;
 
         private float _teleportDistanceSquared = 36;
+
+        // Follow projectile yaw. Local blend on remotes
+        private float _projectileFollowYawStrength;
+        private float _projectileFollowYaw;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
@@ -71,8 +76,11 @@ namespace LichLord.NonPlayerCharacters
 
             // Smooth yaw only
             float currentYaw = NPC.CachedTransform.eulerAngles.y;
-            float targetYaw = data.Yaw; // Assume this is in degrees
+            
+            _projectileFollowYawStrength = Mathf.Clamp(_projectileFollowYawStrength - renderDeltaTime, 0.0f, 1.1f);
 
+            // Get the local projectile follow strength blended with the server position.
+            float targetYaw = Mathf.LerpAngle(data.Yaw, _projectileFollowYaw, _projectileFollowYawStrength);
             float lerpedYaw = Mathf.LerpAngle(currentYaw, targetYaw, renderDeltaTime * 10f);
 
             // Keep existing pitch and roll
@@ -194,8 +202,20 @@ namespace LichLord.NonPlayerCharacters
             _followerMaxSpeed = newSpeed;
         }
 
+        public void SetProjectileYaw(ref FProjectileData data)
+        {
+            Vector3 direction = (data.TargetPosition.Position - data.Position.Position);
+            direction.y = 0;
+            float yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+
+            _projectileFollowYaw = yaw;
+            _projectileFollowYawStrength = 1.1f;
+        }
+
         public void StartRecycle()
         {
         }
+
+
     }
 }

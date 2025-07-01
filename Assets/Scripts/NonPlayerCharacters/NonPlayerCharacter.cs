@@ -1,5 +1,6 @@
 ﻿using DWD.Pooling;
 using Fusion;
+using LichLord.Projectiles;
 using LichLord.Props;
 using LichLord.World;
 using System.Collections.Generic;
@@ -183,6 +184,24 @@ namespace LichLord.NonPlayerCharacters
         public void OnHitTaken(ref FHitUtilityData hit)
         {
 
+        }
+
+        void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
+        {
+            if (projectile == null) 
+                return;
+
+            if (definition == null)
+                return;
+
+            if (!definition.ForcesRemoteAiming)
+                return;
+
+            if (Replicator.HasStateAuthority)
+                return;
+
+            Movement.SetProjectileYaw(ref data);
+            AnimationController.SetProjectileFrame(definition);
         }
 
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)

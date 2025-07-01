@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using AYellowpaper.SerializedCollections;
+using LichLord.Projectiles;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -19,6 +22,10 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private NonPlayerCharacter _npc;
         [SerializeField] private Animator _animator;
+
+        [SerializeField]
+        [SerializedDictionary]
+        private SerializedDictionary<ProjectileDefinition, FAnimationCallbackData> _animationCallbacks;
 
         public void SetAnimationForTrigger(FAnimationTrigger animationTrigger)
         {
@@ -80,6 +87,22 @@ namespace LichLord.NonPlayerCharacters
             _animator.SetBool(_animIDMoving, isMoving);
             _animator.SetFloat(_animIDSpeedX, animationVelocity.x, 0.1f, renderDeltaTime);
             _animator.SetFloat(_animIDSpeedZ, animationVelocity.z, 0.1f, renderDeltaTime);
+        }
+
+        public void SetProjectileFrame(ProjectileDefinition definition)
+        {
+            if (_animationCallbacks.TryGetValue(definition, out FAnimationCallbackData animationCallback))
+            {
+                string animationStateName = animationCallback.AnimationStateName;
+
+                int totalFrames = animationCallback.TotalFrames;
+                int desiredFrame = animationCallback.Frame;
+
+                float normalizedTime = desiredFrame / (float)totalFrames;
+                
+                // current time in the clip
+                _animator.CrossFade(animationStateName, 0.2f, 0, normalizedTime);
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ namespace LichLord.Projectiles
     using DWD.Pooling;
     using DG.Tweening;
     using LichLord.Props;
+    using LichLord.NonPlayerCharacters;
 
     //using DG.Tweening;
 
@@ -45,10 +46,12 @@ namespace LichLord.Projectiles
             {
                 Definition.ProjectileMovement.ActivateRender(this, ref data);
                 LoadVisualsPrefab(Definition.VisualsPrefab, ref data);
+
+                if (Instigator != null)
+                    Instigator.NetActor.ProjectileSpawnedCallback(this, Definition, ref data);
             }
 
             AffectedActors.Clear();
-
         }
 
         public void DeactivateRenderProjectile()

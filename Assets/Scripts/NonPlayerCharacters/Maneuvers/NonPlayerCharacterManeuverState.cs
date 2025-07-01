@@ -13,6 +13,7 @@ namespace LichLord.NonPlayerCharacters
         public int CooldownExpirationTick;
         public int ActivationExpirationTick;
         public int ActivationTick;
+        public float RandomAimOffset = 7f;
 
         public bool IsValid()
         {
@@ -179,11 +180,11 @@ namespace LichLord.NonPlayerCharacters
             bool targetIsMasterClient
         )
         {
-            float maxLead = targetIsMasterClient ? 0.1f : 0.2f;
+            float maxLead = targetIsMasterClient ? 0.0f : 0.15f;
             float distance = Vector3.Distance(targetPosition, shooterPosition);
             float distancePercent = Mathf.Clamp01((distance / projectileSpeed));
          
-            float interceptTime = Mathf.Lerp(0, maxLead, distancePercent);
+            float interceptTime = Mathf.Lerp(0.1f, 0.1f + maxLead, distancePercent);
             Vector3 additiveTarget = (targetVelocity * interceptTime);
             additiveTarget.y = 0;
 
@@ -196,7 +197,7 @@ namespace LichLord.NonPlayerCharacters
             float targetDistance = Vector3.Distance(muzzlePosition, targetPosition);
 
             // how much to randomize (in meters at target distance)
-            float randomRadius = targetDistance * Mathf.Tan(5 * Mathf.Deg2Rad);
+            float randomRadius = targetDistance * Mathf.Tan(RandomAimOffset * Mathf.Deg2Rad);
 
             // random point in circle around target
             Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * randomRadius;
