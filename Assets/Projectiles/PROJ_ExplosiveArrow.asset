@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
   m_Name: PROJ_ExplosiveArrow
   m_EditorClassIdentifier: 
-  _tableID: 3
-  _lifetime: 5
+  _tableID: 2
+  _lifetimeTicks: 96
+  _lifetimeExpiredSpawnedProjectiles: []
   _projectileMovement: {fileID: 11400000, guid: 908262b09eef1914a9892899916f592d,
     type: 2}
   _speed: 16
@@ -39,17 +40,19 @@ MonoBehaviour:
     m_Bits: 0
   _scaleOverLifetime: {fileID: 0}
   _visualsPrefab:
-    _name: PROJ_VIS_Arrow
-    _bundle: proj_vis_arrow
+    _name: PROJ_VIS_ExplosiveArrow
+    _bundle: proj_vis_explosivearrow
   _impactSticksToHitActor: 0
   _homesAtApex: 0
+  _damage: 16
+  _damageType: 0
   _postImpactTicks: 8
   _impactSpawnedProjectiles: []
   _proximityDetonationRange: 0
   _proximityDetonationTicks: 0
   _proximityDetonationProjectile: []
   _hasTimedFuse: 1
-  _timedFuseTickRange: {x: 16, y: 64}
+  _timedFuseTickRange: {x: 16, y: 72}
   _timedFuseDistanceRange: {x: 8, y: 32}
   _timedFuseDetonationProjectiles:
   - {fileID: 11400000, guid: fd235daad7390c546b457b70468fba4a, type: 2}

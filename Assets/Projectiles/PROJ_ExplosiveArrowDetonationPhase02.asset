@@ -10,45 +10,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
-  m_Name: PROJ_Fireball
+  m_Name: PROJ_ExplosiveArrowDetonationPhase02
   m_EditorClassIdentifier: 
-  _tableID: 5
-  _lifetimeTicks: 160
+  _tableID: 3
+  _lifetimeTicks: 64
   _lifetimeExpiredSpawnedProjectiles: []
-  _projectileMovement: {fileID: 11400000, guid: 339f033f4deb71d4e9d8f12a1f09c1af,
+  _projectileMovement: {fileID: 11400000, guid: 73f3a09a38ebc1549a0ae6dde5708fca,
     type: 2}
-  _speed: 30
+  _speed: 0
   _impactCollisionLayer:
     serializedVersion: 2
-    m_Bits: 257
+    m_Bits: 0
   _overlapCollisionLayer:
     serializedVersion: 2
-    m_Bits: 257
+    m_Bits: 256
   _shape: 1
   _lineOfSightRequirement: 0
-  _rotationType: 1
-  _extents: {x: 0.05, y: 0, z: 0}
-  _onlyAffectsOnce: 0
+  _rotationType: 0
+  _extents: {x: 2, y: 0, z: 0}
+  _onlyAffectsOnce: 1
   _affectsEachCast: 0
-  _physicsSweep: 2
+  _physicsSweep: 1
   _collisionCheckTrim: {x: 0, y: 0}
   _collisionCheckRate: 0
-  _collisionCheckNumber: 4
+  _collisionCheckNumber: 8
   _onlyAffectImpactTarget: 0
   _lineOfSightLayer:
     serializedVersion: 2
     m_Bits: 0
   _scaleOverLifetime: {fileID: 0}
   _visualsPrefab:
-    _name: PROJ_VIS_Fireball
-    _bundle: proj_vis_fireball
+    _name: PROJ_VIS_ExplosiveArrowDetonationPhase02
+    _bundle: proj_vis_explosivearrowdetonation
   _impactSticksToHitActor: 0
   _homesAtApex: 0
-  _damage: 10
+  _damage: 25
   _damageType: 0
   _postImpactTicks: 16
-  _impactSpawnedProjectiles:
-  - {fileID: 11400000, guid: b523ee05e006f2749901e9c2798f5875, type: 2}
+  _impactSpawnedProjectiles: []
   _proximityDetonationRange: 0
   _proximityDetonationTicks: 0
   _proximityDetonationProjectile: []

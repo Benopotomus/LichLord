@@ -8,7 +8,7 @@ namespace LichLord.Projectiles
 
     public class ServerProjectilePool : ProjectilePool
     {
-        protected new const int MAX_PROJECTILE_COUNT = 256;
+        protected new const int MAX_PROJECTILE_COUNT = 1024;
 
         [Networked, Capacity(MAX_PROJECTILE_COUNT)]
         protected override NetworkArray<FProjectileData> _projectileDatas { get; }
@@ -86,6 +86,7 @@ namespace LichLord.Projectiles
         protected override void SetupRenderProjectile(ref FProjectileData data, RenderProjectile projectile, int index)
         {
             projectile.OwningPool = this;
+            projectile.Context = Context;
             projectile.Index = index;
             projectile.IsNPCProjectile = true;
             projectile.ActivateRender(ref data);

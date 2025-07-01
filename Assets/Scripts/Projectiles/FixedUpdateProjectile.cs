@@ -56,6 +56,7 @@ namespace LichLord.Projectiles
 
         public void OnLifetimeExpired(ref FProjectileData data)
         {
+            Definition.SpawnLifetimeExpiredProjectiles(ref data, this);
             DeactivateFixedUpdate(ref data);
         }
 
@@ -67,7 +68,7 @@ namespace LichLord.Projectiles
             if (!IsDataSet)
                 SetData(ref data);
 
-            if (simulationTime >= (data.FireTick * deltaTime) + Definition.Lifetime)
+            if (tick >= (data.FireTick + Definition.LifetimeTicks))
             {
                 OnLifetimeExpired(ref data);
                 return;

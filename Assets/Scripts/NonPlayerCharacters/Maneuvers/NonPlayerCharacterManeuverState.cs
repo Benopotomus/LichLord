@@ -182,8 +182,8 @@ namespace LichLord.NonPlayerCharacters
             float maxLead = targetIsMasterClient ? 0.1f : 0.2f;
             float distance = Vector3.Distance(targetPosition, shooterPosition);
             float distancePercent = Mathf.Clamp01((distance / projectileSpeed) + 0.25f);
-
-            float interceptTime = Mathf.Clamp(distance / projectileSpeed, 0, maxLead * distancePercent);
+         
+            float interceptTime = Mathf.Clamp((distance / projectileSpeed) + maxLead, 0, distancePercent);
             Vector3 additiveTarget = (targetVelocity * interceptTime);
             additiveTarget.y = 0;
 

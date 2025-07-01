@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
-  m_Name: PROJ_ArrowDetonation
+  m_Name: PROJ_ExplosiveArrowDetonationPhase01
   m_EditorClassIdentifier: 
-  _tableID: 2
-  _lifetime: 0.5
-  _postImpactTicks: 16
-  _deactivationSpawnedProjectiles: []
+  _tableID: 4
+  _lifetimeTicks: 16
+  _lifetimeExpiredSpawnedProjectiles:
+  - {fileID: 11400000, guid: 57c0ab2cdf0fda649867c63290922f9b, type: 2}
   _projectileMovement: {fileID: 11400000, guid: 73f3a09a38ebc1549a0ae6dde5708fca,
     type: 2}
   _speed: 0
@@ -24,27 +24,35 @@ MonoBehaviour:
     m_Bits: 0
   _overlapCollisionLayer:
     serializedVersion: 2
-    m_Bits: 256
-  _shape: 1
+    m_Bits: 0
+  _shape: 0
   _lineOfSightRequirement: 0
   _rotationType: 0
-  _extents: {x: 4, y: 0, z: 0}
+  _extents: {x: 0, y: 0, z: 0}
   _onlyAffectsOnce: 0
   _affectsEachCast: 0
-  _physicsSweep: 1
-  _collisionCheckTrim: {x: 0, y: 0.1}
+  _physicsSweep: 0
+  _collisionCheckTrim: {x: 0, y: 0}
   _collisionCheckRate: 0
-  _collisionCheckNumber: 8
+  _collisionCheckNumber: 0
   _onlyAffectImpactTarget: 0
   _lineOfSightLayer:
     serializedVersion: 2
     m_Bits: 0
-  _scaleOverLifetime: {fileID: 11400000, guid: 917ff6c25fd8b034c9accb9b7c3f5fd8, type: 2}
+  _scaleOverLifetime: {fileID: 0}
   _visualsPrefab:
-    _name: PROJ_VIS_ArrowDetonation
-    _bundle: proj_vis_arrowdetonation
+    _name: PROJ_VIS_ExplosiveArrowDetonationPhase01
+    _bundle: proj_vis_explosivearrowdetonationphase01
   _impactSticksToHitActor: 0
   _homesAtApex: 0
+  _damage: 0
+  _damageType: 0
+  _postImpactTicks: 0
+  _impactSpawnedProjectiles: []
   _proximityDetonationRange: 0
   _proximityDetonationTicks: 0
   _proximityDetonationProjectile: []
+  _hasTimedFuse: 0
+  _timedFuseTickRange: {x: 0, y: 0}
+  _timedFuseDistanceRange: {x: 0, y: 0}
+  _timedFuseDetonationProjectiles: []

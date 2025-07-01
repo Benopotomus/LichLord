@@ -26,6 +26,7 @@ namespace LichLord.NonPlayerCharacters
         // Prediction
         private Dictionary<int, NonPlayerCharacterState> _predictedStates = new Dictionary<int, NonPlayerCharacterState>();
         private List<FNonPlayerCharacterData> _localNpcDatas = new List<FNonPlayerCharacterData>();
+        
         [SerializeField]
         private int _predictedStatesCount = 0;
 

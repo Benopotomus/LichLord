@@ -10,9 +10,20 @@ namespace LichLord.Projectiles
     {
         //Definitions
         [SerializeField]
-        protected float _lifetime;
-        public float Lifetime => _lifetime;
+        protected int _lifetimeTicks;
+        public int LifetimeTicks => _lifetimeTicks;
 
+        [SerializeField]
+        protected List<ProjectileDefinition> _lifetimeExpiredSpawnedProjectiles = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);
+        public List<ProjectileDefinition> LifetimeExpiredSpawnedProjectiles => _lifetimeExpiredSpawnedProjectiles;
+
+        public void SpawnLifetimeExpiredProjectiles(ref FProjectileData data, FixedUpdateProjectile projectile)
+        {
+            for (int i = 0; i < LifetimeExpiredSpawnedProjectiles.Count; i++)
+            {
+                projectile.SpawnProjectile(ref data, LifetimeExpiredSpawnedProjectiles[i], projectile.Position);
+            }
+        }
 
         // Movement
         [SerializeField]
@@ -105,8 +116,16 @@ namespace LichLord.Projectiles
         protected bool _homesAtApex;
         public bool HomesAtApex => _homesAtApex;
 
-        [Header("Impact")]
+        [Header("Damage")]
+        [SerializeField]
+        protected int _damage = 10;
+        public int Damage => _damage;
 
+        [SerializeField]
+        protected EDamageType _damageType = EDamageType.None;
+        public EDamageType DamageType => _damageType;
+
+        [Header("Impact")]
         [SerializeField]
         protected float _postImpactTicks = 16;
         public float PostImpactTicks => _postImpactTicks;

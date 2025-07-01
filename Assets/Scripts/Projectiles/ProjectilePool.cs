@@ -252,38 +252,40 @@ namespace LichLord.Projectiles
         protected virtual void SetupRenderProjectile(ref FProjectileData data, RenderProjectile projectile, int index)
         {
             projectile.OwningPool = this;
+            projectile.Context = Context;
             projectile.Index = index;
+            projectile.IsNPCProjectile = false;
             projectile.ActivateRender(ref data);
         }
 
-        void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
-            if (_fixedUpdateProjectiles == null)
+            DrawFixedUpdateProjectilesGizmos();
+            DrawRenderProjectilesGizmos();
+        }
+
+        private void DrawRenderProjectilesGizmos()
+        {
+            if (_views == null)
                 return;
 
-            for (int i = 0; i < MAX_PROJECTILE_COUNT; i++)
+            foreach (var pair in _views)
             {
-                FixedUpdateProjectile projectile = _fixedUpdateProjectiles[i];
-                if (projectile == null || projectile.Definition == null) continue;
+                var projectile = pair.Value.Projectile;
+                if (projectile == null || projectile.Definition == null)
+                    continue;
 
-                Gizmos.color = Color.blue;
+                Gizmos.color = Color.green; // distinguish render projectiles
 
-                // Ensure rotation values are correct
                 Quaternion rotation = projectile.Rotation;
 
-                // If the rotation is invalid (near zero), use identity to avoid errors
-                float sqrMagnitude = rotation.x * rotation.x + rotation.y * rotation.y + rotation.z * rotation.z + rotation.w * rotation.w;
-                if (sqrMagnitude < 0.0001f)
-                {
+                if (rotation == Quaternion.identity || rotation.eulerAngles.magnitude < 0.0001f)
                     rotation = Quaternion.identity;
-                }
 
-                // Use correct transformation matrix assignment
                 Gizmos.matrix = Matrix4x4.TRS(projectile.Position, rotation, Vector3.one);
 
-                float simTimeSinceFired = Runner.SimulationTime - (projectile.FireTick * projectile.Runner.DeltaTime);
-
-                float scale = ProjectilePhysicsUtility.GetScaleAtTime(projectile.Definition, simTimeSinceFired);
+                float renderTimeSinceFired = Runner.RemoteRenderTime - (projectile.FireTick * Runner.DeltaTime);
+                float scale = ProjectilePhysicsUtility.GetScaleAtTime(projectile.Definition, renderTimeSinceFired, Runner.DeltaTime);
 
                 switch (projectile.Definition.Shape)
                 {
@@ -291,44 +293,91 @@ namespace LichLord.Projectiles
                         Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x * scale);
                         Gizmos.DrawRay(Vector3.zero, Vector3.forward * 10);
                         break;
+
                     case EShapeType.Capsule:
-                        // Calculate the direction and distance to the target
                         Vector3 directionToTarget = (projectile.TargetPosition - projectile.Position).normalized;
                         float distanceToTarget = Vector3.Distance(projectile.Position, projectile.TargetPosition);
-
-                        // Clamp the distance to Extents.y
                         float clampedDistance = Mathf.Min(distanceToTarget, projectile.Definition.Extents.y);
 
-                        // Compute the position of the second sphee, limited to Extents.y
                         Vector3 secondSpherePosition = projectile.Position + directionToTarget * clampedDistance;
 
-                        // Calculate rotation for the capsule based on the direction
                         Quaternion capsuleRotation = directionToTarget.sqrMagnitude > 0.0001f
                             ? Quaternion.LookRotation(directionToTarget)
                             : Quaternion.identity;
 
-                        // Set the matrix to the projectile's position with the capsule's rotation
                         Gizmos.matrix = Matrix4x4.TRS(projectile.Position, capsuleRotation, Vector3.one);
-
-                        // Draw the first sphere at the projectile's position (local zero)
                         Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x * scale);
 
-                        // Temporarily reset the matrix to draw the second sphere in world space
                         Gizmos.matrix = Matrix4x4.identity;
                         Gizmos.DrawWireSphere(secondSpherePosition, projectile.Definition.Extents.x * scale);
-
-                        // Optional: Draw a line to visualize the capsule's orientation
                         Gizmos.DrawLine(projectile.Position, secondSpherePosition);
                         break;
+
                     case EShapeType.Raycast:
                         Gizmos.DrawRay(Vector3.zero, Vector3.forward * projectile.Definition.Extents.x);
                         break;
                 }
 
-                // Restore default transformation
                 Gizmos.matrix = Matrix4x4.identity;
             }
-            
+        }
+
+        private void DrawFixedUpdateProjectilesGizmos()
+        {
+            if (_fixedUpdateProjectiles == null)
+                return;
+
+            for (int i = 0; i < MAX_PROJECTILE_COUNT; i++)
+            {
+                var projectile = _fixedUpdateProjectiles[i];
+                if (projectile == null || projectile.Definition == null)
+                    continue;
+
+                Gizmos.color = Color.blue; // distinguish fixed projectiles
+
+                Quaternion rotation = projectile.Rotation;
+
+                if (rotation == Quaternion.identity || rotation.eulerAngles.magnitude < 0.0001f)
+                    rotation = Quaternion.identity;
+
+                Gizmos.matrix = Matrix4x4.TRS(projectile.Position, rotation, Vector3.one);
+
+                float simTimeSinceFired = Runner.SimulationTime - (projectile.FireTick * Runner.DeltaTime);
+                float scale = ProjectilePhysicsUtility.GetScaleAtTime(projectile.Definition, simTimeSinceFired, Runner.DeltaTime);
+
+                switch (projectile.Definition.Shape)
+                {
+                    case EShapeType.Sphere:
+                        Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x * scale);
+                        Gizmos.DrawRay(Vector3.zero, Vector3.forward * 10);
+                        break;
+
+                    case EShapeType.Capsule:
+                        Vector3 directionToTarget = (projectile.TargetPosition - projectile.Position).normalized;
+                        float distanceToTarget = Vector3.Distance(projectile.Position, projectile.TargetPosition);
+                        float clampedDistance = Mathf.Min(distanceToTarget, projectile.Definition.Extents.y);
+
+                        Vector3 secondSpherePosition = projectile.Position + directionToTarget * clampedDistance;
+
+                        Quaternion capsuleRotation = directionToTarget.sqrMagnitude > 0.0001f
+                            ? Quaternion.LookRotation(directionToTarget)
+                            : Quaternion.identity;
+
+                        Gizmos.matrix = Matrix4x4.TRS(projectile.Position, capsuleRotation, Vector3.one);
+                        Gizmos.DrawWireSphere(Vector3.zero, projectile.Definition.Extents.x * scale);
+
+                        Gizmos.matrix = Matrix4x4.identity;
+                        Gizmos.DrawWireSphere(secondSpherePosition, projectile.Definition.Extents.x * scale);
+                        Gizmos.DrawLine(projectile.Position, secondSpherePosition);
+                        break;
+
+                    case EShapeType.Raycast:
+                        Gizmos.DrawRay(Vector3.zero, Vector3.forward * projectile.Definition.Extents.x);
+                        break;
+                }
+
+                Gizmos.matrix = Matrix4x4.identity;
+            }
         }
 
         protected class ViewEntry
@@ -337,7 +386,4 @@ namespace LichLord.Projectiles
             public FProjectileData LastData;
         }
     }
-
-
-
 } 

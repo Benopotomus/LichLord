@@ -275,7 +275,13 @@ namespace LichLord
             }
         }
 
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_TakeProjectileHit(int projectileIndex, int damage)
+        { 
+            Debug.Log("Projectile Hit me: " +  projectileIndex + " Damage: " + damage);
 
+           // Context.ProjectileManager.Server
+        }
 
         private string GetProjectName()
         {

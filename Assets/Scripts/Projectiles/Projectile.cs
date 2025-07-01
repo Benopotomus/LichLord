@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using LichLord.NonPlayerCharacters;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -47,7 +48,17 @@ namespace LichLord.Projectiles
 
                 AffectedActors.Add(hitTarget);
                 FPhysicsHitData hitData = hitDatas[i];
-                CollideWithHitData(ref data, ref hitData, tick);
+
+                Vector2 impactPosition = hitData.ProjectilePosition;
+                Vector2 targetTestPosition = hitData.HitObject.transform.position.ToVector2();
+
+                if (IsSightBlocked(impactPosition, targetTestPosition))
+                    continue;
+
+                if (IsNPCProjectile && this is RenderProjectile)
+                    NPC_CollideWithHitData(ref data, ref hitData, tick);
+                else
+                    CollideWithHitData(ref data, ref hitData, tick);
             }
 
             // If it can hit more than once, remove actors no longer in the hit list
@@ -84,47 +95,32 @@ namespace LichLord.Projectiles
 
         private void CollideWithHitData(ref FProjectileData data, ref FPhysicsHitData hitData, int tick)
         {
-            
             Vector2 impactPosition = hitData.ProjectilePosition;
-            Vector2 targetTestPosition = hitData.HitObject.transform.position.ToVector2();
-            IHitTarget hitTarget = hitData.HitTarget;
-            /*
-       switch (Definition.LineOfSightRequirement)
-       {
 
-           case ELineOfSightRequirement.LOS_To_Instigator_Feet:
-
-               sourcePosition = Instigator.NetActor.GlobalPosition();
-
-               if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
-                   Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor)))
-                   return;
-               break;
-
-           case eLineOfSightRequirement.LOS_To_Instigator_SkillComponent:
-
-               sourcePosition = NetActorUtility.GetActorCenter(Instigator.NetActor);
-
-               if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
-                   Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor))) // if the target actor is not visible, ignore
-                   return;
-               break;
-
-           case eLineOfSightRequirement.LOS_To_Projectile_Center:
-               if (!HallowHeartHelpers.IsPointVisible(sourcePosition, targetTestPosition,
-                   Definition.LineOfSightLayer, GetIgnoreGameObjects(currentActor.NetActor))) // if the target actor is not visible, ignore
-                   return;
-               break;
-       
-        }
-    */
             _collisionEvent.projectile = this;
-            _collisionEvent.hitTarget = hitTarget;
+            _collisionEvent.hitTarget = hitData.HitTarget;
             _collisionEvent.collideTick = OwningPool.Runner.Tick;
             _collisionEvent.impactPosition = impactPosition;
             _collisionEvent.impactRotation = GetImpactRotation(impactPosition);
 
             ProjectileImpactUtility.HandleCollisionHitActor(this, ref data, ref _collisionEvent, tick);
+        }
+
+        private void NPC_CollideWithHitData(ref FProjectileData data, ref FPhysicsHitData hitData, int tick)
+        {
+            if (hitData.HitTarget is PlayerCharacter pc)
+            {
+                if (pc == Context.LocalPlayerCharacter)
+                {
+                    Debug.Log("Instigator: " + Instigator.NetActor);
+                    if (Instigator.NetActor is NonPlayerCharacter npc)
+                    {
+
+                    }
+
+                    pc.RPC_TakeProjectileHit(Index, Definition.Damage);
+                }
+            }
         }
 
         public Quaternion GetImpactRotation(Vector3 impactPosition)
@@ -154,6 +150,29 @@ namespace LichLord.Projectiles
             */
 
             return Quaternion.identity;
+        }
+
+        private bool IsSightBlocked(Vector3 impactPosition, Vector3 targetTestPosition)
+        {
+            switch (Definition.LineOfSightRequirement)
+            {
+                case ELineOfSightRequirement.LOS_To_Projectile_Center:
+                    if (Physics.Linecast(
+                        impactPosition,
+                        targetTestPosition,
+                        out RaycastHit hit,
+                        Definition.LineOfSightLayer
+                        ))
+                    {
+                        // sight is blocked if something is hit
+                        return true;
+                    }
+                    
+                    break;
+            }
+
+            // default to unblocked if no requirement
+            return false;
         }
 
         public void SetImpactData(ref FProjectileData data, Vector3 impactPosition, int tick)

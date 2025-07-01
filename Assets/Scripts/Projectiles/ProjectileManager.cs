@@ -52,5 +52,11 @@ namespace LichLord.Projectiles
             fireEvent.payload_spawnedProjectile.Copy(ref payload_spawnedProjectile);
         }
 
+        // Called from a player character and RPC
+        public void DeactivateServerProjectile(int index)
+        { 
+            
+        }
+
     }
 }

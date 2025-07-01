@@ -4,8 +4,8 @@ namespace LichLord.Projectiles
     using UnityEngine;
     using DWD.Utility.Loading;
     using DWD.Pooling;
-    using Fusion;
     using DG.Tweening;
+    using LichLord.Props;
 
     //using DG.Tweening;
 
@@ -14,7 +14,7 @@ namespace LichLord.Projectiles
         public bool IsFinished { get; private set; }
 
         // Visuals
-        private AssetBundleLoader PrefabLoader;
+        private ProjectileVisualSpawner VisualSpawner = new ProjectileVisualSpawner();
         public DWDObjectPoolObject VisualsPrefab { get; private set; }
         public ProjectileVisualEffect VisualsInstance { get; private set; }
         private const bool _FORCE_WARMUP_VISUALS = false;
@@ -27,6 +27,8 @@ namespace LichLord.Projectiles
         public float InterpolationTime;
         public float RenderTimeSinceFired = 0;
 
+        private int _lastTick;
+
         public void ActivateRender(ref FProjectileData data)
         {
             InterpolationTime = 0f;
@@ -37,14 +39,16 @@ namespace LichLord.Projectiles
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;
             RenderTimeSinceFired = 0;
+            _lastTick = 0;
 
             if (Definition != null)
             {
                 Definition.ProjectileMovement.ActivateRender(this, ref data);
-                LoadVisualsPrefab(Definition.VisualsPrefab);
+                LoadVisualsPrefab(Definition.VisualsPrefab, ref data);
             }
 
             AffectedActors.Clear();
+
         }
 
         public void DeactivateRenderProjectile()
@@ -85,43 +89,24 @@ namespace LichLord.Projectiles
 
             Definition.ProjectileMovement.OnRender(this, ref toData, ref fromData, bufferAlpha, localDelta, renderTimeSinceFired, tick);
 
-            VisualsInstance.UpdateVisuals(this);
+            UpdateNPCProjectileCasts(ref toData, tick, renderTime, networkDelta, localDelta);
+
+            VisualsInstance.UpdateVisuals(this, ref toData);
         }
 
         // VISUALS
 
-        private void LoadVisualsPrefab(BundleObject prefabBundle)
+        private void LoadVisualsPrefab(BundleObject prefabBundle, ref FProjectileData data)
         {
             ClearVisuals();
 
-            if (prefabBundle.Ready == false)
-            {
-                Debug.LogWarning("Cannot spawn Projectile Visuals for " + Definition.name + ".  Visual Bundle is not ready.");
-                return;
-            }
-
-            PrefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            if (PrefabLoader != null)
-            {
-                if (PrefabLoader.IsLoaded)
-                    SpawnLoadedVisuals(PrefabLoader);
-                else
-                    PrefabLoader.OnLoadComplete += OnVisualsPrefabLoaded;
-            }
+            VisualSpawner.OnProjectileVisualSpawned += OnVisualsPrefabLoaded;
+            VisualSpawner.SpawnProjectileVisual(Definition, ref data);
         }
 
-        private void OnVisualsPrefabLoaded(ILoader clipLoader)
+        private void OnVisualsPrefabLoaded(GameObject go, FProjectileData data)
         {
-            if (PrefabLoader != null)
-                PrefabLoader.OnLoadComplete -= OnVisualsPrefabLoaded;
-
-            SpawnLoadedVisuals(clipLoader);
-        }
-
-        private void SpawnLoadedVisuals(ILoader clipLoader)
-        {
-            AssetBundleLoader loader = clipLoader as AssetBundleLoader;
-            GameObject go = loader.GetAssetWithin<GameObject>();
+            VisualSpawner.OnProjectileVisualSpawned -= OnVisualsPrefabLoaded;
 
             if (Definition == null)
             {
@@ -144,11 +129,36 @@ namespace LichLord.Projectiles
             VisualsInstance = DWDObjectPool.Instance.SpawnAt(VisualsPrefab, Position, Quaternion.identity) as ProjectileVisualEffect;
 
             if (VisualsInstance != null)
-                VisualsInstance.InitializeVisuals(this);
+                VisualsInstance.InitializeVisuals(this, ref data);
             else
                 Debug.LogWarning("Visual Instance for Projectile is null!  Object Pool failed to spawn for " + Definition.name);
         }
 
+        // CLIENT CHECKS
+
+        private void UpdateNPCProjectileCasts(ref FProjectileData data, int tick, float simulationTime, float networkDeltaTime, float localDeltaTime)
+        {
+            if (!IsNPCProjectile)
+                return;
+
+            if (tick == _lastTick)
+                return;
+
+            _lastTick = tick;
+
+            Vector3 newPosition = Position;
+            Quaternion newRotation = Rotation;
+
+            ProjectilePhysicsUtility.CheckAndHandleCollision(this,
+                ref data,
+                tick,
+                simulationTime,
+                networkDeltaTime,
+                newPosition,
+                newPosition,
+                newRotation,
+                newRotation);
+        }
         
     }
 }

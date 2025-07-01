@@ -47,15 +47,15 @@ namespace LichLord.Props
             if (propLoader.Loader != null)
             {
                 if (propLoader.Loader.IsLoaded)
-                    OnPrefabLoaded(propLoader);
+                    OnLoaderLoaded(propLoader);
                 else
-                    propLoader.OnLoadComplete += OnPrefabLoaded;
+                    propLoader.OnLoadComplete += OnLoaderLoaded;
             }
         }
 
-        private void OnPrefabLoaded(PropLoader propLoader)
+        private void OnLoaderLoaded(PropLoader propLoader)
         {
-            propLoader.OnLoadComplete -= OnPrefabLoaded;
+            propLoader.OnLoadComplete -= OnLoaderLoaded;
 
             OnPrefabLoaded(propLoader.RuntimeState, propLoader.Loader);
         }

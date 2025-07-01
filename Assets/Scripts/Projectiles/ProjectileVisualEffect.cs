@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using DWD.Pooling;
 using Cinemachine;
+using System;
 
 namespace LichLord.Projectiles
 {
@@ -14,7 +15,10 @@ namespace LichLord.Projectiles
 
         public RenderProjectile Projectile { get; private set; }
 
-        public virtual void InitializeVisuals(RenderProjectile projectile)
+        private bool _hasImpacted = false;
+        private Action<VisualEffectBase> onImpacted;
+
+        public virtual void InitializeVisuals(RenderProjectile projectile, ref FProjectileData data)
         {
             Projectile = projectile;
 
@@ -24,7 +28,7 @@ namespace LichLord.Projectiles
                 return;
             }
 
-            UpdateVisuals(projectile);
+            UpdateVisuals(projectile, ref data);
 
             if (_cameraShake != null)
                 _cameraShake.GenerateImpulse();
@@ -32,7 +36,7 @@ namespace LichLord.Projectiles
             onInitialized?.Invoke(this);
         }
 
-        public virtual void UpdateVisuals(RenderProjectile projectile)
+        public virtual void UpdateVisuals(RenderProjectile projectile, ref FProjectileData data)
         {
             if (projectile.Definition == null)
             {
@@ -44,6 +48,13 @@ namespace LichLord.Projectiles
             UpdateVisualsPosition(projectile);
 
             onUpdate?.Invoke(this);
+
+
+            if (!_hasImpacted && data.HasImpacted)
+            {
+                _hasImpacted = true;
+                onImpacted?.Invoke(this);
+            }
         }
 
         protected virtual void UpdateVisualsPosition(RenderProjectile projectile)
@@ -62,6 +73,12 @@ namespace LichLord.Projectiles
         {
             _workingEulerAngles = GetVisualsRotationDegrees(projectile).eulerAngles;
             CachedTransform.eulerAngles = _workingEulerAngles;
+        }
+
+        protected override void RecycleVisualEffect()
+        {
+            _hasImpacted = false;
+            base.RecycleVisualEffect();
         }
     }
 }
