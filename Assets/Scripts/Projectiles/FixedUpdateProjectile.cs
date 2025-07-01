@@ -82,7 +82,7 @@ namespace LichLord.Projectiles
             {
                 if (tick >= ImpactTick + Definition.PostImpactTicks)
                 {
-                    DeactivateFixedUpdate(ref data);
+                    OnLifetimeExpired(ref data);
                 }
 
                 return;

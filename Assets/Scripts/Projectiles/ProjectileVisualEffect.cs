@@ -16,7 +16,7 @@ namespace LichLord.Projectiles
         public RenderProjectile Projectile { get; private set; }
 
         private bool _hasImpacted = false;
-        private Action<VisualEffectBase> onImpacted;
+        public Action<VisualEffectBase> onImpacted;
 
         public virtual void InitializeVisuals(RenderProjectile projectile, ref FProjectileData data)
         {

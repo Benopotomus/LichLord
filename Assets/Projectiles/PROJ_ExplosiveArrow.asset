@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: PROJ_ExplosiveArrow
   m_EditorClassIdentifier: 
   _tableID: 2
-  _lifetimeTicks: 96
-  _lifetimeExpiredSpawnedProjectiles: []
+  _lifetimeTicks: 160
+  _lifetimeExpiredSpawnedProjectiles:
+  - {fileID: 11400000, guid: 57c0ab2cdf0fda649867c63290922f9b, type: 2}
   _projectileMovement: {fileID: 11400000, guid: 908262b09eef1914a9892899916f592d,
     type: 2}
   _speed: 16
@@ -46,7 +47,7 @@ MonoBehaviour:
   _homesAtApex: 0
   _damage: 16
   _damageType: 0
-  _postImpactTicks: 8
+  _postImpactTicks: 18
   _impactSpawnedProjectiles: []
   _proximityDetonationRange: 0
   _proximityDetonationTicks: 0
@@ -54,5 +55,4 @@ MonoBehaviour:
   _hasTimedFuse: 1
   _timedFuseTickRange: {x: 16, y: 72}
   _timedFuseDistanceRange: {x: 8, y: 32}
-  _timedFuseDetonationProjectiles:
-  - {fileID: 11400000, guid: fd235daad7390c546b457b70468fba4a, type: 2}
+  _timedFuseDetonationProjectiles: []

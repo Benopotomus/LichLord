@@ -32,6 +32,8 @@ namespace LichLord.NonPlayerCharacters
 
         private Transform _transform;
 
+        private float _teleportDistanceSquared = 36;
+
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
             _lastPosition = spawnParams.position;
@@ -52,12 +54,20 @@ namespace LichLord.NonPlayerCharacters
             SetFollowerCanMove(false);
             SetFollowerLocalAvoidance(false);
 
-            // Smooth position
-            NPC.CachedTransform.position = Vector3.Lerp(
-                NPC.CachedTransform.position,
-                data.Position,
-                renderDeltaTime * 4f
-            );
+            // If the data is too far away, teleport 
+            if ((data.Position - NPC.CachedTransform.position).sqrMagnitude > _teleportDistanceSquared)
+            {
+                NPC.CachedTransform.position = data.Position;
+            }
+            else
+            {
+                // Smooth position
+                NPC.CachedTransform.position = Vector3.Lerp(
+                    NPC.CachedTransform.position,
+                    data.Position,
+                    renderDeltaTime * 4f
+                );
+            }
 
             // Smooth yaw only
             float currentYaw = NPC.CachedTransform.eulerAngles.y;
