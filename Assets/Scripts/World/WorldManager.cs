@@ -26,7 +26,13 @@ namespace LichLord.World
 
             if (HasStateAuthority)
             {
-                Context.ChunkManager.LoadChunkFromSaves();
+                Context.ChunkManager.LoadChunksFromSaves();
+            }
+            
+            if (HasStateAuthority)
+            {
+                Context.WorldSaveLoadManager.LoadNPCs();
+                Context.NonPlayerCharacterManager.LoadNPCsFromSaves();
             }
 
             Context.SpawnManager.SpawnLocalPlayer(Runner.LocalPlayer);

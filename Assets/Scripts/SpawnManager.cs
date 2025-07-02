@@ -43,7 +43,7 @@ namespace LichLord
             Quaternion spawnRotation = Quaternion.identity;
             EMovementState moveState = EMovementState.Walking;
 
-            if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
+            if (Runner == null)
             {
                 Debug.LogWarning("No active session; cannot check for saved player data.");
             }
@@ -52,41 +52,36 @@ namespace LichLord
             string nickname = GetInstanceId();
 
             // Check SaveLoadManager for saved player data
-            if (SaveLoadManager.instance != null && Runner != null && !string.IsNullOrEmpty(Runner.SessionInfo.Name))
+
+            string sessionName = Global.Networking.SessionName;
+            string playerKey = $"{sessionName}_{nickname}"; // Composite key
+            if (SaveLoadManager.instance.TryGetPlayerData(playerKey, out string json))
             {
-                string worldId = Runner.SessionInfo.Name;
-                string playerKey = $"{worldId}_{nickname}"; // Composite key
-                if (SaveLoadManager.instance.TryGetPlayerData(playerKey, out string json))
+                try
                 {
-                    try
+                    FPlayerSaveData savedData = JsonUtility.FromJson<FPlayerSaveData>(json);
+                    if (!string.IsNullOrEmpty(savedData.playerName))
                     {
-                        FPlayerSaveData savedData = JsonUtility.FromJson<FPlayerSaveData>(json);
-                        if (!string.IsNullOrEmpty(savedData.playerName))
-                        {
-                            spawnPosition = savedData.position;
-                            spawnRotation = savedData.rotation;
-                            moveState = savedData.moveState;
-                            //Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world {worldId} with key {playerKey}.");
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"Saved player data for key {playerKey} has invalid playerName; using default spawn.");
-                        }
+                        spawnPosition = savedData.position;
+                        spawnRotation = savedData.rotation;
+                        moveState = savedData.moveState;
+                        //Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world {worldId} with key {playerKey}.");
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Debug.LogError($"Failed to deserialize player save data for key {playerKey}: {e.Message}; using default spawn.");
+                        Debug.LogWarning($"Saved player data for key {playerKey} has invalid playerName; using default spawn.");
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    Debug.Log($"No saved player data found for key {playerKey}; using default spawn.");
+                    Debug.LogError($"Failed to deserialize player save data for key {playerKey}: {e.Message}; using default spawn.");
                 }
             }
             else
             {
-                Debug.LogWarning("SaveLoadManager instance not found or no active session; using default spawn.");
+                Debug.Log($"No saved player data found for key {playerKey}; using default spawn.");
             }
+
 
             if (LocalPlayer == null)
             {

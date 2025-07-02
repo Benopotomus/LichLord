@@ -413,7 +413,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 var animationTriggers = maneuverState.Definition.AnimationTriggers;
 
-                if (animIndex > animationTriggers.Count)
+                if (animIndex < 0 || animIndex >= animationTriggers.Count)
                     return;
 
                 var animationTrigger = animationTriggers[animIndex];

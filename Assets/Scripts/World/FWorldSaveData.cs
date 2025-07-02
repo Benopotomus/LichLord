@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using LichLord.NonPlayerCharacters;
 
 namespace LichLord.World
 {
@@ -14,7 +15,7 @@ namespace LichLord.World
     {
         public FChunkPosition chunkCoord;
         public FPropSaveState[] props;
-        public NPCSaveState[] npcs; // Placeholder for NPC data
+        public FNonPlayerCharacterSaveState[] npcs; // Placeholder for NPC data
     }
 
     [Serializable]
@@ -37,23 +38,28 @@ namespace LichLord.World
     }
 
     [Serializable]
-    public struct NPCSaveState
+    public struct FNonPlayerCharacterSaveState
     {
-        public int guid;
         public Vector3 position;
         public Quaternion rotation;
-        public int definitionId;
-        public int health; // Example NPC-specific field
-        public string aiState; // Example NPC-specific field
+        public int configuration;
+        public int condition;
+        public int events;
 
-        public NPCSaveState(int guid, Vector3 position, Quaternion rotation, int definitionId, int health, string aiState)
+        // Store harvesting target data here as well
+        public FNonPlayerCharacterSaveState(NonPlayerCharacter npc, FNonPlayerCharacterData data)
         {
-            this.guid = guid;
-            this.position = position;
-            this.rotation = rotation;
-            this.definitionId = definitionId;
-            this.health = health;
-            this.aiState = aiState;
+            position = data.Position;
+            rotation = data.Rotation;
+            this.configuration = data.Configuration;
+            this.condition = data.Condition;
+            this.events = data.Events;
         }
+    }
+
+    [Serializable]
+    public struct FNPCSaveData
+    {
+        public FNonPlayerCharacterSaveState[] npcs;
     }
 }

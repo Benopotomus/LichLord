@@ -64,7 +64,7 @@ namespace LichLord.World
             }
         }
 
-        public void LoadChunkFromSaves()
+        public void LoadChunksFromSaves()
         {
             Dictionary<FChunkPosition, FChunkSaveData> loadedChunks =
                        Context.WorldSaveLoadManager.LoadedChunks;

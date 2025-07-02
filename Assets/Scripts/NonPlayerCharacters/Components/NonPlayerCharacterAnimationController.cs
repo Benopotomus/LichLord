@@ -91,6 +91,10 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetProjectileFrame(ProjectileDefinition definition)
         {
+            if (_npc.State.CurrentState == ENonPlayerState.Dead ||
+                _npc.State.CurrentState == ENonPlayerState.HitReact)
+                return;
+
             if (_animationCallbacks.TryGetValue(definition, out FAnimationCallbackData animationCallback))
             {
                 string animationStateName = animationCallback.AnimationStateName;

@@ -344,9 +344,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _debugSpawnDefinition: {fileID: 11400000, guid: 608fde03f28e2a640b451b2b02383be3,
     type: 2}
-  _initialSpawnCount: 10
-  _debugStreamRevive: 1
-  _streamReviveCount: 5
+  _initialSpawnCount: 0
+  _debugStreamRevive: 0
+  _streamSpawnCount: 0
 --- !u!1 &117824875
 GameObject:
   m_ObjectHideFlags: 0
@@ -503,93 +503,75 @@ MonoBehaviour:
     _serializedList:
     - Key: LichLord
       Value: "{\n    \"chunks\": [\n        {\n            \"chunkCoord\": {\n               
-        \"X\": 19,\n                \"Y\": 22\n            },\n            \"props\":
-        [\n                {\n                    \"guid\": 17,\n                   
-        \"position\": {\n                        \"x\": -2.3487439155578615,\n                       
-        \"y\": -1.3086979981156611e-17,\n                        \"z\": 176.8155517578125\n                   
+        \"X\": -1,\n                \"Y\": 0\n            },\n            \"props\":
+        [\n                {\n                    \"guid\": 1,\n                   
+        \"position\": {\n                        \"x\": -0.9282732605934143,\n                       
+        \"y\": -7.44790776564786e-18,\n                        \"z\": 33.542396545410159\n                   
         },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
         \"y\": 0.0,\n                        \"z\": 0.0,\n                       
         \"w\": 1.0\n                    },\n                    \"definitionId\":
         1,\n                    \"stateData\": 3\n                }\n           
         ],\n            \"npcs\": []\n        },\n        {\n            \"chunkCoord\":
-        {\n                \"X\": 20,\n                \"Y\": 20\n            },\n           
-        \"props\": [\n                {\n                    \"guid\": 4,\n                   
-        \"position\": {\n                        \"x\": 9.082327842712403,\n                       
-        \"y\": -2.00557942485908e-18,\n                        \"z\": 27.09697914123535\n                   
+        {\n                \"X\": -1,\n                \"Y\": 1\n            },\n           
+        \"props\": [\n                {\n                    \"guid\": 18,\n                   
+        \"position\": {\n                        \"x\": -45.72560119628906,\n                       
+        \"y\": -1.8663504107466553e-17,\n                        \"z\": 84.05294799804688\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                }\n           
+        ],\n            \"npcs\": []\n        },\n        {\n            \"chunkCoord\":
+        {\n                \"X\": 0,\n                \"Y\": 0\n            },\n           
+        \"props\": [\n                {\n                    \"guid\": 2,\n                   
+        \"position\": {\n                        \"x\": 7.114677906036377,\n                       
+        \"y\": -1.3595784566202266e-17,\n                        \"z\": 61.2299690246582\n                   
+        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
+        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
+        \"w\": 1.0\n                    },\n                    \"definitionId\":
+        1,\n                    \"stateData\": 3\n                },\n               
+        {\n                    \"guid\": 3,\n                    \"position\": {\n                       
+        \"x\": 13.432560920715332,\n                        \"y\": -1.5278666151648538e-17,\n                       
+        \"z\": 68.80899047851563\n                    },\n                    \"rotation\":
+        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
+        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
+        \"definitionId\": 1,\n                    \"stateData\": 3\n               
+        }\n            ],\n            \"npcs\": []\n        },\n        {\n           
+        \"chunkCoord\": {\n                \"X\": 0,\n                \"Y\": 1\n           
+        },\n            \"props\": [\n                {\n                    \"guid\":
+        4,\n                    \"position\": {\n                        \"x\": 10.476177215576172,\n                       
+        \"y\": -1.8438921262435956e-17,\n                        \"z\": 83.04151153564453\n                   
         },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
         \"y\": 0.0,\n                        \"z\": 0.0,\n                       
         \"w\": 1.0\n                    },\n                    \"definitionId\":
         1,\n                    \"stateData\": 3\n                },\n               
         {\n                    \"guid\": 5,\n                    \"position\": {\n                       
-        \"x\": 4.444918632507324,\n                        \"y\": -1.958641888180371e-18,\n                       
-        \"z\": 26.462814331054689\n                    },\n                    \"rotation\":
+        \"x\": 2.1908822059631349,\n                        \"y\": -2.304833559505095e-17,\n                       
+        \"z\": 103.80049133300781\n                    },\n                    \"rotation\":
         {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
         \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
         \"definitionId\": 1,\n                    \"stateData\": 3\n               
-        },\n                {\n                    \"guid\": 7,\n                   
-        \"position\": {\n                        \"x\": 2.7819600105285646,\n                       
-        \"y\": -4.4109488882451459e-18,\n                        \"z\": 59.59544372558594\n                   
-        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
-        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
-        \"w\": 1.0\n                    },\n                    \"definitionId\":
-        1,\n                    \"stateData\": 7681\n                },\n               
-        {\n                    \"guid\": 8,\n                    \"position\": {\n                       
-        \"x\": 3.5602476596832277,\n                        \"y\": -4.573440247775062e-18,\n                       
-        \"z\": 61.79083251953125\n                    },\n                    \"rotation\":
-        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
-        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
-        \"definitionId\": 1,\n                    \"stateData\": 3\n               
-        }\n            ],\n            \"npcs\": []\n        },\n        {\n           
-        \"chunkCoord\": {\n                \"X\": 20,\n                \"Y\": 21\n           
-        },\n            \"props\": [\n                {\n                    \"guid\":
-        10,\n                    \"position\": {\n                        \"x\":
-        0.8093922734260559,\n                        \"y\": -7.017045101000626e-18,\n                       
-        \"z\": 94.8058853149414\n                    },\n                    \"rotation\":
-        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
-        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
-        \"definitionId\": 1,\n                    \"stateData\": 3\n               
-        },\n                {\n                    \"guid\": 11,\n                   
-        \"position\": {\n                        \"x\": 0.31942424178123476,\n                       
-        \"y\": -7.327876414140902e-18,\n                        \"z\": 99.00545501708985\n                   
-        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
-        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
-        \"w\": 1.0\n                    },\n                    \"definitionId\":
-        1,\n                    \"stateData\": 3\n                },\n               
-        {\n                    \"guid\": 12,\n                    \"position\": {\n                       
-        \"x\": 0.22265015542507173,\n                        \"y\": -8.198935649467418e-18,\n                       
-        \"z\": 110.774169921875\n                    },\n                    \"rotation\":
-        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
-        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
-        \"definitionId\": 1,\n                    \"stateData\": 3\n               
-        },\n                {\n                    \"guid\": 13,\n                   
-        \"position\": {\n                        \"x\": 0.8257984519004822,\n                       
-        \"y\": -8.68830231729869e-18,\n                        \"z\": 117.38590240478516\n                   
-        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
-        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
-        \"w\": 1.0\n                    },\n                    \"definitionId\":
-        1,\n                    \"stateData\": 3\n                },\n               
-        {\n                    \"guid\": 14,\n                    \"position\": {\n                       
-        \"x\": 4.617565631866455,\n                        \"y\": -9.92485792372666e-18,\n                       
-        \"z\": 134.09275817871095\n                    },\n                    \"rotation\":
-        {\n                        \"x\": 0.0,\n                        \"y\": 0.0,\n                       
-        \"z\": 0.0,\n                        \"w\": 1.0\n                    },\n                   
-        \"definitionId\": 1,\n                    \"stateData\": 3\n               
-        },\n                {\n                    \"guid\": 15,\n                   
-        \"position\": {\n                        \"x\": 5.713507175445557,\n                       
-        \"y\": -1.0312450770531246e-17,\n                        \"z\": 139.32945251464845\n                   
-        },\n                    \"rotation\": {\n                        \"x\": 0.0,\n                       
-        \"y\": 0.0,\n                        \"z\": 0.0,\n                       
-        \"w\": 1.0\n                    },\n                    \"definitionId\":
-        1,\n                    \"stateData\": 3\n                }\n           
-        ],\n            \"npcs\": []\n        }\n    ]\n}"
+        }\n            ],\n            \"npcs\": []\n        }\n    ]\n}"
+  _npcSavesLoaded:
+    _serializedList:
+    - Key: LichLord
+      Value: "{\n    \"npcs\": [\n        {},\n        {},\n        {},\n       
+        {},\n        {},\n        {},\n        {},\n        {},\n        {},\n       
+        {},\n        {},\n        {},\n        {},\n        {},\n        {},\n       
+        {},\n        {},\n        {},\n        {}\n    ]\n}"
   _playerSavesLoaded:
     _serializedList:
     - Key: LichLord_LichLord
       Value: "{\n    \"playerName\": \"LichLord\",\n    \"position\": {\n       
-        \"x\": 4.7593817710876469,\n        \"y\": 3.8406519889831545,\n        \"z\":
-        19.389270782470704\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
-        \"y\": 0.9953961968421936,\n        \"z\": 0.0,\n        \"w\": 0.09584575891494751\n   
-        },\n    \"moveState\": 0\n}"
+        \"x\": 16.004581451416017,\n        \"y\": 10.182823181152344,\n        \"z\":
+        -70.67376708984375\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
+        \"y\": 0.3379168212413788,\n        \"z\": 0.0,\n        \"w\": -0.9411759972572327\n   
+        },\n    \"moveState\": 3\n}"
+    - Key: LichLord_LichLord_clone_0
+      Value: "{\n    \"playerName\": \"LichLord_clone_0\",\n    \"position\": {\n       
+        \"x\": -13.995767593383789,\n        \"y\": 13.598214149475098,\n       
+        \"z\": 0.42486003041267397\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
+        \"y\": 0.0370795913040638,\n        \"z\": 0.0,\n        \"w\": 0.9993123412132263\n   
+        },\n    \"moveState\": 3\n}"
 --- !u!4 &330450293
 Transform:
   m_ObjectHideFlags: 0
@@ -3357,7 +3339,7 @@ MonoBehaviour:
   _defaultConfiguration:
     GameSessionID: 0
     LevelSeed: 0
-    GameMode: 2
+    GameMode: 1
     ServerName: LichLord
     MaxPlayers: 0
     ExtraPeers: 0

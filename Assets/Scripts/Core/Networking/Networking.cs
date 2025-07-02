@@ -51,9 +51,18 @@ namespace LichLord
         private bool _stopGameOnDisconnect;
         private Coroutine _coroutine;
 
+        private string _cachedSessionName;
+        public string SessionName => !string.IsNullOrEmpty(_cachedSessionName) ? _cachedSessionName : "SinglePlayer";
+
         // PUBLIC METHODS
         public void StartGame(FSessionRequest request)
         {
+            _cachedSessionName = request.SessionName;
+            if (_gameMode == GameMode.Single && string.IsNullOrEmpty(_cachedSessionName))
+            {
+                _cachedSessionName = "SinglePlayer";
+            }
+
             if (request.GameMode != GameMode.Shared && request.GameMode != GameMode.Single)
             {
                 Debug.LogError($"Only GameMode.Shared and GameMode.Single are supported. Got: {request.GameMode}");

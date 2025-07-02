@@ -10,7 +10,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterDefinition _debugSpawnDefinition;
         [SerializeField] private int _initialSpawnCount = 0;
         [SerializeField] private bool _debugStreamRevive;
-        [SerializeField] private int _streamReviveCount = 0;
+        [SerializeField] private int _streamSpawnCount = 0;
+
         public void OnSpawned()
         {
             if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
@@ -55,7 +56,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (flip)
             {
-                for (int i = 0; i < _streamReviveCount; i++)
+                for (int i = 0; i < _streamSpawnCount; i++)
                 {
 
                     Vector3 randomPosition = new Vector3(
@@ -71,7 +72,7 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             {
-                for (int i = 0; i < _streamReviveCount; i++)
+                for (int i = 0; i < _streamSpawnCount; i++)
                 {
                     Vector3 randomPosition = new Vector3(
                         Random.Range(-10f, 10f),

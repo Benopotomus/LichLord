@@ -15,7 +15,7 @@ namespace LichLord
                 return;
             }
 
-            if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
+            if (Runner == null)
             {
                 Debug.LogWarning("No active session; cannot save player data.");
                 return;
@@ -29,7 +29,7 @@ namespace LichLord
 
             try
             {
-                string worldId = Runner.SessionInfo.Name;
+                string worldId = Global.Networking.SessionName;
                 string instanceId = GetInstanceId();
                 string playerKey = $"{worldId}_{instanceId}"; // Composite key
 

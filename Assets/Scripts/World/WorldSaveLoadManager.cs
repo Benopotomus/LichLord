@@ -3,6 +3,7 @@ using System.IO;
 using Fusion;
 using System.Collections.Generic;
 using System;
+using LichLord.NonPlayerCharacters;
 
 namespace LichLord.World
 {
@@ -11,9 +12,12 @@ namespace LichLord.World
         private Dictionary<FChunkPosition, FChunkSaveData> _loadedChunks = new Dictionary<FChunkPosition, FChunkSaveData>();
         public Dictionary<FChunkPosition, FChunkSaveData> LoadedChunks => _loadedChunks;
 
+        private List<FNonPlayerCharacterSaveState> _loadedNPCs = new List<FNonPlayerCharacterSaveState>();
+        public List<FNonPlayerCharacterSaveState> LoadedNPCs => _loadedNPCs;
+
         private void SaveChunks()
         {
-            if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
+            if (Runner == null)
             {
                 Debug.LogWarning("No active session; cannot save chunks.");
                 return;
@@ -21,8 +25,8 @@ namespace LichLord.World
 
             try
             {
-                string sessionName = Runner.SessionInfo.Name;
-                string saveFilePath = GetSaveFilePath(sessionName);
+                string sessionName = Global.Networking.SessionName;
+                string saveFilePath = GetWorldSaveFilePath(sessionName);
 
                 // Get all the world chunks
                 var deltaChunks = Context.ChunkManager.DeltaChunks;
@@ -103,7 +107,7 @@ namespace LichLord.World
         {
             _loadedChunks.Clear();
 
-            if (Runner == null || Runner.SessionInfo == null || string.IsNullOrEmpty(Runner.SessionInfo.Name))
+            if (Runner == null)
             {
                 Debug.LogWarning("No active session; cannot load chunks.");
                 return;
@@ -111,8 +115,8 @@ namespace LichLord.World
 
             try
             {
-                string sessionName = Runner.SessionInfo.Name;
-                string saveFilePath = GetSaveFilePath(sessionName);
+                string sessionName = Global.Networking.SessionName;
+                string saveFilePath = GetWorldSaveFilePath(sessionName);
 
                 string json;
                 // Try to get JSON from SaveLoadManager first
@@ -158,15 +162,105 @@ namespace LichLord.World
             }
         }
 
-        private string GetSaveFilePath(string sessionName)
+        private void SaveNPCs()
+        {
+            if (Runner == null)
+            {
+                Debug.LogWarning("No active session; cannot save NPCs.");
+                return;
+            }
+
+            try
+            {
+                string sessionName = Global.Networking.SessionName;
+                string saveFilePath = GetNPCSaveFilePath(sessionName);
+
+                List<FNonPlayerCharacterSaveState> npcSaves = Context.NonPlayerCharacterManager.GetAllSaveStates();
+
+                FNPCSaveData saveData = new FNPCSaveData
+                {
+                    npcs = npcSaves.ToArray()
+                };
+
+                string json = JsonUtility.ToJson(saveData, true);
+
+                SaveLoadManager.instance.SetNPCData(sessionName, json);
+                File.WriteAllText(saveFilePath, json);
+
+                Debug.Log($"Saved {npcSaves.Count} NPCs for session {sessionName} to {saveFilePath}.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to save NPC states for session: {e.Message}");
+            }
+        }
+
+        public void LoadNPCs()
+        {
+            _loadedNPCs.Clear();
+
+            if (Runner == null)
+            {
+                Debug.LogWarning("No active session; cannot load NPCs.");
+                return;
+            }
+
+            try
+            {
+                string sessionName = Global.Networking.SessionName;
+
+                string saveFilePath = GetNPCSaveFilePath(sessionName);
+
+                string json;
+                // Try to get JSON from SaveLoadManager first
+                if (!SaveLoadManager.instance.TryGetNPCData(sessionName, out json))
+                {
+                    // Fallback to file system if not in SaveLoadManager
+                    if (!File.Exists(saveFilePath))
+                    {
+                        Debug.Log($"No NPC save file found for session {sessionName} at {saveFilePath}. Clearing loaded NPCs.");
+                        return;
+                    }
+
+                    json = File.ReadAllText(saveFilePath);
+                    SaveLoadManager.instance.SetNPCData(sessionName, json); // Cache in SaveLoadManager
+                }
+
+                FNPCSaveData saveData = JsonUtility.FromJson<FNPCSaveData>(json);
+                if (saveData.npcs == null || saveData.npcs.Length == 0)
+                {
+                    Debug.Log($"No NPC data found for session {sessionName}.");
+                    return;
+                }
+
+                foreach (var npcSave in saveData.npcs)
+                {
+                    _loadedNPCs.Add(npcSave);
+                }
+
+                Debug.Log($"Loaded {_loadedNPCs.Count} NPCs for session {sessionName}.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to load NPC states for session: {e.Message}");
+            }
+        }
+
+        private string GetWorldSaveFilePath(string sessionName)
         {
             return SaveLoadManager.instance.GetWorldSaveFilePath(sessionName);
+        }
+
+        private string GetNPCSaveFilePath(string sessionName)
+        {
+            return SaveLoadManager.instance.GetNPCSaveFilePath(sessionName);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             base.Despawned(runner, hasState);
             SaveChunks();
+            SaveNPCs();
         }
     }
 }

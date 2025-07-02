@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace LichLord.NonPlayerCharacters
             base.Despawned(runner, hasState);
             if (runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
-                //saveLoadManager.SaveRuntimeState(_deltaStates);
+
             }
         }
 
@@ -65,6 +66,37 @@ namespace LichLord.NonPlayerCharacters
             replicator.UpdateNPCData(ref data, freeIndex);
         }
 
+        public void SpawnNPC(FNonPlayerCharacterSaveState saveState)
+        {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                Debug.Log("Cannot spawn, I'm not the master client");
+                return;
+            }
+
+            NonPlayerCharacterReplicator replicator = GetReplicatorWithFreeSlots();
+            if (replicator == null)
+                return;
+
+            int freeIndex = replicator.GetFreeIndex();
+            if (freeIndex == -1)
+            {
+                Debug.Log("Can't Spawn NPC No Free Index");
+                return;
+            }
+
+            FNonPlayerCharacterData data = new FNonPlayerCharacterData();
+
+            data.Configuration = (byte)saveState.configuration;
+            data.Position = saveState.position;
+            data.Rotation = saveState.rotation;
+            data.Condition = (byte)saveState.condition;
+            data.Events = (ushort)saveState.events;
+
+            _deltaStates[freeIndex] = data; // Store full state for persistence
+            replicator.UpdateNPCData(ref data, freeIndex);
+        }
+
         public NonPlayerCharacterReplicator GetReplicatorWithFreeSlots()
         {
             foreach (var replicator in _replicators)
@@ -86,18 +118,29 @@ namespace LichLord.NonPlayerCharacters
             return null;
         }
 
-        public class NPCLoadState
+        public void LoadNPCsFromSaves()
         {
-            public NonPlayerCharacter NPC;
-            public ELoadState LoadState;
+            List<FNonPlayerCharacterSaveState> loadedNPCs =
+               Context.WorldSaveLoadManager.LoadedNPCs;
+
+            foreach (var npc in loadedNPCs)
+            {
+                SpawnNPC(npc);
+            }
         }
 
-        public enum ELoadState
+        // Called on match disconnect on the host to save npcs
+        public List<FNonPlayerCharacterSaveState> GetAllSaveStates()
         {
-            None,
-            Loading,
-            Loaded,
-            Unloading,
+            var allSaves = new List<FNonPlayerCharacterSaveState>(NonPlayerCharacterConstants.MAX_NPC_REPS *
+                NonPlayerCharacterConstants.MAX_REPLICATORS);
+
+            foreach (var replicator in _replicators)
+            {
+                allSaves.AddRange(replicator.GetSaveStates());
+            }
+
+            return allSaves;
         }
     }
 }
