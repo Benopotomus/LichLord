@@ -6,28 +6,27 @@
     public static class NonPlayerCharacterDataUtility
     {
         // Bit size constants
-        private const int INDEX_BITS = 9;                // 0-511
-        private const int DEFINITION_BITS = 5;           // 0-31
-        private const int TEAM_BITS = 2;                // 0-3
+        private const int DEFINITION_BITS = 6;          // 0–63
+        private const int TEAM_BITS = 2;                // 0–3
 
-        private const int NPC_STATE_BITS = 4;           // 0-15
-        private const int STATUS_BITS = 2;              // 0-3
-        private const int ANIMATION_INDEX_BITS = 2;      // 0-3
+        private const int NPC_STATE_BITS = 4;           // 0–15
+        private const int STATUS_BITS = 2;              // 0–3
+        private const int ANIMATION_INDEX_BITS = 2;     // 0–3
 
-        private const int HEALTH_BITS = 12;             // 0-4095
+        private const int HEALTH_BITS = 12;             // 0–4095
 
-        // Bit shifts and masks for Configuration (ushort)
-        private const int INDEX_SHIFT = 0;
-        private const int DEFINITION_SHIFT = INDEX_SHIFT + INDEX_BITS;
+        // Bit shifts and masks for Configuration (byte)
+        private const int DEFINITION_SHIFT = 0;
         private const int TEAM_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
-        private const ushort INDEX_MASK = (1 << INDEX_BITS) - 1;
-        private const ushort DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
-        private const ushort TEAM_MASK = (1 << TEAM_BITS) - 1;
+
+        private const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
+        private const byte TEAM_MASK = (1 << TEAM_BITS) - 1;
 
         // Bit shifts and masks for Condition (byte)
         private const int NPC_STATE_SHIFT = 0;
         private const int STATUS_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
         private const int ANIMATION_INDEX_SHIFT = STATUS_SHIFT + STATUS_BITS;
+
         private const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
         private const byte STATUS_MASK = (1 << STATUS_BITS) - 1;
         private const byte ANIMATION_INDEX_MASK = (1 << ANIMATION_INDEX_BITS) - 1;
@@ -36,14 +35,13 @@
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        public static void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, int index, ETeamID teamID)
+        public static void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID)
         {
             if (definition == null)
                 throw new ArgumentNullException(nameof(definition), "NPC definition cannot be null.");
 
             // Initialize Configuration
             npcData.Configuration = 0;
-            SetGUID(index, ref npcData);
             SetDefinitionID(definition.TableID, ref npcData);
             SetTeamID(teamID, ref npcData);
 
@@ -58,20 +56,6 @@
             SetAnimationIndex(0, ref npcData);
         }
 
-        // Index
-        public static int GetGUID(ref FNonPlayerCharacterData npcData)
-        {
-            return (npcData.Configuration >> INDEX_SHIFT) & INDEX_MASK;
-        }
-
-        public static void SetGUID(int index, ref FNonPlayerCharacterData npcData)
-        {
-            ushort config = npcData.Configuration;
-            index = Mathf.Clamp(index, 0, INDEX_MASK);
-            config = (ushort)((config & ~(INDEX_MASK << INDEX_SHIFT)) | (index << INDEX_SHIFT));
-            npcData.Configuration = config;
-        }
-
         // DefinitionID
         public static int GetDefinitionID(ref FNonPlayerCharacterData npcData)
         {
@@ -80,9 +64,9 @@
 
         public static void SetDefinitionID(int definitionIndex, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            byte config = npcData.Configuration;
             definitionIndex = Mathf.Clamp(definitionIndex, 0, DEFINITION_MASK);
-            config = (ushort)((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
+            config = (byte)((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
             npcData.Configuration = config;
         }
 
@@ -94,9 +78,9 @@
 
         public static void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            byte config = npcData.Configuration;
             int teamValue = Mathf.Clamp((int)teamID, 0, TEAM_MASK);
-            config = (ushort)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
+            config = (byte)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
             npcData.Configuration = config;
         }
 
@@ -161,7 +145,7 @@
             return GetNPCState(ref npcData) != ENonPlayerState.Inactive;
         }
 
-        // Handle damage application by type
+        // Handle damage application
         public static void ApplyDamage(ref FNonPlayerCharacterData npcData,
             NonPlayerCharacterDefinition definition,
             int damage, int hitReactIndex)
@@ -169,8 +153,6 @@
             int currentHealth = GetHealth(ref npcData);
             SetHealth(currentHealth - damage, ref npcData);
 
-            //Debug.Log("Apply Damage Health " + GetHealth(ref npcData));
-            // Determine what happens when health is reduced
             if (GetHealth(ref npcData) == 0)
             {
                 SetNPCState(TryAssignState(ref npcData, ENonPlayerState.Dead), ref npcData);
@@ -182,7 +164,6 @@
             }
         }
 
-        // Prioritize the dead states over idle and hit react
         public static ENonPlayerState TryAssignState(ref FNonPlayerCharacterData npcData, ENonPlayerState newState)
         {
             ENonPlayerState currentState = GetNPCState(ref npcData);
@@ -205,10 +186,10 @@
         }
     }
 
-    // Existing enums (unchanged, included for completeness)
+    // Enums for completeness
     public enum ENonPlayerState : byte
     {
-        Inactive,    // Not in the world at all
+        Inactive,
         Idle,
         Dead,
         HitReact,
@@ -220,14 +201,13 @@
 
     public enum ENPCStatus : byte
     {
-        Neutral,        // Default state
-        Alerted,        // Aware of potential threat
-        Engaged,        // Actively in combat
-        Stunned,        // Temporarily incapacitated
-        Fleeing,        // Attempting to escape
-        Patrolling,     // Following a patrol route
-        Searching,      // Looking for target
-        Disabled,       // Temporarily out of action
+        Neutral,
+        Alerted,
+        Engaged,
+        Stunned,
+        Fleeing,
+        Patrolling,
+        Searching,
+        Disabled,
     }
-
 }

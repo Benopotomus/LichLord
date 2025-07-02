@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using LichLord.World;
 using System.Collections.Generic;
+using Unity.VisualScripting.YamlDotNet.Core;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -43,6 +44,10 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
+            _isInMovementStopRange = false;
+            _isInFaceTargetRange = false;
+            _hasAttackTarget = false;
+            _activeManeuverState = ENonPlayerState.Inactive;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, int tick)
@@ -70,7 +75,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateExecutingTimer(ref data, tick);
 
             // Modify the tick by the GUID so not everyone updates at once
-            tick += data.GUID;
+            tick += _npc.Index;
 
             UpdateRangesTick(tick);
             UpdateMoveSpeedTick(ref data, tick);
@@ -106,7 +111,7 @@ namespace LichLord.NonPlayerCharacters
                 SelectManeuver(tick);
                 */
                 data.State = ENonPlayerState.Idle;
-                NPC.Replicator.UpdateNPCData(ref data);
+                NPC.Replicator.UpdateNPCData(ref data, _npc.Index);
                 return;
             }
 

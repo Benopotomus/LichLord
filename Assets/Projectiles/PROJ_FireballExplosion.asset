@@ -28,10 +28,10 @@ MonoBehaviour:
   _lineOfSightRequirement: 0
   _rotationType: 0
   _extents: {x: 4, y: 0, z: 0}
-  _onlyAffectsOnce: 0
+  _onlyAffectsOnce: 1
   _affectsEachCast: 0
   _physicsSweep: 1
-  _collisionCheckTrim: {x: 0, y: 0.1}
+  _collisionCheckTrim: {x: 0, y: 0.25}
   _collisionCheckRate: 0
   _collisionCheckNumber: 8
   _onlyAffectImpactTarget: 0
@@ -55,3 +55,4 @@ MonoBehaviour:
   _timedFuseTickRange: {x: 0, y: 0}
   _timedFuseDistanceRange: {x: 0, y: 0}
   _timedFuseDetonationProjectiles: []
+  _forcesRemoteAiming: 0

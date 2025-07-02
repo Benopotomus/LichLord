@@ -91,7 +91,7 @@ namespace LichLord.NonPlayerCharacters
 
             data.AnimationIndex = newAnimIndex;
 
-            npc.Replicator.UpdateNPCData(ref data);
+            npc.Replicator.UpdateNPCData(ref data, npc.Index);
             ActivationTick = tick;
             CooldownExpirationTick = ActivationTick + Definition.CooldownTicks;
             ActivationExpirationTick = ActivationTick + Definition.StateTicks;

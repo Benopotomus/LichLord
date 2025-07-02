@@ -1,4 +1,5 @@
-﻿using LichLord.Projectiles;
+﻿using Fusion;
+using LichLord.Projectiles;
 using Pathfinding;
 using UnityEngine;
 
@@ -41,7 +42,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
-            _lastPosition = spawnParams.position;
+            _lastPosition = spawnParams.Position;
             _transform = transform;
         }
 
@@ -216,6 +217,14 @@ namespace LichLord.NonPlayerCharacters
         {
         }
 
+        public void OnStateAuthorityChanged(bool hasAuthority)
+        {
+            Debug.Log("State Authority Changed");
+            SetFollowerUpdatePosition(true);
+            SetFollowerUpdateRotation(true);
+            SetFollowerCanMove(true);
+            SetFollowerLocalAvoidance(true);
 
+        }
     }
 }

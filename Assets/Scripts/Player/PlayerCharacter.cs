@@ -176,10 +176,10 @@ namespace LichLord
                     hitReactIndex = (currentAnimIndex + 1) % 4;
                 }
 
-                npc.Replicator.RPC_DealDamageToNPC(npc.GUID, hit.damageData.damageValue, hitReactIndex);
+                npc.Replicator.RPC_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
 
                 if (!Runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.GUID, hit.damageData.damageValue, hitReactIndex);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
             }
 
             if (hit.target is Prop prop)
@@ -193,7 +193,7 @@ namespace LichLord
 
         void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
         {
-            Debug.Log("FireTick: " + data.FireTick + ", CurrentTick: " + Context.Runner.Tick);
+            //Debug.Log("FireTick: " + data.FireTick + ", CurrentTick: " + Context.Runner.Tick);
         }
 
         void IHitTarget.ProcessHit(ref FHitUtilityData hit)

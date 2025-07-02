@@ -55,8 +55,8 @@ namespace LichLord.NonPlayerCharacters
         private FNetObjectID _netObjectID = new FNetObjectID();
         public FNetObjectID NetObjectID => _netObjectID;
 
-        private int _guid;
-        public int GUID => _guid;
+        private int _index;
+        public int Index => _index;
 
         private ETeamID _teamId;
         public ETeamID TeamID => _teamId;
@@ -98,11 +98,11 @@ namespace LichLord.NonPlayerCharacters
             _movementComponent.OnSpawned(ref spawnParams);
             _stateComponent.OnSpawned(ref spawnParams);
             _brainComponent.OnSpawned(ref spawnParams);
-            _guid = spawnParams.index;
+            _index = spawnParams.Index;
             UpdateChunk(_context.ChunkManager);
 
             _netObjectID.networkId = _replicator.Object.Id;
-            _netObjectID.index = (ushort)spawnParams.index;
+            _netObjectID.index = (ushort)spawnParams.Index;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, 
@@ -218,10 +218,10 @@ namespace LichLord.NonPlayerCharacters
                     hitReactIndex = (currentAnimIndex + 1) % 4;
                 }
 
-                npc.Replicator.RPC_DealDamageToNPC(npc.GUID, hit.damageData.damageValue, hitReactIndex);
+                npc.Replicator.RPC_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
 
                 if (!runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.GUID, hit.damageData.damageValue, hitReactIndex);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
             }
 
             if (hit.target is Prop prop)

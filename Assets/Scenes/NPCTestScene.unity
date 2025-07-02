@@ -279,6 +279,7 @@ GameObject:
   - component: {fileID: 111939069}
   - component: {fileID: 111939068}
   - component: {fileID: 111939070}
+  - component: {fileID: 111939071}
   m_Layer: 0
   m_Name: NonPlayerCharacterManager
   m_TagString: Untagged
@@ -301,11 +302,7 @@ MonoBehaviour:
   _spawner: {fileID: 111939070}
   _replicatorPrefab: {fileID: 3957007118019067033, guid: 29fc895c602f8fd4084d2ff263237ec3,
     type: 3}
-  _replicator: {fileID: 0}
-  _debugSpawnDefinition: {fileID: 11400000, guid: c14e591000895f745af5f00ae483b00b,
-    type: 2}
-  _debugSpawnCount: 1
-  _debugStreamRevive: 0
+  _debug: {fileID: 111939071}
 --- !u!4 &111939069
 Transform:
   m_ObjectHideFlags: 0
@@ -333,6 +330,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20cf32547ae23f14e8ee90c51fe0a8a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &111939071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 111939067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ef391a74c2429a44b28d3ff6bf7a230, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _debugSpawnDefinition: {fileID: 11400000, guid: 608fde03f28e2a640b451b2b02383be3,
+    type: 2}
+  _initialSpawnCount: 10
+  _debugStreamRevive: 1
+  _streamReviveCount: 5
 --- !u!1 &117824875
 GameObject:
   m_ObjectHideFlags: 0
@@ -1406,6 +1420,7 @@ MonoBehaviour:
   - {fileID: 805418399}
   - {fileID: 1239710300}
   - {fileID: 111939068}
+  - {fileID: 111939071}
   - {fileID: 1265232217}
   - {fileID: 1887427404}
   - {fileID: 513087587}

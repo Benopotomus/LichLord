@@ -118,7 +118,7 @@ namespace LichLord.NonPlayerCharacters
                     if (_deadTimer < 0f)
                     {
                         data.State = ENonPlayerState.Inactive;
-                        NPC.Replicator.UpdateNPCData(ref data);
+                        NPC.Replicator.UpdateNPCData(ref data, _npc.Index);
                     }
                     break;
             }

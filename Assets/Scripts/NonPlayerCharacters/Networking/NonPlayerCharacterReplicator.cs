@@ -16,12 +16,16 @@ namespace LichLord.NonPlayerCharacters
         [Networked, Capacity(NonPlayerCharacterConstants.MAX_NPC_REPS)]
         private NetworkArray<FNonPlayerCharacterData> _npcDatas { get; }
 
+        [Networked]
+        private byte _highestUsedIndex { get; set; }
+
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
 
         private NPCLoadState[] _loadStates = new NPCLoadState[NonPlayerCharacterConstants.MAX_NPC_REPS];
         public NPCLoadState[] LoadStates => _loadStates;
 
         private HashSet<int> _freeIndices = new HashSet<int>();
+        public IReadOnlyCollection<int> FreeIndices => _freeIndices;
 
         // Prediction
         private Dictionary<int, NonPlayerCharacterState> _predictedStates = new Dictionary<int, NonPlayerCharacterState>();
@@ -104,9 +108,17 @@ namespace LichLord.NonPlayerCharacters
         public void StateAuthorityChanged()
         {
             Debug.Log($"StateAuthority Changed, HasStateAuthority: {HasStateAuthority}");
-            if (HasStateAuthority)
+            if (!HasStateAuthority)
+                return;
+
+            RebuildFreeIndices();
+
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                RebuildFreeIndices();
+                if (_loadStates[i].LoadState == ELoadState.Loaded)
+                {
+                    _loadStates[i].NPC.Movement.OnStateAuthorityChanged(true);
+                }
             }
         }
 
@@ -129,9 +141,8 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        public void UpdateNPCData(ref FNonPlayerCharacterData updatedData)
+        public void UpdateNPCData(ref FNonPlayerCharacterData updatedData, int index)
         {
-            int index = NonPlayerCharacterDataUtility.GetGUID(ref updatedData);
             ref FNonPlayerCharacterData currentData = ref _npcDatas.GetRef(index);
             bool wasActive = NonPlayerCharacterDataUtility.IsActive(ref currentData);
             bool willBeActive = NonPlayerCharacterDataUtility.IsActive(ref updatedData);
@@ -145,19 +156,6 @@ namespace LichLord.NonPlayerCharacters
             else if (willBeActive && !wasActive)
             {
                 _freeIndices.Remove(index); // NPC became active
-            }
-        }
-
-        public void UpdateNPCData(FNonPlayerCharacterSpawnParams spawnParams)
-        {
-            FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(spawnParams.definitionId);
-            if (definition != null)
-            {
-                NonPlayerCharacterDataUtility.InitializeData(ref data, definition, spawnParams.index, spawnParams.teamId);
-                data.Position = spawnParams.position;
-                data.Rotation = spawnParams.rotation;
-                _npcDatas.Set(spawnParams.index, data);
             }
         }
 
@@ -220,7 +218,7 @@ namespace LichLord.NonPlayerCharacters
                 if (shouldBeActive && loadState.LoadState == ELoadState.None)
                 {
                     loadState.LoadState = ELoadState.Loading;
-                    _spawner.SpawnNPC(ref _renderWriteData);
+                    _spawner.SpawnNPC(ref _renderWriteData, i);
                 }
                 else if (shouldBeActive && loadState.LoadState == ELoadState.Loaded)
                 {
@@ -269,7 +267,7 @@ namespace LichLord.NonPlayerCharacters
 
         private void OnNonPlayerCharacterSpawned(FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacter character)
         {
-            ref NPCLoadState loadState = ref _loadStates[spawnParams.index];
+            ref NPCLoadState loadState = ref _loadStates[spawnParams.Index];
             loadState.NPC = character;
             loadState.LoadState = ELoadState.Loaded;
             character.OnSpawned(ref spawnParams, this);
@@ -281,7 +279,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 //Debug.Log("Apply Damage " + damage);
                 NonPlayerCharacterDataUtility.ApplyDamage(ref data, data.Definition, damage, hitReactIndex);
-                UpdateNPCData(ref data);
+                UpdateNPCData(ref data, index);
             }
         }
 

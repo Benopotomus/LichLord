@@ -8,7 +8,7 @@
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
-        private ushort _configuration; // 2 bytes: Index (9 bits) + DefinitionID (5 bits) + TeamID (2 bits)
+        private byte _configuration; // 2 bytes: Index (9 bits) + DefinitionID (5 bits) + TeamID (2 bits)
         [FieldOffset(2)]
         private FWorldTransform _transform; // 8 bytes: Position (6) + Rotation (2)
         [FieldOffset(10)]
@@ -26,11 +26,6 @@
         public NonPlayerCharacterDefinition Definition
         {
             get => Global.Tables.NonPlayerCharacterTable.TryGetDefinition(DefinitionID);
-        }
-
-        public int GUID
-        {
-            get => NonPlayerCharacterDataUtility.GetGUID(ref this);
         }
 
         public int Health
@@ -105,7 +100,7 @@
             set => _condition = value;
         }
 
-        public ushort Configuration
+        public byte Configuration
         {
             get => _configuration;
             set => _configuration = value;

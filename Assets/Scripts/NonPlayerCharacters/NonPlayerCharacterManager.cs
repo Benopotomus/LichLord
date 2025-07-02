@@ -8,96 +8,23 @@ namespace LichLord.NonPlayerCharacters
     {
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
         [SerializeField] private NonPlayerCharacterReplicator _replicatorPrefab;
-        [SerializeField] private NonPlayerCharacterReplicator _replicator;
+        [SerializeField] private NonPlayerCharacterManagerDebug _debug;
 
         [SerializeField] private Dictionary<int, FNonPlayerCharacterData> _deltaStates = new Dictionary<int, FNonPlayerCharacterData>();
 
-        [Header("Debug Spawning")]
-        [SerializeField] private NonPlayerCharacterDefinition _debugSpawnDefinition;
-        [SerializeField] private int _debugSpawnCount = 0;
-        [SerializeField] private bool _debugStreamRevive;
+        private List<NonPlayerCharacterReplicator> _replicators = new List<NonPlayerCharacterReplicator>();
 
         public void AddReplicator(NonPlayerCharacterReplicator replicator)
         {
-            _replicator = replicator;
+            if (!_replicators.Contains(replicator))
+            {
+                _replicators.Add(replicator);
+            }
         }
 
         public override void Spawned()
         {
-            if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
-            {
-                var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity);
-
-                for (int i = 0; i < _debugSpawnCount; i++)
-                {
-                    Vector3 randomPosition = new Vector3(
-                        Random.Range(-10f, 10f),
-                        1f, // Keep Y fixed
-                        Random.Range(-10f, 10f)
-                    );
-
-                    randomPosition += new Vector3(35, 0, 0);
-                    SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamA);
-                }
-
-                for (int i = 0; i < _debugSpawnCount; i++)
-                {
-                    Vector3 randomPosition = new Vector3(
-                        Random.Range(-10f, 10f),
-                        1f, // Keep Y fixed
-                        Random.Range(-10f, 10f)
-                    );
-
-                    randomPosition += new Vector3(-35, 0, 0);
-
-                    SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamB);
-                }
-            }
-        }
-
-        bool flip = false;
-        public override void FixedUpdateNetwork()
-        {
-            base.FixedUpdateNetwork();
-
-            if (!_debugStreamRevive)
-                return;
-
-            if (Runner.Tick % 64 != 0)
-                return;
-
-            if (flip)
-            {
-                for (int i = 0; i < 1; i++)
-                {
-
-                    Vector3 randomPosition = new Vector3(
-                        Random.Range(-10f, 10f),
-                        1f, // Keep Y fixed
-                        Random.Range(-10f, 10f)
-                    );
-
-                    randomPosition += new Vector3(35, 0, 0);
-                    SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamA);
-                }
-                flip = false;
-            }
-            else
-            {
-                for (int i = 0; i < 1; i++)
-                {
-                    Vector3 randomPosition = new Vector3(
-                        Random.Range(-10f, 10f),
-                        1f, // Keep Y fixed
-                        Random.Range(-10f, 10f)
-                    );
-
-                    randomPosition += new Vector3(-35, 0, 0);
-
-                    SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamB);
-                }
-                flip = true;
-            }
+           _debug.OnSpawned();
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -111,27 +38,52 @@ namespace LichLord.NonPlayerCharacters
 
         public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID)
         {
-            if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
-                if (_replicator == null)
-                    return;
-
-                int freeIndex = _replicator.GetFreeIndex();
-                if (freeIndex == -1)
-                {
-                    Debug.Log("Can't Spawn NPC No Free Index");
-                    return;
-                }
-
-                FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-                NonPlayerCharacterDataUtility.InitializeData(ref data, definition, freeIndex, teamID);
-
-                data.Position = spawnPos;
-                data.Rotation = Quaternion.identity;
-
-                _deltaStates[freeIndex] = data; // Store full state for persistence
-                _replicator.UpdateNPCData(ref data);
+                Debug.Log("Cannot spawn, I'm not the master client");
+                return;
             }
+
+            NonPlayerCharacterReplicator replicator = GetReplicatorWithFreeSlots();
+            if(replicator == null) 
+                return;
+
+            int freeIndex = replicator.GetFreeIndex();
+            if (freeIndex == -1)
+            {
+                Debug.Log("Can't Spawn NPC No Free Index");
+                return;
+            }
+
+            FNonPlayerCharacterData data = new FNonPlayerCharacterData();
+            NonPlayerCharacterDataUtility.InitializeData(ref data, definition, teamID);
+
+            data.Position = spawnPos;
+            data.Rotation = Quaternion.identity;
+
+            _deltaStates[freeIndex] = data; // Store full state for persistence
+            replicator.UpdateNPCData(ref data, freeIndex);
+        }
+
+        public NonPlayerCharacterReplicator GetReplicatorWithFreeSlots()
+        {
+            foreach (var replicator in _replicators)
+            {
+                if (replicator.FreeIndices.Count > 0)
+                    return replicator;
+            }
+
+            if (_replicators.Count < NonPlayerCharacterConstants.MAX_REPLICATORS)
+            {
+                var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity);
+                if (newReplicator != null)
+                {
+                    AddReplicator(newReplicator);
+                }
+            }
+
+            Debug.Log("No replicator with free slots found");
+            return null;
         }
 
         public class NPCLoadState

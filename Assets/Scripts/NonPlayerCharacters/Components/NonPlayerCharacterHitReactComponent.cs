@@ -20,7 +20,7 @@ namespace LichLord.NonPlayerCharacters
             if (_hitReactTimer < 0f)
             {
                 data.State = ENonPlayerState.Idle;
-                _npc.Replicator.UpdateNPCData(ref data);
+                _npc.Replicator.UpdateNPCData(ref data, _npc.Index);
             }
         }
 

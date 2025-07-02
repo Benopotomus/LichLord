@@ -10,22 +10,22 @@ namespace LichLord.NonPlayerCharacters
     {
         public Action<FNonPlayerCharacterSpawnParams, NonPlayerCharacter> OnSpawned;
 
-        public void SpawnNPC(ref FNonPlayerCharacterData data)
+        public void SpawnNPC(ref FNonPlayerCharacterData data, int index)
         {
             var spawnParams = new FNonPlayerCharacterSpawnParams
             {
-                index = NonPlayerCharacterDataUtility.GetGUID(ref data),
-                definitionId = NonPlayerCharacterDataUtility.GetDefinitionID(ref data),
-                position = data.Position,
-                rotation = data.Rotation,
-                teamId = NonPlayerCharacterDataUtility.GetTeamID(ref data)
+                Index = index,
+                DefinitionId = NonPlayerCharacterDataUtility.GetDefinitionID(ref data),
+                Position = data.Position,
+                Rotation = data.Rotation,
+                TeamId = NonPlayerCharacterDataUtility.GetTeamID(ref data)
             };
 
-            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(spawnParams.definitionId);
+            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(spawnParams.DefinitionId);
 
             if (definition == null)
             {
-                Debug.LogWarning("Trying to spawn NPC with invalid definition, id: " + spawnParams.definitionId);
+                Debug.LogWarning("Trying to spawn NPC with invalid definition, id: " + spawnParams.DefinitionId);
                 return;
             }
 
@@ -78,11 +78,11 @@ namespace LichLord.NonPlayerCharacters
             var poolObject = prefab.GetComponent<DWDObjectPoolObject>();
             if (poolObject == null)
             {
-                Debug.LogWarning("Could not spawn NPC " + spawnParams.definitionId + ". Could not find DWDObjectPoolObject Component!");
+                Debug.LogWarning("Could not spawn NPC " + spawnParams.DefinitionId + ". Could not find DWDObjectPoolObject Component!");
                 return;
             }
 
-            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, spawnParams.position, spawnParams.rotation);
+            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, spawnParams.Position, spawnParams.Rotation);
 
             NonPlayerCharacter spawnedProp = instance.GetComponent<NonPlayerCharacter>();
 
