@@ -20,7 +20,8 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -107,8 +108,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _BumpPower: 0
     - _BumpScale: 1
     - _ClearCoatMask: 0
@@ -118,6 +122,7 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EmissionScaleUI: 0
     - _EmissiveOn: 0
     - _EnvironmentReflections: 1
@@ -141,6 +146,7 @@ Material:
     - _SpecularLevel: 0.55
     - _SpecularPower: 0.5
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _TexturePower: 0.42857143
     - _TransFresnel: 0.77
@@ -162,7 +168,8 @@ Material:
     - _TransColor: {r: 0.9705882, g: 0.93987614, b: 0.69225776, a: 1}
     - _TranslucentColor: {r: 0.7941176, g: 0.71406156, b: 0.3795415, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &7445918183433382534
+  m_AllowLocking: 1
+--- !u!114 &1716902023157146077
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -174,4 +181,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 9

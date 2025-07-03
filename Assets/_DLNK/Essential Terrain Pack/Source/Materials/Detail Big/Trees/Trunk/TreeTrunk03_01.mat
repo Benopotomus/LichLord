@@ -21,12 +21,13 @@ Material:
   - _METALALPHAGLOSS_ON
   - _METALLICGLOSSMAP
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -107,7 +108,9 @@ Material:
     m_Floats:
     - _AffectAO: -4.35
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -120,6 +123,7 @@ Material:
     - _DiffuseAO: 2.76
     - _DiffuseAOMask: 0.63
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EmissionLM: 0
     - _EnvironmentReflections: 1
     - _Fresnel: 1
@@ -133,7 +137,7 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrenght: 6.97
-    - _OcclusionStrength: 0
+    - _OcclusionStrength: 0.677
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
@@ -142,6 +146,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _TopBottomBumpScale: 2
     - _TopBottomMult: -0.67
@@ -161,7 +166,8 @@ Material:
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _TopTint: {r: 0.7941176, g: 0.6747584, b: 0.4612889, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &1006189738558152318
+  m_AllowLocking: 1
+--- !u!114 &7230751704784367679
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -173,4 +179,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 9

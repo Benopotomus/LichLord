@@ -9,11 +9,13 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: BrickBase00
   m_Shader: {fileID: 4800000, guid: 516e1d638296ed84a8111eeac2e687e3, type: 3}
-  m_ValidKeywords: []
-  m_InvalidKeywords:
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
   - _DETAIL_MULX2
-  - _INVERTMASK_ON
   - _NORMALMAP
+  m_InvalidKeywords:
+  - _INVERTMASK_ON
   - _UVWORLD_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -21,11 +23,12 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _AlbedoTop:
-        m_Texture: {fileID: 2800000, guid: d42f3712f0a51ee41845f4c230d4a0ee, type: 3}
+        m_Texture: {fileID: 2800000, guid: f0f4201189f80e04d8769e8ba2a5beff, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -33,11 +36,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMapTop:
-        m_Texture: {fileID: 2800000, guid: ad72c1f6fc5b36542a99d3aaad3a4af2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1d3dd50bd43b7444abcb0b2380f7f6aa, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
-        m_Texture: {fileID: 2800000, guid: ffc2b931f17d8474a8a26ab158d0236b, type: 3}
+        m_Texture: {fileID: 2800000, guid: 27334a1e50eba544b80d1de79c29b706, type: 3}
         m_Scale: {x: 2, y: 2}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
@@ -49,7 +52,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 2800000, guid: 97abf8102995688489c6c44196b6e675, type: 3}
+        m_Texture: {fileID: 2800000, guid: fbf5eeba7006ce341b9e9c638e647ac8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailOcclusion:
@@ -69,7 +72,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetalnessTop:
-        m_Texture: {fileID: 2800000, guid: 7a17177f2ae706540857dff12c0866b1, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -101,7 +104,7 @@ Material:
     - _AlphaCutoff: 0.5
     - _Ammount: 0.69
     - _BumpMix: 1
-    - _BumpScale: 1
+    - _BumpScale: 0.99
     - _BumpScaleTop: 1
     - _Cutoff: 0.5
     - _DetailGloss: 0
@@ -114,7 +117,7 @@ Material:
     - _EnvironmentReflections: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.263
-    - _GlossinessTop: 0.5
+    - _GlossinessTop: 0
     - _GlossyReflections: 1
     - _InvertMask: 1
     - _MaskSmooth: 0
@@ -141,9 +144,10 @@ Material:
     - _ZWrite: 1
     - __dirty: 1
     m_Colors:
-    - _Clamp: {r: 0.36, g: 0.58, b: 0, a: 0}
-    - _Color: {r: 0.3962264, g: 0.3962264, b: 0.3962264, a: 1}
-    - _ColorTop: {r: 0.8490566, g: 0.8450516, b: 0.8450516, a: 0}
+    - _Clamp: {r: 0.52, g: 0.58, b: 0, a: 0}
+    - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _ColorTop: {r: 0.8490566, g: 0.8370417, b: 0.8370417, a: 0}
     - _DetailColor: {r: 0.6102941, g: 0.6102941, b: 0.6102941, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

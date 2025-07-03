@@ -9,25 +9,29 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: ETP_BigRock01a2
   m_Shader: {fileID: 4800000, guid: 516e1d638296ed84a8111eeac2e687e3, type: 3}
-  m_ValidKeywords: []
-  m_InvalidKeywords:
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
   - _DETAIL_MULX2
   - _EMISSION
-  - _METALLICGLOSSMAP
   - _NORMALMAP
   - _PARALLAXMAP
+  m_InvalidKeywords:
+  - _METALLICGLOSSMAP
   - _USELOCALNORMALS_ON
-  m_LightmapFlags: 1
+  - _UVWORLD_ON
+  m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _AlbedoTop:
-        m_Texture: {fileID: 2800000, guid: 526f7c6a6c6b2304cab7cb94c27dc5a2, type: 3}
+        m_Texture: {fileID: 2800000, guid: e02125d7c84cb53428f78fdd89968e55, type: 3}
         m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -35,11 +39,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMapTop:
-        m_Texture: {fileID: 2800000, guid: c5432988efe6a344680e4c4ef40dddd4, type: 3}
+        m_Texture: {fileID: 2800000, guid: d181d86d9eb09b44e911e512ebe7a636, type: 3}
         m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
-        m_Texture: {fileID: 2800000, guid: 854719a054788eb438c6dcb2e6dbd505, type: 3}
+        m_Texture: {fileID: 2800000, guid: b8cb5078fd995e544b463d93d511157b, type: 3}
         m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
@@ -47,7 +51,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 2800000, guid: 5bf1a05308ae9ee4a8bcaee634eb2c24, type: 3}
+        m_Texture: {fileID: 2800000, guid: 53857f49decc18948b26c91ccaa8d15d, type: 3}
         m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -55,7 +59,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 3831afeecc668f14a9e77559feaa5617, type: 3}
+        m_Texture: {fileID: 2800000, guid: 359aa0954604b7a4398d5b690ae5a19c, type: 3}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -63,7 +67,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetalnessTop:
-        m_Texture: {fileID: 2800000, guid: b916cc513d9a7fb43bc4048ad4ff4bc6, type: 3}
+        m_Texture: {fileID: 2800000, guid: 07979cb9be5a22a4793cff580a115acf, type: 3}
         m_Scale: {x: 5, y: 5}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -120,13 +124,13 @@ Material:
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0.374
     - _Glossiness: 0.31
-    - _GlossinessTop: 0.5
+    - _GlossinessTop: 1
     - _GlossyReflections: 1
     - _HgtMapSmooth: 5
     - _InvertAxis: 0
     - _InvertDepth: 0
     - _Metallic: 0.35
-    - _MetallicTop: 0
+    - _MetallicTop: 1
     - _Mode: 0
     - _NormalSmooth: 0
     - _OcclusionStrenght: 1
@@ -143,10 +147,10 @@ Material:
     - _TopBottom: -0.31
     - _TopBottomMult: 2.39
     - _TopBottomSmooth: 2
-    - _TopTiling: 1
+    - _TopTiling: 2
     - _UVMasterTiling: 1
     - _UVSec: 0
-    - _UVWorld: 0
+    - _UVWorld: 1
     - _UpAOMult: 1
     - _UpAlbPower: 1
     - _UpGloss: 0
@@ -157,7 +161,7 @@ Material:
     - _ZWrite: 1
     - __dirty: 0
     m_Colors:
-    - _Clamp: {r: 0, g: 1, b: 0, a: 0}
+    - _Clamp: {r: 0.5, g: 0.73, b: 0, a: 0}
     - _Color: {r: 0.7794118, g: 0.7794118, b: 0.7794118, a: 1}
     - _ColorTop: {r: 0.78246415, g: 0.7924528, b: 0.7737629, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

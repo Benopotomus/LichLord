@@ -9,8 +9,11 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Water02
   m_Shader: {fileID: 4800000, guid: 0ca99028c518f3548b42ee032a9648a0, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _REFRACTIONENABLE_ON
   - _USEMAINTEXALPHA_ON
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
@@ -18,6 +21,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -139,18 +143,13 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Refraction: 1
+    - _RefractionEnable: 1
     - _SecondaryGloss: 2
     - _Specular: 1
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Tessellation: 20
     - _TimeSize: 1
-    - _TransAmbient: 0.1
-    - _TransDirect: 0.9
-    - _TransNormal: 0.5
-    - _TransScattering: 2
-    - _TransShadow: 0.5
-    - _TransStrength: 1
     - _UVScale: 1
     - _UVSec: 0
     - _UseMainTexAlpha: 1
@@ -172,3 +171,4 @@ Material:
     - _SpecXYSnsZW: {r: 0.1, g: 0, b: 0.5, a: 0.2}
     - _VelocityXYFoamZ: {r: 0.03, g: -0.05, b: 0.04, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

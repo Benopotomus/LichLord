@@ -1,4 +1,4 @@
-// Made with Amplify Shader Editor v1.9.1.5
+// Made with Amplify Shader Editor v1.9.6.3
 // Available at the Unity Asset Store - http://u3d.as/y3X 
 Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 {
@@ -6,18 +6,19 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 	{
 		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
-		[ASEBegin][HDR]_ColorA("Color A", Color) = (0.5943396,0.5943396,0.5943396,0)
+		[HDR]_ColorA("Color A", Color) = (0.5943396,0.5943396,0.5943396,0)
 		[HDR]_ColorB("Color B", Color) = (1,1,1,1)
 		_MainTex("Albedo", 2D) = "white" {}
-		_AlphaThreshold("Alpha Threshold", Float) = 0.2
 		_Smoothness("Smoothness", Float) = 0
 		_BumpMap("Normal", 2D) = "white" {}
+		_Cutoff("MaskClipValue", Float) = 0.5
 		_NormalScale("NormalScale", Float) = 0
-		_Noisespeed1("Noise speed", Float) = 1
-		_NoiseScale1("Noise Scale", Float) = 1
-		_LeavesGradientxy1("Leaves Gradient (xy)", Vector) = (0,1,0,0)
+		_Noisespeed("Noise speed", Float) = 1
+		_NoiseScale("Noise Scale", Float) = 1
+		_MotionValue("MotionValue", Vector) = (0.1,0.1,0.1,0)
+		_LeavesGradientxy("Leaves Gradient (xy)", Vector) = (0,1,0,0)
+		[Toggle]_RotateMask("RotateMask", Float) = 0
 		_AOPower("AO Power", Float) = 0.5
-		[ASEEnd]_MotionValue("MotionValue (xy)", Vector) = (0.1,0.1,0,0)
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -35,8 +36,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 		//_TessEdgeLength ( "Tess Edge length", Range( 2, 50 ) ) = 16
 		//_TessMaxDisp( "Tess Max Displacement", Float ) = 25
 
-		[HideInInspector][ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
-		[HideInInspector][ToggleOff] _EnvironmentReflections("Environment Reflections", Float) = 1.0
+		[HideInInspector][ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1
+		[HideInInspector][ToggleOff] _EnvironmentReflections("Environment Reflections", Float) = 1
 		[HideInInspector][ToggleOff] _ReceiveShadows("Receive Shadows", Float) = 1.0
 
 		[HideInInspector] _QueueOffset("_QueueOffset", Float) = 0
@@ -64,7 +65,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 		
 
 		HLSLINCLUDE
-		#pragma target 3.5
+		#pragma target 4.5
 		#pragma prefer_hlslcc gles
 		// ensure rendering platforms toggle list is visible
 
@@ -191,31 +192,47 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			HLSLPROGRAM
 
+			
+
 			#define _NORMAL_DROPOFF_TS 1
+			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
+			#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
 			#pragma multi_compile_instancing
 			#pragma instancing_options renderinglayer
-			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+			#pragma multi_compile _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+
+			
 
 			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 			#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+
+			
+            #pragma multi_compile _ EVALUATE_SH_MIXED EVALUATE_SH_VERTEX
+		
+
 			#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
 			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
 			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
-			#pragma multi_compile_fragment _ _SHADOWS_SOFT
-			#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+
+			
+
+			
+			#pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+           
+
 			#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
-			#pragma multi_compile_fragment _ _LIGHT_LAYERS
+			#pragma multi_compile _ _LIGHT_LAYERS
 			#pragma multi_compile_fragment _ _LIGHT_COOKIES
-			#pragma multi_compile _ _CLUSTERED_RENDERING
-			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
-			#pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
-			#pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
+			#pragma multi_compile _ _FORWARD_PLUS
+
+			
 
 			#pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
 			#pragma multi_compile _ SHADOWS_SHADOWMASK
@@ -227,7 +244,23 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
+
 			#define SHADERPASS SHADERPASS_FORWARD
+
+			
+            #if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+			#endif
+		
+
+			
+			#if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+			#endif
+		
 
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
@@ -235,10 +268,25 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DBuffer.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+
+			#if defined(LOD_FADE_CROSSFADE)
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
+            #endif
 
 			#if defined(UNITY_INSTANCING_ENABLED) && defined(_TERRAIN_INSTANCED_PERPIXEL_NORMAL)
 				#define ENABLE_TERRAIN_PERPIXEL_NORMAL
@@ -246,11 +294,19 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			
 
+			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
+				#define ASE_SV_DEPTH SV_DepthLessEqual
+				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
+			#else
+				#define ASE_SV_DEPTH SV_Depth
+				#define ASE_SV_POSITION_QUALIFIERS
+			#endif
+
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
-				float4 ase_tangent : TANGENT;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+				float4 tangentOS : TANGENT;
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
@@ -260,17 +316,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
-				float4 lightmapUVOrVertexSH : TEXCOORD0;
-				half4 fogFactorAndVertexLight : TEXCOORD1;
-				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-					float4 shadowCoord : TEXCOORD2;
-				#endif
+				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
+				float4 lightmapUVOrVertexSH : TEXCOORD1;
+				half4 fogFactorAndVertexLight : TEXCOORD2;
 				float4 tSpace0 : TEXCOORD3;
 				float4 tSpace1 : TEXCOORD4;
 				float4 tSpace2 : TEXCOORD5;
-				#if defined(ASE_NEEDS_FRAG_SCREEN_POSITION)
-					float4 screenPos : TEXCOORD6;
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+					float4 shadowCoord : TEXCOORD6;
 				#endif
 				#if defined(DYNAMICLIGHTMAP_ON)
 					float2 dynamicLightmapUV : TEXCOORD7;
@@ -285,14 +339,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -314,27 +369,20 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
-			sampler2D _BumpMap;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
+			TEXTURE2D(_BumpMap);
+			SAMPLER(sampler_BumpMap);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBRForwardPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -391,24 +439,26 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
 				o.ase_texcoord8.xy = v.texcoord.xy;
 				
@@ -416,29 +466,27 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				o.ase_texcoord8.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
-				v.ase_normal = v.ase_normal;
+				v.normalOS = v.normalOS;
+				v.tangentOS = v.tangentOS;
 
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-				float3 positionVS = TransformWorldToView( positionWS );
-				float4 positionCS = TransformWorldToHClip( positionWS );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
+				VertexNormalInputs normalInput = GetVertexNormalInputs( v.normalOS, v.tangentOS );
 
-				VertexNormalInputs normalInput = GetVertexNormalInputs( v.ase_normal, v.ase_tangent );
-
-				o.tSpace0 = float4( normalInput.normalWS, positionWS.x);
-				o.tSpace1 = float4( normalInput.tangentWS, positionWS.y);
-				o.tSpace2 = float4( normalInput.bitangentWS, positionWS.z);
+				o.tSpace0 = float4( normalInput.normalWS, vertexInput.positionWS.x );
+				o.tSpace1 = float4( normalInput.tangentWS, vertexInput.positionWS.y );
+				o.tSpace2 = float4( normalInput.bitangentWS, vertexInput.positionWS.z );
 
 				#if defined(LIGHTMAP_ON)
 					OUTPUT_LIGHTMAP_UV( v.texcoord1, unity_LightmapST, o.lightmapUVOrVertexSH.xy );
@@ -453,14 +501,14 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#endif
 
 				#if defined(ENABLE_TERRAIN_PERPIXEL_NORMAL)
-					o.lightmapUVOrVertexSH.zw = v.texcoord;
-					o.lightmapUVOrVertexSH.xy = v.texcoord * unity_LightmapST.xy + unity_LightmapST.zw;
+					o.lightmapUVOrVertexSH.zw = v.texcoord.xy;
+					o.lightmapUVOrVertexSH.xy = v.texcoord.xy * unity_LightmapST.xy + unity_LightmapST.zw;
 				#endif
 
-				half3 vertexLight = VertexLighting( positionWS, normalInput.normalWS );
+				half3 vertexLight = VertexLighting( vertexInput.positionWS, normalInput.normalWS );
 
 				#ifdef ASE_FOG
-					half fogFactor = ComputeFogFactor( positionCS.z );
+					half fogFactor = ComputeFogFactor( vertexInput.positionCS.z );
 				#else
 					half fogFactor = 0;
 				#endif
@@ -468,18 +516,11 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				o.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = positionCS;
 					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				o.clipPos = positionCS;
-
-				#if defined(ASE_NEEDS_FRAG_SCREEN_POSITION)
-					o.screenPos = ComputeScreenPos(positionCS);
-				#endif
-
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
 				return o;
 			}
 
@@ -487,8 +528,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
-				float4 ase_tangent : TANGENT;
+				float3 normalOS : NORMAL;
+				float4 tangentOS : TANGENT;
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
@@ -507,9 +548,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
-				o.ase_tangent = v.ase_tangent;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.tangentOS = v.tangentOS;
 				o.texcoord = v.texcoord;
 				o.texcoord1 = v.texcoord1;
 				o.texcoord2 = v.texcoord2;
@@ -550,9 +591,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
-				o.ase_tangent = patch[0].ase_tangent * bary.x + patch[1].ase_tangent * bary.y + patch[2].ase_tangent * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.tangentOS = patch[0].tangentOS * bary.x + patch[1].tangentOS * bary.y + patch[2].tangentOS * bary.z;
 				o.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
 				o.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
 				o.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
@@ -560,9 +601,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -574,23 +615,20 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			}
 			#endif
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-			#endif
-
 			half4 frag ( VertexOutput IN
 						#ifdef ASE_DEPTH_WRITE_ON
 						,out float outputDepth : ASE_SV_DEPTH
+						#endif
+						#ifdef _WRITE_RENDERING_LAYERS
+						, out float4 outRenderingLayers : SV_Target1
 						#endif
 						 ) : SV_Target
 			{
 				UNITY_SETUP_INSTANCE_ID(IN);
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
 
-				#ifdef LOD_FADE_CROSSFADE
-					LODDitheringTransition( IN.clipPos.xyz, unity_LODFade.x );
+				#if defined(LOD_FADE_CROSSFADE)
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#if defined(ENABLE_TERRAIN_PERPIXEL_NORMAL)
@@ -608,11 +646,10 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				float3 WorldViewDirection = _WorldSpaceCameraPos.xyz  - WorldPosition;
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
 
-				#if defined(ASE_NEEDS_FRAG_SCREEN_POSITION)
-					float4 ScreenPos = IN.screenPos;
-				#endif
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
-				float2 NormalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.clipPos);
+				float2 NormalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionCS);
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
 					ShadowCoords = IN.shadowCoord;
@@ -623,13 +660,13 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
 				float2 uv_MainTex = IN.ase_texcoord8.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
-				float2 texCoord109 = IN.ase_texcoord8.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_108_0);
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
+				float2 texCoord68 = IN.ase_texcoord8.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_99_0);
 				
 				float2 uv_BumpMap = IN.ase_texcoord8.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
-				float3 unpack11 = UnpackNormalScale( tex2D( _BumpMap, uv_BumpMap ), _NormalScale );
+				float3 unpack11 = UnpackNormalScale( SAMPLE_TEXTURE2D( _BumpMap, sampler_BumpMap, uv_BumpMap ), _NormalScale );
 				unpack11.z = lerp( 1, unpack11.z, saturate(_NormalScale) );
 				
 
@@ -641,7 +678,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				float Smoothness = _Smoothness;
 				float Occlusion = (( 1.0 - _AOPower ) + ((lerpResult49).a - 0.0) * (1.0 - ( 1.0 - _AOPower )) / (1.0 - 0.0));
 				float Alpha = tex2DNode7.a;
-				float AlphaClipThreshold = _AlphaThreshold;
+				float AlphaClipThreshold = _Cutoff;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
 				float3 RefractionColor = 1;
@@ -650,7 +687,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				float3 Translucency = 1;
 
 				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = 0;
+					float DepthValue = IN.positionCS.z;
 				#endif
 
 				#ifdef _CLEARCOAT
@@ -740,32 +777,53 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#endif
 
 				#ifdef _DBUFFER
-					ApplyDecalToSurfaceData(IN.clipPos, surfaceData, inputData);
+					ApplyDecalToSurfaceData(IN.positionCS, surfaceData, inputData);
 				#endif
 
-				half4 color = UniversalFragmentPBR( inputData, surfaceData);
+				#ifdef _ASE_LIGHTING_SIMPLE
+					half4 color = UniversalFragmentBlinnPhong( inputData, surfaceData);
+				#else
+					half4 color = UniversalFragmentPBR( inputData, surfaceData);
+				#endif
 
 				#ifdef ASE_TRANSMISSION
 				{
 					float shadow = _TransmissionShadow;
 
-					Light mainLight = GetMainLight( inputData.shadowCoord );
-					float3 mainAtten = mainLight.color * mainLight.distanceAttenuation;
-					mainAtten = lerp( mainAtten, mainAtten * mainLight.shadowAttenuation, shadow );
-					half3 mainTransmission = max(0 , -dot(inputData.normalWS, mainLight.direction)) * mainAtten * Transmission;
-					color.rgb += BaseColor * mainTransmission;
+					#define SUM_LIGHT_TRANSMISSION(Light)\
+						float3 atten = Light.color * Light.distanceAttenuation;\
+						atten = lerp( atten, atten * Light.shadowAttenuation, shadow );\
+						half3 transmission = max( 0, -dot( inputData.normalWS, Light.direction ) ) * atten * Transmission;\
+						color.rgb += BaseColor * transmission;
 
-					#ifdef _ADDITIONAL_LIGHTS
-						int transPixelLightCount = GetAdditionalLightsCount();
-						for (int i = 0; i < transPixelLightCount; ++i)
-						{
-							Light light = GetAdditionalLight(i, inputData.positionWS);
-							float3 atten = light.color * light.distanceAttenuation;
-							atten = lerp( atten, atten * light.shadowAttenuation, shadow );
+					SUM_LIGHT_TRANSMISSION( GetMainLight( inputData.shadowCoord ) );
 
-							half3 transmission = max(0 , -dot(inputData.normalWS, light.direction)) * atten * Transmission;
-							color.rgb += BaseColor * transmission;
-						}
+					#if defined(_ADDITIONAL_LIGHTS)
+						uint meshRenderingLayers = GetMeshRenderingLayer();
+						uint pixelLightCount = GetAdditionalLightsCount();
+						#if USE_FORWARD_PLUS
+							for (uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, MAX_VISIBLE_LIGHTS); lightIndex++)
+							{
+								FORWARD_PLUS_SUBTRACTIVE_LIGHT_CHECK
+
+								Light light = GetAdditionalLight(lightIndex, inputData.positionWS);
+								#ifdef _LIGHT_LAYERS
+								if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
+								#endif
+								{
+									SUM_LIGHT_TRANSMISSION( light );
+								}
+							}
+						#endif
+						LIGHT_LOOP_BEGIN( pixelLightCount )
+							Light light = GetAdditionalLight(lightIndex, inputData.positionWS);
+							#ifdef _LIGHT_LAYERS
+							if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
+							#endif
+							{
+								SUM_LIGHT_TRANSMISSION( light );
+							}
+						LIGHT_LOOP_END
 					#endif
 				}
 				#endif
@@ -779,28 +837,42 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					float ambient = _TransAmbient;
 					float strength = _TransStrength;
 
-					Light mainLight = GetMainLight( inputData.shadowCoord );
-					float3 mainAtten = mainLight.color * mainLight.distanceAttenuation;
-					mainAtten = lerp( mainAtten, mainAtten * mainLight.shadowAttenuation, shadow );
+					#define SUM_LIGHT_TRANSLUCENCY(Light)\
+						float3 atten = Light.color * Light.distanceAttenuation;\
+						atten = lerp( atten, atten * Light.shadowAttenuation, shadow );\
+						half3 lightDir = Light.direction + inputData.normalWS * normal;\
+						half VdotL = pow( saturate( dot( inputData.viewDirectionWS, -lightDir ) ), scattering );\
+						half3 translucency = atten * ( VdotL * direct + inputData.bakedGI * ambient ) * Translucency;\
+						color.rgb += BaseColor * translucency * strength;
 
-					half3 mainLightDir = mainLight.direction + inputData.normalWS * normal;
-					half mainVdotL = pow( saturate( dot( inputData.viewDirectionWS, -mainLightDir ) ), scattering );
-					half3 mainTranslucency = mainAtten * ( mainVdotL * direct + inputData.bakedGI * ambient ) * Translucency;
-					color.rgb += BaseColor * mainTranslucency * strength;
+					SUM_LIGHT_TRANSLUCENCY( GetMainLight( inputData.shadowCoord ) );
 
-					#ifdef _ADDITIONAL_LIGHTS
-						int transPixelLightCount = GetAdditionalLightsCount();
-						for (int i = 0; i < transPixelLightCount; ++i)
-						{
-							Light light = GetAdditionalLight(i, inputData.positionWS);
-							float3 atten = light.color * light.distanceAttenuation;
-							atten = lerp( atten, atten * light.shadowAttenuation, shadow );
+					#if defined(_ADDITIONAL_LIGHTS)
+						uint meshRenderingLayers = GetMeshRenderingLayer();
+						uint pixelLightCount = GetAdditionalLightsCount();
+						#if USE_FORWARD_PLUS
+							for (uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, MAX_VISIBLE_LIGHTS); lightIndex++)
+							{
+								FORWARD_PLUS_SUBTRACTIVE_LIGHT_CHECK
 
-							half3 lightDir = light.direction + inputData.normalWS * normal;
-							half VdotL = pow( saturate( dot( inputData.viewDirectionWS, -lightDir ) ), scattering );
-							half3 translucency = atten * ( VdotL * direct + inputData.bakedGI * ambient ) * Translucency;
-							color.rgb += BaseColor * translucency * strength;
-						}
+								Light light = GetAdditionalLight(lightIndex, inputData.positionWS);
+								#ifdef _LIGHT_LAYERS
+								if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
+								#endif
+								{
+									SUM_LIGHT_TRANSLUCENCY( light );
+								}
+							}
+						#endif
+						LIGHT_LOOP_BEGIN( pixelLightCount )
+							Light light = GetAdditionalLight(lightIndex, inputData.positionWS);
+							#ifdef _LIGHT_LAYERS
+							if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
+							#endif
+							{
+								SUM_LIGHT_TRANSLUCENCY( light );
+							}
+						LIGHT_LOOP_END
 					#endif
 				}
 				#endif
@@ -830,6 +902,11 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					outputDepth = DepthValue;
 				#endif
 
+				#ifdef _WRITE_RENDERING_LAYERS
+					uint renderingLayers = GetMeshRenderingLayer();
+					outRenderingLayers = float4( EncodeMeshRenderingLayer( renderingLayers ), 0, 0, 0 );
+				#endif
+
 				return color;
 			}
 
@@ -850,21 +927,36 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			HLSLPROGRAM
 
+			
+
 			#define _NORMAL_DROPOFF_TS 1
 			#pragma multi_compile_instancing
-			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+			#pragma multi_compile _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+
+			
+
+			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
 
 			#pragma vertex vert
 			#pragma fragment frag
 
-			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
 
 			#define SHADERPASS SHADERPASS_SHADOWCASTER
+
+			
+            #if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+			#endif
+		
 
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
@@ -872,29 +964,53 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
+			#if defined(LOD_FADE_CROSSFADE)
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
+            #endif
+
 			
+
+			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
+				#define ASE_SV_DEPTH SV_DepthLessEqual
+				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
+			#else
+				#define ASE_SV_DEPTH SV_Depth
+				#define ASE_SV_POSITION_QUALIFIERS
+			#endif
 
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
+				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 worldPos : TEXCOORD0;
+					float3 positionWS : TEXCOORD1;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					float4 shadowCoord : TEXCOORD1;
-				#endif
-				float4 ase_texcoord2 : TEXCOORD2;
+					float4 shadowCoord : TEXCOORD2;
+				#endif				
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -904,14 +1020,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -933,26 +1050,18 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShadowCasterPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -1012,52 +1121,54 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
-				o.ase_texcoord2.xy = v.ase_texcoord.xy;
+				o.ase_texcoord3.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord2.zw = 0;
+				o.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					o.worldPos = positionWS;
+					o.positionWS = positionWS;
 				#endif
 
-				float3 normalWS = TransformObjectToWorldDir(v.ase_normal);
+				float3 normalWS = TransformObjectToWorldDir(v.normalOS);
 
 				#if _CASTING_PUNCTUAL_LIGHT_SHADOW
 					float3 lightDirectionWS = normalize(_LightPosition - positionWS);
@@ -1065,23 +1176,23 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					float3 lightDirectionWS = _LightDirection;
 				#endif
 
-				float4 clipPos = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
+				float4 positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
 
 				#if UNITY_REVERSED_Z
-					clipPos.z = min(clipPos.z, UNITY_NEAR_CLIP_VALUE);
+					positionCS.z = min(positionCS.z, UNITY_NEAR_CLIP_VALUE);
 				#else
-					clipPos.z = max(clipPos.z, UNITY_NEAR_CLIP_VALUE);
+					positionCS.z = max(positionCS.z, UNITY_NEAR_CLIP_VALUE);
 				#endif
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
 					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = clipPos;
+					vertexInput.positionCS = positionCS;
 					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				o.clipPos = clipPos;
-
+				o.positionCS = positionCS;
+				o.clipPosV = positionCS;
 				return o;
 			}
 
@@ -1089,7 +1200,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -1106,8 +1217,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
 				o.ase_texcoord = v.ase_texcoord;
 				return o;
 			}
@@ -1145,15 +1256,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -1163,12 +1274,6 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			{
 				return VertexFunction( v );
 			}
-			#endif
-
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-			#else
-				#define ASE_SV_DEPTH SV_Depth
 			#endif
 
 			half4 frag(	VertexOutput IN
@@ -1181,10 +1286,12 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 WorldPosition = IN.worldPos;
+					float3 WorldPosition = IN.positionWS;
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
@@ -1194,16 +1301,16 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					#endif
 				#endif
 
-				float2 uv_MainTex = IN.ase_texcoord2.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
+				float2 uv_MainTex = IN.ase_texcoord3.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
 				
 
 				float Alpha = tex2DNode7.a;
-				float AlphaClipThreshold = _AlphaThreshold;
+				float AlphaClipThreshold = _Cutoff;
 				float AlphaClipThresholdShadow = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = 0;
+					float DepthValue = IN.positionCS.z;
 				#endif
 
 				#ifdef _ALPHATEST_ON
@@ -1214,8 +1321,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					#endif
 				#endif
 
-				#ifdef LOD_FADE_CROSSFADE
-					LODDitheringTransition( IN.clipPos.xyz, unity_LODFade.x );
+				#if defined(LOD_FADE_CROSSFADE)
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -1235,24 +1342,39 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			Tags { "LightMode"="DepthOnly" }
 
 			ZWrite On
-			ColorMask 0
+			ColorMask R
 			AlphaToMask Off
 
 			HLSLPROGRAM
 
+			
+
 			#define _NORMAL_DROPOFF_TS 1
 			#pragma multi_compile_instancing
-			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+			#pragma multi_compile _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+
+			
 
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
+
 			#define SHADERPASS SHADERPASS_DEPTHONLY
+
+			
+            #if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+			#endif
+		
 
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
@@ -1260,29 +1382,53 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
+			#if defined(LOD_FADE_CROSSFADE)
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
+            #endif
+
 			
+
+			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
+				#define ASE_SV_DEPTH SV_DepthLessEqual
+				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
+			#else
+				#define ASE_SV_DEPTH SV_Depth
+				#define ASE_SV_POSITION_QUALIFIERS
+			#endif
 
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
+				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				float3 worldPos : TEXCOORD0;
+				float3 positionWS : TEXCOORD1;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-				float4 shadowCoord : TEXCOORD1;
+				float4 shadowCoord : TEXCOORD2;
 				#endif
-				float4 ase_texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -1292,14 +1438,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1321,26 +1468,18 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/DepthOnlyPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -1397,61 +1536,60 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
-				o.ase_texcoord2.xy = v.ase_texcoord.xy;
+				o.ase_texcoord3.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord2.zw = 0;
+				o.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-				float4 positionCS = TransformWorldToHClip( positionWS );
+				v.normalOS = v.normalOS;
+
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					o.worldPos = positionWS;
+					o.positionWS = vertexInput.positionWS;
 				#endif
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = positionCS;
 					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				o.clipPos = positionCS;
-
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
 				return o;
 			}
 
@@ -1459,7 +1597,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -1476,8 +1614,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
 				o.ase_texcoord = v.ase_texcoord;
 				return o;
 			}
@@ -1515,15 +1653,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -1533,12 +1671,6 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			{
 				return VertexFunction( v );
 			}
-			#endif
-
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-			#else
-				#define ASE_SV_DEPTH SV_Depth
 			#endif
 
 			half4 frag(	VertexOutput IN
@@ -1551,10 +1683,12 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				float3 WorldPosition = IN.worldPos;
+				float3 WorldPosition = IN.positionWS;
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
@@ -1564,22 +1698,23 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					#endif
 				#endif
 
-				float2 uv_MainTex = IN.ase_texcoord2.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
+				float2 uv_MainTex = IN.ase_texcoord3.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
 				
 
 				float Alpha = tex2DNode7.a;
-				float AlphaClipThreshold = _AlphaThreshold;
+				float AlphaClipThreshold = _Cutoff;
+
 				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = 0;
+					float DepthValue = IN.positionCS.z;
 				#endif
 
 				#ifdef _ALPHATEST_ON
 					clip(Alpha - AlphaClipThreshold);
 				#endif
 
-				#ifdef LOD_FADE_CROSSFADE
-					LODDitheringTransition( IN.clipPos.xyz, unity_LODFade.x );
+				#if defined(LOD_FADE_CROSSFADE)
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -1601,18 +1736,21 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			Cull Off
 
 			HLSLPROGRAM
-
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+			#pragma shader_feature EDITOR_VISUALIZATION
 
 			#pragma vertex vert
 			#pragma fragment frag
 
-			#pragma shader_feature EDITOR_VISUALIZATION
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
 
 			#define SHADERPASS SHADERPASS_META
 
@@ -1622,6 +1760,17 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MetaInput.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
@@ -1630,8 +1779,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
 				float4 texcoord0 : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
@@ -1641,9 +1790,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
+				float4 positionCS : SV_POSITION;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 worldPos : TEXCOORD0;
+					float3 positionWS : TEXCOORD0;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					float4 shadowCoord : TEXCOORD1;
@@ -1662,14 +1811,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1691,26 +1841,18 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/LightingMetaPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -1767,24 +1909,26 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.texcoord0.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.texcoord0.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
 				o.ase_texcoord4.xy = v.texcoord0.xy;
 				
@@ -1792,33 +1936,33 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				o.ase_texcoord4.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					o.worldPos = positionWS;
+					o.positionWS = positionWS;
 				#endif
 
-				o.clipPos = MetaVertexPosition( v.vertex, v.texcoord1.xy, v.texcoord1.xy, unity_LightmapST, unity_DynamicLightmapST );
+				o.positionCS = MetaVertexPosition( v.positionOS, v.texcoord1.xy, v.texcoord1.xy, unity_LightmapST, unity_DynamicLightmapST );
 
 				#ifdef EDITOR_VISUALIZATION
 					float2 VizUV = 0;
 					float4 LightCoord = 0;
-					UnityEditorVizData(v.vertex.xyz, v.texcoord0.xy, v.texcoord1.xy, v.texcoord2.xy, VizUV, LightCoord);
+					UnityEditorVizData(v.positionOS.xyz, v.texcoord0.xy, v.texcoord1.xy, v.texcoord2.xy, VizUV, LightCoord);
 					o.VizUV = float4(VizUV, 0, 0);
 					o.LightCoord = LightCoord;
 				#endif
@@ -1826,7 +1970,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
 					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = o.clipPos;
+					vertexInput.positionCS = o.positionCS;
 					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
@@ -1837,7 +1981,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 texcoord0 : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
@@ -1856,8 +2000,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
 				o.texcoord0 = v.texcoord0;
 				o.texcoord1 = v.texcoord1;
 				o.texcoord2 = v.texcoord2;
@@ -1898,8 +2042,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
 				o.texcoord0 = patch[0].texcoord0 * bary.x + patch[1].texcoord0 * bary.y + patch[2].texcoord0 * bary.z;
 				o.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
 				o.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
@@ -1907,9 +2051,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -1927,7 +2071,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 WorldPosition = IN.worldPos;
+					float3 WorldPosition = IN.positionWS;
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
@@ -1941,16 +2085,16 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#endif
 
 				float2 uv_MainTex = IN.ase_texcoord4.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
-				float2 texCoord109 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_108_0);
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
+				float2 texCoord68 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_99_0);
 				
 
 				float3 BaseColor = ( tex2DNode7 * lerpResult49 ).rgb;
 				float3 Emission = 0;
 				float Alpha = tex2DNode7.a;
-				float AlphaClipThreshold = _AlphaThreshold;
+				float AlphaClipThreshold = _Cutoff;
 
 				#ifdef _ALPHATEST_ON
 					clip(Alpha - AlphaClipThreshold);
@@ -1988,11 +2132,16 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
 
 			#pragma vertex vert
 			#pragma fragment frag
+
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
 
 			#define SHADERPASS SHADERPASS_2D
 
@@ -2002,6 +2151,17 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
@@ -2009,17 +2169,17 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
+				float4 positionCS : SV_POSITION;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 worldPos : TEXCOORD0;
+					float3 positionWS : TEXCOORD0;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					float4 shadowCoord : TEXCOORD1;
@@ -2034,14 +2194,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2063,26 +2224,18 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBR2DPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -2139,24 +2292,26 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID( v, o );
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
 				o.ase_texcoord2.xy = v.ase_texcoord.xy;
 				
@@ -2164,36 +2319,32 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				o.ase_texcoord2.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-				float4 positionCS = TransformWorldToHClip( positionWS );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					o.worldPos = positionWS;
+					o.positionWS = vertexInput.positionWS;
 				#endif
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = positionCS;
 					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				o.clipPos = positionCS;
+				o.positionCS = vertexInput.positionCS;
 
 				return o;
 			}
@@ -2202,7 +2353,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -2219,8 +2370,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
 				o.ase_texcoord = v.ase_texcoord;
 				return o;
 			}
@@ -2258,15 +2409,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -2284,7 +2435,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 WorldPosition = IN.worldPos;
+					float3 WorldPosition = IN.positionWS;
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
@@ -2298,15 +2449,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#endif
 
 				float2 uv_MainTex = IN.ase_texcoord2.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
-				float2 texCoord109 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_108_0);
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
+				float2 texCoord68 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_99_0);
 				
 
 				float3 BaseColor = ( tex2DNode7 * lerpResult49 ).rgb;
 				float Alpha = tex2DNode7.a;
-				float AlphaClipThreshold = _AlphaThreshold;
+				float AlphaClipThreshold = _Cutoff;
 
 				half4 color = half4(BaseColor, Alpha );
 
@@ -2333,19 +2484,45 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			HLSLPROGRAM
 
+			
+
+			
+
 			#define _NORMAL_DROPOFF_TS 1
 			#pragma multi_compile_instancing
-			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+			#pragma multi_compile _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+
+			
+
+			
 
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
+
 			#define SHADERPASS SHADERPASS_DEPTHNORMALSONLY
+			//#define SHADERPASS SHADERPASS_DEPTHNORMALS
+
+			
+            #if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+			#endif
+		
+
+			
+			#if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+			#endif
+		
 
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
@@ -2353,32 +2530,56 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
+			#if defined(LOD_FADE_CROSSFADE)
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
+            #endif
+
 			
+
+			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
+				#define ASE_SV_DEPTH SV_DepthLessEqual
+				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
+			#else
+				#define ASE_SV_DEPTH SV_Depth
+				#define ASE_SV_POSITION_QUALIFIERS
+			#endif
 
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
-				float4 ase_tangent : TANGENT;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+				float4 tangentOS : TANGENT;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
+				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
+				float3 worldNormal : TEXCOORD1;
+				float4 worldTangent : TEXCOORD2;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 worldPos : TEXCOORD0;
+					float3 positionWS : TEXCOORD3;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					float4 shadowCoord : TEXCOORD1;
+					float4 shadowCoord : TEXCOORD4;
 				#endif
-				float3 worldNormal : TEXCOORD2;
-				float4 worldTangent : TEXCOORD3;
-				float4 ase_texcoord4 : TEXCOORD4;
+				float4 ase_texcoord5 : TEXCOORD5;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -2388,14 +2589,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2417,27 +2619,20 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _BumpMap;
-			sampler2D _MainTex;
+			TEXTURE2D(_BumpMap);
+			SAMPLER(sampler_BumpMap);
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/DepthNormalsOnlyPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -2494,65 +2689,66 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
-				o.ase_texcoord4.xy = v.ase_texcoord.xy;
+				o.ase_texcoord5.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord4.zw = 0;
+				o.ase_texcoord5.zw = 0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-				float3 normalWS = TransformObjectToWorldNormal( v.ase_normal );
-				float4 tangentWS = float4(TransformObjectToWorldDir( v.ase_tangent.xyz), v.ase_tangent.w);
-				float4 positionCS = TransformWorldToHClip( positionWS );
+				v.normalOS = v.normalOS;
+				v.tangentOS = v.tangentOS;
+
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
+
+				float3 normalWS = TransformObjectToWorldNormal( v.normalOS );
+				float4 tangentWS = float4( TransformObjectToWorldDir( v.tangentOS.xyz ), v.tangentOS.w );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					o.worldPos = positionWS;
+					o.positionWS = vertexInput.positionWS;
 				#endif
 
 				o.worldNormal = normalWS;
 				o.worldTangent = tangentWS;
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = positionCS;
 					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				o.clipPos = positionCS;
-
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
 				return o;
 			}
 
@@ -2560,8 +2756,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
-				float4 ase_tangent : TANGENT;
+				float3 normalOS : NORMAL;
+				float4 tangentOS : TANGENT;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -2578,9 +2774,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
-				o.ase_tangent = v.ase_tangent;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.tangentOS = v.tangentOS;
 				o.ase_texcoord = v.ase_texcoord;
 				return o;
 			}
@@ -2618,16 +2814,16 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
-				o.ase_tangent = patch[0].ase_tangent * bary.x + patch[1].ase_tangent * bary.y + patch[2].ase_tangent * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.tangentOS = patch[0].tangentOS * bary.x + patch[1].tangentOS * bary.y + patch[2].tangentOS * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -2639,28 +2835,29 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			}
 			#endif
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-			#endif
-
-			half4 frag(	VertexOutput IN
+			void frag(	VertexOutput IN
+						, out half4 outNormalWS : SV_Target0
 						#ifdef ASE_DEPTH_WRITE_ON
 						,out float outputDepth : ASE_SV_DEPTH
 						#endif
-						 ) : SV_TARGET
+						#ifdef _WRITE_RENDERING_LAYERS
+						, out float4 outRenderingLayers : SV_Target1
+						#endif
+						 )
 			{
 				UNITY_SETUP_INSTANCE_ID(IN);
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 WorldPosition = IN.worldPos;
+					float3 WorldPosition = IN.positionWS;
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
 				float3 WorldNormal = IN.worldNormal;
 				float4 WorldTangent = IN.worldTangent;
+
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
@@ -2670,27 +2867,28 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					#endif
 				#endif
 
-				float2 uv_BumpMap = IN.ase_texcoord4.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
-				float3 unpack11 = UnpackNormalScale( tex2D( _BumpMap, uv_BumpMap ), _NormalScale );
+				float2 uv_BumpMap = IN.ase_texcoord5.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
+				float3 unpack11 = UnpackNormalScale( SAMPLE_TEXTURE2D( _BumpMap, sampler_BumpMap, uv_BumpMap ), _NormalScale );
 				unpack11.z = lerp( 1, unpack11.z, saturate(_NormalScale) );
 				
-				float2 uv_MainTex = IN.ase_texcoord4.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
+				float2 uv_MainTex = IN.ase_texcoord5.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
 				
 
 				float3 Normal = unpack11;
 				float Alpha = tex2DNode7.a;
-				float AlphaClipThreshold = _AlphaThreshold;
+				float AlphaClipThreshold = _Cutoff;
+
 				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = 0;
+					float DepthValue = IN.positionCS.z;
 				#endif
 
 				#ifdef _ALPHATEST_ON
 					clip(Alpha - AlphaClipThreshold);
 				#endif
 
-				#ifdef LOD_FADE_CROSSFADE
-					LODDitheringTransition( IN.clipPos.xyz, unity_LODFade.x );
+				#if defined(LOD_FADE_CROSSFADE)
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -2701,7 +2899,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					float2 octNormalWS = PackNormalOctQuadEncode(WorldNormal);
 					float2 remappedOctNormalWS = saturate(octNormalWS * 0.5 + 0.5);
 					half3 packedNormalWS = PackFloat2To888(remappedOctNormalWS);
-					return half4(packedNormalWS, 0.0);
+					outNormalWS = half4(packedNormalWS, 0.0);
 				#else
 					#if defined(_NORMALMAP)
 						#if _NORMAL_DROPOFF_TS
@@ -2716,7 +2914,12 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 					#else
 						float3 normalWS = WorldNormal;
 					#endif
-					return half4(NormalizeNormalPerPixel(normalWS), 0.0);
+					outNormalWS = half4(NormalizeNormalPerPixel(normalWS), 0.0);
+				#endif
+
+				#ifdef _WRITE_RENDERING_LAYERS
+					uint renderingLayers = GetMeshRenderingLayer();
+					outRenderingLayers = float4( EncodeMeshRenderingLayer( renderingLayers ), 0, 0, 0 );
 				#endif
 			}
 			ENDHLSL
@@ -2738,39 +2941,67 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			HLSLPROGRAM
 
+			
+
 			#define _NORMAL_DROPOFF_TS 1
+			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
 			#pragma multi_compile_instancing
 			#pragma instancing_options renderinglayer
-			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+			#pragma multi_compile _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+
+			
 
 			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
 			#pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
-			#pragma multi_compile_fragment _ _SHADOWS_SOFT
+
+			
+
+			
+			#pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+           
+
 			#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
-			#pragma multi_compile_fragment _ _LIGHT_LAYERS
+			#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
 			#pragma multi_compile_fragment _ _RENDER_PASS_ENABLED
-			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
-			#pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
-			#pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
+      
+			
 
 			#pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
+			#pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
 			#pragma multi_compile _ SHADOWS_SHADOWMASK
 			#pragma multi_compile _ DIRLIGHTMAP_COMBINED
 			#pragma multi_compile _ LIGHTMAP_ON
 			#pragma multi_compile _ DYNAMICLIGHTMAP_ON
-			#pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+			#pragma multi_compile_fragment _ DEBUG_DISPLAY
 
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
+
 			#define SHADERPASS SHADERPASS_GBUFFER
+
+			
+            #if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+			#endif
+		
+
+			
+			#if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+			#endif
+		
 
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
@@ -2778,22 +3009,45 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DBuffer.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
+			#if defined(LOD_FADE_CROSSFADE)
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
+            #endif
+			
 			#if defined(UNITY_INSTANCING_ENABLED) && defined(_TERRAIN_INSTANCED_PERPIXEL_NORMAL)
 				#define ENABLE_TERRAIN_PERPIXEL_NORMAL
 			#endif
 
 			
 
+			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
+				#define ASE_SV_DEPTH SV_DepthLessEqual
+				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
+			#else
+				#define ASE_SV_DEPTH SV_Depth
+				#define ASE_SV_POSITION_QUALIFIERS
+			#endif
+
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
-				float4 ase_tangent : TANGENT;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+				float4 tangentOS : TANGENT;
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
@@ -2803,17 +3057,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
-				float4 lightmapUVOrVertexSH : TEXCOORD0;
-				half4 fogFactorAndVertexLight : TEXCOORD1;
-				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-				float4 shadowCoord : TEXCOORD2;
-				#endif
+				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
+				float4 lightmapUVOrVertexSH : TEXCOORD1;
+				half4 fogFactorAndVertexLight : TEXCOORD2;
 				float4 tSpace0 : TEXCOORD3;
 				float4 tSpace1 : TEXCOORD4;
 				float4 tSpace2 : TEXCOORD5;
-				#if defined(ASE_NEEDS_FRAG_SCREEN_POSITION)
-				float4 screenPos : TEXCOORD6;
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+				float4 shadowCoord : TEXCOORD6;
 				#endif
 				#if defined(DYNAMICLIGHTMAP_ON)
 				float2 dynamicLightmapUV : TEXCOORD7;
@@ -2828,14 +3080,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2857,24 +3110,22 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
-			sampler2D _BumpMap;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
+			TEXTURE2D(_BumpMap);
+			SAMPLER(sampler_BumpMap);
 
 
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBRGBufferPass.hlsl"
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -2931,54 +3182,54 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
 				o.ase_texcoord8.xy = v.texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
 				o.ase_texcoord8.zw = 0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
+				v.normalOS = v.normalOS;
+				v.tangentOS = v.tangentOS;
 
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-				float3 positionVS = TransformWorldToView( positionWS );
-				float4 positionCS = TransformWorldToHClip( positionWS );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
+				VertexNormalInputs normalInput = GetVertexNormalInputs( v.normalOS, v.tangentOS );
 
-				VertexNormalInputs normalInput = GetVertexNormalInputs( v.ase_normal, v.ase_tangent );
-
-				o.tSpace0 = float4( normalInput.normalWS, positionWS.x);
-				o.tSpace1 = float4( normalInput.tangentWS, positionWS.y);
-				o.tSpace2 = float4( normalInput.bitangentWS, positionWS.z);
+				o.tSpace0 = float4( normalInput.normalWS, vertexInput.positionWS.x);
+				o.tSpace1 = float4( normalInput.tangentWS, vertexInput.positionWS.y);
+				o.tSpace2 = float4( normalInput.bitangentWS, vertexInput.positionWS.z);
 
 				#if defined(LIGHTMAP_ON)
 					OUTPUT_LIGHTMAP_UV(v.texcoord1, unity_LightmapST, o.lightmapUVOrVertexSH.xy);
@@ -2993,27 +3244,20 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#endif
 
 				#if defined(ENABLE_TERRAIN_PERPIXEL_NORMAL)
-					o.lightmapUVOrVertexSH.zw = v.texcoord;
-					o.lightmapUVOrVertexSH.xy = v.texcoord * unity_LightmapST.xy + unity_LightmapST.zw;
+					o.lightmapUVOrVertexSH.zw = v.texcoord.xy;
+					o.lightmapUVOrVertexSH.xy = v.texcoord.xy * unity_LightmapST.xy + unity_LightmapST.zw;
 				#endif
 
-				half3 vertexLight = VertexLighting( positionWS, normalInput.normalWS );
+				half3 vertexLight = VertexLighting( vertexInput.positionWS, normalInput.normalWS );
 
 				o.fogFactorAndVertexLight = half4(0, vertexLight);
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = positionCS;
 					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-					o.clipPos = positionCS;
-
-				#if defined(ASE_NEEDS_FRAG_SCREEN_POSITION)
-					o.screenPos = ComputeScreenPos(positionCS);
-				#endif
-
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
 				return o;
 			}
 
@@ -3021,8 +3265,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
-				float4 ase_tangent : TANGENT;
+				float3 normalOS : NORMAL;
+				float4 tangentOS : TANGENT;
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
@@ -3041,9 +3285,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
-				o.ase_tangent = v.ase_tangent;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.tangentOS = v.tangentOS;
 				o.texcoord = v.texcoord;
 				o.texcoord1 = v.texcoord1;
 				o.texcoord2 = v.texcoord2;
@@ -3084,9 +3328,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
-				o.ase_tangent = patch[0].ase_tangent * bary.x + patch[1].ase_tangent * bary.y + patch[2].ase_tangent * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.tangentOS = patch[0].tangentOS * bary.x + patch[1].tangentOS * bary.y + patch[2].tangentOS * bary.z;
 				o.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
 				o.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
 				o.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
@@ -3094,9 +3338,9 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -3108,12 +3352,6 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			}
 			#endif
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-			#endif
-
 			FragmentOutput frag ( VertexOutput IN
 								#ifdef ASE_DEPTH_WRITE_ON
 								,out float outputDepth : ASE_SV_DEPTH
@@ -3123,8 +3361,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_SETUP_INSTANCE_ID(IN);
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
 
-				#ifdef LOD_FADE_CROSSFADE
-					LODDitheringTransition( IN.clipPos.xyz, unity_LODFade.x );
+				#if defined(LOD_FADE_CROSSFADE)
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#if defined(ENABLE_TERRAIN_PERPIXEL_NORMAL)
@@ -3142,11 +3380,10 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				float3 WorldViewDirection = _WorldSpaceCameraPos.xyz  - WorldPosition;
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
 
-				#if defined(ASE_NEEDS_FRAG_SCREEN_POSITION)
-					float4 ScreenPos = IN.screenPos;
-				#endif
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
-				float2 NormalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.clipPos);
+				float2 NormalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionCS);
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
 					ShadowCoords = IN.shadowCoord;
@@ -3159,13 +3396,13 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
 				float2 uv_MainTex = IN.ase_texcoord8.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
-				float2 texCoord109 = IN.ase_texcoord8.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_108_0);
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
+				float2 texCoord68 = IN.ase_texcoord8.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult49 = lerp( _ColorA , _ColorB , temp_output_99_0);
 				
 				float2 uv_BumpMap = IN.ase_texcoord8.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
-				float3 unpack11 = UnpackNormalScale( tex2D( _BumpMap, uv_BumpMap ), _NormalScale );
+				float3 unpack11 = UnpackNormalScale( SAMPLE_TEXTURE2D( _BumpMap, sampler_BumpMap, uv_BumpMap ), _NormalScale );
 				unpack11.z = lerp( 1, unpack11.z, saturate(_NormalScale) );
 				
 
@@ -3177,7 +3414,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				float Smoothness = _Smoothness;
 				float Occlusion = (( 1.0 - _AOPower ) + ((lerpResult49).a - 0.0) * (1.0 - ( 1.0 - _AOPower )) / (1.0 - 0.0));
 				float Alpha = tex2DNode7.a;
-				float AlphaClipThreshold = _AlphaThreshold;
+				float AlphaClipThreshold = _Cutoff;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
 				float3 RefractionColor = 1;
@@ -3186,7 +3423,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				float3 Translucency = 1;
 
 				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = 0;
+					float DepthValue = IN.positionCS.z;
 				#endif
 
 				#ifdef _ALPHATEST_ON
@@ -3195,7 +3432,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 
 				InputData inputData = (InputData)0;
 				inputData.positionWS = WorldPosition;
-				inputData.positionCS = IN.clipPos;
+				inputData.positionCS = IN.positionCS;
 				inputData.shadowCoord = ShadowCoords;
 
 				#ifdef _NORMALMAP
@@ -3246,7 +3483,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				#endif
 
 				#ifdef _DBUFFER
-					ApplyDecal(IN.clipPos,
+					ApplyDecal(IN.positionCS,
 						BaseColor,
 						Specular,
 						inputData.normalWS,
@@ -3287,18 +3524,28 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			Tags { "LightMode"="SceneSelectionPass" }
 
 			Cull Off
+			AlphaToMask Off
 
 			HLSLPROGRAM
+
+			
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+
+			
 
 			#pragma vertex vert
 			#pragma fragment frag
+
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
 
 			#define SCENESELECTIONPASS 1
 
@@ -3312,22 +3559,40 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+
+			
+            #if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
 			
 
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
+				float4 positionCS : SV_POSITION;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
@@ -3338,14 +3603,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3367,26 +3633,18 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/SelectionPickingPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -3451,24 +3709,26 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
 				o.ase_texcoord.xy = v.ase_texcoord.xy;
 				
@@ -3476,24 +3736,24 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				o.ase_texcoord.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
 
-				o.clipPos = TransformWorldToHClip(positionWS);
+				o.positionCS = TransformWorldToHClip(positionWS);
 
 				return o;
 			}
@@ -3502,7 +3762,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -3519,8 +3779,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
 				o.ase_texcoord = v.ase_texcoord;
 				return o;
 			}
@@ -3558,15 +3818,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -3583,11 +3843,11 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
 				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
 				
 
 				surfaceDescription.Alpha = tex2DNode7.a;
-				surfaceDescription.AlphaClipThreshold = _AlphaThreshold;
+				surfaceDescription.AlphaClipThreshold = _Cutoff;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -3618,17 +3878,28 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			Name "ScenePickingPass"
 			Tags { "LightMode"="Picking" }
 
+			AlphaToMask Off
+
 			HLSLPROGRAM
+
+			
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 120110
+			#define ASE_SRP_VERSION 140010
+			#define ASE_USING_SAMPLING_MACROS 1
 
+
+			
 
 			#pragma vertex vert
 			#pragma fragment frag
+
+			#if defined(_SPECULAR_SETUP) && defined(_ASE_LIGHTING_SIMPLE)
+				#define _SPECULAR_COLOR 1
+			#endif
 
 		    #define SCENEPICKINGPASS 1
 
@@ -3642,22 +3913,40 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+
+			
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+           
+
+			
+            #if ASE_SRP_VERSION >=140009
+			#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+
+			
+            #if ASE_SRP_VERSION >=140007
+			#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+			#endif
+		
+
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
 			
 
 			struct VertexInput
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
 			struct VertexOutput
 			{
-				float4 clipPos : SV_POSITION;
+				float4 positionCS : SV_POSITION;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
@@ -3668,14 +3957,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			float4 _ColorA;
 			float4 _ColorB;
 			float4 _BumpMap_ST;
-			float2 _MotionValue;
-			float2 _LeavesGradientxy1;
-			float _Noisespeed1;
-			float _NoiseScale1;
+			float3 _MotionValue;
+			float2 _LeavesGradientxy;
+			float _Noisespeed;
+			float _NoiseScale;
+			float _RotateMask;
 			float _NormalScale;
 			float _Smoothness;
 			float _AOPower;
-			float _AlphaThreshold;
+			float _Cutoff;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3697,26 +3987,18 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			#endif
 			CBUFFER_END
 
-			// Property used by ScenePickingPass
 			#ifdef SCENEPICKINGPASS
 				float4 _SelectionID;
 			#endif
 
-			// Properties used by SceneSelectionPass
 			#ifdef SCENESELECTIONPASS
 				int _ObjectId;
 				int _PassValue;
 			#endif
 
-			sampler2D _MainTex;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-			//#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/SelectionPickingPass.hlsl"
-
-			//#ifdef HAVE_VFX_MODIFICATION
-			//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-			//#endif
 
 			float3 mod3D289( float3 x ) { return x - floor( x / 289.0 ) * 289.0; }
 			float4 mod3D289( float4 x ) { return x - floor( x / 289.0 ) * 289.0; }
@@ -3781,24 +4063,26 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 temp_cast_0 = (_Noisespeed1).xx;
-				float3 ase_worldPos = TransformObjectToWorld( (v.vertex).xyz );
-				float2 panner103 = ( 1.0 * _Time.y * temp_cast_0 + ase_worldPos.xy);
-				float simplePerlin3D101 = snoise( float3( panner103 ,  0.0 )*_NoiseScale1 );
-				simplePerlin3D101 = simplePerlin3D101*0.5 + 0.5;
-				float2 temp_cast_3 = (_Noisespeed1).xx;
-				float2 panner104 = ( 6.6 * _Time.y * temp_cast_3 + ase_worldPos.xy);
-				float simplePerlin3D102 = snoise( float3( panner104 ,  0.0 )*( 1.0 - _NoiseScale1 ) );
-				simplePerlin3D102 = simplePerlin3D102*0.5 + 0.5;
-				float blendOpSrc107 = simplePerlin3D101;
-				float blendOpDest107 = simplePerlin3D102;
-				float temp_output_107_0 = ( saturate( (( blendOpDest107 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest107 ) * ( 1.0 - blendOpSrc107 ) ) : ( 2.0 * blendOpDest107 * blendOpSrc107 ) ) ));
+				float2 temp_cast_0 = (_Noisespeed).xx;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				float2 appendResult106 = (float2(ase_worldPos.y , ase_worldPos.z));
+				float2 panner56 = ( 1.0 * _Time.y * temp_cast_0 + appendResult106);
+				float simplePerlin3D57 = snoise( float3( panner56 ,  0.0 )*_NoiseScale );
+				simplePerlin3D57 = simplePerlin3D57*0.5 + 0.5;
+				float2 temp_cast_2 = (_Noisespeed).xx;
+				float2 panner93 = ( 6.6 * _Time.y * temp_cast_2 + appendResult106);
+				float simplePerlin3D88 = snoise( float3( panner93 ,  0.0 )*( 1.0 - _NoiseScale ) );
+				simplePerlin3D88 = simplePerlin3D88*0.5 + 0.5;
+				float blendOpSrc97 = simplePerlin3D57;
+				float blendOpDest97 = simplePerlin3D88;
+				float temp_output_97_0 = ( saturate( (( blendOpDest97 > 0.5 ) ? ( 1.0 - 2.0 * ( 1.0 - blendOpDest97 ) * ( 1.0 - blendOpSrc97 ) ) : ( 2.0 * blendOpDest97 * blendOpSrc97 ) ) ));
 				float lerpResult83 = lerp( _MotionValue.x , -_MotionValue.x , cos( _TimeParameters.x * 0.5 ));
+				float lerpResult101 = lerp( _MotionValue.z , -_MotionValue.z , _TimeParameters.z);
 				float lerpResult85 = lerp( _MotionValue.y , -_MotionValue.y , cos( _TimeParameters.x * 0.25 ));
-				float4 appendResult64 = (float4(( temp_output_107_0 * lerpResult83 ) , 0.0 , ( temp_output_107_0 * lerpResult85 ) , 0.0));
-				float2 texCoord109 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float temp_output_108_0 = saturate( (_LeavesGradientxy1.x + (texCoord109.y - 0.0) * (_LeavesGradientxy1.y - _LeavesGradientxy1.x) / (1.0 - 0.0)) );
-				float4 lerpResult112 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_108_0);
+				float4 appendResult64 = (float4(( temp_output_97_0 * lerpResult83 ) , ( temp_output_97_0 * lerpResult101 ) , ( temp_output_97_0 * lerpResult85 ) , 0.0));
+				float2 texCoord68 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float temp_output_99_0 = saturate( (_LeavesGradientxy.x + ((( _RotateMask )?( texCoord68.x ):( texCoord68.y )) - 0.0) * (_LeavesGradientxy.y - _LeavesGradientxy.x) / (1.0 - 0.0)) );
+				float4 lerpResult92 = lerp( float4( 0,0,0,0 ) , appendResult64 , temp_output_99_0);
 				
 				o.ase_texcoord.xy = v.ase_texcoord.xy;
 				
@@ -3806,23 +4090,23 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				o.ase_texcoord.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
-				float3 vertexValue = lerpResult112.xyz;
+				float3 vertexValue = lerpResult92.xyz;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					v.vertex.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				v.ase_normal = v.ase_normal;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-				o.clipPos = TransformWorldToHClip(positionWS);
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
+				o.positionCS = TransformWorldToHClip(positionWS);
 
 				return o;
 			}
@@ -3831,7 +4115,7 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			struct VertexControl
 			{
 				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -3848,8 +4132,8 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				VertexControl o;
 				UNITY_SETUP_INSTANCE_ID(v);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
 				o.ase_texcoord = v.ase_texcoord;
 				return o;
 			}
@@ -3887,15 +4171,15 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
 				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
 				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
 				return VertexFunction(o);
@@ -3912,11 +4196,11 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
 				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-				float4 tex2DNode7 = tex2D( _MainTex, uv_MainTex );
+				float4 tex2DNode7 = SAMPLE_TEXTURE2D( _MainTex, sampler_MainTex, uv_MainTex );
 				
 
 				surfaceDescription.Alpha = tex2DNode7.a;
-				surfaceDescription.AlphaClipThreshold = _AlphaThreshold;
+				surfaceDescription.AlphaClipThreshold = _Cutoff;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -3948,100 +4232,116 @@ Shader "DLNK Shaders/ASE/Nature/LeavesAnim"
 	Fallback Off
 }
 /*ASEBEGIN
-Version=19105
-Node;AmplifyShaderEditor.RangedFloatNode;55;-106.7086,118.1799;Inherit;False;Property;_Smoothness;Smoothness;4;0;Create;True;0;0;0;False;0;False;0;0.21;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;11;-486,49.5;Inherit;True;Property;_BumpMap;Normal;5;0;Create;False;0;0;0;False;0;False;-1;None;0e583f3b37f188247a51bd0b01807f38;True;0;True;white;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.LerpOp;49;-118.9743,-461.2481;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.RangedFloatNode;16;-688.0908,131.8801;Inherit;False;Property;_NormalScale;NormalScale;6;0;Create;True;0;0;0;False;0;False;0;1;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;63;-252.9211,298.8245;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.DynamicAppendNode;64;-117.9211,316.8246;Inherit;False;FLOAT4;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT4;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;65;-249.9211,396.8245;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;7;-669.2058,-282.7589;Inherit;True;Property;_MainTex;Albedo;2;0;Create;False;0;0;0;False;0;False;-1;None;3d5c50564736e884cad3dabb41663f2e;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.ComponentMaskNode;74;114.9911,-484.1711;Inherit;False;False;False;False;True;1;0;COLOR;0,0,0,0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.OneMinusNode;78;158.5382,-367.3395;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Version=19603
+Node;AmplifyShaderEditor.WorldPosInputsNode;61;-1088,672;Inherit;False;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
+Node;AmplifyShaderEditor.RangedFloatNode;59;-912,880;Inherit;False;Property;_Noisespeed;Noise speed;8;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;60;-912,960;Inherit;False;Property;_NoiseScale;Noise Scale;9;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.DynamicAppendNode;106;-848,752;Inherit;False;FLOAT2;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT2;0
+Node;AmplifyShaderEditor.PannerNode;93;-656,896;Inherit;False;3;0;FLOAT2;0,0;False;2;FLOAT2;0,0;False;1;FLOAT;6.6;False;1;FLOAT2;0
+Node;AmplifyShaderEditor.OneMinusNode;94;-624,1056;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.Vector3Node;100;-1072,384;Inherit;False;Property;_MotionValue;MotionValue;10;0;Create;False;0;0;0;False;0;False;0.1,0.1,0.1;0.1,0.1,0.1;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
+Node;AmplifyShaderEditor.PannerNode;56;-672,752;Inherit;False;3;0;FLOAT2;0,0;False;2;FLOAT2;0,0;False;1;FLOAT;1;False;1;FLOAT2;0
+Node;AmplifyShaderEditor.TextureCoordinatesNode;68;-1120,-128;Inherit;False;0;-1;2;3;2;SAMPLER2D;;False;0;FLOAT2;1,1;False;1;FLOAT2;0,0;False;5;FLOAT2;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.NegateNode;82;-754.9707,263.1711;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.CosTime;87;-1104,176;Inherit;True;0;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.NegateNode;102;-768,528;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.NegateNode;84;-784,384;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.NoiseGeneratorNode;57;-448,720;Inherit;False;Simplex3D;True;False;2;0;FLOAT3;0,0,0;False;1;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.NoiseGeneratorNode;88;-448,816;Inherit;False;Simplex3D;True;False;2;0;FLOAT3;0,0,0;False;1;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.Vector2Node;73;-1007.23,17.29645;Inherit;False;Property;_LeavesGradientxy;Leaves Gradient (xy);11;0;Create;True;0;0;0;False;0;False;0,1;0,0;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
+Node;AmplifyShaderEditor.ToggleSwitchNode;107;-880,-288;Inherit;False;Property;_RotateMask;RotateMask;12;0;Create;True;0;0;0;False;0;False;0;True;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;83;-612.9706,243.171;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;85;-612.9706,387.171;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.Vector2Node;86;-988.9707,427.1711;Inherit;False;Property;_MotionValue;MotionValue (xy);11;0;Create;False;0;0;0;False;0;False;0.1,0.1;0.4,0.2;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
-Node;AmplifyShaderEditor.CosTime;87;-1012.971,243.171;Inherit;True;0;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.NegateNode;84;-756.9707,388.1711;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.NegateNode;82;-754.9707,263.1711;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.ColorNode;50;-345.1744,-602.0415;Inherit;False;Property;_ColorA;Color A;0;1;[HDR];Create;True;0;0;0;False;0;False;0.5943396,0.5943396,0.5943396,0;0.31781,0.6603774,0.3021538,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.ColorNode;51;-335.1071,-424.8551;Inherit;False;Property;_ColorB;Color B;1;1;[HDR];Create;True;0;0;0;False;0;False;1,1,1,1;0.2460395,0.9150943,0.3294058,1;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.LerpOp;101;-624,528;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.BlendOpsNode;97;-176,688;Inherit;False;Overlay;True;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.TFHCRemapNode;98;-727.9154,-67.28079;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;63;-272,288;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;65;-272,384;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;103;-320,528;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SaturateNode;99;-298.7416,-77.29484;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.DynamicAppendNode;64;-64,320;Inherit;False;FLOAT4;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT4;0
+Node;AmplifyShaderEditor.ColorNode;50;-345.1744,-602.0415;Inherit;False;Property;_ColorA;Color A;0;1;[HDR];Create;True;0;0;0;False;0;False;0.5943396,0.5943396,0.5943396,0;0,0,0,0;True;True;0;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.ColorNode;51;-335.1071,-424.8551;Inherit;False;Property;_ColorB;Color B;1;1;[HDR];Create;True;0;0;0;False;0;False;1,1,1,1;0,0,0,0;True;True;0;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.LerpOp;49;-118.9743,-461.2481;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;76;77.02814,-559.2891;Inherit;False;Property;_AOPower;AO Power;13;0;Create;True;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;16;-688.0908,131.8801;Inherit;False;Property;_NormalScale;NormalScale;7;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.ComponentMaskNode;74;114.9911,-484.1711;Inherit;False;False;False;False;True;1;0;COLOR;0,0,0,0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.OneMinusNode;78;158.5382,-367.3395;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;7;-688,-480;Inherit;True;Property;_MainTex;Albedo;2;0;Create;False;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.SamplerNode;11;-486,49.5;Inherit;True;Property;_BumpMap;Normal;4;0;Create;False;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;48;141.9001,-270.1754;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.TFHCRemapNode;79;348.3381,-446.7395;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;76;77.02814,-559.2891;Inherit;False;Property;_AOPower;AO Power;10;0;Create;True;0;0;0;False;0;False;0.5;0.5;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;88;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;89;580.2238,-158.7592;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;DLNK Shaders/ASE/Nature/LeavesAnim;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;19;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;0;638207679793000482;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;90;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;91;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;92;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;93;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;94;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthNormals;0;6;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormals;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;95;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;GBuffer;0;7;GBuffer;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalGBuffer;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;96;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;SceneSelectionPass;0;8;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;97;580.2238,-158.7592;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;3;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.SaturateNode;108;-565.9518,-54.9692;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.TextureCoordinatesNode;109;-1271.982,-93.39926;Inherit;False;0;-1;2;3;2;SAMPLER2D;;False;0;FLOAT2;1,1;False;1;FLOAT2;0,0;False;5;FLOAT2;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.Vector2Node;110;-1274.44,39.62207;Inherit;False;Property;_LeavesGradientxy1;Leaves Gradient (xy);9;0;Create;True;0;0;0;False;0;False;0,1;0,1;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
-Node;AmplifyShaderEditor.TFHCRemapNode;111;-995.1257,-44.95515;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;99;-1076.752,760.8513;Inherit;False;Property;_Noisespeed1;Noise speed;7;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.WorldPosInputsNode;100;-1085.572,611.0388;Inherit;False;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.NoiseGeneratorNode;101;-695.0599,577.1897;Inherit;False;Simplex3D;True;False;2;0;FLOAT3;0,0,0;False;1;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.NoiseGeneratorNode;102;-678.838,704.6482;Inherit;False;Simplex3D;True;False;2;0;FLOAT3;0,0,0;False;1;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.PannerNode;103;-898.711,640.6241;Inherit;False;3;0;FLOAT2;0,0;False;2;FLOAT2;0,0;False;1;FLOAT;1;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.PannerNode;104;-874.8272,779.0382;Inherit;False;3;0;FLOAT2;0,0;False;2;FLOAT2;0,0;False;1;FLOAT;6.6;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.RangedFloatNode;105;-1115.323,866.7361;Inherit;False;Property;_NoiseScale1;Noise Scale;8;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.OneMinusNode;106;-850.5073,936.4019;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.BlendOpsNode;107;-462.8206,590.2018;Inherit;False;Overlay;True;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.LerpOp;112;100.7228,214.7616;Inherit;False;3;0;FLOAT4;0,0,0,0;False;1;FLOAT4;0,0,0,0;False;2;FLOAT;0;False;1;FLOAT4;0
-Node;AmplifyShaderEditor.RangedFloatNode;98;187.811,77.5064;Inherit;False;Property;_AlphaThreshold;Alpha Threshold;3;0;Create;True;0;0;0;False;0;False;0.2;0.1;0;0;0;1;FLOAT;0
-WireConnection;11;5;16;0
-WireConnection;49;0;50;0
-WireConnection;49;1;51;0
-WireConnection;49;2;108;0
-WireConnection;63;0;107;0
-WireConnection;63;1;83;0
-WireConnection;64;0;63;0
-WireConnection;64;2;65;0
-WireConnection;65;0;107;0
-WireConnection;65;1;85;0
-WireConnection;74;0;49;0
-WireConnection;78;0;76;0
-WireConnection;83;0;86;1
+Node;AmplifyShaderEditor.LerpOp;92;139.0153,134.4308;Inherit;False;3;0;FLOAT4;0,0,0,0;False;1;FLOAT4;0,0,0,0;False;2;FLOAT;0;False;1;FLOAT4;0
+Node;AmplifyShaderEditor.RangedFloatNode;55;112,48;Inherit;False;Property;_Smoothness;Smoothness;3;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.TFHCRemapNode;79;384,-48;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;118;480,192;Inherit;False;Property;_Cutoff;MaskClipValue;6;0;Create;False;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;108;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;109;752,-208;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;DLNK Shaders/ASE/Nature/LeavesAnim;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;21;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;42;Lighting Model;0;0;Workflow;1;0;Surface;0;638609546263024441;  Refraction Model;0;0;  Blend;0;0;Two Sided;0;638609546341258450;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;638609546448004209;Receive Shadows;1;0;Receive SSAO;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;110;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;111;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;True;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;112;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;113;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;114;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthNormals;0;6;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormals;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;115;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;GBuffer;0;7;GBuffer;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalGBuffer;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;116;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;SceneSelectionPass;0;8;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;117;752,-208;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
+WireConnection;106;0;61;2
+WireConnection;106;1;61;3
+WireConnection;93;0;106;0
+WireConnection;93;2;59;0
+WireConnection;94;0;60;0
+WireConnection;56;0;106;0
+WireConnection;56;2;59;0
+WireConnection;82;0;100;1
+WireConnection;102;0;100;3
+WireConnection;84;0;100;2
+WireConnection;57;0;56;0
+WireConnection;57;1;60;0
+WireConnection;88;0;93;0
+WireConnection;88;1;94;0
+WireConnection;107;0;68;2
+WireConnection;107;1;68;1
+WireConnection;83;0;100;1
 WireConnection;83;1;82;0
 WireConnection;83;2;87;3
-WireConnection;85;0;86;2
+WireConnection;85;0;100;2
 WireConnection;85;1;84;0
 WireConnection;85;2;87;2
-WireConnection;84;0;86;2
-WireConnection;82;0;86;1
+WireConnection;101;0;100;3
+WireConnection;101;1;102;0
+WireConnection;101;2;87;4
+WireConnection;97;0;57;0
+WireConnection;97;1;88;0
+WireConnection;98;0;107;0
+WireConnection;98;3;73;1
+WireConnection;98;4;73;2
+WireConnection;63;0;97;0
+WireConnection;63;1;83;0
+WireConnection;65;0;97;0
+WireConnection;65;1;85;0
+WireConnection;103;0;97;0
+WireConnection;103;1;101;0
+WireConnection;99;0;98;0
+WireConnection;64;0;63;0
+WireConnection;64;1;103;0
+WireConnection;64;2;65;0
+WireConnection;49;0;50;0
+WireConnection;49;1;51;0
+WireConnection;49;2;99;0
+WireConnection;74;0;49;0
+WireConnection;78;0;76;0
+WireConnection;11;5;16;0
 WireConnection;48;0;7;0
 WireConnection;48;1;49;0
+WireConnection;92;1;64;0
+WireConnection;92;2;99;0
 WireConnection;79;0;74;0
 WireConnection;79;3;78;0
-WireConnection;89;0;48;0
-WireConnection;89;1;11;0
-WireConnection;89;4;55;0
-WireConnection;89;5;79;0
-WireConnection;89;6;7;4
-WireConnection;89;7;98;0
-WireConnection;89;8;112;0
-WireConnection;108;0;111;0
-WireConnection;111;0;109;2
-WireConnection;111;3;110;1
-WireConnection;111;4;110;2
-WireConnection;101;0;103;0
-WireConnection;101;1;105;0
-WireConnection;102;0;104;0
-WireConnection;102;1;106;0
-WireConnection;103;0;100;0
-WireConnection;103;2;99;0
-WireConnection;104;0;100;0
-WireConnection;104;2;99;0
-WireConnection;106;0;105;0
-WireConnection;107;0;101;0
-WireConnection;107;1;102;0
-WireConnection;112;1;64;0
-WireConnection;112;2;108;0
+WireConnection;109;0;48;0
+WireConnection;109;1;11;0
+WireConnection;109;4;55;0
+WireConnection;109;5;79;0
+WireConnection;109;6;7;4
+WireConnection;109;7;118;0
+WireConnection;109;8;92;0
 ASEEND*/
-//CHKSM=E95F973ECD232BB9F510A896D0594BE0F9631180
+//CHKSM=74160B86C634985E065DB2CA901AF0AED4019AB0

@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Tree03 LODBranch
   m_Shader: {fileID: 4800000, guid: 1943d357ba4d6c8438f2b80309da5570, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _NORMALMAP
@@ -18,6 +20,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -87,13 +90,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AOPower: 0.5
+    - _AOPower: 1
     - _AlphaCutoff: 0.5
-    - _AlphaThreshold: 0.1
     - _AnimIntensity: 0
     - _BumpScale: 1
     - _ColorMask: 1
-    - _Cutoff: 0.3
+    - _Cutoff: 0.1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EmissionLM: 0
@@ -102,15 +104,14 @@ Material:
     - _Glossiness: 0
     - _LenghtAnim: 3.73
     - _LengthOffset: 0
+    - _MaskClipValue: 0.5
     - _MaskHeight: 0
     - _MetalAlphaGloss: 0
     - _Metallic: 0
     - _Mode: 1
     - _MovementAOMask: 0.09
     - _NoiseScale: 1
-    - _NoiseScale1: 1
     - _Noisespeed: 1
-    - _Noisespeed1: 1
     - _NormalScale: 1
     - _OcclusionStrenght: 2
     - _OcclusionStrength: 1
@@ -119,7 +120,8 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RimPower: 0
-    - _Smoothness: 0.18
+    - _RotateMask: 0
+    - _Smoothness: 0.2
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
@@ -133,14 +135,13 @@ Material:
     - __dirty: 1
     m_Colors:
     - _Color: {r: 0, g: 0, b: 0, a: 1}
-    - _ColorA: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 0}
-    - _ColorB: {r: 0.3773585, g: 0.3773585, b: 0.3773585, a: 0}
+    - _ColorA: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorB: {r: 0, g: 0.46226418, b: 0.06780772, a: 0}
     - _ColorFade: {r: 0.47240484, g: 0.63235295, b: 0.4324178, a: 1}
     - _ColorRoot: {r: 0.15686275, g: 0.20784315, b: 0.17254902, a: 1}
     - _ColorTime: {r: 0.4478885, g: 0.8088235, b: 0.33304498, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _LeavesGradientxy: {r: -1, g: 1, b: 0, a: 0}
-    - _LeavesGradientxy1: {r: 0, g: 1, b: 0, a: 0}
+    - _LeavesGradientxy: {r: 1.02, g: -0.27, b: 0, a: 0}
     - _MotionValue: {r: 1, g: 1, b: 0, a: 0}
     - _RimColor: {r: 0.85294116, g: 0.620891, b: 0.620891, a: 1}
   m_BuildTextureStacks: []

@@ -12,11 +12,11 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _DETAIL_MULX2
   - _EMISSION
   - _METALLICSPECGLOSSMAP
   - _NORMALMAP
   - _OCCLUSIONMAP
+  - _PARALLAXMAP
   m_InvalidKeywords:
   - _DETAILSPEC_ON
   - _METALLICGLOSSMAP
@@ -28,13 +28,14 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: d5dcb6877e098b94ab77f160bc28cdb4, type: 3}
+        m_Texture: {fileID: 2800000, guid: f565b1c468d217e499463accbeb85bb7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpDetail:
@@ -42,7 +43,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 9cb54da3b2facf846b6fe0c4005a843f, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6d5b5cfe4f9e4df4ead5bc920dea0dbc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -54,7 +55,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 2800000, guid: 8bcc0ea8840ffbc4c89401d2ad9c514d, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailTex:
@@ -82,11 +83,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: d5dcb6877e098b94ab77f160bc28cdb4, type: 3}
+        m_Texture: {fileID: 2800000, guid: f565b1c468d217e499463accbeb85bb7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 2800000, guid: 59d889107a5364f4d828b7b0c0820db0, type: 3}
+        m_Texture: {fileID: 2800000, guid: f9de7fc2f6e37b04799c242964278934, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalDetail:
@@ -102,7 +103,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: 689c61f29248d7342814b1fefff06cc0, type: 3}
+        m_Texture: {fileID: 2800000, guid: dcaf4e820e2974140b77bd68bae2a639, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OclussionMap:
@@ -110,7 +111,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 3bbdeb7dc7167cc499087a411fb56341, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -136,8 +137,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _AOPower: 1
+    - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _BumpDetailPower: 0
     - _BumpPower: 0
     - _BumpScale: 1
@@ -150,6 +154,7 @@ Material:
     - _DetailSpec: 0.1219685
     - _DetailTiling: 2
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
     - _Gloss: 0.26785713
@@ -172,6 +177,7 @@ Material:
     - _SpecularLevel: 0.11
     - _SpecularPower: 0.5
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _UVSec: 0
     - _UseGlossMap: 1
@@ -179,15 +185,16 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.5294118, g: 0.5294118, b: 0.5294118, a: 1}
-    - _Color: {r: 0.5294118, g: 0.5294118, b: 0.5294118, a: 1}
+    - _BaseColor: {r: 0.8018868, g: 0.8018868, b: 0.8018868, a: 1}
+    - _Color: {r: 0.8018868, g: 0.8018868, b: 0.8018868, a: 1}
     - _ColorTint: {r: 0.8161765, g: 0.82217777, b: 0.82217777, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _SpecularColor: {r: 0.9117647, g: 0.9069562, b: 0.8983564, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &308412321862448176
+  m_AllowLocking: 1
+--- !u!114 &8587550803008887036
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -199,4 +206,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 9

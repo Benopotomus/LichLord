@@ -12,7 +12,6 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _DETAIL_MULX2
   - _METALLICSPECGLOSSMAP
   - _NORMALMAP
   - _OCCLUSIONMAP
@@ -29,21 +28,22 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 399cbaf22c333db4694fa7f2a947ff20, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6bec18a0510e46f428f291c1a979b6d0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 885646c5d7d2d7b439e56f34dfb53d64, type: 3}
+        m_Texture: {fileID: 2800000, guid: b99653008b26cfc459f84909040721bc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
-        m_Texture: {fileID: 2800000, guid: 399cbaf22c333db4694fa7f2a947ff20, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 3, y: 3}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
@@ -51,7 +51,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 2800000, guid: a4912c6c858f54943839f538b3a4d73c, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -71,15 +71,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 399cbaf22c333db4694fa7f2a947ff20, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6bec18a0510e46f428f291c1a979b6d0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 2800000, guid: f940cc0f4e4d518418ff5cac7f399e7a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 4a5c0adddd823ab418cbe222c0f3e22e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: 1aa4741fbcbb8f34b94fe58a5aca026d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 8c1af998b1e86b347b4b41e2cfc719ee, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -105,8 +105,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _AOPower: 1
+    - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _BumpPower: 0.5
     - _BumpScale: 1
     - _ClearCoatMask: 0
@@ -124,9 +127,10 @@ Material:
     - _Diffusepower: 1
     - _DifuseIntensityIBL: 1
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
-    - _GlossMapScale: 0.6
+    - _GlossMapScale: 0.943
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _IBLPower: 5
@@ -137,7 +141,7 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _NormalDetail: 0.5
-    - _OcclusionStrength: 0.317
+    - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
@@ -145,7 +149,7 @@ Material:
     - _RimPower: 0.5
     - _Shininess: 0.73331064
     - _SmoothDiffuseIBL: 4.642857
-    - _Smoothness: 0.6
+    - _Smoothness: 0.943
     - _SmoothnessTextureChannel: 0
     - _SpecDetail: 1
     - _SpecularHighlights: 1
@@ -153,21 +157,23 @@ Material:
     - _SpecularIntensityIBL: 1
     - _SpecularPower: 0.2
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _UVSec: 0
     - _UseDetailMask: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.9117647, g: 0.6025414, b: 0.32179925, a: 1}
-    - _Color: {r: 0.9117647, g: 0.6025414, b: 0.32179922, a: 1}
+    - _BaseColor: {r: 0.7075471, g: 0.5357334, b: 0.37713593, a: 1}
+    - _Color: {r: 0.7075471, g: 0.5357334, b: 0.3771359, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
     - _LightWrapColor: {r: 0.5735294, g: 0.2825476, b: 0.2825476, a: 1}
     - _RimLightColor: {r: 0.5808823, g: 0.37869284, b: 0.24772921, a: 1}
     - _SpecColor: {r: 0.875, g: 0.59191173, b: 0.59191173, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &4123611336712147445
+  m_AllowLocking: 1
+--- !u!114 &3320253803758542709
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -179,4 +185,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 9

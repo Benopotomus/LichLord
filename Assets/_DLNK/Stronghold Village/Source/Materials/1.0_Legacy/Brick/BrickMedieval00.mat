@@ -8,10 +8,12 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: BrickMedieval00
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Shader: {fileID: 4800000, guid: 5968c0508e32d9a4985a39878b998b75, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _NORMALMAP
+  - _PARALLAXMAP
   m_InvalidKeywords:
   - _AFFECTAO_ON
   - _METALLICGLOSSMAP
@@ -19,23 +21,18 @@ Material:
   - _RIMAO_ON
   - _SPECULARAO_ON
   - _SPECULARIBL_ON
-  m_LightmapFlags: 4
+  m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap:
-    RenderType: Opaque
+  stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 590cf6fcd3f77954eb96444ba28354e8, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: e899be39521eafa42b87f4824efcb9c3, type: 3}
+        m_Texture: {fileID: 2800000, guid: c6238a0e1446f84468cc40f1b973472b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -95,11 +92,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 590cf6fcd3f77954eb96444ba28354e8, type: 3}
+        m_Texture: {fileID: 2800000, guid: a477cbc81dae71c44912e35851887b53, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 2800000, guid: affa17177f2f4714da29db9d966b61dd, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7d796e6989fc0374fa1daab44552bd80, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
@@ -107,7 +104,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: 0b6dc5c88d23bee4db2787cd89cbb23c, type: 3}
+        m_Texture: {fileID: 2800000, guid: 34d7f3e8b24399542a61884a2f2afccf, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Oclussion:
@@ -119,15 +116,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
-        m_Texture: {fileID: 2800000, guid: cd08d49eaaf87694991e0f43efb6ba4b, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _SpecGlossMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 4fe8e2167d0ee094fa6328b6c22e56c0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularMap:
         m_Texture: {fileID: 2800000, guid: 1bdac5bbe3d73a942b14429b117cce5a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -146,20 +143,13 @@ Material:
     m_Floats:
     - _AOPower: 2
     - _AffectAO: 1
-    - _AlphaClip: 0
-    - _AlphaToMask: 0
-    - _Blend: 0
-    - _BlendModePreserveSpecular: 1
+    - _AlphaCutoff: 0.5
     - _BumpPower: -1
     - _BumpScale: 2
-    - _ClearCoatMask: 0
-    - _ClearCoatSmoothness: 0
     - _ColorDetail: 0
-    - _Cull: 2
     - _Cutoff: 0.5
     - _Depth: 0.05
     - _DepthDirection: 0
-    - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DetailPower: 0.5
     - _DiffuseRim: 0.5
@@ -167,12 +157,12 @@ Material:
     - _DifuseIntensityIBL: 200
     - _DifusePower: 3
     - _DstBlend: 0
-    - _DstBlendAlpha: 0
+    - _Emission: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
     - _Gloss: 0.23214284
-    - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _GlossMapScale: 0.724
+    - _Glossiness: 0.8
     - _GlossyReflections: 1
     - _HeightPower: 0.03
     - _IBLAmbient: 0
@@ -182,16 +172,18 @@ Material:
     - _LightWrapPower: 2
     - _MainTiling: 1
     - _MasterTile: 1
-    - _Metallic: 0
+    - _Metallic: 1
     - _Mode: 0
     - _NormalSmooth: 0
     - _OcclusionStrength: 1
+    - _OclusionStrength: 1
     - _OclussionFade: 2.0535715
     - _OclussionIntensity: 0.30357143
     - _OclussionPower: 1.23
-    - _Parallax: 0.0578
+    - _Parallax: 0.1
     - _ParallaxOn: 1
     - _Quality: 10
+    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RimAO: 1
@@ -200,7 +192,6 @@ Material:
     - _RimPower: 0.17
     - _Shininess: 0.67
     - _SmoothDiffuseIBL: 0
-    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularAO: 1
     - _SpecularHighlights: 1
@@ -209,38 +200,26 @@ Material:
     - _SpecularLevel: 0.6
     - _SpecularPower: 0.5
     - _SrcBlend: 1
-    - _SrcBlendAlpha: 1
-    - _Surface: 0
+    - _Tiling: 1
     - _UVSec: 0
     - _UseDetailAlpha: 0
     - _UseGlossMap: 0
     - _UseNormalDetail: 0
     - _UseSpecularMap: 0
-    - _WorkflowMode: 1
     - _ZWrite: 1
+    - __dirty: 0
     m_Colors:
-    - _BaseColor: {r: 0.6544117, g: 0.6544117, b: 0.6544117, a: 1}
-    - _Color: {r: 0.6544117, g: 0.6544117, b: 0.6544117, a: 1}
+    - _Color: {r: 0.6544118, g: 0.6544118, b: 0.6544118, a: 1}
     - _ColorTint: {r: 1, g: 1, b: 1, a: 1}
+    - _Curvature: {r: 0.5, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
     - _LightWrapColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _RimColor: {r: 0.16911763, g: 0.16911763, b: 0.16911763, a: 1}
     - _RimLightColor: {r: 0.5147059, g: 0.5147059, b: 0.5147059, a: 1}
+    - _Samplesxy: {r: 2, g: 30, b: 0, a: 0}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecularColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _SpecularTint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &7813138267658325072
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7
+  m_AllowLocking: 1

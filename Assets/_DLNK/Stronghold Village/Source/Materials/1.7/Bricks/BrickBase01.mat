@@ -9,11 +9,13 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: BrickBase01
   m_Shader: {fileID: 4800000, guid: 516e1d638296ed84a8111eeac2e687e3, type: 3}
-  m_ValidKeywords: []
-  m_InvalidKeywords:
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
   - _DETAIL_MULX2
-  - _METALLICGLOSSMAP
   - _NORMALMAP
+  m_InvalidKeywords:
+  - _METALLICGLOSSMAP
   - _USEMETALMAPS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -21,6 +23,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -143,3 +146,4 @@ Material:
     - _ColorTop: {r: 0.8490566, g: 0.8450516, b: 0.8450516, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

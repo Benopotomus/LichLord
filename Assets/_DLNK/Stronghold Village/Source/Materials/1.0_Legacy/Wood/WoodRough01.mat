@@ -13,8 +13,10 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _EMISSION
+  - _METALLICSPECGLOSSMAP
   - _NORMALMAP
   - _OCCLUSIONMAP
+  - _PARALLAXMAP
   m_InvalidKeywords:
   - _DETAILCOLOR_ON
   - _DETAILSPEC_ON
@@ -31,7 +33,8 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -45,11 +48,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 03f7e71ed7ad7df45b71d36e366fdc79, type: 3}
+        m_Texture: {fileID: 2800000, guid: d756b8d0efc4d0548a38d0b7a38ac849, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 62a44dcc4f5a9764ea655a4dc383cfa3, type: 3}
+        m_Texture: {fileID: 2800000, guid: 9d53be9c54adbc743ac5dd370ef1a9b8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Detail:
@@ -77,11 +80,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 03f7e71ed7ad7df45b71d36e366fdc79, type: 3}
+        m_Texture: {fileID: 2800000, guid: d756b8d0efc4d0548a38d0b7a38ac849, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 2800000, guid: 86cbe952ea4548047a451081f6873c48, type: 3}
+        m_Texture: {fileID: 2800000, guid: c3a27c95982b34e4a96ad591cbdf7e2c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Occlusion:
@@ -89,11 +92,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: aa9e84eb62d25d74aa16d6953e1a3cb4, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3ab289143d02fc8418012afa554c435c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
-        m_Texture: {fileID: 2800000, guid: 967202556e1fa5746b73074afaa7cdeb, type: 3}
+        m_Texture: {fileID: 2800000, guid: f43b6081f1c0f4b4aa5ad87573b22b49, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -143,12 +146,13 @@ Material:
     m_Ints: []
     m_Floats:
     - _AOPower: 3
+    - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpPower: 0
-    - _BumpScale: 0.57
+    - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -220,7 +224,8 @@ Material:
     - _SpecColor: {r: 0.7794118, g: 0.7152249, b: 0.61894464, a: 1}
     - _TransmissionColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &2528566147849681325
+  m_AllowLocking: 1
+--- !u!114 &2002992698069018930
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -232,4 +237,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 9

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7206600494399768068
+--- !u!114 &-5117036236104224883
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 9
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -46,7 +46,8 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -60,7 +61,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
-        m_Texture: {fileID: 2800000, guid: fb52aa91397216048b89f3567ee2b999, type: 3}
+        m_Texture: {fileID: 2800000, guid: f9e5f8f6bb0900e41aa392acf5404697, type: 3}
         m_Scale: {x: 2, y: 2}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
@@ -72,7 +73,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 2800000, guid: 6af59dac82657e44bb83eebf9609590b, type: 3}
+        m_Texture: {fileID: 2800000, guid: c709d004659ec76458aa9fb27ad481f5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Diffuse:
@@ -190,9 +191,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _AOon: 0.8470588
+    - _AddPrecomputedVelocity: 0
     - _AffectAO: 0.1019608
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -202,16 +206,17 @@ Material:
     - _Depth: 0.06
     - _DepthDirection: 1
     - _DetailAlbedoMapScale: 1
-    - _DetailNormalMapScale: 0.58
+    - _DetailNormalMapScale: 1
     - _DetailPower: 0.5
     - _DetailSpec: 0.122353
     - _DetailTiling: 2.48
     - _DifusePower: 1
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
     - _Gloss: 0.32
-    - _GlossMapScale: 0.589
+    - _GlossMapScale: 0.631
     - _Glossiness: 0.461
     - _GlossyReflections: 1
     - _HeightPower: 0.01
@@ -234,13 +239,14 @@ Material:
     - _RimOn: 0
     - _RimPower: 4
     - _SSSAO: 0.49
-    - _Smoothness: 0.589
+    - _Smoothness: 0.631
     - _SmoothnessTextureChannel: 0
     - _SpecIntensity: 1
     - _SpecularAO: 0.2784314
     - _SpecularHighlights: 1
     - _SpecularLevel: 2
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _UVSec: 0
     - _UseDetailAlpha: 0.2784314
@@ -264,3 +270,4 @@ Material:
     - _SpecularColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _SpecularTint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

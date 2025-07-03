@@ -29,7 +29,8 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: Opaque
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -108,9 +109,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AddPrecomputedVelocity: 0
     - _AffectAO: 2.77
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -123,10 +127,11 @@ Material:
     - _DiffuseAO: 2.76
     - _DiffuseAOMask: 0.63
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EmissionLM: 0
     - _EnvironmentReflections: 0
     - _Fresnel: 1
-    - _GlossMapScale: 0.101
+    - _GlossMapScale: 1
     - _Glossiness: 0.63
     - _GlossyReflections: 0
     - _InvertAOMask: 1
@@ -136,7 +141,7 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrenght: 2
-    - _OcclusionStrength: 0.583
+    - _OcclusionStrength: 1
     - _Parallax: 0.0106
     - _QueueOffset: 0
     - _ReceiveShadows: 1
@@ -145,6 +150,7 @@ Material:
     - _SmoothnessTextureChannel: 1
     - _SpecularHighlights: 0
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _TopBottomBumpScale: 2
     - _TopBottomMult: 2.06
@@ -156,15 +162,16 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.57547164, g: 0.57547164, b: 0.57547164, a: 1}
-    - _Color: {r: 0.57547164, g: 0.57547164, b: 0.57547164, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _LightWarpTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _RimColor: {r: 0.5514706, g: 0.32439446, b: 0.32439446, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _TopTint: {r: 0.7941176, g: 0.6747584, b: 0.4612889, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &6423014665870934854
+  m_AllowLocking: 1
+--- !u!114 &8304734752498126323
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,4 +183,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 7
+  version: 9
