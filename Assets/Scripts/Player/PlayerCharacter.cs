@@ -8,6 +8,7 @@ using LichLord.World;
 using LichLord.Props;
 using System.Collections.Generic;
 using System.IO;
+using LichLord.Buildables;
 
 namespace LichLord
 {
@@ -18,17 +19,20 @@ namespace LichLord
         public PlayerCharacterMovementComponent Movement;
         public PlayerCameraController CameraController;
         public PlayerCharacterInput Input;
-        public PlayerCharacterManeuvers Maneuvers;
+        public ManeuverComponent Maneuvers;
         public PlayerProjectilePool ProjectilePool;
         public PlayerCurrencyComponent Currency;
         public HurtboxComponent Hurtbox;
         public Animator Animator;
+        public BuilderComponent Builder;
+        public PlayerCharacterFSM FSM;
 
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 
         public Renderer[] HeadRenderers;
         public GameObject[] FirstPersonOverlayObjects;
+
 
         [Networked, HideInInspector, Capacity(24), OnChangedRender(nameof(OnNicknameChanged))]
         public string Nickname { get; set; }
@@ -144,9 +148,6 @@ namespace LichLord
             // Change the chunk and tell the server we've changed chunks
             UpdateChunk();
         }
-
-        private Quaternion _lastRotation; // Store the original rotation
-        private bool wasUpperBodyActive;         // Track state to detect transitions
 
 
         private void Respawn(Vector3 position)

@@ -1328,6 +1328,7 @@ GameObject:
   - component: {fileID: 7904855827506051427}
   - component: {fileID: 7134053186718281712}
   - component: {fileID: 3226170803067638791}
+  - component: {fileID: 8429857202971717623}
   m_Layer: 6
   m_Name: FSM
   m_TagString: Untagged
@@ -1372,10 +1373,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2325368546965728258}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e280963a371f5d24ab9e407336748de8, type: 3}
+  m_Script: {fileID: 11500000, guid: 987de95f3f152b343a5b47385a012e01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Creature: {fileID: 2971398371087610287}
+  PC: {fileID: 2971398371087610287}
 --- !u!114 &3226170803067638791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1391,9 +1392,21 @@ MonoBehaviour:
   _priority: 0
   _checkPriorityOnExit: 1
   fsmRef: {fileID: 7134053186718281712}
-  anim: {fileID: 0}
-  animState: 
-  animTransitionLength: 0.06666667
+--- !u!114 &8429857202971717623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2325368546965728258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4dec3172276675448d02940b7f1bc78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _priority: 0
+  _checkPriorityOnExit: 1
+  fsmRef: {fileID: 7134053186718281712}
 --- !u!1 &2354456845603870186
 GameObject:
   m_ObjectHideFlags: 0
@@ -1997,6 +2010,7 @@ GameObject:
   - component: {fileID: 8911782388783612553}
   - component: {fileID: 6479483160014541239}
   - component: {fileID: 5886866483268230399}
+  - component: {fileID: 18907217600452759}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -2051,6 +2065,8 @@ MonoBehaviour:
   Currency: {fileID: 6479483160014541239}
   Hurtbox: {fileID: 1365664862452816086}
   Animator: {fileID: 3816291510956059953}
+  Builder: {fileID: 18907217600452759}
+  FSM: {fileID: 7134053186718281712}
   _muzzleComponent: {fileID: 5886866483268230399}
   HeadRenderers: []
   FirstPersonOverlayObjects: []
@@ -2141,7 +2157,7 @@ MonoBehaviour:
   SprintSpeed: 8
   SprintAccelerationTime: 0.3
   UpGravity: -15
-  DownGravity: -20
+  DownGravity: -15
   RotationSpeed: 8
   GroundAcceleration: 55
   GroundDeceleration: 25
@@ -2198,10 +2214,12 @@ MonoBehaviour:
   - {fileID: 4081789406591363571}
   - {fileID: 4804172155013043321}
   - {fileID: 6479483160014541239}
+  - {fileID: 18907217600452759}
   - {fileID: 5077866948997885989}
   - {fileID: 7904855827506051427}
   - {fileID: 7134053186718281712}
   - {fileID: 3226170803067638791}
+  - {fileID: 8429857202971717623}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4804172155013043321
 MonoBehaviour:
@@ -2294,6 +2312,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handBoneLeft: {fileID: 5362074393791706597}
   _handBoneRight: {fileID: 3423735672707374332}
+--- !u!114 &18907217600452759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 238507a9861c686498a04e0520e2dfb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _targetZone: {fileID: 0}
+  _pc: {fileID: 2971398371087610287}
+  _previewMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  _previewMaterial: {fileID: 2100000, guid: 4a9bce6530477274bb3c6af94180b8f9, type: 2}
+  _selectedDefinition: {fileID: 0}
+  _availableBuildables:
+  - {fileID: 11400000, guid: 5e9858f45cadf2d459ad3fa358753f8d, type: 2}
+  - {fileID: 11400000, guid: 65092710afa4b1747930cdb9bbf68ab9, type: 2}
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0

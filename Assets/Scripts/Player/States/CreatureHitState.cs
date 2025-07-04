@@ -4,7 +4,7 @@ namespace LichLord
     using Fusion.Addons.FSM;
     using UnityEngine;
 
-    public class CreatureHitState : CreatureStateBase
+    public class CreatureHitState : CharacterStateBase
     {
         [SerializeField, Tooltip("The knockback speed the player enters after being damaged.")]
         Vector2 speed = new Vector2(12.5f, 10f);
@@ -14,7 +14,7 @@ namespace LichLord
 
         public override void Spawned()
         {
-            fsmRef = GetComponentInParent<CreatureFSM>();
+            fsmRef = GetComponentInParent<PlayerCharacterFSM>();
             base.Spawned();
         }
 
@@ -26,7 +26,6 @@ namespace LichLord
                 //fsmRef.PlayerNetworkObject.damageFX.PlayFX();
             }
 
-            anim.CrossFadeInFixedTime(animState, animTransitionLength);
             base.OnEnterStateRender();
         }
 

@@ -58,6 +58,7 @@ namespace LichLord
             _input.ToggleCameraView = false;
             _input.ScrollDelta = 0f;
             _input.ActionSelection = 0;
+            _input.BuildMode = false;
         }
 
         private void Update()
@@ -85,6 +86,7 @@ namespace LichLord
             _input.FireHeld |= _controls.Gameplay.Fire.IsPressed();
             _input.Sprint = _controls.Gameplay.Sprint.IsPressed();
             _input.ToggleCameraView |= _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
+            _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();
 
             // Scroll input
             if (_controls.Gameplay.Scroll.WasPerformedThisFrame())

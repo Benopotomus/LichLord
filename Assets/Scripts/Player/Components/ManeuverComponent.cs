@@ -5,14 +5,14 @@ using System.Collections.Generic;
 
 namespace LichLord
 {
-    public class PlayerCharacterManeuvers : NetworkBehaviour
+    public class ManeuverComponent : NetworkBehaviour
     {
         [SerializeField] private PlayerCharacter _pc;
 
-        [Header("Action Setup")]
+        [Header("Maneuvers Setup")]
         [SerializeField] private List<ManeuverDefinition> _availableManeuvers = new List<ManeuverDefinition>();
-        public List<ManeuverDefinition> AvailableManeuvers => _availableManeuvers;
-        
+        public IReadOnlyList<ManeuverDefinition> AvailableManeuvers => _availableManeuvers;
+
         [SerializeField] public Transform ActionSpawnPoint; // Where actions originate
 
         [Networked] private sbyte _selectedIndex { get; set; }
@@ -66,14 +66,16 @@ namespace LichLord
             }
         }
 
-        public void OnFixedUpdate(ref FGameplayInput input)
+        public void ProcessInput(ref FGameplayInput input)
         {
-            if (!HasStateAuthority) 
-                return;
-
-            ProcessActionSelection(ref input);
+            ProcessManeuverSelection(ref input);
             ProcessManeuverActivation(ref input);
             ProcessActiveManeuver(ref input);
+        }
+
+        public void OnFixedUpdate()
+        {
+            ProcessManeuverExpiration();
         }
 
         private void ProcessActiveManeuver(ref FGameplayInput input)
@@ -94,14 +96,24 @@ namespace LichLord
                 }
             }
 
+            if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+            {
+                int ticksSinceStart = Runner.Tick - _activeManeuverTick;
+                activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
+            }
+        }
+
+        private void ProcessManeuverExpiration()
+        {
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+            if (activeManeuver == null)
+                return;
+
             if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
             {
                 activeManeuver.EndExecute(_pc, Runner);
                 return;
             }
-
-            int ticksSinceStart = Runner.Tick - _activeManeuverTick;
-            activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
         }
 
         private void ProcessManeuverActivation(ref FGameplayInput input)
@@ -241,7 +253,7 @@ namespace LichLord
             }
         }
 
-        private void ProcessActionSelection(ref FGameplayInput input)
+        private void ProcessManeuverSelection(ref FGameplayInput input)
         {
             int newIndex = -1;
             if (input.ScrollDelta != 0 && _availableManeuvers.Count > 1)

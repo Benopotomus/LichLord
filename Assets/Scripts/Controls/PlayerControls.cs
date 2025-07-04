@@ -203,7 +203,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""Action2"",
                     ""type"": ""Button"",
                     ""id"": ""419743d3-eb07-4b6e-bcac-69fd7ef72375"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -279,6 +279,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""BuildMode"",
+                    ""type"": ""Button"",
+                    ""id"": ""1c042ec9-fc18-4872-af39-b029ec800956"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -796,6 +805,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Scroll"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""60739c61-0cde-46c5-9cb1-a59c1bd49852"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""BuildMode"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1404,6 +1424,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Action8 = m_Gameplay.FindAction("Action8", throwIfNotFound: true);
         m_Gameplay_Action9 = m_Gameplay.FindAction("Action9", throwIfNotFound: true);
         m_Gameplay_Scroll = m_Gameplay.FindAction("Scroll", throwIfNotFound: true);
+        m_Gameplay_BuildMode = m_Gameplay.FindAction("BuildMode", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1518,6 +1539,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Action8;
     private readonly InputAction m_Gameplay_Action9;
     private readonly InputAction m_Gameplay_Scroll;
+    private readonly InputAction m_Gameplay_BuildMode;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1614,6 +1636,10 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Scroll => m_Wrapper.m_Gameplay_Scroll;
         /// <summary>
+        /// Provides access to the underlying input action "Gameplay/BuildMode".
+        /// </summary>
+        public InputAction @BuildMode => m_Wrapper.m_Gameplay_BuildMode;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
@@ -1702,6 +1728,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Scroll.started += instance.OnScroll;
             @Scroll.performed += instance.OnScroll;
             @Scroll.canceled += instance.OnScroll;
+            @BuildMode.started += instance.OnBuildMode;
+            @BuildMode.performed += instance.OnBuildMode;
+            @BuildMode.canceled += instance.OnBuildMode;
         }
 
         /// <summary>
@@ -1776,6 +1805,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Scroll.started -= instance.OnScroll;
             @Scroll.performed -= instance.OnScroll;
             @Scroll.canceled -= instance.OnScroll;
+            @BuildMode.started -= instance.OnBuildMode;
+            @BuildMode.performed -= instance.OnBuildMode;
+            @BuildMode.canceled -= instance.OnBuildMode;
         }
 
         /// <summary>
@@ -2223,6 +2255,13 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnScroll(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BuildMode" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBuildMode(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

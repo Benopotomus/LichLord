@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LichLord
 {
-    public class CreatureDeathState : CreatureStateBase
+    public class CreatureDeathState : CharacterStateBase
     {
         [Tooltip("The NetworkObject that will be spawned when the player dies.")]
         public NetworkObject deadPlayerSpawn;
@@ -47,7 +47,7 @@ namespace LichLord
             if (Machine.StateTime >= respawnTime)
             {
                 //fsmRef.PlayerNetworkObject.Health = fsmRef.PlayerNetworkObject.MaxHealth;
-                Machine.TryActivateState<CreatureIdleState>();
+                Machine.TryActivateState<IdleState>();
             }
         }
     }

@@ -1,4 +1,5 @@
 using Cinemachine;
+using LichLord.Buildables;
 using UnityEngine;
 
 namespace LichLord
@@ -18,6 +19,8 @@ namespace LichLord
         private bool isFirstPerson = false;
         private FCachedRaycast _cachedRaycastHit; // Store last hit/max range point
         public FCachedRaycast CachedRaycastHit => _cachedRaycastHit;
+
+        [SerializeField] private LayerMask _buildableZoneLayer;
 
         private bool lastRaycastHit; // True if last raycast hit something
 
@@ -85,48 +88,73 @@ namespace LichLord
 
         }
 
-        /// <summary>
-        /// Performs a raycast from the center of the active camera
-        /// </summary>
-        /// <param name="hitInfo">Raycast hit information if something was hit</param>
-        /// <returns>The hit point if the raycast hit something, otherwise the point at max range</returns>
         public void RaycastFromCameraCenter(GameObject ignoredObject)
         {
-            // Get the active camera's Cinemachine brain
             Camera mainCamera = Camera.main;
             if (mainCamera == null)
             {
                 Debug.LogWarning("[CameraManager] Main camera not found!");
-                _cachedRaycastHit.raycastHit = new RaycastHit();
-                _cachedRaycastHit.position = Vector3.zero;
+                _cachedRaycastHit = new FCachedRaycast();
+                return;
             }
 
             float minDistance = isFirstPerson ? 0 : _minRaycastDistance;
-
             Transform cameraTransform = mainCamera.transform;
-            // Calculate ray from camera center
+
             Vector3 rayOrigin = cameraTransform.position + (cameraTransform.forward * minDistance);
             Vector3 rayDirection = cameraTransform.forward;
 
-            // Perform raycast with all hits
-            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, _maxRaycastDistance, raycastLayerMask);
+            LayerMask combinedMask = raycastLayerMask | _buildableZoneLayer;
 
-            // Find the closest valid hit, ignoring the specified object
+            // Reset cached buildable zone
+            _cachedRaycastHit.buildableZone = null;
+
+            // OverlapSphere to detect if inside a buildable zone trigger
+            Collider[] overlappingColliders = Physics.OverlapSphere(rayOrigin, 0.1f, _buildableZoneLayer);
+            foreach (var collider in overlappingColliders)
+            {
+                BuildableZone bz = collider.GetComponent<BuildableZone>();
+                if (bz != null)
+                {
+                    _cachedRaycastHit.buildableZone = bz;
+                    break;
+                }
+            }
+
+            // RaycastAll including triggers
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, _maxRaycastDistance, combinedMask, QueryTriggerInteraction.Collide);
+
             RaycastHit closestHit = new RaycastHit();
             float closestDistance = float.MaxValue;
             bool foundValidHit = false;
 
             foreach (var hit in hits)
             {
-                // Skip hits on the ignored object or its children
+                // Skip ignored object and children
                 if (ignoredObject != null && (hit.collider.gameObject == ignoredObject || hit.collider.transform.IsChildOf(ignoredObject.transform)))
                     continue;
 
-                if (hit.distance < closestDistance)
+                // Check if this hit is on buildable zone layer
+                if (((1 << hit.collider.gameObject.layer) & _buildableZoneLayer) != 0)
                 {
-                    closestHit = hit;
-                    closestDistance = hit.distance;
-                    foundValidHit = true;
+                    BuildableZone bz = hit.collider.GetComponent<BuildableZone>();
+                    if (bz != null)
+                    {
+                        _cachedRaycastHit.buildableZone = bz;
+                        // Note: Do NOT affect closest hit with this
+                        // Just keep the buildable zone reference here
+                    }
+                }
+
+                // Check if this hit is in the raycastLayerMask (excluding buildable zone layer)
+                if (((1 << hit.collider.gameObject.layer) & raycastLayerMask) != 0)
+                {
+                    if (hit.distance < closestDistance)
+                    {
+                        closestHit = hit;
+                        closestDistance = hit.distance;
+                        foundValidHit = true;
+                    }
                 }
             }
 
@@ -135,13 +163,14 @@ namespace LichLord
                 _cachedRaycastHit.raycastHit = closestHit;
                 _cachedRaycastHit.position = closestHit.point;
                 lastRaycastHit = true;
-                return;
             }
-
-            // Return point at max distance if no valid hit
-            Vector3 maxRangePoint = rayOrigin + rayDirection * _maxRaycastDistance;
-            _cachedRaycastHit.raycastHit = new RaycastHit();
-            _cachedRaycastHit.position = maxRangePoint;
+            else
+            {
+                Vector3 maxRangePoint = rayOrigin + rayDirection * _maxRaycastDistance;
+                _cachedRaycastHit.raycastHit = new RaycastHit();
+                _cachedRaycastHit.position = maxRangePoint;
+                lastRaycastHit = false;
+            }
         }
 
         private void OnDrawGizmos()
@@ -159,5 +188,6 @@ namespace LichLord
     { 
         public RaycastHit raycastHit;
         public Vector3 position;
+        public BuildableZone buildableZone;
     }
 }
