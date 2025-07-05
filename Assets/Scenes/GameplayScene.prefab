@@ -46,6 +46,52 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _hideCachedObjectsInHierarchy: 1
   _precacheObjects: []
+--- !u!1 &1067974917114084694
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5551067060867195444}
+  - component: {fileID: 2359048744612493593}
+  m_Layer: 0
+  m_Name: BuildableManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5551067060867195444
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067974917114084694}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8113843857799798740}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2359048744612493593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067974917114084694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f4bda285e5cb1a4e8be9f386520583c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _zonePrefab: {fileID: 0}
+  saveLoadManager: {fileID: 0}
 --- !u!1 &1535960176442849830
 GameObject:
   m_ObjectHideFlags: 0
@@ -612,6 +658,7 @@ Transform:
   - {fileID: 4906087415985119617}
   - {fileID: 7099861583356609012}
   - {fileID: 5486574105159563111}
+  - {fileID: 5551067060867195444}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8456462539329708384
@@ -636,7 +683,7 @@ MonoBehaviour:
     SpawnManager: {fileID: 4640506421543687027}
     ProjectileManager: {fileID: 5081629984164606860}
     PropManager: {fileID: 2006906620178597693}
-    BuildableManager: {fileID: 0}
+    BuildableManager: {fileID: 2359048744612493593}
     WorldSaveLoadManager: {fileID: 8472042852854681875}
     PlayerSaveLoadManager: {fileID: 6717108323470848868}
     NonPlayerCharacterManager: {fileID: 59580087568348656}
@@ -673,6 +720,7 @@ MonoBehaviour:
   - {fileID: 8472042852854681875}
   - {fileID: 6717108323470848868}
   - {fileID: 6103561022375725254}
+  - {fileID: 2359048744612493593}
   ForceRemoteRenderTimeframe: 0
 --- !u!1 &3984658796438664736
 GameObject:
@@ -1550,7 +1598,7 @@ Transform:
   m_GameObject: {fileID: 7136224720027177897}
   serializedVersion: 2
   m_LocalRotation: {x: 1.7763568e-15, y: -7.1054274e-15, z: 5.646419e-23, w: 1}
-  m_LocalPosition: {x: 0, y: 0.25, z: 5.5511154e-20}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

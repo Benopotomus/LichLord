@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2989928030817275704}
   - component: {fileID: 6982354465380821239}
   - component: {fileID: 4583120824937561567}
+  - component: {fileID: 4426455324921341048}
   - component: {fileID: 5719243280605522234}
   - component: {fileID: 2131666699098261133}
   m_Layer: 11
@@ -49,6 +50,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 4583120824937561567}
+  _spawner: {fileID: 4426455324921341048}
   _boxCollider: {fileID: 5719243280605522234}
 --- !u!114 &4583120824937561567
 MonoBehaviour:
@@ -62,13 +64,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6ee9a2fb60c50f4fa0398c053ef5443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GridSizeX: 8
+  GridSizeX: 16
   GridSizeY: 4
-  GridSizeZ: 8
+  GridSizeZ: 16
   TileSizeXZ: 5
-  TileSizeY: 4
+  TileSizeY: 3
   FloorMesh: {fileID: 4300014, guid: 45bb58d2f8c4ab544b49812b57d66ee9, type: 3}
   FloorMaterial: {fileID: 2100000, guid: d452a9d98a963834fba7fb43ba8122aa, type: 2}
+--- !u!114 &4426455324921341048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 648983852749263541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 665e4bf7059e4d64dac77d31a6036cee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!65 &5719243280605522234
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -88,8 +102,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 40, y: 20, z: 40}
-  m_Center: {x: 20, y: 10, z: 20}
+  m_Size: {x: 80, y: 20, z: 80}
+  m_Center: {x: 40, y: 10, z: 40}
 --- !u!114 &2131666699098261133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -104,7 +118,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SortKey: 2850804004
   ObjectInterest: 1
-  Flags: 1
+  Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6982354465380821239}

@@ -1,4 +1,5 @@
 ﻿using DWD.Utility.Loading;
+using TMPro;
 using UnityEngine;
 
 namespace LichLord.Buildables
@@ -6,8 +7,20 @@ namespace LichLord.Buildables
     [System.Serializable]
     public class BuildableLoader
     {
-        private BuildableRuntimeState _runtimeState;
-        public BuildableRuntimeState RuntimeState => _runtimeState;
+        private BuildableZone _zone;
+        public BuildableZone Zone => _zone;
+
+        private BuildableDefinition _definition;
+        public BuildableDefinition Definition => _definition;
+
+        private Vector3 _position;
+        public Vector3 Position => _position;
+
+        private Quaternion _rotation;
+        public Quaternion Rotation => _rotation;
+
+        private int _data;
+        public int Data => _data;
 
         private AssetBundleLoader _loader;
         public AssetBundleLoader Loader
@@ -25,10 +38,18 @@ namespace LichLord.Buildables
         public System.Action<BuildableLoader> OnLoadComplete;
 
         public BuildableLoader() { }
-        public BuildableLoader(BuildableRuntimeState runtimeState,
+        public BuildableLoader(BuildableZone zone,
+            BuildableDefinition definition,
+            Vector3 position,
+            Quaternion rotation,
+            int data,
             AssetBundleLoader iLoader)
         {
-            _runtimeState = runtimeState;
+            _zone = zone;
+            _definition = definition;
+            _position = position;
+            _rotation = rotation;
+            _data = data;
             Loader = iLoader;
         }
 

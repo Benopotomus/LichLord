@@ -8,15 +8,17 @@ namespace LichLord.Buildables
 {
     public class BuildableSpawner : MonoBehaviour
     {
-        public Action<BuildableRuntimeState, Buildable> OnBuildableSpawned;
+        public Action<Buildable> OnBuildableSpawned;
 
-        public void SpawnProp(BuildableRuntimeState buildRuntimeState)
+        public void SpawnBuildable(BuildableZone zone, 
+            BuildableDefinition definition, 
+            Vector3 spawnPosition, 
+            Quaternion spawnRotation, 
+            int data)
         {
-            BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(buildRuntimeState.definitionId);
-
             if (definition == null)
             {
-                Debug.LogWarning("Trying to spawn prop with invalid definition, id: " + buildRuntimeState.definitionId);
+                Debug.LogWarning("Trying to spawn prop with invalid definition, id: " + definition);
                 return;
             }
 
@@ -36,31 +38,47 @@ namespace LichLord.Buildables
 
                 if (loadedBundle.BundleName == prefabBundle.Bundle)
                 {
-                    OnPrefabLoaded(buildRuntimeState, loadedBundle);
+                    OnPrefabLoaded(zone, definition, spawnPosition, spawnRotation, data, loadedBundle);
                     return;
                 }
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            BuildableLoader propLoader = new BuildableLoader(buildRuntimeState, prefabLoader);
+            BuildableLoader buildableLoader = new BuildableLoader(zone, 
+                definition, 
+                spawnPosition, 
+                spawnRotation, 
+                data, 
+                prefabLoader);
 
-            if (propLoader.Loader != null)
+
+            if (buildableLoader.Loader != null)
             {
-                if (propLoader.Loader.IsLoaded)
-                    OnPrefabLoaded(propLoader);
+                if (buildableLoader.Loader.IsLoaded)
+                    OnLoaderLoaded(buildableLoader);
                 else
-                    propLoader.OnLoadComplete += OnPrefabLoaded;
+                    buildableLoader.OnLoadComplete += OnLoaderLoaded;
             }
         }
 
-        private void OnPrefabLoaded(BuildableLoader propLoader)
+        private void OnLoaderLoaded(BuildableLoader buildableLoader)
         {
-            propLoader.OnLoadComplete -= OnPrefabLoaded;
+            buildableLoader.OnLoadComplete -= OnLoaderLoaded;
 
-            OnPrefabLoaded(propLoader.RuntimeState, propLoader.Loader);
+            OnPrefabLoaded(buildableLoader.Zone, 
+                buildableLoader.Definition, 
+                buildableLoader.Position, 
+                buildableLoader.Rotation,
+                buildableLoader.Data,
+                buildableLoader.Loader);
         }
 
-        private void OnPrefabLoaded(BuildableRuntimeState runtimeState, AssetBundleLoader loadedBundle)
+        private void OnPrefabLoaded(BuildableZone zone, 
+            BuildableDefinition definition,
+            Vector3 position,
+            Quaternion rotation,
+            int data,
+            AssetBundleLoader loadedBundle)
        {
             GameObject prefab = loadedBundle.GetAssetWithin<GameObject>();
 
@@ -70,11 +88,12 @@ namespace LichLord.Buildables
             var poolObject = prefab.GetComponent<DWDObjectPoolObject>();
             if (poolObject == null)
             {
-                Debug.LogWarning("Could not spawn prop " + runtimeState.definitionId + ".  Could not find DWDObjectPoolObject Component!");
+                Debug.LogWarning("Could not spawn prop " + definition + ".  Could not find DWDObjectPoolObject Component!");
                 return;
             }
 
-            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, runtimeState.position, runtimeState.rotation);
+            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, position, rotation);
+            Debug.Log(rotation);
 
             Buildable spawnedBuildable = instance.GetComponent<Buildable>();
 
@@ -84,7 +103,7 @@ namespace LichLord.Buildables
                 return;
             }
 
-            OnBuildableSpawned?.Invoke(runtimeState, spawnedBuildable);
+            OnBuildableSpawned?.Invoke(spawnedBuildable);
         }
     }
 }

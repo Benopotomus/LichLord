@@ -6,7 +6,7 @@ namespace LichLord
     public struct FNetObjectID : INetworkStruct
     {
         public NetworkId networkId;
-        public ushort index;
+        public byte index;
 
         public bool IsValid()
         {

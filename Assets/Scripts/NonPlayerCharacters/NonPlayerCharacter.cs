@@ -102,7 +102,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(_context.ChunkManager);
 
             _netObjectID.networkId = _replicator.Object.Id;
-            _netObjectID.index = (ushort)spawnParams.Index;
+            _netObjectID.index = (byte)spawnParams.Index;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, 

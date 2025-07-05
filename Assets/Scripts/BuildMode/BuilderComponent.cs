@@ -7,8 +7,7 @@ namespace LichLord.Buildables
 {
     public class BuilderComponent : ContextBehaviour
     {
-        [SerializeField]
-        private BuildableZone _targetZone;
+
 
         [SerializeField]
         private PlayerCharacter _pc;
@@ -24,14 +23,22 @@ namespace LichLord.Buildables
         private MeshFilter _previewFilter;
         private MeshRenderer _previewRenderer;
 
-        [SerializeField]
-        private BuildableDefinition _selectedDefinition;
-
         [Header("Buildable Inventory")]
         [SerializeField] private List<BuildableDefinition> _availableBuildables = new List<BuildableDefinition>();
         public IReadOnlyList<BuildableDefinition> AvailableBuildables => _availableBuildables;
 
+
+        [SerializeField]
+        private BuildableDefinition _selectedDefinition;
+
         [Networked] private sbyte _selectedIndex { get; set; }
+
+        [Header("Placement")]
+        [SerializeField] private BuildableZone _targetZone;
+
+        [SerializeField] bool _placementValid;
+        [SerializeField] private Vector3Int _gridPosition;
+        [SerializeField] private EWallOrientation _orientation;
 
         private void Start()
         {
@@ -48,20 +55,19 @@ namespace LichLord.Buildables
             SetGhostVisibility(false);
         }
 
+        public override void Spawned()
+        {
+            base.Spawned();
+            UpdateActionSelection(0);
+        }
+
         public void ProcessInput(ref FGameplayInput input)
         {
             ProcessBuildableSelection(ref input);
-            ProcessBuildableActions(ref input);
+
             ProcessSelectedGridArea();
-        }
 
-        private void ProcessBuildableActions(ref FGameplayInput input)
-        {
-            if (input.Fire)
-            { 
-                // Attempt to build here
-
-            }
+            ProcessBuildableActions(ref input);
         }
 
         public void OnFixedUpdate()
@@ -81,13 +87,12 @@ namespace LichLord.Buildables
 
             if (input.ActionSelection > 0)
             {
-                //Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}");
+                Debug.Log($"[BuilderComponent] ActionSelection={input.ActionSelection}");
                 newIndex = input.ActionSelection - 1;
             }
 
             if (newIndex >= _availableBuildables.Count)
             {
-                //Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (exceeds availableActions.Count={availableActions.Count})");
                 return;
             }
 
@@ -102,27 +107,40 @@ namespace LichLord.Buildables
 
         private void UpdateActionSelection(int newIndex)
         {
-            if (HasStateAuthority)
+            if (!HasStateAuthority)
+                return;
+
+            if (_selectedIndex >= 0 && _selectedIndex < _availableBuildables.Count)
             {
-                if (_selectedIndex >= 0 && _selectedIndex < _availableBuildables.Count)
-                {
-                    //_availableBuildables[_selectedIndex].DeselectAction(_pc, Runner);
-                }
+                //_availableBuildables[_selectedIndex].DeselectAction(_pc, Runner);
+            }
 
-                _selectedIndex = (sbyte)newIndex;
-                if (newIndex >= 0 && newIndex < _availableBuildables.Count)
-                {
-                   // _availableBuildables[newIndex].SelectAction(_pc, Runner);
-                }
+            _selectedIndex = (sbyte)newIndex;
+            _selectedDefinition = _availableBuildables[newIndex];
+        }
 
-                if (newIndex >= 0 && newIndex < _availableBuildables.Count)
-                {
-                    Debug.Log($"[ActionManager] Selected action: {_availableBuildables[newIndex].BuildableName} (Index: {newIndex})");
-                }
-                else
-                {
-                    Debug.Log("[ActionManager] Action selection cleared");
-                }
+        private void ProcessBuildableActions(ref FGameplayInput input)
+        {
+            if (!input.Fire)
+                return;
+
+            switch (_selectedDefinition.PlacementType)
+            { 
+                case EBuildablePlacementType.Wall:
+                    Context.BuildableManager.RPC_PlaceBuildableWall(_targetZone,
+                        _orientation,
+                        (byte)_gridPosition.x,
+                        (byte)_gridPosition.y,
+                        (byte)_gridPosition.z,
+                        (byte)_selectedDefinition.TableID);
+                    break;
+                case EBuildablePlacementType.Floor:
+                    Context.BuildableManager.RPC_PlaceBuildableFloor(_targetZone,
+                        (byte)_gridPosition.x,
+                        (byte)_gridPosition.y,
+                        (byte)_gridPosition.z,
+                        (byte)_selectedDefinition.TableID);
+                    break;
             }
         }
 
@@ -131,22 +149,33 @@ namespace LichLord.Buildables
             FCachedRaycast cachedRaycast = Context.Camera.CachedRaycastHit;
             _targetZone = cachedRaycast.buildableZone;
 
-            if (_targetZone == null)
+            if (_targetZone == null || _selectedDefinition == null)
             {
-                _ghostPreview.SetActive(false);
+                SetGhostVisibility(false);
                 return;
             }
 
-            // If no grid, try wall
-            if (UpdateWallPosition(cachedRaycast.position))
-                return;
+            bool hasValidSelection = false;
 
-            // Try grid first
-            if (UpdateGridPosition(cachedRaycast.position))
-                return;
+            switch (_selectedDefinition.PlacementType)
+            {
+                case EBuildablePlacementType.Floor:
+                    hasValidSelection = UpdateGridPosition(cachedRaycast.position);
+                    break;
+                case EBuildablePlacementType.Wall:
+                    hasValidSelection = UpdateWallPosition(cachedRaycast.position);
+                    break;
+            }
 
-            // No valid placement
-            SetGhostVisibility(false);
+            _placementValid = hasValidSelection;
+
+            if (!_placementValid)
+            {
+                _gridPosition = new Vector3Int(0, 0, 0);
+                _orientation = EWallOrientation.None;
+            }
+
+            SetGhostVisibility(hasValidSelection);
         }
 
         public void SetGhostVisibility(bool newVisiblity)
@@ -158,6 +187,8 @@ namespace LichLord.Buildables
         {
             if (_targetZone.Grid.TryGetGridPosition(position, out int gridX, out int gridY, out int gridZ))
             {
+                _gridPosition = new Vector3Int(gridX, gridY, gridZ);
+
                 var grid = _targetZone.Grid;
 
                 Vector3 cellCenter = new Vector3(
@@ -174,8 +205,6 @@ namespace LichLord.Buildables
                     grid.TileSizeXZ
                 );
 
-                SetGhostVisibility(true);
-
                 //Debug.Log($"Grid: {gridX}, {gridY}, {gridZ}");
                 return true;
             }
@@ -187,6 +216,10 @@ namespace LichLord.Buildables
         {
             if (_targetZone.Grid.TryGetWallPosition(position, out int gridX, out int gridY, out int gridZ, out EWallOrientation orientation))
             {
+                // Set the placement data
+                _gridPosition = new Vector3Int(gridX, gridY, gridZ);
+                _orientation = orientation;
+
                 var grid = _targetZone.Grid;
                 float halfSizeXZ = grid.TileSizeXZ * 0.5f;
                 float halfSizeY = grid.TileSizeY * 0.5f;
@@ -242,7 +275,6 @@ namespace LichLord.Buildables
 
                 _ghostPreview.transform.position = wallCenter + grid.transform.position;
                 _ghostPreview.transform.rotation = Quaternion.identity;
-                SetGhostVisibility(true);
 
                 //Debug.Log($"Wall: {gridX}, {gridY}, {gridZ}, {orientation}");
                 return true;

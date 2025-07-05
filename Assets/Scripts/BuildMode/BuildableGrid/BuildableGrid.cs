@@ -12,20 +12,7 @@ namespace LichLord.Buildables
         public int TileSizeXZ = 5;
         public float TileSizeY = 3.5f;
 
-        [Networked, Capacity(256)]
-        protected virtual NetworkArray<FBuildTileData> _tileInteriors { get; }
 
-        [Networked, Capacity(256)]
-        protected virtual NetworkArray<FBuildWallData> _tileWallsNorth { get; }
-
-        [Networked, Capacity(256)]
-        protected virtual NetworkArray<FBuildWallData> _tileWallsEast { get; }
-
-        [Networked, Capacity(256)]
-        protected virtual NetworkArray<FBuildWallData> _tileWallsSouth { get; }
-
-        [Networked, Capacity(256)]
-        protected virtual NetworkArray<FBuildWallData> _tileWallsWest { get; }
 
         public Mesh FloorMesh;
         public Material FloorMaterial;
@@ -199,8 +186,9 @@ namespace LichLord.Buildables
 
     }
 
-    public enum EWallOrientation
+    public enum EWallOrientation : byte
     {
+        None,
         North,
         South,
         East,
