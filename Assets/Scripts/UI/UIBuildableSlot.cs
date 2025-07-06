@@ -39,9 +39,31 @@ namespace LichLord.UI
             if (pc == null)
                 return;
 
-            _text.text = _slot.ToString();
+            if (_slot == 0)
+            {
+                if (pc.Builder.IsDeleteMode)
+                {
+                    _iconImage.color = _activeColor;
+                }
+                else
+                {
+                    _iconImage.color = _unselectedColor;
+                }
+                _text.text = "X"; // label for delete
+                return;
+            }
 
-            BuildableDefinition slotDefinition = pc.Builder.AvailableBuildables[_slot - 1];
+            _text.text = _slot.ToString();
+            int index = _slot - 1;
+
+            var activeBuildables = pc.Builder.ActiveBuildables;
+            if (activeBuildables == null || index >= activeBuildables.Count)
+                return;
+
+            BuildableDefinition slotDefinition = activeBuildables[index];
+
+            if (slotDefinition == null)
+                return;
 
             // Check if the definitin has changed. Load icon if it has
             if (_definition == null || slotDefinition.TableID != _definition.TableID)

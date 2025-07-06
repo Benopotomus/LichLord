@@ -2324,14 +2324,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 238507a9861c686498a04e0520e2dfb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _targetZone: {fileID: 0}
   _pc: {fileID: 2971398371087610287}
   _previewMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  _previewMeshArrow: {fileID: -6639996529428066002, guid: 61aa5284b5deb7947a4e351f487a70ea,
+    type: 3}
   _previewMaterial: {fileID: 2100000, guid: 4a9bce6530477274bb3c6af94180b8f9, type: 2}
-  _selectedDefinition: {fileID: 0}
+  _buildableCateogory: 0
   _availableBuildables:
   - {fileID: 11400000, guid: 5e9858f45cadf2d459ad3fa358753f8d, type: 2}
-  - {fileID: 11400000, guid: 65092710afa4b1747930cdb9bbf68ab9, type: 2}
+  _availableBuildableWalls:
+  - {fileID: 11400000, guid: ec3df3e4fd8d2c844972bbfce319524c, type: 2}
+  _selectedDefinition: {fileID: 0}
+  _targetZone: {fileID: 0}
+  _placementValid: 0
+  _gridPosition: {x: 0, y: 0, z: 0}
+  _orientation: 0
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0

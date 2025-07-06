@@ -9,15 +9,11 @@ namespace LichLord.Buildables
         public int GridSizeX = 16;
         public int GridSizeY = 4;
         public int GridSizeZ = 16;
-        public int TileSizeXZ = 5;
+        public float TileSizeXZ = 5f;
         public float TileSizeY = 3.5f;
-
-
 
         public Mesh FloorMesh;
         public Material FloorMaterial;
-
-        private Vector3 _tileScale = new Vector3(0.99f, 1, 0.99f);
         private GameObject _floorMeshObject;
 
         private void Start()
@@ -61,15 +57,17 @@ namespace LichLord.Buildables
             Mesh combinedMesh = new Mesh();
             CombineInstance[] combine = new CombineInstance[GridSizeX * GridSizeZ];
 
+            Vector3 _tileScale = new Vector3(TileSizeXZ * 0.95f, 0.25f, TileSizeXZ * 0.95f);
+
             int i = 0;
             for (int x = 0; x < GridSizeX; x++)
             {
                 for (int y = 0; y < GridSizeZ; y++)
                 {
                     var pos = new Vector3(
-                        x * TileSizeXZ + TileSizeXZ * 0.5f - 2.5f,
+                        x * TileSizeXZ + TileSizeXZ * 0.5f,
                         0,
-                        y * TileSizeXZ + TileSizeXZ * 0.5f + 2.5f
+                        y * TileSizeXZ + TileSizeXZ * 0.5f
                     );
                     Matrix4x4 transformMatrix = Matrix4x4.TRS(pos, Quaternion.identity, _tileScale);
 
@@ -87,15 +85,12 @@ namespace LichLord.Buildables
 
         public bool TryGetGridPosition(Vector3 worldPos, out int gridX, out int gridY, out int gridZ)
         {
-            // Convert world position to local position relative to grid origin (this.transform.position)
-            Vector3 localPos = worldPos - transform.position;
+            Vector3 localPos = transform.InverseTransformPoint(worldPos);
 
-            // Calculate grid indices by dividing local position by TileSize
             gridX = Mathf.FloorToInt(localPos.x / TileSizeXZ);
-            gridY = Mathf.CeilToInt(localPos.y / TileSizeY);
+            gridY = GetNearestFloorLevel(localPos.y);
             gridZ = Mathf.FloorToInt(localPos.z / TileSizeXZ);
 
-            // Check if inside grid bounds
             bool insideX = gridX >= 0 && gridX < GridSizeX;
             bool insideY = gridY >= 0 && gridY < GridSizeY;
             bool insideZ = gridZ >= 0 && gridZ < GridSizeZ;
@@ -103,95 +98,70 @@ namespace LichLord.Buildables
             return insideX && insideY && insideZ;
         }
 
-        /// <summary>
-        /// Given a world position, tries to find which wall line it is closest to, and returns the wall orientation and grid position.
-        /// If the point is within a "dead zone" (center 3 units of the tile), returns false.
-        /// </summary>
         public bool TryGetWallPosition(Vector3 worldPos, out int gridX, out int gridY, out int gridZ, out EWallOrientation orientation)
         {
-            // convert world to local
-            Vector3 localPos = worldPos - transform.position;
+            orientation = default;
 
-            // work out which tile we are in
-            int tileX = Mathf.FloorToInt(localPos.x / TileSizeXZ);
-            int tileY = Mathf.FloorToInt((localPos.y + 0.001f) / TileSizeY) ;
-            int tileZ = Mathf.FloorToInt(localPos.z / TileSizeXZ);
-
-            // get relative offset within the tile [0..TileSize]
-            float localXInTile = localPos.x - tileX * TileSizeXZ;
-            float localZInTile = localPos.z - tileZ * TileSizeXZ;
-
-            // define deadzone around center of the tile (±1.5 from 2.5)
-            float centerMin = (TileSizeXZ * 0.5f) - 1.5f;
-            float centerMax = (TileSizeXZ * 0.5f) + 1.5f;
-
-            if (localXInTile >= centerMin && localXInTile <= centerMax &&
-                localZInTile >= centerMin && localZInTile <= centerMax)
+            // Use TryGetGridPosition to get x/y/z
+            if (!TryGetGridPosition(worldPos, out gridX, out gridY, out gridZ))
             {
-                // deadzone, no wall
-                gridX = gridY = gridZ = 0;
-                orientation = default;
                 return false;
             }
 
-            // now figure out which wall line is closest
-            // measure distance to left/right walls
-            float distToWest = localXInTile;
-            float distToEast = TileSizeXZ - localXInTile;
+            // We know it’s in bounds now
+            Vector3 localPos = transform.InverseTransformPoint(worldPos);
 
-            // measure distance to south/north walls
-            float distToSouth = localZInTile;
-            float distToNorth = TileSizeXZ - localZInTile;
+            // reconstruct the tile’s local origin
+            Vector3 tileOrigin = new Vector3(gridX * TileSizeXZ, gridY * TileSizeY, gridZ * TileSizeXZ);
 
-            // pick closest of the four
-            float minDist = Mathf.Min(distToWest, distToEast, distToSouth, distToNorth);
+            // calculate wall centers
+            Vector3 westCenter = tileOrigin + new Vector3(0f, 0f, TileSizeXZ * 0.5f);
+            Vector3 eastCenter = tileOrigin + new Vector3(TileSizeXZ, 0f, TileSizeXZ * 0.5f);
+            Vector3 southCenter = tileOrigin + new Vector3(TileSizeXZ * 0.5f, 0f, 0f);
+            Vector3 northCenter = tileOrigin + new Vector3(TileSizeXZ * 0.5f, 0f, TileSizeXZ);
 
-            if (minDist == distToWest)
+            float distWest = Vector3.Distance(localPos, westCenter);
+            float distEast = Vector3.Distance(localPos, eastCenter);
+            float distSouth = Vector3.Distance(localPos, southCenter);
+            float distNorth = Vector3.Distance(localPos, northCenter);
+
+            float minDist = Mathf.Min(distWest, distEast, distSouth, distNorth);
+            float epsilon = 0.001f;
+            float maxDistance = TileSizeXZ * 0.75f;
+
+            if (minDist > maxDistance)
             {
-                orientation = EWallOrientation.West;
-                gridX = tileX;
-                gridZ = tileZ;
-            }
-            else if (minDist == distToEast)
-            {
-                orientation = EWallOrientation.East;
-                gridX = tileX + 1;
-                gridZ = tileZ;
-            }
-            else if (minDist == distToSouth)
-            {
-                orientation = EWallOrientation.South;
-                gridX = tileX;
-                gridZ = tileZ;
-            }
-            else // distToNorth
-            {
-                orientation = EWallOrientation.North;
-                gridX = tileX;
-                gridZ = tileZ + 1;
+                return false;
             }
 
-            gridY = tileY;
+            int countClosest = 0;
+            if (Mathf.Abs(distWest - minDist) < epsilon) { orientation = EWallOrientation.West; countClosest++; }
+            if (Mathf.Abs(distEast - minDist) < epsilon) { orientation = EWallOrientation.East; countClosest++; }
+            if (Mathf.Abs(distSouth - minDist) < epsilon) { orientation = EWallOrientation.South; countClosest++; }
+            if (Mathf.Abs(distNorth - minDist) < epsilon) { orientation = EWallOrientation.North; countClosest++; }
 
-            // validate
-            bool insideX = gridX >= 0 && gridX <= GridSizeX;
-            bool insideY = gridY >= 0 && gridY < GridSizeY;
-            bool insideZ = gridZ >= 0 && gridZ <= GridSizeZ;
+            if (countClosest != 1)
+            {
+                return false; // ambiguous
+            }
 
-            if (insideX && insideY && insideZ)
-                return true;
-
-            return false;
+            return true;
         }
 
+        private int GetNearestFloorLevel(float localY)
+        {
+            int baseY = Mathf.FloorToInt(localY / TileSizeY);
+            if (baseY < 0) baseY = 0;
+
+            float lowerCenterY = baseY * TileSizeY;
+            float upperCenterY = (baseY + 1) * TileSizeY;
+
+            float distToLower = Mathf.Abs(localY - lowerCenterY);
+            float distToUpper = Mathf.Abs(localY - upperCenterY);
+
+            return (distToUpper < distToLower) ? baseY + 1 : baseY;
+        }
     }
 
-    public enum EWallOrientation : byte
-    {
-        None,
-        North,
-        South,
-        East,
-        West
-    }
+   
 }

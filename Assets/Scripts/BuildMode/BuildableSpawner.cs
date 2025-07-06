@@ -93,13 +93,12 @@ namespace LichLord.Buildables
             }
 
             var instance = DWDObjectPool.Instance.SpawnAt(poolObject, position, rotation);
-            Debug.Log(rotation);
 
             Buildable spawnedBuildable = instance.GetComponent<Buildable>();
 
             if (spawnedBuildable == null)
             {
-                Debug.LogWarning("Prop is Invalid, Check Bundles! (" + loadedBundle.BundleName + ")");
+                //Debug.LogWarning("Prop is Invalid, Check Bundles! (" + loadedBundle.BundleName + ")");
                 return;
             }
 

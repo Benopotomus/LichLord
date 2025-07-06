@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using LichLord.Buildables;
+using UnityEngine;
 
 namespace LichLord
 {
@@ -17,6 +18,8 @@ namespace LichLord
         public int ActionSelection; // Index of selected action (1-9 for keys, 0 for none)
         public float ScrollDelta; // Mouse wheel delta (positive: up, negative: down)
         public bool BuildMode; // Toggles build mode
+        public EBuildableCategory BuildCategory;
+        public bool DeleteMode;
 
     }
 }

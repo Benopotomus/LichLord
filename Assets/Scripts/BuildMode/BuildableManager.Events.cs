@@ -14,7 +14,10 @@ namespace LichLord.Buildables
             byte posZ, 
             byte definitionID)
         {
-            Debug.Log(zone);
+            if (zone == null)
+                return;
+
+            Debug.Log("Place Floor Position: " + new Vector3Int(posX, posY, posZ));
 
             zone.PlaceBuildableFloor(posX,
             posY,
@@ -31,7 +34,10 @@ namespace LichLord.Buildables
             byte posZ,
             byte definitionID)
         {
-            Debug.Log(zone);
+            if (zone == null)
+                return;
+
+            Debug.Log("Place Wall Position: " + new Vector3Int(posX, posY, posZ) + " Orientation: " + wallOrientation);
 
             zone.PlaceBuildableWall(definitionID,
                 wallOrientation,

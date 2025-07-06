@@ -8,6 +8,7 @@ namespace LichLord.UI
     {
         [SerializeField] private HorizontalLayoutGroup _maneuverIconsSection;
         [SerializeField] private HorizontalLayoutGroup _buildIconsSection;
+        [SerializeField] private HorizontalLayoutGroup _buildCategorySection;
 
         [SerializeField] private Image _manueverIcon;
         [SerializeField] private Image _buildIcon;
@@ -50,18 +51,21 @@ namespace LichLord.UI
                     _maneuverIconsSection.SetActive(false);
                     _manueverIcon.SetActive(false);
                     _buildIconsSection.SetActive(false);
+                    _buildCategorySection.SetActive(false);
                     _buildIcon.SetActive(false);
                     break;
                 case EActiveLayout.Maneuvers:
                     _maneuverIconsSection.SetActive(true);
                     _manueverIcon.SetActive(false);
                     _buildIconsSection.SetActive(false);
+                    _buildCategorySection.SetActive(false);
                     _buildIcon.SetActive(true);
                     break;
                 case EActiveLayout.Buildables:
                     _buildIconsSection.SetActive(true);
                     _buildIcon.SetActive(false);
                     _maneuverIconsSection.SetActive(false);
+                    _buildCategorySection.SetActive(true);
                     _manueverIcon.SetActive(true);
                     break;
             }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LichLord.Buildables
 {
-    [CreateAssetMenu(menuName = "LichLord/Buildables/BuildableDefinition")]
+
     public class BuildableDefinition : TableObject
     {
         [SerializeField]

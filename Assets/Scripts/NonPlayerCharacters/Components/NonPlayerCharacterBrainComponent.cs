@@ -99,17 +99,8 @@ namespace LichLord.NonPlayerCharacters
 
             if (executingManuever.HasExpired(tick))
             {
-                /*
-                // if the target is no longer valid, search for a new one
-                if (_hasAttackTarget && !IsTargetValid(_attackTarget))
-                {
-                    FindCurrentTarget();
-                }
 
-                // Im removing this maneuver immediatly 
                 SetActiveManuever(null);
-                SelectManeuver(tick);
-                */
                 data.State = ENonPlayerState.Idle;
                 NPC.Replicator.UpdateNPCData(ref data, _npc.Index);
                 return;

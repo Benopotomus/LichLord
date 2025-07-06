@@ -13,7 +13,7 @@ namespace LichLord
     {
         public ProjectileTable ProjectileTable;
         public PropTable PropTable;
-        public BuildableTable BuildableTable;
+        public BuildableWallTable BuildableWallTable;
         public NonPlayerCharacterTable NonPlayerCharacterTable;
         public ManeuverTable ManeuverTable;
 
