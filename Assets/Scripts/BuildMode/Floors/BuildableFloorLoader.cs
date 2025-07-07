@@ -5,7 +5,7 @@ using UnityEngine;
 namespace LichLord.Buildables
 {
     [System.Serializable]
-    public class BuildableWallLoader
+    public class BuildableFloorLoader
     {
         private BuildableZoneReplicator _floor;
         public BuildableZoneReplicator Floor => _floor;
@@ -15,9 +15,6 @@ namespace LichLord.Buildables
 
         private int _floorTileIndex;
         public int FloorTileIndex => _floorTileIndex;
-
-        private EWallOrientation _orientation;
-        public EWallOrientation Orientation => _orientation;
 
         private Vector3 _position;
         public Vector3 Position => _position;
@@ -41,12 +38,11 @@ namespace LichLord.Buildables
 
         private GameObject _loadedPrefab;
         public GameObject LoadedPrefab { get { return _loadedPrefab; } }
-        public System.Action<BuildableWallLoader> OnLoadComplete;
+        public System.Action<BuildableFloorLoader> OnLoadComplete;
 
-        public BuildableWallLoader() { }
-        public BuildableWallLoader(BuildableZoneReplicator floor,
+        public BuildableFloorLoader() { }
+        public BuildableFloorLoader(BuildableZoneReplicator floor,
             int floorTileIndex,
-            EWallOrientation orientation,
             BuildableDefinition definition,
             Vector3 position,
             Quaternion rotation,
@@ -55,7 +51,6 @@ namespace LichLord.Buildables
         {
             _floor = floor;
             _floorTileIndex = floorTileIndex;
-            _orientation = orientation;
             _definition = definition;
             _position = position;
             _rotation = rotation;

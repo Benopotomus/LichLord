@@ -12,7 +12,7 @@ namespace LichLord.Buildables
         public BuildableGrid Grid => _grid;
 
         [SerializeField]
-        private BuildableZoneFloor _floorPrefab;
+        private BuildableZoneReplicator _floorPrefab;
 
         [SerializeField]
         private BoxCollider _boxCollider;
@@ -20,7 +20,7 @@ namespace LichLord.Buildables
         [Networked]
         private ref FWorldTransform _transform => ref MakeRef<FWorldTransform>();
 
-        private List<BuildableZoneFloor> _floors = new List<BuildableZoneFloor>(8);
+        private List<BuildableZoneReplicator> _floors = new List<BuildableZoneReplicator>(8);
 
         private void Reset()
         {

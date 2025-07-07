@@ -30,6 +30,11 @@ namespace LichLord.UI
 
         private IconLoader _iconLoader = new IconLoader();
 
+        protected override void OnVisible()
+        {
+            _text.text = _slot.ToString();
+        }
+
         protected override void OnTick()
         {
             base.OnTick();
@@ -53,10 +58,10 @@ namespace LichLord.UI
                 return;
             }
 
-            _text.text = _slot.ToString();
             int index = _slot - 1;
 
             var activeBuildables = pc.Builder.ActiveBuildables;
+
             if (activeBuildables == null || index >= activeBuildables.Count)
                 return;
 
@@ -66,7 +71,9 @@ namespace LichLord.UI
                 return;
 
             // Check if the definitin has changed. Load icon if it has
-            if (_definition == null || slotDefinition.TableID != _definition.TableID)
+            if (_definition == null || 
+                slotDefinition.TableID != _definition.TableID ||
+                slotDefinition.PlacementType != _definition.PlacementType)
             {
                 LoadDefinition(slotDefinition);
             }

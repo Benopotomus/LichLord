@@ -1,5 +1,6 @@
 ﻿using Fusion;
 using LichLord;
+using LichLord.Props;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,12 @@ using UnityEngine;
 
 namespace LichLord.Buildables
 {
-    public class BuildableZoneFloor : ContextBehaviour
+    public class BuildableZoneReplicator : ContextBehaviour
     {
         private BuildableZone _zone;
 
         [SerializeField]
-        private BuildableSpawner _spawner;
+        private BuildableFloorSpawner _floorSpawner;
 
         [SerializeField]
         private BuildableWallSpawner _wallSpawner;
@@ -41,15 +42,69 @@ namespace LichLord.Buildables
         private FBuildWallData[] _previousWallsEast = new FBuildWallData[256];
         private FBuildWallData[] _previousWallsWest = new FBuildWallData[256];
 
+        private Dictionary<int, Buildable> _buildableFloors = new Dictionary<int, Buildable>();
         private Dictionary<int, Buildable> _buildableWallsNorth = new Dictionary<int, Buildable>();
         private Dictionary<int, Buildable> _buildableWallsSouth = new Dictionary<int, Buildable>();
         private Dictionary<int, Buildable> _buildableWallsEast = new Dictionary<int, Buildable>();
         private Dictionary<int, Buildable> _buildableWallsWest = new Dictionary<int, Buildable>();
 
+        private HashSet<int> _freeIndicesFloor = new HashSet<int>();
+        public IReadOnlyCollection<int> FreeIndicesFloor => _freeIndicesFloor;
+
+        private HashSet<int> _freeIndicesWallNorth = new HashSet<int>();
+        public IReadOnlyCollection<int> FreeIndicesWallNorth => _freeIndicesWallNorth;
+
+        private HashSet<int> _freeIndicesWallSouth = new HashSet<int>();
+        public IReadOnlyCollection<int> FreeIndicesWallSouth => _freeIndicesWallSouth;
+
+        private HashSet<int> _freeIndicesWallEast = new HashSet<int>();
+        public IReadOnlyCollection<int> FreeIndicesWallEast => _freeIndicesWallEast;
+
+        private HashSet<int> _freeIndicesWallWest = new HashSet<int>();
+        public IReadOnlyCollection<int> FreeIndicesWallWest => _freeIndicesWallWest;
+
         public void Initialized(BuildableZone zone)
         {
             _zone = zone;
+            _floorSpawner.OnBuildableFloorSpawned += OnBuildableFloorSpawned;
             _wallSpawner.OnBuildableWallSpawned += OnBuildableWallSpawned;
+        }
+
+        public bool HasFreeIndex()
+        {
+            return GetFreeIndex() >= 0;
+        }
+
+        public int GetFreeIndex()
+        {
+            if (_freeIndicesFloor.Count > 0)
+            {
+                return _freeIndicesFloor.First();
+            }
+            return -1;
+        }
+
+        public override void Spawned()
+        {
+            base.Spawned();
+
+            for (int i = 0; i < BuildableConstants.MAX_BUILDABLE_REPS; i++)
+            {
+                _freeIndicesFloor.Add(i); // Initially, all indices are free
+            }
+        }
+
+        private void RebuildFreeIndices()
+        {
+            _freeIndicesFloor.Clear();
+            for (int i = 0; i < BuildableConstants.MAX_BUILDABLE_REPS; i++)
+            {
+                var data = _tileFloors.GetRef(i);
+                if (data.FloorDefinitionID == 0)
+                {
+                    _freeIndicesFloor.Add(i);
+                }
+            }
         }
 
         public void PlaceBuildableFloor(int definitionID, int x, int y, int z)
@@ -62,7 +117,11 @@ namespace LichLord.Buildables
             
             int index = x + (z * 16);
 
-            _tileFloors.GetRef(index).FloorDefinitionID = (byte)definitionID;
+            ref FBuildFloorData floorData = ref _tileFloors.GetRef(index);
+            floorData.FloorDefinitionID = (byte)definitionID;
+            floorData.GridX = (byte)x;
+            floorData.GridY = (byte)y;
+            floorData.GridZ = (byte)z;
         }
 
         public void PlaceBuildableWall(int definitionID, EWallOrientation orientation, int x, int y, int z)
@@ -78,7 +137,11 @@ namespace LichLord.Buildables
             switch (orientation)
             {
                 case EWallOrientation.North:
-                    _tileWallsNorth.GetRef(index).WallDefinitionID = (byte)definitionID;
+                    ref FBuildWallData northWallData = ref _tileWallsNorth.GetRef(index);
+                    northWallData.WallDefinitionID = (byte)definitionID;
+                    northWallData.GridX = (byte)x;
+                    northWallData.GridY = (byte)y;
+                    northWallData.GridZ = (byte)z;
                     break;
                 case EWallOrientation.South:
                     _tileWallsSouth.GetRef(index).WallDefinitionID = (byte)definitionID;
@@ -91,7 +154,7 @@ namespace LichLord.Buildables
                     break;
             }
         }
-
+         
         int _lastRenderFrame = -1;
         public override void Render()
         {
@@ -157,10 +220,7 @@ namespace LichLord.Buildables
 
         private void UpdateWallVisual(int index, EWallOrientation orientation, FBuildWallData wallData)
         {
-            int x = index % 16;
-            int z = index / 16;
-
-            Debug.Log($"[Render] Wall {orientation} changed at ({x},{z}) -> {wallData.WallDefinitionID}");
+            //Debug.Log($"[Render] Wall {orientation} changed at ({x},{z}) -> {wallData.WallDefinitionID}");
 
             // TODO: update wall mesh or prefab instance here
 
@@ -173,9 +233,13 @@ namespace LichLord.Buildables
 
             BuildableDefinition definition = Global.Tables.BuildableWallTable.TryGetDefinition(wallData.WallDefinitionID);
 
-            BuildableUtility.GetWallWorldTransform(_zone, x, 0, z, orientation, out Vector3 worldPosition, out Quaternion rotation);
-
-            worldPosition.y = transform.position.y;
+            BuildableUtility.GetWallWorldTransform(_zone, 
+                wallData.GridX, 
+                wallData.GridY, 
+                wallData.GridZ, 
+                orientation, 
+                out Vector3 worldPosition, 
+                out Quaternion rotation);
 
             _wallSpawner.SpawnBuildableWall(this, index, orientation, definition, worldPosition, rotation, 0);
         }
@@ -257,6 +321,11 @@ namespace LichLord.Buildables
             }
 
             return adjWallID != 0;
+        }
+
+        private void OnBuildableFloorSpawned(Buildable buildable, int index)
+        {
+            _buildableFloors[index] = buildable;
         }
 
         private void OnBuildableWallSpawned(Buildable buildable, int index, EWallOrientation orientation)

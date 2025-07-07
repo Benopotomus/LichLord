@@ -14,6 +14,7 @@ namespace LichLord
         public ProjectileTable ProjectileTable;
         public PropTable PropTable;
         public BuildableWallTable BuildableWallTable;
+        public BuildableFloorTable BuildableFloorTable;
         public NonPlayerCharacterTable NonPlayerCharacterTable;
         public ManeuverTable ManeuverTable;
 

@@ -36,11 +36,15 @@ namespace LichLord.UI
         protected override void OnEnable()
         {
             // Rebuild icons
+            base.OnEnable();
             RebuildIcons();
         }
 
         public void RebuildIcons()
         {
+            if (Context == null)
+                return;
+
             PlayerCharacter pc = Context.LocalPlayerCharacter;
             if (pc == null)
                 return;
@@ -49,6 +53,7 @@ namespace LichLord.UI
             var activeBuildables = builder.ActiveBuildables;
 
             int buildableCount = activeBuildables?.Count ?? 0;
+            Debug.Log(activeBuildables);
 
             for (int i = 0; i < _slots.Count; i++)
             {

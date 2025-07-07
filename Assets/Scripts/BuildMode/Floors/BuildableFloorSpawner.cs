@@ -6,13 +6,12 @@ using UnityEngine;
 
 namespace LichLord.Buildables
 {
-    public class BuildableWallSpawner : MonoBehaviour
+    public class BuildableFloorSpawner : MonoBehaviour
     {
-        public Action<Buildable, int, EWallOrientation> OnBuildableWallSpawned;
+        public Action<Buildable, int> OnBuildableFloorSpawned;
 
-        public void SpawnBuildableWall(BuildableZoneReplicator floor, 
+        public void SpawnBuildableFloor(BuildableZoneReplicator floor, 
             int floorTileIndex,
-            EWallOrientation wallOrientation,
             BuildableDefinition definition, 
             Vector3 spawnPosition, 
             Quaternion spawnRotation, 
@@ -40,15 +39,14 @@ namespace LichLord.Buildables
 
                 if (loadedBundle.BundleName == prefabBundle.Bundle)
                 {
-                    OnPrefabLoaded(floor, floorTileIndex, wallOrientation, definition, spawnPosition, spawnRotation, data, loadedBundle);
+                    OnPrefabLoaded(floor, floorTileIndex, definition, spawnPosition, spawnRotation, data, loadedBundle);
                     return;
                 }
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            BuildableWallLoader buildableWallLoader = new BuildableWallLoader(floor,
+            BuildableFloorLoader buildableFloorLoader = new BuildableFloorLoader(floor,
                 floorTileIndex,
-                wallOrientation,
                 definition, 
                 spawnPosition, 
                 spawnRotation, 
@@ -56,32 +54,30 @@ namespace LichLord.Buildables
                 prefabLoader);
 
 
-            if (buildableWallLoader.Loader != null)
+            if (buildableFloorLoader.Loader != null)
             {
-                if (buildableWallLoader.Loader.IsLoaded)
-                    OnLoaderLoaded(buildableWallLoader);
+                if (buildableFloorLoader.Loader.IsLoaded)
+                    OnLoaderLoaded(buildableFloorLoader);
                 else
-                    buildableWallLoader.OnLoadComplete += OnLoaderLoaded;
+                    buildableFloorLoader.OnLoadComplete += OnLoaderLoaded;
             }
         }
 
-        private void OnLoaderLoaded(BuildableWallLoader buildableWallLoader)
+        private void OnLoaderLoaded(BuildableFloorLoader buildableFloorLoader)
         {
-            buildableWallLoader.OnLoadComplete -= OnLoaderLoaded;
+            buildableFloorLoader.OnLoadComplete -= OnLoaderLoaded;
 
-            OnPrefabLoaded(buildableWallLoader.Floor,
-                buildableWallLoader.FloorTileIndex,
-                buildableWallLoader.Orientation,
-                buildableWallLoader.Definition,
-                buildableWallLoader.Position,
-                buildableWallLoader.Rotation,
-                buildableWallLoader.Data,
-                buildableWallLoader.Loader);
+            OnPrefabLoaded(buildableFloorLoader.Floor,
+                buildableFloorLoader.FloorTileIndex,
+                buildableFloorLoader.Definition,
+                buildableFloorLoader.Position,
+                buildableFloorLoader.Rotation,
+                buildableFloorLoader.Data,
+                buildableFloorLoader.Loader);
         }
 
         private void OnPrefabLoaded(BuildableZoneReplicator floor,
             int floorTileIndex,
-            EWallOrientation wallOrientation,
             BuildableDefinition definition,
             Vector3 position,
             Quaternion rotation,
@@ -110,7 +106,7 @@ namespace LichLord.Buildables
                 return;
             }
 
-            OnBuildableWallSpawned?.Invoke(spawnedBuildable, floorTileIndex, wallOrientation);
+            OnBuildableFloorSpawned?.Invoke(spawnedBuildable, floorTileIndex);
         }
     }
 }

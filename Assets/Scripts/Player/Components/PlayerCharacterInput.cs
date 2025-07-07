@@ -120,7 +120,7 @@ namespace LichLord
 
         private Vector2 ClampLookRotation(Vector2 lookRotation)
         {
-            lookRotation.x = Mathf.Clamp(lookRotation.x, -30f, 70f);
+            lookRotation.x = Mathf.Clamp(lookRotation.x, -60f, 70f);
             return lookRotation;
         }
     }
