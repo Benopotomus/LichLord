@@ -24,7 +24,7 @@ namespace LichLord.World
 
         public ELoadState LoadState { get; set; }
 
-        public Chunk(FChunkPosition chunkID, Vector2 worldOrigin, ChunkManager manager)
+        public Chunk(FChunkPosition chunkID, ChunkManager manager)
         {
             ChunkID = chunkID;
             _manager = manager;
@@ -33,8 +33,8 @@ namespace LichLord.World
 
             // Calculate the chunk's world position, accounting for worldOrigin as the center
             Vector2 chunkCorner = new Vector2(
-                worldOrigin.x + chunkID.X * chunkSize,
-                worldOrigin.y + chunkID.Y * chunkSize
+                chunkID.X * chunkSize,
+                chunkID.Y * chunkSize
             );
 
             // Set Bounds center at the middle of the chunk

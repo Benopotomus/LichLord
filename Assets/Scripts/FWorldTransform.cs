@@ -33,87 +33,13 @@ namespace LichLord
         public static implicit operator Int24(int value) => new Int24(value);
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 6)]
-    public struct FWorldPosition : INetworkStruct
-    {
-        [FieldOffset(0)] private short _positionX; // 2 bytes
-        [FieldOffset(2)] private short _positionYCompressed; // 2 bytes
-        [FieldOffset(4)] private short _positionZ; // 2 bytes
-        // Total: 6 bytes
-
-        private const float SCALE_FACTOR = 20f; // For 0.05 precision (1 / 0.05)
-        private const float X_Z_MIN = -1638.35f; // -32767 / 20
-        private const float X_Z_MAX = 1638.35f; // 32767 / 20
-        private const float Y_MIN = -327.68f; // -32,768 / 100
-        private const float Y_MAX = 327.67f; // 32,767 / 100
-
-        public float PositionX
-        {
-            get => _positionX / SCALE_FACTOR;
-            set => _positionX = (short)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
-        }
-
-        public float PositionY
-        {
-            get => _positionYCompressed / 100f; // Y still uses 0.01 precision
-            set => _positionYCompressed = (short)(Mathf.Clamp(value, Y_MIN, Y_MAX) * 100f);
-        }
-
-        public float PositionZ
-        {
-            get => _positionZ / SCALE_FACTOR;
-            set => _positionZ = (short)(Mathf.Clamp(value, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
-        }
-
-        public Vector3 Position
-        {
-            get => new Vector3(
-                _positionX / SCALE_FACTOR,
-                _positionYCompressed / 100f,
-                _positionZ / SCALE_FACTOR
-            );
-            set
-            {
-                _positionX = (short)(Mathf.Clamp(value.x, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
-                _positionYCompressed = (short)(Mathf.Clamp(value.y, Y_MIN, Y_MAX) * 100f);
-                _positionZ = (short)(Mathf.Clamp(value.z, X_Z_MIN, X_Z_MAX) * SCALE_FACTOR);
-            }
-        }
-        
-        public bool IsPositionEqual(ref FWorldPosition other)
-        {
-            return _positionX == other._positionX &&
-                   _positionYCompressed == other._positionYCompressed &&
-                   _positionZ == other._positionZ;
-        }
-
-        public void CopyPosition(Vector3 other)
-        {
-            PositionX = other.x;
-            PositionY = other.y;
-            PositionZ = other.z;
-        }
-
-        public void CopyPosition(ref FWorldPosition other)
-        {
-            _positionX = other._positionX;
-            _positionYCompressed = other._positionYCompressed;
-            _positionZ = other._positionZ;
-        }
-
-        public string DebugString()
-        {
-            return $"Position: ({_positionX / SCALE_FACTOR:F2}, {_positionYCompressed / 100f:F2}, {_positionZ / SCALE_FACTOR:F2})";
-        }
-    }
-
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct FWorldTransform : INetworkStruct
     {
-        [FieldOffset(0)] private FWorldPosition _position; // 6 bytes
-        [FieldOffset(6)] private byte _compressedYaw; // 1 byte
-        [FieldOffset(7)] private byte _compressedPitch; // 1 byte
-        // Total: 8 bytes
+        [FieldOffset(0)] private FWorldPosition _position; // 7 bytes
+        [FieldOffset(7)] private byte _compressedYaw; // 1 byte
+        [FieldOffset(8)] private byte _compressedPitch; // 1 byte
+        // Total: 9 bytes
 
         public float PositionX
         {

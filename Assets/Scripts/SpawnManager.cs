@@ -15,6 +15,7 @@ namespace LichLord
         public PlayerCharacter LocalPlayer { get; private set; }
 
         private SpawnPoint[] _spawnPoints;
+        [SerializeField] private Vector3 _fallbackSpawnPosition = new Vector3(1000, 0, 1000);
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
@@ -119,7 +120,7 @@ namespace LichLord
                 return spawnPoint.transform.position + new Vector3(randomPositionOffset.x, 0f, randomPositionOffset.y);
             }
             //Debug.Log("No spawn points available, using default position (0,0,0)");
-            return Vector3.zero;
+            return _fallbackSpawnPosition;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private bool _debugStreamRevive;
         [SerializeField] private int _streamSpawnCount = 0;
 
+        [SerializeField] private Vector3 _debugSpawnPosition = new Vector3(1000, 0, 1000);
+
         public void OnSpawned()
         {
             if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
@@ -24,7 +26,7 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(35, 0, 0);
+                    randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
                     Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamA);
                 }
 
@@ -36,7 +38,7 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(-35, 0, 0);
+                    randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
                     Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamB);
                 }
@@ -65,7 +67,7 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(35, 0, 0);
+                    randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
                     Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamA);
                 }
                 flip = false;
@@ -80,7 +82,7 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(-35, 0, 0);
+                    randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
                     Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamB);
                 }

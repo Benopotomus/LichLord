@@ -12,11 +12,7 @@ using UnityEditor;
 public class WorldSettings : ScriptableObject
 {
     [SerializeField]
-    private Vector2 _worldOrigin = new Vector2(-500f, -500f);
-    public Vector2 WorldOrigin => _worldOrigin;
-
-    [SerializeField]
-    private Vector2 _worldSize = new Vector2(1000f, 1000f);
+    private Vector2 _worldSize = new Vector2(3000f, 3000f);
     public Vector2 WorldSize => _worldSize;
 
     [SerializeField]
@@ -85,7 +81,7 @@ public class WorldSettings : ScriptableObject
     // Calculate chunk coordinate from world position
     public FChunkPosition GetChunkCoordFromPosition(Vector3 worldPosition)
     {
-        Vector2 relativePos = new Vector2(worldPosition.x, worldPosition.z) - _worldOrigin;
+        Vector2 relativePos = new Vector2(worldPosition.x, worldPosition.z);
         return new FChunkPosition
         {
             X = (sbyte)(Mathf.FloorToInt(relativePos.x / LichLord.World.WorldConstants.CHUNK_SIZE)),

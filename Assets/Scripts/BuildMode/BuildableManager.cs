@@ -15,11 +15,6 @@ namespace LichLord.Buildables
 
         }
 
-        public void PlaceBuilding(Vector3 position, int definitionId)
-        {
-            Debug.Log("PlaceBuilding: " + definitionId);
-        }
-
         private void OnBuildableSpawned(BuildableRuntimeState propRuntimeState, Buildable buildable)
         {
 
