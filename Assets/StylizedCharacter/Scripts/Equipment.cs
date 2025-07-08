@@ -12,11 +12,16 @@ namespace NHance.Assets.Scripts
         
         void Start()
         {
+            //RemapBones();
+        }
+
+        public void RemapBones()
+        {
             var boneMap = new Dictionary<string, Transform>();
             GetAllSkinnedMeshRenderers(ref boneMap, Target);
             List<SkinnedMeshRenderer> renderList = GetComponents<SkinnedMeshRenderer>().ToList();
             renderList.AddRange(GetComponentsInChildren<SkinnedMeshRenderer>());
-            
+
             //nothing to map
             if (renderList.Count == 0)
                 return;
