@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using DWD.Pooling;
+using LichLord.World;
 
 namespace LichLord.Props
 {
-    public class Prop : DWDObjectPoolObject, IHitTarget
+    public class Prop : DWDObjectPoolObject, IHitTarget , IChunkTrackable
     {
         [SerializeField]
         private PropStateComponent _stateComponent;
@@ -25,6 +26,25 @@ namespace LichLord.Props
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
 
+        // IChunkTrackable
+        private Chunk _currentChunk;
+        public Chunk CurrentChunk { get => _currentChunk; set => _currentChunk = value; }
+
+        public Vector3 Position => CachedTransform.position;
+        public bool IsAttackable
+        {
+            get
+            {
+                switch (_stateComponent.CurrentState)
+                {
+                    case EPropState.Destroyed:
+                    case EPropState.Inactive:
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
         public HurtboxComponent Hurtbox;
 
         public virtual void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)

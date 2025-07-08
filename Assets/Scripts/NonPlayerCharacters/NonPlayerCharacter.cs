@@ -154,16 +154,19 @@ namespace LichLord.NonPlayerCharacters
             if (_teamId == newTeam)
                 return;
 
-            switch (newTeam)
+            if (redHat != null && blueHat != null)
             {
-                case ETeamID.EnemiesTeamA:
-                    redHat.SetActive(false);
-                    blueHat.SetActive(true);
-                    break;
-                case ETeamID.EnemiesTeamB:
-                    blueHat.SetActive(false);
-                    redHat.SetActive(true);
-                    break;
+                switch (newTeam)
+                {
+                    case ETeamID.EnemiesTeamA:
+                        redHat.SetActive(false);
+                        blueHat.SetActive(true);
+                        break;
+                    case ETeamID.EnemiesTeamB:
+                        blueHat.SetActive(false);
+                        redHat.SetActive(true);
+                        break;
+                }
             }
 
             _teamId = newTeam;

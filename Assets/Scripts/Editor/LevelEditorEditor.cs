@@ -11,8 +11,10 @@ public class LevelEditorEditor : Editor
 {
     private PropDefinition newPropDefinition;
     private bool isAddingPoints = false;
+    private bool isDeletingPoints = false;
     private Vector3 forwardDirection = Vector3.forward;
     private bool useSurfaceNormal = false;
+    private float deleteRadius = 1.0f;
 
     public override void OnInspectorGUI()
     {
@@ -37,6 +39,7 @@ public class LevelEditorEditor : Editor
         if (GUILayout.Button(isAddingPoints ? "Stop Adding Points" : "Start Adding Points"))
         {
             isAddingPoints = !isAddingPoints;
+            isDeletingPoints = false; // Ensure delete mode is off
             if (isAddingPoints)
             {
                 Selection.activeGameObject = manager.gameObject;
@@ -46,6 +49,27 @@ public class LevelEditorEditor : Editor
             {
                 SceneView.duringSceneGui -= OnSceneGUI;
             }
+        }
+
+        if (GUILayout.Button(isDeletingPoints ? "Stop Deleting Points" : "Start Deleting Points"))
+        {
+            isDeletingPoints = !isDeletingPoints;
+            isAddingPoints = false; // Ensure add mode is off
+            if (isDeletingPoints)
+            {
+                Selection.activeGameObject = manager.gameObject;
+                SceneView.duringSceneGui += OnSceneGUI;
+            }
+            else
+            {
+                SceneView.duringSceneGui -= OnSceneGUI;
+            }
+        }
+
+        if (isDeletingPoints)
+        {
+            deleteRadius = EditorGUILayout.FloatField("Delete Radius", deleteRadius);
+            deleteRadius = Mathf.Max(0.1f, deleteRadius); // Prevent negative or zero radius
         }
 
         if (GUILayout.Button("Clear All Points"))
@@ -202,66 +226,115 @@ public class LevelEditorEditor : Editor
 
     private void OnSceneGUI(SceneView sceneView)
     {
-        if (!isAddingPoints || newPropDefinition == null)
-            return;
-
-        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
-
-        Event e = Event.current;
         LevelEditor manager = (LevelEditor)target;
+        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+        Event e = Event.current;
 
-        if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
+        if (isAddingPoints && newPropDefinition != null)
         {
-            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
             {
-                // Calculate chunk coordinate
-                FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
-                ChunkPropsMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
-
-                Undo.RecordObject(markupData, "Add Prop Point");
-
-                List<PropMarkupData> points = markupData.propMarkupDatas != null
-                    ? new List<PropMarkupData>(markupData.propMarkupDatas)
-                    : new List<PropMarkupData>();
-
-                int guid = GetUniqueGuid(manager.WorldSettings);
-
-                points.Add(new PropMarkupData
+                Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+                if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    guid = guid,
-                    position = hit.point,
-                    rotation = Quaternion.LookRotation((useSurfaceNormal ? hit.normal : forwardDirection).normalized, Vector3.up),
-                    propDefinition = newPropDefinition
-                });
+                    // Calculate chunk coordinate
+                    FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
+                    ChunkPropsMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
 
-                markupData.propMarkupDatas = points.ToArray();
-                EditorUtility.SetDirty(markupData);
-                EditorUtility.SetDirty(manager.WorldSettings);
+                    Undo.RecordObject(markupData, "Add Prop Point");
 
-                e.Use();
+                    List<PropMarkupData> points = markupData.propMarkupDatas != null
+                        ? new List<PropMarkupData>(markupData.propMarkupDatas)
+                        : new List<PropMarkupData>();
+
+                    int guid = GetUniqueGuid(manager.WorldSettings);
+
+                    points.Add(new PropMarkupData
+                    {
+                        guid = guid,
+                        position = hit.point,
+                        rotation = Quaternion.LookRotation((useSurfaceNormal ? hit.normal : forwardDirection).normalized, Vector3.up),
+                        propDefinition = newPropDefinition
+                    });
+
+                    markupData.propMarkupDatas = points.ToArray();
+                    EditorUtility.SetDirty(markupData);
+                    EditorUtility.SetDirty(manager.WorldSettings);
+
+                    e.Use();
+                }
+            }
+
+            if (Physics.Raycast(HandleUtility.GUIPointToWorldRay(e.mousePosition), out RaycastHit previewHit))
+            {
+                Mesh mesh = manager.GetMeshFromPrefab(newPropDefinition.prefab);
+                Vector3 forward = useSurfaceNormal ? previewHit.normal : forwardDirection;
+
+                if (mesh != null && newPropDefinition.prefab != null)
+                {
+                    Handles.color = new Color(1f, 1f, 0f, 0.5f);
+                    Quaternion rotation = forward.sqrMagnitude > 0 ? Quaternion.LookRotation(forward, Vector3.up) : Quaternion.identity;
+                    Vector3 scale = newPropDefinition.prefab.transform.localScale;
+                    Bounds bounds = mesh.bounds;
+                    Handles.DrawWireCube(previewHit.point + rotation * bounds.center, rotation * Vector3.Scale(bounds.size, scale));
+                }
+                else
+                {
+                    Handles.color = Color.yellow;
+                    Handles.DrawSolidDisc(previewHit.point, previewHit.normal, 0.3f);
+                }
             }
         }
-
-        if (Physics.Raycast(HandleUtility.GUIPointToWorldRay(e.mousePosition), out RaycastHit previewHit))
+        else if (isDeletingPoints)
         {
-            Mesh mesh = manager.GetMeshFromPrefab(newPropDefinition.prefab);
-            Vector3 forward = useSurfaceNormal ? previewHit.normal : forwardDirection;
+            if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
+            {
+                Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+                if (Physics.Raycast(ray, out RaycastHit hit))
+                {
+                    FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
+                    ChunkPropsMarkupData markupData = manager.WorldSettings.GetMarkupData(chunkCoord);
 
-            if (mesh != null && newPropDefinition.prefab != null)
-            {
-                Handles.color = new Color(1f, 1f, 0f, 0.5f);
-                Quaternion rotation = forward.sqrMagnitude > 0 ? Quaternion.LookRotation(forward, Vector3.up) : Quaternion.identity;
-                Vector3 scale = newPropDefinition.prefab.transform.localScale;
-                Bounds bounds = mesh.bounds;
-                Handles.DrawWireCube(previewHit.point + rotation * bounds.center, rotation * Vector3.Scale(bounds.size, scale));
+                    if (markupData != null && markupData.propMarkupDatas != null)
+                    {
+                        List<PropMarkupData> points = new List<PropMarkupData>(markupData.propMarkupDatas);
+                        PropMarkupData closestPoint = null;
+                        float minDistance = float.MaxValue;
+
+                        foreach (PropMarkupData point in points)
+                        {
+                            if (point != null)
+                            {
+                                float distance = Vector3.Distance(hit.point, point.position);
+                                if (distance < deleteRadius && distance < minDistance)
+                                {
+                                    minDistance = distance;
+                                    closestPoint = point;
+                                }
+                            }
+                        }
+
+                        if (closestPoint != null)
+                        {
+                            Undo.RecordObject(markupData, "Delete Prop Point");
+                            points.Remove(closestPoint);
+                            markupData.propMarkupDatas = points.ToArray();
+                            EditorUtility.SetDirty(markupData);
+                            EditorUtility.SetDirty(manager.WorldSettings);
+                        }
+                    }
+
+                    e.Use();
+                }
             }
-            else
+
+            if (Physics.Raycast(HandleUtility.GUIPointToWorldRay(e.mousePosition), out RaycastHit previewHit))
             {
-                Handles.color = Color.yellow;
-                Handles.DrawSolidDisc(previewHit.point, previewHit.normal, 0.3f);
+                Handles.color = new Color(1f, 0f, 0f, 0.5f);
+                Handles.DrawWireDisc(previewHit.point, previewHit.normal, deleteRadius);
             }
         }
+
         sceneView.Repaint();
     }
 
