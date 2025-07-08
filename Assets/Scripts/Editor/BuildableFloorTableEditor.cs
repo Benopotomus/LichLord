@@ -3,10 +3,10 @@ using LichLord.Buildables;
 
 namespace LichLord.Editor
 {
-    [CustomEditor(typeof(BuildableFloorTable))]
-    public class BuildableFloorTableEditor : ObjectTableEditor<
-        BuildableFloorDefinition,
-        BuildableFloorTable>
+    [CustomEditor(typeof(BuildableFeatureTable))]
+    public class BuildableFeatureTableEditor : ObjectTableEditor<
+        BuildableFeatureDefinition,
+        BuildableFeatureTable>
     {
 
     }

@@ -33,6 +33,6 @@ namespace LichLord.Buildables
         None,
         Wall,
         Floor,
-        Free,
+        SubTile,
     }
 }

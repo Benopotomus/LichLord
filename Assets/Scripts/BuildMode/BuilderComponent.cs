@@ -38,6 +38,9 @@ namespace LichLord.Buildables
         [SerializeField] private List<BuildableFloorDefinition> _availableBuildableFloors = new List<BuildableFloorDefinition>();
         public IReadOnlyList<BuildableFloorDefinition> AvailableBuildableFloors => _availableBuildableFloors;
 
+        [SerializeField] private List<BuildableFeatureDefinition> _availableBuildableFeatures = new List<BuildableFeatureDefinition>();
+        public IReadOnlyList<BuildableFeatureDefinition> AvailableBuildableFeatures => _availableBuildableFeatures;
+
         [SerializeField]
         private BuildableDefinition _selectedDefinition;
 
@@ -138,6 +141,9 @@ namespace LichLord.Buildables
                 case EBuildableCategory.Floor:
                     listCount = _availableBuildableFloors.Count;
                     break;
+                case EBuildableCategory.Feature:
+                    listCount = _availableBuildableFeatures.Count;
+                    break;
             }
 
             if (input.ScrollDelta != 0 && listCount > 1)
@@ -177,12 +183,18 @@ namespace LichLord.Buildables
                 case EBuildableCategory.Floor:
                     _selectedDefinition = _availableBuildableFloors[newIndex];
                     break;
+                case EBuildableCategory.Feature:
+                    _selectedDefinition = _availableBuildableFeatures[newIndex];
+                    break;
             }
         }
 
         private void ProcessBuildableActions(ref FGameplayInput input)
         {
             if (!input.Fire)
+                return;
+
+            if (!_placementValid)
                 return;
 
             if (_isDeleteMode)
@@ -209,13 +221,24 @@ namespace LichLord.Buildables
                             0
                         );
                         break;
+
+                    case EBuildableCategory.Feature:
+                        Context.BuildableManager.RPC_PlaceBuildableFeature(
+                            _targetZone,
+                            _orientation,
+                            (byte)_gridPosition.x,
+                            (byte)_gridPosition.y,
+                            (byte)_gridPosition.z,
+                            0
+                        );
+                        break;
                 }
                 return;
             }
 
-            switch (_selectedDefinition.PlacementType)
+            switch (_buildableCategory)
             {
-                case EBuildablePlacementType.Wall:
+                case EBuildableCategory.Wall:
                     Context.BuildableManager.RPC_PlaceBuildableWall(
                         _targetZone,
                         _orientation,
@@ -225,9 +248,19 @@ namespace LichLord.Buildables
                         (byte)_selectedDefinition.TableID
                     );
                     break;
-                case EBuildablePlacementType.Floor:
+                case EBuildableCategory.Floor:
                     Context.BuildableManager.RPC_PlaceBuildableFloor(
                         _targetZone,
+                        (byte)_gridPosition.x,
+                        (byte)_gridPosition.y,
+                        (byte)_gridPosition.z,
+                        (byte)_selectedDefinition.TableID
+                    );
+                    break;
+                case EBuildableCategory.Feature:
+                    Context.BuildableManager.RPC_PlaceBuildableFeature(
+                        _targetZone,
+                        _orientation,
                         (byte)_gridPosition.x,
                         (byte)_gridPosition.y,
                         (byte)_gridPosition.z,
@@ -253,10 +286,13 @@ namespace LichLord.Buildables
             switch (_selectedDefinition.PlacementType)
             {
                 case EBuildablePlacementType.Floor:
-                    hasValidSelection = UpdateGridPosition(cachedRaycast.position);
+                    hasValidSelection = UpdateFloorGridPosition(cachedRaycast.position);
                     break;
                 case EBuildablePlacementType.Wall:
                     hasValidSelection = UpdateWallPosition(cachedRaycast.position);
+                    break;
+                case EBuildablePlacementType.SubTile:
+                    hasValidSelection = UpdateFeatureGridPosition(cachedRaycast.position);
                     break;
             }
 
@@ -281,7 +317,7 @@ namespace LichLord.Buildables
             _ghostPreviewArrow.SetActive(newVisibility && isWall);
         }
 
-        private bool UpdateGridPosition(Vector3 position)
+        private bool UpdateFloorGridPosition(Vector3 position)
         {
             if (_targetZone.Grid.TryGetGridPosition(position, out int gridX, out int gridY, out int gridZ))
             {
@@ -344,6 +380,38 @@ namespace LichLord.Buildables
             return false;
         }
 
+        private bool UpdateFeatureGridPosition(Vector3 position)
+        {
+            if (_targetZone.Grid.TryGetSubGridPosition(position, out int subTileX, out int gridY, out int subTileZ))
+            {
+                _gridPosition = new Vector3Int(subTileX, gridY, subTileZ);
+
+                var grid = _targetZone.Grid;
+
+                float subTileSize = grid.TileSizeXZ / 8f;
+
+                Vector3 localSubTileCenter = new Vector3(
+                    subTileX * subTileSize + subTileSize * 0.5f,
+                    gridY * grid.TileSizeY,
+                    subTileZ * subTileSize + subTileSize * 0.5f
+                );
+
+                Vector3 worldSubTileCenter = _targetZone.transform.TransformPoint(localSubTileCenter);
+
+                UpdateGhostPreviews(
+                    worldSubTileCenter,
+                    _targetZone.transform.rotation,
+                    new Vector3(subTileSize, 0.25f, subTileSize),
+                    false,
+                    EWallOrientation.None
+                );
+
+                return true;
+            }
+
+            return false;
+        }
+
         private void UpdateGhostPreviews(Vector3 worldPosition, Quaternion rotation, Vector3 scale, bool isWall, EWallOrientation orientation)
         {
             _ghostPreview.transform.position = worldPosition;
@@ -353,31 +421,16 @@ namespace LichLord.Buildables
             if (isWall)
             {
                 // determine a directional offset based on wall orientation
-                Vector3 offsetDir = Vector3.zero;
-
-                switch (orientation)
-                {
-                    case EWallOrientation.North:
-                        offsetDir = Vector3.back; // toward tile interior
-                        break;
-                    case EWallOrientation.South:
-                        offsetDir = Vector3.forward;
-                        break;
-                    case EWallOrientation.East:
-                        offsetDir = Vector3.left;
-                        break;
-                    case EWallOrientation.West:
-                        offsetDir = Vector3.right;
-                        break;
-                }
+                Vector3 offsetDir = Vector3.back; // toward tile interior
 
                 // move the arrow slightly into the tile
-                Vector3 arrowPosition = worldPosition + offsetDir * (scale.x * 0.2f);
+                Vector3 arrowPosition = worldPosition + (rotation * offsetDir * 1f);
+                arrowPosition.y -= 1f;
 
                 _ghostPreviewArrow.transform.position = arrowPosition;
-                _ghostPreviewArrow.transform.localScale = new Vector3(1, 2f, 0.25f);
+                _ghostPreviewArrow.transform.localScale = new Vector3(2, 1f, 2f);
 
-                Quaternion arrowRotation = rotation * Quaternion.Euler(90, 270f, 0);
+                Quaternion arrowRotation = rotation * Quaternion.Euler(0f, 0f, 0);
                 _ghostPreviewArrow.transform.rotation = arrowRotation;
             }
         }
@@ -393,6 +446,8 @@ namespace LichLord.Buildables
                     return _availableBuildableWalls[_selectedIndex];
                 case EBuildableCategory.Floor:
                     return _availableBuildableFloors[_selectedIndex];
+                case EBuildableCategory.Feature:
+                    return _availableBuildableFeatures[_selectedIndex];
                 default:
                     return null;
             }
@@ -408,6 +463,9 @@ namespace LichLord.Buildables
                         return _availableBuildableWalls;
                     case EBuildableCategory.Floor:
                         return _availableBuildableFloors;
+                    case EBuildableCategory.Feature:
+                        return _availableBuildableFeatures;
+
                     case EBuildableCategory.Roof:
                     case EBuildableCategory.Interior:
                         return null;
@@ -423,6 +481,7 @@ namespace LichLord.Buildables
         None,
         Wall,
         Floor,
+        Feature,
         Roof,
         Interior,
     }

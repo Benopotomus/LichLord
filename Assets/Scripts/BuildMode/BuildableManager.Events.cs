@@ -17,13 +17,12 @@ namespace LichLord.Buildables
             if (zone == null)
                 return;
 
-            Debug.Log("Place Floor Position: " + new Vector3Int(posX, posY, posZ));
+            //Debug.Log("Place Floor Position: " + new Vector3Int(posX, posY, posZ) + ", Def ID: " + definitionID);
 
-            zone.PlaceBuildableFloor(posX,
+            zone.PlaceBuildableFloor(definitionID,
+            posX,
             posY,
-            posZ,
-            definitionID);
-          
+            posZ);
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
@@ -37,15 +36,33 @@ namespace LichLord.Buildables
             if (zone == null)
                 return;
 
-            Debug.Log("Place Wall Position: " + new Vector3Int(posX, posY, posZ) + " Orientation: " + wallOrientation);
+            //Debug.Log("Place Wall Position: " + new Vector3Int(posX, posY, posZ) + " Orientation: " + wallOrientation);
 
             zone.PlaceBuildableWall(definitionID,
                 wallOrientation,
                 posX,
                 posY,
                 posZ);
+        }
 
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_PlaceBuildableFeature(BuildableZone zone,
+            EWallOrientation wallOrientation,
+            byte posX,
+            byte posY,
+            byte posZ,
+            byte definitionID)
+        {
+            if (zone == null)
+                return;
 
+            //Debug.Log("Place Wall Position: " + new Vector3Int(posX, posY, posZ) + " Orientation: " + wallOrientation);
+
+            zone.PlaceBuildableFeature(definitionID,
+                wallOrientation,
+                posX,
+                posY,
+                posZ);
         }
     }
 }

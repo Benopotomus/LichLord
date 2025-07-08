@@ -20,7 +20,15 @@ namespace LichLord.Buildables
         [Networked]
         private ref FWorldTransform _transform => ref MakeRef<FWorldTransform>();
 
-        private List<BuildableZoneReplicator> _floors = new List<BuildableZoneReplicator>(8);
+        private List<BuildableZoneReplicator> _replicators = new List<BuildableZoneReplicator>(8);
+
+        public void AddReplicator(BuildableZoneReplicator replicator)
+        {
+            if (!_replicators.Contains(replicator))
+            {
+                _replicators.Add(replicator);
+            }
+        }
 
         private void Reset()
         {
@@ -60,38 +68,99 @@ namespace LichLord.Buildables
 
         public void PlaceBuildableWall(int definitionID, EWallOrientation orientation, int x, int y, int z)
         {
-            // make sure there is a floor for this level
-            if (y >= _floors.Count)
-            {
-                SpawnMissingFloors(y);
-            }
+            // make sure there is enough room for a floor
+            var replicator = GetReplicatorWithFreeWallSlots(orientation);
+            int freeIndex = replicator.GetFreeWallIndex(orientation);
 
             // then place the wall on the floor
-            _floors[y].PlaceBuildableWall(definitionID, orientation, x, y, z);
+            replicator.PlaceBuildableWall(freeIndex, definitionID, orientation, x, y, z);
         }
 
         public void PlaceBuildableFloor(int definitionID, int x, int y, int z)
         {
-            // make sure there is a floor for this level
-            if (y >= _floors.Count)
-            {
-                SpawnMissingFloors(y);
-            }
+            // make sure there is enough room for this wall
+            var replicator = GetReplicatorWithFreeFloorSlots();
+            int freeIndex = replicator.GetFreeFloorIndex();
 
             // then place the wall on the floor
-            _floors[y].PlaceBuildableFloor(definitionID, x, y, z);
+            replicator.PlaceBuildableFloor(freeIndex, definitionID, x, y, z);
         }
 
-        private void SpawnMissingFloors(int floorY)
+        public void PlaceBuildableFeature(int definitionID, EWallOrientation orientation, int x, int y, int z)
         {
-            // spawn missing floors up to y
-            for (int i = _floors.Count; i <= floorY; i++)
+            // make sure there is enough room for a floor
+            var replicator = GetReplicatorWithFreeFeatureSlots();
+            int freeIndex = replicator.GetFreeFeatureIndex();
+
+            // then place the wall on the floor
+            replicator.PlaceBuildableWall(freeIndex, definitionID, orientation, x, y, z);
+        }
+
+        private BuildableZoneReplicator SpawnReplicator()
+        {
+            var replicator = Runner.Spawn(
+                _floorPrefab,
+                transform.position,
+                Quaternion.identity,
+                inputAuthority: null,
+                onBeforeSpawned: (runner, spawnedObject) =>
+                {
+                    // This is your spawn delegate
+                    var rep = spawnedObject.GetComponent<BuildableZoneReplicator>();
+                    rep.Initialized(this);
+                });
+
+            return replicator;
+        }
+
+        public BuildableZoneReplicator GetReplicatorWithFreeFloorSlots()
+        {
+            foreach (var replicator in _replicators)
             {
-                var spawnPosition = transform.position + Vector3.up * i * Grid.TileSizeY; // assuming 2m floor height
-                var floorInstance = Runner.Spawn(_floorPrefab, spawnPosition, Quaternion.identity, inputAuthority: null);
-                _floors.Add(floorInstance);
-                floorInstance.Initialized(this);
+                if (replicator.FreeIndicesFloor.Count > 0)
+                    return replicator;
             }
+
+            return SpawnReplicator();
+        }
+
+        public BuildableZoneReplicator GetReplicatorWithFreeWallSlots(EWallOrientation orientation)
+        {
+            foreach (var replicator in _replicators)
+            {
+                switch (orientation)
+                {
+                    case EWallOrientation.North:
+                        if (replicator.FreeIndicesWallNorth.Count > 0)
+                            return replicator;
+                        break;
+                    case EWallOrientation.South:
+                        if (replicator.FreeIndicesWallSouth.Count > 0)
+                            return replicator;
+                        break;
+                    case EWallOrientation.West:
+                        if (replicator.FreeIndicesWallWest.Count > 0)
+                            return replicator;
+                        break;
+                    case EWallOrientation.East:
+                        if (replicator.FreeIndicesWallEast.Count > 0)
+                            return replicator;
+                        break;
+                }
+            }
+
+            return SpawnReplicator();
+        }
+
+        public BuildableZoneReplicator GetReplicatorWithFreeFeatureSlots()
+        {
+            foreach (var replicator in _replicators)
+            {
+                if (replicator.FreeIndicesFeature.Count > 0)
+                    return replicator;
+            }
+
+            return SpawnReplicator();
         }
     }
 }

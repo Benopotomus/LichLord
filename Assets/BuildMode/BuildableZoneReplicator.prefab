@@ -13,9 +13,10 @@ GameObject:
   - component: {fileID: 5719243280605522234}
   - component: {fileID: 452369478476921640}
   - component: {fileID: 5504025299528896701}
+  - component: {fileID: -2581612566461300350}
   - component: {fileID: 2131666699098261133}
   m_Layer: 11
-  m_Name: BuildableZoneFloor
+  m_Name: BuildableZoneReplicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,11 +47,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 648983852749263541}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88ad90daa4f27494bbc22e0b91e19127, type: 3}
+  m_Script: {fileID: 11500000, guid: bbe38d32b53e89c46bad7d4b87a515d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _floorSpawner: {fileID: 452369478476921640}
   _wallSpawner: {fileID: 5504025299528896701}
+  _featureSpawner: {fileID: -2581612566461300350}
 --- !u!65 &5719243280605522234
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -94,6 +96,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7a5e5ac9d158bb41b02dc54848a4299, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-2581612566461300350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 648983852749263541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a89735199fe92d54086aa67b99baebb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &2131666699098261133

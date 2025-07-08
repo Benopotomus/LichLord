@@ -88,5 +88,69 @@ namespace LichLord.Buildables
                 _ => Quaternion.identity
             };
         }
+
+        public static void GetFloorWorldTransform(
+            BuildableZone zone,
+            int x,
+            int y,
+            int z,
+            out Vector3 worldPosition,
+            out Quaternion rotation)
+        {
+            if (zone == null || zone.Grid == null)
+            {
+                worldPosition = Vector3.zero;
+                rotation = Quaternion.identity;
+                Debug.LogWarning("BuildableZone or its Grid is null.");
+                return;
+            }
+
+            float tileSizeXZ = zone.Grid.TileSizeXZ;
+            float tileSizeY = zone.Grid.TileSizeY;
+
+            // center of the floor tile
+            float halfSizeXZ = tileSizeXZ * 0.5f;
+
+            Vector3 floorCenterLocal = new Vector3(
+                x * tileSizeXZ + halfSizeXZ,
+                y * tileSizeY,
+                z * tileSizeXZ + halfSizeXZ
+            );
+
+            worldPosition = zone.transform.TransformPoint(floorCenterLocal);
+            rotation = zone.transform.rotation; // floors are flat on the grid
+        }
+
+        public static void GetFeatureWorldTransform(
+                BuildableZone zone,
+                int subTileX,
+                int y,
+                int subTileZ,
+                out Vector3 worldPosition,
+                out Quaternion rotation)
+        {
+            if (zone == null || zone.Grid == null)
+            {
+                worldPosition = Vector3.zero;
+                rotation = Quaternion.identity;
+                Debug.LogWarning("BuildableZone or its Grid is null.");
+                return;
+            }
+
+            float tileSizeXZ = zone.Grid.TileSizeXZ;
+            float tileSizeY = zone.Grid.TileSizeY;
+
+            // center of the floor tile
+            float halfSizeXZ = tileSizeXZ * 0.5f;
+
+            Vector3 floorCenterLocal = new Vector3(
+                subTileX * tileSizeXZ + halfSizeXZ,
+                y * tileSizeY,
+                subTileZ * tileSizeXZ + halfSizeXZ
+            );
+
+            worldPosition = zone.transform.TransformPoint(floorCenterLocal);
+            rotation = zone.transform.rotation; // floors are flat on the grid
+        }
     }
 }

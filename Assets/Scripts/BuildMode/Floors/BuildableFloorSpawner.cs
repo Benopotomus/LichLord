@@ -10,7 +10,7 @@ namespace LichLord.Buildables
     {
         public Action<Buildable, int> OnBuildableFloorSpawned;
 
-        public void SpawnBuildableFloor(BuildableZoneReplicator floor, 
+        public void SpawnBuildableFloor(BuildableZoneReplicator replicator, 
             int floorTileIndex,
             BuildableDefinition definition, 
             Vector3 spawnPosition, 
@@ -19,7 +19,7 @@ namespace LichLord.Buildables
         {
             if (definition == null)
             {
-                Debug.LogWarning("Trying to spawn prop with invalid definition, id: " + definition);
+                Debug.LogWarning("Trying to spawn prop with invalid definition, id: " + definition.TableID);
                 return;
             }
 
@@ -39,13 +39,13 @@ namespace LichLord.Buildables
 
                 if (loadedBundle.BundleName == prefabBundle.Bundle)
                 {
-                    OnPrefabLoaded(floor, floorTileIndex, definition, spawnPosition, spawnRotation, data, loadedBundle);
+                    OnPrefabLoaded(replicator, floorTileIndex, definition, spawnPosition, spawnRotation, data, loadedBundle);
                     return;
                 }
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            BuildableFloorLoader buildableFloorLoader = new BuildableFloorLoader(floor,
+            BuildableFloorLoader buildableFloorLoader = new BuildableFloorLoader(replicator,
                 floorTileIndex,
                 definition, 
                 spawnPosition, 

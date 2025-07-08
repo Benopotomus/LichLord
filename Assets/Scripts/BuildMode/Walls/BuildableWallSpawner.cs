@@ -69,7 +69,7 @@ namespace LichLord.Buildables
         {
             buildableWallLoader.OnLoadComplete -= OnLoaderLoaded;
 
-            OnPrefabLoaded(buildableWallLoader.Floor,
+            OnPrefabLoaded(buildableWallLoader.Replicator,
                 buildableWallLoader.FloorTileIndex,
                 buildableWallLoader.Orientation,
                 buildableWallLoader.Definition,
