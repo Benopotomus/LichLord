@@ -58,6 +58,8 @@ namespace LichLord.Props
 
             CachedTransform.position = _propRuntimeState.position;
             CachedTransform.rotation = _propRuntimeState.rotation;
+
+            _currentChunk = propRuntimeState.chunk;
         }
 
         // This is the visuals for authority and client.

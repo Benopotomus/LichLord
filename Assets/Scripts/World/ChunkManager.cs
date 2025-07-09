@@ -6,16 +6,29 @@ using LichLord.Props;
 
 namespace LichLord.World
 {
-    public class ChunkManager : ContextBehaviour
+    public class ChunkManager : ContextBehaviour 
     {
+        [SerializeField]
+        private ChunkReplicator _replicatorPrefab;
+
         [SerializeField]
         private bool drawChunkBounds = true;
 
-        private Chunk[,] _worldChunks = new Chunk[40, 40];
+        private Chunk[,] _worldChunks = new Chunk[135, 135];
         public Chunk[,] WorldChunks => _worldChunks;
 
         public HashSet<Chunk> _deltaChunks = new HashSet<Chunk>();
         public HashSet<Chunk> DeltaChunks => _deltaChunks;
+
+        private HashSet<Chunk> _replicatedChunks = new HashSet<Chunk>(); // Track replicated chunks
+        public HashSet<Chunk> ReplicatedChunks => _replicatedChunks;
+
+        private HashSet<Chunk> _loadedChunks = new HashSet<Chunk>(); // Track loaded chunks
+        public HashSet<Chunk> LoadedChunks => _loadedChunks;
+
+        private Dictionary<FChunkPosition, ChunkReplicator> _replicators = new Dictionary<FChunkPosition, ChunkReplicator>();
+
+        private Stack<ChunkReplicator> _replicatorPool = new Stack<ChunkReplicator>();
 
         public void InitializeWorldChunks()
         {
@@ -34,8 +47,8 @@ namespace LichLord.World
                 {
                     FChunkPosition chunkID = new FChunkPosition
                     {
-                        X = (sbyte)x,
-                        Y = (sbyte)y
+                        X = (byte)x,
+                        Y = (byte)y
                     };
 
                     _worldChunks[x, y] = new Chunk(chunkID, this);
@@ -43,73 +56,95 @@ namespace LichLord.World
             }
         }
 
-        public void LoadChunksFromSaves()
+        public void TryAddReplicatedChunks(List<Chunk> chunksToAdd)
         {
-            Dictionary<FChunkPosition, FChunkSaveData> loadedChunks = Context.WorldSaveLoadManager.LoadedChunks;
-
-            foreach (var chunkSaveData in loadedChunks.Values)
-            {
-                Chunk chunk = GetChunk(chunkSaveData.chunkCoord);
-                foreach (var savedProp in chunkSaveData.props)
-                {
-                    FPropData savedData = new FPropData { StateData = savedProp.stateData };
-
-                    PropRuntimeState propRuntimeState = new PropRuntimeState(
-                        savedProp.guid,
-                        savedProp.position,
-                        savedProp.rotation,
-                        savedProp.definitionId,
-                        savedData
-                    );
-
-                    Context.PropManager.ReplicateAuthorityData(propRuntimeState);
-                }
-            }
-        }
-
-        public override void FixedUpdateNetwork()
-        {
-            if (!Runner.IsForward || !Runner.IsFirstTick)
+            if (chunksToAdd == null || chunksToAdd.Count == 0)
                 return;
 
-            base.FixedUpdateNetwork();
-        }
-
-        public override void Render()
-        {
-            base.Render();
-
-            if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter character))
-                return;
-
-            foreach (Chunk chunk in character.CachedChunks)
+            foreach (var chunk in chunksToAdd)
             {
-                if (chunk.LoadState != ELoadState.None)
+                if (chunk == null)
                     continue;
 
-                LoadChunkIntoMemory(chunk);
+                if (chunk.LoadState == ELoadState.None)
+                {
+                    LoadChunkIntoMemory(chunk);
+                }
+
+                chunk.IncrementReplicationRef();
+
+                _replicatedChunks.Add(chunk);
+
+                if (HasStateAuthority)
+                {
+                    if (_replicators.ContainsKey(chunk.ChunkID))
+                        continue;
+
+                    ChunkReplicator replicator;
+
+                    // Reuse from pool
+                    if (_replicatorPool.Count > 0)
+                    {
+                        replicator = _replicatorPool.Pop();
+                        replicator.transform.position = chunk.Bounds.center;
+                        replicator.PreSpawned(chunk.ChunkID);
+                        replicator.OnSpawned();
+                        replicator.gameObject.SetActive(true); // Enable reused replicator
+
+                    }
+                    else
+                    {
+                        replicator = Runner.Spawn(_replicatorPrefab,
+                            chunk.Bounds.center,
+                            Quaternion.identity,
+                            inputAuthority: null,
+                            onBeforeSpawned: (runner, spawnedObject) =>
+                            {
+                                var rep = spawnedObject.GetComponent<ChunkReplicator>();
+                                rep.PreSpawned(chunk.ChunkID);
+                            });
+                    }
+                }
             }
         }
 
+        public void TryRemoveReplicatedChunks(List<Chunk> chunksToRemove)
+        {
+            if (chunksToRemove == null || chunksToRemove.Count == 0)
+                return;
+
+            foreach (var chunk in chunksToRemove)
+            {
+                if (chunk == null)
+                    continue;
+
+                chunk.DecrementReplicationRef();
+
+                if (chunk.ReplicationRefCount > 0)
+                    continue;
+
+                _replicatedChunks.Remove(chunk);
+
+                if (_replicators.TryGetValue(chunk.ChunkID, out var replicator))
+                {
+                    _replicators.Remove(chunk.ChunkID);
+                    
+                    replicator.Deactivate();
+                    replicator.gameObject.SetActive(false); // Disable and pool
+
+                    _replicatorPool.Push(replicator);
+                }
+
+                // Optionally unload
+                // UnloadChunkFromMemory(chunk);
+            }
+        }
+  
         private void LoadChunkIntoMemory(Chunk chunkToLoad)
         {
-            if (PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter character))
-            {
-                if (character.CurrentChunk == null)
-                    return;
-
-                FChunkPosition currentChunkId = character.CurrentChunk.ChunkID;
-                FChunkPosition loadedChunkId = chunkToLoad.ChunkID;
-
-                chunkToLoad.LoadState = ELoadState.Loaded;
-                Context.PropManager.LoadPropsForChunk(chunkToLoad);
-
-                if (Math.Abs(currentChunkId.X - loadedChunkId.X) <= 2 &&
-                    Math.Abs(currentChunkId.Y - loadedChunkId.Y) <= 2)
-                {
-                    character.UpdateVisibilePropStates();
-                }
-            }
+            chunkToLoad.LoadState = ELoadState.Loaded;
+            Context.PropManager.LoadPropsForChunk(chunkToLoad);
+            _loadedChunks.Add(chunkToLoad);
         }
 
         public Chunk GetChunk(FChunkPosition position)
@@ -137,8 +172,8 @@ namespace LichLord.World
 
             return new FChunkPosition
             {
-                X = (sbyte)Mathf.FloorToInt((position.x) / WorldConstants.CHUNK_SIZE),
-                Y = (sbyte)Mathf.FloorToInt((position.z) / WorldConstants.CHUNK_SIZE)
+                X = (byte)Mathf.FloorToInt((position.x) / WorldConstants.CHUNK_SIZE),
+                Y = (byte)Mathf.FloorToInt((position.z) / WorldConstants.CHUNK_SIZE)
             };
         }
 
@@ -173,6 +208,21 @@ namespace LichLord.World
             base.Despawned(runner, hasState);
         }
 
+        public override void FixedUpdateNetwork()
+        {
+            base.FixedUpdateNetwork();
+
+            if (!Context.IsGameplayActive())
+                return;
+
+            int tick = Runner.Tick;
+
+            foreach (Chunk chunk in _replicatedChunks)
+            {
+                chunk.UpdatePropRuntimeStates(tick);
+            }
+        }
+
         void OnDrawGizmos()
         {
             if (!drawChunkBounds) return;
@@ -188,6 +238,22 @@ namespace LichLord.World
                     new Vector3(bounds.center.x, 0, bounds.center.z),
                     new Vector3(bounds.size.x - 0.1f, 0.1f, bounds.size.z - 0.1f)
                 );
+            }
+        }
+
+        public void RegisterReplicator(ChunkReplicator replicator)
+        {
+            if (!_replicators.ContainsKey(replicator.ChunkID))
+            {
+                _replicators[replicator.ChunkID] = replicator;
+            }
+        }
+
+        public void UnregisterReplicator(ChunkReplicator replicator)
+        {
+            if (_replicators.TryGetValue(replicator.ChunkID, out var current) && current == replicator)
+            {
+                _replicators.Remove(replicator.ChunkID);
             }
         }
     }

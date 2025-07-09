@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using LichLord.Props;
 using System.IO;
 using System.Linq;
+using LichLord.Props;
 using LichLord.World;
 
 [CustomEditor(typeof(LevelEditor))]
@@ -15,6 +15,19 @@ public class LevelEditorEditor : Editor
     private Vector3 forwardDirection = Vector3.forward;
     private bool useSurfaceNormal = false;
     private float deleteRadius = 1.0f;
+
+    private List<GameObject> _previewInstances = new();
+
+    private void OnEnable()
+    {
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+
+    private void OnDisable()
+    {
+        SceneView.duringSceneGui -= OnSceneGUI;
+        CleanupPreviews();
+    }
 
     public override void OnInspectorGUI()
     {
@@ -30,6 +43,7 @@ public class LevelEditorEditor : Editor
 
         newPropDefinition = EditorGUILayout.ObjectField("Prop Definition", newPropDefinition, typeof(PropDefinition), false) as PropDefinition;
         useSurfaceNormal = EditorGUILayout.Toggle("Use Surface Normal", useSurfaceNormal);
+
         if (!useSurfaceNormal)
         {
             forwardDirection = EditorGUILayout.Vector3Field("Forward Direction", forwardDirection.normalized);
@@ -39,37 +53,19 @@ public class LevelEditorEditor : Editor
         if (GUILayout.Button(isAddingPoints ? "Stop Adding Points" : "Start Adding Points"))
         {
             isAddingPoints = !isAddingPoints;
-            isDeletingPoints = false; // Ensure delete mode is off
-            if (isAddingPoints)
-            {
-                Selection.activeGameObject = manager.gameObject;
-                SceneView.duringSceneGui += OnSceneGUI;
-            }
-            else
-            {
-                SceneView.duringSceneGui -= OnSceneGUI;
-            }
+            isDeletingPoints = false;
         }
 
         if (GUILayout.Button(isDeletingPoints ? "Stop Deleting Points" : "Start Deleting Points"))
         {
             isDeletingPoints = !isDeletingPoints;
-            isAddingPoints = false; // Ensure add mode is off
-            if (isDeletingPoints)
-            {
-                Selection.activeGameObject = manager.gameObject;
-                SceneView.duringSceneGui += OnSceneGUI;
-            }
-            else
-            {
-                SceneView.duringSceneGui -= OnSceneGUI;
-            }
+            isAddingPoints = false;
         }
 
         if (isDeletingPoints)
         {
             deleteRadius = EditorGUILayout.FloatField("Delete Radius", deleteRadius);
-            deleteRadius = Mathf.Max(0.1f, deleteRadius); // Prevent negative or zero radius
+            deleteRadius = Mathf.Max(0.1f, deleteRadius);
         }
 
         if (GUILayout.Button("Clear All Points"))
@@ -127,108 +123,35 @@ public class LevelEditorEditor : Editor
         }
     }
 
-    private void CleanUpWorldSettings(WorldSettings worldSettings)
-    {
-        if (worldSettings == null || worldSettings.PropMarkupDatas == null)
-        {
-            Debug.LogWarning("WorldSettings or PropMarkupDatas is null, cannot clean up.");
-            return;
-        }
-
-        // Track all GUIDs to detect duplicates
-        HashSet<int> usedGuids = new HashSet<int>();
-        List<ChunkPropsMarkupData> validMarkupDatas = new List<ChunkPropsMarkupData>();
-        int removedMarkupDatas = 0;
-        int removedProps = 0;
-        int reassignedGuids = 0;
-
-        foreach (ChunkPropsMarkupData markupData in worldSettings.PropMarkupDatas)
-        {
-            if (markupData == null)
-            {
-                removedMarkupDatas++;
-                continue;
-            }
-
-            if (markupData.propMarkupDatas == null)
-            {
-                markupData.propMarkupDatas = new PropMarkupData[0];
-                EditorUtility.SetDirty(markupData);
-            }
-
-            List<PropMarkupData> validProps = new List<PropMarkupData>();
-            foreach (PropMarkupData prop in markupData.propMarkupDatas)
-            {
-                if (prop == null || prop.propDefinition == null)
-                {
-                    removedProps++;
-                    continue;
-                }
-
-                // Check for duplicate or invalid GUIDs
-                while (prop.guid == 0 || usedGuids.Contains(prop.guid))
-                {
-                    prop.guid = GenerateUniqueGuid(usedGuids);
-                    reassignedGuids++;
-                }
-                usedGuids.Add(prop.guid);
-                validProps.Add(prop);
-            }
-
-            markupData.propMarkupDatas = validProps.ToArray();
-            if (validProps.Count > 0)
-            {
-                validMarkupDatas.Add(markupData);
-                EditorUtility.SetDirty(markupData);
-            }
-            else
-            {
-                removedMarkupDatas++;
-            }
-        }
-
-        // Update WorldSettings with valid markup datas
-        worldSettings.PropMarkupDatas.Clear();
-        worldSettings.PropMarkupDatas.AddRange(validMarkupDatas);
-        EditorUtility.SetDirty(worldSettings);
-
-        Debug.Log($"Clean Up World Settings: Removed {removedMarkupDatas} invalid MarkupDatas, {removedProps} invalid props, reassigned {reassignedGuids} GUIDs. Valid MarkupDatas: {validMarkupDatas.Count}, Total Props: {usedGuids.Count}.");
-    }
-
-    private int GenerateUniqueGuid(HashSet<int> usedGuids)
-    {
-        int newGuid = usedGuids.Count > 0 ? usedGuids.Max() + 1 : 1;
-        while (usedGuids.Contains(newGuid))
-        {
-            newGuid++;
-        }
-        return newGuid;
-    }
-
-    private int GetUniqueGuid(WorldSettings worldSettings)
-    {
-        HashSet<int> usedGuids = new HashSet<int>();
-        foreach (ChunkPropsMarkupData markupData in worldSettings.PropMarkupDatas)
-        {
-            if (markupData != null && markupData.propMarkupDatas != null)
-            {
-                foreach (PropMarkupData prop in markupData.propMarkupDatas)
-                {
-                    if (prop != null)
-                    {
-                        usedGuids.Add(prop.guid);
-                    }
-                }
-            }
-        }
-        return GenerateUniqueGuid(usedGuids);
-    }
-
     private void OnSceneGUI(SceneView sceneView)
     {
         LevelEditor manager = (LevelEditor)target;
-        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
         Event e = Event.current;
+
+        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+        CleanupPreviews();
+
+        if (manager.WorldSettings?.PropMarkupDatas != null)
+        {
+            foreach (var markupData in manager.WorldSettings.PropMarkupDatas)
+            {
+                if (markupData?.propMarkupDatas == null) continue;
+
+                foreach (var point in markupData.propMarkupDatas)
+                {
+                    if (point?.propDefinition?.prefab == null) continue;
+
+                    GameObject preview = (GameObject)PrefabUtility.InstantiatePrefab(point.propDefinition.prefab);
+                    if (preview == null) continue;
+
+                    preview.transform.position = point.position;
+                    preview.transform.rotation = point.rotation;
+                    preview.transform.localScale = point.propDefinition.prefab.transform.localScale;
+                    preview.hideFlags = HideFlags.DontSave | HideFlags.HideInHierarchy;
+                    _previewInstances.Add(preview);
+                }
+            }
+        }
 
         if (isAddingPoints && newPropDefinition != null)
         {
@@ -237,17 +160,13 @@ public class LevelEditorEditor : Editor
                 Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    // Calculate chunk coordinate
                     FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
                     ChunkPropsMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
 
                     Undo.RecordObject(markupData, "Add Prop Point");
 
-                    List<PropMarkupData> points = markupData.propMarkupDatas != null
-                        ? new List<PropMarkupData>(markupData.propMarkupDatas)
-                        : new List<PropMarkupData>();
-
-                    int guid = GetUniqueGuid(manager.WorldSettings);
+                    List<PropMarkupData> points = markupData.propMarkupDatas?.ToList() ?? new List<PropMarkupData>();
+                    int guid = GetUniqueGuid(markupData);
 
                     points.Add(new PropMarkupData
                     {
@@ -265,23 +184,19 @@ public class LevelEditorEditor : Editor
                 }
             }
 
+            // Hover Preview
             if (Physics.Raycast(HandleUtility.GUIPointToWorldRay(e.mousePosition), out RaycastHit previewHit))
             {
-                Mesh mesh = manager.GetMeshFromPrefab(newPropDefinition.prefab);
-                Vector3 forward = useSurfaceNormal ? previewHit.normal : forwardDirection;
-
-                if (mesh != null && newPropDefinition.prefab != null)
+                GameObject prefab = newPropDefinition.prefab;
+                if (prefab != null)
                 {
-                    Handles.color = new Color(1f, 1f, 0f, 0.5f);
-                    Quaternion rotation = forward.sqrMagnitude > 0 ? Quaternion.LookRotation(forward, Vector3.up) : Quaternion.identity;
-                    Vector3 scale = newPropDefinition.prefab.transform.localScale;
-                    Bounds bounds = mesh.bounds;
-                    Handles.DrawWireCube(previewHit.point + rotation * bounds.center, rotation * Vector3.Scale(bounds.size, scale));
-                }
-                else
-                {
-                    Handles.color = Color.yellow;
-                    Handles.DrawSolidDisc(previewHit.point, previewHit.normal, 0.3f);
+                    GameObject preview = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                    preview.transform.position = previewHit.point;
+                    Quaternion rotation = Quaternion.LookRotation((useSurfaceNormal ? previewHit.normal : forwardDirection).normalized, Vector3.up);
+                    preview.transform.rotation = rotation;
+                    preview.transform.localScale = prefab.transform.localScale;
+                    preview.hideFlags = HideFlags.DontSave | HideFlags.HideInHierarchy;
+                    _previewInstances.Add(preview);
                 }
             }
         }
@@ -303,14 +218,11 @@ public class LevelEditorEditor : Editor
 
                         foreach (PropMarkupData point in points)
                         {
-                            if (point != null)
+                            float distance = Vector3.Distance(hit.point, point.position);
+                            if (distance < deleteRadius && distance < minDistance)
                             {
-                                float distance = Vector3.Distance(hit.point, point.position);
-                                if (distance < deleteRadius && distance < minDistance)
-                                {
-                                    minDistance = distance;
-                                    closestPoint = point;
-                                }
+                                minDistance = distance;
+                                closestPoint = point;
                             }
                         }
 
@@ -328,6 +240,7 @@ public class LevelEditorEditor : Editor
                 }
             }
 
+            // Draw delete disc
             if (Physics.Raycast(HandleUtility.GUIPointToWorldRay(e.mousePosition), out RaycastHit previewHit))
             {
                 Handles.color = new Color(1f, 0f, 0f, 0.5f);
@@ -338,8 +251,60 @@ public class LevelEditorEditor : Editor
         sceneView.Repaint();
     }
 
-    private void OnDisable()
+    private void CleanupPreviews()
     {
-        SceneView.duringSceneGui -= OnSceneGUI;
+        foreach (var obj in _previewInstances)
+        {
+            if (obj != null)
+            {
+                GameObject.DestroyImmediate(obj);
+            }
+        }
+        _previewInstances.Clear();
+    }
+
+    private int GenerateUniqueGuid(HashSet<int> usedGuids)
+    {
+        int newGuid = usedGuids.Count > 0 ? usedGuids.Max() + 1 : 1;
+        while (usedGuids.Contains(newGuid)) newGuid++;
+        return newGuid;
+    }
+
+    private int GetUniqueGuid(ChunkPropsMarkupData markupData)
+    {
+        HashSet<int> usedGuids = markupData?.propMarkupDatas?.Select(p => p.guid).ToHashSet() ?? new HashSet<int>();
+        return GenerateUniqueGuid(usedGuids);
+    }
+
+    private void CleanUpWorldSettings(WorldSettings worldSettings)
+    {
+        if (worldSettings == null || worldSettings.PropMarkupDatas == null)
+            return;
+
+        var validMarkupDatas = new List<ChunkPropsMarkupData>();
+        foreach (var markupData in worldSettings.PropMarkupDatas)
+        {
+            if (markupData == null) continue;
+
+            var points = markupData.propMarkupDatas?.Where(p => p != null && p.propDefinition != null).ToList() ?? new List<PropMarkupData>();
+            var usedGuids = new HashSet<int>();
+
+            foreach (var p in points)
+            {
+                while (p.guid == 0 || usedGuids.Contains(p.guid))
+                    p.guid = GenerateUniqueGuid(usedGuids);
+                usedGuids.Add(p.guid);
+            }
+
+            markupData.propMarkupDatas = points.ToArray();
+            if (points.Count > 0)
+                validMarkupDatas.Add(markupData);
+
+            EditorUtility.SetDirty(markupData);
+        }
+
+        worldSettings.PropMarkupDatas.Clear();
+        worldSettings.PropMarkupDatas.AddRange(validMarkupDatas);
+        EditorUtility.SetDirty(worldSettings);
     }
 }

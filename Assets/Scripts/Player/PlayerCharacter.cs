@@ -149,6 +149,11 @@ namespace LichLord
             UpdateChunk();
         }
 
+        private void RenderChunks()
+        {
+            if (!HasStateAuthority)
+                return;
+        }
 
         private void Respawn(Vector3 position)
         {
@@ -185,10 +190,10 @@ namespace LichLord
 
             if (hit.target is Prop prop)
             {
-                Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
+                Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
 
                 if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                    Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
+                    Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
             }
         }
 
@@ -210,74 +215,77 @@ namespace LichLord
             var lastChunk = CurrentChunk;
             var newChunk = Context.ChunkManager.GetChunkAtPosition(CachedTransform.position);
 
-            if (lastChunk != newChunk)
-            {
-                CurrentChunk = newChunk;
+            if (lastChunk == newChunk)
+                return;
+            
+            CurrentChunk = newChunk;
 
-                if (lastChunk != null)
-                    lastChunk.RemoveObject(this);
+            if (lastChunk != null)
+                lastChunk.RemoveObject(this);
 
-                if (newChunk != null)
-                    newChunk.AddObject(this);
+            if (newChunk != null)
+                newChunk.AddObject(this);
 
-                // Update cached nearby chunks
-                _cachedChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
+            var oldChunks = _cachedChunks;
+            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
 
-                // Update cached prop states on chunk change
-                UpdateVisibilePropStates();
-                //Debug.Log($"Player chunk changed from ({lastChunk?.ChunkID.X}, {lastChunk?.ChunkID.Y}) to ({newChunk?.ChunkID.X}, {newChunk?.ChunkID.Y}). Cached {CachedPropStates.Count} prop states.", this);
-            }
+            DiffChunks(oldChunks, newChunks, out var added, out var removed);
+            DespawnPropsForRemovedChunks(removed);
+            _cachedChunks = newChunks;
+
+            Debug.Log($"Chunks Added: {added.Count}, Removed: {removed.Count}");
+
+            Context.ChunkManager.TryRemoveReplicatedChunks(removed);
+            Context.ChunkManager.TryAddReplicatedChunks(added);
         }
 
-        public HashSet<int> _visibileGuids = new HashSet<int>();
-
-        public void UpdateVisibilePropStates()
+        private void DespawnPropsForRemovedChunks(List<Chunk> removed)
         {
-            if (CurrentChunk == null)
+            if (!HasStateAuthority)
                 return;
 
-            _cachedPropStates.Clear();
-
-            HashSet<int> newGuids = new HashSet<int>();
-            HashSet<int> oldGuids = _visibileGuids;
-            foreach (Chunk chunk in _cachedChunks)
+            for (int i = 0; i < removed.Count; i++)
             {
-                if (chunk == null || chunk.PropStates == null)
-                    continue;
-
-                foreach (PropRuntimeState state in chunk.PropStates)
-                {
-                    if (state != null && !_cachedPropStates.Contains(state))
-                    {
-                        _cachedPropStates.Add(state);
-                        _visibileGuids.Add(state.guid);
-                        newGuids.Add(state.guid);
-                    }
-                }
+                removed[i].DespawnProps();
             }
-
-            // Despawn props no longer in cached states
-            DespawnUnusedProps(newGuids, oldGuids);
-
-            _visibileGuids = newGuids;
         }
 
-        private void DespawnUnusedProps(HashSet<int> newGuids, HashSet<int> oldGuids)
+        public void DiffChunks(List<Chunk> oldChunks, List<Chunk> newChunks,
+                             out List<Chunk> addedChunks, out List<Chunk> removedChunks)
         {
-            // Identify GUIDs to despawn (in previous set but not in current set)
-            List<int> guidsToDespawn = new List<int>();
-            foreach (int guid in oldGuids)
+            addedChunks = new List<Chunk>();
+            removedChunks = new List<Chunk>();
+
+            // Build HashSet of old IDs
+            var oldIds = new HashSet<FChunkPosition>(oldChunks.Count);
+            for (int i = 0; i < oldChunks.Count; i++)
             {
-                if (!newGuids.Contains(guid))
+                oldIds.Add(oldChunks[i].ChunkID);
+            }
+
+            // Build HashSet of new IDs
+            var newIds = new HashSet<FChunkPosition>(newChunks.Count);
+            for (int i = 0; i < newChunks.Count; i++)
+            {
+                newIds.Add(newChunks[i].ChunkID);
+            }
+
+            // Added: newChunks that aren't in oldIds
+            for (int i = 0; i < newChunks.Count; i++)
+            {
+                if (!oldIds.Contains(newChunks[i].ChunkID))
                 {
-                    guidsToDespawn.Add(guid);
+                    addedChunks.Add(newChunks[i]);
                 }
             }
 
-            // Despawn each prop
-            foreach (int guid in guidsToDespawn)
+            // Removed: oldChunks that aren't in newIds
+            for (int i = 0; i < oldChunks.Count; i++)
             {
-                Context.PropManager.DespawnProp(guid);
+                if (!newIds.Contains(oldChunks[i].ChunkID))
+                {
+                    removedChunks.Add(oldChunks[i]);
+                }
             }
         }
 

@@ -84,8 +84,8 @@ public class WorldSettings : ScriptableObject
         Vector2 relativePos = new Vector2(worldPosition.x, worldPosition.z);
         return new FChunkPosition
         {
-            X = (sbyte)(Mathf.FloorToInt(relativePos.x / LichLord.World.WorldConstants.CHUNK_SIZE)),
-            Y = (sbyte)(Mathf.FloorToInt(relativePos.y / LichLord.World.WorldConstants.CHUNK_SIZE))
+            X = (byte)(Mathf.FloorToInt(relativePos.x / LichLord.World.WorldConstants.CHUNK_SIZE)),
+            Y = (byte)(Mathf.FloorToInt(relativePos.y / LichLord.World.WorldConstants.CHUNK_SIZE))
         };
     }
 
