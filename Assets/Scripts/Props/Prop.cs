@@ -4,7 +4,7 @@ using LichLord.World;
 
 namespace LichLord.Props
 {
-    public class Prop : DWDObjectPoolObject, IHitTarget , IChunkTrackable
+    public class Prop : DWDObjectPoolObject, IHitTarget, IChunkTrackable
     {
         [SerializeField]
         private PropStateComponent _stateComponent;
@@ -45,6 +45,7 @@ namespace LichLord.Props
                 }
             }
         }
+        
         public HurtboxComponent Hurtbox;
 
         public virtual void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)

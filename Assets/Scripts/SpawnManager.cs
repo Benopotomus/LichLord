@@ -66,7 +66,7 @@ namespace LichLord
                         spawnPosition = savedData.position;
                         spawnRotation = savedData.rotation;
                         moveState = savedData.moveState;
-                        //Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world {worldId} with key {playerKey}.");
+                        Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world with key {playerKey}.");
                     }
                     else
                     {

@@ -77,6 +77,7 @@ namespace LichLord
             _input.ActionSelection = 0;
             _input.BuildMode = false;
             _input.DeleteMode = false;
+            _input.Interact = false;
         }
 
         private void Update()
@@ -106,6 +107,7 @@ namespace LichLord
             _input.ToggleCameraView |= _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
             _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();
             _input.DeleteMode |= _controls.Gameplay.DeleteMode.WasPressedThisFrame();
+            _input.Interact |= _controls.Gameplay.Interact.WasPressedThisFrame();
 
             // Scroll input
             if (_controls.Gameplay.Scroll.WasPerformedThisFrame())

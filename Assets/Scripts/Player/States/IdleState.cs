@@ -18,10 +18,13 @@ namespace LichLord
             fsmRef.PC.Movement.OnFixedUpdate(ref input);
             fsmRef.PC.CameraController.OnFixedUpdate(ref input);
 
-            // Process activations
+            // Process input
             fsmRef.PC.Maneuvers.ProcessInput(ref input);
             // Process timing
             fsmRef.PC.Maneuvers.OnFixedUpdate();
+
+            fsmRef.PC.Interactor.ProcessInput(ref input);
+            fsmRef.PC.Interactor.OnFixedUpdate();
 
             CheckBuildMode(ref input);
 

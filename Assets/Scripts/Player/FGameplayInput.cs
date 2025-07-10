@@ -20,6 +20,7 @@ namespace LichLord
         public bool BuildMode; // Toggles build mode
         public EBuildableCategory BuildCategory;
         public bool DeleteMode;
+        public bool Interact;
 
     }
 }

@@ -247,6 +247,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Interact1",
+                    "type": "Button",
+                    "id": "85e706aa-6535-4558-97e2-95438dace27c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -830,6 +839,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "DeleteMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7a4d8dc0-8ae9-43fb-af23-78e6b0d5f50f",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Interact1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -26,13 +26,13 @@ namespace LichLord
         public Animator Animator;
         public BuilderComponent Builder;
         public PlayerCharacterFSM FSM;
+        public InteractorComponent Interactor;
 
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 
         public Renderer[] HeadRenderers;
         public GameObject[] FirstPersonOverlayObjects;
-
 
         [Networked, HideInInspector, Capacity(24), OnChangedRender(nameof(OnNicknameChanged))]
         public string Nickname { get; set; }
@@ -125,6 +125,7 @@ namespace LichLord
         public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState)
         {
             Movement.CC.Move(position);
+            transform.position = position;
             Movement.SetMovementState(moveState);
             Input.SetLookRotation(rotation);
         }

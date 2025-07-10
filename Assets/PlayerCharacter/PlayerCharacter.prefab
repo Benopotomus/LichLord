@@ -2011,6 +2011,7 @@ GameObject:
   - component: {fileID: 6479483160014541239}
   - component: {fileID: 5886866483268230399}
   - component: {fileID: 18907217600452759}
+  - component: {fileID: 4628596752965340789}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -2067,6 +2068,7 @@ MonoBehaviour:
   Animator: {fileID: 3816291510956059953}
   Builder: {fileID: 18907217600452759}
   FSM: {fileID: 7134053186718281712}
+  Interactor: {fileID: 4628596752965340789}
   _muzzleComponent: {fileID: 5886866483268230399}
   HeadRenderers: []
   FirstPersonOverlayObjects: []
@@ -2215,6 +2217,7 @@ MonoBehaviour:
   - {fileID: 4804172155013043321}
   - {fileID: 6479483160014541239}
   - {fileID: 18907217600452759}
+  - {fileID: 4628596752965340789}
   - {fileID: 5077866948997885989}
   - {fileID: 7904855827506051427}
   - {fileID: 7134053186718281712}
@@ -2341,6 +2344,22 @@ MonoBehaviour:
   _placementValid: 0
   _gridPosition: {x: 0, y: 0, z: 0}
   _orientation: 0
+--- !u!114 &4628596752965340789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fa126d810d8b0c4ba49b8fcbbf9eeb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interactableLayerMask:
+    serializedVersion: 2
+    m_Bits: 8192
+  _pc: {fileID: 2971398371087610287}
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0

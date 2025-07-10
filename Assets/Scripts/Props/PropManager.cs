@@ -9,6 +9,8 @@ namespace LichLord.Props
     {
         [SerializeField] private PropSpawner _propSpawner;
 
+        private Stack<ChunkReplicator> _replicatorPool = new Stack<ChunkReplicator>();
+
         public override void Spawned()
         {
             _propSpawner.OnPropSpawned += OnPropSpawned;
