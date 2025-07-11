@@ -9,9 +9,8 @@ namespace LichLord.World
     {
         private ChunkManager _manager;
         private SceneContext _context;
-        private ChunkReplicator _replicator;
 
-        private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
+                private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
         public List<IChunkTrackable> Trackables => _trackablesInChunk;
 
         private Dictionary<int, PropRuntimeState> _propStates = new Dictionary<int, PropRuntimeState>();
@@ -37,6 +36,9 @@ namespace LichLord.World
         // Saved data
         private Dictionary<int, PropRuntimeState> _loadedPropStates = new Dictionary<int, PropRuntimeState>();
         public Dictionary<int, PropRuntimeState> LoadedPropStates => _loadedPropStates;
+
+        // Network Props
+        public List<NetworkProp> NetworkProps = new List<NetworkProp>();
 
         public Chunk(FChunkPosition chunkID, ChunkManager manager)
         {

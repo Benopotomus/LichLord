@@ -14,6 +14,16 @@ namespace LichLord.Props
         public Vector3 position; // World position
         public Quaternion rotation; // World rotation
 
+        // Terrain
+        // Only for terrains
+        public string terrainId;            // Unique ID of the terrain
+        public Vector3 terrainTreePosition; // Tree's world-space position
+
+        public Terrain terrain;
+
+        public int treeIndex = -1;
+        public int originalPrototypeIndex = -1;
+
         private PropDefinition _definition;
         public PropDefinition Definition
         {
@@ -33,13 +43,16 @@ namespace LichLord.Props
             Chunk chunk,
             Vector3 position, 
             Quaternion rotation, 
-            int definitionId)
+            int definitionId,
+            string terrainId)
         {
             this.guid = guid;
             this.chunk = chunk;
             this.definitionId = definitionId;
             this.position = position;
             this.rotation = rotation;
+            this.terrainId = terrainId;
+            this.terrain = GetTerrainById(terrainId);
 
             PropDefinition definition = Global.Tables.PropTable.TryGetDefinition(definitionId);
             PropDataDefinition dataDefinition = definition.PropDataDefinition;
@@ -49,30 +62,14 @@ namespace LichLord.Props
             dataDefinition.InitializeData(ref _data, definition);
         }
 
-        public PropRuntimeState(int guid,
-            Chunk chunk,
-            Vector3 position,
-            Quaternion rotation,
-            int definitionId,
-            FPropData propData)
-        {
-            this.guid = guid;
-            this.chunk = chunk;
-            this.definitionId = definitionId;
-            this.position = position;
-            this.rotation = rotation;
-
-            _data.Copy(ref propData);
-            _data.GUID = guid;
-            _data.DefinitionID = definitionId;
-        }
-
         public PropRuntimeState(PropRuntimeState other)
         {
             this.guid = other.guid;
             this.definitionId = other.definitionId;
             this.position = other.position;
             this.rotation = other.rotation;
+            this.terrainId = other.terrainId;
+            this.terrain = other.terrain;
 
             FPropData otherData = other.Data;
             _data.Copy(ref otherData);
@@ -135,6 +132,18 @@ namespace LichLord.Props
             }
 
             return false;
+        }
+
+        public Terrain GetTerrainById(string id)
+        {
+            Terrain[] terrains = Terrain.activeTerrains;
+            for (int i = 0; i < terrains.Length; i++)
+            {
+                TerrainID tid = terrains[i].GetComponent<TerrainID>();
+                if (tid != null && tid.ID == id)
+                    return terrains[i];
+            }
+            return null;
         }
     }
 }

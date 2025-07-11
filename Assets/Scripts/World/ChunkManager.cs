@@ -30,6 +30,7 @@ namespace LichLord.World
 
         private Stack<ChunkReplicator> _replicatorPool = new Stack<ChunkReplicator>();
 
+
         public void InitializeWorldChunks()
         {
             WorldSettings worldSettings = Context.WorldManager.WorldSettings;
@@ -80,8 +81,10 @@ namespace LichLord.World
                     if (_replicators.ContainsKey(chunk.ChunkID))
                         continue;
 
-                    ChunkReplicator replicator;
+                    Context.PropManager.SpawnNetworkPropsForChunk(chunk);
 
+                    ChunkReplicator replicator;
+                    
                     // Reuse from pool
                     if (_replicatorPool.Count > 0)
                     {
@@ -122,6 +125,8 @@ namespace LichLord.World
 
                 if (chunk.ReplicationRefCount > 0)
                     continue;
+
+                Context.PropManager.DespawnNetworkPropsForChunk(chunk);
 
                 _replicatedChunks.Remove(chunk);
 

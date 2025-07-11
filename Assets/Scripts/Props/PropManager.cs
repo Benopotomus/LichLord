@@ -9,7 +9,11 @@ namespace LichLord.Props
     {
         [SerializeField] private PropSpawner _propSpawner;
 
-        private Stack<ChunkReplicator> _replicatorPool = new Stack<ChunkReplicator>();
+        [SerializeField] private NetworkProp _propPrefab;
+
+        private Stack<NetworkProp> _propPool = new Stack<NetworkProp>();
+
+        private List<NetworkProp> _activeProps = new List<NetworkProp>();
 
         public override void Spawned()
         {
@@ -36,7 +40,8 @@ namespace LichLord.Props
                     chunk,
                     propMarkupData.position,
                     propMarkupData.rotation,
-                    propMarkupData.propDefinition.TableID);
+                    propMarkupData.propDefinition.TableID,
+                    propMarkupData.terrainId);
 
                 chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
             }
@@ -64,6 +69,8 @@ namespace LichLord.Props
         int _lastTick = -1;
         public override void Render()
         {
+           //Debug.Log(_activeProps.Count);
+            return;
             if (_lastTick == Runner.Tick)
                 return;
 
@@ -154,6 +161,42 @@ namespace LichLord.Props
             {
                 propLoadState.Prop.StartRecycle();
                 propLoadState.LoadState = ELoadState.None;
+            }
+        }
+
+        public void SpawnNetworkPropsForChunk(Chunk chunk)
+        {
+            //return;
+            foreach (var prop in chunk.PropStates.Values)
+            {
+                NetworkProp networkProp;
+
+                if (_propPool.Count > 0)
+                {
+                    networkProp = _propPool.Pop();
+                    networkProp.transform.position = prop.position;
+                    networkProp.transform.rotation = prop.rotation;
+
+                }
+                else
+                { 
+                    networkProp = Runner.Spawn(_propPrefab, prop.position, prop.rotation, null);
+                }
+
+                networkProp.OnSpawned(prop, this);
+                chunk.NetworkProps.Add(networkProp);
+                _activeProps.Add(networkProp);
+            }
+        }
+
+        public void DespawnNetworkPropsForChunk(Chunk chunk)
+        {
+            //return;
+            foreach (var networkProp in chunk.NetworkProps)
+            {
+                networkProp.Deactivate();
+                _propPool.Push(networkProp);
+                _activeProps.Remove(networkProp);
             }
         }
     }

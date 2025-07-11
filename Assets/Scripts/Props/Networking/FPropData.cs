@@ -1,6 +1,7 @@
 ﻿namespace LichLord.Props
 {
     using Fusion;
+    using LichLord.World;
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Explicit)]
@@ -9,10 +10,12 @@
         [FieldOffset(0)]
         private byte _propGUID; // 1 byte
         [FieldOffset(1)]
-        private ushort _definitionId; // 2 bytes. definition id;
+        private FChunkPosition _chunkPosition; // 2 bytes
         [FieldOffset(3)]
+        private ushort _definitionId; // 2 bytes. definition id;
+        [FieldOffset(5)]
         private int _stateData; // 4 bytes
-        // 7
+        // 9
 
         public int DefinitionID
         {
