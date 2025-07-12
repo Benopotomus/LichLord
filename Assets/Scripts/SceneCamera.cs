@@ -6,6 +6,8 @@ namespace LichLord
 {
     public class SceneCamera : SceneService
     {
+        [SerializeField] private Transform _skydomeTransform;
+
         [Header("Cinemachine Cameras")]
         [SerializeField] private CinemachineVirtualCamera thirdPersonCam;
         [SerializeField] private CinemachineVirtualCamera firstPersonCam;
@@ -21,6 +23,7 @@ namespace LichLord
         public FCachedRaycast CachedRaycastHit => _cachedRaycastHit;
 
         [SerializeField] private LayerMask _buildableZoneLayer;
+
 
         private bool lastRaycastHit; // True if last raycast hit something
 
@@ -85,6 +88,12 @@ namespace LichLord
             if(localPlayerCreature != null ) 
                 RaycastFromCameraCenter(localPlayerCreature.gameObject);
 
+            Camera mainCamera = Camera.main;
+            _skydomeTransform.position = mainCamera.transform.position;
+        }
+
+        private void LateUpdate()
+        {
 
         }
 

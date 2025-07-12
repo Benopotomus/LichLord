@@ -13,9 +13,13 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private int _streamSpawnCount = 0;
 
         [SerializeField] private Vector3 _debugSpawnPosition = new Vector3(1000, 0, 1000);
+        [SerializeField] private Transform _debugSpawnTransform;
 
         public void OnSpawned()
         {
+            if (_debugSpawnTransform != null) 
+                _debugSpawnPosition = _debugSpawnTransform.position;
+
             if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
                 for (int i = 0; i < _initialSpawnCount; i++)

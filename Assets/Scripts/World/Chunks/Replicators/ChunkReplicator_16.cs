@@ -34,6 +34,11 @@ namespace LichLord.World
 
         public override ref FPropData GetPropData(int index)
         {
+            if (index > 15)
+            {
+                Debug.Log("Fucking here");
+            }
+            
             return ref _propDatas.GetRef(index);
         }
     }

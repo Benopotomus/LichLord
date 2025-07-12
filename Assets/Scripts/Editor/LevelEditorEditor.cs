@@ -265,7 +265,7 @@ public class LevelEditorEditor : Editor
 
     private int GenerateUniqueGuid(HashSet<int> usedGuids)
     {
-        int newGuid = usedGuids.Count > 0 ? usedGuids.Max() + 1 : 1;
+        int newGuid = usedGuids.Count > 0 ? usedGuids.Max() + 1 : 0;
         while (usedGuids.Contains(newGuid)) newGuid++;
         return newGuid;
     }

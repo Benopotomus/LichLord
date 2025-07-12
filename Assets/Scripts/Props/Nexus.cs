@@ -11,6 +11,12 @@ namespace LichLord.Props
         [SerializeField]
         private VisualEffectBase _interactEffect;
 
+        [SerializeField]
+        private VisualEffectBase _activatedEffect;
+
+        [SerializeField]
+        private Transform _rocksTransform;
+
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
             base.OnSpawned(propRuntimeState, propManager);
@@ -33,6 +39,10 @@ namespace LichLord.Props
             base.OnRender(propRuntimeState, renderDeltaTime);
 
             _interactEffect.Toggle(propRuntimeState.GetIsInteracting());
+            _activatedEffect.Toggle(propRuntimeState.GetIsActivated());
+
+            float rotationSpeed = 20f; // degrees per second
+            _rocksTransform.Rotate(0f, rotationSpeed * renderDeltaTime, 0f, Space.Self);
         }
 
         private bool IsPotentialInteractor(InteractorComponent interactor)

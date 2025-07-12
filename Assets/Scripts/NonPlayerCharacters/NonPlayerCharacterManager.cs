@@ -132,8 +132,8 @@ namespace LichLord.NonPlayerCharacters
         // Called on match disconnect on the host to save npcs
         public List<FNonPlayerCharacterSaveState> GetAllSaveStates()
         {
-            var allSaves = new List<FNonPlayerCharacterSaveState>(NonPlayerCharacterConstants.MAX_NPC_REPS *
-                NonPlayerCharacterConstants.MAX_REPLICATORS);
+            var allSaves = new List<FNonPlayerCharacterSaveState>((NonPlayerCharacterConstants.MAX_NPC_REPS *
+                NonPlayerCharacterConstants.MAX_REPLICATORS) + 1);
 
             foreach (var replicator in _replicators)
             {

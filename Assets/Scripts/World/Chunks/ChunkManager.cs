@@ -116,7 +116,13 @@ namespace LichLord.World
                 if (HasStateAuthority)
                 {
                     var replicator = chunk.Replicator;
-                   
+
+                    if (replicator == null)
+                    {
+                        Debug.Log("No replicator");
+                        return;
+                    }
+
                     switch (replicator)
                     {
                         case ChunkReplicator_16 r16: _pool16.Push(r16); break;
@@ -223,10 +229,10 @@ namespace LichLord.World
         int _lastTick = -1;
         public override void Render()
         {
-            if (_lastTick == Runner.Tick)
-                return;
+            //if (_lastTick == Runner.Tick)
+            //    return;
 
-            _lastTick = Runner.Tick;
+           // _lastTick = Runner.Tick;
 
             if (!Context.IsGameplayActive())
                 return;
@@ -241,7 +247,7 @@ namespace LichLord.World
                 replicator.OnRender();
             }
 
-            float renderDeltaTime = Runner.LocalAlpha;
+            float renderDeltaTime = Time.deltaTime;
             bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
 
             // Update states from player's cached list

@@ -1,7 +1,5 @@
-﻿using JetBrains.Annotations;
-using LichLord.World;
+﻿using LichLord.World;
 using System.Collections.Generic;
-using Unity.VisualScripting.YamlDotNet.Core;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
