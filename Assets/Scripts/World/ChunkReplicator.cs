@@ -1,7 +1,5 @@
 ﻿using Fusion;
 using LichLord.Props;
-using LichLord.World;
-using Mono.Cecil.Cil;
 using UnityEngine;
 
 namespace LichLord.World
@@ -9,35 +7,39 @@ namespace LichLord.World
     public class ChunkReplicator : ContextBehaviour
     {
         [Networked]
-        public FChunkPosition ChunkID { get; private set; }
+        public ref FChunkPosition ChunkID => ref MakeRef<FChunkPosition>();
+        private FChunkPosition _lastChunkId;
 
         [Networked, Capacity(PropConstants.MAX_PROP_REPS)]
         private NetworkArray<FPropData> _propDatas { get; }
 
-        [SerializeField]
-        private Chunk chunk;
-
         public override void Spawned()
         { 
             base.Spawned();
-            OnSpawned();
-
-            if (HasStateAuthority)
-            {
-                Context.ChunkManager.RegisterReplicator(this);
-            }
+            OnChunkChanged();
+            Context.ChunkManager.RegisterReplicator(this);
         }
 
-        public void OnSpawned()
+        public void OnRender()
         {
-            chunk = Context.ChunkManager.GetChunk(ChunkID);
+            if (_lastChunkId.IsEqual(ref ChunkID))
+                return;
+
+            _lastChunkId = ChunkID;
+
+            OnChunkChanged();
+        }
+
+        private void OnChunkChanged()
+        {
+            Chunk chunk = Context.ChunkManager.GetChunk(ChunkID);
             transform.position = chunk.Bounds.center;
             gameObject.name = "Chunk Rep: " + ChunkID.X + ", " + ChunkID.Y;
-            chunk.SetReplicator(this);
-            CopyDataFromChunk();
+            chunk.Replicator = this;
+            CopyDataFromChunk(chunk);
         }
 
-        public void PreSpawned(FChunkPosition chunkID)
+        public void SetID(FChunkPosition chunkID)
         {
             ChunkID = chunkID;
         }
@@ -54,11 +56,10 @@ namespace LichLord.World
 
         public void Deactivate()
         {
-            Context.ChunkManager.UnregisterReplicator(this);
-            chunk.SetReplicator(this);
+
         }
 
-        private void CopyDataFromChunk()
+        private void CopyDataFromChunk(Chunk chunk)
         {
             foreach (var deltaStates in chunk.DeltaPropStates)
             {

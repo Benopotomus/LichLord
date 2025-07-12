@@ -13,6 +13,8 @@ namespace LichLord.Props
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
             base.OnSpawned(propRuntimeState, propManager);
+
+           
         }
 
         public override void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)

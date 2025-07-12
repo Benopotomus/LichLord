@@ -9,11 +9,14 @@ namespace LichLord.Props
     {
         [SerializeField] private PropSpawner _propSpawner;
 
-        private Stack<ChunkReplicator> _replicatorPool = new Stack<ChunkReplicator>();
-
         public override void Spawned()
         {
             _propSpawner.OnPropSpawned += OnPropSpawned;
+        }
+
+        public void SpawnProp(PropRuntimeState runtimeState)
+        { 
+            _propSpawner.SpawnProp(runtimeState);
         }
 
         public void LoadPropsForChunk(Chunk chunk)
@@ -61,63 +64,6 @@ namespace LichLord.Props
             }
         }
 
-        int _lastTick = -1;
-        public override void Render()
-        {
-            if (_lastTick == Runner.Tick)
-                return;
-
-            _lastTick = Runner.Tick;
-
-            if (!Context.IsGameplayActive())
-                return;
-
-            if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter pc))
-                return;
-
-            float renderDeltaTime = Runner.LocalAlpha;
-            bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
-
-            // Update states from player's cached list
-            foreach (Chunk chunk in pc.CachedChunks)
-            {
-                foreach (var kvp in chunk.PropStates)
-                {
-                    int guid = kvp.Key;
-
-                    if (!chunk.GetRenderState(hasAuthority, chunk, guid, out var usedState))
-                    {
-                        Debug.LogWarning($"Null PropRuntimeState for GUID {guid} in Render.", this);
-                        continue;
-                    }
-
-                    // if we have no loader for guid, create one
-                    if (!chunk.PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
-                    {
-                        propLoadState = new FPropLoadState();
-                        chunk.PropLoadStates[guid] = propLoadState;
-                    }
-
-                    if (propLoadState.LoadState == ELoadState.None)
-                    {
-                        // Set the state to loading
-                        propLoadState.LoadState = ELoadState.Loading;
-                        chunk.PropLoadStates[guid] = propLoadState;
-
-                        _propSpawner.SpawnProp(usedState);
-                    }
-                    else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
-                    {
-                        propLoadState.Prop.OnRender(usedState, renderDeltaTime);
-                    }
-                    else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
-                    {
-                        DespawnProp(chunk, guid);
-                    }
-                }
-            }
-        }
-     
         private void OnPropSpawned(PropRuntimeState propRuntimeState, Prop prop)
         {
             Chunk chunk = propRuntimeState.chunk;

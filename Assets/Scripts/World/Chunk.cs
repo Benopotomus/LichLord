@@ -9,8 +9,8 @@ namespace LichLord.World
     {
         private ChunkManager _manager;
         private SceneContext _context;
-        private ChunkReplicator _replicator;
-
+        public ChunkReplicator Replicator;
+    
         private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
         public List<IChunkTrackable> Trackables => _trackablesInChunk;
 
@@ -119,21 +119,16 @@ namespace LichLord.World
             _localRuntimePropStates.Clear();
         }
 
-        public void SetReplicator(ChunkReplicator replicator)
-        {
-            _replicator = replicator;
-        }
-
         public void UpdatePropRuntimeState(PropRuntimeState runtimeState)
         {
-            if (_replicator == null)
+            if (Replicator == null)
             {
                 Debug.Log("No replicator");
                 return;
             }
 
             // if we have replication data, use that
-            ref FPropData propData = ref _replicator.GetPropData(runtimeState.guid);
+            ref FPropData propData = ref Replicator.GetPropData(runtimeState.guid);
             if (propData.IsValid())
             {
                 FPropData runtimeData = runtimeState.Data;
@@ -162,7 +157,7 @@ namespace LichLord.World
         public void ReplicatePropState(PropRuntimeState replictedState)
         {
             AddOrUpdateDeltaState(replictedState);
-            ref FPropData data = ref _replicator.GetPropData(replictedState.guid);
+            ref FPropData data = ref Replicator.GetPropData(replictedState.guid);
             FPropData currentData = replictedState.Data;
             data.Copy(ref currentData);
         }
@@ -245,9 +240,43 @@ namespace LichLord.World
             return true;
         }
 
+        public void OnRender(bool hasAuthority, float renderDeltaTime)
+        {
+            foreach (var kvp in PropStates)
+            {
+                int guid = kvp.Key;
+
+                if (!GetRenderState(hasAuthority, this, guid, out var usedState))
+                {
+                    Debug.LogWarning($"Null PropRuntimeState for GUID {guid} in Render.");
+                    continue;
+                }
+
+                // if we have no loader for guid, create one
+                if (!PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
+                {
+                    propLoadState = new FPropLoadState();
+                    PropLoadStates[guid] = propLoadState;
+                }
+
+                if (propLoadState.LoadState == ELoadState.None)
+                {
+                    // Set the state to loading
+                    propLoadState.LoadState = ELoadState.Loading;
+                    PropLoadStates[guid] = propLoadState;
+
+                    _context.PropManager.SpawnProp(usedState);
+                }
+                else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
+                {
+                    propLoadState.Prop.OnRender(usedState, renderDeltaTime);
+                }                
+            }
+        }
+
         private readonly List<PropRuntimeState> _tempPropStateList = new List<PropRuntimeState>();
 
-        public void UpdatePropRuntimeStates(int tick)
+        public void OnFixedUpdateNetwork(int tick)
         {
             _tempPropStateList.Clear();
 

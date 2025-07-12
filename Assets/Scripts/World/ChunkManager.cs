@@ -26,7 +26,7 @@ namespace LichLord.World
         private HashSet<Chunk> _loadedChunks = new HashSet<Chunk>(); // Track loaded chunks
         public HashSet<Chunk> LoadedChunks => _loadedChunks;
 
-        private Dictionary<FChunkPosition, ChunkReplicator> _replicators = new Dictionary<FChunkPosition, ChunkReplicator>();
+        private List<ChunkReplicator> _replicators = new List<ChunkReplicator>();
 
         private Stack<ChunkReplicator> _replicatorPool = new Stack<ChunkReplicator>();
 
@@ -51,7 +51,14 @@ namespace LichLord.World
                         Y = (byte)y
                     };
 
-                    _worldChunks[x, y] = new Chunk(chunkID, this);
+                    Chunk chunk = new Chunk(chunkID, this);
+
+                    _worldChunks[x, y] = chunk;
+
+                    if (chunk.LoadState == ELoadState.None)
+                    {
+                        LoadChunkIntoMemory(chunk);
+                    }
                 }
             }
         }
@@ -66,19 +73,19 @@ namespace LichLord.World
                 if (chunk == null)
                     continue;
 
-                if (chunk.LoadState == ELoadState.None)
-                {
-                    LoadChunkIntoMemory(chunk);
-                }
-
                 chunk.IncrementReplicationRef();
 
                 _replicatedChunks.Add(chunk);
 
                 if (HasStateAuthority)
                 {
-                    if (_replicators.ContainsKey(chunk.ChunkID))
-                        continue;
+                    var chunkId =  chunk.ChunkID;
+
+                    foreach (var activeReplicator in _replicators)
+                    {
+                        if (activeReplicator.ChunkID.IsEqual(ref chunkId))
+                            return;
+                    }
 
                     ChunkReplicator replicator;
 
@@ -87,8 +94,7 @@ namespace LichLord.World
                     {
                         replicator = _replicatorPool.Pop();
                         replicator.transform.position = chunk.Bounds.center;
-                        replicator.PreSpawned(chunk.ChunkID);
-                        replicator.OnSpawned();
+                        replicator.SetID(chunk.ChunkID);
                         replicator.gameObject.SetActive(true); // Enable reused replicator
 
                     }
@@ -101,7 +107,7 @@ namespace LichLord.World
                             onBeforeSpawned: (runner, spawnedObject) =>
                             {
                                 var rep = spawnedObject.GetComponent<ChunkReplicator>();
-                                rep.PreSpawned(chunk.ChunkID);
+                                rep.SetID(chunk.ChunkID);
                             });
                     }
                 }
@@ -125,18 +131,14 @@ namespace LichLord.World
 
                 _replicatedChunks.Remove(chunk);
 
-                if (_replicators.TryGetValue(chunk.ChunkID, out var replicator))
+                if (HasStateAuthority)
                 {
-                    _replicators.Remove(chunk.ChunkID);
-                    
-                    replicator.Deactivate();
-                    replicator.gameObject.SetActive(false); // Disable and pool
+                    var replicator = chunk.Replicator;
+                    chunk.Replicator = null;
 
                     _replicatorPool.Push(replicator);
+                    replicator.gameObject.SetActive(false);
                 }
-
-                // Optionally unload
-                // UnloadChunkFromMemory(chunk);
             }
         }
   
@@ -219,7 +221,39 @@ namespace LichLord.World
 
             foreach (Chunk chunk in _replicatedChunks)
             {
-                chunk.UpdatePropRuntimeStates(tick);
+                chunk.OnFixedUpdateNetwork(tick);
+            }
+        }
+
+        int _lastTick = -1;
+        public override void Render()
+        {
+            if (_lastTick == Runner.Tick)
+                return;
+
+            _lastTick = Runner.Tick;
+
+            if (!Context.IsGameplayActive())
+                return;
+
+            var pc = Context.LocalPlayerCharacter;
+
+            if (pc == null)
+                return;
+
+            Debug.Log(Runner.GetAllBehaviours<ChunkReplicator>().Count);
+            foreach (ChunkReplicator replicator in _replicators)
+            {
+                replicator.OnRender();
+            }
+
+            float renderDeltaTime = Runner.LocalAlpha;
+            bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
+
+            // Update states from player's cached list
+            foreach (Chunk chunk in pc.CachedChunks)
+            {
+                chunk.OnRender(hasAuthority, renderDeltaTime);
             }
         }
 
@@ -241,20 +275,10 @@ namespace LichLord.World
             }
         }
 
+        // Just on spawned callbacks so we have a list
         public void RegisterReplicator(ChunkReplicator replicator)
         {
-            if (!_replicators.ContainsKey(replicator.ChunkID))
-            {
-                _replicators[replicator.ChunkID] = replicator;
-            }
-        }
-
-        public void UnregisterReplicator(ChunkReplicator replicator)
-        {
-            if (_replicators.TryGetValue(replicator.ChunkID, out var current) && current == replicator)
-            {
-                _replicators.Remove(replicator.ChunkID);
-            }
+            _replicators.Add(replicator);
         }
     }
 }
