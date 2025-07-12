@@ -48,8 +48,8 @@ namespace LichLord
         INetActor IHitInstigator.NetActor => this;
 
         // IChunkTrackable
-        private Chunk _currentChunk;
-        public Chunk CurrentChunk { get { return _currentChunk; } set { _currentChunk = value; } }
+        private Chunk _chunk;
+        public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
         public Vector3 Position => CachedTransform.position;
         public bool IsAttackable { get { return true; } }
 
@@ -213,13 +213,13 @@ namespace LichLord
 
         public void UpdateChunk()
         {
-            var lastChunk = _currentChunk;
+            var lastChunk = CurrentChunk;
             var newChunk = Context.ChunkManager.GetChunkAtPosition(CachedTransform.position);
 
             if (lastChunk == newChunk)
                 return;
-
-            _currentChunk = newChunk;
+            
+            CurrentChunk = newChunk;
 
             if (lastChunk != null)
                 lastChunk.RemoveObject(this);
@@ -234,7 +234,7 @@ namespace LichLord
             DespawnPropsForRemovedChunks(removed);
             _cachedChunks = newChunks;
 
-            //Debug.Log($"Chunks Added: {added.Count}, Removed: {removed.Count}");
+            Debug.Log($"Chunks Added: {added.Count}, Removed: {removed.Count}");
 
             Context.ChunkManager.TryRemoveReplicatedChunks(removed);
             Context.ChunkManager.TryAddReplicatedChunks(added);

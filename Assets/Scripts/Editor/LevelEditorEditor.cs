@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LichLord.Props;
 using LichLord.World;
-using System.Linq;
 
 [CustomEditor(typeof(LevelEditor))]
 public class LevelEditorEditor : Editor
@@ -15,8 +15,6 @@ public class LevelEditorEditor : Editor
     private Vector3 forwardDirection = Vector3.forward;
     private bool useSurfaceNormal = false;
     private float deleteRadius = 1.0f;
-
-    public float maxDrawDistance = 200f; // Set your desired max draw distance here
 
     private List<GameObject> _previewInstances = new();
 
@@ -123,11 +121,6 @@ public class LevelEditorEditor : Editor
                 EditorUtility.DisplayDialog("Success", "ChunkPropsMarkupData removal complete. Check console for details.", "OK");
             }
         }
-
-        if (GUILayout.Button("Import Trees From Terrain"))
-        {
-            ImportTreesFromTerrain(manager);
-        }
     }
 
     private void OnSceneGUI(SceneView sceneView)
@@ -140,9 +133,6 @@ public class LevelEditorEditor : Editor
 
         if (manager.WorldSettings?.PropMarkupDatas != null)
         {
-            Camera sceneCam = SceneView.currentDrawingSceneView.camera;
-
-
             foreach (var markupData in manager.WorldSettings.PropMarkupDatas)
             {
                 if (markupData?.propMarkupDatas == null) continue;
@@ -150,10 +140,6 @@ public class LevelEditorEditor : Editor
                 foreach (var point in markupData.propMarkupDatas)
                 {
                     if (point?.propDefinition?.prefab == null) continue;
-
-                    float distance = Vector3.Distance(sceneCam.transform.position, point.position);
-                    if (distance > maxDrawDistance)
-                        continue;
 
                     GameObject preview = (GameObject)PrefabUtility.InstantiatePrefab(point.propDefinition.prefab);
                     if (preview == null) continue;
@@ -167,7 +153,6 @@ public class LevelEditorEditor : Editor
             }
         }
 
-
         if (isAddingPoints && newPropDefinition != null)
         {
             if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
@@ -180,7 +165,7 @@ public class LevelEditorEditor : Editor
 
                     Undo.RecordObject(markupData, "Add Prop Point");
 
-                    List<PropMarkupData> points = markupData.propMarkupDatas != null ? new List<PropMarkupData>(markupData.propMarkupDatas) : new List<PropMarkupData>();
+                    List<PropMarkupData> points = markupData.propMarkupDatas?.ToList() ?? new List<PropMarkupData>();
                     int guid = GetUniqueGuid(markupData);
 
                     points.Add(new PropMarkupData
@@ -280,34 +265,15 @@ public class LevelEditorEditor : Editor
 
     private int GenerateUniqueGuid(HashSet<int> usedGuids)
     {
-        int newGuid = usedGuids.Count > 0 ? 0 : 1;
-        if (newGuid == 0)
-        {
-            newGuid = usedGuids.Max() + 1;
-        }
-
-        while (usedGuids.Contains(newGuid))
-            newGuid++;
-
+        int newGuid = usedGuids.Count > 0 ? usedGuids.Max() + 1 : 1;
+        while (usedGuids.Contains(newGuid)) newGuid++;
         return newGuid;
     }
 
     private int GetUniqueGuid(ChunkPropsMarkupData markupData)
     {
-        HashSet<int> usedGuids = new HashSet<int>();
-        if (markupData.propMarkupDatas != null)
-        {
-            for (int i = 0; i < markupData.propMarkupDatas.Length; i++)
-            {
-                usedGuids.Add(markupData.propMarkupDatas[i].guid);
-            }
-        }
-
-        int newGuid = 1;
-        while (usedGuids.Contains(newGuid))
-            newGuid++;
-
-        return newGuid;
+        HashSet<int> usedGuids = markupData?.propMarkupDatas?.Select(p => p.guid).ToHashSet() ?? new HashSet<int>();
+        return GenerateUniqueGuid(usedGuids);
     }
 
     private void CleanUpWorldSettings(WorldSettings worldSettings)
@@ -315,32 +281,19 @@ public class LevelEditorEditor : Editor
         if (worldSettings == null || worldSettings.PropMarkupDatas == null)
             return;
 
-        List<ChunkPropsMarkupData> validMarkupDatas = new List<ChunkPropsMarkupData>();
-        for (int i = 0; i < worldSettings.PropMarkupDatas.Count; i++)
+        var validMarkupDatas = new List<ChunkPropsMarkupData>();
+        foreach (var markupData in worldSettings.PropMarkupDatas)
         {
-            ChunkPropsMarkupData markupData = worldSettings.PropMarkupDatas[i];
-            if (markupData == null)
-                continue;
+            if (markupData == null) continue;
 
-            List<PropMarkupData> points = new List<PropMarkupData>();
-            if (markupData.propMarkupDatas != null)
-            {
-                for (int j = 0; j < markupData.propMarkupDatas.Length; j++)
-                {
-                    PropMarkupData p = markupData.propMarkupDatas[j];
-                    if (p != null && p.propDefinition != null)
-                        points.Add(p);
-                }
-            }
+            var points = markupData.propMarkupDatas?.Where(p => p != null && p.propDefinition != null).ToList() ?? new List<PropMarkupData>();
+            var usedGuids = new HashSet<int>();
 
-            HashSet<int> usedGuids = new HashSet<int>();
-            for (int k = 0; k < points.Count; k++)
+            foreach (var p in points)
             {
-                while (points[k].guid == 0 || usedGuids.Contains(points[k].guid))
-                {
-                    points[k].guid = GenerateUniqueGuid(usedGuids);
-                }
-                usedGuids.Add(points[k].guid);
+                while (p.guid == 0 || usedGuids.Contains(p.guid))
+                    p.guid = GenerateUniqueGuid(usedGuids);
+                usedGuids.Add(p.guid);
             }
 
             markupData.propMarkupDatas = points.ToArray();
@@ -353,118 +306,5 @@ public class LevelEditorEditor : Editor
         worldSettings.PropMarkupDatas.Clear();
         worldSettings.PropMarkupDatas.AddRange(validMarkupDatas);
         EditorUtility.SetDirty(worldSettings);
-    }
-
-    private void ImportTreesFromTerrain(LevelEditor manager)
-    {
-        if (manager.WorldSettings == null)
-        {
-            Debug.LogWarning("WorldSettings is null.");
-            return;
-        }
-
-        Terrain[] terrains = Terrain.activeTerrains;
-        if (terrains == null || terrains.Length == 0)
-        {
-            Debug.LogWarning("No active terrains found in the scene.");
-            return;
-        }
-
-        int addedCount = 0;
-
-        for (int t = 0; t < terrains.Length; t++)
-        {
-            Terrain terrain = terrains[t];
-            TerrainID idComponent = terrain.GetComponent<TerrainID>();
-            if (idComponent == null)
-            {
-                Debug.LogWarning($"Terrain '{terrain.name}' is missing a TerrainID component.");
-                continue;
-            }
-
-            string terrainID = idComponent.ID;
-            Vector3 terrainPos = terrain.transform.position;
-            TerrainData terrainData = terrain.terrainData;
-
-            TreePrototype[] prototypes = terrainData.treePrototypes;
-            TreeInstance[] trees = terrainData.treeInstances;
-
-            for (int i = 0; i < trees.Length; i++)
-            {
-                TreeInstance tree = trees[i];
-                Vector3 worldPos = Vector3.Scale(tree.position, terrainData.size) + terrainPos;
-                float yRotation = tree.rotation * 360f;
-                Quaternion rotation = Quaternion.Euler(0, yRotation, 0);
-
-                int prototypeIndex = tree.prototypeIndex;
-                if (prototypeIndex < 0 || prototypeIndex >= prototypes.Length)
-                    continue;
-
-                GameObject prefab = prototypes[prototypeIndex].prefab;
-                if (prefab == null)
-                    continue;
-
-                PropDefinition def = FindPropDefinitionByPrefab(prefab);
-                if (def == null)
-                    continue;
-
-                FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(worldPos);
-                ChunkPropsMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
-
-                PropMarkupData[] existing = markupData.propMarkupDatas ?? new PropMarkupData[0];
-
-                bool alreadyExists = false;
-                for (int j = 0; j < existing.Length; j++)
-                {
-                    if (Vector3.Distance(existing[j].position, worldPos) < 0.1f && existing[j].propDefinition == def)
-                    {
-                        alreadyExists = true;
-                        break;
-                    }
-                }
-                if (alreadyExists)
-                    continue;
-
-                Undo.RecordObject(markupData, "Import Tree");
-                Undo.RecordObject(manager.WorldSettings, "Import Tree");
-
-                PropMarkupData[] updated = new PropMarkupData[existing.Length + 1];
-                for (int j = 0; j < existing.Length; j++)
-                    updated[j] = existing[j];
-
-                int guid = GetUniqueGuid(markupData);
-
-                updated[existing.Length] = new PropMarkupData
-                {
-                    guid = guid,
-                    position = worldPos,
-                    rotation = rotation,
-                    propDefinition = def,
-                    terrainId = terrainID,
-                    terrainTreePosition = worldPos
-                };
-
-                markupData.propMarkupDatas = updated;
-                EditorUtility.SetDirty(markupData);
-                EditorUtility.SetDirty(manager.WorldSettings);
-                addedCount++;
-            }
-        }
-
-        Debug.Log($"Imported {addedCount} trees into prop markups.");
-    }
-
-    private PropDefinition FindPropDefinitionByPrefab(GameObject prefab)
-    {
-        return newPropDefinition;
-
-        // TODO: Replace this with your actual lookup method
-        PropDefinition[] allDefs = Resources.FindObjectsOfTypeAll<PropDefinition>();
-        for (int i = 0; i < allDefs.Length; i++)
-        {
-            if (allDefs[i].prefab == prefab)
-                return allDefs[i];
-        }
-        return null;
     }
 }
