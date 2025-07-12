@@ -6,7 +6,8 @@ namespace LichLord.Props
 {
     public class InteractableComponent : MonoBehaviour
     {
-        public Prop _owner { get; protected set; }
+        public Prop Owner { get; protected set; }
+
         private Func<InteractorComponent, bool> _IsPotentialInteract;
         private Func<InteractorComponent, bool> _IsInteractionValid;
         private Func<InteractorComponent, string> _GetInteractionText;
@@ -17,20 +18,50 @@ namespace LichLord.Props
         public Action<InteractableComponent, InteractorComponent> onInteractionComplete;
 
         public InteractorComponent CurrentInteractor { get; protected set; }
-        public int InteractTick = 32;
-        
+        public int TicksToComplete = 32;
+
+        public int InteractTick;
+
         public void Activate(Prop owner,
             Func<InteractorComponent, bool> isPotentialInteract,
             Func<InteractorComponent, bool> isInteractionValid,
             Func<InteractorComponent, string> getInteractionText,
             Func<InteractorComponent, float> getInteractionTime)
         {
+            Owner = owner;
             _IsPotentialInteract = isPotentialInteract;
             _IsInteractionValid = isInteractionValid;
             _GetInteractionText = getInteractionText;
             _GetInteractionTime = getInteractionTime;
         }
 
+        public float GetTimeRemaining(int currentTick)
+        {
+            if (CurrentInteractor == null)
+                return 0;
+
+            int ticksElapsed = currentTick - InteractTick;
+            int ticksRemaining = TicksToComplete - ticksElapsed;
+
+            if (ticksRemaining <= 0)
+                return 0;
+
+            float tickRate = 32f;
+            return ticksRemaining / tickRate;
+        }
+
+        public float GetTimeRemaining(float localRenderTime)
+        {
+            if (CurrentInteractor == null)
+                return 0f;
+
+            float tickRate = 32f; // ticks per second
+            float interactStartTime = InteractTick / tickRate;
+            float timeElapsed = localRenderTime - interactStartTime;
+            float timeRemaining = (TicksToComplete / tickRate) - timeElapsed;
+
+            return Mathf.Max(0f, timeRemaining);
+        }
         // Can this interactable be added to the list of potentials
         public virtual bool IsPotentialInteractor(InteractorComponent interactorComponent)
         {
@@ -77,29 +108,25 @@ namespace LichLord.Props
             return 0f;
         }
 
-        
         // Interact start that runs on clients and server on state change
-        public virtual void InteractStart(InteractorComponent interactor)
+        public virtual void InteractStart(InteractorComponent interactor, int tick)
         {
-            CurrentInteractor = interactor; 
-
+            CurrentInteractor = interactor;
+            InteractTick = tick;
+            onInteractStart?.Invoke(this, interactor);
         }
 
         // Client interact start
         public virtual void InteractEnd(InteractorComponent interactor)
         {
-
+            CurrentInteractor = null;
+            onInteractEnd?.Invoke(this, interactor);
         }
 
-        public virtual void CompleteInteract(InteractorComponent interactor, FInteractorState interactorState)
+        public virtual void CompleteInteract(InteractorComponent interactor)
         {
-
-        }
-
-        private void ToggleInteractStartAudio(bool playAudio)
-        {
-
-
+            CurrentInteractor = null;
+            onInteractionComplete?.Invoke(this, interactor);
         }
         
     }

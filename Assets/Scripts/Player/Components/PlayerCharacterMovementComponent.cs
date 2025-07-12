@@ -183,8 +183,15 @@ namespace LichLord
             CC.transform.rotation = Quaternion.Euler(0f, input.LookRotation.y, 0f);
         }
 
+        bool _spawnTickComplete = false;
         public void OnFixedUpdate(ref FGameplayInput input)
         {
+            if (!_spawnTickComplete)
+            {
+                _spawnTickComplete = true;
+                return;
+            }
+
             float deltaTime = Runner.DeltaTime;
             SetLookRotation(input);
 

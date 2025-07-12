@@ -1,13 +1,18 @@
-﻿using LichLord.UI;
+﻿using LichLord;
+using LichLord.UI;
 using UnityEngine;
+using UnityEngine.UI; // Needed for Image
 
 public class UIFloatingInteract : UIWidget
 {
-    public Transform Target;  // The world object to follow
-    public Vector3 Offset = new Vector3(0, 1f, 0); // Offset above the object
-    public Camera UICamera; // Optional: only if using Screen Space - Camera
+    public Transform Target;
+    public Vector3 Offset = new Vector3(0, 1f, 0);
+    public Camera UICamera;
 
     private RectTransform _rectTransform;
+
+    [Header("UI Elements")]
+    [SerializeField] private Slider _progressSlider;  // Drag your progress bar fill image here
 
     private void Awake()
     {
@@ -17,11 +22,15 @@ public class UIFloatingInteract : UIWidget
     protected override void OnTick()
     {
         base.OnTick();
+        UpdateScreenSpacePosition();
+    }
 
+    private void UpdateScreenSpacePosition()
+    {
         if (Target != null)
         {
             Vector3 worldPos = Target.position + Offset;
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos); // Use UICamera if set
+            Vector3 screenPos = (UICamera != null ? UICamera : Camera.main).WorldToScreenPoint(worldPos);
             _rectTransform.position = screenPos;
         }
         else
@@ -30,6 +39,15 @@ public class UIFloatingInteract : UIWidget
         }
     }
 
+    public void SetProgressBarVisible(bool visible)
+    {
+        _progressSlider.SetActive(visible);
+    }
+
+    public void SetProgressBarPercent(float percent)
+    {
+        _progressSlider.value = Mathf.Clamp01(1 - percent);
+    }
 
     public void SetTarget(Transform target)
     {

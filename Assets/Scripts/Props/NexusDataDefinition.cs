@@ -12,7 +12,11 @@ namespace LichLord.Props
 
         private const int IS_ACTIVATED_BITS = 1;
         private const int IS_ACTIVATED_SHIFT = HEALTH_SHIFT + HEALTH_BITS; // 20
-        private const int IS_ACTIVATED_MASK = (1 << IS_ACTIVATED_BITS);    // 0b1
+        private const int IS_ACTIVATED_MASK = (1 << IS_ACTIVATED_BITS) - 1;    // 0b1
+
+        private const int IS_INTERACTING_BITS = 1;
+        private const int IS_INTERACTING_SHIFT = IS_ACTIVATED_SHIFT + IS_ACTIVATED_BITS; // 21
+        private const int IS_INTERACTING_MASK = (1 << IS_INTERACTING_BITS) - 1;
 
         public bool GetIsActivated(ref FPropData propData)
         {
@@ -32,12 +36,27 @@ namespace LichLord.Props
         {
             base.InitializeData(ref propData, definition);
             SetIsActivated(StartingActivation, ref propData); // default inactive
+            SetIsInteracting(false, ref propData);
         }
 
         public void ToggleActivation(ref FPropData propData)
         {
             bool current = GetIsActivated(ref propData);
             SetIsActivated(!current, ref propData);
+        }
+
+        public bool GetIsInteracting(ref FPropData propData)
+        {
+            return (propData.StateData & (IS_INTERACTING_MASK << IS_INTERACTING_SHIFT)) != 0;
+        }
+
+        public void SetIsInteracting(bool isInteracting, ref FPropData propData)
+        {
+            int stateData = propData.StateData;
+            stateData &= ~(IS_INTERACTING_MASK << IS_INTERACTING_SHIFT); // clear bit
+            if (isInteracting)
+                stateData |= (1 << IS_INTERACTING_SHIFT);
+            propData.StateData = stateData;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace LichLord
 {
@@ -16,6 +17,35 @@ namespace LichLord
                 _visualEffectBase.onInitialized += OnInitialized;
                 _visualEffectBase.onRecycleDelayStart += OnRecycleDelayStart;
                 _visualEffectBase.onRecycled += OnRecycled;
+                _visualEffectBase.onToggled += OnToggled;
+            }
+        }
+
+        private bool _isOn;
+
+        private void OnToggled(VisualEffectBase effect, bool isOn)
+        {
+            if (_isOn == isOn)
+                return;
+
+            _isOn = isOn;
+
+            if (isOn)
+            {
+                foreach (var particle in _particleSystems)
+                {
+                    particle.Stop();
+                    particle.Clear();
+                    particle.Play();
+                }
+            }
+            else
+            {
+                foreach (var particle in _particleSystems)
+                {
+                    particle.Stop();
+                    particle.Clear();
+                }
             }
         }
 

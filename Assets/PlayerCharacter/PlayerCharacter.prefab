@@ -1329,6 +1329,7 @@ GameObject:
   - component: {fileID: 7134053186718281712}
   - component: {fileID: 3226170803067638791}
   - component: {fileID: 8429857202971717623}
+  - component: {fileID: 7082911450453534011}
   m_Layer: 6
   m_Name: FSM
   m_TagString: Untagged
@@ -1402,6 +1403,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4dec3172276675448d02940b7f1bc78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _priority: 0
+  _checkPriorityOnExit: 1
+  fsmRef: {fileID: 7134053186718281712}
+--- !u!114 &7082911450453534011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2325368546965728258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1579ed3666f63724f8c72fa8c63042a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _priority: 0
@@ -2223,6 +2239,7 @@ MonoBehaviour:
   - {fileID: 7134053186718281712}
   - {fileID: 3226170803067638791}
   - {fileID: 8429857202971717623}
+  - {fileID: 7082911450453534011}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4804172155013043321
 MonoBehaviour:
@@ -2360,6 +2377,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8192
   _pc: {fileID: 2971398371087610287}
+  _bestInteractable: {fileID: 0}
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0

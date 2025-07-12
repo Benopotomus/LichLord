@@ -8,57 +8,89 @@ namespace LichLord
     using UnityEngine;
     using System.Collections.Generic;
     using Fusion;
-    using System;
     using LichLord.Props;
     using LichLord.UI;
 
     public class InteractorComponent : ContextBehaviour
     {
-        [SerializeField]
-        private LayerMask _interactableLayerMask;
+        [SerializeField] private PlayerCharacter _pc;
 
-        [SerializeField]
-        private PlayerCharacter _pc;
+        [SerializeField] private LayerMask _interactableLayerMask;
 
         private List<InteractableComponent> _allInteractables = new List<InteractableComponent>();
 
-        [SerializeField]
-        private InteractableComponent _bestInteractable;
+        [SerializeField] private InteractableComponent _bestInteractable;
+        [SerializeField] private InteractableComponent _currentInteractable;
 
         private float _interactDistance = 1.0f;
-
-        [Networked]
-        private ref FInteractorState _state => ref MakeRef<FInteractorState>();
-
-        public Action<InteractorComponent, InteractableComponent> onBestInteractableChanged;
-        public void InvokeBestInteractableChanged(InteractableComponent interactable) { onBestInteractableChanged?.Invoke(this, interactable); }
-
-        public Action<InteractorComponent, bool> onInteractingChanged;
-        public void InvokeInteractingChanged(bool isInteracting) { onInteractingChanged?.Invoke(this, isInteracting); }
-
-        public bool IsInteracting => _state.IsInteracting;
-        public bool IsExecuting => _state.IsExecuting;
-        public bool IsLooting => _state.IsLooting;
 
         public void ProcessInput(ref FGameplayInput input)
         {
             if (_bestInteractable == null)
                 return;
 
-            if (input.Interact)
+            if (!input.Interact)
+                return;
+
+            if (_pc.FSM.StateMachine.ActiveState is IdleState idleState)
             {
-                _bestInteractable.InteractStart(this);
+                SetInteract(_bestInteractable, true);
+  
             }
+            else if (_pc.FSM.StateMachine.ActiveState is InteractingState interactingState)
+            {
+                SetInteract(_bestInteractable, false);
+            }
+        }
+
+        private void SetInteract(InteractableComponent interactable, bool isInteracting)
+        {
+            int tick = Runner.Tick;
+
+            CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
+
+            if (isInteracting)
+            {
+                state.MoveToInteract();
+                _currentInteractable = _bestInteractable;
+                _currentInteractable.InteractStart(this, tick);
+            }
+            else
+            {
+                state.MoveToIdle();
+                _currentInteractable.InteractEnd(this);
+                _currentInteractable = null;
+            }
+
+            Prop prop = interactable.Owner;
+
+            Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, isInteracting);
+
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, isInteracting);
         }
 
         public void OnFixedUpdate()
         {
+            int tick = Runner.Tick;
+
             RefreshInteractables();
-            UpdateInteractUI();
+            
+            if (_currentInteractable != null)
+            {
+                if (_currentInteractable.GetTimeRemaining(tick) <= 0f)
+                {
+                    _currentInteractable.CompleteInteract(this);
+                    SetInteract(_currentInteractable, false);
+                }
+            }
         }
 
-        private void UpdateInteractUI()
+        public void UpdateInteractUI(float localRenderTime)
         {
+            if (!HasStateAuthority)
+                return;
+
             GameplayUI gameplayUI = Context.UI as GameplayUI;
 
             if (gameplayUI == null)
@@ -76,6 +108,20 @@ namespace LichLord
             {
                 floatingInteract.SetTarget(_bestInteractable.transform);
             }
+
+            if (_currentInteractable == null)
+            {
+                floatingInteract.SetProgressBarVisible(false);
+                return;
+            }
+
+            floatingInteract.SetProgressBarPercent(_currentInteractable.GetTimeRemaining(localRenderTime));
+            floatingInteract.SetProgressBarVisible(true);
+        }
+
+        public void OnRender(float deltaTime, float localRenderTime, int tick)
+        {
+            UpdateInteractUI(localRenderTime);
         }
 
         public void InteractableEntered(InteractableComponent interactable)
@@ -90,10 +136,16 @@ namespace LichLord
 
         private void RefreshInteractables()
         {
+            if (_currentInteractable != null)
+            {
+                _bestInteractable = _currentInteractable;
+                return;
+            }
+
             _allInteractables.Clear();
             _bestInteractable = null;
 
-            Collider[] checkedCollisions = new Collider[8];
+            Collider[] checkedCollisions = new Collider[4];
 
             int hitCount = Physics.OverlapSphereNonAlloc(
                 transform.position,
@@ -130,144 +182,7 @@ namespace LichLord
                 _allInteractables.Add(curInteractable);
             }
 
-            // If needed, do something with newBestInteractable
-
             _bestInteractable = newBestInteractable;
         }
-
-        /*
-        //[Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Unreliable)]
-        private void RPC_CompleteInteract(FInteractorState state)
-        {
-            // Figure out what to do when the interact time completes
-            InteractableComponent interactable = state.GetInteractable(Context);
-
-            if (interactable == null)
-                return;
-
-            interactable.CompleteInteract(this, state);
-            _state.IsInteracting = false;
-            _state.StartTick = 0;
-            _state.SetInteractable(null);
-
-            // if the interact is a chest start looting
-            if (interactable.Owner is Chest chest)
-            {
-                _state.IsLooting = true;
-            }
-
-            if (interactable.Owner is CreatureEntity creatureEntity)
-            {
-                Debug.Log("Complete Interact");
-
-                _state.IsInteracting = false;
-                _state.IsExecuting = false;
-                _state.IsReviving = false;
-            }
-        }
-
-        public bool PollInput(eInputAction inputAction)
-        {
-            if (!heroEntity.HeroInput.HasActive(inputAction))
-                return false;
-
-            if (heroEntity.ActionsComponent.PressLockedInput == inputAction)
-                return false;
-
-            if (!CanInteract())
-                return false;
-
-            if (!_state.IsInteracting)
-                Input_StartInteract();
-            else
-                Input_EndInteract();
-
-            heroEntity.ActionsComponent.PressLockedInput = inputAction;
-            return true;
-        }
-
-        private bool CanInteract()
-        {
-            if (heroEntity.ActiveStrikeEvent.IsValid())
-                return false;
-
-            return true;
-        }
-
-        public void CancelLooting()
-        {
-            _state.Clear();
-            _state.IsInteracting = false;
-            _state.IsLooting = false;
-        }
-
-        public float GetInteractionPercent(float simOrRenderTime)
-        {
-            if (!_state.IsValid() || !_state.IsInteracting || BestInteractable == null)
-                return 0;
-
-            float timespan = BestInteractable.GetInteractionTime(this);
-            float completeTime = (_state.StartTick * Runner.DeltaTime) + timespan;
-
-            float remainingTime = completeTime - simOrRenderTime;
-
-            return Mathf.Clamp01((timespan - remainingTime) / timespan);
-        }
-
-
-        public bool IsSkillUseLocked()
-        {
-            if (_state.IsInteracting)
-                return true;
-
-            return false;
-        }
-
-        public void Input_StartInteract()
-        {
-            InteractableComponent interactable = _state.GetInteractable(Context);
-            if (interactable == null)
-                return;
-
-            // check interaction valid with the object (two people opening a door, or door state invalid)
-            if (!interactable.IsInteractionValid(this))
-                return;
-
-            _state.StartTick = Runner.Tick;
-            _state.IsInteracting = true;
-
-            if (interactable.Owner is CreatureEntity targetCreature)
-            {
-                if (targetCreature.FSM.StateMachine.ActiveState is CreatureDownedState)
-                {
-                    switch (TeamUtility.GetAttitudeForContextBehaviors(targetCreature, heroEntity))
-                    {
-                        case eTeamAttitude.Friendly:
-                            _state.IsReviving = true;
-
-                            break;
-                        case eTeamAttitude.Hostile:
-                            _state.IsExecuting = true;
-                            break;
-                    }
-                }
-            }
-        }
-
-        public void Input_EndInteract()
-        {
-            _state.IsInteracting = false;
-        }
-
-        public Vector2 GetVectorToInteractable()
-        {
-            if (BestInteractable == null)
-                return Vector2.right;
-
-            return (BestInteractable.transform.position - heroEntity.CachedTransform.position).normalized;
-        }
-         */
     }
-
-
 }

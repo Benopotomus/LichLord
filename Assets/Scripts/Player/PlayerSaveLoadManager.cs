@@ -41,6 +41,8 @@ namespace LichLord
                     moveState = pc.Movement.CurrentMoveState
                 };
 
+                Debug.Log("Saving Position: " + playerSaveData.position);
+
                 // Serialize to JSON
                 string json = JsonUtility.ToJson(playerSaveData, true);
 

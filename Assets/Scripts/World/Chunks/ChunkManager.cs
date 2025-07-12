@@ -1,15 +1,20 @@
 ﻿using Fusion;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
-using LichLord.Props;
 
 namespace LichLord.World
 {
     public class ChunkManager : ContextBehaviour 
     {
-        [SerializeField]
-        private ChunkReplicator _replicatorPrefab;
+        [SerializeField] private ChunkReplicator_16 _replicator16Prefab;
+        [SerializeField] private ChunkReplicator_32 _replicator32Prefab;
+        [SerializeField] private ChunkReplicator_64 _replicator64Prefab;
+        [SerializeField] private ChunkReplicator_128 _replicator128Prefab;
+
+        private readonly Stack<ChunkReplicator> _pool16 = new();
+        private readonly Stack<ChunkReplicator> _pool32 = new();
+        private readonly Stack<ChunkReplicator> _pool64 = new();
+        private readonly Stack<ChunkReplicator> _pool128 = new();
 
         [SerializeField]
         private bool drawChunkBounds = true;
@@ -27,8 +32,6 @@ namespace LichLord.World
         public HashSet<Chunk> LoadedChunks => _loadedChunks;
 
         private List<ChunkReplicator> _replicators = new List<ChunkReplicator>();
-
-        private Stack<ChunkReplicator> _replicatorPool = new Stack<ChunkReplicator>();
 
         public void InitializeWorldChunks()
         {
@@ -79,7 +82,7 @@ namespace LichLord.World
 
                 if (HasStateAuthority)
                 {
-                    var chunkId =  chunk.ChunkID;
+                    var chunkId = chunk.ChunkID;
 
                     foreach (var activeReplicator in _replicators)
                     {
@@ -87,29 +90,8 @@ namespace LichLord.World
                             return;
                     }
 
-                    ChunkReplicator replicator;
-
-                    // Reuse from pool
-                    if (_replicatorPool.Count > 0)
-                    {
-                        replicator = _replicatorPool.Pop();
-                        replicator.transform.position = chunk.Bounds.center;
-                        replicator.SetID(chunk.ChunkID);
-                        replicator.gameObject.SetActive(true); // Enable reused replicator
-
-                    }
-                    else
-                    {
-                        replicator = Runner.Spawn(_replicatorPrefab,
-                            chunk.Bounds.center,
-                            Quaternion.identity,
-                            inputAuthority: null,
-                            onBeforeSpawned: (runner, spawnedObject) =>
-                            {
-                                var rep = spawnedObject.GetComponent<ChunkReplicator>();
-                                rep.SetID(chunk.ChunkID);
-                            });
-                    }
+                    var size = GetOptimalReplicatorSizeForChunk(chunk);
+                    ChunkReplicator replicator = TryGetOrSpawnReplicator(chunk, size);
                 }
             }
         }
@@ -134,10 +116,23 @@ namespace LichLord.World
                 if (HasStateAuthority)
                 {
                     var replicator = chunk.Replicator;
-                    chunk.Replicator = null;
+                   
+                    switch (replicator)
+                    {
+                        case ChunkReplicator_16 r16: _pool16.Push(r16); break;
+                        case ChunkReplicator_32 r32: _pool32.Push(r32); break;
+                        case ChunkReplicator_64 r64: _pool64.Push(r64); break;
+                        case ChunkReplicator_128 r128: _pool128.Push(r128); break;
+                    }
 
-                    _replicatorPool.Push(replicator);
-                    replicator.gameObject.SetActive(false);
+                    if (replicator.gameObject != null)
+                    {
+                        replicator.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[ChunkManager] Replicator {replicator} had null gameObject. Possibly despawned?");
+                    }
                 }
             }
         }
@@ -241,7 +236,6 @@ namespace LichLord.World
             if (pc == null)
                 return;
 
-            Debug.Log(Runner.GetAllBehaviours<ChunkReplicator>().Count);
             foreach (ChunkReplicator replicator in _replicators)
             {
                 replicator.OnRender();
@@ -279,6 +273,79 @@ namespace LichLord.World
         public void RegisterReplicator(ChunkReplicator replicator)
         {
             _replicators.Add(replicator);
+        }
+
+        private EReplicatorSize GetOptimalReplicatorSizeForChunk(Chunk chunk)
+        {
+            int propCount = chunk.PropStates.Count; // or use whatever metric you track
+            if (propCount <= 16)
+                return EReplicatorSize.S16;
+            if (propCount <= 32)
+                return EReplicatorSize.S32;
+            if (propCount <= 64)
+                return EReplicatorSize.S64;
+            return EReplicatorSize.S128;
+        }
+
+        private ChunkReplicator TryGetOrSpawnReplicator(Chunk chunk, EReplicatorSize size)
+        {
+            Stack<ChunkReplicator> pool = size switch
+            {
+                EReplicatorSize.S16 => _pool16,
+                EReplicatorSize.S32 => _pool32,
+                EReplicatorSize.S64 => _pool64,
+                EReplicatorSize.S128 => _pool128,
+                _ => throw new System.ArgumentOutOfRangeException()
+            };
+
+            ChunkReplicator replicator;
+            if (pool.Count > 0)
+            {
+                replicator = pool.Pop();
+                replicator.transform.position = chunk.Bounds.center;
+                replicator.SetID(chunk.ChunkID);
+                replicator.gameObject.SetActive(true);
+                return replicator;
+            }
+
+            // Spawn the correct type via Fusion
+            replicator = size switch
+            {
+                EReplicatorSize.S16 => Runner.Spawn(_replicator16Prefab, chunk.Bounds.center, Quaternion.identity, null,
+                    onBeforeSpawned: (runner, obj) =>
+                    {
+                        var r = obj.GetComponent<ChunkReplicator_16>();
+                        r.SetID(chunk.ChunkID);
+                    }),
+                EReplicatorSize.S32 => Runner.Spawn(_replicator32Prefab, chunk.Bounds.center, Quaternion.identity, null,
+                    onBeforeSpawned: (runner, obj) =>
+                    {
+                        var r = obj.GetComponent<ChunkReplicator_32>();
+                        r.SetID(chunk.ChunkID);
+                    }),
+                EReplicatorSize.S64 => Runner.Spawn(_replicator64Prefab, chunk.Bounds.center, Quaternion.identity, null,
+                    onBeforeSpawned: (runner, obj) =>
+                    {
+                        var r = obj.GetComponent<ChunkReplicator_64>();
+                        r.SetID(chunk.ChunkID);
+                    }),
+                EReplicatorSize.S128 => Runner.Spawn(_replicator128Prefab, chunk.Bounds.center, Quaternion.identity, null,
+                    onBeforeSpawned: (runner, obj) =>
+                    {
+                        var r = obj.GetComponent<ChunkReplicator_128>();
+                        r.SetID(chunk.ChunkID);
+                    }),
+                _ => throw new System.Exception("Unhandled replicator size")
+            };
+
+            return replicator;
+        }
+        public enum EReplicatorSize
+        {
+            S16 = 16,
+            S32 = 32,
+            S64 = 64,
+            S128 = 128
         }
     }
 }

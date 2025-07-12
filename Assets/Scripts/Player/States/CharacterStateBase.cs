@@ -23,7 +23,7 @@ namespace LichLord
             {
                 if (input.BuildMode)
                 {
-                    fsmRef.StateMachine.TryActivateState<BuildModeState>();
+                    MoveToBuildMode();
                     return;
                 }
             }
@@ -31,10 +31,25 @@ namespace LichLord
             {
                 if (input.BuildMode)
                 {
-                    fsmRef.StateMachine.TryActivateState<IdleState>();
+                    MoveToIdle();
                     return;
                 }
             }
+        }
+
+        public void MoveToInteract()
+        {
+            fsmRef.StateMachine.TryActivateState<InteractingState>();
+        }
+
+        public void MoveToIdle()
+        {
+            fsmRef.StateMachine.TryActivateState<IdleState>();
+        }
+
+        public void MoveToBuildMode()
+        {
+            fsmRef.StateMachine.TryActivateState<BuildModeState>();
         }
     }
 }

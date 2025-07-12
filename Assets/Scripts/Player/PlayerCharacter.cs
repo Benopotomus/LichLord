@@ -117,9 +117,6 @@ namespace LichLord
                     FirstPersonOverlayObjects[i].layer = overlayLayer;
                 }
             }
-
-            // Initialize cached prop states
-            UpdateChunk();
         }
 
         public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState)
@@ -128,6 +125,8 @@ namespace LichLord
             transform.position = position;
             Movement.SetMovementState(moveState);
             Input.SetLookRotation(rotation);
+
+            Debug.Log("Apply: " + transform.position);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -191,16 +190,15 @@ namespace LichLord
 
             if (hit.target is Prop prop)
             {
-                Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
+                Context.PropManager.RPC_DealDamage(prop.ChunkID, prop.GUID, hit.damageData.damageValue);
 
                 if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                    Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
+                    Context.PropManager.Predict_DealDamage(prop.ChunkID, prop.GUID, hit.damageData.damageValue);
             }
         }
 
         void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
         {
-            //Debug.Log("FireTick: " + data.FireTick + ", CurrentTick: " + Context.Runner.Tick);
         }
 
         void IHitTarget.ProcessHit(ref FHitUtilityData hit)
@@ -231,24 +229,17 @@ namespace LichLord
             var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
 
             DiffChunks(oldChunks, newChunks, out var added, out var removed);
-            DespawnPropsForRemovedChunks(removed);
+
+            if (HasStateAuthority)
+                for (int i = 0; i < removed.Count; i++)
+                    removed[i].DespawnProps();
+
             _cachedChunks = newChunks;
 
             Debug.Log($"Chunks Added: {added.Count}, Removed: {removed.Count}");
 
             Context.ChunkManager.TryRemoveReplicatedChunks(removed);
             Context.ChunkManager.TryAddReplicatedChunks(added);
-        }
-
-        private void DespawnPropsForRemovedChunks(List<Chunk> removed)
-        {
-            if (!HasStateAuthority)
-                return;
-
-            for (int i = 0; i < removed.Count; i++)
-            {
-                removed[i].DespawnProps();
-            }
         }
 
         public void DiffChunks(List<Chunk> oldChunks, List<Chunk> newChunks,

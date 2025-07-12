@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3972574693024457636}
-  - component: {fileID: 8221559517614959616}
+  - component: {fileID: 5822250490972213421}
   - component: {fileID: 8064787756335320870}
   m_Layer: 0
-  m_Name: ChunkReplicator
+  m_Name: ChunkReplicator_16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34,7 +34,7 @@ Transform:
   - {fileID: 4217220337111557151}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8221559517614959616
+--- !u!114 &5822250490972213421
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,7 +43,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 597006559944892601}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21d3339e3517cb8429b16b6fae31c70a, type: 3}
+  m_Script: {fileID: 11500000, guid: dc76c15d23b5cae47aee49c4e0b95206, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _ChunkID:
@@ -61,12 +61,12 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 4151775725
+  SortKey: 1736017151
   ObjectInterest: 1
   Flags: 131073
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: 8221559517614959616}
+  - {fileID: 5822250490972213421}
   ForceRemoteRenderTimeframe: 0
 --- !u!1 &1145184199830022495
 GameObject:

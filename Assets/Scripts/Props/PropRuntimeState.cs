@@ -74,7 +74,7 @@ namespace LichLord.Props
             this.position = other.position;
             this.rotation = other.rotation;
 
-            FPropData otherData = other.Data;
+            FPropData otherData = other._data;
             _data.Copy(ref otherData);
             _data.GUID = guid;
             _data.DefinitionID = definitionId;
@@ -100,6 +100,51 @@ namespace LichLord.Props
             dataDefinition.ApplyDamage(ref _data, damage);
 
             _hitReactEndTick = _hitReactTicks + tick;
+        }
+
+        public void SetInteract(bool interact, int tick)
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                nexusDataDefinition.SetIsInteracting(interact, ref _data);
+            }
+        }
+
+        public void SetActivated(bool activated, int tick)
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                Debug.Log("Set Activated: " + activated);
+                nexusDataDefinition.SetIsActivated(activated, ref _data);
+            }
+        }
+
+        public bool GetIsInteracting()
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                // Create a propdata and set its state data to get current health
+                return nexusDataDefinition.GetIsInteracting(ref _data);
+            }
+
+            return false;
+        }
+
+        public bool GetIsActivated()
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                // Create a propdata and set its state data to get current health
+                return nexusDataDefinition.GetIsActivated(ref _data);
+            }
+
+            return false;
         }
 
         public void CopyData(ref FPropData propData)

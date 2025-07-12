@@ -10,9 +10,6 @@ namespace LichLord.World
         public ref FChunkPosition ChunkID => ref MakeRef<FChunkPosition>();
         private FChunkPosition _lastChunkId;
 
-        [Networked, Capacity(PropConstants.MAX_PROP_REPS)]
-        private NetworkArray<FPropData> _propDatas { get; }
-
         public override void Spawned()
         { 
             base.Spawned();
@@ -20,7 +17,7 @@ namespace LichLord.World
             Context.ChunkManager.RegisterReplicator(this);
         }
 
-        public void OnRender()
+        public virtual void OnRender()
         {
             if (_lastChunkId.IsEqual(ref ChunkID))
                 return;
@@ -30,18 +27,18 @@ namespace LichLord.World
             OnChunkChanged();
         }
 
-        private void OnChunkChanged()
+        protected virtual void OnChunkChanged()
         {
             Chunk chunk = Context.ChunkManager.GetChunk(ChunkID);
             transform.position = chunk.Bounds.center;
-            gameObject.name = "Chunk Rep: " + ChunkID.X + ", " + ChunkID.Y;
             chunk.Replicator = this;
             CopyDataFromChunk(chunk);
         }
 
-        public void SetID(FChunkPosition chunkID)
+        public virtual void SetID(FChunkPosition chunkID)
         {
             ChunkID = chunkID;
+            OnChunkChanged();
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -56,21 +53,15 @@ namespace LichLord.World
 
         public void Deactivate()
         {
-
         }
 
-        private void CopyDataFromChunk(Chunk chunk)
+        protected virtual void CopyDataFromChunk(Chunk chunk)
         {
-            foreach (var deltaStates in chunk.DeltaPropStates)
-            {
-                ref FPropData propData = ref _propDatas.GetRef(deltaStates.Key);
-                propData.Copy(deltaStates.Value);
-            }
         }
 
-        public ref FPropData GetPropData(int index)
-        { 
-            return ref _propDatas.GetRef(index);
+        public virtual ref FPropData GetPropData(int index)
+        {
+            throw new System.NotImplementedException("GetPropData must be overridden in a derived class.");
         }
     }
 }

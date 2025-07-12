@@ -89,10 +89,6 @@ namespace LichLord
                 LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
             }
 
-            Runner.SetPlayerObject(playerRef, LocalPlayer.Object);
-
-            // Spawn player with InputAuthority
-
             LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState);
 
             // Set the unique nickname

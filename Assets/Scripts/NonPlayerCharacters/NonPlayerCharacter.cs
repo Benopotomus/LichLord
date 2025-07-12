@@ -229,10 +229,10 @@ namespace LichLord.NonPlayerCharacters
 
             if (hit.target is Prop prop)
             {
-                Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
+                Context.PropManager.RPC_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
 
                 if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                    Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
+                    Context.PropManager.Predict_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
             }
         }
 

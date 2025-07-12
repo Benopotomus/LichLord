@@ -25,9 +25,17 @@ namespace LichLord
         // Called when the effect is recycled
         public Action<VisualEffectBase> onRecycled;
 
+        // Called when the effect is recycled
+        public Action<VisualEffectBase, bool> onToggled;
+
         public virtual void Initialize()
         {
             onInitialized?.Invoke(this);
+        }
+
+        public virtual void Toggle(bool isActive)
+        {
+            onToggled?.Invoke(this, isActive);
         }
 
         // Called externally.

@@ -20,6 +20,9 @@ namespace LichLord.Props
         protected PropRuntimeState _propRuntimeState;
         public PropRuntimeState RuntimeState => _propRuntimeState;
 
+        public FChunkPosition ChunkID;
+        public int GUID;
+
         [SerializeField] 
         protected PropDefinition _propDefinition;
 
@@ -27,8 +30,7 @@ namespace LichLord.Props
         public Transform CachedTransform => _transform;
 
         // IChunkTrackable
-        private Chunk _currentChunk;
-        public Chunk CurrentChunk { get => _currentChunk; set => _currentChunk = value; }
+        public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
 
         public Vector3 Position => CachedTransform.position;
         public bool IsAttackable
@@ -60,7 +62,8 @@ namespace LichLord.Props
             CachedTransform.position = _propRuntimeState.position;
             CachedTransform.rotation = _propRuntimeState.rotation;
 
-            _currentChunk = propRuntimeState.chunk;
+            ChunkID = propRuntimeState.chunk.ChunkID;
+            GUID = propRuntimeState.guid;
         }
 
         // This is the visuals for authority and client.
@@ -68,8 +71,8 @@ namespace LichLord.Props
         public virtual void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
         {
             _propRuntimeState = propRuntimeState;
-            _stateComponent.UpdateState(_propRuntimeState.GetState());
-            _healthComponent.UpdateHealth(_propRuntimeState.GetHealth());
+            _stateComponent.UpdateState(propRuntimeState.GetState());
+            _healthComponent.UpdateHealth(propRuntimeState.GetHealth());
         }
 
         public void StartRecycle()
