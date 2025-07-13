@@ -114,12 +114,38 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
         {
-            //30 server ticks/second
-            //10 send ticks/second
-            if (tick % 3 != 0)
+            int sendRateModulus = GetSendRateModulus();
+
+            if ((tick + _npc.Index) % sendRateModulus != 0)
                 return;
 
             WriteData(ref data);
+        }
+
+        private int GetSendRateModulus()
+        {
+            var activePlayers = _npc.Context.NetworkGame.ActivePlayers;
+
+            float minSqrDist = float.MaxValue;
+
+            foreach (var player in activePlayers)
+            {
+                if (player.HasStateAuthority)
+                    continue;
+
+                float sqrDist = (player.CachedTransform.position - _npc.CachedTransform.position).sqrMagnitude;
+
+                if (sqrDist < minSqrDist)
+                    minSqrDist = sqrDist;
+            }
+
+            // Now decide based on nearest player distance
+            if (minSqrDist < (40f * 40f))
+                return 3; // ~10.7 Hz
+            if (minSqrDist < (80f * 80f))
+                return 4; // 8 Hz
+
+            return 5; // ~6.4 Hz
         }
 
         private void WriteData(ref FNonPlayerCharacterData data)

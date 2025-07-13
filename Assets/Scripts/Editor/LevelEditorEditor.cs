@@ -133,6 +133,11 @@ public class LevelEditorEditor : Editor
 
         if (manager.WorldSettings?.PropMarkupDatas != null)
         {
+            Camera sceneCamera = SceneView.currentDrawingSceneView?.camera;
+            if (sceneCamera == null) return;
+
+            float maxDrawRange = manager.maxDrawRange;
+
             foreach (var markupData in manager.WorldSettings.PropMarkupDatas)
             {
                 if (markupData?.propMarkupDatas == null) continue;
@@ -140,6 +145,9 @@ public class LevelEditorEditor : Editor
                 foreach (var point in markupData.propMarkupDatas)
                 {
                     if (point?.propDefinition?.prefab == null) continue;
+
+                    float distance = Vector3.Distance(sceneCamera.transform.position, point.position);
+                    if (distance > maxDrawRange) continue;
 
                     GameObject preview = (GameObject)PrefabUtility.InstantiatePrefab(point.propDefinition.prefab);
                     if (preview == null) continue;
@@ -152,6 +160,7 @@ public class LevelEditorEditor : Editor
                 }
             }
         }
+
 
         if (isAddingPoints && newPropDefinition != null)
         {
@@ -173,7 +182,8 @@ public class LevelEditorEditor : Editor
                         guid = guid,
                         position = hit.point,
                         rotation = Quaternion.LookRotation((useSurfaceNormal ? hit.normal : forwardDirection).normalized, Vector3.up),
-                        propDefinition = newPropDefinition
+                        propDefinition = newPropDefinition,
+                        propDefinitionId = newPropDefinition.TableID
                     });
 
                     markupData.propMarkupDatas = points.ToArray();

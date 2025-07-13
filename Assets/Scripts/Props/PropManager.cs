@@ -29,7 +29,7 @@ namespace LichLord.Props
             for (int i = 0; i < baseMarkupData.propMarkupDatas.Length; i++)
             {
                 PropMarkupData propMarkupData = baseMarkupData.propMarkupDatas[i];
-                if (propMarkupData == null || propMarkupData.propDefinition == null)
+                if (propMarkupData == null)
                 {
                     continue;
                 }
@@ -39,7 +39,7 @@ namespace LichLord.Props
                     chunk,
                     propMarkupData.position,
                     propMarkupData.rotation,
-                    propMarkupData.propDefinition.TableID);
+                    propMarkupData.propDefinitionId);
 
                 chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
             }

@@ -164,6 +164,7 @@ namespace LichLord.World
 
         private void SaveNPCs()
         {
+            return;
             if (Runner == null)
             {
                 Debug.LogWarning("No active session; cannot save NPCs.");

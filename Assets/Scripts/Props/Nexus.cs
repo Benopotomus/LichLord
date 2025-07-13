@@ -19,6 +19,7 @@ namespace LichLord.Props
 
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
+            Debug.Log(SystemInfo.graphicsDeviceType);
             base.OnSpawned(propRuntimeState, propManager);
 
             _interactableComponent.Activate(

@@ -8,6 +8,8 @@ namespace LichLord.World
         [SerializeField] private WorldSettings worldSettings;
         public WorldSettings WorldSettings => worldSettings;
 
+        public float maxDrawRange = 300f;
+
         public Mesh GetMeshFromPrefab(GameObject prefab)
         {
             if (prefab == null) return null;
