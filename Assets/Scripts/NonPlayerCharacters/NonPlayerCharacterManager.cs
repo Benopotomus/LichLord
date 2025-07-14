@@ -111,6 +111,7 @@ namespace LichLord.NonPlayerCharacters
                 if (newReplicator != null)
                 {
                     AddReplicator(newReplicator);
+                    return newReplicator;
                 }
             }
 
@@ -133,11 +134,12 @@ namespace LichLord.NonPlayerCharacters
         public List<FNonPlayerCharacterSaveState> GetAllSaveStates()
         {
             var allSaves = new List<FNonPlayerCharacterSaveState>((NonPlayerCharacterConstants.MAX_NPC_REPS *
-                NonPlayerCharacterConstants.MAX_REPLICATORS) + 1);
+                NonPlayerCharacterConstants.MAX_REPLICATORS));
 
             foreach (var replicator in _replicators)
             {
                 allSaves.AddRange(replicator.GetSaveStates());
+                Debug.Log(replicator);
             }
 
             return allSaves;

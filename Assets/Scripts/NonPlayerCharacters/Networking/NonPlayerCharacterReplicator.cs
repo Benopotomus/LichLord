@@ -102,12 +102,15 @@ namespace LichLord.NonPlayerCharacters
         // The save data needs the network data and the NPC for specific authority information
         public List<FNonPlayerCharacterSaveState> GetSaveStates()
         {
-            var saves = new List<FNonPlayerCharacterSaveState>();
+            List<FNonPlayerCharacterSaveState> saves = new List<FNonPlayerCharacterSaveState>();
 
-            for (int i = 0; i <= NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
                 if (_loadStates[i].LoadState == ELoadState.Loaded)
                 {
+                    if (_loadStates[i].NPC == null)
+                        continue;
+
                     FNonPlayerCharacterSaveState saveState = new FNonPlayerCharacterSaveState(_loadStates[i].NPC, _npcDatas.Get(i));
                     saves.Add(saveState);
                 }

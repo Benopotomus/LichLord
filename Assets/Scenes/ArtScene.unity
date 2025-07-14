@@ -2679,7 +2679,7 @@ PrefabInstance:
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.size
-      value: 4
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
@@ -2704,6 +2704,30 @@ PrefabInstance:
       propertyPath: _debugSpawnDefinitions.Array.data[3]
       value: 
       objectReference: {fileID: 11400000, guid: 2ca99c2f7cc62bc43a5a83ad3ebfcad0,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[4]
+      value: 
+      objectReference: {fileID: 11400000, guid: 2ca99c2f7cc62bc43a5a83ad3ebfcad0,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[5]
+      value: 
+      objectReference: {fileID: 11400000, guid: 2ca99c2f7cc62bc43a5a83ad3ebfcad0,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[6]
+      value: 
+      objectReference: {fileID: 11400000, guid: fdc0e87a0c95b1e4f9cbea8135efa084,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[7]
+      value: 
+      objectReference: {fileID: 11400000, guid: fdc0e87a0c95b1e4f9cbea8135efa084,
         type: 2}
     - target: {fileID: 2255625441212249006, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
@@ -3082,11 +3106,7 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 33635685}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7136224720027177897, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 465fd4e57519ec44fb1a0a4afb74af8c, type: 3}
 --- !u!20 &1581192687 stripped
 Camera:
@@ -3478,7 +3498,7 @@ MonoBehaviour:
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
-    - {x: 1130.0099, y: 42.8237, z: 1066.0123, w: 0}
+    - {x: 1130.039, y: 42.85769, z: 1066.005, w: 0}
     fov:
     - 0.57735026
     - 0.57735026
@@ -3499,43 +3519,43 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
-    - e00: -0.5740153
-      e01: -0.00021108717
-      e02: -0.6131437
-      e03: 1302.2706
-      e10: 0.8979826
-      e11: 1.2190915
-      e12: -0.8410965
-      e13: -170.31592
-      e20: 0.513944
-      e21: -0.71036285
-      e22: -0.48090166
-      e23: -39.034786
-      e30: 0.51393884
-      e31: -0.71035576
-      e32: -0.48089683
-      e33: -37.69397
+    - e00: -0.51260567
+      e01: -0.000008460508
+      e02: -0.6653375
+      e03: 1288.5178
+      e10: 0.7101219
+      e11: 1.4820179
+      e12: -0.5471285
+      e13: -282.7396
+      e20: 0.6778156
+      e21: -0.5175709
+      e22: -0.52221274
+      e23: -188.43527
+      e30: 0.6778088
+      e31: -0.5175657
+      e32: -0.5222075
+      e33: -187.09296
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.69788826, y: -2.5444768e-15, z: 0.7162066, w: 0}
-    - {x: -0.04600302, y: -0.5441101, z: -0.8377517, w: 968.3382}
+    - {x: 0.12650286, y: -0.39632785, z: -0.9093521, w: 843.4063}
     frustumPlane1:
     - {x: -0.69788826, y: -2.544477e-15, z: 0.7162066, w: 0}
-    - {x: 0.83309114, y: -0.54378694, z: 0.101266846, w: -1026.0659}
+    - {x: 0.9115493, y: -0.39631492, z: 0.10960054, w: -1129.9359}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: 0.7059607, y: 0.25436786, z: -0.6609966, w: -104.00493}
+    - {x: 0.69396544, y: 0.48222613, z: -0.534668, w: -234.9163}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: -0.19202188, y: -0.96472365, z: 0.18009984, w: 66.310974}
+    - {x: -0.016156556, y: -0.9997919, z: 0.012460502, w: 47.823322}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
-    - {x: 0.5139388, y: -0.7103557, z: -0.48089677, w: -38.36418}
+    - {x: 0.6778089, y: -0.51756585, z: -0.52220756, w: -187.7632}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
-    - {x: -0.51286876, y: 0.7096672, z: 0.4830508, w: 134151.95}
+    - {x: -0.67755187, y: 0.51707906, z: 0.52302253, w: 133848.11}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:

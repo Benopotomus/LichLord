@@ -3,7 +3,7 @@ using System.IO;
 using Fusion;
 using System.Collections.Generic;
 using System;
-using LichLord.NonPlayerCharacters;
+using Fusion.Sockets;
 
 namespace LichLord.World
 {
@@ -14,6 +14,17 @@ namespace LichLord.World
 
         private List<FNonPlayerCharacterSaveState> _loadedNPCs = new List<FNonPlayerCharacterSaveState>();
         public List<FNonPlayerCharacterSaveState> LoadedNPCs => _loadedNPCs;
+
+        private FusionCallbacksHandler _shutdownHandler;
+
+        public override void Spawned()
+        {
+            base.Spawned();
+            _shutdownHandler = new FusionCallbacksHandler();
+            _shutdownHandler.Shutdown += OnFusionShutdown;
+
+            Runner.AddCallbacks(_shutdownHandler);
+        }
 
         private void SaveChunks()
         {
@@ -164,7 +175,6 @@ namespace LichLord.World
 
         private void SaveNPCs()
         {
-            return;
             if (Runner == null)
             {
                 Debug.LogWarning("No active session; cannot save NPCs.");
@@ -257,11 +267,13 @@ namespace LichLord.World
             return SaveLoadManager.instance.GetNPCSaveFilePath(sessionName);
         }
 
-        public override void Despawned(NetworkRunner runner, bool hasState)
+        private void OnFusionShutdown(NetworkRunner runner, ShutdownReason reason)
         {
-            base.Despawned(runner, hasState);
+            Debug.Log("Fusion shutting down: saving world and NPC state...");
+
             SaveChunks();
             SaveNPCs();
         }
+
     }
 }
