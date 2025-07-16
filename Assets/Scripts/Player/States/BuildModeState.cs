@@ -15,8 +15,8 @@ namespace LichLord
             FGameplayInput input = fsmRef.PC.Input.CurrentInput;
 
 
-            fsmRef.PC.Movement.OnFixedUpdate(ref input);
-            fsmRef.PC.CameraController.OnFixedUpdate(ref input);
+            //fsmRef.PC.Movement.Move(ref input);
+            fsmRef.PC.CameraController.ProcessInput(ref input);
             fsmRef.PC.Builder.ProcessInput(ref input);
 
             // Call this for the ending of maneuvers

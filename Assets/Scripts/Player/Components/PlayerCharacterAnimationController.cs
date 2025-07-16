@@ -4,6 +4,7 @@ namespace LichLord
 {
     public class PlayerCharacterAnimationController : MonoBehaviour
     {
+
         private int _animIDMoving = Animator.StringToHash("Moving");
         private int _animIDBlocking = Animator.StringToHash("Blocking");
         private int _animIDWeapon = Animator.StringToHash("Weapon");
@@ -33,28 +34,71 @@ namespace LichLord
             _animator.SetTrigger(_animIDTrigger);
         }
 
-        public void UpdateAnimatonForMovement(Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
+        public void UpdateAnimatonForMovement(Vector3 localVelocity, float yawVelocity, EMovementState moveState, float renderDeltaTime)
         {
-            float speed = localVelocity.magnitude;
-            float walkSpeed = 5;
+            float speed = localVelocity.sqrMagnitude;
+            float horizontalSpeed = new Vector3(localVelocity.x, 0, localVelocity.z).sqrMagnitude;
+
+            float walkSpeed = 5f;
 
             // Determine if the character is moving
-            bool isMoving = speed > 0.1f || Mathf.Abs(yawVelocity) > 1f;
+            bool isMoving = horizontalSpeed > 0.0f || Mathf.Abs(yawVelocity) > 1f;
 
             // Compute normalized animation velocity
             Vector3 animationVelocity = localVelocity / walkSpeed;
 
             // If movement is very small, zero forward motion and apply yaw as strafe
-            if (speed < 0.1f)
+            if (horizontalSpeed < 0.01f)
             {
                 animationVelocity.z = 0f;
-                animationVelocity.x = yawVelocity * 2f; // Turn in place animation
+                animationVelocity.x = Mathf.Clamp( yawVelocity * 4, -0.5f, 0.5f); // Turn in place animation
             }
 
-            // Set animation parameters
-            _animator.SetBool(_animIDMoving, isMoving);
-            _animator.SetFloat(_animIDSpeedX, animationVelocity.x, 0.1f, renderDeltaTime);
-            _animator.SetFloat(_animIDSpeedZ, animationVelocity.z, 0.1f, renderDeltaTime);
+            switch (moveState)
+            {
+                case EMovementState.Walking:
+                    _animator.SetBool(_animIDMoving, isMoving);
+                    _animator.SetFloat(_animIDSpeedX, animationVelocity.x, 0.25f, renderDeltaTime);
+                    _animator.SetFloat(_animIDSpeedZ, animationVelocity.z, 0.25f, renderDeltaTime);
+                    break;
+                case EMovementState.Jumping:
+                    break;
+                case EMovementState.Flying:
+                    break;
+            }
+        }
+
+        public void OnMovementStateChanged(EMovementState newMovementState)
+        {
+            switch (newMovementState)
+            {
+                case EMovementState.Walking:
+                    //Debug.Log("Walking");
+                    _animator.SetBool(_animIDMoving, true);
+                    _animator.SetFloat(_animIDSpeedX, 0f);
+                    _animator.SetFloat(_animIDSpeedZ, 0f);
+                    _animator.SetInteger(_animIDJumping, 0);
+                    _animator.SetTrigger(_animIDTrigger);
+                    break;
+
+                case EMovementState.Jumping:
+                    //Debug.Log("Jump Hit");
+                    _animator.SetInteger(_animIDWeapon, 0);
+                    _animator.SetBool(_animIDMoving, false);
+                    _animator.SetInteger(_animIDJumping, 1);
+                    _animator.SetInteger(_animIDTriggerNumber, 18);
+                    _animator.SetTrigger(_animIDTrigger);
+
+                    break;
+                case EMovementState.Flying:
+                    //Debug.Log("Jump Hit");
+                    _animator.SetInteger(_animIDWeapon, 0);
+                    _animator.SetBool(_animIDMoving, false);
+                    _animator.SetInteger(_animIDJumping, 2);
+                    _animator.SetInteger(_animIDTriggerNumber, 18);
+                    _animator.SetTrigger(_animIDTrigger);
+                    break;
+            }
         }
     }
 }

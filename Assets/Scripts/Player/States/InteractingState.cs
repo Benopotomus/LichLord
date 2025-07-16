@@ -14,7 +14,7 @@ namespace LichLord
         {
             FGameplayInput input = fsmRef.PC.Input.CurrentInput;
 
-            fsmRef.PC.CameraController.OnFixedUpdate(ref input);
+            fsmRef.PC.CameraController.ProcessInput(ref input);
 
             fsmRef.PC.Interactor.ProcessInput(ref input);
             fsmRef.PC.Interactor.OnFixedUpdate();

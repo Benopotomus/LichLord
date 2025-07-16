@@ -14,6 +14,7 @@ namespace LichLord
         [SerializeField] private PlayerCharacter _playerPrefab;
         public PlayerCharacter LocalPlayer { get; private set; }
 
+        [SerializeField]
         private SpawnPoint[] _spawnPoints;
         [SerializeField] private Vector3 _fallbackSpawnPosition = new Vector3(1000, 0, 1000);
 

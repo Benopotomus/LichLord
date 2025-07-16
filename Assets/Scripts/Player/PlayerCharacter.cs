@@ -28,6 +28,9 @@ namespace LichLord
         public PlayerCharacterFSM FSM;
         public InteractorComponent Interactor;
 
+        [SerializeField] private PlayerCharacterAnimationController _animationController;
+        public PlayerCharacterAnimationController AnimationController => _animationController;
+
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 
@@ -121,7 +124,7 @@ namespace LichLord
 
         public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState)
         {
-            Movement.CC.Move(position);
+
             transform.position = position;
             Movement.SetMovementState(moveState);
             Input.SetLookRotation(rotation);

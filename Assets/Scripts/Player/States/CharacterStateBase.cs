@@ -37,6 +37,12 @@ namespace LichLord
             }
         }
 
+        protected override void OnRender()
+        {
+            
+
+        }
+
         public void MoveToInteract()
         {
             fsmRef.StateMachine.TryActivateState<InteractingState>();

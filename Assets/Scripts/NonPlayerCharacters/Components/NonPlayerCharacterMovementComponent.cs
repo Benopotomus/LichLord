@@ -13,8 +13,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private FollowerEntity _follower;
         public FollowerEntity AIFollower => _follower;
 
-        [SerializeField] private Vector3 _velocity;
-        public Vector3 Velocity => _velocity;
+        [SerializeField] private Vector3 _worldVelocity;
+        public Vector3 Velocity => _worldVelocity;
 
         [SerializeField] private bool _isGrounded;
         public bool IsGrounded => _isGrounded;
@@ -99,9 +99,9 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateVelocity(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            _velocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
+            _worldVelocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
             _lastPosition = NPC.CachedTransform.position;
-            _localVelocity = NPC.CachedTransform.InverseTransformDirection(_velocity);
+            _localVelocity = NPC.CachedTransform.InverseTransformDirection(_worldVelocity);
         }
 
         private void UpdateYawVelocity()
