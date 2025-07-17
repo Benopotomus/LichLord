@@ -61,7 +61,7 @@ namespace LichLord
         // Called from the save/load
         public void SetLookRotation(Quaternion rotation)
         {
-            _input.LookRotation = new Vector2(0, rotation.eulerAngles.y);
+            _input.LookDelta = new Vector2(0, rotation.eulerAngles.y);
         }
 
         public void ResetInput()
@@ -92,9 +92,8 @@ namespace LichLord
             _input.MoveDirection = _controls.Gameplay.Move.ReadValue<Vector2>();
 
             Vector2 rawLook = _controls.Gameplay.Look.ReadValue<Vector2>();
-            const float lookSensitivity = 0.25f;
-            _input.LookRotation += new Vector2(-rawLook.y, rawLook.x) * lookSensitivity;
-            _input.LookRotation = ClampLookRotation(_input.LookRotation);
+            const float lookSensitivity = 1f;
+            _input.LookDelta = new Vector2(-rawLook.y, rawLook.x) * lookSensitivity;
 
             // Button inputs
             _input.Jump |= _controls.Gameplay.Jump.WasPressedThisFrame();
@@ -118,12 +117,6 @@ namespace LichLord
                     _input.ScrollDelta = scrollY;
                 }
             }
-        }
-
-        private Vector2 ClampLookRotation(Vector2 lookRotation)
-        {
-            lookRotation.x = Mathf.Clamp(lookRotation.x, -60f, 70f);
-            return lookRotation;
         }
     }
 }

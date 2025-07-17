@@ -44,7 +44,7 @@ namespace LichLord
                 foreach (var particle in _particleSystems)
                 {
                     particle.Stop();
-                    particle.Clear();
+                    //particle.Clear();
                 }
             }
         }

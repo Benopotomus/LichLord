@@ -27,6 +27,7 @@ namespace LichLord
             float blendAmount = HasStateAuthority ? 0.05f : 0.2f;
 
             var pitchRotation = _pc.Movement.WorldTransform.Pitch;
+
             CameraPivot.localRotation = Quaternion.Euler(pitchRotation, 0, 0);
 
             SpineBoneBottom.rotation = Quaternion.Lerp(SpineBoneBottom.rotation, ChestTargetTransform.rotation, (_pc.Animator.GetFloat(_animIDUpperBodyBlend) * 0.25f));

@@ -17,19 +17,23 @@ namespace LichLord
 
             FGameplayInput input = fsmRef.PC.Input.CurrentInput;
 
-            fsmRef.PC.Movement.ProcessInput(ref input, deltaTime);
-            fsmRef.PC.Movement.OnFixedUpdateNetwork();
+            // Authority
             fsmRef.PC.CameraController.ProcessInput(ref input);
-
-            // Process input
+            fsmRef.PC.Movement.ProcessInput(ref input, deltaTime);
+            fsmRef.PC.Movement.UpdateLookRotation(deltaTime);
             fsmRef.PC.Maneuvers.ProcessInput(ref input);
-            // Process timing
+
+            fsmRef.PC.Movement.WritePosition();
             fsmRef.PC.Maneuvers.OnFixedUpdate();
 
-            fsmRef.PC.Interactor.ProcessInput(ref input);
-            fsmRef.PC.Interactor.OnFixedUpdate();
 
-            CheckBuildMode(ref input);
+            fsmRef.PC.Interactor.RefreshInteractables();
+            fsmRef.PC.Interactor.ProcessInput(ref input);
+
+
+            //CheckBuildMode(ref input);
+
+
 
             fsmRef.PC.Input.ResetInput();
         }
@@ -51,6 +55,5 @@ namespace LichLord
             fsmRef.PC.Maneuvers.OnRender();
             fsmRef.PC.Interactor.OnRender(deltaTime, localRenderTime, tick);
         }
-
     }
 }

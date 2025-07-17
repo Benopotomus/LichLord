@@ -8,6 +8,11 @@ namespace LichLord
     {
         [SerializeField] private Transform _skydomeTransform;
 
+        [SerializeField]
+        public Transform _cameraFollowTarget;
+
+        public Transform followTransform;
+
         [Header("Cinemachine Cameras")]
         [SerializeField] private CinemachineVirtualCamera thirdPersonCam;
         [SerializeField] private CinemachineVirtualCamera firstPersonCam;
@@ -37,31 +42,21 @@ namespace LichLord
 
             // Set initial camera view
             SetCameraView(isFirstPerson);
+
+            thirdPersonCam.Follow = _cameraFollowTarget;
+            thirdPersonCam.LookAt = _cameraFollowTarget;
+            firstPersonCam.Follow = _cameraFollowTarget;
+            firstPersonCam.LookAt = _cameraFollowTarget;
         }
 
-        public void SetCameraTargets(Transform firstPersonTarget, Transform thirdPersonFollowTarget)
+        public void ModifyCameraTargetRotation(Quaternion newRotation)
         {
-            if (thirdPersonCam != null)
-            {
-                if (thirdPersonFollowTarget != null)
-                {
-                    thirdPersonCam.Follow = thirdPersonFollowTarget;
-                    thirdPersonCam.LookAt = thirdPersonFollowTarget;
-                }
-            }
+            _cameraFollowTarget.rotation = newRotation;
+        }
 
-            if (firstPersonCam != null)
-            {
-                if (firstPersonTarget != null)
-                {
-                    firstPersonCam.Follow = firstPersonTarget;
-                    thirdPersonCam.LookAt = firstPersonTarget;
-                }
-                else
-                {
-                    Debug.LogWarning("[CameraManager] First person camera follow target not assigned.");
-                }
-            }
+        public void SetCameraFollow(Transform transform)
+        {
+            followTransform = transform;
         }
 
         public void SetCameraView(bool firstPerson)
@@ -90,6 +85,9 @@ namespace LichLord
 
             Camera mainCamera = Camera.main;
             _skydomeTransform.position = mainCamera.transform.position;
+
+            if(followTransform != null)
+                _cameraFollowTarget.position = followTransform.position;
         }
 
         private void LateUpdate()

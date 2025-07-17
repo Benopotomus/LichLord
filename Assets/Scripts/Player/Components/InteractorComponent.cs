@@ -70,19 +70,22 @@ namespace LichLord
                 Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, isInteracting);
         }
 
-        public void OnFixedUpdate()
+        public void OnFixedUpdateNetwork(int tick, float deltaTime)
         {
-            int tick = Runner.Tick;
-
-            RefreshInteractables();
-            
             if (_currentInteractable != null)
             {
+                Vector3 interactablePosition = _currentInteractable.transform.position;
+                _pc.Movement.ProcessInteractMovement(interactablePosition, deltaTime);
+                _pc.Movement.LookTarget = _currentInteractable.transform;
                 if (_currentInteractable.GetTimeRemaining(tick) <= 0f)
                 {
                     _currentInteractable.CompleteInteract(this);
                     SetInteract(_currentInteractable, false);
                 }
+            }
+            else
+            {
+                _pc.Movement.LookTarget = null;
             }
         }
 
@@ -134,7 +137,7 @@ namespace LichLord
             _allInteractables.Remove(interactable);
         }
 
-        private void RefreshInteractables()
+        public void RefreshInteractables()
         {
             if (_currentInteractable != null)
             {

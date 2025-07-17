@@ -2,7 +2,6 @@
 using Fusion;
 using System.Collections.Generic;
 
-
 namespace LichLord
 {
     public class ManeuverComponent : NetworkBehaviour
@@ -38,6 +37,7 @@ namespace LichLord
         // Current upper body blend amount
         private float _upperBodyBlend = 0f;
         private float _moveSpeedMultiplier = 1f;
+        public float MoveSpeedMultiplier => _moveSpeedMultiplier;
 
         public override void Spawned()
         {
@@ -147,7 +147,7 @@ namespace LichLord
 
             if (input.Fire)
             {
-                //Debug.Log($"[ActionManager] Executing action: {selectedAction.ActionName} (Index: {SelectedActionIndex})");
+                Debug.Log($"[ActionManager] Executing action: {GetSelectedManeuver().ManeuverName} (Index: {_selectedIndex})");
 
                 _activeManeuverTick = Runner.Tick;
                 _activeManeuverIndex = _selectedIndex;
@@ -232,8 +232,6 @@ namespace LichLord
             {
                 _moveSpeedMultiplier = Mathf.Lerp(_moveSpeedMultiplier, 1, deltaTime * 4f);
             }
-
-            _pc.Movement.SetManeuverSpeedMultiplier(_moveSpeedMultiplier);
         }
 
         public void UpdateWeaponModel()

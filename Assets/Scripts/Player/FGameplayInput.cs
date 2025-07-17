@@ -5,7 +5,7 @@ namespace LichLord
 {
     public struct FGameplayInput
     {
-        public Vector2 LookRotation;
+        public Vector2 LookDelta;
         public Vector2 MoveDirection;
         public bool Jump;
         public bool JumpHeld;

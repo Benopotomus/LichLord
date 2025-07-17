@@ -1,3 +1,4 @@
+using Fusion;
 using UnityEngine;
 
 namespace LichLord
@@ -12,12 +13,15 @@ namespace LichLord
 
         protected override void OnFixedUpdate()
         {
-            FGameplayInput input = fsmRef.PC.Input.CurrentInput;
+            float deltaTime = Runner.DeltaTime;
+            int tick = Runner.Tick;
 
+            FGameplayInput input = fsmRef.PC.Input.CurrentInput;
             fsmRef.PC.CameraController.ProcessInput(ref input);
 
+            fsmRef.PC.Interactor.RefreshInteractables();
             fsmRef.PC.Interactor.ProcessInput(ref input);
-            fsmRef.PC.Interactor.OnFixedUpdate();
+            fsmRef.PC.Interactor.OnFixedUpdateNetwork(tick, deltaTime);
 
             fsmRef.PC.Input.ResetInput();
         }
@@ -28,8 +32,8 @@ namespace LichLord
             float localRenderTime = Runner.LocalRenderTime;
             int tick = Runner.Tick;
 
-            //fsmRef.PC.Movement.OnRender(deltaTime);
-            //fsmRef.PC.Maneuvers.OnRender();
+            // Both
+            fsmRef.PC.Movement.OnRender(deltaTime);
             fsmRef.PC.Interactor.OnRender(deltaTime, localRenderTime, tick);
         }
 

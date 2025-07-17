@@ -51,7 +51,7 @@ namespace LichLord
 
         public void Start()
         {
-            //PopulateSaveData();
+            PopulateSaveData();
         }
 
         public void PopulateSaveData()
@@ -246,9 +246,7 @@ namespace LichLord
         // PLAYER
         public bool TryGetPlayerData(string playerKey, out string json)
         {
-
             json = null;
-            return false;
             if (string.IsNullOrEmpty(playerKey))
             {
                 playerKey = "default";
