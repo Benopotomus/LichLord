@@ -1165,6 +1165,37 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &2762215769894999994
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2024376527359719044}
+  m_Layer: 2
+  m_Name: CameraFollow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2024376527359719044
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2762215769894999994}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8114466163471220816}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3109180888072580357
 GameObject:
   m_ObjectHideFlags: 0
@@ -2173,6 +2204,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3b2c1e8ccf26684eb9c3837831eff6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &5825151058618563233
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 507459427110585306}
+  m_Layer: 0
+  m_Name: DebugSpawnTransform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &507459427110585306
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5825151058618563233}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1263.6, y: 27.5, z: 986.6}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5659346549072746464}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5997713225184429534
 GameObject:
   m_ObjectHideFlags: 0
@@ -2465,6 +2527,7 @@ Transform:
   - {fileID: 1346708055740677769}
   - {fileID: 1792994744468899580}
   - {fileID: 6544025952768842302}
+  - {fileID: 2024376527359719044}
   m_Father: {fileID: 8113843857799798740}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &393352328543011169
@@ -2480,6 +2543,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _skydomeTransform: {fileID: 2269921538234528462}
+  _cameraFollowTarget: {fileID: 2024376527359719044}
+  followTransform: {fileID: 0}
   thirdPersonCam: {fileID: 914776622807509504}
   firstPersonCam: {fileID: 2409695272435535700}
   _minRaycastDistance: 4
@@ -3689,6 +3754,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7407177223082808489}
+  - {fileID: 507459427110585306}
   m_Father: {fileID: 8113843857799798740}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &59580087568348656
@@ -3742,9 +3808,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fdc0e87a0c95b1e4f9cbea8135efa084, type: 2}
   _initialSpawnCount: 0
   _debugStreamRevive: 0
-  _streamSpawnCount: 5
+  _streamSpawnCount: 0
   _debugSpawnPosition: {x: 1000, y: 0, z: 1000}
-  _debugSpawnTransform: {fileID: 7407177223082808489}
+  _debugSpawnTransform: {fileID: 507459427110585306}
 --- !u!1 &8067374089588892938
 GameObject:
   m_ObjectHideFlags: 0
