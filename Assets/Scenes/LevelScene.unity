@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
-  m_Fog: 1
+  m_Fog: 0
   m_FogColor: {r: 0.30609936, g: 0.42138356, b: 0.38607347, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.01
@@ -301,9 +301,7 @@ MonoBehaviour:
   _spawner: {fileID: 111939070}
   _replicatorPrefab: {fileID: 3957007118019067033, guid: 29fc895c602f8fd4084d2ff263237ec3,
     type: 3}
-  _replicator: {fileID: 0}
-  _debugSpawnCount: 1
-  _debugStreamRevive: 0
+  _debug: {fileID: 0}
 --- !u!4 &111939069
 Transform:
   m_ObjectHideFlags: 0
@@ -766,6 +764,8 @@ MonoBehaviour:
         \"w\": 1.0\n                    },\n                    \"definitionId\":
         1,\n                    \"stateData\": 3\n                }\n           
         ],\n            \"npcs\": []\n        }\n    ]\n}"
+  _npcSavesLoaded:
+    _serializedList: []
   _playerSavesLoaded:
     _serializedList:
     - Key: LichLord_LichLord
@@ -937,6 +937,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.z
       value: 0.501
+      objectReference: {fileID: 0}
+    - target: {fileID: 9106086303564119316, guid: 75ac96b2759e84447ac3e40bcb02a6e5,
+        type: 3}
+      propertyPath: materialOptions.albedoMapGeneration
+      value: 512
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -1490,6 +1495,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4372488814566394913, guid: d6fba9d9c5ebff24698425ab2ab19eda,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4372488814566394913, guid: d6fba9d9c5ebff24698425ab2ab19eda,
+        type: 3}
+      propertyPath: windSpeed
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 7707547671812332825, guid: d6fba9d9c5ebff24698425ab2ab19eda,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1548,7 +1563,7 @@ PrefabInstance:
     - target: {fileID: 8445465162412098350, guid: d6fba9d9c5ebff24698425ab2ab19eda,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2838,8 +2853,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drawChunkBounds: 1
-  __networkChunks:
-    _items: []
 --- !u!4 &1265232218
 Transform:
   m_ObjectHideFlags: 0
@@ -3949,8 +3962,24 @@ MonoBehaviour:
   terrains:
   - {fileID: 0}
   providers:
+  - {fileID: 1717280248}
+  - {fileID: 1717280247}
+  - {fileID: 1117397595}
+  - {fileID: 1117397594}
+  - {fileID: 1555048946}
+  - {fileID: 1555048945}
+  - {fileID: 1450691087}
+  - {fileID: 1450691086}
+  - {fileID: 1696154283}
+  - {fileID: 1696154282}
+  - {fileID: 190148058}
+  - {fileID: 190148057}
+  - {fileID: 416185350}
+  - {fileID: 416185349}
   - {fileID: 354269906}
   - {fileID: 354269905}
+  - {fileID: 1487651767}
+  - {fileID: 1487651766}
   treeDrawType:
     cachingMode: 0
     cachingDistance: 256
@@ -3959,9 +3988,9 @@ MonoBehaviour:
       enabled: 1
       distanceMode: 0
       maxDrawDistance: 2000
-      shadowDistanceMode: 0
-      shadowDistance: 40
-      maxShadowLOD: 0
+      shadowDistanceMode: 1
+      shadowDistance: 100
+      maxShadowLOD: 1
       boundsExpand: {x: 0, y: 0, z: 0}
       density: 1
       skipHiZ: 0
@@ -4704,64 +4733,64 @@ MonoBehaviour:
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
-    - {x: -1402.8279, y: 715.85925, z: -334.1104, w: 0}
+    - {x: -6.9919205, y: 3.0474234, z: 6.2510357, w: 0}
     fov:
     - 0.57735026
     - 0.57735026
     viewProjection:
-    - e00: 0.97463584
-      e01: 1.1006402e-22
-      e02: 1.3850408e-14
+    - e00: 0.97427857
+      e01: 1.1002368e-22
+      e02: 1.3845331e-14
       e03: 0
       e10: -1.9559773e-22
       e11: 1.7320508
       e12: 6.1534805e-15
       e13: 0
-      e20: -1.4216542e-14
-      e21: -3.5541354e-15
-      e22: 1.0004002
-      e23: -0.60012007
+      e20: -1.4211338e-14
+      e21: -3.5528344e-15
+      e22: 1.000034
+      e23: -0.6000102
       e30: -1.4210855e-14
       e31: -3.5527137e-15
       e32: 1
       e33: 0
-    - e00: 0.2742955
-      e01: 0.0048714397
-      e02: -0.76943934
-      e03: 124.22443
-      e10: 1.0741268
-      e11: 1.3012502
-      e12: 0.39115125
-      e13: 705.9907
-      e20: 0.7089973
-      e21: -0.65996647
-      e22: 0.24857031
-      e23: 1550.0696
-      e30: 0.7089902
-      e31: -0.65995985
-      e32: 0.24856782
-      e33: 1550.0786
+    - e00: 0.8359205
+      e01: 0.003105681
+      e02: -0.46953362
+      e03: 8.770297
+      e10: 0.17835861
+      e11: 1.6911919
+      e12: 0.3287218
+      e13: -5.9615602
+      e20: 0.4787934
+      e21: -0.2159021
+      e22: 0.8509778
+      e23: -1.6498812
+      e30: 0.4787886
+      e31: -0.21589994
+      e32: 0.85096925
+      e33: -1.313849
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
-    - {x: 0.69796646, y: -2.5442064e-15, z: 0.7161305, w: 0}
-    - {x: 0.7615055, y: -0.5073331, z: -0.40338886, w: 1296.6637}
+    - {x: 0.69783515, y: -2.5446606e-15, z: 0.71625835, w: 0}
+    - {x: 0.94899875, y: -0.15360163, z: 0.27533233, w: 5.3823004}
     frustumPlane1:
-    - {x: -0.69796646, y: -2.5442066e-15, z: 0.7161305, w: 0}
-    - {x: 0.33664927, y: -0.5148785, z: 0.7883955, w: 1104.2527}
+    - {x: -0.69783515, y: -2.5446608e-15, z: 0.71625835, w: 0}
+    - {x: -0.25778913, y: -0.15808521, z: 0.9531809, w: -7.279057}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: 0.8915585, y: 0.32064518, z: 0.31985953, w: 1128.0347}
+    - {x: 0.3285736, y: 0.737646, z: 0.58984554, w: -3.6377046}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: -0.18256833, y: -0.9806051, z: -0.07129172, w: 422.044}
+    - {x: 0.150215, y: -0.9535459, z: 0.26112372, w: 2.3238556}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
-    - {x: 0.7089902, y: -0.65995985, z: 0.24856782, w: 1550.0663}
+    - {x: 0.4787886, y: -0.21589993, z: 0.85096925, w: -1.4818578}
     frustumPlane5:
-    - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
-    - {x: -0.70832, y: 0.6607019, z: -0.24850723, w: 902.07825}
+    - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 17660.53}
+    - {x: -0.47900283, y: 0.21570003, z: -0.85089946, w: 33546.18}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -5311,7 +5340,7 @@ MonoBehaviour:
     FieldOfView: 60.000004
     OrthographicSize: 5
     NearClipPlane: 0.3
-    FarClipPlane: 1500
+    FarClipPlane: 17707
     Dutch: 0
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
@@ -5938,8 +5967,8 @@ Camera:
   m_GameObject: {fileID: 8944336656349189697}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.34901962, g: 0.48235297, b: 0.454902, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -5961,7 +5990,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1500
+  far clip plane: 17707
   field of view: 60.000004
   orthographic: 0
   orthographic size: 5
