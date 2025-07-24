@@ -1,0 +1,55 @@
+struct AttributesInstancing
+{
+    float4 color : COLOR;
+    float4 positionOS : POSITION;
+    float3 normalOS : NORMAL;
+    float4 tangentOS : TANGENT;
+    float2 texcoord : TEXCOORD0;
+    float4 texcoord2 : TEXCOORD2;
+    float2 staticLightmapUV : TEXCOORD1;
+    float2 dynamicLightmapUV : TEXCOORD3;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+#include "AnimationInstancingBaseURP.hlsl"
+
+Varyings LitPassVertexSimpleInstancing(AttributesInstancing input)
+{
+    Varyings output = (Varyings)0;
+
+    UNITY_SETUP_INSTANCE_ID(input);
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+    input.positionOS = skinning(input);
+    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
+    VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
+
+    output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
+    output.posWS.xyz = vertexInput.positionWS;
+    output.positionCS = vertexInput.positionCS;
+
+    #ifdef _NORMALMAP
+        half3 viewDirWS = GetWorldSpaceNormalizeViewDir(vertexInput.positionWS);
+        output.normal = half4(normalInput.normalWS, viewDirWS.x);
+        output.tangent = half4(normalInput.tangentWS, viewDirWS.y);
+        output.bitangent = half4(normalInput.bitangentWS, viewDirWS.z);
+    #else
+        output.normal = NormalizeNormalPerVertex(normalInput.normalWS);
+    #endif
+
+    OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
+#ifdef DYNAMICLIGHTMAP_ON
+    output.dynamicLightmapUV = input.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+#endif
+    OUTPUT_SH(output.normal.xyz, output.vertexSH);
+
+    #ifdef _ADDITIONAL_LIGHTS_VERTEX
+        half3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
+        output.vertexLighting = vertexLight;
+    #endif
+
+    #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+        output.shadowCoord = GetShadowCoord(vertexInput);
+    #endif
+
+    return output;
+}
