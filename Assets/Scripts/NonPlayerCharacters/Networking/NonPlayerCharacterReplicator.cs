@@ -18,11 +18,6 @@ namespace LichLord.NonPlayerCharacters
         [Networked, Capacity(NonPlayerCharacterConstants.MAX_NPC_REPS)]
         private NetworkArray<FNonPlayerCharacterData> _npcDatas { get; }
 
-        [Networked]
-        [SerializeField]
-        private byte _highestUsedIndex { get; set; }
-        public int HighestUsedIndex => _highestUsedIndex;
-
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
 
         private FNPCLoadState[] _loadStates = new FNPCLoadState[NonPlayerCharacterConstants.MAX_NPC_REPS];
@@ -96,11 +91,6 @@ namespace LichLord.NonPlayerCharacters
 
             Context.NonPlayerCharacterManager.AddReplicator(this);
             _spawner.OnSpawned += OnNonPlayerCharacterSpawned;
-
-            if (HasStateAuthority)
-            {
-                RebuildFreeIndices();
-            }
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -112,12 +102,15 @@ namespace LichLord.NonPlayerCharacters
         // The save data needs the network data and the NPC for specific authority information
         public List<FNonPlayerCharacterSaveState> GetSaveStates()
         {
-            var saves = new List<FNonPlayerCharacterSaveState>();
+            List<FNonPlayerCharacterSaveState> saves = new List<FNonPlayerCharacterSaveState>();
 
-            for (int i = 0; i <= HighestUsedIndex; i++)
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
                 if (_loadStates[i].LoadState == ELoadState.Loaded)
                 {
+                    if (_loadStates[i].NPC == null)
+                        continue;
+
                     FNonPlayerCharacterSaveState saveState = new FNonPlayerCharacterSaveState(_loadStates[i].NPC, _npcDatas.Get(i));
                     saves.Add(saveState);
                 }
@@ -283,16 +276,6 @@ namespace LichLord.NonPlayerCharacters
             {
                 loadState.NPC.StartRecycle();
                 loadState.LoadState = ELoadState.None;
-
-                // check if we need to reduce the highest used index
-                if (index == _highestUsedIndex)
-                {
-                    _highestUsedIndex = (byte)(_loadStates
-                        .Where(state => state.LoadState == ELoadState.Loaded)
-                        .Select((state, i) => i)
-                        .DefaultIfEmpty(0)
-                        .Max());
-                }
             }
         }
 
@@ -302,10 +285,6 @@ namespace LichLord.NonPlayerCharacters
             loadState.NPC = character;
             loadState.LoadState = ELoadState.Loaded;
             character.OnSpawned(ref spawnParams, this);
-
-            // update the highest used index
-            if(HasStateAuthority)
-                _highestUsedIndex = Math.Max(_highestUsedIndex, (byte)spawnParams.Index);
         }
 
         public void ApplyDamage(int index, int damage, int hitReactIndex)

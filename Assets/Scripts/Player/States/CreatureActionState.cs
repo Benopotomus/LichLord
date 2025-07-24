@@ -5,7 +5,7 @@ using UnityEngine;
 namespace LichLord
 {
     [Tooltip("Player state entered when performing attacks.")]
-    public class CreatureActionState : CreatureStateBase
+    public class CreatureActionState : CharacterStateBase
     {
         [Tooltip("The curve at which the player moves on their forward vector.")]
         public AnimationCurve movementCurve;
@@ -63,7 +63,6 @@ namespace LichLord
 
         protected override void OnEnterStateRender()
         {
-            anim.CrossFadeInFixedTime(animState, animTransitionLength);
         }
 
         protected override void OnExitState()

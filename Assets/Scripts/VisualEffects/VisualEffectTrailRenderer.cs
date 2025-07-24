@@ -16,6 +16,34 @@ namespace LichLord
                 _visualEffectBase.onInitialized += OnInitialized;
                 _visualEffectBase.onRecycleDelayStart += OnRecycleDelayStart;
                 _visualEffectBase.onRecycled += OnRecycled;
+                _visualEffectBase.onToggled += OnToggled;
+            }
+        }
+
+        private bool _isOn;
+
+        private void OnToggled(VisualEffectBase effect, bool isOn)
+        {
+            if (_isOn == isOn)
+                return;
+
+            _isOn = isOn;
+
+            if (isOn)
+            {
+                foreach (var trailRenderer in _trailRenderers)
+                {
+                    trailRenderer.Clear();
+                    trailRenderer.emitting = true;
+                }
+            }
+            else
+            {
+                foreach (var trailRenderer in _trailRenderers)
+                {
+                    //trailRenderer.Clear();
+                    trailRenderer.emitting = false;
+                }
             }
         }
 

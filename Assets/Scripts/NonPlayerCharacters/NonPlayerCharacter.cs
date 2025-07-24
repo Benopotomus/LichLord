@@ -102,7 +102,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(_context.ChunkManager);
 
             _netObjectID.networkId = _replicator.Object.Id;
-            _netObjectID.index = (ushort)spawnParams.Index;
+            _netObjectID.index = (byte)spawnParams.Index;
         }
 
         public void AuthorityUpdate(ref FNonPlayerCharacterData data, 
@@ -154,16 +154,19 @@ namespace LichLord.NonPlayerCharacters
             if (_teamId == newTeam)
                 return;
 
-            switch (newTeam)
+            if (redHat != null && blueHat != null)
             {
-                case ETeamID.EnemiesTeamA:
-                    redHat.SetActive(false);
-                    blueHat.SetActive(true);
-                    break;
-                case ETeamID.EnemiesTeamB:
-                    blueHat.SetActive(false);
-                    redHat.SetActive(true);
-                    break;
+                switch (newTeam)
+                {
+                    case ETeamID.EnemiesTeamA:
+                        redHat.SetActive(false);
+                        blueHat.SetActive(true);
+                        break;
+                    case ETeamID.EnemiesTeamB:
+                        blueHat.SetActive(false);
+                        redHat.SetActive(true);
+                        break;
+                }
             }
 
             _teamId = newTeam;
@@ -226,10 +229,10 @@ namespace LichLord.NonPlayerCharacters
 
             if (hit.target is Prop prop)
             {
-                Context.PropManager.RPC_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
+                Context.PropManager.RPC_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
 
                 if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                    Context.PropManager.Predict_DealDamageToProp(prop.RuntimeState.guid, hit.damageData.damageValue);
+                    Context.PropManager.Predict_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
             }
         }
 

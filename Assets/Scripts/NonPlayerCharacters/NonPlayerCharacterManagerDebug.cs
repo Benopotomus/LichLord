@@ -7,13 +7,21 @@ namespace LichLord.NonPlayerCharacters
     public class NonPlayerCharacterManagerDebug : ContextBehaviour
     {
         [Header("Debug Spawning")]
-        [SerializeField] private NonPlayerCharacterDefinition _debugSpawnDefinition;
+        [SerializeField] private List<NonPlayerCharacterDefinition> _debugSpawnDefinitions;
         [SerializeField] private int _initialSpawnCount = 0;
         [SerializeField] private bool _debugStreamRevive;
         [SerializeField] private int _streamSpawnCount = 0;
 
+        [SerializeField] private Vector3 _debugSpawnPosition = new Vector3(1000, 0, 1000);
+        [SerializeField] private Transform _debugSpawnTransform;
+
         public void OnSpawned()
         {
+            if (_debugSpawnTransform != null) 
+                _debugSpawnPosition = _debugSpawnTransform.position;
+
+            var spawnDef = GetRandomSpawnDefinition();
+
             if (Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
             {
                 for (int i = 0; i < _initialSpawnCount; i++)
@@ -24,8 +32,8 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(35, 0, 0);
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamA);
+                    randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA);
                 }
 
                 for (int i = 0; i < _initialSpawnCount; i++)
@@ -36,9 +44,9 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(-35, 0, 0);
+                    randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamB);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB);
                 }
             }
         }
@@ -54,6 +62,7 @@ namespace LichLord.NonPlayerCharacters
             if (Runner.Tick % 64 != 0)
                 return;
 
+            var spawnDef = GetRandomSpawnDefinition();
             if (flip)
             {
                 for (int i = 0; i < _streamSpawnCount; i++)
@@ -65,8 +74,8 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(35, 0, 0);
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamA);
+                    randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA);
                 }
                 flip = false;
             }
@@ -80,12 +89,21 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-10f, 10f)
                     );
 
-                    randomPosition += new Vector3(-35, 0, 0);
+                    randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, _debugSpawnDefinition, ETeamID.EnemiesTeamB);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB);
                 }
                 flip = true;
             }
+        }
+
+        private NonPlayerCharacterDefinition GetRandomSpawnDefinition()
+        {
+            if (_debugSpawnDefinitions == null || _debugSpawnDefinitions.Count == 0)
+                return null;
+
+            int index = Random.Range(0, _debugSpawnDefinitions.Count);
+            return _debugSpawnDefinitions[index];
         }
     }
 }

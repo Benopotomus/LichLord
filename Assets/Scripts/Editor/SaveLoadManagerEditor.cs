@@ -89,6 +89,40 @@ public class SaveLoadManagerEditor : Editor
             }
         }
 
+        // Add a button to delete NPC save file
+        if (GUILayout.Button("Delete NPC Save"))
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(key))
+                {
+                    Debug.LogWarning("NPC key is empty. Please enter a valid NPC key (e.g., sessionName).");
+                    return;
+                }
+
+                // Delete from SaveLoadManager and file system
+                string saveFilePath = saveLoadManager.GetNPCSaveFilePath(key);
+                saveLoadManager.ClearNPCData(key);
+
+                if (File.Exists(saveFilePath))
+                {
+                    File.Delete(saveFilePath);
+                    Debug.Log($"Successfully deleted NPC save file for key {key} at {saveFilePath} via Editor button.");
+                }
+                else
+                {
+                    Debug.Log($"No NPC save file found for key {key} at {saveFilePath}. Removed from SaveLoadManager if present.");
+                }
+
+                // Mark the SaveLoadManager as dirty to ensure Inspector updates
+                EditorUtility.SetDirty(saveLoadManager);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Failed to delete NPC save file for key {key} via Editor button: {e.Message}");
+            }
+        }
+
         // Add a button to delete player save file
         if (GUILayout.Button("Delete Player Save"))
         {

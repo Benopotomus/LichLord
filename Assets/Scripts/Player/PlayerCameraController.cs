@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using Cinemachine;
-using Fusion.Addons.SimpleKCC;
-using Fusion;
 
 namespace LichLord
 {
@@ -24,26 +21,35 @@ namespace LichLord
 
             if (HasStateAuthority)
             {
-                Context.Camera.SetCameraTargets(
-                        firstPersonFollowTarget,
+                Context.Camera.SetCameraFollow(
                         thirdPersonFollowTarget);
             }
         }
 
-        public void OnFixedUpdate(ref FGameplayInput input)
+        Vector2 _lastEuler = Vector2.zero;
+        public void ProcessInput(ref FGameplayInput input)
         {
             if (!HasStateAuthority)
                 return;
 
-            firstPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
-            thirdPersonFollowTarget.rotation = Quaternion.Euler(input.LookRotation);
+            Vector2 lookDelta = input.LookDelta;
+            Vector2 newEuler = _lastEuler + lookDelta;
+
+            // Clamp the X rotation (pitch) to -60/60 degrees
+            newEuler.x = Mathf.Clamp(newEuler.x, -60f, 60f);
+
+            Context.Camera.ModifyCameraTargetRotation(Quaternion.Euler(newEuler));
+            
+            _lastEuler = newEuler;
 
             if (input.ToggleCameraView)
             {
                 isFirstPerson = !isFirstPerson;
-                Context.Camera.SetCameraView(isFirstPerson);
-            }
 
+                var followTarget = isFirstPerson ? firstPersonFollowTarget : thirdPersonFollowTarget; ;
+                Context.Camera.SetCameraView(isFirstPerson);
+                Context.Camera.SetCameraFollow(followTarget);
+            }
         }
 
     }

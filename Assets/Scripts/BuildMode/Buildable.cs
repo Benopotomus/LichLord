@@ -10,31 +10,24 @@ namespace LichLord.Buildables
 {
     public class Buildable : DWDObjectPoolObject, IHitTarget
     {
-        protected BuildableManager _buildableManager;
-        protected BuildableRuntimeState _buildableRuntimeState;
+        private BuildableZone _zone;
+        public BuildableZone Zone => _zone;
 
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
 
         public HurtboxComponent Hurtbox;
 
-        public virtual void OnSpawned(BuildableRuntimeState buildableRuntimeState, BuildableManager buildableManager)
+        public virtual void OnSpawned(BuildableZone zone, Vector3 position, Quaternion rotation, int data)
         {
-            _buildableRuntimeState = buildableRuntimeState;
-            _buildableManager = buildableManager;
+            _zone = zone;
 
-            CachedTransform.position = _buildableRuntimeState.position;
-            CachedTransform.rotation = _buildableRuntimeState.rotation;
+            CachedTransform.position = position;
+            CachedTransform.rotation = rotation;
         }
 
         public virtual void UpdateBuildable(BuildableRuntimeState buildableRuntimeState, float renderDeltaTime)
         {
-            if (buildableRuntimeState.stateData == 1)
-            {
-                gameObject.SetActive(false);
-            }
-            else
-                gameObject.SetActive(true);
 
         }
 

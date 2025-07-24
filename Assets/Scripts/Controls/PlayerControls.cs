@@ -203,7 +203,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""Action2"",
                     ""type"": ""Button"",
                     ""id"": ""419743d3-eb07-4b6e-bcac-69fd7ef72375"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -266,7 +266,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""Action9"",
                     ""type"": ""Button"",
                     ""id"": ""3e63b310-8a20-4df0-9bea-a472a70dc75b"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -279,6 +279,69 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""BuildMode"",
+                    ""type"": ""Button"",
+                    ""id"": ""1c042ec9-fc18-4872-af39-b029ec800956"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BuildCategory1"",
+                    ""type"": ""Button"",
+                    ""id"": ""6d02c794-83af-4a4c-9696-3cc3f8b6f68c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BuildCategory2"",
+                    ""type"": ""Button"",
+                    ""id"": ""e2ef78b1-a55a-466d-abc1-6371e83a59b2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BuildCategory3"",
+                    ""type"": ""Button"",
+                    ""id"": ""bfb12650-783f-40b2-8159-cde71c942fe9"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BuildCategory4"",
+                    ""type"": ""Button"",
+                    ""id"": ""42700cc2-f3a1-4470-af5c-40038f097c72"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DeleteMode"",
+                    ""type"": ""Button"",
+                    ""id"": ""42fb2fae-6eba-4dea-bd05-5ac90e72e65a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact1"",
+                    ""type"": ""Button"",
+                    ""id"": ""85e706aa-6535-4558-97e2-95438dace27c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -796,6 +859,83 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Scroll"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""60739c61-0cde-46c5-9cb1-a59c1bd49852"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""BuildMode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6c21a2f0-9c30-46f5-97b0-0475b39ef3e8"",
+                    ""path"": ""<Keyboard>/f1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BuildCategory1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a99e250a-bc49-4589-a664-dbe9b0189828"",
+                    ""path"": ""<Keyboard>/f2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BuildCategory2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""325c3b24-6d43-4dd1-8033-0a2977374455"",
+                    ""path"": ""<Keyboard>/f3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BuildCategory3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3709529f-a142-4c5d-86e1-48f8ffa0f207"",
+                    ""path"": ""<Keyboard>/f4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BuildCategory4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9c9818bf-0637-4c66-a225-7521cc1deec6"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""DeleteMode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7a4d8dc0-8ae9-43fb-af23-78e6b0d5f50f"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Interact1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1404,6 +1544,13 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Action8 = m_Gameplay.FindAction("Action8", throwIfNotFound: true);
         m_Gameplay_Action9 = m_Gameplay.FindAction("Action9", throwIfNotFound: true);
         m_Gameplay_Scroll = m_Gameplay.FindAction("Scroll", throwIfNotFound: true);
+        m_Gameplay_BuildMode = m_Gameplay.FindAction("BuildMode", throwIfNotFound: true);
+        m_Gameplay_BuildCategory1 = m_Gameplay.FindAction("BuildCategory1", throwIfNotFound: true);
+        m_Gameplay_BuildCategory2 = m_Gameplay.FindAction("BuildCategory2", throwIfNotFound: true);
+        m_Gameplay_BuildCategory3 = m_Gameplay.FindAction("BuildCategory3", throwIfNotFound: true);
+        m_Gameplay_BuildCategory4 = m_Gameplay.FindAction("BuildCategory4", throwIfNotFound: true);
+        m_Gameplay_DeleteMode = m_Gameplay.FindAction("DeleteMode", throwIfNotFound: true);
+        m_Gameplay_Interact1 = m_Gameplay.FindAction("Interact1", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1518,6 +1665,13 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Action8;
     private readonly InputAction m_Gameplay_Action9;
     private readonly InputAction m_Gameplay_Scroll;
+    private readonly InputAction m_Gameplay_BuildMode;
+    private readonly InputAction m_Gameplay_BuildCategory1;
+    private readonly InputAction m_Gameplay_BuildCategory2;
+    private readonly InputAction m_Gameplay_BuildCategory3;
+    private readonly InputAction m_Gameplay_BuildCategory4;
+    private readonly InputAction m_Gameplay_DeleteMode;
+    private readonly InputAction m_Gameplay_Interact1;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1614,6 +1768,34 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Scroll => m_Wrapper.m_Gameplay_Scroll;
         /// <summary>
+        /// Provides access to the underlying input action "Gameplay/BuildMode".
+        /// </summary>
+        public InputAction @BuildMode => m_Wrapper.m_Gameplay_BuildMode;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/BuildCategory1".
+        /// </summary>
+        public InputAction @BuildCategory1 => m_Wrapper.m_Gameplay_BuildCategory1;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/BuildCategory2".
+        /// </summary>
+        public InputAction @BuildCategory2 => m_Wrapper.m_Gameplay_BuildCategory2;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/BuildCategory3".
+        /// </summary>
+        public InputAction @BuildCategory3 => m_Wrapper.m_Gameplay_BuildCategory3;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/BuildCategory4".
+        /// </summary>
+        public InputAction @BuildCategory4 => m_Wrapper.m_Gameplay_BuildCategory4;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/DeleteMode".
+        /// </summary>
+        public InputAction @DeleteMode => m_Wrapper.m_Gameplay_DeleteMode;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Interact1".
+        /// </summary>
+        public InputAction @Interact1 => m_Wrapper.m_Gameplay_Interact1;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
@@ -1702,6 +1884,27 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Scroll.started += instance.OnScroll;
             @Scroll.performed += instance.OnScroll;
             @Scroll.canceled += instance.OnScroll;
+            @BuildMode.started += instance.OnBuildMode;
+            @BuildMode.performed += instance.OnBuildMode;
+            @BuildMode.canceled += instance.OnBuildMode;
+            @BuildCategory1.started += instance.OnBuildCategory1;
+            @BuildCategory1.performed += instance.OnBuildCategory1;
+            @BuildCategory1.canceled += instance.OnBuildCategory1;
+            @BuildCategory2.started += instance.OnBuildCategory2;
+            @BuildCategory2.performed += instance.OnBuildCategory2;
+            @BuildCategory2.canceled += instance.OnBuildCategory2;
+            @BuildCategory3.started += instance.OnBuildCategory3;
+            @BuildCategory3.performed += instance.OnBuildCategory3;
+            @BuildCategory3.canceled += instance.OnBuildCategory3;
+            @BuildCategory4.started += instance.OnBuildCategory4;
+            @BuildCategory4.performed += instance.OnBuildCategory4;
+            @BuildCategory4.canceled += instance.OnBuildCategory4;
+            @DeleteMode.started += instance.OnDeleteMode;
+            @DeleteMode.performed += instance.OnDeleteMode;
+            @DeleteMode.canceled += instance.OnDeleteMode;
+            @Interact1.started += instance.OnInteract1;
+            @Interact1.performed += instance.OnInteract1;
+            @Interact1.canceled += instance.OnInteract1;
         }
 
         /// <summary>
@@ -1776,6 +1979,27 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Scroll.started -= instance.OnScroll;
             @Scroll.performed -= instance.OnScroll;
             @Scroll.canceled -= instance.OnScroll;
+            @BuildMode.started -= instance.OnBuildMode;
+            @BuildMode.performed -= instance.OnBuildMode;
+            @BuildMode.canceled -= instance.OnBuildMode;
+            @BuildCategory1.started -= instance.OnBuildCategory1;
+            @BuildCategory1.performed -= instance.OnBuildCategory1;
+            @BuildCategory1.canceled -= instance.OnBuildCategory1;
+            @BuildCategory2.started -= instance.OnBuildCategory2;
+            @BuildCategory2.performed -= instance.OnBuildCategory2;
+            @BuildCategory2.canceled -= instance.OnBuildCategory2;
+            @BuildCategory3.started -= instance.OnBuildCategory3;
+            @BuildCategory3.performed -= instance.OnBuildCategory3;
+            @BuildCategory3.canceled -= instance.OnBuildCategory3;
+            @BuildCategory4.started -= instance.OnBuildCategory4;
+            @BuildCategory4.performed -= instance.OnBuildCategory4;
+            @BuildCategory4.canceled -= instance.OnBuildCategory4;
+            @DeleteMode.started -= instance.OnDeleteMode;
+            @DeleteMode.performed -= instance.OnDeleteMode;
+            @DeleteMode.canceled -= instance.OnDeleteMode;
+            @Interact1.started -= instance.OnInteract1;
+            @Interact1.performed -= instance.OnInteract1;
+            @Interact1.canceled -= instance.OnInteract1;
         }
 
         /// <summary>
@@ -2223,6 +2447,55 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnScroll(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BuildMode" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBuildMode(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BuildCategory1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBuildCategory1(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BuildCategory2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBuildCategory2(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BuildCategory3" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBuildCategory3(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BuildCategory4" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBuildCategory4(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DeleteMode" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDeleteMode(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract1(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

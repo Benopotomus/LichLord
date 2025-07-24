@@ -51,14 +51,14 @@ namespace LichLord.NonPlayerCharacters
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            NonPlayerCharacterLoader propLoader = new NonPlayerCharacterLoader(spawnParams, prefabLoader);
+            NonPlayerCharacterLoader npcLoader = new NonPlayerCharacterLoader(spawnParams, prefabLoader);
 
-            if (propLoader.Loader != null)
+            if (npcLoader.Loader != null)
             {
-                if (propLoader.Loader.IsLoaded)
-                    OnPrefabLoaded(propLoader);
+                if (npcLoader.Loader.IsLoaded)
+                    OnPrefabLoaded(npcLoader);
                 else
-                    propLoader.OnLoadComplete += OnPrefabLoaded;
+                    npcLoader.OnLoadComplete += OnPrefabLoaded;
             }
         }
 

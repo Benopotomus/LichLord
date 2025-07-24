@@ -13,8 +13,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private FollowerEntity _follower;
         public FollowerEntity AIFollower => _follower;
 
-        [SerializeField] private Vector3 _velocity;
-        public Vector3 Velocity => _velocity;
+        [SerializeField] private Vector3 _worldVelocity;
+        public Vector3 Velocity => _worldVelocity;
 
         [SerializeField] private bool _isGrounded;
         public bool IsGrounded => _isGrounded;
@@ -99,9 +99,9 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateVelocity(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
-            _velocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
+            _worldVelocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
             _lastPosition = NPC.CachedTransform.position;
-            _localVelocity = NPC.CachedTransform.InverseTransformDirection(_velocity);
+            _localVelocity = NPC.CachedTransform.InverseTransformDirection(_worldVelocity);
         }
 
         private void UpdateYawVelocity()
@@ -114,12 +114,38 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
         {
-            //30 server ticks/second
-            //10 send ticks/second
-            if (tick % 3 != 0)
+            int sendRateModulus = GetSendRateModulus();
+
+            if ((tick + _npc.Index) % sendRateModulus != 0)
                 return;
 
             WriteData(ref data);
+        }
+
+        private int GetSendRateModulus()
+        {
+            var activePlayers = _npc.Context.NetworkGame.ActivePlayers;
+
+            float minSqrDist = float.MaxValue;
+
+            foreach (var player in activePlayers)
+            {
+                if (player.HasStateAuthority)
+                    continue;
+
+                float sqrDist = (player.CachedTransform.position - _npc.CachedTransform.position).sqrMagnitude;
+
+                if (sqrDist < minSqrDist)
+                    minSqrDist = sqrDist;
+            }
+
+            // Now decide based on nearest player distance
+            if (minSqrDist < (40f * 40f))
+                return 3; // ~10.7 Hz
+            if (minSqrDist < (80f * 80f))
+                return 4; // 8 Hz
+
+            return 5; // ~6.4 Hz
         }
 
         private void WriteData(ref FNonPlayerCharacterData data)

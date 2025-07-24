@@ -24,11 +24,7 @@ namespace LichLord.World
 
             Context.ChunkManager.InitializeWorldChunks();
 
-            if (HasStateAuthority)
-            {
-                Context.ChunkManager.LoadChunksFromSaves();
-            }
-            
+
             if (HasStateAuthority)
             {
                 Context.WorldSaveLoadManager.LoadNPCs();

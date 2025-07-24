@@ -7,27 +7,27 @@ namespace LichLord.Props
     public class PropDataDefinition : ScriptableObject
     {
         [SerializeField]
-        private int _maxHealth = 100;
+        protected int _maxHealth = 100;
         public int MaxHealth => _maxHealth;
 
         [SerializeField]
-        private EPropState _startingState = EPropState.Idle;
+        protected EPropState _startingState = EPropState.Idle;
         public EPropState StartingState => _startingState;
 
         // Bit size constants (matching PropDataDefinition)
-        private const int STATE_BITS = 4;           // 0-15
-        private const int STATUS_BITS = 4;          // 0-15
-        private const int HEALTH_BITS = 12;         // 0-4095
+        protected const int STATE_BITS = 4;           // 0-15
+        protected const int STATUS_BITS = 4;          // 0-15
+        protected const int HEALTH_BITS = 12;         // 0-4095
 
         // Bit shifts and masks for StateData (int)
-        private const int STATE_SHIFT = 0;
-        private const int STATUS_SHIFT = STATE_SHIFT + STATE_BITS;
-        private const int HEALTH_SHIFT = STATUS_SHIFT + STATUS_BITS;
-        private const int STATE_MASK = (1 << STATE_BITS) - 1;
-        private const int STATUS_MASK = (1 << STATUS_BITS) - 1;
-        private const int HEALTH_MASK = (1 << HEALTH_BITS) - 1;
+        protected const int STATE_SHIFT = 0;
+        protected const int STATUS_SHIFT = STATE_SHIFT + STATE_BITS;
+        protected const int HEALTH_SHIFT = STATUS_SHIFT + STATUS_BITS;
+        protected const int STATE_MASK = (1 << STATE_BITS) - 1;
+        protected const int STATUS_MASK = (1 << STATUS_BITS) - 1;
+        protected const int HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        public void InitializeData(ref FPropData propData, PropDefinition definition)
+        public virtual void InitializeData(ref FPropData propData, PropDefinition definition)
         {
             // Initialize fields
             propData.DefinitionID = definition.TableID; // Assuming definition has an ID
@@ -137,7 +137,6 @@ namespace LichLord.Props
         Idle,        // Default active state
         HitReact,     // After taking damage
         Destroyed,   // Health <= 0
-        Action_1,      // Performing an action
     }
 
     public enum EPropStatus : byte

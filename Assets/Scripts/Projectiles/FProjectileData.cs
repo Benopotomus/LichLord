@@ -18,15 +18,15 @@ namespace LichLord.Projectiles
         [FieldOffset(0)]
         private byte _state;
         [FieldOffset(1)]
-        public ushort DefinitionID;
-        [FieldOffset(3)]
+        public byte DefinitionID;
+        [FieldOffset(2)]
         public int FireTick;
-        [FieldOffset(7)]
+        [FieldOffset(6)]
         public FWorldPosition Position;
         [FieldOffset(13)]
         public FWorldPosition TargetPosition;
-        [FieldOffset(19)]
-        public FNetObjectID InstigatorID;
+        [FieldOffset(20)]
+        public FNetObjectID InstigatorID; // this can be reduced down to 2 bytes
         [FieldOffset(25)]
 
         // Custom Data

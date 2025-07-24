@@ -6,23 +6,20 @@ namespace LichLord.Buildables
     [Serializable]
     public class BuildableRuntimeState
     {
-        public int guid; // Unique identifier
+        public int definitionId; // Unique identifier
         public Vector3 position; // World position
         public Quaternion rotation; // World rotation
-        public int definitionId; // BuildDefinition.TableID
-        public int stateData; // Custom runtime data (like FPropData.Data)
+        public int data;
 
-        public BuildableRuntimeState(int guid,
+        public BuildableRuntimeState(int definitionId,
             Vector3 position,
             Quaternion rotation,
-            int propDefinitionId,
             int data)
         {
-            this.guid = guid;
+            this.definitionId = definitionId;
             this.position = position;
             this.rotation = rotation;
-            this.definitionId = propDefinitionId;
-            this.stateData = data;
+            this.data = data;
         }
     }
 }

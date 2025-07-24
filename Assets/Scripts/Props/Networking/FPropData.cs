@@ -1,19 +1,18 @@
 ﻿namespace LichLord.Props
 {
     using Fusion;
-    using UnityEngine;
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Explicit)]
     public struct FPropData : INetworkStruct
     {
         [FieldOffset(0)]
-        private int _propGUID; // 4 bytes. The world save/load index for this asset
-        [FieldOffset(4)]
+        private byte _propGUID; // 1 byte
+        [FieldOffset(1)]
         private ushort _definitionId; // 2 bytes. definition id;
-        [FieldOffset(6)]
+        [FieldOffset(3)]
         private int _stateData; // 4 bytes
-        // 10
+        // 7
 
         public int DefinitionID
         {
@@ -30,7 +29,7 @@
         public int GUID
         {
             get => _propGUID;
-            set => _propGUID = value;
+            set => _propGUID = (byte)value;
         }
 
         public bool IsValid()
@@ -47,7 +46,7 @@
 
         public void Copy(PropRuntimeState state)
         {
-            _propGUID = state.guid;
+            _propGUID = (byte)state.guid;
             _definitionId = (ushort)state.definitionId;
             _stateData = state.Data.StateData;
         }

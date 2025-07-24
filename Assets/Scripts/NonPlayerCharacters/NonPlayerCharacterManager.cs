@@ -111,6 +111,7 @@ namespace LichLord.NonPlayerCharacters
                 if (newReplicator != null)
                 {
                     AddReplicator(newReplicator);
+                    return newReplicator;
                 }
             }
 
@@ -132,12 +133,13 @@ namespace LichLord.NonPlayerCharacters
         // Called on match disconnect on the host to save npcs
         public List<FNonPlayerCharacterSaveState> GetAllSaveStates()
         {
-            var allSaves = new List<FNonPlayerCharacterSaveState>(NonPlayerCharacterConstants.MAX_NPC_REPS *
-                NonPlayerCharacterConstants.MAX_REPLICATORS);
+            var allSaves = new List<FNonPlayerCharacterSaveState>((NonPlayerCharacterConstants.MAX_NPC_REPS *
+                NonPlayerCharacterConstants.MAX_REPLICATORS));
 
             foreach (var replicator in _replicators)
             {
                 allSaves.AddRange(replicator.GetSaveStates());
+                Debug.Log(replicator);
             }
 
             return allSaves;

@@ -14,7 +14,9 @@ namespace LichLord
         [SerializeField] private PlayerCharacter _playerPrefab;
         public PlayerCharacter LocalPlayer { get; private set; }
 
+        [SerializeField]
         private SpawnPoint[] _spawnPoints;
+        [SerializeField] private Vector3 _fallbackSpawnPosition = new Vector3(1000, 0, 1000);
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
@@ -65,7 +67,7 @@ namespace LichLord
                         spawnPosition = savedData.position;
                         spawnRotation = savedData.rotation;
                         moveState = savedData.moveState;
-                        //Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world {worldId} with key {playerKey}.");
+                        Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world with key {playerKey}.");
                     }
                     else
                     {
@@ -87,10 +89,6 @@ namespace LichLord
             {
                 LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
             }
-
-            Runner.SetPlayerObject(playerRef, LocalPlayer.Object);
-
-            // Spawn player with InputAuthority
 
             LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState);
 
@@ -119,7 +117,7 @@ namespace LichLord
                 return spawnPoint.transform.position + new Vector3(randomPositionOffset.x, 0f, randomPositionOffset.y);
             }
             //Debug.Log("No spawn points available, using default position (0,0,0)");
-            return Vector3.zero;
+            return _fallbackSpawnPosition;
         }
     }
 }

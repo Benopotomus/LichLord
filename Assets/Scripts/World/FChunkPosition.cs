@@ -9,9 +9,9 @@ namespace LichLord.World
     public struct FChunkPosition : INetworkStruct
     {
         [FieldOffset(0)]
-        public sbyte X;
+        public byte X;
         [FieldOffset(1)]
-        public sbyte Y;
+        public byte Y;
 
         public bool IsEqual(ref FChunkPosition other)
         { 
@@ -20,7 +20,6 @@ namespace LichLord.World
 
             return true;
         }
-
 
         // Override GetHashCode for consistency with Equals
         public override int GetHashCode()

@@ -8,27 +8,19 @@ namespace LichLord.Props
     public partial class PropManager : ContextBehaviour
     {
         [SerializeField] private PropSpawner _propSpawner;
-        [SerializeField] private PropReplicator propReplicationPrefab;
-
-        [SerializeField] private Dictionary<int, PropRuntimeState> _authorityRuntimePropStates = new Dictionary<int, PropRuntimeState>();
-        [SerializeField] private List<PropReplicator> _propReplicators = new List<PropReplicator>();
-
-        private Dictionary<int, PropLoadState> _propLoadStates = new Dictionary<int, PropLoadState>();
-        private HashSet<FChunkPosition> _loadedChunks = new HashSet<FChunkPosition>(); // Track loaded chunks
-        private HashSet<int> _usedGuids = new HashSet<int>(); // Track GUIDs to detect duplicates
 
         public override void Spawned()
         {
             _propSpawner.OnPropSpawned += OnPropSpawned;
         }
 
+        public void SpawnProp(PropRuntimeState runtimeState)
+        { 
+            _propSpawner.SpawnProp(runtimeState);
+        }
+
         public void LoadPropsForChunk(Chunk chunk)
         {
-            if (chunk == null)
-            {
-                return;
-            }
-
             ChunkPropsMarkupData baseMarkupData = Context.WorldManager.WorldSettings.GetMarkupData(chunk.ChunkID);
 
             if (baseMarkupData == null)
@@ -37,145 +29,45 @@ namespace LichLord.Props
             for (int i = 0; i < baseMarkupData.propMarkupDatas.Length; i++)
             {
                 PropMarkupData propMarkupData = baseMarkupData.propMarkupDatas[i];
-                if (propMarkupData == null || propMarkupData.propDefinition == null)
+                if (propMarkupData == null)
                 {
                     continue;
                 }
 
-                if (propMarkupData.guid == 0 || _usedGuids.Contains(propMarkupData.guid))
-                {
-                    continue;
-                }
+                PropRuntimeState propRuntimeState = new PropRuntimeState(
+                    propMarkupData.guid,
+                    chunk,
+                    propMarkupData.position,
+                    propMarkupData.rotation,
+                    propMarkupData.propDefinitionId);
 
-                // if the authority state doesnt exist for this yet. we need ot add it
-                if(!_authorityRuntimePropStates.TryGetValue(propMarkupData.guid, out var state))
-                { 
-                    PropRuntimeState propRuntimeState = new PropRuntimeState(
-                        propMarkupData.guid,
-                        propMarkupData.position,
-                        propMarkupData.rotation,
-                        propMarkupData.propDefinition.TableID);
-
-                    SetupRuntimePropState(chunk, propRuntimeState);
-                }
+                chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
             }
 
-            _loadedChunks.Add(chunk.ChunkID);
-        }
-
-        public override void Render()
-        {
-            if (!Context.IsGameplayActive())
-                return;
-
-            PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter playerCreature);
-
-            if (playerCreature == null)
-                return;
-
-            float renderDeltaTime = Runner.LocalAlpha;
-            bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
-
-            // Ensure an empty replicator exists on the master client
-            if (Runner.IsSharedModeMasterClient)
+            if (HasStateAuthority)
             {
-                EnsureEmptyReplicator();
-            }
+                var loadedChunks = Context.WorldSaveLoadManager.LoadedChunks;
 
-            //Debug.Log($"Rendering with _runtimePropStates count: {playerCreature.CachedPropStates.Count}");
-
-            // Update states from player's cached list
-            foreach (PropRuntimeState propState in playerCreature.CachedPropStates)
-            {
-                int guid = propState.guid;
-
-                if(!GetRenderState(hasAuthority, guid, out var usedState))
+                if (loadedChunks.TryGetValue(chunk.ChunkID, out FChunkSaveData chunkSaveData))
                 {
-                    Debug.LogWarning($"Null PropRuntimeState for GUID {guid} in Render.", this);
-                    continue;
-                }
-
-                // if we have no loader for guid, create one
-                if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState))
-                {
-                    propLoadState = new PropLoadState();
-                    _propLoadStates[guid] = propLoadState;
-                }
-
-                // Get the chunk for this prop's position
-                Chunk propChunk = Context.ChunkManager.GetChunkAtPosition(usedState.position);
-                if (propChunk == null)
-                {
-                    Debug.LogWarning($"No chunk found for prop at position {usedState.position} (GUID {guid}).", this);
-                    continue;
-                }
-
-                if (propLoadState.LoadState == ELoadState.None)
-                {
-                    propLoadState.LoadState = ELoadState.Loading;
-                    _propSpawner.SpawnProp(usedState);
-                }
-                else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
-                {
-                     propLoadState.Prop.OnRender(usedState, renderDeltaTime);
-                }
-                else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
-                {
-                    DespawnProp(guid);
-                }
-            }
-        }
-
-        private void EnsureEmptyReplicator()
-        {
-            bool hasEmptyReplicator = false;
-            foreach (var replicator in _propReplicators)
-            {
-                if (replicator == null)
-                    continue;
-                if (replicator.DataCount == 0)
-                {
-                    hasEmptyReplicator = true;
-                    break;
-                }
-            }
-
-            if (!hasEmptyReplicator)
-            {
-                var newReplicator = Runner.Spawn(propReplicationPrefab, Vector3.zero, Quaternion.identity);
-                if (newReplicator != null)
-                {
-                    _propReplicators.Add(newReplicator);
-                }
-            }
-        }
-
-        public override void FixedUpdateNetwork()
-        {
-            if (!Runner.IsFirstTick || !Runner.IsForward)
-                return;
-
-            float deltaTime = Runner.DeltaTime;
-
-            EnsureEmptyReplicator();
-
-            // Update authority data for things like hitreacts expiring
-            // Create a snapshot to safely iterate
-            var snapshot = new Dictionary<int, PropRuntimeState>(_authorityRuntimePropStates);
-
-            foreach (var propState in snapshot)
-            {
-                PropRuntimeState runtimeState = propState.Value;
-
-                if (runtimeState.AuthorityUpdate(deltaTime))
-                {
-                    ReplicateAuthorityData(runtimeState);
+                    foreach (var savedProp in chunkSaveData.props)
+                    {
+                        FPropData savedData = new FPropData { StateData = savedProp.stateData };
+                        if (chunk.PropStates.TryGetValue(savedProp.guid, out PropRuntimeState state))
+                        { 
+                            state.CopyData(ref savedData);
+                            chunk.UpdatePropRuntimeState(state);
+                            chunk.DeltaPropStates[savedProp.guid] = state;
+                        }
+                    }
                 }
             }
         }
 
         private void OnPropSpawned(PropRuntimeState propRuntimeState, Prop prop)
         {
+            Chunk chunk = propRuntimeState.chunk;
+
             if (propRuntimeState == null)
             {
                 Debug.LogWarning("Null propRuntimeState in OnPropSpawned.", this);
@@ -183,7 +75,7 @@ namespace LichLord.Props
             }
 
             int guid = propRuntimeState.guid;
-            if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState) || propLoadState == null)
+            if (!chunk.PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
             {
                 Debug.LogWarning($"Missing or null PropLoadState for GUID {guid} in OnPropSpawned.", this);
                 return;
@@ -191,13 +83,14 @@ namespace LichLord.Props
 
             propLoadState.Prop = prop;
             propLoadState.LoadState = ELoadState.Loaded;
+            chunk.PropLoadStates[guid] = propLoadState; 
 
             prop.OnSpawned(propRuntimeState, this);
         }
 
-        public void DespawnProp(int guid)
+        public void DespawnProp(Chunk chunk, int guid)
         {
-            if (!_propLoadStates.TryGetValue(guid, out PropLoadState propLoadState) || propLoadState == null)
+            if (!chunk.PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
             {
                 Debug.LogWarning($"Missing or null PropLoadState for GUID {guid} in DespawnProp.", this);
                 return;
@@ -209,39 +102,11 @@ namespace LichLord.Props
                 propLoadState.LoadState = ELoadState.None;
             }
         }
+    }
 
-        public override void Despawned(NetworkRunner runner, bool hasState)
-        {
-            base.Despawned(runner, hasState);
-        }
-
-        // Called from Spawned in a replicator
-        public void AddReplicatorCallback(PropReplicator replicator)
-        {
-            if (replicator == null)
-            {
-                return;
-            }
-            _propReplicators.Add(replicator);
-        }
-
-        public PropReplicator GetReplicatorWithFreeSlots()
-        {
-            for (int i = 0; i < _propReplicators.Count; i++)
-            {
-                PropReplicator propReplicator = _propReplicators[i];
-                if(propReplicator.HasFreeProp())
-                    return propReplicator;
-            }
-
-            Debug.Log("No replicator with free slots found");
-            return null;
-        }
-
-        public class PropLoadState
-        {
-            public Prop Prop;
-            public ELoadState LoadState;
-        }
+    public struct FPropLoadState
+    {
+        public Prop Prop;
+        public ELoadState LoadState;
     }
 }

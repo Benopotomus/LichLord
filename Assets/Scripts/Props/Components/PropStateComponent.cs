@@ -30,9 +30,13 @@ namespace LichLord.Props
                     gameObject.SetActive(true);
                     break;
                 case EPropState.HitReact:
-                    var effectInstance = DWDObjectPool.Instance.SpawnAt(_hitReactPrefab, 
-                        Prop.CachedTransform.position, Prop.CachedTransform.rotation) as VisualEffectBase;
-                    effectInstance.Initialize();
+                    if (_hitReactPrefab != null)
+                    {
+                        var effectInstance = DWDObjectPool.Instance.SpawnAt(_hitReactPrefab,
+                            Prop.CachedTransform.position, Prop.CachedTransform.rotation) as VisualEffectBase;
+                        effectInstance.Initialize();
+                    }
+
                     break;
             }
 

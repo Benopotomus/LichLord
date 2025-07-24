@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: FD_WoodPlanks01b
+  m_Shader: {fileID: 4800000, guid: 516e1d638296ed84a8111eeac2e687e3, type: 3}
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _METALLICGLOSSMAP
+  - _NORMALMAP
+  - _PARALLAXMAP
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AlbedoTop:
+        m_Texture: {fileID: 2800000, guid: e0139d7aecc91b643b06b07c1ac04722, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: 32cb3d1ffe9d28a40b615f9f99216997, type: 3}
+        m_Scale: {x: 0.5, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMapTop:
+        m_Texture: {fileID: 2800000, guid: 4d41a9cddc7ce3549b6cd0bb73260a47, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 0, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 0.5, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 0.54, y: 1}
+        m_Offset: {x: 1, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: a6240ed64303dd34a83e67e71aaf788d, type: 3}
+        m_Scale: {x: 0.5, y: 1}
+        m_Offset: {x: 1, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 2800000, guid: 9e30179b962872e409e6cb0168510acc, type: 3}
+        m_Scale: {x: 0.5, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetalnessTop:
+        m_Texture: {fileID: 2800000, guid: bea9f6039083ad3488d1a347f8eff5ad, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 2800000, guid: 3c20755c25ba37446a419283099f98cf, type: 3}
+        m_Scale: {x: 0.5, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 2800000, guid: 34d1c165a4d0ea5419b939fa4cf16e84, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SmoothnessMap:
+        m_Texture: {fileID: 2800000, guid: 8e60d2e6de743394db015bae3dfff344, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaCutoff: 0.5
+    - _Ammount: 1
+    - _BumpMix: 0
+    - _BumpScale: 1
+    - _BumpScaleTop: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 0.5
+    - _DetailTiling: 5
+    - _DiffuseAOMask: 1.44
+    - _DstBlend: 0
+    - _EmissionLM: 0
+    - _EnvironmentReflections: 1
+    - _Fresnel: 0
+    - _GlossMapScale: 1
+    - _Glossiness: 1
+    - _GlossinessTop: 1
+    - _GlossyReflections: 1
+    - _InvertAOMask: 0
+    - _LightWrap: 1
+    - _MetalAlphaGloss: 0
+    - _Metallic: 1
+    - _MetallicTop: 1
+    - _Mode: 0
+    - _OcclusionStrenght: 1
+    - _OcclusionStrength: 1
+    - _OcclusionTop: 1
+    - _Parallax: 0.0156
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _RimPower: 0
+    - _Smooth: 0.73
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _TopTiling: 1
+    - _UVSec: 0
+    - _UVWorld: 0
+    - _ZWrite: 1
+    - __dirty: 0
+    m_Colors:
+    - _Clamp: {r: 0.68, g: 1, b: 0, a: 0}
+    - _Color: {r: 0.9433962, g: 0.9433962, b: 0.9433962, a: 1}
+    - _ColorTop: {r: 0.8490566, g: 0.8450516, b: 0.8450516, a: 0}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _LightWarpTint: {r: 0.8897059, g: 0.7949603, b: 0.69344723, a: 1}
+    - _RimColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_BuildTextureStacks: []

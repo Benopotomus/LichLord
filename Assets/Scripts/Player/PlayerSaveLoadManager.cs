@@ -35,11 +35,13 @@ namespace LichLord
 
                 FPlayerSaveData playerSaveData = new FPlayerSaveData
                 {
-                    position = pc.Position,
+                    position = pc.transform.position,
                     rotation = pc.transform.rotation,
                     playerName = pc.Nickname ?? "Unknown", // Fallback if Nickname is null
                     moveState = pc.Movement.CurrentMoveState
                 };
+
+                Debug.Log("Saving Position: " + playerSaveData.position);
 
                 // Serialize to JSON
                 string json = JsonUtility.ToJson(playerSaveData, true);

@@ -138,7 +138,7 @@ namespace LichLord.NonPlayerCharacters
 
                 targetPos = CalculateLeadTargetPosition(muzzlePosition,
                     targetPos,
-                    pc.Movement.Velocity, 
+                    pc.Movement.WorldVelocity, 
                     definition.Speed,
                     targetIsMasterClient);
             }

@@ -236,7 +236,7 @@ namespace LichLord.Projectiles
             data.IsHoming = false;
             data.IsProximityFuseActive = false;
             data.InstigatorID = fireEvent.instigator.NetActor.NetObjectID;
-            data.DefinitionID = (ushort)definition.TableID;
+            data.DefinitionID = (byte)definition.TableID;
             data.FireTick = fireEvent.fireTick;
             data.Position.CopyPosition(fireEvent.spawnPosition);
             data.TargetPosition.CopyPosition(fireEvent.targetPosition);

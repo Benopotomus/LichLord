@@ -1,11 +1,12 @@
-﻿using System;
+﻿using LichLord.World;
+using System;
 using UnityEngine;
 
 namespace LichLord.Props
 {
-    [Serializable]
     public class PropRuntimeState
     {
+        public Chunk chunk; // Owning chunk
         public int guid; // Unique identifier
         public int definitionId; // PropDefinition.TableID
 
@@ -29,11 +30,13 @@ namespace LichLord.Props
         public FPropData Data => _data;
 
         public PropRuntimeState(int guid, 
+            Chunk chunk,
             Vector3 position, 
             Quaternion rotation, 
             int definitionId)
         {
             this.guid = guid;
+            this.chunk = chunk;
             this.definitionId = definitionId;
             this.position = position;
             this.rotation = rotation;
@@ -47,12 +50,14 @@ namespace LichLord.Props
         }
 
         public PropRuntimeState(int guid,
+            Chunk chunk,
             Vector3 position,
             Quaternion rotation,
             int definitionId,
             FPropData propData)
         {
             this.guid = guid;
+            this.chunk = chunk;
             this.definitionId = definitionId;
             this.position = position;
             this.rotation = rotation;
@@ -69,7 +74,7 @@ namespace LichLord.Props
             this.position = other.position;
             this.rotation = other.rotation;
 
-            FPropData otherData = other.Data;
+            FPropData otherData = other._data;
             _data.Copy(ref otherData);
             _data.GUID = guid;
             _data.DefinitionID = definitionId;
@@ -87,17 +92,59 @@ namespace LichLord.Props
             return dataDefinition.GetHealth(ref _data);
         }
 
-        public void ApplyDamage(int damage)
+        public void ApplyDamage(int damage, int tick)
         {
             PropDataDefinition dataDefinition = Definition.PropDataDefinition;
 
             // Create a propdata and set its state data to get current health
             dataDefinition.ApplyDamage(ref _data, damage);
 
-            _hitReactTimer = _hitReactTimeMax;
+            _hitReactEndTick = _hitReactTicks + tick;
+        }
 
-            if (GetState() == EPropState.Destroyed)
-                _deadTimer = _deadTimeMax;
+        public void SetInteract(bool interact, int tick)
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                nexusDataDefinition.SetIsInteracting(interact, ref _data);
+            }
+        }
+
+        public void SetActivated(bool activated, int tick)
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                Debug.Log("Set Activated: " + activated);
+                nexusDataDefinition.SetIsActivated(activated, ref _data);
+            }
+        }
+
+        public bool GetIsInteracting()
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                // Create a propdata and set its state data to get current health
+                return nexusDataDefinition.GetIsInteracting(ref _data);
+            }
+
+            return false;
+        }
+
+        public bool GetIsActivated()
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+            if (dataDefinition is NexusDataDefinition nexusDataDefinition)
+            {
+                // Create a propdata and set its state data to get current health
+                return nexusDataDefinition.GetIsActivated(ref _data);
+            }
+
+            return false;
         }
 
         public void CopyData(ref FPropData propData)
@@ -105,20 +152,15 @@ namespace LichLord.Props
             _data.Copy(ref propData);
         }
 
-        // Runtime Updates
-
         // Runtime Values
 
         EPropState _currentState;
-        float _hitReactTimeMax = 0.25f;
-        float _hitReactTimer = 0.25f;
-
-        float _deadTimeMax = 3.0f;
-        float _deadTimer = 3.0f;
+        int _hitReactTicks = 8;
+        int _hitReactEndTick;
 
         // Updates on the server if the RuntimePropState is loaded
         // Does not require the monobehaviour to exist
-        public bool AuthorityUpdate(float networkDeltaTime)
+        public bool AuthorityUpdate(int tick)
         {
             PropDataDefinition dataDefinition = Definition.PropDataDefinition;
             _currentState = dataDefinition.GetState(ref _data);
@@ -126,9 +168,7 @@ namespace LichLord.Props
             switch (_currentState)
             {
                 case EPropState.HitReact:
-
-                    _hitReactTimer -= networkDeltaTime;
-                    if (_hitReactTimer < 0f)
+                    if (tick > _hitReactEndTick)
                     {
                         _currentState = EPropState.Idle;
                         dataDefinition.SetState( _currentState, ref _data);
@@ -136,15 +176,6 @@ namespace LichLord.Props
                     }
                     break;
                 case EPropState.Destroyed:
-                    /*
-                    _deadTimer -= networkDeltaTime;
-                    if (_deadTimer < 0f)
-                    {
-                        _currentState = EPropState.Inactive;
-                        dataDefinition.SetState(_currentState, ref _data);
-                        return true;
-                    }
-                     */
                     break;
             }
 
