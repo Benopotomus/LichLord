@@ -14,6 +14,7 @@ namespace LichLord
         protected override void OnFixedUpdate()
         {
             float deltaTime = Runner.DeltaTime;
+            int tick = Runner.Tick;
 
             FGameplayInput input = fsmRef.PC.Input.CurrentInput;
 
@@ -47,9 +48,11 @@ namespace LichLord
 
             // Remote Only
             fsmRef.PC.Movement.UpdateRemotePosition(deltaTime);
+            fsmRef.PC.Interactor.OnRender(deltaTime, localRenderTime, tick);
+
 
             fsmRef.PC.Maneuvers.OnRender();
-            fsmRef.PC.Interactor.OnRender(deltaTime, localRenderTime, tick);
+           
         }
     }
 }

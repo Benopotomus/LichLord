@@ -54,12 +54,14 @@ namespace LichLord
                 state.MoveToInteract();
                 _currentInteractable = _bestInteractable;
                 _currentInteractable.InteractStart(this, tick);
+                _pc.Movement.LookTarget = _currentInteractable.transform;
             }
             else
             {
                 state.MoveToIdle();
                 _currentInteractable.InteractEnd(this);
                 _currentInteractable = null;
+                _pc.Movement.LookTarget = null;
             }
 
             Prop prop = interactable.Owner;
@@ -76,16 +78,11 @@ namespace LichLord
             {
                 Vector3 interactablePosition = _currentInteractable.transform.position;
                 _pc.Movement.ProcessInteractMovement(interactablePosition, deltaTime);
-                _pc.Movement.LookTarget = _currentInteractable.transform;
                 if (_currentInteractable.GetTimeRemaining(tick) <= 0f)
                 {
                     _currentInteractable.CompleteInteract(this);
                     SetInteract(_currentInteractable, false);
                 }
-            }
-            else
-            {
-                _pc.Movement.LookTarget = null;
             }
         }
 
@@ -172,6 +169,13 @@ namespace LichLord
                     continue;
 
                 if (!curInteractable.IsPotentialInteractor(this))
+                    continue;
+
+                var directionToInteractable = (curInteractable.transform.position - Camera.main.transform.position).normalized;
+                var cameraForward = Camera.main.transform.forward;
+                var dot = Vector3.Dot(directionToInteractable, cameraForward);
+
+                if (dot < 0.95)
                     continue;
 
                 float testDist = Vector3.SqrMagnitude(transform.position - curInteractable.transform.position);
