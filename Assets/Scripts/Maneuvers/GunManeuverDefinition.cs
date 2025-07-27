@@ -57,12 +57,6 @@ namespace LichLord
                 }
             }
 
-
-            // Trigger RPC via CreatureActions
-            if (playerCreature.Maneuvers != null)
-            {
-                playerCreature.Maneuvers.RPC_ExecuteGunAction(playerCreature.Object.Id, TableID, spawnPoint.position, targetPos, hitPosition, hitNormal);
-            }
             
         }
     }

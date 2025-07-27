@@ -21,18 +21,11 @@ namespace LichLord
         private TickTimer _activeManeuverTimer { get; set; }
         private int _activeManeuverTick;
 
-        [Networked]
-        private sbyte _activeUpperBodyTriggerNumber { get; set; }
-
         [Networked, Capacity(8)]
         private NetworkDictionary<sbyte, TickTimer> _maneuverCooldownTimers { get; }
 
         [SerializeField] private GameObject gunModel; // Gun model to toggle visibility
         [SerializeField] private ParticleSystem gunMuzzleParticle; // ParticleSystem on gunModel for muzzle flash
-
-        private int _animIDUpperBodyTriggerNumber = Animator.StringToHash("UpperBodyTriggerNumber");
-        private int _animIDUpperBodyTrigger = Animator.StringToHash("UpperBodyTrigger");
-        private int _animIDUpperBodyBlend = Animator.StringToHash("UpperBodyBlend");
 
         // Current upper body blend amount
         private float _upperBodyBlend = 0f;
@@ -89,10 +82,6 @@ namespace LichLord
                 if (input.FireHeld)
                 {
                     _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
-                }
-                else
-                {
-                    _activeUpperBodyTriggerNumber = 0;
                 }
             }
 
@@ -217,7 +206,7 @@ namespace LichLord
                 _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend - (deltaTime * 4f));
             }
 
-            _pc.Animator.SetFloat(_animIDUpperBodyBlend, _upperBodyBlend);
+            _pc.AnimationController.SetUpperBodyBlend(_upperBodyBlend);
         }
 
         private void UpdateMoveSpeed(float deltaTime)
@@ -308,11 +297,6 @@ namespace LichLord
             }
         }
 
-        public void SetUpperBodyTriggerNumber(sbyte newTriggerNumber)
-        {
-            _activeUpperBodyTriggerNumber = newTriggerNumber;
-        }
-
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         public void RPC_NotifyStartExecute(ushort maneuverDefinitionID)
         {
@@ -320,10 +304,7 @@ namespace LichLord
 
             if (!maneuver.Fullbody)
             {
-                _pc.Animator.SetFloat(_animIDUpperBodyBlend, 0.01f);
-                _activeUpperBodyTriggerNumber = (sbyte)maneuver.UpperbodyTriggerNumber;
-                _pc.Animator.SetInteger(_animIDUpperBodyTriggerNumber, _activeUpperBodyTriggerNumber);
-                _pc.Animator.SetTrigger(_animIDUpperBodyTrigger);
+                _pc.AnimationController.SetAnimationForUpperBodyTrigger(maneuver.UpperbodyTriggerNumber);
             }
         }
 
@@ -334,10 +315,7 @@ namespace LichLord
 
             if (!maneuver.Fullbody)
             {
-                _pc.Animator.SetFloat(_animIDUpperBodyBlend, 0.00f);
-                _activeUpperBodyTriggerNumber = 0;
-                _pc.Animator.SetInteger(_animIDUpperBodyTriggerNumber, _activeUpperBodyTriggerNumber);
-                _pc.Animator.SetTrigger(_animIDUpperBodyTrigger);
+                _pc.AnimationController.SetAnimationForUpperBodyTrigger(0);
             }
 
             if (_maneuverCooldownTimers.TryGet(_activeManeuverIndex, out TickTimer cooldownTimer))
@@ -349,43 +327,10 @@ namespace LichLord
             _activeManeuverIndex = -1;
         }
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        public void RPC_ExecuteGunAction(NetworkId playerId, int maneuverID, Vector3 spawnPosition, Vector3 targetPosition, Vector3 hitPosition, Vector3 hitNormal)
-        {
-            ManeuverDefinition maneuver = _availableManeuvers[_selectedIndex];
-
-            Vector3 direction = (targetPosition - spawnPosition).normalized;
-            Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
-
-            if (maneuver.TableID != maneuverID)
-                return;
-
-            /*
-            // Play muzzle effect
-            if (maneuver.ActionEffect != null)
-            {
-                var effectInstance = DWDObjectPool.Instance.SpawnAt(maneuver.ActionEffect, spawnPosition, rotation) as VisualEffectBase;
-                effectInstance.Initialize();
-            }
-            */
-
-            if (maneuver.ActionSound != null)
-            {
-                AudioSource.PlayClipAtPoint(maneuver.ActionSound, spawnPosition);
-            }
-
-            if (_pc.Animator != null)
-            {
-                _pc.Animator.SetTrigger("UpperBodyTrigger");
-                
-            }
-        }
-
         public int GetAvailableActionsCount()
         {
             return _availableManeuvers.Count;
         }
-
        
     }
 }

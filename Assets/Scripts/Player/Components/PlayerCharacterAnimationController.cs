@@ -18,6 +18,10 @@ namespace LichLord
         private int _animIDSpeedX = Animator.StringToHash("Velocity X");
         private int _animIDSpeedZ = Animator.StringToHash("Velocity Z");
 
+        private int _animIDUpperBodyTriggerNumber = Animator.StringToHash("UpperBodyTriggerNumber");
+        private int _animIDUpperBodyTrigger = Animator.StringToHash("UpperBodyTrigger");
+        private int _animIDUpperBodyBlend = Animator.StringToHash("UpperBodyBlend");
+
         [SerializeField] private PlayerCharacter _pc;
         [SerializeField] private Animator _animator;
 
@@ -100,5 +104,20 @@ namespace LichLord
                     break;
             }
         }
+
+        public void SetUpperBodyBlend(float blendAmount)
+        {
+            _animator.SetFloat(_animIDUpperBodyBlend, blendAmount);
+        }
+
+        public void SetAnimationForUpperBodyTrigger(int upperbodyTriggerNumber)
+        {
+            float blend = upperbodyTriggerNumber > 0 ? 0.01f : 0f;
+
+            _animator.SetFloat(_animIDUpperBodyBlend, blend);
+            _animator.SetInteger(_animIDUpperBodyTriggerNumber, upperbodyTriggerNumber);
+            _animator.SetTrigger(_animIDUpperBodyTrigger);
+        }
+
     }
 }

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DWD.Utility.Loading;
+using System;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -12,5 +12,10 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private FAnimationTrigger _animationTrigger;
         public FAnimationTrigger AnimationTrigger => _animationTrigger;
+
+        [BundleObject(typeof(GameObject))]
+        [SerializeField]
+        private BundleObject _hitEffect;
+        public BundleObject HitEffect => _hitEffect;
     }
 }

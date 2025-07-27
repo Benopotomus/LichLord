@@ -26,6 +26,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterHitReactComponent _hitReactComponent;
         public NonPlayerCharacterHitReactComponent HitReact => _hitReactComponent;
 
+        [SerializeField] private NonPlayerCharacteHealthComponent _healthComponent;
+        public NonPlayerCharacteHealthComponent Health => _healthComponent;
+
         [SerializeField] private NonPlayerCharacterWeaponsComponent _weaponsComponent;
         public NonPlayerCharacterWeaponsComponent Weapons => _weaponsComponent;
 
@@ -135,7 +138,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             _stateComponent.UpdateState(ref data, false);
-
+            //_healthComponent.UpdateHealth(ref data, ping);
             switch (_stateComponent.CurrentState)
             {
                 case ENonPlayerState.Dead:

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DWD.Pooling;
+using DWD.Utility.Loading;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -12,6 +14,16 @@ namespace LichLord.NonPlayerCharacters
         private List<NonPlayerCharacterHitReactState> _hitReacts = new List<NonPlayerCharacterHitReactState>();
 
         float _hitReactTimer = 0.5f;
+
+        [SerializeField]
+        private Transform _impactAttachment;
+
+        private ImpactSpawner _visualSpawner = new ImpactSpawner();
+
+        private void Start()
+        {
+            _visualSpawner.OnImpactSpawnedAttached += OnVisualsPrefabLoadedAttached;
+        }
 
         public void UpdateHitReactState(ref FNonPlayerCharacterData data, float renderDeltaTime)
         {
@@ -32,11 +44,34 @@ namespace LichLord.NonPlayerCharacters
             Debug.Log("Guid: " + _npc.GUID + ", Starting Hit React " + animIndex +
                 ", tick: " + _npc.Context.Runner.Tick);
             */
-            var hitReact = _hitReacts[animIndex];
+            NonPlayerCharacterHitReactState hitReact = _hitReacts[animIndex];
             var animTrigger = hitReact.AnimationTrigger;
 
             _hitReactTimer = hitReact.StateTime;
             _npc.AnimationController.SetAnimationForTrigger(animTrigger);
+
+            if(hitReact.HitEffect.Name != "")
+                _visualSpawner.SpawnImpactVisualAttached(_impactAttachment, _impactAttachment.rotation, hitReact.HitEffect);
+        }
+
+        private void OnVisualsPrefabLoadedAttached(GameObject loadedGameObject, Transform attachment, Quaternion rotation)
+        {
+            var poolObject = loadedGameObject.GetComponent<DWDObjectPoolObject>();
+
+            if (poolObject == null)
+            {
+                Debug.LogWarning("Could not spawn Visuals Prefab for Impact");
+                return;
+            }
+
+            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, attachment.position, attachment.rotation);
+            if(instance is StandaloneVisualEffect standaloneEffect)
+                standaloneEffect.Initialize();
+        }
+
+        private void OnDestroy()
+        {
+            _visualSpawner.OnImpactSpawnedAttached -= OnVisualsPrefabLoadedAttached;
         }
     }
 }

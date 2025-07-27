@@ -37,7 +37,10 @@ namespace LichLord
         protected BundleObject _icon;
         public BundleObject Icon => _icon;
 
-        [Header ("Animation")]
+        [Header("Animation")]
+        private FAnimationTrigger _animationTrigger;
+        public FAnimationTrigger AnimationTrigger => _animationTrigger;
+
         public bool Fullbody; // Animator trigger (e.g., "Shoot" for gun)
         public int UpperbodyTriggerNumber;
         public int UpperbodyTriggerDuration;
@@ -73,7 +76,7 @@ namespace LichLord
             {
                 if (ticksSinceStart > UpperbodyTriggerDuration)
                 {
-                    playerCharacter.Maneuvers.SetUpperBodyTriggerNumber(0);
+
                 }
             }
 

@@ -123,7 +123,7 @@ namespace LichLord.World
         {
             if (Replicator == null)
             {
-                Debug.Log("No replicator");
+                Debug.Log("No replicator " + ChunkID.X + ", " + ChunkID.Y);
                 return;
             }
 

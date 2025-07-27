@@ -1155,7 +1155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
   _follower: {fileID: 7174816834515342640}
-  _velocity: {x: 0, y: 0, z: 0}
+  _worldVelocity: {x: 0, y: 0, z: 0}
   _isGrounded: 0
   _layerMask:
     serializedVersion: 2
@@ -1221,7 +1221,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
   _hitReacts:
-  - StateTime: 0.5
+  - StateTime: 0.75
     _animationTrigger:
       Action: 1
       Weapon: 0
@@ -1231,7 +1231,10 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
-  - StateTime: 0.5
+    _hitEffect:
+      _name: VIS_IMP_BloodBurst
+      _bundle: vis_imp_bloodburst
+  - StateTime: 0.75
     _animationTrigger:
       Action: 2
       Weapon: 0
@@ -1241,7 +1244,10 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
-  - StateTime: 0.5
+    _hitEffect:
+      _name: VIS_IMP_BloodBurst
+      _bundle: vis_imp_bloodburst
+  - StateTime: 0.75
     _animationTrigger:
       Action: 1
       Weapon: 0
@@ -1251,6 +1257,9 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
+    _hitEffect:
+      _name: VIS_IMP_BloodBurst
+      _bundle: vis_imp_bloodburst
   - StateTime: 1.5
     _animationTrigger:
       Action: 1
@@ -1261,7 +1270,10 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
-  - StateTime: 0.5
+    _hitEffect:
+      _name: VIS_IMP_BloodBurst
+      _bundle: vis_imp_bloodburst
+  - StateTime: 0.75
     _animationTrigger:
       Action: 2
       Weapon: 0
@@ -1271,6 +1283,10 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
+    _hitEffect:
+      _name: VIS_IMP_BloodBurst
+      _bundle: vis_imp_bloodburst
+  _impactAttachment: {fileID: 8905927029070619014}
 --- !u!114 &3797343846203693856
 MonoBehaviour:
   m_ObjectHideFlags: 0

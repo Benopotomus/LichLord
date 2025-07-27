@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: 0.30609936, g: 0.42138356, b: 0.38607347, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.01
+  m_FogDensity: 0.005
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.101459265, g: 0.51238096, b: 1.6981132, a: 1}
@@ -2767,7 +2767,7 @@ PrefabInstance:
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.size
-      value: 8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
@@ -3204,7 +3204,11 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 33635685}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7136224720027177897, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 465fd4e57519ec44fb1a0a4afb74af8c, type: 3}
 --- !u!20 &1581192687 stripped
 Camera:
@@ -3592,13 +3596,10 @@ MonoBehaviour:
   maxGraphicsBufferCaches: 8
   _cullingCameras:
   - {fileID: 1581192687}
-  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
-    - {x: 1147.9067, y: 21.362005, z: 1070.0657, w: 0}
     fov:
-    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: 0.97442305
@@ -3617,43 +3618,20 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
-    - e00: 0.21987598
-      e01: 0.00047646675
-      e02: 0.81061274
-      e03: -1119.816
-      e10: -1.0513234
-      e11: 1.3467921
-      e12: 0.28437635
-      e13: 873.74976
-      e20: -0.7503678
-      e21: -0.62880147
-      e22: 0.20390435
-      e23: 656.5669
-      e30: -0.7503603
-      e31: -0.62879515
-      e32: 0.2039023
-      e33: 656.5871
     calibration:
-    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.69788826, y: -2.5444768e-15, z: 0.7162066, w: 0}
-    - {x: -0.40621364, y: -0.48112944, z: 0.7768559, w: -354.71344}
     frustumPlane1:
     - {x: -0.69788826, y: -2.544477e-15, z: 0.7162066, w: 0}
-    - {x: -0.7429498, y: -0.48185912, z: -0.4645831, w: 1360.2648}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: -0.90084195, y: 0.3589985, z: 0.24413936, w: 765.1685}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: 0.15048155, y: -0.9877936, z: -0.040237024, w: -108.58133}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
-    - {x: -0.7503603, y: -0.62879515, z: 0.20390229, w: 656.5737}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
-    - {x: 0.74919, y: 0.6302709, z: -0.20364887, w: 2015.3448}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
