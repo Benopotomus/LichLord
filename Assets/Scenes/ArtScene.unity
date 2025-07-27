@@ -3204,11 +3204,7 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 33635685}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7136224720027177897, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 465fd4e57519ec44fb1a0a4afb74af8c, type: 3}
 --- !u!20 &1581192687 stripped
 Camera:
@@ -3596,10 +3592,13 @@ MonoBehaviour:
   maxGraphicsBufferCaches: 8
   _cullingCameras:
   - {fileID: 1581192687}
+  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
+    - {x: 0.26715943, y: 4.854298, z: -3.5143118, w: 0}
     fov:
+    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: 0.97442305
@@ -3618,20 +3617,43 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
+    - e00: 0.83709586
+      e01: 0.00015517473
+      e02: 0.06367911
+      e03: -0.00060306955
+      e10: -0.03509811
+      e11: 1.6702193
+      e12: 0.45731327
+      e13: -6.491224
+      e20: -0.073096424
+      e21: -0.264809
+      e22: 0.9615369
+      e23: 4.6475816
+      e30: -0.073095694
+      e31: -0.26480636
+      e32: 0.9615272
+      e33: 4.684084
     calibration:
+    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.69788826, y: -2.5444768e-15, z: 0.7162066, w: 0}
+    - {x: 0.58513856, y: -0.20269315, z: 0.7851932, w: 3.5870216}
     frustumPlane1:
     - {x: -0.69788826, y: -2.544477e-15, z: 0.7162066, w: 0}
+    - {x: -0.69710475, y: -0.20293085, z: 0.6876511, w: 3.5879455}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
+    - {x: -0.0540969, y: 0.70270646, z: 0.70942026, w: -0.90356994}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
+    - {x: -0.018998792, y: -0.96751285, z: 0.25210696, w: 5.587654}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
+    - {x: -0.073095694, y: -0.2648064, z: 0.9615272, w: 4.665809}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
+    - {x: 0.07272328, y: 0.26417843, z: -0.9617282, w: 3635.6174}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
