@@ -57,6 +57,7 @@ namespace LichLord
 
         protected virtual void RecycleVisualEffect()
         {
+            _transform.parent = owner.poolRoot;
             onRecycled?.Invoke(this);
             DWDObjectPool.Instance.Recycle(this);
         }

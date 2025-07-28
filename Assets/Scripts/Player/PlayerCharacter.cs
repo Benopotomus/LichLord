@@ -27,6 +27,7 @@ namespace LichLord
         public BuilderComponent Builder;
         public PlayerCharacterFSM FSM;
         public InteractorComponent Interactor;
+        public PlayerCharacterAimComponent Aim;
 
         [SerializeField] private PlayerCharacterAnimationController _animationController;
         public PlayerCharacterAnimationController AnimationController => _animationController;

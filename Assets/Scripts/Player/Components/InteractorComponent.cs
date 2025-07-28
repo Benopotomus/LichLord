@@ -24,6 +24,12 @@ namespace LichLord
 
         private float _interactDistance = 1.0f;
 
+        [Networked]
+        private ref FWorldPosition _interactTargetPosition => ref MakeRef<FWorldPosition>();
+
+        [SerializeField]
+        private FUpperBodyAnimationState _interactState;
+
         public void ProcessInput(ref FGameplayInput input)
         {
             if (_bestInteractable == null)
@@ -34,42 +40,51 @@ namespace LichLord
 
             if (_pc.FSM.StateMachine.ActiveState is IdleState idleState)
             {
-                SetInteract(_bestInteractable, true);
+                StartInteract(_bestInteractable);
   
             }
             else if (_pc.FSM.StateMachine.ActiveState is InteractingState interactingState)
             {
-                SetInteract(_bestInteractable, false);
+                StopInteract(_bestInteractable);
             }
         }
 
-        private void SetInteract(InteractableComponent interactable, bool isInteracting)
+        private void StartInteract(InteractableComponent interactable)
         {
             int tick = Runner.Tick;
 
             CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
 
-            if (isInteracting)
-            {
-                state.MoveToInteract();
-                _currentInteractable = _bestInteractable;
-                _currentInteractable.InteractStart(this, tick);
-                _pc.Movement.LookTarget = _currentInteractable.transform;
-            }
-            else
-            {
-                state.MoveToIdle();
-                _currentInteractable.InteractEnd(this);
-                _currentInteractable = null;
-                _pc.Movement.LookTarget = null;
-            }
+            state.MoveToInteract();
+            _currentInteractable = _bestInteractable;
+            _currentInteractable.InteractStart(this, tick);
+            _pc.Movement.LookTarget = _currentInteractable.transform;
 
             Prop prop = interactable.Owner;
 
-            Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, isInteracting);
+            Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, true);
 
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, isInteracting);
+                Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, true);
+        }
+
+        private void StopInteract(InteractableComponent interactable)
+        {
+            int tick = Runner.Tick;
+
+            CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
+
+            state.MoveToIdle();
+            _currentInteractable.InteractEnd(this);
+            _currentInteractable = null;
+            _pc.Movement.LookTarget = null;
+            
+            Prop prop = interactable.Owner;
+
+            Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, false);
+
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, false);
         }
 
         public void OnFixedUpdateNetwork(int tick, float deltaTime)
@@ -81,10 +96,13 @@ namespace LichLord
                 if (_currentInteractable.GetTimeRemaining(tick) <= 0f)
                 {
                     _currentInteractable.CompleteInteract(this);
-                    SetInteract(_currentInteractable, false);
+                    StopInteract(_currentInteractable);
                 }
             }
         }
+
+        public int UpperbodyTriggerNumber;
+        public int UpperbodyTriggerDuration;
 
         public void UpdateInteractUI(float localRenderTime)
         {
@@ -122,16 +140,6 @@ namespace LichLord
         public void OnRender(float deltaTime, float localRenderTime, int tick)
         {
             UpdateInteractUI(localRenderTime);
-        }
-
-        public void InteractableEntered(InteractableComponent interactable)
-        {
-            _allInteractables.Add(interactable);
-        }
-
-        public void InteractableExited(InteractableComponent interactable)
-        {
-            _allInteractables.Remove(interactable);
         }
 
         public void RefreshInteractables()

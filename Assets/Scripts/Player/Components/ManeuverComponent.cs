@@ -30,7 +30,30 @@ namespace LichLord
         // Current upper body blend amount
         private float _upperBodyBlend = 0f;
         private float _moveSpeedMultiplier = 1f;
-        public float MoveSpeedMultiplier => _moveSpeedMultiplier;
+
+        public float GetMoveSpeedMultiplier()
+        { 
+            if(_activeManeuverIndex < 0)
+                return 1f;
+
+            return _moveSpeedMultiplier;
+        }
+
+        public float GetPitchOffset()
+        {
+            if (_activeManeuverIndex < 0)
+                return 0f;
+
+            return GetActiveManeuver().PitchOffset;
+        }
+
+        public float GetYawOffset()
+        {
+            if (_activeManeuverIndex < 0)
+                return 0f;
+
+            return GetActiveManeuver().YawOffset;
+        }
 
         public override void Spawned()
         {
@@ -189,27 +212,9 @@ namespace LichLord
         public void OnRender()
         {
             float deltaTime = Time.deltaTime;
-
-            UpdateMoveSpeed(deltaTime);
-            UpdateWeaponModel();
-            UpdateAnimation(deltaTime);
         }
 
-        private void UpdateAnimation(float deltaTime)
-        {
-            if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
-            {
-                _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend + (deltaTime * 8f));
-            }
-            else
-            {
-                _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend - (deltaTime * 4f));
-            }
-
-            _pc.AnimationController.SetUpperBodyBlend(_upperBodyBlend);
-        }
-
-        private void UpdateMoveSpeed(float deltaTime)
+        public void UpdateMoveSpeed(float deltaTime)
         {
             ManeuverDefinition activeManeuver = GetActiveManeuver();
 
@@ -220,23 +225,6 @@ namespace LichLord
             else
             {
                 _moveSpeedMultiplier = Mathf.Lerp(_moveSpeedMultiplier, 1, deltaTime * 4f);
-            }
-        }
-
-        public void UpdateWeaponModel()
-        {
-            ManeuverDefinition selectedAction = GetSelectedManeuver();
-            if (selectedAction is GunManeuverDefinition gunActionData)
-            {
-                if (gunModel != null)
-                {
-                    gunModel.SetActive(true);
-                }
-            }
-
-            if (gunModel != null)
-            {
-                gunModel.SetActive(false);
             }
         }
 

@@ -11950,9 +11950,10 @@ GameObject:
   - component: {fileID: 2637221445499037506}
   - component: {fileID: 5886866483268230399}
   - component: {fileID: 4804172155013043321}
+  - component: {fileID: 6895327201870177106}
   - component: {fileID: 4155602845998252645}
-  - component: {fileID: 6155389979576705781}
   - component: {fileID: 8911782388783612553}
+  - component: {fileID: 6155389979576705781}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -12011,6 +12012,7 @@ MonoBehaviour:
   Builder: {fileID: 18907217600452759}
   FSM: {fileID: 6231497543318802807}
   Interactor: {fileID: 4628596752965340789}
+  Aim: {fileID: 6895327201870177106}
   _animationController: {fileID: 2637221445499037506}
   _muzzleComponent: {fileID: 5886866483268230399}
   HeadRenderers: []
@@ -12052,6 +12054,8 @@ MonoBehaviour:
     m_Bits: 8192
   _bestInteractable: {fileID: 0}
   _currentInteractable: {fileID: 0}
+  UpperbodyTriggerNumber: 0
+  UpperbodyTriggerDuration: 0
 --- !u!114 &18907217600452759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12233,6 +12237,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4065fad91402e064fbcca9a9419bde60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6895327201870177106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 418819f8ee58b024d978531e3d327e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pc: {fileID: 2971398371087610287}
 --- !u!114 &4155602845998252645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12268,32 +12285,6 @@ MonoBehaviour:
   - {fileID: 5189535172980925867}
   - {fileID: 8530991970368520409}
   ForceRemoteRenderTimeframe: 0
---- !u!143 &6155389979576705781
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3123905968297068043}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.6
-  m_Radius: 0.35
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.1
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!114 &8911782388783612553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12321,6 +12312,32 @@ MonoBehaviour:
   wallAvoidFalloff: 1
   priority: 1
   debug: 0
+--- !u!143 &6155389979576705781
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 1.6
+  m_Radius: 0.35
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.1
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0

@@ -23,6 +23,7 @@ namespace LichLord
             fsmRef.PC.Movement.ProcessInput(ref input, deltaTime);
             fsmRef.PC.Movement.UpdateLookRotation(deltaTime);
             fsmRef.PC.Maneuvers.ProcessInput(ref input);
+            fsmRef.PC.Maneuvers.UpdateMoveSpeed(deltaTime);
 
             fsmRef.PC.Movement.WritePosition();
             fsmRef.PC.Maneuvers.OnFixedUpdate();
@@ -45,14 +46,11 @@ namespace LichLord
 
             // Both
             fsmRef.PC.Movement.OnRender(deltaTime);
+            fsmRef.PC.Aim.OnRender(deltaTime);
 
             // Remote Only
             fsmRef.PC.Movement.UpdateRemotePosition(deltaTime);
             fsmRef.PC.Interactor.OnRender(deltaTime, localRenderTime, tick);
-
-
-            fsmRef.PC.Maneuvers.OnRender();
-           
         }
     }
 }

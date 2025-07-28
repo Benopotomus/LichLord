@@ -45,6 +45,9 @@ namespace LichLord
         public int UpperbodyTriggerNumber;
         public int UpperbodyTriggerDuration;
 
+        public float PitchOffset = 0f;
+        public float YawOffset = 0f;
+
         public float AnimationSpeed = 1f;
 
         public float MovementSpeedMultiplier = 1f; // Scales movement speed during action

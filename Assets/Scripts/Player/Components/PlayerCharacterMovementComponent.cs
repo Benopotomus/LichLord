@@ -212,7 +212,7 @@ namespace LichLord
             }
 
             // Adjust speed by maneuver
-            targetSpeed *= _pc.Maneuvers.MoveSpeedMultiplier;
+            targetSpeed *= _pc.Maneuvers.GetMoveSpeedMultiplier();
 
             Vector3 desiredMoveVelocity = inputDirection * targetSpeed;
 
