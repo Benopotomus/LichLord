@@ -39,22 +39,6 @@ namespace LichLord
             return _moveSpeedMultiplier;
         }
 
-        public float GetPitchOffset()
-        {
-            if (_activeManeuverIndex < 0)
-                return 0f;
-
-            return GetActiveManeuver().PitchOffset;
-        }
-
-        public float GetYawOffset()
-        {
-            if (_activeManeuverIndex < 0)
-                return 0f;
-
-            return GetActiveManeuver().YawOffset;
-        }
-
         public override void Spawned()
         {
             base.Spawned();
@@ -294,6 +278,9 @@ namespace LichLord
             {
                 _pc.AnimationController.SetAnimationForUpperBodyTrigger(maneuver.UpperbodyTriggerNumber);
             }
+
+            _pc.Aim.TargetPitchOffset = maneuver.PitchOffset;
+            _pc.Aim.TargetYawOffset = maneuver.YawOffset;
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -311,7 +298,10 @@ namespace LichLord
                 cooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
                 _maneuverCooldownTimers.Set(_selectedIndex, cooldownTimer);
             }
-            
+
+            _pc.Aim.TargetPitchOffset = 0;
+            _pc.Aim.TargetYawOffset = 0;
+
             _activeManeuverIndex = -1;
         }
 

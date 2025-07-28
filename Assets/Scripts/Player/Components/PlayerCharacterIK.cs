@@ -24,8 +24,12 @@ namespace LichLord
             if (_pc.Health.IsAlive == false)
                 return;
 
-            // Apply pitch/yaw offset to the chest target rotation
-            Quaternion offsetRotation = Quaternion.Euler(_pc.Aim.PitchOffset, _pc.Aim.YawOffset, 0);
+            Quaternion pitchRotation = Quaternion.AngleAxis(_pc.Aim.PitchOffset, Vector3.right);
+            Quaternion yawRotation = Quaternion.AngleAxis(_pc.Aim.YawOffset, Vector3.forward);
+            Quaternion rollRotation = Quaternion.AngleAxis(_pc.Aim.RollOffset, Vector3.up);
+
+            // Apply yaw in world space, pitch in local chest space
+            Quaternion offsetRotation = yawRotation * pitchRotation * rollRotation;
             Quaternion chestTargetRotation = ChestTargetTransform.rotation * offsetRotation;
 
             float upperBodyBlend = _pc.Aim.UpperBodyBlend;

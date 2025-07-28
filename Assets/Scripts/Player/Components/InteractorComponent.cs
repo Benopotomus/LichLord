@@ -10,6 +10,7 @@ namespace LichLord
     using Fusion;
     using LichLord.Props;
     using LichLord.UI;
+    using DWD.Pooling;
 
     public class InteractorComponent : ContextBehaviour
     {
@@ -28,7 +29,18 @@ namespace LichLord
         private ref FWorldPosition _interactTargetPosition => ref MakeRef<FWorldPosition>();
 
         [SerializeField]
-        private FUpperBodyAnimationState _interactState;
+        private float _pitchOffset = 0f;
+
+        [SerializeField]
+        private float _yawOffset = 0f;
+
+        [SerializeField]
+        private float _rollOffset = 0f;
+
+        [SerializeField]
+        private VisualEffectBeam _beamPrefab;
+
+        private VisualEffectBeam _beamInstance;
 
         public void ProcessInput(ref FGameplayInput input)
         {
@@ -58,6 +70,8 @@ namespace LichLord
             state.MoveToInteract();
             _currentInteractable = _bestInteractable;
             _currentInteractable.InteractStart(this, tick);
+            _interactTargetPosition.CopyPosition(_currentInteractable.transform.position);
+
             _pc.Movement.LookTarget = _currentInteractable.transform;
 
             Prop prop = interactable.Owner;
@@ -91,8 +105,8 @@ namespace LichLord
         {
             if (_currentInteractable != null)
             {
-                Vector3 interactablePosition = _currentInteractable.transform.position;
-                _pc.Movement.ProcessInteractMovement(interactablePosition, deltaTime);
+                RotateTowardInteract(deltaTime);
+
                 if (_currentInteractable.GetTimeRemaining(tick) <= 0f)
                 {
                     _currentInteractable.CompleteInteract(this);
@@ -101,8 +115,11 @@ namespace LichLord
             }
         }
 
-        public int UpperbodyTriggerNumber;
-        public int UpperbodyTriggerDuration;
+        public void RotateTowardInteract(float deltaTime)
+        {
+            Vector3 interactablePosition = _currentInteractable.transform.position;
+            _pc.Movement.ProcessInteractMovement(interactablePosition, deltaTime);
+        }
 
         public void UpdateInteractUI(float localRenderTime)
         {
@@ -133,13 +150,40 @@ namespace LichLord
                 return;
             }
 
-            floatingInteract.SetProgressBarPercent(_currentInteractable.GetTimeRemaining(localRenderTime));
+            floatingInteract.SetProgressBarPercent(_currentInteractable.GetPercentRemaining(localRenderTime));
             floatingInteract.SetProgressBarVisible(true);
         }
 
         public void OnRender(float deltaTime, float localRenderTime, int tick)
         {
             UpdateInteractUI(localRenderTime);
+        }
+
+        public void OnEnterStateRender()
+        {
+            _pc.AnimationController.SetAnimationForUpperBodyTrigger(5);
+            _pc.Aim.TargetPitchOffset = _pitchOffset;
+            _pc.Aim.TargetYawOffset = _yawOffset;
+            _pc.Aim.TargetRollOffset = _rollOffset;
+            SpawnBeamEffect();
+        }
+
+        public void OnExitStateRender()
+        {
+            _pc.AnimationController.SetAnimationForUpperBodyTrigger(0);
+            _pc.Aim.TargetPitchOffset = 0f;
+            _pc.Aim.TargetYawOffset = 0f;
+            _pc.Aim.TargetRollOffset = 0f;
+
+            if (_beamInstance != null)
+                _beamInstance.StartRecycle(0.75f);
+        }
+
+        public void UpdateBeam()
+        {
+            _beamInstance.UpdateBeamPosition(
+                _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand), 
+                _interactTargetPosition.Position);
         }
 
         public void RefreshInteractables()
@@ -198,6 +242,22 @@ namespace LichLord
             }
 
             _bestInteractable = newBestInteractable;
+        }
+
+        private void SpawnBeamEffect()
+        {
+            Vector3 spawnPosition = _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand);
+
+            var instance = DWDObjectPool.Instance.SpawnAt(_beamPrefab, spawnPosition, Quaternion.identity);
+            if (instance is VisualEffectBeam beamEffect)
+            {
+                _beamInstance = beamEffect;
+                _beamInstance.UpdateBeamPosition(
+                    _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand),
+                    _interactTargetPosition.Position);
+
+                _beamInstance.ToggleBeam(true);
+            }
         }
     }
 }

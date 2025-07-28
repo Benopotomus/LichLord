@@ -12,17 +12,24 @@ namespace LichLord
         private float _yawOffset = 0f;
         public float YawOffset => _yawOffset;
 
+        private float _rollOffset = 0f;
+        public float RollOffset => _rollOffset;
+
         private float _upperBodyBlend = 0f;
         public float UpperBodyBlend => _upperBodyBlend;
 
+        public float TargetPitchOffset;
+        public float TargetYawOffset;
+        public float TargetRollOffset;
+
+        [SerializeField]
+        private float _rotationLerpSpeed = 5f;
+
         public void OnRender(float deltaTime)
         {
-            float maneuverPitch = _pc.Maneuvers.GetPitchOffset();
-            float maneuverYaw = _pc.Maneuvers.GetYawOffset();
-
-            _pitchOffset = Mathf.Lerp(_pitchOffset, maneuverPitch, 5 * deltaTime);
-
-            _yawOffset = Mathf.Lerp(_yawOffset, maneuverYaw, 5 * deltaTime);
+            _pitchOffset = Mathf.Lerp(_pitchOffset, TargetPitchOffset, _rotationLerpSpeed * deltaTime);
+            _yawOffset = Mathf.Lerp(_yawOffset, TargetYawOffset, _rotationLerpSpeed * deltaTime);
+            _rollOffset = Mathf.Lerp(_rollOffset, TargetRollOffset, _rotationLerpSpeed * deltaTime);
 
             UpdateUpperBodyBlend(deltaTime);
         }
@@ -31,10 +38,17 @@ namespace LichLord
         {
             bool isUpperBody = false;
 
-            var activeManeuver = _pc.Maneuvers.GetActiveManeuver();
+            if (_pc.FSM.StateMachine.ActiveState is IdleState)
+            {
+                var activeManeuver = _pc.Maneuvers.GetActiveManeuver();
 
-            if (activeManeuver != null && !activeManeuver.Fullbody)
-            { 
+                if (activeManeuver != null && !activeManeuver.Fullbody)
+                {
+                    isUpperBody = true;
+                }
+            }
+            else if (_pc.FSM.StateMachine.ActiveState is InteractingState)
+            {
                 isUpperBody = true;
             }
 

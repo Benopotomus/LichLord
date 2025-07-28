@@ -21,7 +21,7 @@ namespace LichLord
             // Authority
             fsmRef.PC.CameraController.ProcessInput(ref input);
             fsmRef.PC.Movement.ProcessInput(ref input, deltaTime);
-            fsmRef.PC.Movement.UpdateLookRotation(deltaTime);
+            fsmRef.PC.Movement.UpdateLookRotation(deltaTime, 20f);
             fsmRef.PC.Maneuvers.ProcessInput(ref input);
             fsmRef.PC.Maneuvers.UpdateMoveSpeed(deltaTime);
 

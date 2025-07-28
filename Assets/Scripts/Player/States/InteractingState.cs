@@ -9,13 +9,13 @@ namespace LichLord
         protected override void OnEnterStateRender()
         {
             base.OnEnterStateRender();
-            fsmRef.PC.AnimationController.SetAnimationForUpperBodyTrigger(5);
+            fsmRef.PC.Interactor.OnEnterStateRender();
         }
 
         protected override void OnExitStateRender()
         {
             base.OnExitStateRender();
-            fsmRef.PC.AnimationController.SetAnimationForUpperBodyTrigger(0);
+            fsmRef.PC.Interactor.OnExitStateRender();
         }
 
         protected override void OnFixedUpdate()
@@ -27,6 +27,7 @@ namespace LichLord
             fsmRef.PC.CameraController.ProcessInput(ref input);
 
             fsmRef.PC.Movement.WritePosition();
+            fsmRef.PC.Movement.UpdateLookRotation(deltaTime, 4f);
             fsmRef.PC.Maneuvers.OnFixedUpdate();
             
             fsmRef.PC.Interactor.RefreshInteractables();
@@ -45,8 +46,9 @@ namespace LichLord
             // Both
             fsmRef.PC.Movement.OnRender(deltaTime);
             fsmRef.PC.Interactor.OnRender(deltaTime, localRenderTime, tick);
+            fsmRef.PC.Interactor.UpdateBeam();
             fsmRef.PC.Aim.OnRender(deltaTime);
-
+            
             // Remote Only
             fsmRef.PC.Movement.UpdateRemotePosition(deltaTime);
         }

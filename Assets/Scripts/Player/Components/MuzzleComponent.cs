@@ -29,7 +29,7 @@ namespace LichLord
                     return _handBoneLeft.position;
 
                 case EMuzzle.RightHand:
-                    return _handBoneLeft.position;
+                    return _handBoneRight.position;
 
                 case EMuzzle.LeftHand_RightHand_Blend:
                     return Vector3.Lerp(_handBoneLeft.position, _handBoneRight.position, 0.5f);

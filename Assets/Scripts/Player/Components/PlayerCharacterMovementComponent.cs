@@ -151,23 +151,27 @@ namespace LichLord
 
         public Transform LookTarget { get; set; }
 
-        public void UpdateLookRotation(float deltaTime)
+        public void UpdateLookRotation(float deltaTime, float lerpSpeed)
         {
-            Quaternion targetRotation = LookTarget != null ? GetLookTargetRotation() : GetLookCameraRotation();
-            
+            Quaternion targetRotation = LookTarget != null
+                ? GetLookTargetRotation()
+                : Context.Camera._cameraFollowTarget.rotation;
+
+            // Extract desired yaw and pitch from target rotation
             float rawPitch = targetRotation.eulerAngles.x;
             float yaw = targetRotation.eulerAngles.y;
             float normalizedPitch = rawPitch > 180f ? rawPitch - 360f : rawPitch;
-            _worldTransform.Yaw = yaw;
+
+            // Lerp only the Yaw (Y-axis) for horizontal character rotation
+            Quaternion currentRotation = CC.transform.rotation;
+            Quaternion targetYawRotation = Quaternion.Euler(0f, yaw, 0f);
+            Quaternion lerpedRotation = Quaternion.Slerp(currentRotation, targetYawRotation, lerpSpeed * deltaTime);
+
+            CC.transform.rotation = lerpedRotation;
+
+            // Update world transform with latest values
+            _worldTransform.Yaw = lerpedRotation.eulerAngles.y;
             _worldTransform.Pitch = normalizedPitch;
-
-            CC.transform.rotation =  Quaternion.Euler(0f, yaw, 0f);
-        }
-
-        // Get desired rotation from camera (for normal look)
-        public Quaternion GetLookCameraRotation()
-        {
-            return Context.Camera._cameraFollowTarget.rotation;
         }
 
         // Get desired rotation when facing interactable

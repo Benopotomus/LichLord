@@ -54,7 +54,6 @@ namespace LichLord
             RecycleVisualEffect();
         }
 
-
         protected virtual void RecycleVisualEffect()
         {
             _transform.parent = owner.poolRoot;

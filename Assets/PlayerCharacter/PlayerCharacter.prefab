@@ -12054,8 +12054,11 @@ MonoBehaviour:
     m_Bits: 8192
   _bestInteractable: {fileID: 0}
   _currentInteractable: {fileID: 0}
-  UpperbodyTriggerNumber: 0
-  UpperbodyTriggerDuration: 0
+  _pitchOffset: 35
+  _yawOffset: -75
+  _rollOffset: 35
+  _beamPrefab: {fileID: 7466204747608180949, guid: 985795427f3341943a44989cffb6a28c,
+    type: 3}
 --- !u!114 &18907217600452759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12250,6 +12253,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pc: {fileID: 2971398371087610287}
+  TargetPitchOffset: 0
+  TargetYawOffset: 0
+  TargetRollOffset: 0
+  _rotationLerpSpeed: 5
 --- !u!114 &4155602845998252645
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -55,15 +55,15 @@ namespace LichLord
             if (horizontalSpeed < 0.01f)
             {
                 animationVelocity.z = 0f;
-                animationVelocity.x = Mathf.Clamp( yawVelocity * 4, -0.5f, 0.5f); // Turn in place animation
+                animationVelocity.x = Mathf.Clamp( yawVelocity * 0.25f, -2.0f, 2.0f); // Turn in place animation
             }
 
             switch (moveState)
             {
                 case EMovementState.Walking:
                     _animator.SetBool(_animIDMoving, isMoving);
-                    _animator.SetFloat(_animIDSpeedX, animationVelocity.x, 0.25f, renderDeltaTime);
-                    _animator.SetFloat(_animIDSpeedZ, animationVelocity.z, 0.25f, renderDeltaTime);
+                    _animator.SetFloat(_animIDSpeedX, animationVelocity.x, 0.2f, renderDeltaTime);
+                    _animator.SetFloat(_animIDSpeedZ, animationVelocity.z, 0.2f, renderDeltaTime);
                     break;
                 case EMovementState.Jumping:
                     break;

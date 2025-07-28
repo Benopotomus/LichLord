@@ -60,8 +60,28 @@ namespace LichLord.Props
             float timeElapsed = localRenderTime - interactStartTime;
             float timeRemaining = (TicksToComplete / tickRate) - timeElapsed;
 
+            //Debug.Log(timeRemaining);
             return Mathf.Max(0f, timeRemaining);
         }
+
+        public float GetPercentRemaining(float localRenderTime)
+        {
+            if (CurrentInteractor == null || TicksToComplete <= 0)
+                return 0f;
+
+            float tickRate = 32f; // ticks per second
+            float interactStartTime = InteractTick / tickRate;
+            float totalDuration = TicksToComplete / tickRate;
+
+            float timeElapsed = localRenderTime - interactStartTime;
+            float timeRemaining = totalDuration - timeElapsed;
+
+            float percentRemaining = timeRemaining / totalDuration;
+
+            //Debug.Log($"Percent Remaining: {percentRemaining * 100f}%");
+            return Mathf.Clamp01(percentRemaining);
+        }
+
         // Can this interactable be added to the list of potentials
         public virtual bool IsPotentialInteractor(InteractorComponent interactorComponent)
         {
