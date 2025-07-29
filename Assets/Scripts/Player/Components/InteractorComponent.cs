@@ -15,6 +15,7 @@ namespace LichLord
     public class InteractorComponent : ContextBehaviour
     {
         [SerializeField] private PlayerCharacter _pc;
+        public PlayerCharacter PC => _pc;
 
         [SerializeField] private LayerMask _interactableLayerMask;
 

@@ -98,6 +98,8 @@ namespace LichLord.Props
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                 context.PropManager.Predict_SetActivated(prop.ChunkID, prop.GUID, true);
 
+           interactor.PC.Nexus.AddNexus(this);
+
         }
     }
 }

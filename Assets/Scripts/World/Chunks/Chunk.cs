@@ -150,9 +150,9 @@ namespace LichLord.World
             data.Copy(ref currentData);
         }
          
-        public bool GetRenderState(bool hasAuthority, Chunk chunk, int guid, out PropRuntimeState usedState)
+        public bool GetRenderState(bool hasAuthority, int guid, out PropRuntimeState usedState)
         {
-            if (!chunk.PropStates.TryGetValue(guid, out PropRuntimeState authorityState))
+            if (!PropStates.TryGetValue(guid, out PropRuntimeState authorityState))
             {
                 usedState = null;
                 Debug.Log("Get Render State: Trying to get runtime data but its not loaded " + guid);
@@ -212,7 +212,7 @@ namespace LichLord.World
             {
                 int guid = kvp.Key;
 
-                if (!GetRenderState(hasAuthority, this, guid, out var usedState))
+                if (!GetRenderState(hasAuthority, guid, out var usedState))
                 {
                     Debug.LogWarning($"Null PropRuntimeState for GUID {guid} in Render.");
                     continue;

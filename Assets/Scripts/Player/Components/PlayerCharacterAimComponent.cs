@@ -53,9 +53,9 @@ namespace LichLord
             }
 
             if (isUpperBody)
-                _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend + (deltaTime * 8f));
+                _upperBodyBlend = Mathf.Lerp(_upperBodyBlend, 1f, _rotationLerpSpeed * deltaTime);
             else
-                _upperBodyBlend = Mathf.Clamp01(_upperBodyBlend - (deltaTime * 4f));
+                _upperBodyBlend = Mathf.Lerp(_upperBodyBlend, 0f, _rotationLerpSpeed * deltaTime);
 
             _pc.AnimationController.SetUpperBodyBlend(_upperBodyBlend);
         }

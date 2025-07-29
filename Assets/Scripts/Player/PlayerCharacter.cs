@@ -15,7 +15,6 @@ namespace LichLord
     public class PlayerCharacter : RelayPlayer, INetActor, IHitInstigator, IHitTarget, IChunkTrackable
     {
         [Header("References")]
-        public Health Health;
         public PlayerCharacterMovementComponent Movement;
         public PlayerCameraController CameraController;
         public PlayerCharacterInput Input;
@@ -28,6 +27,8 @@ namespace LichLord
         public PlayerCharacterFSM FSM;
         public InteractorComponent Interactor;
         public PlayerCharacterAimComponent Aim;
+        public PlayerNexusComponent Nexus;
+        public PlayerHealthComponent Health;
 
         [SerializeField] private PlayerCharacterAnimationController _animationController;
         public PlayerCharacterAnimationController AnimationController => _animationController;
@@ -147,21 +148,9 @@ namespace LichLord
         {
             base.Render();
             // Disable hits when player is dead
-            Hurtbox.enabled = Health.IsAlive;
 
             // Change the chunk and tell the server we've changed chunks
             UpdateChunk();
-        }
-
-        private void RenderChunks()
-        {
-            if (!HasStateAuthority)
-                return;
-        }
-
-        private void Respawn(Vector3 position)
-        {
-            Health.Revive();
         }
 
         private void OnNicknameChanged()
@@ -170,7 +159,6 @@ namespace LichLord
 
             if (HasStateAuthority)
                 return; // Do not show nickname for local player
-
         }
 
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)

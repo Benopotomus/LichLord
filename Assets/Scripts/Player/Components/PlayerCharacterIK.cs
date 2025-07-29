@@ -21,9 +21,6 @@ namespace LichLord
 
         private void LateUpdate()
         {
-            if (_pc.Health.IsAlive == false)
-                return;
-
             Quaternion pitchRotation = Quaternion.AngleAxis(_pc.Aim.PitchOffset, Vector3.right);
             Quaternion yawRotation = Quaternion.AngleAxis(_pc.Aim.YawOffset, Vector3.forward);
             Quaternion rollRotation = Quaternion.AngleAxis(_pc.Aim.RollOffset, Vector3.up);
