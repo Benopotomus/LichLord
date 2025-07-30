@@ -92,6 +92,12 @@ namespace LichLord.Props
             return dataDefinition.GetHealth(ref _data);
         }
 
+        public int GetMaxHealth()
+        {
+            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
+            return dataDefinition.MaxHealth;
+        }
+
         public void ApplyDamage(int damage, int tick)
         {
             PropDataDefinition dataDefinition = Definition.PropDataDefinition;

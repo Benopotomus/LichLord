@@ -28,16 +28,7 @@ namespace LichLord.NonPlayerCharacters
            _debug.OnSpawned();
         }
 
-        public override void Despawned(NetworkRunner runner, bool hasState)
-        {
-            base.Despawned(runner, hasState);
-            if (runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single)
-            {
-
-            }
-        }
-
-        public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID)
+        public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
@@ -57,7 +48,7 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            NonPlayerCharacterDataUtility.InitializeData(ref data, definition, teamID);
+            NonPlayerCharacterDataUtility.InitializeData(ref data, definition, teamID, isInvasionNPC);
 
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;
@@ -66,7 +57,7 @@ namespace LichLord.NonPlayerCharacters
             replicator.UpdateNPCData(ref data, freeIndex);
         }
 
-        public void SpawnNPC(FNonPlayerCharacterSaveState saveState)
+        public void SpawnNPCFromSave(FNonPlayerCharacterSaveState saveState)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
@@ -121,12 +112,14 @@ namespace LichLord.NonPlayerCharacters
 
         public void LoadNPCsFromSaves()
         {
+            return;
+
             List<FNonPlayerCharacterSaveState> loadedNPCs =
                Context.WorldSaveLoadManager.LoadedNPCs;
 
             foreach (var npc in loadedNPCs)
             {
-                SpawnNPC(npc);
+                SpawnNPCFromSave(npc);
             }
         }
 
@@ -139,7 +132,6 @@ namespace LichLord.NonPlayerCharacters
             foreach (var replicator in _replicators)
             {
                 allSaves.AddRange(replicator.GetSaveStates());
-                Debug.Log(replicator);
             }
 
             return allSaves;

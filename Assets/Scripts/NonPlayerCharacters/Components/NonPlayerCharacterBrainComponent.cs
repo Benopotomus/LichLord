@@ -85,7 +85,7 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateSenses(tick);
             SelectManeuver(tick);
-            UpdateWanderMovement();
+            UpdateWanderMovement(ref data, tick);
         }
 
         public void UpdateExecutingTimer(ref FNonPlayerCharacterData data, int tick)
@@ -132,7 +132,7 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private void UpdateWanderMovement()
+        private void UpdateWanderMovement(ref FNonPlayerCharacterData data, int tick)
         {
             if (_hasAttackTarget)
                 return;
@@ -141,15 +141,35 @@ namespace LichLord.NonPlayerCharacters
             NPC.Movement.SetFollowerUpdatePosition(true);
             NPC.Movement.SetFollowerUpdateRotation(true);
 
-            if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
+            // if we are an invasion npc, the target nexus position is the fallback
+            if (NonPlayerCharacterDataUtility.IsInvasionNPC(ref data))
             {
-                _moveTarget = new Vector3(
-                    Random.Range(-20f, 20f),
-                    0f, // Keep Y fixed
-                    Random.Range(-20f, 20f)
-                );
+                var nexus = NPC.Context.InvasionManager.GetTargetNexus();
+                if (nexus != null)
+                {
+                    var targetPosition = nexus.position;
+                    // If our current destination hasn't changed much, we early out
+                    Vector3 delta = _moveTarget - nexus.position;
+                    if (delta.sqrMagnitude < 0.01f)
+                        return;
 
-                NPC.Movement.AIFollower.destination = _moveTarget;
+                    _moveTarget = targetPosition;
+                    NPC.Movement.AIFollower.destination = _moveTarget;
+                    return;
+                }
+            }
+            else
+            {
+                if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
+                {
+                    _moveTarget = new Vector3(
+                        Random.Range(-20f, 20f),
+                        0f, // Keep Y fixed
+                        Random.Range(-20f, 20f)
+                    );
+
+                    NPC.Movement.AIFollower.destination = _moveTarget;
+                }
             }
         }
 

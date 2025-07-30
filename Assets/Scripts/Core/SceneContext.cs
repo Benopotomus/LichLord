@@ -34,6 +34,8 @@ namespace LichLord
         public ChunkManager ChunkManager;
         public SceneCamera Camera;
         public SceneUI UI;
+        public NexusManager NexusManager;
+        public InvasionManager InvasionManager;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;

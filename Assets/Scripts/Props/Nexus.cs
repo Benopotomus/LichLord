@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using LichLord.World;
 using UnityEngine;
 
 namespace LichLord.Props
@@ -98,7 +99,16 @@ namespace LichLord.Props
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                 context.PropManager.Predict_SetActivated(prop.ChunkID, prop.GUID, true);
 
-           interactor.PC.Nexus.AddNexus(this);
+            context.PropManager.RPC_SetActivated(prop.ChunkID, prop.GUID, true);
+            
+            FNexusData nexusData = new FNexusData();
+            nexusData.ChunkID = prop.ChunkID;
+            nexusData.GUID = (byte)prop.GUID;
+
+            context.NexusManager.RPC_AddNexus(nexusData);
+
+            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
+                context.NexusManager.Predict_AddNexus(nexusData);
 
         }
     }

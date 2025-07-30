@@ -1,6 +1,4 @@
 ﻿using Fusion;
-using UnityEngine;
-using System.Collections.Generic;
 using LichLord.World;
 
 namespace LichLord.Props

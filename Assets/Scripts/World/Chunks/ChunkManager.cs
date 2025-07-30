@@ -284,6 +284,8 @@ namespace LichLord.World
         private EReplicatorSize GetOptimalReplicatorSizeForChunk(Chunk chunk)
         {
             int propCount = chunk.PropStates.Count; // or use whatever metric you track
+            if (propCount == 0)
+                return EReplicatorSize.S0;
             if (propCount <= 16)
                 return EReplicatorSize.S16;
             if (propCount <= 32)
@@ -295,6 +297,9 @@ namespace LichLord.World
 
         private ChunkReplicator TryGetOrSpawnReplicator(Chunk chunk, EReplicatorSize size)
         {
+            if(size == EReplicatorSize.S0)
+                return null;
+
             Stack<ChunkReplicator> pool = size switch
             {
                 EReplicatorSize.S16 => _pool16,
@@ -348,6 +353,7 @@ namespace LichLord.World
         }
         public enum EReplicatorSize
         {
+            S0 = 0,
             S16 = 16,
             S32 = 32,
             S64 = 64,

@@ -6,8 +6,9 @@
     public static class NonPlayerCharacterDataUtility
     {
         // Bit size constants
-        private const int DEFINITION_BITS = 6;          // 0–63
+        private const int DEFINITION_BITS = 8;          // 0–255
         private const int TEAM_BITS = 2;                // 0–3
+        private const int INVASION_NPC_BITS = 1;        // 0-1
 
         private const int NPC_STATE_BITS = 4;           // 0–15
         private const int STATUS_BITS = 2;              // 0–3
@@ -18,9 +19,11 @@
         // Bit shifts and masks for Configuration (byte)
         private const int DEFINITION_SHIFT = 0;
         private const int TEAM_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
+        private const int INVASION_NPC_SHIFT = TEAM_SHIFT + TEAM_BITS;
 
         private const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
         private const byte TEAM_MASK = (1 << TEAM_BITS) - 1;
+        private const ushort INVASION_NPC_MASK = (1 << INVASION_NPC_BITS) - 1;     // 0b0000000000000001
 
         // Bit shifts and masks for Condition (byte)
         private const int NPC_STATE_SHIFT = 0;
@@ -35,7 +38,7 @@
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        public static void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID)
+        public static void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC)
         {
             if (definition == null)
                 throw new ArgumentNullException(nameof(definition), "NPC definition cannot be null.");
@@ -44,6 +47,7 @@
             npcData.Configuration = 0;
             SetDefinitionID(definition.TableID, ref npcData);
             SetTeamID(teamID, ref npcData);
+            SetInvasionNPC(isInvasionNPC, ref npcData);
 
             // Initialize Events
             npcData.Events = 0;
@@ -64,9 +68,9 @@
 
         public static void SetDefinitionID(int definitionIndex, ref FNonPlayerCharacterData npcData)
         {
-            byte config = npcData.Configuration;
+            ushort config = npcData.Configuration;
             definitionIndex = Mathf.Clamp(definitionIndex, 0, DEFINITION_MASK);
-            config = (byte)((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
+            config = (ushort)((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
             npcData.Configuration = config;
         }
 
@@ -78,9 +82,23 @@
 
         public static void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
         {
-            byte config = npcData.Configuration;
+            ushort config = npcData.Configuration;
             int teamValue = Mathf.Clamp((int)teamID, 0, TEAM_MASK);
-            config = (byte)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
+            config = (ushort)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
+            npcData.Configuration = config;
+        }
+
+        // Invasion NPC
+        public static bool IsInvasionNPC(ref FNonPlayerCharacterData npcData)
+        {
+            return ((npcData.Configuration >> INVASION_NPC_SHIFT) & INVASION_NPC_MASK) == 1;
+        }
+
+        public static void SetInvasionNPC(bool isInvasionNPC, ref FNonPlayerCharacterData npcData)
+        {
+            ushort config = npcData.Configuration;
+            int invasionValue = isInvasionNPC ? 1 : 0;
+            config = (ushort)((config & ~(INVASION_NPC_MASK << INVASION_NPC_SHIFT)) | (invasionValue << INVASION_NPC_SHIFT));
             npcData.Configuration = config;
         }
 
