@@ -23,6 +23,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void UpdateState(ref FNonPlayerCharacterData data, bool hasAuthority)
         {
+            ENonPlayerState oldState = _currentState;
             ENonPlayerState newState = data.State;
             int animIndex = data.AnimationIndex;
 
@@ -30,7 +31,17 @@ namespace LichLord.NonPlayerCharacters
                 _currentAnimIndex == animIndex)
                 return;
 
-            NPC.AnimationController.SetAnimationForState(_currentState, newState);
+            NPC.AnimationController.SetAnimationForState(oldState, newState);
+            //Debug.Log("oldState " + oldState + " to " + newState);
+
+            switch (oldState)
+            { 
+                case ENonPlayerState.Inactive:
+                    NPC.Movement.AIFollower.Teleport(data.Position);
+                    //Debug.Log("teleporting " + data.Position);
+                    break;
+
+            }
 
             switch (newState)
             {
@@ -54,8 +65,11 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     if (hasAuthority)
                     {
+                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.SetFollowerUpdatePosition(false);
+                        NPC.Movement.SetFollowerUpdateRotation(false);
                         NPC.Movement.SetFollowerLocalAvoidance(false);
+                        NPC.Movement.SetFollowerCanMove(false);
                     }
                     break;
                 case ENonPlayerState.Dead:
@@ -117,6 +131,7 @@ namespace LichLord.NonPlayerCharacters
                     _deadTimer -= renderDeltaTime;
                     if (_deadTimer < 0f)
                     {
+                        _currentState = ENonPlayerState.Inactive;
                         data.State = ENonPlayerState.Inactive;
                         NPC.Replicator.UpdateNPCData(ref data, _npc.Index);
                     }

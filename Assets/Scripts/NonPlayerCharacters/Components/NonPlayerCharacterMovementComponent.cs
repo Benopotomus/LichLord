@@ -245,12 +245,10 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnStateAuthorityChanged(bool hasAuthority)
         {
-            Debug.Log("State Authority Changed");
             SetFollowerUpdatePosition(true);
             SetFollowerUpdateRotation(true);
             SetFollowerCanMove(true);
             SetFollowerLocalAvoidance(true);
-
         }
     }
 }

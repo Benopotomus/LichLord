@@ -1,5 +1,6 @@
 ﻿using Fusion;
 using LichLord.World;
+using Pathfinding;
 using UnityEngine;
 
 namespace LichLord.Props
@@ -18,8 +19,33 @@ namespace LichLord.Props
         [SerializeField]
         private Transform _rocksTransform;
 
+        public override bool IsAttackable
+        {
+            get
+            {
+                switch (_stateComponent.CurrentState)
+                {
+                    case EPropState.Destroyed:
+                    case EPropState.Inactive:
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
+
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
+            var bounds = new Bounds(transform.position, new Vector3(5f, 5f, 5f)); // adjust size as needed
+            var guo = new GraphUpdateObject(bounds)
+            {
+                updatePhysics = true,
+                resetPenaltyOnPhysics = true,
+                modifyWalkability = true
+            };
+
+            AstarPath.active.UpdateGraphs(guo);
+
             base.OnSpawned(propRuntimeState, propManager);
 
             _interactableComponent.Activate(

@@ -1,4 +1,5 @@
-﻿using LichLord.World;
+﻿using LichLord.Props;
+using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -315,7 +316,7 @@ namespace LichLord.NonPlayerCharacters
                 for (int i = 0; i < trackables.Count; i++)
                 {
                     IChunkTrackable trackable = trackables[i];
-
+                    
                     if (!IsTargetValid(trackable))
                         continue;
 
@@ -331,9 +332,6 @@ namespace LichLord.NonPlayerCharacters
 
             SetAttackTarget(currentTarget);           
         }
-
-        [SerializeField]
-        GameObject targetGO;
 
         private bool IsTargetValid(IChunkTrackable trackable)
         {
@@ -457,7 +455,6 @@ namespace LichLord.NonPlayerCharacters
 
         public void ApplyHitToTarget(IHitTarget hitTarget, NonPlayerCharacterManeuverDefinition definition, int tick)
         {
-
             FDamageData damageData = new FDamageData();
             damageData.damageValue = definition.Damage;
 
@@ -475,6 +472,10 @@ namespace LichLord.NonPlayerCharacters
 
             HitUtility.ProcessHit(ref hit, _npc.Context);
         }
+
+
+        [SerializeField]
+        GameObject targetGO;
 
         private void SetAttackTarget(IChunkTrackable target)
         {
@@ -494,6 +495,9 @@ namespace LichLord.NonPlayerCharacters
 
             if (_attackTarget is PlayerCharacter pc)
                 targetGO = pc.gameObject;
+
+            if (_attackTarget is Nexus nexus)
+                targetGO = nexus.gameObject;
 
             _moveTarget = _attackTarget.Position;
             NPC.Movement.AIFollower.destination = _moveTarget;

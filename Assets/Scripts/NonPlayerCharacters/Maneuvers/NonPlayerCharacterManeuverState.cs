@@ -1,4 +1,5 @@
 ﻿using LichLord.Projectiles;
+using LichLord.Props;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,37 +26,45 @@ namespace LichLord.NonPlayerCharacters
 
         public bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
-            if(Definition == null) 
+            if (Definition == null) 
                 return false;
             
             if (IsOnCooldown(tick))
                 return false;
 
-            switch (Definition.ValidTargetTypes)
-            {
-                case EManeuverTarget.Both:
-                    if(brainComponent.AttackTarget == null)
-                        return false;
-                    break;
-                case EManeuverTarget.NPC:
-                    if(brainComponent.AttackTarget is not NonPlayerCharacter)
-                        return false;
-                    break;
-                case EManeuverTarget.PC:
-                    if (brainComponent.AttackTarget is not PlayerCharacter)
-                        return false;
-                    break;
-            }
+            if (brainComponent.AttackTarget == null)
+                return false;
 
             float distanceToTarget = Vector3.Distance(
-                brainComponent.AttackTarget.Position, 
-                brainComponent.NPC.CachedTransform.position);
+            brainComponent.AttackTarget.Position,
+            brainComponent.NPC.CachedTransform.position);
 
-            if(distanceToTarget < Definition.ValidTargetDistance.x ||
+            if (distanceToTarget < Definition.ValidTargetDistance.x ||
                 distanceToTarget > Definition.ValidTargetDistance.y)
                 return false;
 
-            return true;
+            if (brainComponent.AttackTarget is NonPlayerCharacter)
+            {
+                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.NPC))
+                    return true;
+            }
+            else if (brainComponent.AttackTarget is PlayerCharacter)
+            {
+                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.PC))
+                    return true;
+            }
+            else if (brainComponent.AttackTarget is Nexus)
+            {
+                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Nexus))
+                    return true;
+            }
+            else if (brainComponent.AttackTarget is Prop)
+            {
+                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Props))
+                    return true;
+            }
+
+            return false;
         }
 
         public bool IsOnCooldown(int tick)

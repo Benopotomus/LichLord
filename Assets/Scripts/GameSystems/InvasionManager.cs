@@ -96,9 +96,9 @@ namespace LichLord
                 playerPositions[i] = players[i].CachedTransform.position;
             }
 
-            const float minNexusDistance = 200f;
-            const float maxNexusDistance = 300f;
-            const float minPlayerDistance = 200f;
+            const float minNexusDistance = 150f;
+            const float maxNexusDistance = 200f;
+            const float minPlayerDistance = 150f;
             const int maxAttempts = 50;
             const float raycastHeight = 500f;
             const float maxRaycastDistance = 1000f;

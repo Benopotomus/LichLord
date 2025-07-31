@@ -7,11 +7,11 @@ namespace LichLord.Props
     public class Prop : DWDObjectPoolObject, IHitTarget, IChunkTrackable
     {
         [SerializeField]
-        private PropStateComponent _stateComponent;
+        protected PropStateComponent _stateComponent;
         public PropStateComponent StateComponent => _stateComponent;
 
         [SerializeField]
-        private PropHealthComponent _healthComponent;
+        protected PropHealthComponent _healthComponent;
         public PropHealthComponent HealthComponent => _healthComponent;
 
         protected PropManager _propManager;
@@ -33,18 +33,11 @@ namespace LichLord.Props
         public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
 
         public Vector3 Position => CachedTransform.position;
-        public bool IsAttackable
+        public virtual bool IsAttackable
         {
             get
             {
-                switch (_stateComponent.CurrentState)
-                {
-                    case EPropState.Destroyed:
-                    case EPropState.Inactive:
-                        return false;
-                    default:
-                        return true;
-                }
+                 return false;
             }
         }
         
@@ -64,6 +57,8 @@ namespace LichLord.Props
 
             ChunkID = propRuntimeState.chunk.ChunkID;
             GUID = propRuntimeState.guid;
+
+            CurrentChunk.AddObject(this);
         }
 
         // This is the visuals for authority and client.
@@ -78,6 +73,7 @@ namespace LichLord.Props
         public void StartRecycle()
         {
             DWDObjectPool.Instance.Recycle(this);
+            CurrentChunk.RemoveObject(this);
         }
 
         public void OnHitTaken(ref FHitUtilityData hit)

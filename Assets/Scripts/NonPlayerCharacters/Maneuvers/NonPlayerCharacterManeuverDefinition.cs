@@ -41,8 +41,8 @@ namespace LichLord.NonPlayerCharacters
         public Vector2 ValidTargetDistance => _validTargetDistance;
 
         [SerializeField]
-        private EManeuverTarget _validTargetTypes;
-        public EManeuverTarget ValidTargetTypes => _validTargetTypes;
+        private List<EManeuverTarget> _validTargetTypes = new List<EManeuverTarget>();
+        public List<EManeuverTarget> ValidTargetTypes => _validTargetTypes;
 
         [Header("Animations")]
         [SerializeField]
@@ -61,6 +61,7 @@ namespace LichLord.NonPlayerCharacters
         None,
         NPC,
         PC,
-        Both
+        Nexus,
+        Props,
     }
 }
