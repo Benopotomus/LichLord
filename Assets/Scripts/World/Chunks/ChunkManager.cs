@@ -226,14 +226,8 @@ namespace LichLord.World
             }
         }
 
-        int _lastTick = -1;
         public override void Render()
         {
-            //if (_lastTick == Runner.Tick)
-            //    return;
-
-           // _lastTick = Runner.Tick;
-
             if (!Context.IsGameplayActive())
                 return;
 

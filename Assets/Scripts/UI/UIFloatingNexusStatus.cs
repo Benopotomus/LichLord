@@ -1,34 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LichLord.Props;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace LichLord.UI
 {
-    public class UIFloatingNexusHealth : UIWidget
+    public class UIFloatingNexusStatus : UIFloatingWidget
     {
         [Header("UI Elements")]
         [SerializeField] private Image _iconImage;
         [SerializeField] private Slider _healthSlider;
         [SerializeField] private TextMeshProUGUI _healthText;
 
+        private Nexus _nexus;
+
         protected override void OnTick()
         {
             base.OnTick();
 
-            var nearestNexus = Context.NexusManager.GetNearestNexus(Context.LocalPlayerCharacter.transform.position);
-
-            if (nearestNexus != null)
+            PropRuntimeState nexusState = _nexus.RuntimeState;
+            if (_nexus != null)
             {
                 _iconImage.SetActive(true);
                 _healthSlider.SetActive(true);
                 _healthText.SetActive(true);
-                _healthText.text = nearestNexus.GetHealth() + " / " + nearestNexus.GetMaxHealth();
-                _healthSlider.value = (float)nearestNexus.GetHealth() / (float)nearestNexus.GetMaxHealth();
+                _healthText.text = nexusState.GetHealth() + " / " + nexusState.GetMaxHealth();
+                _healthSlider.value = (float)nexusState.GetHealth() / (float)nexusState.GetMaxHealth();
             }
             else
             {
@@ -36,6 +33,11 @@ namespace LichLord.UI
                 _healthSlider.SetActive(false);
                 _healthText.SetActive(false);
             }
+        }
+
+        public void SetNexus(Nexus nexus)
+        {
+            _nexus = nexus;
         }
 
     }

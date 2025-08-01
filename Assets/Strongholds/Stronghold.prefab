@@ -278,12 +278,10 @@ GameObject:
   m_Component:
   - component: {fileID: 5669841024813192744}
   - component: {fileID: 3375435704011219859}
-  - component: {fileID: 1597884182427900830}
-  - component: {fileID: 8189457276326707979}
-  - component: {fileID: 4770289886910122320}
   - component: {fileID: 6466698900152548025}
+  - component: {fileID: 1556901566859732102}
   m_Layer: 0
-  m_Name: PROP_VIS_Nexus
+  m_Name: Stronghold
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -321,71 +319,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 5546409922144146193}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a083a92937965b418fd64ff8d445df5, type: 3}
+  m_Script: {fileID: 11500000, guid: efa19273faeea2144ab23350acbf0546, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stateComponent: {fileID: 1597884182427900830}
-  _healthComponent: {fileID: 8189457276326707979}
-  ChunkID:
-    X: 0
-    Y: 0
-  GUID: 0
-  _propDefinition: {fileID: 0}
-  _transform: {fileID: 5669841024813192744}
+  _cachedTransform: {fileID: 5669841024813192744}
   Hurtbox: {fileID: 3972895102388555320}
-  _interactableComponent: {fileID: 1990070723009024549}
-  _interactEffect: {fileID: 2530104097262992020}
-  _activatedEffect: {fileID: 7169095659653471979}
-  _rocksTransform: {fileID: 72710799513181268}
---- !u!114 &1597884182427900830
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5546409922144146193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f071b7371d7000d488f9d4173eab6200, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _prop: {fileID: 3375435704011219859}
-  _currentState: 0
-  _hitReactPrefab: {fileID: 0}
---- !u!114 &8189457276326707979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5546409922144146193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d53f7faea48ee624985e7f17ff837daf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _prop: {fileID: 3375435704011219859}
-  _currentHealth: 0
---- !u!114 &4770289886910122320
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5546409922144146193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1014831617, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Type: 0
-  SphereRadius: 0
-  CapsuleRadius: 0
-  BoxExtents: {x: 0, y: 0, z: 0}
-  CapsuleExtents: 0
-  Offset: {x: 0, y: 0, z: 0}
-  Root: {fileID: 0}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!114 &6466698900152548025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -413,6 +351,25 @@ MonoBehaviour:
   wallAvoidFalloff: 1
   priority: 0.5
   debug: 0
+--- !u!114 &1556901566859732102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5546409922144146193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 2290456873
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 3375435704011219859}
+  ForceRemoteRenderTimeframe: 0
 --- !u!1 &6654132188913241803
 GameObject:
   m_ObjectHideFlags: 0

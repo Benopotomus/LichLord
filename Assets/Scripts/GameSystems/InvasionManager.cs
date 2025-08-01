@@ -2,17 +2,19 @@
 using LichLord.Props;
 using LichLord.World;
 using Pathfinding;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// This class is used to spawn invasions that attack player defenses
-/// 
+
 namespace LichLord
 {
     public class InvasionManager : ContextBehaviour
     {
         [Networked]
         public byte InvasionID { get; set; }
+        private byte _localInvasionID;
 
         [Networked]
         public int InvasionStartTick { get; set; }
@@ -24,9 +26,12 @@ namespace LichLord
         public FWorldPosition InvasionSpawnPosition { get; set; }
 
         [Networked]
-        public ref FNexusData TargetNexus => ref MakeRef<FNexusData>();
+        public ref FStrongholdData TargetNexus => ref MakeRef<FStrongholdData>();
 
         public InvasionDefinition ActiveInvasion;
+
+        public Action<FStrongholdData> onInvasionStarted;
+        public Action onInvasionEnded;
 
         public PropRuntimeState GetTargetNexus()
         {
@@ -42,7 +47,7 @@ namespace LichLord
             return null;
         }
 
-        public void BeginInvasion(byte invasionID, FNexusData nexusTarget)
+        public void BeginInvasion(byte invasionID, FStrongholdData nexusTarget)
         {  
             InvasionID = invasionID;
             InvasionStartTick = Runner.Tick;
@@ -57,7 +62,24 @@ namespace LichLord
         {
             base.Render();
 
-            ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
+            if (InvasionID != _localInvasionID)
+            {
+                _localInvasionID = InvasionID;
+                LocalInvasionChanged();
+            }
+        }
+
+        private void LocalInvasionChanged()
+        {
+            if (InvasionID == 0)
+            {
+                onInvasionEnded?.Invoke();
+            }
+            else
+            {
+                ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
+                onInvasionStarted?.Invoke(TargetNexus);
+            }
         }
 
         public override void FixedUpdateNetwork()
@@ -88,7 +110,6 @@ namespace LichLord
             var state = GetTargetNexus();
             Vector3 statePosition = state.position;
 
-            Debug.Log("Target Nexus Position " + statePosition);
             // Pre-allocate array to avoid List resizing
             Vector3[] playerPositions = new Vector3[players.Count];
             for (int i = 0; i < players.Count; i++)
@@ -198,16 +219,16 @@ namespace LichLord
             var spawnWaveDefinition = ActiveInvasion.SpawnWaves[wave];
             var waveCharacters = spawnWaveDefinition.InvasionCharacters;
 
-            var state = Context.NexusManager.GetNexusState(TargetNexus);
+            var state = Context.StrongholdManager.GetNexusState(TargetNexus);
             var stagingPosition = GetInvasionStagingPosition();
 
             for (int i = 0; i < waveCharacters.Count; i++)
             {
                 // Generate random position above ground
                 Vector3 randomPositionAbove = new Vector3(
-                    Random.Range(-10f, 10f),
+                    UnityEngine.Random.Range(-10f, 10f),
                     100f, // Fixed height to raycast from
-                    Random.Range(-10f, 10f)
+                    UnityEngine.Random.Range(-10f, 10f)
                 );
 
                 randomPositionAbove += stagingPosition;

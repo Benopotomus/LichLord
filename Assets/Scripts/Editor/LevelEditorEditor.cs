@@ -5,11 +5,15 @@ using System.IO;
 using System.Linq;
 using LichLord.Props;
 using LichLord.World;
+using LichLord;
 
 [CustomEditor(typeof(LevelEditor))]
 public class LevelEditorEditor : Editor
 {
     private PropDefinition newPropDefinition;
+    private InvasionSpawnPointDefinition newInvasionSpawnPointDefinition;
+    private StrongholdDefinition newStrongholdDefinition;
+
     private bool isAddingPoints = false;
     private bool isDeletingPoints = false;
     private Vector3 forwardDirection = Vector3.forward;
@@ -17,6 +21,15 @@ public class LevelEditorEditor : Editor
     private float deleteRadius = 1.0f;
 
     private List<GameObject> _previewInstances = new();
+
+    private enum EMarkupMode
+    {
+        Prop,
+        InvasionSpawnPoint,
+        Stronghold
+    }
+
+    private EMarkupMode _currentMode = EMarkupMode.Prop;
 
     private void OnEnable()
     {
@@ -42,6 +55,9 @@ public class LevelEditorEditor : Editor
         }
 
         newPropDefinition = EditorGUILayout.ObjectField("Prop Definition", newPropDefinition, typeof(PropDefinition), false) as PropDefinition;
+        newInvasionSpawnPointDefinition = EditorGUILayout.ObjectField("Invasion Spawn Point Definition", newInvasionSpawnPointDefinition, typeof(InvasionSpawnPointDefinition), false) as InvasionSpawnPointDefinition;
+        newStrongholdDefinition = EditorGUILayout.ObjectField("Stronghold Definition", newStrongholdDefinition, typeof(StrongholdDefinition), false) as StrongholdDefinition;
+
         useSurfaceNormal = EditorGUILayout.Toggle("Use Surface Normal", useSurfaceNormal);
 
         if (!useSurfaceNormal)
@@ -71,11 +87,11 @@ public class LevelEditorEditor : Editor
         if (GUILayout.Button("Clear All Points"))
         {
             Undo.RecordObject(manager.WorldSettings, "Clear Prop Points");
-            foreach (ChunkPropsMarkupData markupData in manager.WorldSettings.PropMarkupDatas)
+            foreach (ChunkMarkupData markupData in manager.WorldSettings.ChunkMarkupDatas)
             {
                 if (markupData != null)
                 {
-                    markupData.propMarkupDatas = new PropMarkupData[0];
+                    markupData.PropMarkupDatas = new PropMarkupData[0];
                     EditorUtility.SetDirty(markupData);
                 }
             }
@@ -88,29 +104,6 @@ public class LevelEditorEditor : Editor
             CleanUpWorldSettings(manager.WorldSettings);
             EditorUtility.SetDirty(manager.WorldSettings);
             EditorUtility.DisplayDialog("Success", "World Settings cleaned up. Check console for details.", "OK");
-        }
-
-        if (GUILayout.Button(new GUIContent("Clear Saves", "Deletes the PropSaveData.json file.")))
-        {
-            string saveFileName = "PropSaveData.json";
-            string saveFilePath = Path.Combine(Application.persistentDataPath, saveFileName);
-
-            if (File.Exists(saveFilePath))
-            {
-                try
-                {
-                    File.Delete(saveFilePath);
-                    EditorUtility.DisplayDialog("Success", "PropSaveData.json has been deleted.", "OK");
-                }
-                catch (System.Exception e)
-                {
-                    EditorUtility.DisplayDialog("Error", $"Failed to delete PropSaveData.json: {e.Message}", "OK");
-                }
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("Info", "PropSaveData.json does not exist.", "OK");
-            }
         }
 
         if (GUILayout.Button(new GUIContent("Remove All Markup Data", "Removes all ChunkPropsMarkupData ScriptableObjects from WorldSettings and deletes their sub-assets.")))
@@ -131,18 +124,18 @@ public class LevelEditorEditor : Editor
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
         CleanupPreviews();
 
-        if (manager.WorldSettings?.PropMarkupDatas != null)
+        if (manager.WorldSettings?.ChunkMarkupDatas != null)
         {
             Camera sceneCamera = SceneView.currentDrawingSceneView?.camera;
             if (sceneCamera == null) return;
 
             float maxDrawRange = manager.maxDrawRange;
 
-            foreach (var markupData in manager.WorldSettings.PropMarkupDatas)
+            foreach (var markupData in manager.WorldSettings.ChunkMarkupDatas)
             {
-                if (markupData?.propMarkupDatas == null) continue;
+                if (markupData?.PropMarkupDatas == null) continue;
 
-                foreach (var point in markupData.propMarkupDatas)
+                foreach (var point in markupData.PropMarkupDatas)
                 {
                     if (point?.propDefinition?.prefab == null) continue;
 
@@ -158,9 +151,18 @@ public class LevelEditorEditor : Editor
                     preview.hideFlags = HideFlags.DontSave | HideFlags.HideInHierarchy;
                     _previewInstances.Add(preview);
                 }
+
+                foreach(var invasionSpawnPoint in markupData.InvasionSpawnPointMarkupDatas)
+                { 
+                
+                }
+
+                foreach (var stronghold in markupData.StrongholdMarkupDatas)
+                {
+
+                }
             }
         }
-
 
         if (isAddingPoints && newPropDefinition != null)
         {
@@ -170,11 +172,11 @@ public class LevelEditorEditor : Editor
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
                     FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
-                    ChunkPropsMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
+                    ChunkMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
 
                     Undo.RecordObject(markupData, "Add Prop Point");
 
-                    List<PropMarkupData> points = markupData.propMarkupDatas?.ToList() ?? new List<PropMarkupData>();
+                    List<PropMarkupData> points = markupData.PropMarkupDatas?.ToList() ?? new List<PropMarkupData>();
                     int guid = GetUniqueGuid(markupData);
 
                     points.Add(new PropMarkupData
@@ -186,7 +188,7 @@ public class LevelEditorEditor : Editor
                         propDefinitionId = newPropDefinition.TableID
                     });
 
-                    markupData.propMarkupDatas = points.ToArray();
+                    markupData.PropMarkupDatas = points.ToArray();
                     EditorUtility.SetDirty(markupData);
                     EditorUtility.SetDirty(manager.WorldSettings);
 
@@ -218,11 +220,11 @@ public class LevelEditorEditor : Editor
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
                     FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
-                    ChunkPropsMarkupData markupData = manager.WorldSettings.GetMarkupData(chunkCoord);
+                    ChunkMarkupData markupData = manager.WorldSettings.GetMarkupData(chunkCoord);
 
-                    if (markupData != null && markupData.propMarkupDatas != null)
+                    if (markupData != null && markupData.PropMarkupDatas != null)
                     {
-                        List<PropMarkupData> points = new List<PropMarkupData>(markupData.propMarkupDatas);
+                        List<PropMarkupData> points = new List<PropMarkupData>(markupData.PropMarkupDatas);
                         PropMarkupData closestPoint = null;
                         float minDistance = float.MaxValue;
 
@@ -240,7 +242,7 @@ public class LevelEditorEditor : Editor
                         {
                             Undo.RecordObject(markupData, "Delete Prop Point");
                             points.Remove(closestPoint);
-                            markupData.propMarkupDatas = points.ToArray();
+                            markupData.PropMarkupDatas = points.ToArray();
                             EditorUtility.SetDirty(markupData);
                             EditorUtility.SetDirty(manager.WorldSettings);
                         }
@@ -280,23 +282,62 @@ public class LevelEditorEditor : Editor
         return newGuid;
     }
 
-    private int GetUniqueGuid(ChunkPropsMarkupData markupData)
+    private int GetUniqueGuid(ChunkMarkupData markupData)
     {
-        HashSet<int> usedGuids = markupData?.propMarkupDatas?.Select(p => p.guid).ToHashSet() ?? new HashSet<int>();
+        HashSet<int> usedGuids = markupData?.PropMarkupDatas?.Select(p => p.guid).ToHashSet() ?? new HashSet<int>();
         return GenerateUniqueGuid(usedGuids);
+    }
+
+    private void AddPropMarkup(ChunkMarkupData markupData, RaycastHit hit, Vector3 forwardDirection, bool useSurfaceNormal)
+    {
+        List<PropMarkupData> points = markupData.PropMarkupDatas?.ToList() ?? new List<PropMarkupData>();
+        int guid = GetUniqueGuid(markupData);
+
+        points.Add(new PropMarkupData
+        {
+            guid = guid,
+            position = hit.point,
+            rotation = Quaternion.LookRotation((useSurfaceNormal ? hit.normal : forwardDirection).normalized, Vector3.up),
+            propDefinition = newPropDefinition,
+            propDefinitionId = newPropDefinition?.TableID ?? 0
+        });
+
+        markupData.PropMarkupDatas = points.ToArray();
+    }
+
+    private void AddInvasionSpawnPoint(ChunkMarkupData markupData, RaycastHit hit)
+    {
+        var list = markupData.InvasionSpawnPointMarkupDatas?.ToList() ?? new List<InvasionSpawnPointMarkupData>();
+        list.Add(new InvasionSpawnPointMarkupData
+        {
+            position = hit.point,
+            // Add other defaults if needed
+        });
+        markupData.InvasionSpawnPointMarkupDatas = list.ToArray();
+    }
+
+    private void AddStrongholdMarkup(ChunkMarkupData markupData, RaycastHit hit)
+    {
+        var list = markupData.StrongholdMarkupDatas?.ToList() ?? new List<StrongholdMarkupData>();
+        list.Add(new StrongholdMarkupData
+        {
+            position = hit.point,
+            // Add other defaults if needed
+        });
+        markupData.StrongholdMarkupDatas = list.ToArray();
     }
 
     private void CleanUpWorldSettings(WorldSettings worldSettings)
     {
-        if (worldSettings == null || worldSettings.PropMarkupDatas == null)
+        if (worldSettings == null || worldSettings.ChunkMarkupDatas == null)
             return;
 
-        var validMarkupDatas = new List<ChunkPropsMarkupData>();
-        foreach (var markupData in worldSettings.PropMarkupDatas)
+        var validMarkupDatas = new List<ChunkMarkupData>();
+        foreach (var markupData in worldSettings.ChunkMarkupDatas)
         {
             if (markupData == null) continue;
 
-            var points = markupData.propMarkupDatas?.Where(p => p != null && p.propDefinition != null).ToList() ?? new List<PropMarkupData>();
+            var points = markupData.PropMarkupDatas?.Where(p => p != null && p.propDefinition != null).ToList() ?? new List<PropMarkupData>();
             var usedGuids = new HashSet<int>();
 
             foreach (var p in points)
@@ -306,15 +347,15 @@ public class LevelEditorEditor : Editor
                 usedGuids.Add(p.guid);
             }
 
-            markupData.propMarkupDatas = points.ToArray();
+            markupData.PropMarkupDatas = points.ToArray();
             if (points.Count > 0)
                 validMarkupDatas.Add(markupData);
 
             EditorUtility.SetDirty(markupData);
         }
 
-        worldSettings.PropMarkupDatas.Clear();
-        worldSettings.PropMarkupDatas.AddRange(validMarkupDatas);
+        worldSettings.ChunkMarkupDatas.Clear();
+        worldSettings.ChunkMarkupDatas.AddRange(validMarkupDatas);
         EditorUtility.SetDirty(worldSettings);
     }
 }

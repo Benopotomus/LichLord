@@ -7,7 +7,7 @@ namespace LichLord.World
 {
     public class InvasionSpawnWave
     {
-        public FNexusData TargetNexus;
+        public FStrongholdData TargetNexus;
         public InvasionSpawnWaveDefinition InvasionSpawnWaveDefinitions;
         public Vector3 SpawnZone;
 

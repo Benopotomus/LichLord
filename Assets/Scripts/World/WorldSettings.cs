@@ -16,13 +16,13 @@ public class WorldSettings : ScriptableObject
     public Vector2 WorldSize => _worldSize;
 
     [SerializeField]
-    private List<ChunkPropsMarkupData> _propMarkupDatas = new List<ChunkPropsMarkupData>();
-    public List<ChunkPropsMarkupData> PropMarkupDatas => _propMarkupDatas;
+    private List<ChunkMarkupData> _chunkMarkupDatas = new List<ChunkMarkupData>();
+    public List<ChunkMarkupData> ChunkMarkupDatas => _chunkMarkupDatas;
 
-    public ChunkPropsMarkupData GetMarkupData(FChunkPosition chunkCoord)
+    public ChunkMarkupData GetMarkupData(FChunkPosition chunkCoord)
     {
         // First, check the PropMarkupDatas list
-        ChunkPropsMarkupData markupData = _propMarkupDatas.Find(data => data != null && data.ChunkCoord.IsEqual(ref chunkCoord));
+        ChunkMarkupData markupData = _chunkMarkupDatas.Find(data => data != null && data.ChunkCoord.IsEqual(ref chunkCoord));
         if (markupData != null)
         {
             return markupData;
@@ -32,10 +32,10 @@ public class WorldSettings : ScriptableObject
     }
 
     // Get or create a LevelPropsMarkupData for a specific chunk coordinate
-    public ChunkPropsMarkupData GetOrCreateMarkupData(FChunkPosition chunkCoord)
+    public ChunkMarkupData GetOrCreateMarkupData(FChunkPosition chunkCoord)
     {
         // First, check the PropMarkupDatas list
-        ChunkPropsMarkupData markupData = _propMarkupDatas.Find(data => data != null && data.ChunkCoord.IsEqual(ref chunkCoord));
+        ChunkMarkupData markupData = _chunkMarkupDatas.Find(data => data != null && data.ChunkCoord.IsEqual(ref chunkCoord));
         if (markupData != null)
         {
             return markupData;
@@ -49,11 +49,11 @@ public class WorldSettings : ScriptableObject
             Object[] subAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
             foreach (Object subAsset in subAssets)
             {
-                if (subAsset is ChunkPropsMarkupData existingMarkupData && existingMarkupData.ChunkCoord.IsEqual(ref chunkCoord))
+                if (subAsset is ChunkMarkupData existingMarkupData && existingMarkupData.ChunkCoord.IsEqual(ref chunkCoord))
                 {
-                    if (!_propMarkupDatas.Contains(existingMarkupData))
+                    if (!_chunkMarkupDatas.Contains(existingMarkupData))
                     {
-                        _propMarkupDatas.Add(existingMarkupData);
+                        _chunkMarkupDatas.Add(existingMarkupData);
                         EditorUtility.SetDirty(this);
                         AssetDatabase.SaveAssets();
                         Debug.Log($"Re-added existing sub-asset to PropMarkupDatas: {existingMarkupData.name}");
@@ -65,10 +65,10 @@ public class WorldSettings : ScriptableObject
 #endif
 
         // Create new markup data if none found
-        markupData = ScriptableObject.CreateInstance<ChunkPropsMarkupData>();
+        markupData = ScriptableObject.CreateInstance<ChunkMarkupData>();
         markupData.name = $"MarkupData_{chunkCoord.X}_{chunkCoord.Y}";
         markupData.ChunkCoord = chunkCoord;
-        _propMarkupDatas.Add(markupData);
+        _chunkMarkupDatas.Add(markupData);
 #if UNITY_EDITOR
         AssetDatabase.AddObjectToAsset(markupData, this);
         EditorUtility.SetDirty(this);
@@ -93,10 +93,10 @@ public class WorldSettings : ScriptableObject
     // Remove all ChunkPropsMarkupData sub-assets and clear the PropMarkupDatas list
     public void RemoveAllMarkupData()
     {
-        if (_propMarkupDatas == null)
+        if (_chunkMarkupDatas == null)
         {
             Debug.LogWarning("PropMarkupDatas is null, initializing and clearing.");
-            _propMarkupDatas = new List<ChunkPropsMarkupData>();
+            _chunkMarkupDatas = new List<ChunkMarkupData>();
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -116,7 +116,7 @@ public class WorldSettings : ScriptableObject
             Object[] subAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
             foreach (Object subAsset in subAssets)
             {
-                if (subAsset is ChunkPropsMarkupData markupData && subAsset != this)
+                if (subAsset is ChunkMarkupData markupData && subAsset != this)
                 {
                     totalSubAssets++;
                     Debug.Log($"Removing sub-asset: {markupData.name} (ChunkCoord: {markupData.ChunkCoord.X},{markupData.ChunkCoord.Y})");
@@ -131,18 +131,18 @@ public class WorldSettings : ScriptableObject
         }
 
         // Clear PropMarkupDatas and handle null entries
-        for (int i = _propMarkupDatas.Count - 1; i >= 0; i--)
+        for (int i = _chunkMarkupDatas.Count - 1; i >= 0; i--)
         {
-            if (_propMarkupDatas[i] == null)
+            if (_chunkMarkupDatas[i] == null)
             {
                 nullCount++;
-                _propMarkupDatas.RemoveAt(i);
+                _chunkMarkupDatas.RemoveAt(i);
             }
         }
 
         // Clear remaining entries in PropMarkupDatas
-        int listCount = _propMarkupDatas.Count;
-        _propMarkupDatas.Clear();
+        int listCount = _chunkMarkupDatas.Count;
+        _chunkMarkupDatas.Clear();
 
         EditorUtility.SetDirty(this);
         AssetDatabase.SaveAssets();

@@ -21,6 +21,8 @@ namespace LichLord.Props
         protected PropDataDefinition _propDataDefinition;
         public PropDataDefinition PropDataDefinition => _propDataDefinition;
 
+#if UNITY_EDITOR
         public GameObject prefab;
+#endif
     }
 }

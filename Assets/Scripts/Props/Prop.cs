@@ -15,6 +15,8 @@ namespace LichLord.Props
         public PropHealthComponent HealthComponent => _healthComponent;
 
         protected PropManager _propManager;
+        protected SceneContext _sceneContext;
+        public SceneContext Context => _sceneContext;
 
         [SerializeField]
         protected PropRuntimeState _propRuntimeState;
@@ -47,6 +49,7 @@ namespace LichLord.Props
         {
             _propRuntimeState = propRuntimeState;
             _propManager = propManager;
+            _sceneContext = propManager.Context;
             _propDefinition = propRuntimeState.Definition;
 
             _stateComponent.UpdateState(_propRuntimeState.GetState());
@@ -70,7 +73,7 @@ namespace LichLord.Props
             _healthComponent.UpdateHealth(propRuntimeState.GetHealth());
         }
 
-        public void StartRecycle()
+        public virtual void StartRecycle()
         {
             DWDObjectPool.Instance.Recycle(this);
             CurrentChunk.RemoveObject(this);

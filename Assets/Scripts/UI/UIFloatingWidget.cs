@@ -1,43 +1,91 @@
-﻿using LichLord;
-using LichLord.UI;
+﻿using DWD.AnimationCurveAsset;
+using System;
 using UnityEngine;
-using UnityEngine.UI; // Needed for Image
 
-public class UIFloatingWidget : UIWidget
+namespace LichLord.UI
 {
-    public Transform Target;
-    public Vector3 Offset = new Vector3(0, 1f, 0);
-    public Camera UICamera;
-
-    protected RectTransform _rectTransform;
-
-    private void Awake()
+    public class UIFloatingWidget : UIWidget
     {
-        _rectTransform = GetComponent<RectTransform>();
-    }
+        protected RectTransform _rectTransform;
+        private Camera _camera;
 
-    protected override void OnTick()
-    {
-        base.OnTick();
-        UpdateScreenSpacePosition();
-    }
+        [SerializeField] private Transform _target;
+        [SerializeField] private Vector3 _worldOffset = new Vector3(0, 1f, 0);
+        [SerializeField] private AnimationCurveAsset _scaleDistanceCurve;
 
-    private void UpdateScreenSpacePosition()
-    {
-        if (Target != null)
+        private void Awake()
         {
-            Vector3 worldPos = Target.position + Offset;
-            Vector3 screenPos = (UICamera != null ? UICamera : Camera.main).WorldToScreenPoint(worldPos);
-            _rectTransform.position = screenPos;
+            _rectTransform = GetComponent<RectTransform>();
         }
-        else
-        {
-            _rectTransform.position = new Vector2(-200, -200);
-        }
-    }
 
-    public void SetTarget(Transform target)
-    {
-        Target = target;
+        public void LateUpdate()
+        {
+            if (_camera == null)
+                _camera = Camera.main;
+
+            if (_camera == null) return;
+
+            UpdateScreenSpacePosition();
+            UpdateScreenSpaceScale();
+        }
+
+        protected override void OnTick()
+        {
+            base.OnTick();
+
+
+        }
+
+        private void UpdateScreenSpaceScale()
+        {
+            if (_scaleDistanceCurve == null)
+                return;
+
+            float sqrDist = Vector3.SqrMagnitude(_camera.transform.position - (_target.position + _worldOffset));
+            float scale = _scaleDistanceCurve.Curve.Evaluate(sqrDist);
+            _rectTransform.localScale = new Vector3(scale, scale, scale);
+        }
+
+        private void UpdateScreenSpacePosition()
+        {
+            if (_target != null && _rectTransform != null)
+            {
+
+
+                Vector3 worldPos = _target.position + _worldOffset;
+                Vector3 cameraSpacePos = _camera.WorldToViewportPoint(worldPos); // Use viewport for easier z-check
+
+                // Check if the target is in front of the camera (z > 0)
+                if (cameraSpacePos.z > 0)
+                {
+                    // Convert world position to screen point
+                    Vector3 screenPos = _camera.WorldToScreenPoint(worldPos);
+                    _rectTransform.position = screenPos;
+                }
+                else
+                {
+                    // Option 1: Hide the UI element if behind the camera
+                    _rectTransform.position = new Vector2(-200, -200); // Offscreen position
+
+                    // Option 2: (Alternative) Clamp to screen edges
+                    // Vector3 viewportPos = new Vector3(
+                    //     Mathf.Clamp01(cameraSpacePos.x),
+                    //     Mathf.Clamp01(cameraSpacePos.y),
+                    //     0);
+                    // _rectTransform.position = cam.ViewportToScreenPoint(viewportPos);
+                }
+            }
+            else
+            {
+                _rectTransform.position = new Vector2(-200, -200); // Offscreen if no target
+            }
+        }
+
+        public void SetTarget(Transform target)
+        {
+            _target = target;
+        }
+
+
     }
 }

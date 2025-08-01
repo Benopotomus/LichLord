@@ -1,17 +1,15 @@
 ﻿using Fusion;
+using LichLord.Buildables;
 using LichLord.Props;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace LichLord.World
 {
     [StructLayout(LayoutKind.Explicit)]
-    public struct FNexusData : INetworkStruct
+    public struct FStrongholdData : INetworkStruct
     {
         [FieldOffset(0)]
         public FChunkPosition ChunkID;
@@ -30,10 +28,10 @@ namespace LichLord.World
         }
     }
 
-    public class NexusManager : ContextBehaviour
+    public class StrongholdManager : ContextBehaviour
     {
         [Networked, Capacity(16)]
-        private NetworkArray<FNexusData> _nexusDatas { get; }
+        private NetworkArray<FStrongholdData> _strongholdDatas { get; }
         
         [Networked]
         private int _dataCount { get; set; }
@@ -41,30 +39,37 @@ namespace LichLord.World
         private List<PropRuntimeState> _authorityStates = new List<PropRuntimeState>();
         private List<PropRuntimeState> _predictedStates = new List<PropRuntimeState>();
 
-        protected ArrayReader<FNexusData> _dataBufferReader;
+        protected ArrayReader<FStrongholdData> _dataBufferReader;
         protected PropertyReader<int> _dataCountReader;
 
         protected int _viewCount;
 
+        public Action<Nexus> onNexusSpawned;
+        public Action<Nexus> onNexusDespawned;
+        private List<Nexus> _activeNexuses = new List<Nexus>();
+        public List<Nexus> ActiveNexuses => _activeNexuses;
+
+        [SerializeField] private Stronghold _strongholdPrefab;
+
         public override void Spawned()
         {
             base.Spawned();
-            _dataBufferReader = GetArrayReader<FNexusData>(nameof(_nexusDatas));
+            _dataBufferReader = GetArrayReader<FStrongholdData>(nameof(_strongholdDatas));
             _dataCountReader = GetPropertyReader<int>(nameof(_dataCount));
 
             _viewCount = _dataCount;
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_AddNexus(FNexusData nexusData)
+        public void RPC_ActivatePlayerNexus(FStrongholdData nexusData)
         {
-            _nexusDatas.Set(_dataCount, nexusData);
+            _strongholdDatas.Set(_dataCount, nexusData);
             _dataCount++;
 
             Context.InvasionManager.BeginInvasion(1, nexusData);
         }
 
-        public void Predict_AddNexus(FNexusData nexusData)
+        public void Predict_ActivatePlayerNexus(FStrongholdData nexusData)
         {
             _predictedStates.Add(GetNexusState(nexusData));
         }
@@ -82,8 +87,8 @@ namespace LichLord.World
             int fromDataCount = _dataCountReader.Read(fromNetworkBuffer);
             int toDataCount = _dataCountReader.Read(toNetworkBuffer);
 
-            NetworkArrayReadOnly<FNexusData> fromDataBuffer = _dataBufferReader.Read(fromNetworkBuffer);
-            NetworkArrayReadOnly<FNexusData> toDataBuffer = _dataBufferReader.Read(toNetworkBuffer);
+            NetworkArrayReadOnly<FStrongholdData> fromDataBuffer = _dataBufferReader.Read(fromNetworkBuffer);
+            NetworkArrayReadOnly<FStrongholdData> toDataBuffer = _dataBufferReader.Read(toNetworkBuffer);
 
             // Spawn missing views
             for (int i = _viewCount; i < fromDataCount; i++)
@@ -93,9 +98,10 @@ namespace LichLord.World
 
                 if (_predictedStates.Contains(nexusState))
                     _predictedStates.Remove(nexusState);
-                    return;
-
             }
+
+            // always update the Nexus
+
 
             _viewCount = fromDataCount;
         }
@@ -125,7 +131,7 @@ namespace LichLord.World
             return nearestNexus;
         }
 
-        public PropRuntimeState GetNexusState(FNexusData nexusData)
+        public PropRuntimeState GetNexusState(FStrongholdData nexusData)
         {
             Chunk chunk = Context.ChunkManager.GetChunk(nexusData.ChunkID);
             if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.GUID, out var state))
@@ -134,6 +140,27 @@ namespace LichLord.World
             }
         
             return null;
+        }
+
+        public Vector3 GetStrongholdPosition(FStrongholdData nexusData)
+        {
+            PropRuntimeState nexusState = GetNexusState(nexusData);
+            if (nexusState != null)
+                return nexusState.position;
+
+            return Vector3.zero;
+        }
+
+        public void OnNexusSpawned(Nexus nexus)
+        {
+            _activeNexuses.Add(nexus);
+            onNexusSpawned?.Invoke(nexus);
+        }
+
+        public void OnNexusDespawned(Nexus nexus)
+        {
+            _activeNexuses.Remove(nexus);
+            onNexusDespawned?.Invoke(nexus);
         }
 
     }

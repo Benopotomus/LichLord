@@ -860,6 +860,7 @@ RectTransform:
   - {fileID: 8252242656762298005}
   - {fileID: 3969455740879003944}
   - {fileID: 8108424344633821039}
+  - {fileID: 5592696883380505912}
   m_Father: {fileID: 4500483376938630567}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -896,6 +897,7 @@ MonoBehaviour:
   _useSafeArea: 1
   BlocksHeroInput: 0
   _floatingInteract: {fileID: 5216320044313291804}
+  _nexusTracker: {fileID: 241623851115132340}
 --- !u!222 &3907142034927244839
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1594,7 +1596,7 @@ MonoBehaviour:
     ChunkManager: {fileID: 6418235338973710349}
     Camera: {fileID: 393352328543011169}
     UI: {fileID: 4235548199455008882}
-    NexusManager: {fileID: 2600286277624370897}
+    StrongholdManager: {fileID: 2600286277624370897}
     InvasionManager: {fileID: 156898910518370702}
     LocalPlayerCharacter: {fileID: 0}
 --- !u!114 &3481607325188494411
@@ -1629,6 +1631,58 @@ MonoBehaviour:
   - {fileID: 2600286277624370897}
   - {fileID: 156898910518370702}
   ForceRemoteRenderTimeframe: 0
+--- !u!1 &3901655325337348968
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5592696883380505912}
+  - component: {fileID: 241623851115132340}
+  m_Layer: 5
+  m_Name: NexusTracker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5592696883380505912
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3901655325337348968}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2279972434163937567}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &241623851115132340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3901655325337348968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0339911f6b895044d82ff351c9f39fc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _freeWidgets: []
+  _floatingNexusWidgetPrefab: {fileID: -7590188812141222316, guid: 33aceffc82010414782a44a52ad1fd6a,
+    type: 3}
+  _widgetParent: {fileID: 2279972434163937567}
 --- !u!1 &3962042570116354205
 GameObject:
   m_ObjectHideFlags: 0
@@ -2595,37 +2649,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3b2c1e8ccf26684eb9c3837831eff6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &5825151058618563233
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 507459427110585306}
-  m_Layer: 0
-  m_Name: DebugSpawnTransform
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &507459427110585306
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5825151058618563233}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1263.6, y: 27.5, z: 986.6}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5659346549072746464}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5881895316905228289
 GameObject:
   m_ObjectHideFlags: 0
@@ -2670,8 +2693,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e478f80657e82b49b08cae69cf8cc2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnemiesToSpawn: 0
-  EnemiesRemaining: 0
+  _InvasionID: 0
+  _InvasionStartTick: 0
+  _InvasionSpawnWave: 0
+  ActiveInvasion: {fileID: 0}
 --- !u!1 &5997713225184429534
 GameObject:
   m_ObjectHideFlags: 0
@@ -3455,37 +3480,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Damping: 0
---- !u!1 &6755961652644182437
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 9182115363793785507}
-  m_Layer: 0
-  m_Name: DebugSpawnTransform
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &9182115363793785507
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6755961652644182437}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1263.6, y: 27.5, z: 986.6}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5659346549072746464}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6829642980406352107
 GameObject:
   m_ObjectHideFlags: 0
@@ -4222,9 +4216,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea8dbbda5c30b304081412425994b0ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Target: {fileID: 0}
-  Offset: {x: 0, y: 1, z: 0}
-  UICamera: {fileID: 1090317227998844523}
+  _target: {fileID: 0}
+  _worldOffset: {x: 0, y: 1, z: 0}
+  _scaleDistanceCurve: {fileID: 0}
   _progressSlider: {fileID: 7573828791867089859}
 --- !u!222 &7579398211645071784
 CanvasRenderer:
@@ -4297,8 +4291,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7407177223082808489}
-  - {fileID: 507459427110585306}
-  - {fileID: 9182115363793785507}
   m_Father: {fileID: 8113843857799798740}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &59580087568348656
@@ -4350,7 +4342,7 @@ MonoBehaviour:
   _debugStreamRevive: 0
   _streamSpawnCount: 10
   _debugSpawnPosition: {x: 1000, y: 0, z: 1000}
-  _debugSpawnTransform: {fileID: 9182115363793785507}
+  _debugSpawnTransform: {fileID: 7407177223082808489}
 --- !u!1 &8067374089588892938
 GameObject:
   m_ObjectHideFlags: 0
@@ -4728,7 +4720,7 @@ GameObject:
   - component: {fileID: 1157049727817132551}
   - component: {fileID: 2600286277624370897}
   m_Layer: 0
-  m_Name: NexusManager
+  m_Name: StrongholdManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4758,7 +4750,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8921692020260725069}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 535f6c35620f42b458e5d0aeeb047646, type: 3}
+  m_Script: {fileID: 11500000, guid: c63a471eb34660242a87b66d59dd5341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8981083752927187975

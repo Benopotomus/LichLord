@@ -20,7 +20,7 @@ namespace LichLord.UI
         {
             base.OnTick();
 
-            var nearestNexus = Context.NexusManager.GetNearestNexus(Context.LocalPlayerCharacter.transform.position);
+            var nearestNexus = Context.StrongholdManager.GetNearestNexus(Context.LocalPlayerCharacter.transform.position);
 
             if (nearestNexus != null)
             {

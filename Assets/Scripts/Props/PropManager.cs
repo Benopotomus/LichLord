@@ -21,14 +21,14 @@ namespace LichLord.Props
 
         public void LoadPropsForChunk(Chunk chunk)
         {
-            ChunkPropsMarkupData baseMarkupData = Context.WorldManager.WorldSettings.GetMarkupData(chunk.ChunkID);
+            ChunkMarkupData baseMarkupData = Context.WorldManager.WorldSettings.GetMarkupData(chunk.ChunkID);
 
             if (baseMarkupData == null)
                 return;
 
-            for (int i = 0; i < baseMarkupData.propMarkupDatas.Length; i++)
+            for (int i = 0; i < baseMarkupData.PropMarkupDatas.Length; i++)
             {
-                PropMarkupData propMarkupData = baseMarkupData.propMarkupDatas[i];
+                PropMarkupData propMarkupData = baseMarkupData.PropMarkupDatas[i];
                 if (propMarkupData == null)
                 {
                     continue;

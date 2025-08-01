@@ -3165,18 +3165,37 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8802678564681559319, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _nexusTracker
+      value: 
+      objectReference: {fileID: 1787230750}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2279972434163937567, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1787230749}
     - targetCorrespondingSourceObject: {fileID: 5659346549072746464, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 33635685}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7136224720027177897, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 465fd4e57519ec44fb1a0a4afb74af8c, type: 3}
 --- !u!20 &1581192687 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 1090317227998844523, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+    type: 3}
+  m_PrefabInstance: {fileID: 1581192686}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &1581192688 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2279972434163937567, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
     type: 3}
   m_PrefabInstance: {fileID: 1581192686}
   m_PrefabAsset: {fileID: 0}
@@ -3564,7 +3583,7 @@ MonoBehaviour:
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
-    - {x: 1282.1016, y: 29.242382, z: 1010.75214, w: 0}
+    - {x: -2282.118, y: 3269.0002, z: -4058.9155, w: 0}
     fov:
     - 0.57735026
     - 0.57735026
@@ -3585,43 +3604,43 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
-    - e00: -0.6894352
-      e01: -0.000108797205
-      e02: 0.4790238
-      e03: 399.75476
-      e10: -0.5427501
-      e11: 1.4476656
-      e12: -0.78082436
-      e13: 1442.7476
-      e20: -0.47685644
-      e21: -0.54902405
-      e22: -0.68644047
-      e23: 1321.2003
-      e30: -0.47685173
-      e31: -0.5490186
-      e32: -0.6864337
-      e33: 1321.2413
+    - e00: 0.62015253
+      e01: -0.0003317333
+      e02: -0.56585795
+      e03: -880.42395
+      e10: 0.51370525
+      e11: 1.5556891
+      e12: 0.56208384
+      e13: -1631.7614
+      e20: 0.60527647
+      e21: -0.43963715
+      e22: 0.663611
+      e23: 5450.8623
+      e30: 0.6052704
+      e31: -0.43963274
+      e32: 0.6636044
+      e33: 5511.972
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.69783515, y: -2.5446606e-15, z: 0.71625835, w: 0}
-    - {x: -0.8932451, y: -0.42057005, z: -0.15885271, w: 1318.0901}
+    - {x: 0.9385367, y: -0.33696353, z: 0.07486282, w: 3547.2476}
     frustumPlane1:
     - {x: -0.69783515, y: -2.5446608e-15, z: 0.71625835, w: 0}
-    - {x: 0.1628151, y: -0.42040342, z: -0.89260983, w: 705.75543}
+    - {x: -0.011398057, y: -0.33645537, z: 0.9416305, w: 4895.8594}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: -0.5098009, y: 0.44932348, z: -0.733629, w: 1381.9944}
+    - {x: 0.5594878, y: 0.55802816, z: 0.6128441, w: 1940.1055}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: 0.032949194, y: -0.9983421, z: 0.047195345, w: -60.753113}
+    - {x: 0.045782566, y: -0.99766093, z: 0.05076027, w: 3571.8667}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
-    - {x: -0.4768517, y: -0.5490186, z: -0.6864336, w: 1321.2142}
+    - {x: 0.6052704, y: -0.43963274, z: 0.6636044, w: 5481.3896}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
-    - {x: 0.4762321, y: 0.54857117, z: 0.687221, w: 4148.211}
+    - {x: -0.6073904, y: 0.44065577, z: -0.6609836, w: 6105186.5}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -3753,6 +3772,58 @@ MonoBehaviour:
   tiltScaleZ: 0
   mipBias: 0
   version: 2
+--- !u!1 &1787230748
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1787230749}
+  - component: {fileID: 1787230750}
+  m_Layer: 5
+  m_Name: NexusTracker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1787230749
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787230748}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1581192688}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1787230750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787230748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0339911f6b895044d82ff351c9f39fc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _freeWidgets: []
+  _floatingNexusWidgetPrefab: {fileID: -7590188812141222316, guid: 33aceffc82010414782a44a52ad1fd6a,
+    type: 3}
+  _widgetParent: {fileID: 1581192688}
 --- !u!1 &1845423295
 GameObject:
   m_ObjectHideFlags: 0
@@ -4356,7 +4427,7 @@ MonoBehaviour:
   _defaultConfiguration:
     GameSessionID: 0
     LevelSeed: 0
-    GameMode: 2
+    GameMode: 1
     ServerName: LichLord
     MaxPlayers: 0
     ExtraPeers: 0

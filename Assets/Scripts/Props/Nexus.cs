@@ -23,6 +23,9 @@ namespace LichLord.Props
         {
             get
             {
+                if(!RuntimeState.GetIsActivated())
+                    return false;
+
                 switch (_stateComponent.CurrentState)
                 {
                     case EPropState.Destroyed:
@@ -36,16 +39,6 @@ namespace LichLord.Props
 
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
-            var bounds = new Bounds(transform.position, new Vector3(5f, 5f, 5f)); // adjust size as needed
-            var guo = new GraphUpdateObject(bounds)
-            {
-                updatePhysics = true,
-                resetPenaltyOnPhysics = true,
-                modifyWalkability = true
-            };
-
-            AstarPath.active.UpdateGraphs(guo);
-
             base.OnSpawned(propRuntimeState, propManager);
 
             _interactableComponent.Activate(
@@ -59,6 +52,29 @@ namespace LichLord.Props
             _interactableComponent.onInteractStart += OnInteractStart;
             _interactableComponent.onInteractEnd += OnInteractEnd;
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
+
+            UpdateNavmesh();
+
+            Context.StrongholdManager.OnNexusSpawned(this);
+        }
+
+        public override void StartRecycle()
+        {
+            Context.StrongholdManager.OnNexusDespawned(this);
+            base.StartRecycle();
+        }
+
+        private void UpdateNavmesh()
+        {
+            var bounds = new Bounds(transform.position, new Vector3(5f, 5f, 5f)); // adjust size as needed
+            var guo = new GraphUpdateObject(bounds)
+            {
+                updatePhysics = true,
+                resetPenaltyOnPhysics = true,
+                modifyWalkability = true
+            };
+
+            AstarPath.active.UpdateGraphs(guo);
         }
 
         public override void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
@@ -127,14 +143,14 @@ namespace LichLord.Props
 
             context.PropManager.RPC_SetActivated(prop.ChunkID, prop.GUID, true);
             
-            FNexusData nexusData = new FNexusData();
+            FStrongholdData nexusData = new FStrongholdData();
             nexusData.ChunkID = prop.ChunkID;
             nexusData.GUID = (byte)prop.GUID;
 
-            context.NexusManager.RPC_AddNexus(nexusData);
+            context.StrongholdManager.RPC_ActivatePlayerNexus(nexusData);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.NexusManager.Predict_AddNexus(nexusData);
+                context.StrongholdManager.Predict_ActivatePlayerNexus(nexusData);
 
         }
     }
