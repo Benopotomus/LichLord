@@ -46,6 +46,7 @@ namespace LichLord.Props
                 Debug.Log("Prop Found");
             }
 
+            return;
             if (HasStateAuthority)
             {
                 var loadedChunks = Context.WorldSaveLoadManager.LoadedChunks;

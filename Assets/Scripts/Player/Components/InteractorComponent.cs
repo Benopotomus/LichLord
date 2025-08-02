@@ -75,12 +75,13 @@ namespace LichLord
 
             _pc.Movement.LookTarget = _currentInteractable.transform;
 
-            Prop prop = interactable.Owner;
+            if (interactable.Owner is Prop prop)
+            {
+                Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, true);
 
-            Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, true);
-
-            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, true);
+                if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                    Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, true);
+            }       
         }
 
         private void StopInteract(InteractableComponent interactable)
@@ -93,13 +94,14 @@ namespace LichLord
             _currentInteractable.InteractEnd(this);
             _currentInteractable = null;
             _pc.Movement.LookTarget = null;
-            
-            Prop prop = interactable.Owner;
 
-            Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, false);
+            if (interactable.Owner is Prop prop)
+            {
+                Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, false);
 
-            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, false);
+                if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                    Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, false);
+            }
         }
 
         public void OnFixedUpdateNetwork(int tick, float deltaTime)

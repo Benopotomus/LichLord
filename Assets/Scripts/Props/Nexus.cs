@@ -14,9 +14,6 @@ namespace LichLord.Props
         private VisualEffectBase _interactEffect;
 
         [SerializeField]
-        private VisualEffectBase _activatedEffect;
-
-        [SerializeField]
         private Transform _rocksTransform;
 
         public override bool IsAttackable
@@ -54,14 +51,6 @@ namespace LichLord.Props
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
             UpdateNavmesh();
-
-            Context.StrongholdManager.OnNexusSpawned(this);
-        }
-
-        public override void StartRecycle()
-        {
-            Context.StrongholdManager.OnNexusDespawned(this);
-            base.StartRecycle();
         }
 
         private void UpdateNavmesh()
@@ -82,10 +71,11 @@ namespace LichLord.Props
             base.OnRender(propRuntimeState, renderDeltaTime);
 
             _interactEffect.Toggle(propRuntimeState.GetIsInteracting());
-            _activatedEffect.Toggle(propRuntimeState.GetIsActivated());
 
             float rotationSpeed = 20f; // degrees per second
             _rocksTransform.Rotate(0f, rotationSpeed * renderDeltaTime, 0f, Space.Self);
+            _rocksTransform.SetActive(!propRuntimeState.GetIsActivated());
+
         }
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
@@ -93,16 +83,16 @@ namespace LichLord.Props
             if (_propRuntimeState.GetIsInteracting())
                 return false;
 
-            //if (_propRuntimeState.GetIsActivated())
-            //    return false;
+            if (_propRuntimeState.GetIsActivated())
+                return false;
 
             return interactor != null;
         }
 
         private bool IsInteractionValid(InteractorComponent interactor)
         {
-            //if (_propRuntimeState.GetIsActivated())
-            //    return false;
+            if (_propRuntimeState.GetIsActivated())
+                return false;
 
             return true;
         }
@@ -143,14 +133,14 @@ namespace LichLord.Props
 
             context.PropManager.RPC_SetActivated(prop.ChunkID, prop.GUID, true);
             
-            FStrongholdData nexusData = new FStrongholdData();
-            nexusData.ChunkID = prop.ChunkID;
-            nexusData.GUID = (byte)prop.GUID;
+            FStrongholdData strongholdData = new FStrongholdData();
+            strongholdData.ChunkID = prop.ChunkID;
+            strongholdData.GUID = (byte)prop.GUID;
 
-            context.StrongholdManager.RPC_ActivatePlayerNexus(nexusData);
+            context.StrongholdManager.RPC_ActivatePlayerNexus(strongholdData);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.StrongholdManager.Predict_ActivatePlayerNexus(nexusData);
+                context.StrongholdManager.Predict_ActivatePlayerNexus(strongholdData);
 
         }
     }

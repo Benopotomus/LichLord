@@ -30,19 +30,8 @@ namespace LichLord.World
 
     public class StrongholdManager : ContextBehaviour
     {
-        [Networked, Capacity(16)]
-        private NetworkArray<FStrongholdData> _strongholdDatas { get; }
-        
-        [Networked]
-        private int _dataCount { get; set; }
-
-        private List<PropRuntimeState> _authorityStates = new List<PropRuntimeState>();
+        private List<PropRuntimeState> _authorityNexusStates = new List<PropRuntimeState>();
         private List<PropRuntimeState> _predictedStates = new List<PropRuntimeState>();
-
-        protected ArrayReader<FStrongholdData> _dataBufferReader;
-        protected PropertyReader<int> _dataCountReader;
-
-        protected int _viewCount;
 
         public Action<Nexus> onNexusSpawned;
         public Action<Nexus> onNexusDespawned;
@@ -54,56 +43,26 @@ namespace LichLord.World
         public override void Spawned()
         {
             base.Spawned();
-            _dataBufferReader = GetArrayReader<FStrongholdData>(nameof(_strongholdDatas));
-            _dataCountReader = GetPropertyReader<int>(nameof(_dataCount));
-
-            _viewCount = _dataCount;
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_ActivatePlayerNexus(FStrongholdData nexusData)
         {
-            _strongholdDatas.Set(_dataCount, nexusData);
-            _dataCount++;
+            var position = GetStrongholdPosition(nexusData);
 
-            Context.InvasionManager.BeginInvasion(1, nexusData);
+            Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
+                                onBeforeSpawned: (runner, obj) =>
+                                {
+                                    var r = obj.GetComponent<Stronghold>();
+                                    r.SetData(nexusData);
+                                });
+
+            //Context.InvasionManager.BeginInvasion(1, nexusData);
         }
 
         public void Predict_ActivatePlayerNexus(FStrongholdData nexusData)
         {
             _predictedStates.Add(GetNexusState(nexusData));
-        }
-
-        public override void Render()
-        {
-            base.Render();
-
-            if (!Context.IsGameplayActive())
-                return;
-
-            if (TryGetSnapshotsBuffers(out var fromNetworkBuffer, out var toNetworkBuffer, out float bufferAlpha) == false)
-                return;
-
-            int fromDataCount = _dataCountReader.Read(fromNetworkBuffer);
-            int toDataCount = _dataCountReader.Read(toNetworkBuffer);
-
-            NetworkArrayReadOnly<FStrongholdData> fromDataBuffer = _dataBufferReader.Read(fromNetworkBuffer);
-            NetworkArrayReadOnly<FStrongholdData> toDataBuffer = _dataBufferReader.Read(toNetworkBuffer);
-
-            // Spawn missing views
-            for (int i = _viewCount; i < fromDataCount; i++)
-            {
-                var nexusState = GetNexusState(toDataBuffer[i]);
-                _authorityStates.Add(nexusState);
-
-                if (_predictedStates.Contains(nexusState))
-                    _predictedStates.Remove(nexusState);
-            }
-
-            // always update the Nexus
-
-
-            _viewCount = fromDataCount;
         }
 
         // Get the nearest runtime state for a nexus
@@ -112,7 +71,7 @@ namespace LichLord.World
             PropRuntimeState nearestNexus = null; // Reset to null each frame
             float minSqrDistance = float.MaxValue;
 
-            List<PropRuntimeState> allNexusStates = new List<PropRuntimeState>(_authorityStates);
+            List<PropRuntimeState> allNexusStates = new List<PropRuntimeState>(_authorityNexusStates);
             allNexusStates.AddRange(_predictedStates);
 
             foreach (var state in allNexusStates)
@@ -142,9 +101,9 @@ namespace LichLord.World
             return null;
         }
 
-        public Vector3 GetStrongholdPosition(FStrongholdData nexusData)
+        public Vector3 GetStrongholdPosition(FStrongholdData strongholdData)
         {
-            PropRuntimeState nexusState = GetNexusState(nexusData);
+            PropRuntimeState nexusState = GetNexusState(strongholdData);
             if (nexusState != null)
                 return nexusState.position;
 

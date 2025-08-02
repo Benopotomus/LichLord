@@ -29,6 +29,14 @@ namespace LichLord.Buildables
 
         public HurtboxComponent Hurtbox;
 
+        public override void Spawned()
+        {
+            base.Spawned();
+        }
 
+        public void SetData(FStrongholdData data)
+        { 
+            _data = data;
+        }
     }
 }

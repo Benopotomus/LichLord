@@ -26,7 +26,7 @@ namespace LichLord
         public FWorldPosition InvasionSpawnPosition { get; set; }
 
         [Networked]
-        public ref FStrongholdData TargetNexus => ref MakeRef<FStrongholdData>();
+        public ref FStrongholdData TargetStronghold => ref MakeRef<FStrongholdData>();
 
         public InvasionDefinition ActiveInvasion;
 
@@ -35,11 +35,11 @@ namespace LichLord
 
         public PropRuntimeState GetTargetNexus()
         {
-            if (!TargetNexus.IsValid())
+            if (!TargetStronghold.IsValid())
                 return null;
 
-            Chunk chunk = Context.ChunkManager.GetChunk(TargetNexus.ChunkID);
-            if (chunk != null && chunk.GetRenderState(HasStateAuthority, TargetNexus.GUID, out var state))
+            Chunk chunk = Context.ChunkManager.GetChunk(TargetStronghold.ChunkID);
+            if (chunk != null && chunk.GetRenderState(HasStateAuthority, TargetStronghold.GUID, out var state))
             {
                 return state;
             }
@@ -47,13 +47,13 @@ namespace LichLord
             return null;
         }
 
-        public void BeginInvasion(byte invasionID, FStrongholdData nexusTarget)
+        public void BeginInvasion(byte invasionID, FStrongholdData targetStronghold)
         {  
             InvasionID = invasionID;
             InvasionStartTick = Runner.Tick;
             InvasionSpawnWave = 0;
 
-            TargetNexus = nexusTarget;
+            TargetStronghold = targetStronghold;
 
             SpawnInvasionWave(InvasionSpawnWave);
         }
@@ -78,7 +78,7 @@ namespace LichLord
             else
             {
                 ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
-                onInvasionStarted?.Invoke(TargetNexus);
+                onInvasionStarted?.Invoke(TargetStronghold);
             }
         }
 
@@ -107,11 +107,12 @@ namespace LichLord
         private Vector3 GetInvasionStagingPosition()
         {
             var players = Context.NetworkGame.ActivePlayers;
-            var state = GetTargetNexus();
-            Vector3 statePosition = state.position;
-            Vector3 fallbackStagingPosition = state.position;
+            var state = Context.StrongholdManager.GetNexusState(TargetStronghold);
 
-            var nearbyChunks = Context.ChunkManager.GetNearbyChunks(state.chunk.ChunkID,2);
+            Chunk strongholdChunk = state.chunk;
+            Vector3 strongholdPosition = state.position;
+
+            var nearbyChunks = Context.ChunkManager.GetNearbyChunks(strongholdChunk.ChunkID,2);
             var nearbyInvasionSpawns = new List<InvasionSpawnPoint>();
 
             foreach (var chunk in nearbyChunks)
@@ -136,7 +137,7 @@ namespace LichLord
             var validSpawnPoints = new List<InvasionSpawnPoint>();
             for (int i = 0; i < nearbyInvasionSpawns.Count; i++)
             {
-                float distToNexus = Vector3.Distance(nearbyInvasionSpawns[i].position, statePosition);
+                float distToNexus = Vector3.Distance(nearbyInvasionSpawns[i].position, strongholdPosition);
                 if (distToNexus >= minNexusDistance && distToNexus <= maxNexusDistance)
                 {
                     validSpawnPoints.Add(nearbyInvasionSpawns[i]);
@@ -170,7 +171,7 @@ namespace LichLord
                 return validSpawnPoints[randomIndex].position;
             }
 
-            return fallbackStagingPosition;
+            return strongholdPosition;
         }
 
         private void SpawnInvasionWave(int wave)
@@ -179,7 +180,6 @@ namespace LichLord
             var spawnWaveDefinition = ActiveInvasion.SpawnWaves[wave];
             var waveCharacters = spawnWaveDefinition.InvasionCharacters;
 
-            var state = Context.StrongholdManager.GetNexusState(TargetNexus);
             var stagingPosition = GetInvasionStagingPosition();
 
             for (int i = 0; i < waveCharacters.Count; i++)
