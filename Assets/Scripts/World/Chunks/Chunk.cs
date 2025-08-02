@@ -14,6 +14,9 @@ namespace LichLord.World
         private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
         public List<IChunkTrackable> Trackables => _trackablesInChunk;
 
+        private List<InvasionSpawnPoint> _invasionSpawnPoints = new List<InvasionSpawnPoint>();
+        public List<InvasionSpawnPoint> InvasionSpawnPoints => _invasionSpawnPoints;
+
         private Dictionary<int, PropRuntimeState> _propStates = new Dictionary<int, PropRuntimeState>();
         public Dictionary<int, PropRuntimeState> PropStates => _propStates;
 
@@ -87,6 +90,11 @@ namespace LichLord.World
         {
             _propStates[propState.guid] = propState;
             PropLoadStates[propState.guid] = new FPropLoadState();
+        }
+
+        public void AddInvasionSpawnPoint(InvasionSpawnPoint spawnPoint)
+        {
+            _invasionSpawnPoints.Add(spawnPoint);
         }
 
         public void RemoveObject(PropRuntimeState propState)

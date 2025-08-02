@@ -1,50 +1,72 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using LichLord.Props;
 using LichLord.World;
 using LichLord;
+using UnityEngine.SceneManagement;
 
 [CustomEditor(typeof(LevelEditor))]
 public class LevelEditorEditor : Editor
 {
-    private PropDefinition newPropDefinition;
-    private InvasionSpawnPointDefinition newInvasionSpawnPointDefinition;
-    private StrongholdDefinition newStrongholdDefinition;
-
-    private bool isAddingPoints = false;
-    private bool isDeletingPoints = false;
-    private Vector3 forwardDirection = Vector3.forward;
+    private GameObject markerPrefab;
+    private bool isPlacing = false;
     private bool useSurfaceNormal = false;
-    private float deleteRadius = 1.0f;
+    private Vector3 forwardDirection = Vector3.forward;
 
-    private List<GameObject> _previewInstances = new();
-
-    private enum EMarkupMode
+    static LevelEditorEditor()
     {
-        Prop,
-        InvasionSpawnPoint,
-        Stronghold
+        SceneView.duringSceneGui += OnGlobalSceneGUI;
     }
 
-    private EMarkupMode _currentMode = EMarkupMode.Prop;
-
-    private void OnEnable()
+    private static void OnGlobalSceneGUI(SceneView sceneView)
     {
-        SceneView.duringSceneGui += OnSceneGUI;
+        foreach (var editor in Resources.FindObjectsOfTypeAll<LevelEditorEditor>())
+        {
+            editor.DrawSceneView(sceneView);
+        }
     }
 
-    private void OnDisable()
+    private void DrawSceneView(SceneView sceneView)
     {
-        SceneView.duringSceneGui -= OnSceneGUI;
-        CleanupPreviews();
-    }
+        if (target == null || markerPrefab == null || !isPlacing)
+            return;
 
+        LevelEditor manager = (LevelEditor)target;
+        Event e = Event.current;
+
+        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+
+        if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(markerPrefab, SceneManager.GetActiveScene());
+
+                if (instance != null)
+                {
+                    Undo.RegisterCreatedObjectUndo(instance, "Place PropMarker");
+                    instance.transform.position = hit.point;
+
+                    Quaternion rotation = Quaternion.LookRotation(
+                        (useSurfaceNormal ? hit.normal : forwardDirection).normalized,
+                        Vector3.up);
+                    instance.transform.rotation = rotation;
+
+                    //Selection.activeGameObject = instance;
+                }
+
+                e.Use();
+            }
+        }
+    }
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
+
+        GUILayout.Space(10);  // Adds 10 pixels of vertical space
 
         LevelEditor manager = (LevelEditor)target;
 
@@ -54,9 +76,9 @@ public class LevelEditorEditor : Editor
             return;
         }
 
-        newPropDefinition = EditorGUILayout.ObjectField("Prop Definition", newPropDefinition, typeof(PropDefinition), false) as PropDefinition;
-        newInvasionSpawnPointDefinition = EditorGUILayout.ObjectField("Invasion Spawn Point Definition", newInvasionSpawnPointDefinition, typeof(InvasionSpawnPointDefinition), false) as InvasionSpawnPointDefinition;
-        newStrongholdDefinition = EditorGUILayout.ObjectField("Stronghold Definition", newStrongholdDefinition, typeof(StrongholdDefinition), false) as StrongholdDefinition;
+        EditorGUILayout.LabelField("Marker Settings", EditorStyles.boldLabel);
+
+        markerPrefab = EditorGUILayout.ObjectField("Marker to Spawn", markerPrefab, typeof(GameObject), false) as GameObject;
 
         useSurfaceNormal = EditorGUILayout.Toggle("Use Surface Normal", useSurfaceNormal);
 
@@ -66,296 +88,191 @@ public class LevelEditorEditor : Editor
             forwardDirection = forwardDirection.normalized;
         }
 
-        if (GUILayout.Button(isAddingPoints ? "Stop Adding Points" : "Start Adding Points"))
+        GUILayout.Space(5);
+        if (GUILayout.Button(isPlacing ? "Stop Placing Markers" : "Start Placing Markers", GUILayout.Height(40)))
         {
-            isAddingPoints = !isAddingPoints;
-            isDeletingPoints = false;
+            isPlacing = !isPlacing;
         }
 
-        if (GUILayout.Button(isDeletingPoints ? "Stop Deleting Points" : "Start Deleting Points"))
-        {
-            isDeletingPoints = !isDeletingPoints;
-            isAddingPoints = false;
-        }
+        GUILayout.Space(5);
 
-        if (isDeletingPoints)
+        if (GUILayout.Button("Clear All Markup Data", GUILayout.Height(40)))
         {
-            deleteRadius = EditorGUILayout.FloatField("Delete Radius", deleteRadius);
-            deleteRadius = Mathf.Max(0.1f, deleteRadius);
-        }
-
-        if (GUILayout.Button("Clear All Points"))
-        {
-            Undo.RecordObject(manager.WorldSettings, "Clear Prop Points");
-            foreach (ChunkMarkupData markupData in manager.WorldSettings.ChunkMarkupDatas)
+            if (EditorUtility.DisplayDialog(
+                    "Confirm Clear",
+                    "Are you sure you want to clear all markup data? This action cannot be undone.",
+                    "Yes", "No"))
             {
-                if (markupData != null)
+
+                Undo.RecordObject(manager.WorldSettings, "Clear Prop Points");
+                int clearedCount = 0;
+                foreach (ChunkMarkupData markupData in manager.WorldSettings.ChunkMarkupDatas)
                 {
-                    markupData.PropMarkupDatas = new PropMarkupData[0];
-                    EditorUtility.SetDirty(markupData);
-                }
-            }
-            EditorUtility.SetDirty(manager.WorldSettings);
-        }
-
-        if (GUILayout.Button("Clean Up World Settings"))
-        {
-            Undo.RecordObject(manager.WorldSettings, "Clean Up World Settings");
-            CleanUpWorldSettings(manager.WorldSettings);
-            EditorUtility.SetDirty(manager.WorldSettings);
-            EditorUtility.DisplayDialog("Success", "World Settings cleaned up. Check console for details.", "OK");
-        }
-
-        if (GUILayout.Button(new GUIContent("Remove All Markup Data", "Removes all ChunkPropsMarkupData ScriptableObjects from WorldSettings and deletes their sub-assets.")))
-        {
-            if (EditorUtility.DisplayDialog("Confirm Removal", "Are you sure you want to remove all ChunkPropsMarkupData ScriptableObjects? This will delete their sub-assets and cannot be undone without asset recovery.", "Yes", "No"))
-            {
-                manager.WorldSettings.RemoveAllMarkupData();
-                EditorUtility.DisplayDialog("Success", "ChunkPropsMarkupData removal complete. Check console for details.", "OK");
-            }
-        }
-    }
-
-    private void OnSceneGUI(SceneView sceneView)
-    {
-        LevelEditor manager = (LevelEditor)target;
-        Event e = Event.current;
-
-        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
-        CleanupPreviews();
-
-        if (manager.WorldSettings?.ChunkMarkupDatas != null)
-        {
-            Camera sceneCamera = SceneView.currentDrawingSceneView?.camera;
-            if (sceneCamera == null) return;
-
-            float maxDrawRange = manager.maxDrawRange;
-
-            foreach (var markupData in manager.WorldSettings.ChunkMarkupDatas)
-            {
-                if (markupData?.PropMarkupDatas == null) continue;
-
-                foreach (var point in markupData.PropMarkupDatas)
-                {
-                    if (point?.propDefinition?.prefab == null) continue;
-
-                    float distance = Vector3.Distance(sceneCamera.transform.position, point.position);
-                    if (distance > maxDrawRange) continue;
-
-                    GameObject preview = (GameObject)PrefabUtility.InstantiatePrefab(point.propDefinition.prefab);
-                    if (preview == null) continue;
-
-                    preview.transform.position = point.position;
-                    preview.transform.rotation = point.rotation;
-                    preview.transform.localScale = point.propDefinition.prefab.transform.localScale;
-                    preview.hideFlags = HideFlags.DontSave | HideFlags.HideInHierarchy;
-                    _previewInstances.Add(preview);
-                }
-
-                foreach(var invasionSpawnPoint in markupData.InvasionSpawnPointMarkupDatas)
-                { 
-                
-                }
-
-                foreach (var stronghold in markupData.StrongholdMarkupDatas)
-                {
-
-                }
-            }
-        }
-
-        if (isAddingPoints && newPropDefinition != null)
-        {
-            if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
-            {
-                Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-                if (Physics.Raycast(ray, out RaycastHit hit))
-                {
-                    FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
-                    ChunkMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
-
-                    Undo.RecordObject(markupData, "Add Prop Point");
-
-                    List<PropMarkupData> points = markupData.PropMarkupDatas?.ToList() ?? new List<PropMarkupData>();
-                    int guid = GetUniqueGuid(markupData);
-
-                    points.Add(new PropMarkupData
+                    if (markupData != null)
                     {
-                        guid = guid,
-                        position = hit.point,
-                        rotation = Quaternion.LookRotation((useSurfaceNormal ? hit.normal : forwardDirection).normalized, Vector3.up),
-                        propDefinition = newPropDefinition,
-                        propDefinitionId = newPropDefinition.TableID
-                    });
-
-                    markupData.PropMarkupDatas = points.ToArray();
-                    EditorUtility.SetDirty(markupData);
-                    EditorUtility.SetDirty(manager.WorldSettings);
-
-                    e.Use();
-                }
-            }
-
-            // Hover Preview
-            if (Physics.Raycast(HandleUtility.GUIPointToWorldRay(e.mousePosition), out RaycastHit previewHit))
-            {
-                GameObject prefab = newPropDefinition.prefab;
-                if (prefab != null)
-                {
-                    GameObject preview = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-                    preview.transform.position = previewHit.point;
-                    Quaternion rotation = Quaternion.LookRotation((useSurfaceNormal ? previewHit.normal : forwardDirection).normalized, Vector3.up);
-                    preview.transform.rotation = rotation;
-                    preview.transform.localScale = prefab.transform.localScale;
-                    preview.hideFlags = HideFlags.DontSave | HideFlags.HideInHierarchy;
-                    _previewInstances.Add(preview);
-                }
-            }
-        }
-        else if (isDeletingPoints)
-        {
-            if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
-            {
-                Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-                if (Physics.Raycast(ray, out RaycastHit hit))
-                {
-                    FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
-                    ChunkMarkupData markupData = manager.WorldSettings.GetMarkupData(chunkCoord);
-
-                    if (markupData != null && markupData.PropMarkupDatas != null)
-                    {
-                        List<PropMarkupData> points = new List<PropMarkupData>(markupData.PropMarkupDatas);
-                        PropMarkupData closestPoint = null;
-                        float minDistance = float.MaxValue;
-
-                        foreach (PropMarkupData point in points)
-                        {
-                            float distance = Vector3.Distance(hit.point, point.position);
-                            if (distance < deleteRadius && distance < minDistance)
-                            {
-                                minDistance = distance;
-                                closestPoint = point;
-                            }
-                        }
-
-                        if (closestPoint != null)
-                        {
-                            Undo.RecordObject(markupData, "Delete Prop Point");
-                            points.Remove(closestPoint);
-                            markupData.PropMarkupDatas = points.ToArray();
-                            EditorUtility.SetDirty(markupData);
-                            EditorUtility.SetDirty(manager.WorldSettings);
-                        }
+                        markupData.PropMarkupDatas = new PropMarkupData[0];
+                        EditorUtility.SetDirty(markupData);
+                        clearedCount++;
                     }
-
-                    e.Use();
                 }
+                EditorUtility.SetDirty(manager.WorldSettings);
+                Debug.Log($"Cleared markup data in {clearedCount} chunk(s).");
             }
-
-            // Draw delete disc
-            if (Physics.Raycast(HandleUtility.GUIPointToWorldRay(e.mousePosition), out RaycastHit previewHit))
+            else
             {
-                Handles.color = new Color(1f, 0f, 0f, 0.5f);
-                Handles.DrawWireDisc(previewHit.point, previewHit.normal, deleteRadius);
+                Debug.Log("Clear operation canceled by user.");
             }
         }
 
-        sceneView.Repaint();
-    }
+        GUILayout.Space(5);
 
-    private void CleanupPreviews()
-    {
-        foreach (var obj in _previewInstances)
+        if (GUILayout.Button("Gather All Markers Into World Settings", GUILayout.Height(40)))
         {
-            if (obj != null)
-            {
-                GameObject.DestroyImmediate(obj);
-            }
+            GatherAllMarkersIntoWorldSettings(manager);
         }
-        _previewInstances.Clear();
-    }
 
-    private int GenerateUniqueGuid(HashSet<int> usedGuids)
-    {
-        int newGuid = usedGuids.Count > 0 ? usedGuids.Max() + 1 : 0;
-        while (usedGuids.Contains(newGuid)) newGuid++;
-        return newGuid;
-    }
+        GUILayout.Space(5);
 
-    private int GetUniqueGuid(ChunkMarkupData markupData)
-    {
-        HashSet<int> usedGuids = markupData?.PropMarkupDatas?.Select(p => p.guid).ToHashSet() ?? new HashSet<int>();
-        return GenerateUniqueGuid(usedGuids);
-    }
-
-    private void AddPropMarkup(ChunkMarkupData markupData, RaycastHit hit, Vector3 forwardDirection, bool useSurfaceNormal)
-    {
-        List<PropMarkupData> points = markupData.PropMarkupDatas?.ToList() ?? new List<PropMarkupData>();
-        int guid = GetUniqueGuid(markupData);
-
-        points.Add(new PropMarkupData
+        if (GUILayout.Button("Regenerate Markers from Markup Data", GUILayout.Height(40)))
         {
-            guid = guid,
-            position = hit.point,
-            rotation = Quaternion.LookRotation((useSurfaceNormal ? hit.normal : forwardDirection).normalized, Vector3.up),
-            propDefinition = newPropDefinition,
-            propDefinitionId = newPropDefinition?.TableID ?? 0
-        });
-
-        markupData.PropMarkupDatas = points.ToArray();
+            RegenerateMarkers();
+        }
     }
 
-    private void AddInvasionSpawnPoint(ChunkMarkupData markupData, RaycastHit hit)
+    private void GatherAllMarkersIntoWorldSettings(LevelEditor manager)
     {
-        var list = markupData.InvasionSpawnPointMarkupDatas?.ToList() ?? new List<InvasionSpawnPointMarkupData>();
-        list.Add(new InvasionSpawnPointMarkupData
+        if (manager.WorldSettings == null)
         {
-            position = hit.point,
-            // Add other defaults if needed
-        });
-        markupData.InvasionSpawnPointMarkupDatas = list.ToArray();
-    }
-
-    private void AddStrongholdMarkup(ChunkMarkupData markupData, RaycastHit hit)
-    {
-        var list = markupData.StrongholdMarkupDatas?.ToList() ?? new List<StrongholdMarkupData>();
-        list.Add(new StrongholdMarkupData
-        {
-            position = hit.point,
-            // Add other defaults if needed
-        });
-        markupData.StrongholdMarkupDatas = list.ToArray();
-    }
-
-    private void CleanUpWorldSettings(WorldSettings worldSettings)
-    {
-        if (worldSettings == null || worldSettings.ChunkMarkupDatas == null)
+            Debug.LogWarning("WorldSettings is not assigned.");
             return;
+        }
 
-        var validMarkupDatas = new List<ChunkMarkupData>();
-        foreach (var markupData in worldSettings.ChunkMarkupDatas)
+        PropMarker[] propMarkers = GameObject.FindObjectsOfType<PropMarker>(true);
+        Dictionary<FChunkPosition, List<PropMarkupData>> chunkToProps = new();
+
+        foreach (var marker in propMarkers)
         {
-            if (markupData == null) continue;
+            if (marker.definition == null) continue;
 
-            var points = markupData.PropMarkupDatas?.Where(p => p != null && p.propDefinition != null).ToList() ?? new List<PropMarkupData>();
-            var usedGuids = new HashSet<int>();
+            Vector3 position = marker.transform.position;
+            Quaternion rotation = marker.transform.rotation;
+            FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(position);
 
-            foreach (var p in points)
+            if (!chunkToProps.TryGetValue(chunkCoord, out var list))
             {
-                while (p.guid == 0 || usedGuids.Contains(p.guid))
-                    p.guid = GenerateUniqueGuid(usedGuids);
-                usedGuids.Add(p.guid);
+                list = new List<PropMarkupData>();
+                chunkToProps[chunkCoord] = list;
             }
 
-            markupData.PropMarkupDatas = points.ToArray();
-            if (points.Count > 0)
-                validMarkupDatas.Add(markupData);
+            list.Add(new PropMarkupData
+            {
+                guid = list.Count,
+                position = position,
+                rotation = rotation,
+                propDefinition = marker.definition,
+                propDefinitionId = marker.definition.TableID
+            });
+        }
+
+        InvasionSpawnPointMarker[] invasionSpawnMarkers = GameObject.FindObjectsOfType<InvasionSpawnPointMarker>(true);
+        Dictionary<FChunkPosition, List<InvasionSpawnPointMarkupData>> chunkToInvasionSpawns = new();
+
+        foreach (var marker in invasionSpawnMarkers)
+        {
+            Vector3 position = marker.transform.position;
+            Quaternion rotation = marker.transform.rotation;
+            FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(position);
+
+            if (!chunkToInvasionSpawns.TryGetValue(chunkCoord, out var list))
+            {
+                list = new List<InvasionSpawnPointMarkupData>();
+                chunkToInvasionSpawns[chunkCoord] = list;
+            }
+
+            list.Add(new InvasionSpawnPointMarkupData
+            {
+                guid = list.Count,
+                position = position,
+            });
+        }
+
+        Undo.RecordObject(manager.WorldSettings, "Gather PropMarkers");
+
+        foreach (var kvp in chunkToProps)
+        {
+            FChunkPosition chunk = kvp.Key;
+            List<PropMarkupData> newProps = kvp.Value;
+
+            ChunkMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunk);
+
+            markupData.PropMarkupDatas = newProps.ToArray();
 
             EditorUtility.SetDirty(markupData);
         }
 
-        worldSettings.ChunkMarkupDatas.Clear();
-        worldSettings.ChunkMarkupDatas.AddRange(validMarkupDatas);
-        EditorUtility.SetDirty(worldSettings);
+        foreach (var kvp in chunkToInvasionSpawns)
+        {
+            FChunkPosition chunk = kvp.Key;
+            List<InvasionSpawnPointMarkupData> newInvasions = kvp.Value;
+
+            ChunkMarkupData markupData = manager.WorldSettings.GetOrCreateMarkupData(chunk);
+
+            markupData.InvasionSpawnPointMarkupDatas = newInvasions.ToArray();
+
+            EditorUtility.SetDirty(markupData);
+        }
+
+        EditorUtility.SetDirty(manager.WorldSettings);
+        Debug.Log($"Gathered {propMarkers.Length} PropMarkers into WorldSettings.");
+    }
+
+    private void RegenerateMarkers()
+    {
+        LevelEditor editor = (LevelEditor)target;
+        WorldSettings worldSettings = editor.WorldSettings;
+
+        if (worldSettings == null || worldSettings.ChunkMarkupDatas == null)
+        {
+            Debug.LogWarning("WorldSettings or ChunkMarkupDatas is missing.");
+            return;
+        }
+
+        foreach (var chunkMarkup in worldSettings.ChunkMarkupDatas)
+        {
+            if (chunkMarkup == null || chunkMarkup.PropMarkupDatas == null)
+                continue;
+
+            foreach (var propMarkup in chunkMarkup.PropMarkupDatas)
+            {
+                if (propMarkup == null)
+                    continue;
+
+                var propDefinition = editor.GlobalTables.PropTable.TryGetDefinition(propMarkup.propDefinitionId);
+                if (propDefinition == null)
+                    continue;
+
+                if (!HasMarkerAt(propDefinition, propMarkup.position))
+                {
+                    GameObject go = new GameObject("PropMarker");
+                    Undo.RegisterCreatedObjectUndo(go, "Spawn Marker from Chunk Data");
+
+                    var propMarker = go.AddComponent<PropMarker>();
+                    propMarker.definition = propDefinition;
+
+                    go.transform.position = propMarkup.position;
+                    go.transform.rotation = Quaternion.identity;
+                }
+            }
+        }
+    }
+
+    private float markerDetectionRadius = 0.2f;
+
+    private bool HasMarkerAt(PropDefinition definition, Vector3 position)
+    {
+        return GameObject.FindObjectsOfType<PropMarker>()
+            .Any(marker =>
+                marker.definition == definition &&
+                Vector3.Distance(marker.transform.position, position) < markerDetectionRadius);
     }
 }

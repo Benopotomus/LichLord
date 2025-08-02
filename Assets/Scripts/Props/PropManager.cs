@@ -26,6 +26,7 @@ namespace LichLord.Props
             if (baseMarkupData == null)
                 return;
 
+            Debug.Log(baseMarkupData.ChunkCoord.X + ", " + baseMarkupData.ChunkCoord.Y);
             for (int i = 0; i < baseMarkupData.PropMarkupDatas.Length; i++)
             {
                 PropMarkupData propMarkupData = baseMarkupData.PropMarkupDatas[i];
@@ -42,6 +43,7 @@ namespace LichLord.Props
                     propMarkupData.propDefinitionId);
 
                 chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
+                Debug.Log("Prop Found");
             }
 
             if (HasStateAuthority)

@@ -32,8 +32,6 @@ namespace LichLord.UI
         protected override void OnTick()
         {
             base.OnTick();
-
-
         }
 
         private void UpdateScreenSpaceScale()
@@ -41,17 +39,18 @@ namespace LichLord.UI
             if (_scaleDistanceCurve == null)
                 return;
 
-            float sqrDist = Vector3.SqrMagnitude(_camera.transform.position - (_target.position + _worldOffset));
-            float scale = _scaleDistanceCurve.Curve.Evaluate(sqrDist);
-            _rectTransform.localScale = new Vector3(scale, scale, scale);
+            if (_target != null && _rectTransform != null)
+                    {
+                float sqrDist = Vector3.SqrMagnitude(_camera.transform.position - (_target.position + _worldOffset));
+                float scale = _scaleDistanceCurve.Curve.Evaluate(sqrDist);
+                _rectTransform.localScale = new Vector3(scale, scale, scale);
+            }
         }
 
         private void UpdateScreenSpacePosition()
         {
             if (_target != null && _rectTransform != null)
             {
-
-
                 Vector3 worldPos = _target.position + _worldOffset;
                 Vector3 cameraSpacePos = _camera.WorldToViewportPoint(worldPos); // Use viewport for easier z-check
 

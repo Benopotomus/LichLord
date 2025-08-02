@@ -19,7 +19,7 @@ namespace LichLord.World
         [SerializeField]
         private bool drawChunkBounds = true;
 
-        private Chunk[,] _worldChunks = new Chunk[135, 135];
+        private Chunk[,] _worldChunks = new Chunk[235, 235];
         public Chunk[,] WorldChunks => _worldChunks;
 
         public HashSet<Chunk> _deltaChunks = new HashSet<Chunk>();
@@ -58,6 +58,7 @@ namespace LichLord.World
 
                     _worldChunks[x, y] = chunk;
 
+                    Debug.Log("new Chunk: " + x + ", " + y);
                     if (chunk.LoadState == ELoadState.None)
                     {
                         LoadChunkIntoMemory(chunk);
@@ -119,7 +120,7 @@ namespace LichLord.World
 
                     if (replicator == null)
                     {
-                        Debug.Log("No replicator");
+                        //Debug.Log("No replicator");
                         return;
                     }
 
@@ -147,6 +148,7 @@ namespace LichLord.World
         {
             chunkToLoad.LoadState = ELoadState.Loaded;
             Context.PropManager.LoadPropsForChunk(chunkToLoad);
+            Context.InvasionManager.LoadInvasionSpawnPointsForChunk(chunkToLoad);
             _loadedChunks.Add(chunkToLoad);
         }
 

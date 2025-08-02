@@ -12,7 +12,7 @@ using UnityEditor;
 public class WorldSettings : ScriptableObject
 {
     [SerializeField]
-    private Vector2 _worldSize = new Vector2(3000f, 3000f);
+    private Vector2 _worldSize = new Vector2(8000f, 8000f);
     public Vector2 WorldSize => _worldSize;
 
     [SerializeField]

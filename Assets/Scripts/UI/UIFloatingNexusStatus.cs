@@ -18,9 +18,9 @@ namespace LichLord.UI
         {
             base.OnTick();
 
-            PropRuntimeState nexusState = _nexus.RuntimeState;
             if (_nexus != null)
             {
+                PropRuntimeState nexusState = _nexus.RuntimeState;
                 _iconImage.SetActive(true);
                 _healthSlider.SetActive(true);
                 _healthText.SetActive(true);

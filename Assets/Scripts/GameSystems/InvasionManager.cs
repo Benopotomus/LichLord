@@ -109,8 +109,19 @@ namespace LichLord
             var players = Context.NetworkGame.ActivePlayers;
             var state = GetTargetNexus();
             Vector3 statePosition = state.position;
+            Vector3 fallbackStagingPosition = state.position;
 
-            // Pre-allocate array to avoid List resizing
+            var nearbyChunks = Context.ChunkManager.GetNearbyChunks(state.chunk.ChunkID,2);
+            var nearbyInvasionSpawns = new List<InvasionSpawnPoint>();
+
+            foreach (var chunk in nearbyChunks)
+            {
+                foreach (var spawnPoint in chunk.InvasionSpawnPoints)
+                {
+                    nearbyInvasionSpawns.Add(spawnPoint);
+                }
+            }
+
             Vector3[] playerPositions = new Vector3[players.Count];
             for (int i = 0; i < players.Count; i++)
             {
@@ -120,97 +131,46 @@ namespace LichLord
             const float minNexusDistance = 150f;
             const float maxNexusDistance = 200f;
             const float minPlayerDistance = 150f;
-            const int maxAttempts = 50;
-            const float raycastHeight = 500f;
-            const float maxRaycastDistance = 1000f;
 
-            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            // 1. Filter spawn points by distance to the nexus position (min/max distance)
+            var validSpawnPoints = new List<InvasionSpawnPoint>();
+            for (int i = 0; i < nearbyInvasionSpawns.Count; i++)
             {
-                // Generate random angle and distance
-                float angle = UnityEngine.Random.value * Mathf.PI * 2f;
-                float distance = UnityEngine.Random.Range(minNexusDistance, maxNexusDistance);
-
-                // Calculate candidate position in XZ plane
-                Vector3 direction = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
-                Vector3 candidatePosition = statePosition + direction * distance;
-
-                // Verify nexus distance in XZ plane
-                Vector2 stateXZ = new Vector2(statePosition.x, statePosition.z);
-                Vector2 candidateXZ = new Vector2(candidatePosition.x, candidatePosition.z);
-                float nexusDistanceSqr = (candidateXZ - stateXZ).sqrMagnitude;
-                if (nexusDistanceSqr < minNexusDistance * minNexusDistance ||
-                    nexusDistanceSqr > maxNexusDistance * maxNexusDistance)
+                float distToNexus = Vector3.Distance(nearbyInvasionSpawns[i].position, statePosition);
+                if (distToNexus >= minNexusDistance && distToNexus <= maxNexusDistance)
                 {
-                    Debug.LogWarning($"Attempt {attempt}: Invalid nexus distance {Mathf.Sqrt(nexusDistanceSqr)}");
-                    continue;
+                    validSpawnPoints.Add(nearbyInvasionSpawns[i]);
                 }
+            }
 
-                // Check XZ distance to players
-                bool valid = true;
-                float minPlayerDistanceSqr = minPlayerDistance * minPlayerDistance;
-                for (int i = 0; i < playerPositions.Length; i++)
+            // 2. Filter out spawn points that are too close to any player
+            for (int i = validSpawnPoints.Count - 1; i >= 0; i--)
+            {
+                bool tooCloseToPlayer = false;
+                for (int p = 0; p < playerPositions.Length; p++)
                 {
-                    Vector2 playerXZ = new Vector2(playerPositions[i].x, playerPositions[i].z);
-                    float playerDistanceSqr = (candidateXZ - playerXZ).sqrMagnitude;
-                    if (playerDistanceSqr < minPlayerDistanceSqr)
+                    float distToPlayer = Vector3.Distance(validSpawnPoints[i].position, playerPositions[p]);
+                    if (distToPlayer < minPlayerDistance)
                     {
-                        valid = false;
-                        Debug.Log($"Attempt {attempt}: Too close to player {i}, distance {Mathf.Sqrt(playerDistanceSqr)}");
+                        tooCloseToPlayer = true;
                         break;
                     }
                 }
 
-                if (valid)
+                if (tooCloseToPlayer)
                 {
-                    // Raycast down from 500 units above
-                    Vector3 raycastOrigin = new Vector3(candidatePosition.x, raycastHeight, candidatePosition.z);
-                    RaycastHit hit;
-                    if (Physics.Raycast(raycastOrigin, Vector3.down, out hit, maxRaycastDistance))
-                    {
-                        Vector3 finalPosition = hit.point;
-                        // Double-check final position distances
-                        float finalNexusDistance = (new Vector2(finalPosition.x, finalPosition.z) - stateXZ).magnitude;
-                        bool playersValid = true;
-                        for (int i = 0; i < playerPositions.Length; i++)
-                        {
-                            if ((new Vector2(finalPosition.x, finalPosition.z) - new Vector2(playerPositions[i].x, playerPositions[i].z)).sqrMagnitude < minPlayerDistanceSqr)
-                            {
-                                playersValid = false;
-                                Debug.Log($"Raycast hit invalid: Too close to player {i}");
-                                break;
-                            }
-                        }
-                        if (finalNexusDistance >= minNexusDistance && finalNexusDistance <= maxNexusDistance && playersValid)
-                        {
-                            Debug.Log($"Valid position found at attempt {attempt}: {finalPosition}, nexus distance {finalNexusDistance}");
-                            return finalPosition;
-                        }
-                        Debug.Log($"Raycast hit invalid: Nexus distance {finalNexusDistance}");
-                    }
-                    else
-                    {
-                        Debug.Log($"Attempt {attempt}: Raycast missed terrain");
-                    }
+                    validSpawnPoints.RemoveAt(i);
                 }
             }
 
-            // Fallback: Try raycast from 500 units above a point 250 units from nexus
-            float fallbackAngle = UnityEngine.Random.value * Mathf.PI * 2f;
-            Vector3 fallbackDirection = new Vector3(Mathf.Sin(fallbackAngle), 0, Mathf.Cos(fallbackAngle));
-            Vector3 fallbackPosition = statePosition + fallbackDirection * 250f;
-            Vector3 fallbackRaycastOrigin = new Vector3(fallbackPosition.x, statePosition.y + raycastHeight, fallbackPosition.z);
-            RaycastHit fallbackHit;
-            if (Physics.Raycast(fallbackRaycastOrigin, Vector3.down, out fallbackHit, maxRaycastDistance))
+            // 3. Choose random valid spawn point or fallback
+            if (validSpawnPoints.Count > 0)
             {
-                Vector3 finalPosition = fallbackHit.point;
-                Debug.Log($"Fallback used: Position {finalPosition}, nexus distance {(new Vector2(finalPosition.x, finalPosition.z) - new Vector2(statePosition.x, statePosition.z)).magnitude}");
-                return finalPosition;
+                int randomIndex = UnityEngine.Random.Range(0, validSpawnPoints.Count);
+                return validSpawnPoints[randomIndex].position;
             }
 
-            // Ultimate fallback: Return position at nexus height
-            Vector3 ultimateFallback = new Vector3(fallbackPosition.x, statePosition.y, fallbackPosition.z);
-            Debug.LogWarning($"Ultimate fallback used: {ultimateFallback}");
-            return ultimateFallback;
+            return fallbackStagingPosition;
         }
 
         private void SpawnInvasionWave(int wave)
@@ -255,5 +215,29 @@ namespace LichLord
 
             InvasionSpawnWave++;
         }
+
+        public void LoadInvasionSpawnPointsForChunk(Chunk chunk)
+        {
+            ChunkMarkupData baseMarkupData = Context.WorldManager.WorldSettings.GetMarkupData(chunk.ChunkID);
+
+            if (baseMarkupData == null)
+                return;
+
+            for (int i = 0; i < baseMarkupData.InvasionSpawnPointMarkupDatas.Length; i++)
+            {
+                var invasionSpawnMarkupData = baseMarkupData.InvasionSpawnPointMarkupDatas[i];
+                if (invasionSpawnMarkupData == null)
+                {
+                    continue;
+                }
+
+                InvasionSpawnPoint invasionSpawnPoint = new InvasionSpawnPoint(
+                    invasionSpawnMarkupData.position,
+                    chunk);
+
+                chunk.AddInvasionSpawnPoint(invasionSpawnPoint); // Add to chunk's invasionSpawns
+            }
+        }
+
     }
 }
