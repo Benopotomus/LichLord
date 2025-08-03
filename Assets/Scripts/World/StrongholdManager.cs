@@ -1,9 +1,9 @@
 ﻿using Fusion;
-using LichLord.Buildables;
 using LichLord.Props;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using UnityEditor;
 using UnityEngine;
 
 namespace LichLord.World
@@ -26,6 +26,16 @@ namespace LichLord.World
 
             return true;
         }
+
+        public bool IsEqual(FStrongholdData other)
+        {
+            if (ChunkID.X == other.ChunkID.X &&
+                ChunkID.Y == other.ChunkID.Y &&
+                GUID == other.GUID)
+                return true;
+
+            return false;
+        }
     }
 
     public class StrongholdManager : ContextBehaviour
@@ -33,34 +43,57 @@ namespace LichLord.World
         private List<PropRuntimeState> _authorityNexusStates = new List<PropRuntimeState>();
         private List<PropRuntimeState> _predictedStates = new List<PropRuntimeState>();
 
-        public Action<Nexus> onNexusSpawned;
-        public Action<Nexus> onNexusDespawned;
-        private List<Nexus> _activeNexuses = new List<Nexus>();
-        public List<Nexus> ActiveNexuses => _activeNexuses;
+        public Action<Stronghold> onStrongholdSpawned;
+        public Action<Stronghold> onStrongholdDespawned;
 
         [SerializeField] private Stronghold _strongholdPrefab;
 
-        public override void Spawned()
-        {
-            base.Spawned();
+        private List<Stronghold> _activeStrongholds = new List<Stronghold>();
+        public List<Stronghold> ActiveStrongholds => _activeStrongholds;
+
+        public void OnStrongholdSpawned(Stronghold stronghold)
+        { 
+            _activeStrongholds.Add(stronghold);
+            onStrongholdSpawned?.Invoke(stronghold);
         }
 
+        public void OnStrongholdDespawned(Stronghold stronghold)
+        {
+            _activeStrongholds.Remove(stronghold);
+            onStrongholdDespawned?.Invoke(stronghold);
+        }
+
+        public Stronghold GetStronghold(FStrongholdData strongholdData)
+        {
+            foreach(var stronghold in  _activeStrongholds) 
+            {
+                if(stronghold.Data.IsEqual(strongholdData))
+                    return stronghold;
+            }
+
+            return null;
+        }
+
+
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_ActivatePlayerNexus(FStrongholdData nexusData)
+        public void RPC_ActivateNexus(FStrongholdData nexusData)
         {
             var position = GetStrongholdPosition(nexusData);
 
-            Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
-                                onBeforeSpawned: (runner, obj) =>
-                                {
-                                    var r = obj.GetComponent<Stronghold>();
-                                    r.SetData(nexusData);
-                                });
+            // Create particle here
 
-            //Context.InvasionManager.BeginInvasion(1, nexusData);
+            if (HasStateAuthority)
+            {
+                Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
+                                    onBeforeSpawned: (runner, obj) =>
+                                    {
+                                        var r = obj.GetComponent<Stronghold>();
+                                        r.SetData(nexusData, 1000, 1000, 50f);
+                                    });
+            }
         }
 
-        public void Predict_ActivatePlayerNexus(FStrongholdData nexusData)
+        public void Predict_ActivateNexus(FStrongholdData nexusData)
         {
             _predictedStates.Add(GetNexusState(nexusData));
         }
@@ -109,19 +142,5 @@ namespace LichLord.World
 
             return Vector3.zero;
         }
-
-        public void OnNexusSpawned(Nexus nexus)
-        {
-            _activeNexuses.Add(nexus);
-            onNexusSpawned?.Invoke(nexus);
-        }
-
-        public void OnNexusDespawned(Nexus nexus)
-        {
-            _activeNexuses.Remove(nexus);
-            onNexusDespawned?.Invoke(nexus);
-        }
-
     }
-
 }

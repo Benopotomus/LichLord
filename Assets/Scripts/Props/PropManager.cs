@@ -43,7 +43,6 @@ namespace LichLord.Props
                     propMarkupData.propDefinitionId);
 
                 chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
-                Debug.Log("Prop Found");
             }
 
             return;

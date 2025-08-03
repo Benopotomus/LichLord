@@ -53,9 +53,9 @@ namespace LichLord.NonPlayerCharacters
                 if (Definition.ValidTargetTypes.Contains(EManeuverTarget.PC))
                     return true;
             }
-            else if (brainComponent.AttackTarget is Nexus)
+            else if (brainComponent.AttackTarget is Stronghold)
             {
-                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Nexus))
+                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Stronghold))
                     return true;
             }
             else if (brainComponent.AttackTarget is Prop)

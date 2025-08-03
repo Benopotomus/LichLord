@@ -145,12 +145,12 @@ namespace LichLord.NonPlayerCharacters
             // if we are an invasion npc, the target nexus position is the fallback
             if (NonPlayerCharacterDataUtility.IsInvasionNPC(ref data))
             {
-                var nexus = NPC.Context.InvasionManager.GetTargetNexus();
-                if (nexus != null)
+                var stronghold = NPC.Context.InvasionManager.TargetStronghold;
+                if (stronghold != null)
                 {
-                    var targetPosition = nexus.position;
+                    var targetPosition = stronghold.CachedTransform.position;
                     // If our current destination hasn't changed much, we early out
-                    Vector3 delta = _moveTarget - nexus.position;
+                    Vector3 delta = _moveTarget - targetPosition;
                     if (delta.sqrMagnitude < 0.01f)
                         return;
 
@@ -445,10 +445,11 @@ namespace LichLord.NonPlayerCharacters
             if (_hasAttackTarget &&
                 HasActiveManeuver())
             {
-                NonPlayerCharacter npc = _attackTarget as NonPlayerCharacter;
-                if(npc != null) 
+                var hitTarget = _attackTarget as IHitTarget;
+
+                if(hitTarget != null) 
                 {
-                    ApplyHitToTarget(npc, _activeManeuver.Definition, _npc.Context.Runner.Tick);
+                    ApplyHitToTarget(hitTarget, _activeManeuver.Definition, _npc.Context.Runner.Tick);
                 }
             }
         }

@@ -13,5 +13,10 @@ namespace LichLord
         [SerializeField]
         private int _ticksBetweenWaves = 160;
         public int TicksBetweenWaves => _ticksBetweenWaves;
+
+
+        [SerializeField]
+        private int _invasionTotalTicks = 640;
+        public int InvasionTotalTicks => _invasionTotalTicks;
     }
 }

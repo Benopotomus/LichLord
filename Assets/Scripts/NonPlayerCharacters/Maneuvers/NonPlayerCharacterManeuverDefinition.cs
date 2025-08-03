@@ -61,7 +61,7 @@ namespace LichLord.NonPlayerCharacters
         None,
         NPC,
         PC,
-        Nexus,
+        Stronghold,
         Props,
     }
 }

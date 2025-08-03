@@ -58,7 +58,6 @@ namespace LichLord.World
 
                     _worldChunks[x, y] = chunk;
 
-                    Debug.Log("new Chunk: " + x + ", " + y);
                     if (chunk.LoadState == ELoadState.None)
                     {
                         LoadChunkIntoMemory(chunk);

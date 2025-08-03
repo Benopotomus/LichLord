@@ -143,7 +143,7 @@ namespace LichLord
 
             if (input.Fire)
             {
-                Debug.Log($"[ActionManager] Executing action: {GetSelectedManeuver().ManeuverName} (Index: {_selectedIndex})");
+                //Debug.Log($"[ActionManager] Executing action: {GetSelectedManeuver().ManeuverName} (Index: {_selectedIndex})");
 
                 _activeManeuverTick = Runner.Tick;
                 _activeManeuverIndex = _selectedIndex;

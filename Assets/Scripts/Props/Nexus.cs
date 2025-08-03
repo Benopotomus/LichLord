@@ -20,17 +20,7 @@ namespace LichLord.Props
         {
             get
             {
-                if(!RuntimeState.GetIsActivated())
-                    return false;
-
-                switch (_stateComponent.CurrentState)
-                {
-                    case EPropState.Destroyed:
-                    case EPropState.Inactive:
-                        return false;
-                    default:
-                        return true;
-                }
+                return false;
             }
         }
 
@@ -137,10 +127,10 @@ namespace LichLord.Props
             strongholdData.ChunkID = prop.ChunkID;
             strongholdData.GUID = (byte)prop.GUID;
 
-            context.StrongholdManager.RPC_ActivatePlayerNexus(strongholdData);
+            context.StrongholdManager.RPC_ActivateNexus(strongholdData);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.StrongholdManager.Predict_ActivatePlayerNexus(strongholdData);
+                context.StrongholdManager.Predict_ActivateNexus(strongholdData);
 
         }
     }

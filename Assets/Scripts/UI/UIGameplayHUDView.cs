@@ -1,9 +1,6 @@
 ﻿namespace LichLord.UI
 {
-    using LichLord.Props;
-    using System;
     using UnityEngine;
-    using UnityEngine.EventSystems;
 
     public class UIGameplayHUDView : UIGameplayView
     {
@@ -12,18 +9,27 @@
         public UIFloatingInteract FloatingInteract => _floatingInteract;
 
         [SerializeField]
-        private UINexusTracker _nexusTracker;
-        public UINexusTracker NexusTracker => _nexusTracker;
+        private UIStrongholdTracker _strongholdTracker;
+
+        [SerializeField]
+        private UIInvasion _invasion;
 
         protected override void OnVisible()
         {
             base.OnVisible();
 
-            Context.StrongholdManager.onNexusSpawned += _nexusTracker.OnNexusSpawned;
-            Context.StrongholdManager.onNexusDespawned += _nexusTracker.OnNexusDespawned;
+            Context.StrongholdManager.onStrongholdSpawned += _strongholdTracker.OnStrongholdSpawned;
+            Context.StrongholdManager.onStrongholdDespawned += _strongholdTracker.OnStrongholdDespawned;
 
-            foreach(var nexus in Context.StrongholdManager.ActiveNexuses)
-                _nexusTracker.OnNexusSpawned(nexus);
+            foreach(var stronghold in Context.StrongholdManager.ActiveStrongholds)
+                _strongholdTracker.OnStrongholdSpawned(stronghold);
+        }
+
+        protected override void OnTick()
+        {
+            base.OnTick();
+
+            _invasion.SetActive(Context.InvasionManager.InvasionID > 0);
         }
     }
 }

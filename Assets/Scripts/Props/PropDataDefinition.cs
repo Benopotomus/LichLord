@@ -92,7 +92,7 @@ namespace LichLord.Props
             int currentHealth = GetHealth(ref propData);
             SetHealth(currentHealth - damage, ref propData);
 
-            Debug.Log($"Apply Damage " + propData.GUID + ", Health: " + GetHealth(ref propData));
+            //Debug.Log($"Apply Damage " + propData.GUID + ", Health: " + GetHealth(ref propData));
 
             if (GetHealth(ref propData) <= 0)
             {

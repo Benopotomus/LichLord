@@ -138,7 +138,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             _stateComponent.UpdateState(ref data, false);
-            //_healthComponent.UpdateHealth(ref data, ping);
+
             switch (_stateComponent.CurrentState)
             {
                 case ENonPlayerState.Dead:
@@ -236,6 +236,11 @@ namespace LichLord.NonPlayerCharacters
 
                 if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
+            }
+
+            if (hit.target is Stronghold stronghold)
+            {
+                stronghold.RPC_DealDamage(hit.damageData.damageValue);
             }
         }
 
