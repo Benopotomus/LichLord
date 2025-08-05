@@ -43,5 +43,18 @@ namespace LichLord.Props
             Chunk chunk = Context.ChunkManager.GetChunk(chunkPosition);
             chunk.SetActivated(guid, isActivated, Runner.Tick);
         }
+
+        public void Predict_HarvestNode(FChunkPosition chunkPosition, int guid, int harvestValue)
+        {
+            Chunk chunk = Context.ChunkManager.GetChunk(chunkPosition);
+            chunk.Predict_HarvestProp(guid, harvestValue, Runner.Tick);
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_HarvestNode(FChunkPosition chunkPosition, int guid, int harvestValue)
+        {
+            Chunk chunk = Context.ChunkManager.GetChunk(chunkPosition);
+            chunk.HarvestProp(guid, harvestValue, Runner.Tick);
+        }
     }
 }

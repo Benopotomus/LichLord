@@ -458,6 +458,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3250597500166225624}
   - component: {fileID: 8439297619170031021}
+  - component: {fileID: 1094255631455831052}
   m_Layer: 0
   m_Name: PROP_VIS_StoneNode
   m_TagString: Untagged
@@ -501,3 +502,19 @@ MonoBehaviour:
   _cachedTransform: {fileID: 3250597500166225624}
   _interactableComponent: {fileID: 8320375805748504049}
   _interactEffect: {fileID: 0}
+  _stateComponent: {fileID: 1094255631455831052}
+--- !u!114 &1094255631455831052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6272355397201178900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f071b7371d7000d488f9d4173eab6200, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prop: {fileID: 8439297619170031021}
+  _currentState: 0
+  _hitReactPrefab: {fileID: 0}

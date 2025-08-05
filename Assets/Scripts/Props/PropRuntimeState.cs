@@ -110,6 +110,14 @@ namespace LichLord.Props
             _hitReactEndTick = _hitReactTicks + tick;
         }
 
+        public void Harvest(int harvestValue, int tick)
+        {
+            if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)
+                harvestDataDefinition.ApplyHarvest(ref _data, harvestValue);
+
+            _hitReactEndTick = _hitReactTicks + tick;
+        }
+
         public void SetInteract(bool interact, int tick)
         {
             PropDataDefinition dataDefinition = Definition.PropDataDefinition;

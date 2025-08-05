@@ -13,6 +13,10 @@ namespace LichLord.Props
         [SerializeField]
         private VisualEffectBase _interactEffect;
 
+        [SerializeField]
+        protected PropStateComponent _stateComponent;
+        public PropStateComponent StateComponent => _stateComponent;
+
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
             base.OnSpawned(propRuntimeState, propManager);
@@ -28,6 +32,8 @@ namespace LichLord.Props
             _interactableComponent.onInteractStart += OnInteractStart;
             _interactableComponent.onInteractEnd += OnInteractEnd;
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
+
+            _stateComponent.UpdateState(_propRuntimeState.GetState());
 
             UpdateNavmesh();
         }
@@ -49,7 +55,9 @@ namespace LichLord.Props
         {
             base.OnRender(propRuntimeState, renderDeltaTime);
 
-            if(_interactEffect != null)
+            _stateComponent.UpdateState(_propRuntimeState.GetState());
+
+            if (_interactEffect != null)
                 _interactEffect.Toggle(propRuntimeState.GetIsInteracting());
         }
 
@@ -79,7 +87,7 @@ namespace LichLord.Props
 
         private float GetInteractionTime(InteractorComponent interactor)
         {
-            return 2.0f; // seconds to complete interaction
+            return 3.0f;
         }
 
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
@@ -97,14 +105,19 @@ namespace LichLord.Props
             Debug.Log("Harvest Node Interaction complete.");
             // Trigger effects, state changes, or events
 
+            if (RuntimeState.Definition.PropDataDefinition is not HarvestNodeDataDefinition harvestData)
+                return;
+
             Prop prop = interactable.Owner;
             NetworkRunner runner = interactor.Runner;
             SceneContext context = interactor.Context;
 
-            context.PropManager.RPC_SetActivated(prop.ChunkID, prop.GUID, true);
+            context.PropManager.RPC_HarvestNode(prop.ChunkID, prop.GUID, harvestData.HarvestPointsCost);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                 context.PropManager.Predict_SetActivated(prop.ChunkID, prop.GUID, true);
+
+            interactor.PC.Currency.AddCurrency(harvestData.CurrencyTypeHarvested, harvestData.ResourcesPerHarvest);
         }
 
 

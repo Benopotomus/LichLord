@@ -8,10 +8,25 @@ namespace LichLord
     {
         public string CurrencyName;
 
+        [SerializeField]
+        private ECurrencyType _currencyType;
+        public ECurrencyType CurrencyType => _currencyType;
+
         //UI
         [BundleObject(typeof(Sprite))]
         [SerializeField]
         protected BundleObject _icon;
         public BundleObject Icon => _icon;
+    }
+
+    public enum ECurrencyType
+    { 
+        None,
+        Wood,
+        Stone,
+        Iron,
+        Souls,
+        Gold,
+
     }
 }

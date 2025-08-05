@@ -1,9 +1,5 @@
 ﻿using Fusion;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using UnityEngine;
 
 namespace LichLord
 {
@@ -25,6 +21,18 @@ namespace LichLord
         {
             base.Spawned();
             ReplicateToAll(false);
+        }
+
+        public void AddCurrency(CurrencyDefinition currencyDefinition, int resourceCount)
+        {
+            switch (currencyDefinition.CurrencyType)
+            {
+                case ECurrencyType.Stone:
+                    _stone += resourceCount;
+                    Debug.Log(_stone);
+                    break;
+            }
+
         }
     }
 }

@@ -10,8 +10,20 @@ namespace LichLord.Props
         protected int _maxHarvestPoints = 1000;
         public int MaxHarvestPoints => _maxHarvestPoints;
 
-        // Bit size constants (matching PropDataDefinition)
+        [SerializeField] // Number of points spent from the Harvest Points each time this node is harvested
+        protected int _harvestPointsCost = 1;
+        public int HarvestPointsCost => _harvestPointsCost;
 
+        [SerializeField]
+        protected int _resourcesPerHarvest = 10;
+        public int ResourcesPerHarvest => _resourcesPerHarvest;
+
+        [SerializeField]
+        protected CurrencyDefinition _currencyTypeHarvested;
+        public CurrencyDefinition CurrencyTypeHarvested => _currencyTypeHarvested;
+
+        // Bit size constants (matching PropDataDefinition)
+        // 4 for state
         protected const int HARVEST_POINTS_BITS = 12;         // 0-4095
         protected const int IS_INTERACTING_BITS = 1;
 
@@ -48,11 +60,11 @@ namespace LichLord.Props
         }
 
         // Handle harvesting
-        public void ApplyHarvest(ref FPropData propData, int damage)
+        public void ApplyHarvest(ref FPropData propData, int harvestValue)
         {
-            int currentHealth = GetHarvestPoints(ref propData);
+            int currentHarvestPoints = GetHarvestPoints(ref propData);
 
-            SetHarvestPoints(currentHealth - damage, ref propData);
+            SetHarvestPoints(currentHarvestPoints - harvestValue, ref propData);
 
             Debug.Log($"Harvested " + propData.GUID + ", Harvest Points: " + GetHarvestPoints(ref propData));
 
