@@ -88,22 +88,24 @@ namespace LichLord.Props
 
         public int GetHealth()
         {
-            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
-            return dataDefinition.GetHealth(ref _data);
+            if (Definition.PropDataDefinition is DestructibleDataDefinition destructibleDataDefinition)
+                return destructibleDataDefinition.GetHealth(ref _data);
+
+            return 0;
         }
 
         public int GetMaxHealth()
         {
-            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
-            return dataDefinition.MaxHealth;
+            if (Definition.PropDataDefinition is DestructibleDataDefinition destructibleDataDefinition)
+                return destructibleDataDefinition.MaxHealth;
+
+            return 0;
         }
 
         public void ApplyDamage(int damage, int tick)
         {
-            PropDataDefinition dataDefinition = Definition.PropDataDefinition;
-
-            // Create a propdata and set its state data to get current health
-            dataDefinition.ApplyDamage(ref _data, damage);
+            if (Definition.PropDataDefinition is DestructibleDataDefinition destructibleDataDefinition)
+                destructibleDataDefinition.ApplyDamage(ref _data, damage);
 
             _hitReactEndTick = _hitReactTicks + tick;
         }

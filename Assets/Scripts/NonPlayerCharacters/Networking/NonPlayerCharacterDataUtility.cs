@@ -215,17 +215,21 @@
         Maneuver_2,
         Maneuver_3,
         Maneuver_4,
+        Harvest_1,
+        Harvest_2,
+        Harvest_3,
+        Harvest_4,
+        Interact_1,
+        Interact_2,
+        Stunned,
+        Spawning,
     }
 
     public enum ENPCStatus : byte
     {
         Neutral,
-        Alerted,
-        Engaged,
-        Stunned,
-        Fleeing,
+        Wounded,
+        Carrying,
         Patrolling,
-        Searching,
-        Disabled,
     }
 }

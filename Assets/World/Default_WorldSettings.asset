@@ -217,7 +217,12 @@ MonoBehaviour:
   ChunkCoord:
     X: 60
     Y: 59
-  PropMarkupDatas: []
+  PropMarkupDatas:
+  - guid: 0
+    position: {x: 4557.8354, y: 20.324085, z: 4498.7417}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: 6ddaf09c7199b98408bddc2ad061f6e9, type: 2}
+    propDefinitionId: 3
   InvasionSpawnPointMarkupDatas:
   - guid: 0
     position: {x: 4561.95, y: 20.78184, z: 4432.3}
@@ -572,52 +577,62 @@ MonoBehaviour:
     Y: 60
   PropMarkupDatas:
   - guid: 0
-    position: {x: 4604.8, y: 22.62887, z: 4524.1}
-    rotation: {x: -0, y: -0, z: -0, w: 1}
-    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
-    propDefinitionId: 1
+    position: {x: 4579.559, y: 23.866638, z: 4541.1934}
+    rotation: {x: -0, y: 0.39852017, z: -0, w: 0.91715956}
+    propDefinition: {fileID: 11400000, guid: 6ddaf09c7199b98408bddc2ad061f6e9, type: 2}
+    propDefinitionId: 3
   - guid: 1
-    position: {x: 4603.5854, y: 23.093172, z: 4527.637}
+    position: {x: 4579.328, y: 23.179895, z: 4533.098}
     rotation: {x: -0, y: -0, z: -0, w: 1}
     propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
     propDefinitionId: 1
   - guid: 2
-    position: {x: 4619.294, y: 23.015785, z: 4535.0625}
-    rotation: {x: -0, y: -0, z: -0, w: 1}
-    propDefinition: {fileID: 11400000, guid: de702fdacc8d9b14d841c2da0500142b, type: 2}
-    propDefinitionId: 2
-  - guid: 3
-    position: {x: 4601.356, y: 22.539711, z: 4521.312}
-    rotation: {x: -0, y: -0, z: -0, w: 1}
-    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
-    propDefinitionId: 1
-  - guid: 4
-    position: {x: 4589.925, y: 22.89433, z: 4524.45}
-    rotation: {x: -0, y: -0, z: -0, w: 1}
-    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
-    propDefinitionId: 1
-  - guid: 5
-    position: {x: 4620.859, y: 22.131706, z: 4520.561}
-    rotation: {x: -0, y: -0, z: -0, w: 1}
-    propDefinition: {fileID: 11400000, guid: de702fdacc8d9b14d841c2da0500142b, type: 2}
-    propDefinitionId: 2
-  - guid: 6
-    position: {x: 4633.4395, y: 21.564602, z: 4524.1}
-    rotation: {x: -0, y: -0, z: 0.64484435, w: 0.764314}
-    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
-    propDefinitionId: 1
-  - guid: 7
-    position: {x: 4603.1597, y: 24.739964, z: 4539.9116}
-    rotation: {x: -0, y: -0, z: -0, w: 1}
-    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
-    propDefinitionId: 1
-  - guid: 8
     position: {x: 4596.0166, y: 23.901766, z: 4531.757}
     rotation: {x: -0, y: -0, z: -0, w: 1}
     propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
     propDefinitionId: 1
-  - guid: 9
+  - guid: 3
     position: {x: 4611.3027, y: 22.95902, z: 4529.58}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
+    propDefinitionId: 1
+  - guid: 4
+    position: {x: 4603.1597, y: 24.739964, z: 4539.9116}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
+    propDefinitionId: 1
+  - guid: 5
+    position: {x: 4619.294, y: 23.015785, z: 4535.0625}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: de702fdacc8d9b14d841c2da0500142b, type: 2}
+    propDefinitionId: 2
+  - guid: 6
+    position: {x: 4589.925, y: 22.89433, z: 4524.45}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
+    propDefinitionId: 1
+  - guid: 7
+    position: {x: 4620.859, y: 22.131706, z: 4520.561}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: de702fdacc8d9b14d841c2da0500142b, type: 2}
+    propDefinitionId: 2
+  - guid: 8
+    position: {x: 4603.5854, y: 23.093172, z: 4527.637}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
+    propDefinitionId: 1
+  - guid: 9
+    position: {x: 4601.356, y: 22.539711, z: 4521.312}
+    rotation: {x: -0, y: -0, z: -0, w: 1}
+    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
+    propDefinitionId: 1
+  - guid: 10
+    position: {x: 4633.4395, y: 21.564602, z: 4524.1}
+    rotation: {x: -0, y: -0, z: 0.64484435, w: 0.764314}
+    propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
+    propDefinitionId: 1
+  - guid: 11
+    position: {x: 4604.8, y: 22.62887, z: 4524.1}
     rotation: {x: -0, y: -0, z: -0, w: 1}
     propDefinition: {fileID: 11400000, guid: acd4e1d7e19aeac439cd3319e4caa020, type: 2}
     propDefinitionId: 1

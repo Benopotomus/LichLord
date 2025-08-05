@@ -121,8 +121,6 @@ namespace LichLord.Props
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                 context.PropManager.Predict_SetActivated(prop.ChunkID, prop.GUID, true);
 
-            context.PropManager.RPC_SetActivated(prop.ChunkID, prop.GUID, true);
-            
             FStrongholdData strongholdData = new FStrongholdData();
             strongholdData.ChunkID = prop.ChunkID;
             strongholdData.GUID = (byte)prop.GUID;

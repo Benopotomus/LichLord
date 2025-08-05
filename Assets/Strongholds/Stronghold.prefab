@@ -324,6 +324,52 @@ CapsuleCollider:
   m_Height: 4
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &4800298634475542108
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9111321769291883032}
+  - component: {fileID: 4733492135524773368}
+  m_Layer: 0
+  m_Name: Flattener
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9111321769291883032
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4800298634475542108}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5669841024813192744}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4733492135524773368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4800298634475542108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57c667ef4adb64a4a8f17886b94c9261, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flattenRadius: 15
+  flattenHeightOffset: 0
 --- !u!1 &5546409922144146193
 GameObject:
   m_ObjectHideFlags: 0
@@ -365,6 +411,7 @@ Transform:
   - {fileID: 393918241676351021}
   - {fileID: 898508190570582435}
   - {fileID: 8912397494160136302}
+  - {fileID: 9111321769291883032}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3375435704011219859
@@ -381,6 +428,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cachedTransform: {fileID: 5669841024813192744}
   _decalProjector: {fileID: 2190342279917576302}
+  _maxHealth: 0
   Hurtbox: {fileID: 3972895102388555320}
 --- !u!114 &6466698900152548025
 MonoBehaviour:

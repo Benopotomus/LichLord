@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using LichLord.Props;
 using LichLord.World;
-using LichLord;
 using UnityEngine.SceneManagement;
 
 [CustomEditor(typeof(LevelEditor))]
 public class LevelEditorEditor : Editor
 {
-    private GameObject markerPrefab;
     private bool isPlacing = false;
     private bool useSurfaceNormal = false;
     private Vector3 forwardDirection = Vector3.forward;
@@ -30,10 +28,12 @@ public class LevelEditorEditor : Editor
 
     private void DrawSceneView(SceneView sceneView)
     {
-        if (target == null || markerPrefab == null || !isPlacing)
+        LevelEditor manager = (LevelEditor)target;
+
+        if (target == null || manager.MarkerPrefab == null || !isPlacing)
             return;
 
-        LevelEditor manager = (LevelEditor)target;
+
         Event e = Event.current;
 
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
@@ -43,19 +43,19 @@ public class LevelEditorEditor : Editor
             Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(markerPrefab, SceneManager.GetActiveScene());
+                Debug.Log(manager.MarkerPrefab);
+                LevelEditorMarker instance = (LevelEditorMarker)PrefabUtility.InstantiatePrefab(manager.MarkerPrefab, SceneManager.GetActiveScene());
 
                 if (instance != null)
                 {
                     Undo.RegisterCreatedObjectUndo(instance, "Place PropMarker");
                     instance.transform.position = hit.point;
+                    instance.transform.SetParent(manager.transform); // <-- Parent to LevelEditor
 
                     Quaternion rotation = Quaternion.LookRotation(
                         (useSurfaceNormal ? hit.normal : forwardDirection).normalized,
                         Vector3.up);
                     instance.transform.rotation = rotation;
-
-                    //Selection.activeGameObject = instance;
                 }
 
                 e.Use();
@@ -77,8 +77,6 @@ public class LevelEditorEditor : Editor
         }
 
         EditorGUILayout.LabelField("Marker Settings", EditorStyles.boldLabel);
-
-        markerPrefab = EditorGUILayout.ObjectField("Marker to Spawn", markerPrefab, typeof(GameObject), false) as GameObject;
 
         useSurfaceNormal = EditorGUILayout.Toggle("Use Surface Normal", useSurfaceNormal);
 
@@ -261,6 +259,7 @@ public class LevelEditorEditor : Editor
 
                     go.transform.position = propMarkup.position;
                     go.transform.rotation = Quaternion.identity;
+                    go.transform.SetParent(editor.transform); // <-- Parent to LevelEditor
                 }
             }
         }

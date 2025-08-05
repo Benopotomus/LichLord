@@ -93,10 +93,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3250597500166225624}
-  - component: {fileID: 8546807908320132942}
-  - component: {fileID: 6629033338036438909}
+  - component: {fileID: 5244930249846838747}
   - component: {fileID: 7120471587053415041}
   - component: {fileID: 5192144284826553988}
+  - component: {fileID: 6629033338036438909}
   m_Layer: 0
   m_Name: PROP_VIS_Barrel
   m_TagString: Untagged
@@ -121,7 +121,7 @@ Transform:
   - {fileID: 6190960949100972725}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8546807908320132942
+--- !u!114 &5244930249846838747
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -130,18 +130,48 @@ MonoBehaviour:
   m_GameObject: {fileID: 6272355397201178900}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e195bcef408773640a28a2036703db9e, type: 3}
+  m_Script: {fileID: 11500000, guid: 9ac5bef9bab33dc478908c35d11136a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stateComponent: {fileID: 7120471587053415041}
-  _healthComponent: {fileID: 5192144284826553988}
   ChunkID:
     X: 0
     Y: 0
   GUID: 0
   _propDefinition: {fileID: 0}
-  _transform: {fileID: 3250597500166225624}
+  _cachedTransform: {fileID: 3250597500166225624}
+  _stateComponent: {fileID: 7120471587053415041}
+  _healthComponent: {fileID: 5192144284826553988}
   Hurtbox: {fileID: 3862204457948869884}
+--- !u!114 &7120471587053415041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6272355397201178900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f071b7371d7000d488f9d4173eab6200, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prop: {fileID: 5244930249846838747}
+  _currentState: 0
+  _hitReactPrefab: {fileID: 3681557076833651950, guid: dfdf42c475b86fc46964c54ac300c264,
+    type: 3}
+--- !u!114 &5192144284826553988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6272355397201178900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d53f7faea48ee624985e7f17ff837daf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prop: {fileID: 5244930249846838747}
+  _currentHealth: 0
 --- !u!114 &6629033338036438909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,36 +199,6 @@ MonoBehaviour:
   wallAvoidFalloff: 1
   priority: 0.5
   debug: 0
---- !u!114 &7120471587053415041
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6272355397201178900}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f071b7371d7000d488f9d4173eab6200, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _prop: {fileID: 8546807908320132942}
-  _currentState: 0
-  _hitReactPrefab: {fileID: 3681557076833651950, guid: dfdf42c475b86fc46964c54ac300c264,
-    type: 3}
---- !u!114 &5192144284826553988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6272355397201178900}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d53f7faea48ee624985e7f17ff837daf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _prop: {fileID: 8546807908320132942}
-  _currentHealth: 0
 --- !u!1001 &6117706998730230234
 PrefabInstance:
   m_ObjectHideFlags: 0

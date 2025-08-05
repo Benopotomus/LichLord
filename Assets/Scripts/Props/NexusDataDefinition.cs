@@ -5,17 +5,17 @@ namespace LichLord.Props
     [CreateAssetMenu(fileName = "NexusDataDefinition", menuName = "LichLord/Props/NexusDataDefinition")]
     public class NexusDataDefinition : PropDataDefinition
     {
-
         [SerializeField]
         protected bool _startingActivation = false;
         public bool StartingActivation => _startingActivation;
 
         private const int IS_ACTIVATED_BITS = 1;
-        private const int IS_ACTIVATED_SHIFT = HEALTH_SHIFT + HEALTH_BITS; // 20
-        private const int IS_ACTIVATED_MASK = (1 << IS_ACTIVATED_BITS) - 1;    // 0b1
-
         private const int IS_INTERACTING_BITS = 1;
-        private const int IS_INTERACTING_SHIFT = IS_ACTIVATED_SHIFT + IS_ACTIVATED_BITS; // 21
+
+        private const int IS_ACTIVATED_SHIFT = STATE_SHIFT + STATE_BITS; 
+        private const int IS_INTERACTING_SHIFT = IS_ACTIVATED_SHIFT + IS_ACTIVATED_BITS; 
+
+        private const int IS_ACTIVATED_MASK = (1 << IS_ACTIVATED_BITS) - 1;
         private const int IS_INTERACTING_MASK = (1 << IS_INTERACTING_BITS) - 1;
 
         public bool GetIsActivated(ref FPropData propData)

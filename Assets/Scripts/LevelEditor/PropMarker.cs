@@ -8,7 +8,7 @@ using UnityEditor.Experimental.SceneManagement; // For PrefabStageUtility
 #endif
 
 [ExecuteAlways]
-public class PropMarker : MonoBehaviour
+public class PropMarker : LevelEditorMarker
 {
     public PropDefinition definition;
 
@@ -20,32 +20,9 @@ public class PropMarker : MonoBehaviour
     private Vector3 _lastCameraPosition;
     private const float cameraMoveThreshold = 0.5f;
 
-    void Awake()
-    {
-        if (Application.isPlaying)
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    private void OnEnable()
-    {
-        SceneView.duringSceneGui += OnSceneGUI;
-        //ScheduleRefreshPreview();
-    }
-
-    private void OnDisable()
-    {
-        SceneView.duringSceneGui -= OnSceneGUI;
-       // ScheduleDestroyPreview();
-    }
-
-    private void OnValidate()
-    {
-       // ScheduleRefreshPreview();
-    }
-
     private bool _refreshScheduled = false;
+
+
 
     private void ScheduleRefreshPreview()
     {
@@ -62,19 +39,6 @@ public class PropMarker : MonoBehaviour
             _refreshScheduled = false;
             self.DestroyPreview();
             self.CreatePreview();
-        };
-    }
-
-    private void ScheduleDestroyPreview()
-    {
-        PropMarker self = this;
-
-        EditorApplication.delayCall += () =>
-        {
-            if (self == null || self.transform == null)
-                return;
-
-            self.DestroyPreview();
         };
     }
 
@@ -147,7 +111,7 @@ public class PropMarker : MonoBehaviour
         _editorInstance = null;
     }
 
-    private void OnSceneGUI(SceneView sceneView)
+    protected override void OnSceneGUI(SceneView sceneView)
     {
         if (sceneView.camera == null)
             return;
@@ -170,7 +134,6 @@ public class PropMarker : MonoBehaviour
             }
         }
     }
-
 
     private bool IsDraggingPrefab()
     {

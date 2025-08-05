@@ -10,7 +10,7 @@ using UnityEditor.Experimental.SceneManagement; // For PrefabStageUtility
 #endif
 
 [ExecuteAlways]
-public class InvasionSpawnPointMarker : MonoBehaviour
+public class InvasionSpawnPointMarker : LevelEditorMarker
 {
     public InvasionSpawnPointDefinition definition;
 
@@ -21,31 +21,6 @@ public class InvasionSpawnPointMarker : MonoBehaviour
     private const float maxDrawRange = 200f;
     private Vector3 _lastCameraPosition;
     private const float cameraMoveThreshold = 0.5f;
-
-    void Awake()
-    {
-        if (Application.isPlaying)
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    private void OnEnable()
-    {
-        SceneView.duringSceneGui += OnSceneGUI;
-        //ScheduleRefreshPreview();
-    }
-
-    private void OnDisable()
-    {
-        SceneView.duringSceneGui -= OnSceneGUI;
-        // ScheduleDestroyPreview();
-    }
-
-    private void OnValidate()
-    {
-        // ScheduleRefreshPreview();
-    }
 
     private bool _refreshScheduled = false;
 
