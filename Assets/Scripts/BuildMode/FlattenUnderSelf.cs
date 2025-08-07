@@ -20,11 +20,12 @@ public class FlattenUnderSelf : MonoBehaviour
         TryFlattenUnderSelf();
     }
 
+
     private void TryFlattenUnderSelf()
     {
-        RaycastHit hit;
         Vector3 rayOrigin = transform.position + Vector3.up * 10f;
-        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, 100f, terrainRaycastMask))
+        RaycastHit[] hits = Physics.RaycastAll(rayOrigin, Vector3.down, 50f, terrainRaycastMask);
+        foreach (RaycastHit hit in hits)
         {
             Terrain terrain = hit.collider.GetComponent<Terrain>();
             if (terrain)
@@ -35,6 +36,7 @@ public class FlattenUnderSelf : MonoBehaviour
                 // Update A* Recast Graph
                 Bounds updateBounds = new Bounds(hit.point, new Vector3(flattenRadius * 2f, 20f, flattenRadius * 2f));
                 AstarPath.active?.UpdateGraphs(updateBounds);
+                return; // Early out after processing the first terrain hit
             }
         }
     }

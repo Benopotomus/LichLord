@@ -9,15 +9,15 @@ namespace LichLord.UI
     public class UICurrencySlot : UIWidget
     {
         [SerializeField]
-        private CurrencyDefinition _definition;
+        protected CurrencyDefinition _definition;
 
         [SerializeField]
-        private TextMeshProUGUI _text;
+        protected TextMeshProUGUI _text;
 
         [SerializeField]
-        private Image _iconImage;
+        protected Image _iconImage;
 
-        private IconLoader _iconLoader = new IconLoader();
+        protected IconLoader _iconLoader = new IconLoader();
 
         protected override void OnVisible()
         {
@@ -42,6 +42,13 @@ namespace LichLord.UI
         {
             _definition = definition;
             LoadIcon(_definition.Icon);
+        }
+
+        public void SetDefinition(CurrencyDefinition definition)
+        {
+            _definition = definition;
+
+            LoadDefinition(_definition);
         }
 
         // VISUALS

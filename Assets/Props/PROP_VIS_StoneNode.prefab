@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 1688145790903861481}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -66,7 +66,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 2.85
+  m_Radius: 2.5
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3809351368344311270
 GameObject:
@@ -459,6 +459,7 @@ GameObject:
   - component: {fileID: 3250597500166225624}
   - component: {fileID: 8439297619170031021}
   - component: {fileID: 1094255631455831052}
+  - component: {fileID: 2965421870978108874}
   m_Layer: 0
   m_Name: PROP_VIS_StoneNode
   m_TagString: Untagged
@@ -502,6 +503,8 @@ MonoBehaviour:
   _cachedTransform: {fileID: 3250597500166225624}
   _interactableComponent: {fileID: 8320375805748504049}
   _interactEffect: {fileID: 0}
+  _harvestCompletePrefab: {fileID: 6300435901046798084, guid: 14153a9053a711d45a11a0e3b6816ec4,
+    type: 3}
   _stateComponent: {fileID: 1094255631455831052}
 --- !u!114 &1094255631455831052
 MonoBehaviour:
@@ -518,3 +521,30 @@ MonoBehaviour:
   _prop: {fileID: 8439297619170031021}
   _currentState: 0
   _hitReactPrefab: {fileID: 0}
+--- !u!114 &2965421870978108874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6272355397201178900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 560112f876f5746c780eca0d404e7139, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1073741824
+  radiusBackingField: 1.65
+  heightBackingField: 2
+  centerBackingField: 1
+  locked: 0
+  lockWhenNotMoving: 0
+  agentTimeHorizon: 2
+  obstacleTimeHorizon: 0.5
+  maxNeighbours: 10
+  layer: 1
+  collidesWith: -1
+  wallAvoidForce: 1
+  wallAvoidFalloff: 1
+  priority: 0.5
+  debug: 0

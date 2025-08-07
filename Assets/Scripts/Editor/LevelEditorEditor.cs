@@ -249,17 +249,36 @@ public class LevelEditorEditor : Editor
                 if (propDefinition == null)
                     continue;
 
-                if (!HasMarkerAt(propDefinition, propMarkup.position))
+                if (!HasPropMarkerAt(propDefinition, propMarkup.position))
                 {
-                    GameObject go = new GameObject("PropMarker");
-                    Undo.RegisterCreatedObjectUndo(go, "Spawn Marker from Chunk Data");
+                    var markerDict = editor.PropMarkerPrefabs;
+                    if (markerDict.TryGetValue(propDefinition, out PropMarker marker))
+                    {
+                        LevelEditorMarker instance = (LevelEditorMarker)PrefabUtility.InstantiatePrefab(marker, SceneManager.GetActiveScene());
 
-                    var propMarker = go.AddComponent<PropMarker>();
-                    propMarker.definition = propDefinition;
+                        Undo.RegisterCreatedObjectUndo(instance, "Spawn Marker from Chunk Data");
 
-                    go.transform.position = propMarkup.position;
-                    go.transform.rotation = Quaternion.identity;
-                    go.transform.SetParent(editor.transform); // <-- Parent to LevelEditor
+                        instance.transform.position = propMarkup.position;
+                        instance.transform.rotation = Quaternion.identity;
+                        instance.transform.SetParent(editor.transform); // <-- Parent to LevelEditor
+                    }
+                }
+            }
+
+            foreach (var invasionMarkup in chunkMarkup.InvasionSpawnPointMarkupDatas)
+            {
+                if (invasionMarkup == null)
+                    continue;
+
+                if (!HasInvasionMarkerAt(invasionMarkup.position))
+                {
+                    LevelEditorMarker instance = (LevelEditorMarker)PrefabUtility.InstantiatePrefab(editor.InvasionSpawnMarkerPrefab, SceneManager.GetActiveScene());
+
+                    Undo.RegisterCreatedObjectUndo(instance, "Spawn Marker from Chunk Data");
+
+                    instance.transform.position = invasionMarkup.position;
+                    instance.transform.rotation = Quaternion.identity;
+                    instance.transform.SetParent(editor.transform); // <-- Parent to LevelEditor
                 }
             }
         }
@@ -267,11 +286,17 @@ public class LevelEditorEditor : Editor
 
     private float markerDetectionRadius = 0.2f;
 
-    private bool HasMarkerAt(PropDefinition definition, Vector3 position)
+    private bool HasPropMarkerAt(PropDefinition definition, Vector3 position)
     {
         return GameObject.FindObjectsOfType<PropMarker>()
             .Any(marker =>
                 marker.definition == definition &&
                 Vector3.Distance(marker.transform.position, position) < markerDetectionRadius);
+    }
+
+    private bool HasInvasionMarkerAt(Vector3 position)
+    {
+        return GameObject.FindObjectsOfType<InvasionSpawnPointMarker>()
+            .Any(marker => Vector3.Distance(marker.transform.position, position) < markerDetectionRadius);
     }
 }

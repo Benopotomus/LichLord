@@ -84,6 +84,19 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
   - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
   m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
+--- !u!114 &-1298497840909519555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6683168b891706409980b588519af85, type: 3}
+  m_Name: InstancedAnimationEditorOutlinePostProcessRendererURP
+  m_EditorClassIdentifier: 
+  m_Active: 1
 --- !u!114 &-667515673877650301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,8 +143,8 @@ MonoBehaviour:
   - {fileID: -1878332245247344467}
   - {fileID: -5363319739473070610}
   - {fileID: -4679823498161999642}
-  - {fileID: -667515673877650301}
-  m_RendererFeatureMap: adc0de57c6d2eee5eef5ddef1ca991b5e63087bc52ed0dbfd662efa7d6c59e7ae37160668688fcbd3b8ead58122cb2f7836484000882bcf6
+  - {fileID: -1298497840909519555}
+  m_RendererFeatureMap: adc0de57c6d2eee5eef5ddef1ca991b5e63087bc52ed0dbfd662efa7d6c59e7ae37160668688fcbd3b8ead58122cb2f7836484000882bcf63df5f9ea17cffaed
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: d322abdc99ebb0f4b9fee6250c00e37a, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

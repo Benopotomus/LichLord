@@ -9,7 +9,7 @@ namespace LichLord.UI
         protected RectTransform _rectTransform;
         private Camera _camera;
 
-        [SerializeField] private Transform _target;
+        [SerializeField] protected Transform _target;
         [SerializeField] private Vector3 _worldOffset = new Vector3(0, 1f, 0);
         [SerializeField] private AnimationCurveAsset _scaleDistanceCurve;
 
@@ -80,7 +80,7 @@ namespace LichLord.UI
             }
         }
 
-        public void SetTarget(Transform target)
+        public virtual void SetTarget(Transform target)
         {
             _target = target;
         }

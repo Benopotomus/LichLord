@@ -43,6 +43,25 @@ namespace LichLord
 
         private VisualEffectBeam _beamInstance;
 
+        private UIFloatingInteract _floatingUI;
+        public UIFloatingInteract FloatingUI
+        {
+            get
+            {
+                if (_floatingUI == null)
+                {
+                    GameplayUI gameplayUI = Context.UI as GameplayUI;
+
+                    if (gameplayUI == null)
+                        return null;
+
+                    _floatingUI = gameplayUI.HUD.FloatingInteract;
+                }
+
+                return _floatingUI;
+            }
+        }
+
         public void ProcessInput(ref FGameplayInput input)
         {
             if (_bestInteractable == null)
@@ -70,7 +89,6 @@ namespace LichLord
 
             state.MoveToInteract();
             _currentInteractable = _bestInteractable;
-            _currentInteractable.InteractStart(this, tick);
             _interactTargetPosition.CopyPosition(_currentInteractable.transform.position);
 
             _pc.Movement.LookTarget = _currentInteractable.transform;
@@ -81,7 +99,9 @@ namespace LichLord
 
                 if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, true);
-            }       
+            }
+
+            _currentInteractable.InteractStart(this, tick);
         }
 
         private void StopInteract(InteractableComponent interactable)
@@ -102,6 +122,14 @@ namespace LichLord
                 if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, false);
             }
+        }
+
+        public void CancelInteract(InteractableComponent interactable, string warningMessage)
+        { 
+            StopInteract(interactable);
+
+            if (FloatingUI != null)
+                FloatingUI.ShowWarningMessage(warningMessage);
         }
 
         public void OnFixedUpdateNetwork(int tick, float deltaTime)
@@ -129,32 +157,29 @@ namespace LichLord
             if (!HasStateAuthority)
                 return;
 
-            GameplayUI gameplayUI = Context.UI as GameplayUI;
 
-            if (gameplayUI == null)
+            if (FloatingUI == null)
                 return;
-
-            UIFloatingInteract floatingInteract = gameplayUI.HUD.FloatingInteract;
 
             if (_bestInteractable == null)
             {
-                floatingInteract.SetTarget(null);
+                FloatingUI.SetTarget(null);
                 return;
             }
 
             if (_bestInteractable.IsInteractionValid(this))
             {
-                floatingInteract.SetTarget(_bestInteractable.transform);
+                FloatingUI.SetTarget(_bestInteractable.transform);
             }
 
             if (_currentInteractable == null)
             {
-                floatingInteract.SetProgressBarVisible(false);
+                FloatingUI.SetProgressBarVisible(false);
                 return;
             }
 
-            floatingInteract.SetProgressBarPercent(_currentInteractable.GetPercentRemaining(localRenderTime));
-            floatingInteract.SetProgressBarVisible(true);
+            FloatingUI.SetProgressBarPercent(_currentInteractable.GetPercentRemaining(localRenderTime));
+            FloatingUI.SetProgressBarVisible(true);
         }
 
         public void OnRender(float deltaTime, float localRenderTime, int tick)

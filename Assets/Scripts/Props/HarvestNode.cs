@@ -1,7 +1,9 @@
-﻿using Fusion;
+﻿using DWD.Pooling;
+using Fusion;
 using LichLord.World;
 using Pathfinding;
 using UnityEngine;
+using DG.Tweening; // Add DOTween namespace
 
 namespace LichLord.Props
 {
@@ -14,8 +16,14 @@ namespace LichLord.Props
         private VisualEffectBase _interactEffect;
 
         [SerializeField]
+        private RockExplosionSystem _harvestCompletePrefab;
+
+        [SerializeField]
         protected PropStateComponent _stateComponent;
         public PropStateComponent StateComponent => _stateComponent;
+
+        [SerializeField]
+        private float _shakeDuration = 0.25f;
 
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
@@ -93,6 +101,14 @@ namespace LichLord.Props
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
         {
             Debug.Log("Interaction started with Harvest Node.");
+
+            if (RuntimeState.Definition.PropDataDefinition is not HarvestNodeDataDefinition harvestData)
+                return;
+
+            var currencyComponent = interactor.PC.Currency;
+
+            if (!currencyComponent.HasRoomForCurrency(harvestData.CurrencyTypeHarvested, harvestData.ResourcesPerHarvest))
+                interactor.CancelInteract(interactable, "Inventory Full");
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
@@ -111,15 +127,51 @@ namespace LichLord.Props
             Prop prop = interactable.Owner;
             NetworkRunner runner = interactor.Runner;
             SceneContext context = interactor.Context;
-
-            context.PropManager.RPC_HarvestNode(prop.ChunkID, prop.GUID, harvestData.HarvestPointsCost);
+            PlayerCharacter pc = interactor.PC;
+            context.PropManager.RPC_HarvestNode(prop.ChunkID, prop.GUID, harvestData.HarvestPointsCost, pc);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.PropManager.Predict_SetActivated(prop.ChunkID, prop.GUID, true);
+                context.PropManager.Predict_HarvestNode(prop.ChunkID, prop.GUID, harvestData.HarvestPointsCost);
 
             interactor.PC.Currency.AddCurrency(harvestData.CurrencyTypeHarvested, harvestData.ResourcesPerHarvest);
         }
 
+        public void PlayHarvestParticles(PlayerCharacter pc)
+        {
+            if (pc == null) return;
 
+            // Create a DOTween Sequence to handle both shake effects
+            Sequence shakeSequence = DOTween.Sequence();
+
+            // Add position shake
+            shakeSequence.Join(transform.DOShakePosition(
+                duration: _shakeDuration, // Duration of the shake
+                strength: 0.05f, // Strength of the position shake
+                vibrato: 20, // Number of oscillations
+                randomness: 90, // Randomness of the shake
+                snapping: false, // Smooth movement
+                fadeOut: true // Gradually reduce shake intensity
+            ));
+
+            // Add rotation shake
+            shakeSequence.Join(transform.DOShakeRotation(
+                duration: _shakeDuration, // Same duration as position shake
+                strength: new Vector3(2f, 2f, 2f), // Slight rotation shake (degrees)
+                vibrato: 20, // Number of oscillations
+                randomness: 90, // Randomness of the shake
+                fadeOut: true // Gradually reduce shake intensity
+            ));
+
+            shakeSequence.OnComplete(() =>
+            {
+
+            });
+
+            RockExplosionSystem system = DWDObjectPool.Instance.SpawnAt(_harvestCompletePrefab, transform.position, Quaternion.identity) as RockExplosionSystem;
+            Debug.Log(pc);
+
+            system.player = pc.transform;
+            system.GetComponent<VisualEffectBase>().Initialize();
+        }
     }
 }

@@ -6,9 +6,11 @@
     public static class NonPlayerCharacterDataUtility
     {
         // Bit size constants
-        private const int DEFINITION_BITS = 8;          // 0–255
+        private const int DEFINITION_BITS = 5;          // 0–31
         private const int TEAM_BITS = 2;                // 0–3
         private const int INVASION_NPC_BITS = 1;        // 0-1
+        private const int FORMATION_ID_BITS = 4;        // 0-15
+        private const int FORMATION_INDEX_BITS = 4;     // 0-15
 
         private const int NPC_STATE_BITS = 4;           // 0–15
         private const int STATUS_BITS = 2;              // 0–3
@@ -16,7 +18,7 @@
 
         private const int HEALTH_BITS = 12;             // 0–4095
 
-        // Bit shifts and masks for Configuration (byte)
+        // Bit shifts and masks for Configuration (ushort)
         private const int DEFINITION_SHIFT = 0;
         private const int TEAM_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
         private const int INVASION_NPC_SHIFT = TEAM_SHIFT + TEAM_BITS;
