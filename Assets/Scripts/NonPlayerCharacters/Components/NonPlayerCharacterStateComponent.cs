@@ -76,6 +76,8 @@ namespace LichLord.NonPlayerCharacters
                     _deadTimer = _deadTimeMax;
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.Collider.enabled = false;
+                    NPC.HitReact.SpawnImpactVisualEffect(0);
+
                     if (hasAuthority)
                     {
                         NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;

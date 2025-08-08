@@ -199,8 +199,11 @@ namespace LichLord.NonPlayerCharacters
 
             if (NPC.Brain.AttackTarget is PlayerCharacter pc)
             {
-                if(data.RawCompressedYaw != (byte)(pc.PlayerIndex + 240))
-                    data.RawCompressedYaw = (byte)(pc.PlayerIndex + 240);
+                if (pc.SpawnComplete)
+                {
+                    if (data.RawCompressedYaw != (byte)(pc.PlayerIndex + 240))
+                        data.RawCompressedYaw = (byte)(pc.PlayerIndex + 240);
+                }
             }
             else
             {

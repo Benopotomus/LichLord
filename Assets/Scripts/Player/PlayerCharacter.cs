@@ -292,7 +292,19 @@ namespace LichLord
         { 
             Debug.Log("Projectile Hit me: " +  projectileIndex + " Damage: " + damage);
 
+            Health.ApplyDamage(damage);
            // Context.ProjectileManager.Server
+
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_TakeHitNPC(int index, int damage)
+        {
+            Debug.Log("NPC Hit me: " + index + " Damage: " + damage);
+
+            Health.ApplyDamage(damage);
+            // Context.ProjectileManager.Server
+
         }
 
         private string GetProjectName()

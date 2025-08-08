@@ -50,7 +50,15 @@ namespace LichLord.NonPlayerCharacters
             _hitReactTimer = hitReact.StateTime;
             _npc.AnimationController.SetAnimationForTrigger(animTrigger);
 
-            if(hitReact.HitEffect.Name != "")
+            SpawnImpactVisualEffect(animIndex);
+        }
+
+        public void SpawnImpactVisualEffect(int animIndex)
+        {
+            NonPlayerCharacterHitReactState hitReact = _hitReacts[animIndex];
+            var animTrigger = hitReact.AnimationTrigger;
+
+            if (hitReact.HitEffect.Name != "")
                 _visualSpawner.SpawnImpactVisualAttached(_impactAttachment, _impactAttachment.rotation, hitReact.HitEffect);
         }
 

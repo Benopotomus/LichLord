@@ -45,6 +45,8 @@ namespace LichLord.NonPlayerCharacters
 
         private NonPlayerCharacterManeuverState _activeManeuver = null;
 
+        public PlayerCharacter TargetPlayer;
+
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
             _isInMovementStopRange = false;
@@ -60,6 +62,8 @@ namespace LichLord.NonPlayerCharacters
                 NPC.State.CurrentState == ENonPlayerState.HitReact)
                 return;
 
+            TargetPlayer = (data.TargetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(data.TargetPlayerIndex) : null;
+
             // Detect if an active state is running 
             // We don't want to update the target during this
             // since we need to wait for the hit event from animation
@@ -71,6 +75,11 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             UpdateActiveManeuver(ref data, renderDeltaTime, tick);
+        }
+
+        public void RemoteUpdate(ref FNonPlayerCharacterData data)
+        {
+            TargetPlayer = (data.TargetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(data.TargetPlayerIndex) :  null;
         }
 
         public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
@@ -102,7 +111,6 @@ namespace LichLord.NonPlayerCharacters
 
             if (executingManuever.HasExpired(tick))
             {
-
                 SetActiveManuever(null);
                 data.State = ENonPlayerState.Idle;
                 NPC.Replicator.UpdateNPCData(ref data, _npc.Index);
@@ -456,6 +464,29 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnHitFromAnimation()
         {
+
+            if (TargetPlayer != null)
+            {
+                if (NPC.Context.LocalPlayerCharacter == TargetPlayer)
+                {
+                    float distance = Vector3.Distance(TargetPlayer.CachedTransform.position, NPC.CachedTransform.position);
+
+                    var currentManeuver = GetManeuverFromState(NPC.State.CurrentState);
+                    if (currentManeuver != null)
+                    {
+                        if (distance < currentManeuver.Definition.AttackRange)
+                        {
+                            TargetPlayer.RPC_TakeHitNPC(0, currentManeuver.Definition.Damage);
+                            //ApplyHitToTarget(TargetPlayer, currentManeuver.Definition, _npc.Context.Runner.Tick);
+                        }
+                    } 
+                }
+
+                return;
+             }
+
+            
+
             if (_hasAttackTarget &&
                 HasActiveManeuver())
             {
@@ -485,9 +516,10 @@ namespace LichLord.NonPlayerCharacters
                 tick = tick,
             };
 
+            Debug.Log("Hit From Animation " + hitTarget);
+
             HitUtility.ProcessHit(ref hit, _npc.Context);
         }
-
 
         [SerializeField]
         GameObject targetGO;

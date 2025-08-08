@@ -133,10 +133,6 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(_context.ChunkManager);
             UpdateTeam(ref data);
 
-            var definition = GetDefinition(ref data);
-            if (definition == null)
-                return;
-
             _stateComponent.UpdateState(ref data, false);
 
             switch (_stateComponent.CurrentState)
@@ -145,6 +141,7 @@ namespace LichLord.NonPlayerCharacters
                 case ENonPlayerState.Inactive:
                     break;
                 default:
+                    _brainComponent.RemoteUpdate(ref data);
                     _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
                     break;
             }
@@ -229,18 +226,23 @@ namespace LichLord.NonPlayerCharacters
                 if (!runner.IsSharedModeMasterClient)
                     npc.Replicator.Predict_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
             }
-
-            if (hit.target is Prop prop)
+            else if (hit.target is Prop prop)
             {
                 Context.PropManager.RPC_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
 
                 if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.guid, hit.damageData.damageValue);
             }
-
-            if (hit.target is Stronghold stronghold)
+            else if (hit.target is Stronghold stronghold)
             {
                 stronghold.RPC_DealDamage(hit.damageData.damageValue);
+            }
+            else if (hit.target is PlayerCharacter pc)
+            { 
+                if(pc.HasStateAuthority)
+                {
+                   
+                }
             }
         }
 

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LichLord.NonPlayerCharacters
+namespace LichLord
 {
     public class ImpactSpawner
     {

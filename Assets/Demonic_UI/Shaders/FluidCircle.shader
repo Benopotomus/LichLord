@@ -1,4 +1,4 @@
-﻿Shader "UI/Custom/FluideURP"
+﻿Shader "UI/Custom/FluideURP_CircleMasked"
 {
     Properties
     {
@@ -21,6 +21,9 @@
         _HotLineColor ("Hot Line Color", Color) = (1,1,1,1)
         _HotLineHeight ("Hot Line Height", Range(0,0.1)) = 0.01
         _HotLineBrightness ("Hot Line Brightness", Range(0,10)) = 1
+
+        _CircleCenter ("Circle Center", Vector) = (0.5, 0.5, 0, 0)
+        _CircleRadius ("Circle Radius", Range(0,1)) = 0.5
     }
     SubShader
     {
@@ -82,6 +85,9 @@
             float _Brightness;
             float _HotLineBrightness;
 
+            float4 _CircleCenter;
+            float _CircleRadius;
+
             v2f vert(appdata_t IN)
             {
                 v2f OUT;
@@ -119,6 +125,10 @@
 
             fixed4 frag(v2f IN) : SV_Target
             {
+                // Circle mask
+                float dist = distance(IN.uv, _CircleCenter.xy);
+                clip(_CircleRadius - dist); // discard outside circle
+
                 fixed4 mainFillColor = ResolveMainColor(IN.uv);
                 fixed4 tex1 = ProcessTexture(IN.uv, _MainTex, _MainTex_ST, _Speed1);
                 fixed4 tex2 = ProcessTexture(IN.uv, _SecondTex, _SecondTex_ST, _Speed2);
