@@ -66,6 +66,12 @@ namespace LichLord
         private List<Chunk> _cachedChunks = new List<Chunk>();
         public IReadOnlyList<Chunk> CachedChunks => _cachedChunks.AsReadOnly();
 
+        [Networked]
+        [SerializeField]
+        public int PlayerIndex { get; set; }
+
+        public bool SpawnComplete = false;
+
         public static bool TryGetLocalPlayer(NetworkRunner runner, out PlayerCharacter playerCreature)
         {
             playerCreature = null;
@@ -121,7 +127,12 @@ namespace LichLord
                 {
                     FirstPersonOverlayObjects[i].layer = overlayLayer;
                 }
+
+                PlayerIndex = Context.NetworkGame.GetFreePlayerIndex();
             }
+
+            SpawnComplete = true;
+
         }
 
         public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState)
@@ -137,11 +148,14 @@ namespace LichLord
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             base.Despawned(runner, hasState);
+            SpawnComplete = false;
             Context.NetworkGame.OnPlayerDespawned(this);
             //Context.WorldSaveLoadManager.OnPlayerDespawned(this);
 
             if(CurrentChunk != null)
                 CurrentChunk.RemoveObject(this);
+
+
         }
 
         public override void Render()

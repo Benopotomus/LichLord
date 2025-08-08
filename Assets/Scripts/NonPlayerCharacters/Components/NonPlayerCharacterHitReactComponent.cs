@@ -64,7 +64,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, attachment.position, attachment.rotation);
+            var instance = DWDObjectPool.Instance.SpawnAttached(poolObject, attachment.position, attachment.rotation, attachment);
             if(instance is StandaloneVisualEffect standaloneEffect)
                 standaloneEffect.Initialize();
         }

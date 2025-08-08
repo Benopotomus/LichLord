@@ -82,6 +82,23 @@
             set => _transform.Yaw = value;
         }
 
+        public byte RawCompressedYaw
+        {
+            get => _transform.RawCompressedYaw;
+            set => _transform.RawCompressedYaw = value;
+        }
+
+        public int TargetPlayerIndex
+        {
+            get
+            {
+                if(_transform.RawCompressedYaw > 240)
+                    return _transform.RawCompressedYaw - 240;
+                else
+                    return -1;
+            }
+        }
+
         public float Pitch
         {
             get => _transform.Pitch;

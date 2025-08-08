@@ -32,6 +32,10 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private float _faceTargetRange = 5f;
 
+        [SerializeField]
+        private bool _requiresLOS = true;
+        public bool RequiresLOS => _requiresLOS;
+
         public float MovementStopRangeSqrt => _movementStopRange * _movementStopRange;
         public float FaceTargetRangeSqrt => _faceTargetRange * _faceTargetRange;
 

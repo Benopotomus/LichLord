@@ -43,6 +43,9 @@ namespace LichLord.NonPlayerCharacters
                 distanceToTarget > Definition.ValidTargetDistance.y)
                 return false;
 
+            if (Definition.RequiresLOS && !brainComponent.HasLineOfSight)
+                return false;
+
             if (brainComponent.AttackTarget is NonPlayerCharacter)
             {
                 if (Definition.ValidTargetTypes.Contains(EManeuverTarget.NPC))
@@ -189,13 +192,12 @@ namespace LichLord.NonPlayerCharacters
             bool targetIsMasterClient
         )
         {
-            float maxLead = targetIsMasterClient ? 0.0f : 0.15f;
+            targetVelocity.y = 0f;
+
             float distance = Vector3.Distance(targetPosition, shooterPosition);
-            float distancePercent = Mathf.Clamp01((distance / projectileSpeed));
-         
-            float interceptTime = Mathf.Lerp(0.1f, 0.1f + maxLead, distancePercent);
+            float interceptTime = distance / 10f;
+
             Vector3 additiveTarget = (targetVelocity * interceptTime);
-            additiveTarget.y = 0;
 
             return targetPosition + (targetVelocity * interceptTime);
         }

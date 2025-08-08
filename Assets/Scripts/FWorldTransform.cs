@@ -65,14 +65,31 @@ namespace LichLord
             set => _position.Position = value;
         }
 
-        public float Yaw // Yaw in degrees (0 to 360)
+        public byte RawCompressedYaw
         {
-            get => (_compressedYaw / 255f) * 360f;
+            get => _compressedYaw;
+            set => _compressedYaw = value;
+        }
+
+        public float Yaw // Always mapped to byte 0–240
+        {
+            get
+            {
+                // If value is over 240, treat as 240 for yaw purposes
+                byte yawByte = _compressedYaw > 240 ? (byte)240 : _compressedYaw;
+                return (yawByte / 240f) * 360f;
+            }
             set
             {
                 float clampedYaw = value % 360f;
                 if (clampedYaw < 0f) clampedYaw += 360f;
-                _compressedYaw = (byte)(clampedYaw / 360f * 255f);
+
+                // Map 0–360 degrees into byte range 0–240
+                _compressedYaw = (byte)Mathf.Clamp(
+                    Mathf.RoundToInt(clampedYaw / 360f * 240f),
+                    0,
+                    240
+                );
             }
         }
 

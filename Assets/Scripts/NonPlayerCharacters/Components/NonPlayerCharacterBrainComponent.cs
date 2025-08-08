@@ -37,6 +37,10 @@ namespace LichLord.NonPlayerCharacters
         private bool _hasAttackTarget = false;
 
         [SerializeField]
+        private bool _hasLineOfSight = false;
+        public bool HasLineOfSight => _hasLineOfSight;
+
+        [SerializeField]
         private List<NonPlayerCharacterManeuverState> _maneuvers = new List<NonPlayerCharacterManeuverState>();
 
         private NonPlayerCharacterManeuverState _activeManeuver = null;
@@ -114,6 +118,16 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             UpdateRanges();
+
+            if (_attackTarget != null)
+                _hasLineOfSight = GetLineOfSight(NPC.CachedTransform.position, _attackTarget.Position);
+            else
+                _hasLineOfSight = false;
+
+            if (_hasLineOfSight)
+            {
+                FindBetterLOSPosition();
+            }
         }
 
         private void UpdateMoveSpeedTick(ref FNonPlayerCharacterData data, int tick)
@@ -503,6 +517,64 @@ namespace LichLord.NonPlayerCharacters
             _moveTarget = _attackTarget.Position;
             NPC.Movement.AIFollower.destination = _moveTarget;
             UpdateRanges();
+        }
+
+        private void FindBetterLOSPosition()
+        {
+            Vector3 origin = NPC.CachedTransform.position;
+            float checkRadius = 5f; // distance to search around current position
+            float stepDegrees = 30f; // spacing of test points
+
+            Vector3 bestSpot = origin;
+            bool found = false;
+
+            for (float angle = 0; angle < 360; angle += stepDegrees)
+            {
+                Vector3 dir = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+                Vector3 candidate = origin + dir * checkRadius;
+
+                // Keep ground level
+                candidate.y = origin.y;
+
+                if (GetLineOfSight(candidate, _attackTarget.Position))
+                {
+                    bestSpot = candidate;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                _moveTarget = bestSpot;
+                NPC.Movement.AIFollower.destination = _moveTarget;
+            }
+        }
+
+        private bool GetLineOfSight(Vector3 from, Vector3 to)
+        {
+            Vector3 dir = (to - from).normalized;
+            float distance = Vector3.Distance(from, to);
+
+            // Slight eye-level offset
+            from.y += 1.6f;
+            to.y += 1.6f;
+
+            if (Physics.Raycast(from, dir, out RaycastHit hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            {
+                // If first thing we hit is ourselves, LOS is still fine — but should never happen unless origin is inside collider
+                if (hit.collider.transform.IsChildOf(NPC.gameObject.transform))
+                    return true;
+
+                // If first thing we hit is the target, LOS is fine
+                if (targetGO != null && hit.collider.transform.IsChildOf(targetGO.transform))
+                    return true;
+
+                return false; // Hit something else
+            }
+
+            // No hit at all means nothing is blocking
+            return true;
         }
 
     }

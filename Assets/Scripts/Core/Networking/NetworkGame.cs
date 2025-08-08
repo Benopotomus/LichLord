@@ -73,8 +73,35 @@ namespace LichLord
             return null;
         }
 
+        public int GetFreePlayerIndex()
+        {
+            const int MaxPlayers = 16;
+            HashSet<int> usedIndices = new HashSet<int>();
 
+            for (int i = 0; i < _activePlayers.Count; i++)
+            {
+                usedIndices.Add(_activePlayers[i].PlayerIndex);
+            }
 
+            for (int i = 0; i < MaxPlayers; i++)
+            {
+                if (!usedIndices.Contains(i))
+                    return i;
+            }
 
+            return -1;
+        }
+
+        public PlayerCharacter GetPlayerByIndex(int targetIndex)
+        {
+            for (int i = 0; i < _activePlayers.Count; i++)
+            {
+                if (_activePlayers[i].SpawnComplete &&
+                    _activePlayers[i].PlayerIndex == targetIndex)
+                    return _activePlayers[i];
+            }
+
+            return null;
+        }
     }
 }

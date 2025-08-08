@@ -77,7 +77,35 @@ namespace LichLord.NonPlayerCharacters
 
             // Smooth yaw only
             float currentYaw = NPC.CachedTransform.eulerAngles.y;
-            
+            float targetYaw = data.Yaw;
+            int targetPlayerIndex = data.TargetPlayerIndex;
+
+            if (targetPlayerIndex > 0)
+            {
+                var targetPlayer = NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex);
+                if (targetPlayer != null)
+                {
+                    Vector3 dir = targetPlayer.Position - NPC.CachedTransform.position;
+                    if (dir.sqrMagnitude > 0.0001f)
+                    {
+                        // Calculate yaw toward the target player
+                        float playerYaw = Quaternion.LookRotation(dir, Vector3.up).eulerAngles.y;
+
+                        // Blend between facing player and existing projectile follow yaw
+                        targetYaw = playerYaw;
+                    }
+                }
+            }
+
+            float lerpedYaw = Mathf.LerpAngle(currentYaw, targetYaw, renderDeltaTime * 10f);
+
+            Vector3 currentEuler = NPC.CachedTransform.eulerAngles;
+            NPC.CachedTransform.rotation = Quaternion.Euler(
+                0,
+                lerpedYaw,
+                0
+            );
+            /*
             _projectileFollowYawStrength = Mathf.Clamp(_projectileFollowYawStrength - renderDeltaTime, 0.0f, 1.1f);
 
             // Get the local projectile follow strength blended with the server position.
@@ -91,6 +119,7 @@ namespace LichLord.NonPlayerCharacters
                 lerpedYaw,
                 0
             );
+            */
 
             UpdateVelocity(ref data, renderDeltaTime);
             UpdateYawVelocity();
@@ -168,14 +197,22 @@ namespace LichLord.NonPlayerCharacters
                 data.PositionZ = NPC.CachedTransform.position.z;
             }
 
-            // Update rotation only if the change is significant
-            const float ROTATION_THRESHOLD_DEGREES = 5.0f;
-            float yawA = NPC.CachedTransform.eulerAngles.y;
-            float yawB = data.Yaw;
-
-            if (Mathf.Abs(Mathf.DeltaAngle(yawA, yawB)) > ROTATION_THRESHOLD_DEGREES)
+            if (NPC.Brain.AttackTarget is PlayerCharacter pc)
             {
-                data.Yaw = yawA;
+                if(data.RawCompressedYaw != (byte)(pc.PlayerIndex + 240))
+                    data.RawCompressedYaw = (byte)(pc.PlayerIndex + 240);
+            }
+            else
+            {
+                // Update rotation only if the change is significant
+                const float ROTATION_THRESHOLD_DEGREES = 5.0f;
+                float yawA = NPC.CachedTransform.eulerAngles.y;
+                float yawB = data.Yaw;
+
+                if (Mathf.Abs(Mathf.DeltaAngle(yawA, yawB)) > ROTATION_THRESHOLD_DEGREES)
+                {
+                    data.Yaw = yawA;
+                }
             }
         }
 
