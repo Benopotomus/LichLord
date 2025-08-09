@@ -23,5 +23,10 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         protected float _walkSpeed;
         public float WalkSpeed => _walkSpeed;
+
+        [SerializeField] // added radius for NPC targeting/melee
+        protected float _bonusRadius;
+        public float BonusRadius => _bonusRadius;
+
     }
 }

@@ -13,9 +13,9 @@ public class EquipmentEditor : Editor
 
         if(GUILayout.Button("Remap Bones"))
         {
-            ((Equipment)serializedObject.targetObject).RemapBones();
-            serializedObject.Update();
-            serializedObject.ApplyModifiedProperties();
+            //((Equipment)serializedObject.targetObject).RemapBones();
+           // serializedObject.Update();
+            //serializedObject.ApplyModifiedProperties();
         }
     }
 }

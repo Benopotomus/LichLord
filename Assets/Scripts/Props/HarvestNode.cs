@@ -46,6 +46,15 @@ namespace LichLord.Props
             UpdateNavmesh();
         }
 
+        public override void StartRecycle()
+        {
+            _interactableComponent.onInteractStart -= OnInteractStart;
+            _interactableComponent.onInteractEnd -= OnInteractEnd;
+            _interactableComponent.onInteractionComplete -= OnInteractionComplete;
+
+            base.StartRecycle();
+        }
+
         private void UpdateNavmesh()
         {
             var bounds = new Bounds(transform.position, new Vector3(5f, 5f, 5f)); // adjust size as needed
