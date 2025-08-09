@@ -58,6 +58,8 @@ namespace LichLord.NonPlayerCharacters
         private FNetObjectID _netObjectID = new FNetObjectID();
         public FNetObjectID NetObjectID => _netObjectID;
 
+        public float BonusRadius { get { return 2; } }
+
         private int _index;
         public int Index => _index;
 

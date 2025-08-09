@@ -23,6 +23,9 @@ namespace LichLord.Props
         // IChunkTrackable
         public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
 
+        // Extra radius added for npc maneuvers to determine if they're in range.
+        public float BonusRadius { get; }
+
         public Vector3 Position => CachedTransform.position;
         public virtual bool IsAttackable
         {

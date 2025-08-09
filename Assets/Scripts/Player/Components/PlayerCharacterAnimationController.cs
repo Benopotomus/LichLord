@@ -22,6 +22,9 @@ namespace LichLord
         private int _animIDUpperBodyTrigger = Animator.StringToHash("UpperBodyTrigger");
         private int _animIDUpperBodyBlend = Animator.StringToHash("UpperBodyBlend");
 
+        private int _animIDFlinchTrigger = Animator.StringToHash("HitFlinch");
+        private int _animIDFlinchTriggerNumber = Animator.StringToHash("HitFlinchNumber");
+
         [SerializeField] private PlayerCharacter _pc;
         [SerializeField] private Animator _animator;
 
@@ -36,6 +39,12 @@ namespace LichLord
             _animator.SetInteger(_animIDJumping, animationTrigger.Jumping);
             _animator.SetInteger(_animIDTriggerNumber, animationTrigger.TriggerNumber);
             _animator.SetTrigger(_animIDTrigger);
+        }
+
+        public void PlayFlinchAnimation()
+        {
+            _pc.Animator.SetInteger(_animIDFlinchTriggerNumber, Random.Range(1, 4));
+            _pc.Animator.SetTrigger(_animIDFlinchTrigger);
         }
 
         public void UpdateAnimatonForMovement(Vector3 localVelocity, float yawVelocity, EMovementState moveState, float renderDeltaTime)

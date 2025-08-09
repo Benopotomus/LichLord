@@ -50,6 +50,8 @@ namespace LichLord
             get => Object != null ? new FNetObjectID { networkId = Object.Id } : default;
         }
 
+        public float BonusRadius { get { return 0; } }
+
         INetActor IHitInstigator.NetActor => this;
 
         // IChunkTrackable
@@ -290,21 +292,13 @@ namespace LichLord
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_TakeProjectileHit(int projectileIndex, int damage)
         { 
-            Debug.Log("Projectile Hit me: " +  projectileIndex + " Damage: " + damage);
-
             Health.ApplyDamage(damage);
-           // Context.ProjectileManager.Server
-
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_TakeHitNPC(int index, int damage)
         {
-            Debug.Log("NPC Hit me: " + index + " Damage: " + damage);
-
             Health.ApplyDamage(damage);
-            // Context.ProjectileManager.Server
-
         }
 
         private string GetProjectName()

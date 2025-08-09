@@ -8,6 +8,9 @@ namespace LichLord
 {
     public class PlayerHealthComponent : ContextBehaviour
     {
+        [SerializeField]
+        private PlayerCharacter _pc;
+
         [Networked]
         private int _currentHealth { get; set; } = 1000;
         public int CurrentHealth => _currentHealth;
@@ -39,12 +42,15 @@ namespace LichLord
             Debug.Log("Damage Taken: " + damage + ", Health: " + _currentHealth);
 
             SpawnImpactVisualEffect(0);
+
             if (_currentHealth == 0)
             {
                 Debug.Log("Player Died");
             }
-        }
 
+            _pc.AnimationController.PlayFlinchAnimation();
+
+        }
 
         public void SpawnImpactVisualEffect(int animIndex)
         {

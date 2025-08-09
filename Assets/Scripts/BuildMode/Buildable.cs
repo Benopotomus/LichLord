@@ -16,6 +16,8 @@ namespace LichLord.Buildables
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
 
+        public float BonusRadius { get { return 0; } }
+
         public HurtboxComponent Hurtbox;
 
         public virtual void OnSpawned(BuildableZone zone, Vector3 position, Quaternion rotation, int data)

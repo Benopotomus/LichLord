@@ -28,12 +28,14 @@ namespace LichLord
         private float _buildDistance { get; set; }
 
         [Networked]
-        private float _influenceDistance { get; set; }
+        private float _influenceDistance { get; set; } = 20.0f;
 
         public Chunk CurrentChunk { get { return _chunk; } set { } }
         private Chunk _chunk;
 
         public Vector3 Position => _cachedTransform.position;
+
+        public float BonusRadius { get { return 4f; } }
 
         public bool IsAttackable {
             get

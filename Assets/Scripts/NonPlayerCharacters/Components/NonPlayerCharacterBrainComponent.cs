@@ -127,14 +127,17 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateRanges();
 
-            if (_attackTarget != null)
-                _hasLineOfSight = GetLineOfSight(NPC.CachedTransform.position, _attackTarget.Position);
-            else
-                _hasLineOfSight = false;
-
-            if (_hasLineOfSight)
+            if (_isInFaceTargetRange)
             {
-                FindBetterLOSPosition();
+                if (_attackTarget != null)
+                    _hasLineOfSight = GetLineOfSight(NPC.CachedTransform.position, _attackTarget.Position);
+                else
+                    _hasLineOfSight = false;
+
+                if (_hasLineOfSight)
+                {
+                    FindBetterLOSPosition();
+                }
             }
         }
 
@@ -272,7 +275,7 @@ namespace LichLord.NonPlayerCharacters
                 !_hasAttackTarget)
                 return;
 
-            float sqrDist = (NPC.CachedTransform.position - _attackTarget.Position).sqrMagnitude;
+            float sqrDist = (NPC.CachedTransform.position - _attackTarget.Position).sqrMagnitude - _attackTarget.BonusRadius;
             _isInMovementStopRange = sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt;
             _isInFaceTargetRange = sqrDist < _activeManeuver.Definition.FaceTargetRangeSqrt;
         }
@@ -297,7 +300,13 @@ namespace LichLord.NonPlayerCharacters
                 {
                     if (angle < 5f)
                     {
-                        _activeManeuver.ExecuteManeuver(NPC, ref data, tick);
+                        if (_activeManeuver.Definition.RequiresLOS)
+                        {
+                            if (HasLineOfSight)
+                                _activeManeuver.ExecuteManeuver(NPC, ref data, tick);
+                        }
+                        else
+                            _activeManeuver.ExecuteManeuver(NPC, ref data, tick);
                     }
                 }
             }
@@ -464,7 +473,6 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnHitFromAnimation()
         {
-
             if (TargetPlayer != null)
             {
                 if (NPC.Context.LocalPlayerCharacter == TargetPlayer)
@@ -477,15 +485,12 @@ namespace LichLord.NonPlayerCharacters
                         if (distance < currentManeuver.Definition.AttackRange)
                         {
                             TargetPlayer.RPC_TakeHitNPC(0, currentManeuver.Definition.Damage);
-                            //ApplyHitToTarget(TargetPlayer, currentManeuver.Definition, _npc.Context.Runner.Tick);
                         }
                     } 
                 }
 
                 return;
              }
-
-            
 
             if (_hasAttackTarget &&
                 HasActiveManeuver())
@@ -516,8 +521,6 @@ namespace LichLord.NonPlayerCharacters
                 tick = tick,
             };
 
-            Debug.Log("Hit From Animation " + hitTarget);
-
             HitUtility.ProcessHit(ref hit, _npc.Context);
         }
 
@@ -545,6 +548,9 @@ namespace LichLord.NonPlayerCharacters
 
             if (_attackTarget is Nexus nexus)
                 targetGO = nexus.gameObject;
+            
+            if (_attackTarget is Stronghold stronghold)
+                targetGO = stronghold.gameObject;
 
             _moveTarget = _attackTarget.Position;
             NPC.Movement.AIFollower.destination = _moveTarget;

@@ -43,9 +43,6 @@ namespace LichLord.NonPlayerCharacters
                 distanceToTarget > Definition.ValidTargetDistance.y)
                 return false;
 
-            if (Definition.RequiresLOS && !brainComponent.HasLineOfSight)
-                return false;
-
             if (brainComponent.AttackTarget is NonPlayerCharacter)
             {
                 if (Definition.ValidTargetTypes.Contains(EManeuverTarget.NPC))
