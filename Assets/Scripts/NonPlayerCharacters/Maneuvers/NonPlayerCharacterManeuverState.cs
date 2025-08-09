@@ -138,7 +138,7 @@ namespace LichLord.NonPlayerCharacters
             Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(npc, projectileData.Muzzle);
 
             Vector3 targetPos = npc.Brain.AttackTarget.Position;
-            targetPos.y += 1f;
+            targetPos.y += (1f + Definition.VerticalAimOffset);
 
             // Modify target position by target velocity
             if (npc.Brain.AttackTarget is PlayerCharacter pc)

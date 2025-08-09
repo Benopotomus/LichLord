@@ -6,9 +6,6 @@ namespace LichLord.Projectiles
     using DWD.Pooling;
     using DG.Tweening;
     using LichLord.Props;
-    using LichLord.NonPlayerCharacters;
-
-    //using DG.Tweening;
 
     public class RenderProjectile : Projectile
     {
@@ -139,8 +136,13 @@ namespace LichLord.Projectiles
 
         // CLIENT CHECKS
 
+        private Vector3 _lastRenderPosition;
+        
         private void UpdateNPCProjectileCasts(ref FProjectileData data, int tick, float simulationTime, float networkDeltaTime, float localDeltaTime)
         {
+            if (Context.ProjectileManager.HasStateAuthority)
+                return;
+
             if (!IsNPCProjectile)
                 return;
 
@@ -149,19 +151,17 @@ namespace LichLord.Projectiles
 
             _lastTick = tick;
 
-            Vector3 newPosition = Position;
-            Quaternion newRotation = Rotation;
-
             ProjectilePhysicsUtility.CheckAndHandleCollision(this,
                 ref data,
                 tick,
                 simulationTime,
                 networkDeltaTime,
-                newPosition,
-                newPosition,
-                newRotation,
-                newRotation);
+                _lastRenderPosition,
+                Position,
+                Rotation,
+                Rotation);
+
+            _lastRenderPosition = Position;
         }
-        
     }
 }

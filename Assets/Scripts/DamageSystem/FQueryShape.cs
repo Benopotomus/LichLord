@@ -4,6 +4,7 @@ namespace LichLord
 {
     public struct FQueryShape
     {
+        public Vector3 lastPostion;
         public Vector3 position;
         public Quaternion rotation;
         public Vector3 scale;

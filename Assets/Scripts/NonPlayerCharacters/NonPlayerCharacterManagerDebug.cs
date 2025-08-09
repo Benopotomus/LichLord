@@ -35,7 +35,7 @@ namespace LichLord.NonPlayerCharacters
                     randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
                     Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA, false);
                 }
-
+                
                 for (int i = 0; i < _initialSpawnCount; i++)
                 {
                     Vector3 randomPosition = new Vector3(
@@ -48,6 +48,7 @@ namespace LichLord.NonPlayerCharacters
 
                     Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB, false);
                 }
+                
             }
         }
 

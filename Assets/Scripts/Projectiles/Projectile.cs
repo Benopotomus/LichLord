@@ -55,8 +55,16 @@ namespace LichLord.Projectiles
                 if (IsSightBlocked(impactPosition, targetTestPosition))
                     continue;
 
-                if (IsNPCProjectile && this is RenderProjectile)
-                    NPC_CollideWithHitData(ref data, ref hitData, tick);
+                if (IsNPCProjectile)
+                {
+                    if (this is RenderProjectile)
+                        NPC_CollideWithHitData(ref data, ref hitData, tick);
+                    else
+                        if (hitTarget is PlayerCharacter pc && pc.HasStateAuthority)
+                            NPC_CollideWithHitData(ref data, ref hitData, tick);
+                        else
+                            CollideWithHitData(ref data, ref hitData, tick);
+                }
                 else
                     CollideWithHitData(ref data, ref hitData, tick);
             }

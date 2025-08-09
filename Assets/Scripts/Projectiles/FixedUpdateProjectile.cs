@@ -101,15 +101,6 @@ namespace LichLord.Projectiles
             ref FPhysicsHitData hitdata,
             int tick)
         {
-            /*
-            _collisionEvent.projectile = this;
-            _collisionEvent.hitTarget = collidedActor;
-            _collisionEvent.collideTick = OwningPool.Runner.Tick;
-            _collisionEvent.impactPosition = sourcePosition;
-            _collisionEvent.impactRotationRadians = GetImpactRotationRadiansFromActor(ref hitdata);
-
-            Definition.ImpactResponse.HandleCollisionHitActor(this, ref data, ref _collisionEvent, tick);
-        */
         }
 
         public void SpawnProjectile(ref FProjectileData data, ProjectileDefinition definition, Vector3 position)
@@ -128,7 +119,5 @@ namespace LichLord.Projectiles
 
             OwningPool.SpawnProjectile(fireEvent);
         }
-
-
     }
 }

@@ -25,11 +25,11 @@ namespace LichLord
         [Networked] private int _souls { get; set; }
         public int Souls => _souls;
 
-        private int _woodMax = 30;
-        private int _stoneMax = 30;
-        private int _ironMax = 30;
-        private int _goldMax = 30;
-        private int _soulsMax = 30;
+        private int _woodMax = 100;
+        private int _stoneMax = 100;
+        private int _ironMax = 100;
+        private int _goldMax = 100;
+        private int _soulsMax = 100;
 
         public override void Spawned()
         {

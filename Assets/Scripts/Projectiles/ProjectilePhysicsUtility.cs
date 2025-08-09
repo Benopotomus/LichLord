@@ -76,6 +76,7 @@
                 tick,
                 simTimeSinceFired,
                 networkDeltaTime,
+                oldPosition,
                 newPosition,
                 newRotation,
                 ref hitDatas,
@@ -112,6 +113,7 @@
             int tick,
             float simTimeSinceFired,
             float networkDeltaTime,
+            Vector3 oldPosition,
             Vector3 position,
             Quaternion rotation,
             ref List<FPhysicsHitData> hitDatas,
@@ -121,6 +123,7 @@
 
             FQueryShape _currentQueryShape = new FQueryShape
             {
+                lastPostion = oldPosition,
                 position = position,
                 rotation = rotation,
                 shapeType = definition.Shape,
@@ -176,7 +179,12 @@
                 {
                     if (!impactHit.IsAssigned)
                     {
-                        impactHit.IsAssigned = true;
+                        // if the hit is a PC, we don't want to set impact to true
+                        if (hitTarget is not PlayerCharacter pc)
+                        {
+                            impactHit.IsAssigned = true;
+                        }
+
                         impactHit.HitObject = gameObjectHit;
                         impactHit.HitTarget = hitTarget;
                         impactHit.ProjectilePosition = queryShape.position;
@@ -365,7 +373,7 @@
 
         public static List<FOverlapHit> GetCastHits(Projectile projectile, ref FQueryShape queryShape)
         {
-            Vector3 lastPosition = projectile.Position;
+            Vector3 lastPosition = queryShape.lastPostion;
             ProjectileDefinition definition = projectile.Definition;
             Vector3 nextPosition = queryShape.position;
             Quaternion rotation = queryShape.rotation;
@@ -479,8 +487,9 @@
             {
                 if (projectile is FixedUpdateProjectile)
                 {
-                    if(hitTarget is PlayerCharacter)
-                        return false;
+                    if(hitTarget is PlayerCharacter pc)
+                        if(!pc.HasStateAuthority)
+                            return false;
                 }
             }
 
@@ -536,160 +545,5 @@
 
             ListPool<FOverlapHit>.Release(hitResults);
         }
-
-        /*
-        public static void NPC_CheckAndHandleCollision(Projectile projectile,
-            ref FProjectileData data,
-            int tick,
-            float simulationTime,
-            float localDeltaTime,
-            Vector3 oldPosition,
-            Vector3 newPosition,
-            Quaternion oldRotation,
-            Quaternion newRotation)
-        {
-            float simTimeSinceFired = simulationTime - (data.FireTick * projectile.Runner.DeltaTime);
-
-            if (IsCollidingActive(projectile.Definition, simTimeSinceFired))
-            {
-                int collisionCheckRate = projectile.Definition.CollisionCheckRate;
-
-                // Check every tick if rate is 0, otherwise follow the tick interval
-                if (collisionCheckRate == 0 || (tick % collisionCheckRate == 0))
-                {
-                    NPC_PerformCollisionChecks(projectile, ref data, tick, simTimeSinceFired,
-                        oldPosition, newPosition,
-                        oldRotation, newRotation);
-                }
-            }
-        }
-
-        private static void NPC_PerformCollisionChecks(Projectile projectile,
-            ref FProjectileData data,
-            int tick,
-            float simTimeSinceFired,
-            Vector3 oldPosition,
-            Vector3 newPosition,
-            Quaternion oldRotation,
-            Quaternion newRotation)
-        {
-            ProjectileDefinition definition = projectile.Definition;
-
-            FPhysicsHitData impactHit = new FPhysicsHitData();
-            List<FPhysicsHitData> hitDatas = ListPool<FPhysicsHitData>.Get();
-
-            // Perform the shape collision check
-            NPC_CheckShapeCollisions(projectile,
-                ref data,
-                tick,
-                simTimeSinceFired,
-                newPosition,
-                newRotation,
-                ref hitDatas,
-                ref impactHit);
-
-            if (definition.OnlyAffectImpactTarget && impactHit.IsAssigned)
-            {
-                List<FPhysicsHitData> singleHitData = ListPool<FPhysicsHitData>.Get();
-                singleHitData.Add(impactHit);
-                projectile.UpdateAffectedActors(ref data, singleHitData, tick);
-                ListPool<FPhysicsHitData>.Release(singleHitData);
-            }
-            else
-            {
-                projectile.UpdateAffectedActors(ref data, hitDatas, tick);
-            }
-
-            // If there's an impact, handle it
-            if (impactHit.IsAssigned)
-            {
-                ProjectileImpactUtility.HandleImpact(projectile,
-                    definition,
-                    ref data,
-                    ref impactHit,
-                    tick);
-            }
-
-            // Release the hitDatas list
-            ListPool<FPhysicsHitData>.Release(hitDatas);
-        }
-
-        public static void NPC_CheckShapeCollisions(Projectile projectile,
-            ref FProjectileData data,
-            int tick,
-            float simTimeSinceFired,
-            Vector3 position,
-            Quaternion rotation,
-            ref List<FPhysicsHitData> hitDatas,
-            ref FPhysicsHitData impactHit)
-        {
-            ProjectileDefinition definition = projectile.Definition;
-
-            FQueryShape _currentQueryShape = new FQueryShape
-            {
-                position = position,
-                rotation = rotation,
-                shapeType = definition.Shape,
-                shapeExtents = definition.Extents * GetScaleAtTime(definition, simTimeSinceFired)
-            };
-
-            NPC_GetValidHits(projectile, ref data, ref _currentQueryShape, ref hitDatas, ref impactHit);
-        }
-
-        public static void NPC_GetValidHits(Projectile projectile,
-               ref FProjectileData data,
-               ref FQueryShape queryShape,
-               ref List<FPhysicsHitData> hitDatas,
-               ref FPhysicsHitData impactHit)
-        {
-            List<FOverlapHit> hitResults = ListPool<FOverlapHit>.Get();
-
-            switch (projectile.Definition.PhysicsSweep)
-            {
-                case EPhysicsSweep.Overlap:
-                    hitResults = GetOverlapHits(projectile, ref queryShape);
-                    break;
-            }
-
-            LayerMask overlapLayer = projectile.Definition.OverlapCollisionLayer;
-
-            Vector2 startPosition = queryShape.position;
-
-            foreach (var hitResult in hitResults)
-            {
-                GameObject gameObjectHit = hitResult.GameObject;
-
-                IHitTarget hitTarget = null;
-
-                if (gameObjectHit.tag == "Hurtbox")
-                {
-                    HurtboxOwner hitboxOwnerComp = gameObjectHit.GetComponent<HurtboxOwner>();
-                    if (hitboxOwnerComp == null)
-                        continue;
-
-                    hitTarget = hitboxOwnerComp.HitTarget;
-                }
-
-                // Check for overlap layer
-                if ((overlapLayer.value & (1 << gameObjectHit.layer)) != 0)
-                {
-                    FPhysicsHitData hitData = new FPhysicsHitData
-                    {
-                        IsAssigned = true,
-                        HitObject = gameObjectHit,
-                        HitTarget = hitTarget,
-                        ProjectilePosition = queryShape.position,
-                        ImpactPoint = hitResult.HitPoint,
-                        HitNormal = hitResult.Normal
-                    };
-
-                    hitDatas.Add(hitData);
-                }
-            }
-
-            // Release hitResults
-            ListPool<FOverlapHit>.Release(hitResults);
-        }
-        */
     }
 }

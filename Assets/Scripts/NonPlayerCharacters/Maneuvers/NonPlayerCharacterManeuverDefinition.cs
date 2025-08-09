@@ -39,6 +39,10 @@ namespace LichLord.NonPlayerCharacters
         public float MovementStopRangeSqrt => _movementStopRange * _movementStopRange;
         public float FaceTargetRangeSqrt => _faceTargetRange * _faceTargetRange;
 
+        [SerializeField]
+        private float _verticalAimOffset;
+        public float VerticalAimOffset => _verticalAimOffset;
+
         [Header("Targeting")]
         [SerializeField]
         private Vector2 _validTargetDistance = Vector2.zero;

@@ -55,7 +55,7 @@ namespace LichLord.Projectiles
         // Called from a player character and RPC
         public void DeactivateServerProjectile(int index)
         { 
-            
+ 
         }
 
     }
