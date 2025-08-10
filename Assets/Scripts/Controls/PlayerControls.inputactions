@@ -90,7 +90,34 @@
                     "name": "Fire",
                     "type": "Button",
                     "id": "3acf276f-04c9-41a8-b3b9-ae7455b7ff44",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "AltFire",
+                    "type": "Button",
+                    "id": "11eac8b9-c277-4498-a72c-80fd8ef15a90",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PlaceBuildable",
+                    "type": "Button",
+                    "id": "6edea168-1fbe-428d-aba8-1e60f58d0f48",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RotateBuildableYaw",
+                    "type": "Button",
+                    "id": "ed85ad69-ae05-4f10-9de0-a851df41dcdb",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -99,7 +126,7 @@
                     "name": "CameraViewSwitch",
                     "type": "Button",
                     "id": "f705210b-3615-4b83-8cd3-c6e97555e5f9",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -652,6 +679,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7ca239b1-c21d-4772-b7fb-c73b3d21775b",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AltFire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e7d79ecb-4b2f-4454-be75-1737ed140128",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlaceBuildable",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a075f89d-1d2c-413b-9135-8aca36af6fdb",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RotateBuildableYaw",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

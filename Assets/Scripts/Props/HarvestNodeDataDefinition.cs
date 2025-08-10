@@ -66,7 +66,7 @@ namespace LichLord.Props
 
             SetHarvestPoints(currentHarvestPoints - harvestValue, ref propData);
 
-            Debug.Log($"Harvested " + propData.GUID + ", Harvest Points: " + GetHarvestPoints(ref propData));
+            //Debug.Log($"Harvested " + Index + ", Harvest Points: " + GetHarvestPoints(ref propData));
 
             if (GetHarvestPoints(ref propData) <= 0)
             {

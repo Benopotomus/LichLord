@@ -4,6 +4,7 @@ using Fusion;
 using System.Collections.Generic;
 using System;
 using Fusion.Sockets;
+using LichLord.Buildables;
 
 namespace LichLord.World
 {
@@ -88,6 +89,84 @@ namespace LichLord.World
                         chunkSaveDatas[chunkCoord] = chunkSaveData;
                         totalPropCount += propList.Count; // Increment prop counter
                     }
+                }
+
+                // Convert to WorldSaveData for serialization
+                FWorldSaveData saveData = new FWorldSaveData
+                {
+                    chunks = new FChunkSaveData[chunkSaveDatas.Count]
+                };
+                int index = 0;
+                foreach (var chunkData in chunkSaveDatas.Values)
+                {
+                    saveData.chunks[index] = chunkData;
+                    index++;
+                }
+
+                // Serialize to JSON and store in SaveLoadManager
+                string json = JsonUtility.ToJson(saveData, true);
+                SaveLoadManager.instance.SetWorldData(sessionName, json);
+                File.WriteAllText(saveFilePath, json);
+                Debug.Log($"Saved {chunkSaveDatas.Count} chunks with {totalPropCount} props for session {sessionName} to {saveFilePath}.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to save chunk states for session: {e.Message}");
+            }
+        }
+
+        private void SaveStrongholds()
+        {
+            if (Runner == null)
+            {
+                Debug.LogWarning("No active session; cannot save chunks.");
+                return;
+            }
+
+            try
+            {
+                string sessionName = Global.Networking.SessionName;
+                string saveFilePath = GetWorldSaveFilePath(sessionName);
+
+                // Hold onto a dictionary of chunk save datas
+                Dictionary<FChunkPosition, FChunkSaveData> chunkSaveDatas = new Dictionary<FChunkPosition, FChunkSaveData>();
+                int totalPropCount = 0; // Manual counter for props
+
+                foreach (var stronghold in Context.StrongholdManager.ActiveStrongholds)
+                {
+                    FChunkPosition chunkCoord = stronghold.Data.ChunkID;
+
+                    List<FBuildableSaveState> buildableList = new List<FBuildableSaveState>();
+
+                    /*
+                    foreach (var buildData in stronghold.BuildableZone.Data)
+                    {
+                        buildableList.Add(new FBuildableSaveState(
+                            buildData.guid,
+                            buildData.position,
+                            buildData.rotation,
+                            buildData.definitionId,
+                            buildData.Data.StateData
+                        ));
+                    }
+
+                    if (propList.Count > 0)
+                    {
+                        // Create or update FChunkSaveData
+                        FChunkSaveData chunkSaveData;
+                        if (!chunkSaveDatas.TryGetValue(chunkCoord, out chunkSaveData))
+                        {
+                            chunkSaveData = new FChunkSaveData { chunkCoord = chunkCoord };
+                        }
+
+                        // Update the props field
+                        chunkSaveData.props = propList.ToArray();
+
+                        // Reassign to dictionary to persist changes
+                        chunkSaveDatas[chunkCoord] = chunkSaveData;
+                        totalPropCount += propList.Count; // Increment prop counter
+                    }
+                    */
                 }
 
                 // Convert to WorldSaveData for serialization

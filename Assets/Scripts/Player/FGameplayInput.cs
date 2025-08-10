@@ -13,6 +13,12 @@ namespace LichLord
         public bool CrouchHeld;
         public bool Fire;
         public bool FireHeld;
+        public bool AltFire;
+
+        public bool PlaceBuildable;
+        public bool RotateBuildableYaw;
+        public bool RotateBuildablePitch;
+
         public bool Sprint;
         public bool ToggleCameraView;
         public int ActionSelection; // Index of selected action (1-9 for keys, 0 for none)

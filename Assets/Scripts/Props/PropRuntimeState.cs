@@ -44,7 +44,6 @@ namespace LichLord.Props
             PropDefinition definition = Global.Tables.PropTable.TryGetDefinition(definitionId);
             PropDataDefinition dataDefinition = definition.PropDataDefinition;
 
-            _data.GUID = guid;
             _data.DefinitionID = definitionId;
             dataDefinition.InitializeData(ref _data, definition);
         }
@@ -63,7 +62,6 @@ namespace LichLord.Props
             this.rotation = rotation;
 
             _data.Copy(ref propData);
-            _data.GUID = guid;
             _data.DefinitionID = definitionId;
         }
 
@@ -76,7 +74,6 @@ namespace LichLord.Props
 
             FPropData otherData = other._data;
             _data.Copy(ref otherData);
-            _data.GUID = guid;
             _data.DefinitionID = definitionId;
         }
 

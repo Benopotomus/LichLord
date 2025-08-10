@@ -7,8 +7,8 @@ namespace LichLord.Buildables
     [System.Serializable]
     public class BuildableFloorLoader
     {
-        private BuildableZoneReplicator _floor;
-        public BuildableZoneReplicator Floor => _floor;
+        private BuildableZone _zone;
+        public BuildableZone Zone => _zone;
 
         private BuildableDefinition _definition;
         public BuildableDefinition Definition => _definition;
@@ -41,7 +41,7 @@ namespace LichLord.Buildables
         public System.Action<BuildableFloorLoader> OnLoadComplete;
 
         public BuildableFloorLoader() { }
-        public BuildableFloorLoader(BuildableZoneReplicator floor,
+        public BuildableFloorLoader(BuildableZone zone,
             int floorTileIndex,
             BuildableDefinition definition,
             Vector3 position,
@@ -49,7 +49,7 @@ namespace LichLord.Buildables
             int data,
             AssetBundleLoader iLoader)
         {
-            _floor = floor;
+            _zone = zone;
             _floorTileIndex = floorTileIndex;
             _definition = definition;
             _position = position;

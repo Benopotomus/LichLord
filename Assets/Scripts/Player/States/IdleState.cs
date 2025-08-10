@@ -31,7 +31,7 @@ namespace LichLord
             fsmRef.PC.Interactor.RefreshInteractables();
             fsmRef.PC.Interactor.ProcessInput(ref input);
 
-            //CheckBuildMode(ref input);
+            CheckBuildModeToggle(ref input);
 
             fsmRef.PC.Input.ResetInput();
         }

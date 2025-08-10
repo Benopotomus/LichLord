@@ -38,6 +38,25 @@ namespace LichLord.World
     }
 
     [Serializable]
+    public struct FBuildableSaveState
+    {
+        public int index;
+        public Vector3 position;
+        public Quaternion rotation;
+        public int definitionId;
+        public int stateData;
+
+        public FBuildableSaveState(int index, Vector3 position, Quaternion rotation, int definitionId, int stateData)
+        {
+            this.index = index;
+            this.position = position;
+            this.rotation = rotation;
+            this.definitionId = definitionId;
+            this.stateData = stateData;
+        }
+    }
+
+    [Serializable]
     public struct FNonPlayerCharacterSaveState
     {
         public Vector3 position;

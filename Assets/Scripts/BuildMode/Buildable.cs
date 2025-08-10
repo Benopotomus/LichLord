@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace LichLord.Buildables
 {
@@ -31,6 +32,11 @@ namespace LichLord.Buildables
         public virtual void UpdateBuildable(BuildableRuntimeState buildableRuntimeState, float renderDeltaTime)
         {
 
+        }
+
+        public virtual void OnRender(float renderDeltaTime) 
+        { 
+        
         }
 
         public void StartRecycle()

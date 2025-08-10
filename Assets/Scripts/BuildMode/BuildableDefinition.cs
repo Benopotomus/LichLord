@@ -10,10 +10,6 @@ namespace LichLord.Buildables
         protected string _buildableName;
         public string BuildableName => _buildableName;
 
-        [SerializeField]
-        protected EBuildablePlacementType _placementType;
-        public EBuildablePlacementType PlacementType => _placementType;
-
         //Visuals
         [BundleObject(typeof(GameObject))]
         [SerializeField]
@@ -26,13 +22,5 @@ namespace LichLord.Buildables
         protected BundleObject _icon;
         public BundleObject Icon => _icon;
 
-    }
-
-    public enum EBuildablePlacementType
-    { 
-        None,
-        Wall,
-        Floor,
-        SubTile,
     }
 }

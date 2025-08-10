@@ -16,9 +16,8 @@ namespace LichLord
             FGameplayInput input = fsmRef.PC.Input.CurrentInput;
         }
 
-        protected virtual void CheckBuildMode(ref FGameplayInput input)
+        protected virtual void CheckBuildModeToggle(ref FGameplayInput input)
         {
-
             if (fsmRef.StateMachine.ActiveState is IdleState)
             {
                 if (input.BuildMode)

@@ -18,11 +18,12 @@ namespace LichLord.Buildables
                 return;
 
             //Debug.Log("Place Floor Position: " + new Vector3Int(posX, posY, posZ) + ", Def ID: " + definitionID);
-
+            /*
             zone.PlaceBuildableFloor(definitionID,
             posX,
             posY,
             posZ);
+            */
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
@@ -37,32 +38,34 @@ namespace LichLord.Buildables
                 return;
 
             //Debug.Log("Place Wall Position: " + new Vector3Int(posX, posY, posZ) + " Orientation: " + wallOrientation);
+/*
+zone.PlaceBuildableWall(definitionID,
+    wallOrientation,
+    posX,
+    posY,
+    posZ);
+*/
+}
 
-            zone.PlaceBuildableWall(definitionID,
-                wallOrientation,
-                posX,
-                posY,
-                posZ);
-        }
+[Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+public void RPC_PlaceBuildableFeature(BuildableZone zone,
+EWallOrientation wallOrientation,
+byte posX,
+byte posY,
+byte posZ,
+byte definitionID)
+{
+if (zone == null)
+    return;
 
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_PlaceBuildableFeature(BuildableZone zone,
-            EWallOrientation wallOrientation,
-            byte posX,
-            byte posY,
-            byte posZ,
-            byte definitionID)
-        {
-            if (zone == null)
-                return;
-
-            //Debug.Log("Place Wall Position: " + new Vector3Int(posX, posY, posZ) + " Orientation: " + wallOrientation);
-
-            zone.PlaceBuildableFeature(definitionID,
-                wallOrientation,
-                posX,
-                posY,
-                posZ);
-        }
-    }
+//Debug.Log("Place Wall Position: " + new Vector3Int(posX, posY, posZ) + " Orientation: " + wallOrientation);
+/*
+zone.PlaceBuildableFeature(definitionID,
+    wallOrientation,
+    posX,
+    posY,
+    posZ);
+            */
+}
+}
 }

@@ -71,6 +71,12 @@ namespace LichLord
             _input.Crouch = false;
             _input.Fire = false;
             _input.FireHeld = false;
+            _input.AltFire = false;
+
+            _input.PlaceBuildable = false;
+            _input.RotateBuildableYaw = false;
+            _input.RotateBuildablePitch = false;
+
             _input.Sprint = false;
             _input.ToggleCameraView = false;
             _input.ScrollDelta = 0f;
@@ -101,12 +107,16 @@ namespace LichLord
             _input.Crouch |= _controls.Gameplay.Crouch.WasPressedThisFrame();
             _input.CrouchHeld = _controls.Gameplay.Crouch.IsPressed();
             _input.Fire |= _controls.Gameplay.Fire.WasPressedThisFrame();
+            _input.AltFire |= _controls.Gameplay.AltFire.WasPressedThisFrame();
             _input.FireHeld |= _controls.Gameplay.Fire.IsPressed();
             _input.Sprint = _controls.Gameplay.Sprint.IsPressed();
             _input.ToggleCameraView |= _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
             _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();
             _input.DeleteMode |= _controls.Gameplay.DeleteMode.WasPressedThisFrame();
             _input.Interact |= _controls.Gameplay.Interact.WasPressedThisFrame();
+
+            _input.PlaceBuildable |= _controls.Gameplay.PlaceBuildable.WasPressedThisFrame();
+            _input.RotateBuildableYaw |= _controls.Gameplay.RotateBuildableYaw.WasPressedThisFrame();
 
             // Scroll input
             if (_controls.Gameplay.Scroll.WasPerformedThisFrame())

@@ -72,8 +72,7 @@ namespace LichLord.UI
 
             // Check if the definitin has changed. Load icon if it has
             if (_definition == null || 
-                slotDefinition.TableID != _definition.TableID ||
-                slotDefinition.PlacementType != _definition.PlacementType)
+                slotDefinition.TableID != _definition.TableID)
             {
                 LoadDefinition(slotDefinition);
             }

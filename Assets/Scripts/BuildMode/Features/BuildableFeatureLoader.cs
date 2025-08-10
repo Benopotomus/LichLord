@@ -7,8 +7,8 @@ namespace LichLord.Buildables
     [System.Serializable]
     public class BuildableFeatureLoader
     {
-        private BuildableZoneReplicator _replicator;
-        public BuildableZoneReplicator Replicator => _replicator;
+        private BuildableZone _replicator;
+        public BuildableZone Zone => _replicator;
 
         private BuildableDefinition _definition;
         public BuildableDefinition Definition => _definition;
@@ -44,7 +44,7 @@ namespace LichLord.Buildables
         public System.Action<BuildableFeatureLoader> OnLoadComplete;
 
         public BuildableFeatureLoader() { }
-        public BuildableFeatureLoader(BuildableZoneReplicator replicator,
+        public BuildableFeatureLoader(BuildableZone replicator,
             int subTileIndex,
             BuildableDefinition definition,
             Vector3 position,

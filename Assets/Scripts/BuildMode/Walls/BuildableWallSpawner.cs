@@ -10,7 +10,7 @@ namespace LichLord.Buildables
     {
         public Action<Buildable, int, EWallOrientation> OnBuildableWallSpawned;
 
-        public void SpawnBuildableWall(BuildableZoneReplicator floor, 
+        public void SpawnBuildableWall(BuildableZone zone, 
             int floorTileIndex,
             EWallOrientation wallOrientation,
             BuildableDefinition definition, 
@@ -40,13 +40,13 @@ namespace LichLord.Buildables
 
                 if (loadedBundle.BundleName == prefabBundle.Bundle)
                 {
-                    OnPrefabLoaded(floor, floorTileIndex, wallOrientation, definition, spawnPosition, spawnRotation, data, loadedBundle);
+                    OnPrefabLoaded(zone, floorTileIndex, wallOrientation, definition, spawnPosition, spawnRotation, data, loadedBundle);
                     return;
                 }
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            BuildableWallLoader buildableWallLoader = new BuildableWallLoader(floor,
+            BuildableWallLoader buildableWallLoader = new BuildableWallLoader(zone,
                 floorTileIndex,
                 wallOrientation,
                 definition, 
@@ -69,7 +69,7 @@ namespace LichLord.Buildables
         {
             buildableWallLoader.OnLoadComplete -= OnLoaderLoaded;
 
-            OnPrefabLoaded(buildableWallLoader.Replicator,
+            OnPrefabLoaded(buildableWallLoader.Zone,
                 buildableWallLoader.FloorTileIndex,
                 buildableWallLoader.Orientation,
                 buildableWallLoader.Definition,
@@ -79,7 +79,7 @@ namespace LichLord.Buildables
                 buildableWallLoader.Loader);
         }
 
-        private void OnPrefabLoaded(BuildableZoneReplicator floor,
+        private void OnPrefabLoaded(BuildableZone zone,
             int floorTileIndex,
             EWallOrientation wallOrientation,
             BuildableDefinition definition,

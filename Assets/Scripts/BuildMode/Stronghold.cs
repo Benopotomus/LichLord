@@ -1,4 +1,6 @@
 ﻿using Fusion;
+using LichLord.Buildables;
+using LichLord.Props;
 using LichLord.World;
 using System;
 using UnityEngine;
@@ -12,6 +14,11 @@ namespace LichLord
         public Transform CachedTransform => _cachedTransform;
 
         [SerializeField] private DecalProjector _decalProjector;
+
+        [SerializeField] private BuildableZone _buildableZone;
+        public BuildableZone BuildableZone => _buildableZone;
+
+        [SerializeField] private TerrainFlattener _terrainFlattener;
 
         [Networked]
         private ref FStrongholdData _data => ref MakeRef<FStrongholdData>();
@@ -29,6 +36,7 @@ namespace LichLord
 
         [Networked]
         private float _influenceDistance { get; set; } = 20.0f;
+        private float _localInfluenceDistance = -1;
 
         public Chunk CurrentChunk { get { return _chunk; } set { } }
         private Chunk _chunk;
@@ -57,7 +65,7 @@ namespace LichLord
             _chunk = Context.ChunkManager.GetChunk(_data.ChunkID);
             _chunk.AddObject(this);
 
-            Context.InvasionManager.BeginInvasion(1, _data);
+            //Context.InvasionManager.BeginInvasion(1, _data);
             Context.StrongholdManager.OnStrongholdSpawned(this);
         }
 
@@ -71,7 +79,15 @@ namespace LichLord
         public override void Render()
         {
             base.Render();
-            _decalProjector.size = new Vector3(_influenceDistance, _influenceDistance);
+
+            if (_localInfluenceDistance != _influenceDistance)
+            {
+                _decalProjector.size = new Vector3(_influenceDistance * 2.95f, _influenceDistance * 2.95f, _influenceDistance * 2.95f);
+                _buildableZone.SetTriggerSize(_influenceDistance);
+                _terrainFlattener.TryFlatten(_influenceDistance, 10f);
+                _localInfluenceDistance = _influenceDistance;
+            }
+
         }
 
         public void ProcessHit(ref FHitUtilityData hit)

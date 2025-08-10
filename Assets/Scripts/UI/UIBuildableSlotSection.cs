@@ -53,7 +53,6 @@ namespace LichLord.UI
             var activeBuildables = builder.ActiveBuildables;
 
             int buildableCount = activeBuildables?.Count ?? 0;
-            Debug.Log(activeBuildables);
 
             for (int i = 0; i < _slots.Count; i++)
             {

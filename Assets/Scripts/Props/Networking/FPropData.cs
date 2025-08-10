@@ -6,8 +6,6 @@
     [StructLayout(LayoutKind.Explicit)]
     public struct FPropData : INetworkStruct
     {
-        [FieldOffset(0)]
-        private byte _propGUID; // 1 byte
         [FieldOffset(1)]
         private ushort _definitionId; // 2 bytes. definition id;
         [FieldOffset(3)]
@@ -26,12 +24,6 @@
             set => _stateData = value;
         }
 
-        public int GUID
-        {
-            get => _propGUID;
-            set => _propGUID = (byte)value;
-        }
-
         public bool IsValid()
         {
             return DefinitionID != 0;
@@ -39,14 +31,13 @@
 
         public void Copy(ref FPropData other)
         {
-            _propGUID = other._propGUID;
+
             _definitionId = other._definitionId;
             _stateData = other._stateData;
         }
 
         public void Copy(PropRuntimeState state)
         {
-            _propGUID = (byte)state.guid;
             _definitionId = (ushort)state.definitionId;
             _stateData = state.Data.StateData;
         }

@@ -10,7 +10,7 @@ namespace LichLord.Buildables
     {
         public Action<Buildable, int> OnBuildableFloorSpawned;
 
-        public void SpawnBuildableFloor(BuildableZoneReplicator replicator, 
+        public void SpawnBuildableFloor(BuildableZone zone, 
             int floorTileIndex,
             BuildableDefinition definition, 
             Vector3 spawnPosition, 
@@ -39,13 +39,13 @@ namespace LichLord.Buildables
 
                 if (loadedBundle.BundleName == prefabBundle.Bundle)
                 {
-                    OnPrefabLoaded(replicator, floorTileIndex, definition, spawnPosition, spawnRotation, data, loadedBundle);
+                    OnPrefabLoaded(zone, floorTileIndex, definition, spawnPosition, spawnRotation, data, loadedBundle);
                     return;
                 }
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
-            BuildableFloorLoader buildableFloorLoader = new BuildableFloorLoader(replicator,
+            BuildableFloorLoader buildableFloorLoader = new BuildableFloorLoader(zone,
                 floorTileIndex,
                 definition, 
                 spawnPosition, 
@@ -67,7 +67,7 @@ namespace LichLord.Buildables
         {
             buildableFloorLoader.OnLoadComplete -= OnLoaderLoaded;
 
-            OnPrefabLoaded(buildableFloorLoader.Floor,
+            OnPrefabLoaded(buildableFloorLoader.Zone,
                 buildableFloorLoader.FloorTileIndex,
                 buildableFloorLoader.Definition,
                 buildableFloorLoader.Position,
@@ -76,7 +76,7 @@ namespace LichLord.Buildables
                 buildableFloorLoader.Loader);
         }
 
-        private void OnPrefabLoaded(BuildableZoneReplicator floor,
+        private void OnPrefabLoaded(BuildableZone zone,
             int floorTileIndex,
             BuildableDefinition definition,
             Vector3 position,

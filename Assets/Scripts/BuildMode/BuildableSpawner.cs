@@ -6,15 +6,16 @@ using UnityEngine;
 
 namespace LichLord.Buildables
 {
-    public class BuildableSpawner : MonoBehaviour
+    public class BuildableSpawner
     {
-        public Action<Buildable> OnBuildableSpawned;
+        public Action<int, Buildable> OnBuildableSpawned;
 
         public void SpawnBuildable(BuildableZone zone, 
+            int index,
             BuildableDefinition definition, 
             Vector3 spawnPosition, 
             Quaternion spawnRotation, 
-            int data)
+            int stateData)
         {
             if (definition == null)
             {
@@ -38,17 +39,18 @@ namespace LichLord.Buildables
 
                 if (loadedBundle.BundleName == prefabBundle.Bundle)
                 {
-                    OnPrefabLoaded(zone, definition, spawnPosition, spawnRotation, data, loadedBundle);
+                    OnPrefabLoaded(zone, index, definition, spawnPosition, spawnRotation, stateData, loadedBundle);
                     return;
                 }
             }
 
             AssetBundleLoader prefabLoader = AssetBundleManager.Instance.LoadBundleObject(prefabBundle) as AssetBundleLoader;
             BuildableLoader buildableLoader = new BuildableLoader(zone, 
+                index,
                 definition, 
                 spawnPosition, 
                 spawnRotation, 
-                data, 
+                stateData, 
                 prefabLoader);
 
 
@@ -66,6 +68,7 @@ namespace LichLord.Buildables
             buildableLoader.OnLoadComplete -= OnLoaderLoaded;
 
             OnPrefabLoaded(buildableLoader.Zone, 
+                buildableLoader.Index,
                 buildableLoader.Definition, 
                 buildableLoader.Position, 
                 buildableLoader.Rotation,
@@ -74,6 +77,7 @@ namespace LichLord.Buildables
         }
 
         private void OnPrefabLoaded(BuildableZone zone, 
+            int index,
             BuildableDefinition definition,
             Vector3 position,
             Quaternion rotation,
@@ -102,7 +106,7 @@ namespace LichLord.Buildables
                 return;
             }
 
-            OnBuildableSpawned?.Invoke(spawnedBuildable);
+            OnBuildableSpawned?.Invoke(index, spawnedBuildable);
         }
     }
 }

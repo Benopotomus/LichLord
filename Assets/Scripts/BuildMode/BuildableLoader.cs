@@ -10,6 +10,9 @@ namespace LichLord.Buildables
         private BuildableZone _zone;
         public BuildableZone Zone => _zone;
 
+        private int _index;
+        public int Index => _index;
+
         private BuildableDefinition _definition;
         public BuildableDefinition Definition => _definition;
 
@@ -39,6 +42,7 @@ namespace LichLord.Buildables
 
         public BuildableLoader() { }
         public BuildableLoader(BuildableZone zone,
+            int index,
             BuildableDefinition definition,
             Vector3 position,
             Quaternion rotation,
@@ -46,6 +50,7 @@ namespace LichLord.Buildables
             AssetBundleLoader iLoader)
         {
             _zone = zone;
+            _index = index;
             _definition = definition;
             _position = position;
             _rotation = rotation;

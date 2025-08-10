@@ -73,7 +73,10 @@ namespace LichLord
             if (_pc.FSM.StateMachine.ActiveState is IdleState idleState)
             {
                 StartInteract(_bestInteractable);
-  
+            }
+            else if (_pc.FSM.StateMachine.ActiveState is BuildModeState buildModeState)
+            {
+                StartInteract(_bestInteractable);
             }
             else if (_pc.FSM.StateMachine.ActiveState is InteractingState interactingState)
             {

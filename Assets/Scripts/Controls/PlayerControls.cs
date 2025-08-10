@@ -176,7 +176,34 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""Fire"",
                     ""type"": ""Button"",
                     ""id"": ""3acf276f-04c9-41a8-b3b9-ae7455b7ff44"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""AltFire"",
+                    ""type"": ""Button"",
+                    ""id"": ""11eac8b9-c277-4498-a72c-80fd8ef15a90"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PlaceBuildable"",
+                    ""type"": ""Button"",
+                    ""id"": ""6edea168-1fbe-428d-aba8-1e60f58d0f48"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RotateBuildableYaw"",
+                    ""type"": ""Button"",
+                    ""id"": ""ed85ad69-ae05-4f10-9de0-a851df41dcdb"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -185,7 +212,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""CameraViewSwitch"",
                     ""type"": ""Button"",
                     ""id"": ""f705210b-3615-4b83-8cd3-c6e97555e5f9"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -738,6 +765,39 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Fire"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7ca239b1-c21d-4772-b7fb-c73b3d21775b"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""AltFire"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e7d79ecb-4b2f-4454-be75-1737ed140128"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PlaceBuildable"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a075f89d-1d2c-413b-9135-8aca36af6fdb"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RotateBuildableYaw"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1533,6 +1593,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Next = m_Gameplay.FindAction("Next", throwIfNotFound: true);
         m_Gameplay_Sprint = m_Gameplay.FindAction("Sprint", throwIfNotFound: true);
         m_Gameplay_Fire = m_Gameplay.FindAction("Fire", throwIfNotFound: true);
+        m_Gameplay_AltFire = m_Gameplay.FindAction("AltFire", throwIfNotFound: true);
+        m_Gameplay_PlaceBuildable = m_Gameplay.FindAction("PlaceBuildable", throwIfNotFound: true);
+        m_Gameplay_RotateBuildableYaw = m_Gameplay.FindAction("RotateBuildableYaw", throwIfNotFound: true);
         m_Gameplay_CameraViewSwitch = m_Gameplay.FindAction("CameraViewSwitch", throwIfNotFound: true);
         m_Gameplay_Action1 = m_Gameplay.FindAction("Action1", throwIfNotFound: true);
         m_Gameplay_Action2 = m_Gameplay.FindAction("Action2", throwIfNotFound: true);
@@ -1654,6 +1717,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Next;
     private readonly InputAction m_Gameplay_Sprint;
     private readonly InputAction m_Gameplay_Fire;
+    private readonly InputAction m_Gameplay_AltFire;
+    private readonly InputAction m_Gameplay_PlaceBuildable;
+    private readonly InputAction m_Gameplay_RotateBuildableYaw;
     private readonly InputAction m_Gameplay_CameraViewSwitch;
     private readonly InputAction m_Gameplay_Action1;
     private readonly InputAction m_Gameplay_Action2;
@@ -1723,6 +1789,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Gameplay/Fire".
         /// </summary>
         public InputAction @Fire => m_Wrapper.m_Gameplay_Fire;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/AltFire".
+        /// </summary>
+        public InputAction @AltFire => m_Wrapper.m_Gameplay_AltFire;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/PlaceBuildable".
+        /// </summary>
+        public InputAction @PlaceBuildable => m_Wrapper.m_Gameplay_PlaceBuildable;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/RotateBuildableYaw".
+        /// </summary>
+        public InputAction @RotateBuildableYaw => m_Wrapper.m_Gameplay_RotateBuildableYaw;
         /// <summary>
         /// Provides access to the underlying input action "Gameplay/CameraViewSwitch".
         /// </summary>
@@ -1851,6 +1929,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Fire.started += instance.OnFire;
             @Fire.performed += instance.OnFire;
             @Fire.canceled += instance.OnFire;
+            @AltFire.started += instance.OnAltFire;
+            @AltFire.performed += instance.OnAltFire;
+            @AltFire.canceled += instance.OnAltFire;
+            @PlaceBuildable.started += instance.OnPlaceBuildable;
+            @PlaceBuildable.performed += instance.OnPlaceBuildable;
+            @PlaceBuildable.canceled += instance.OnPlaceBuildable;
+            @RotateBuildableYaw.started += instance.OnRotateBuildableYaw;
+            @RotateBuildableYaw.performed += instance.OnRotateBuildableYaw;
+            @RotateBuildableYaw.canceled += instance.OnRotateBuildableYaw;
             @CameraViewSwitch.started += instance.OnCameraViewSwitch;
             @CameraViewSwitch.performed += instance.OnCameraViewSwitch;
             @CameraViewSwitch.canceled += instance.OnCameraViewSwitch;
@@ -1946,6 +2033,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Fire.started -= instance.OnFire;
             @Fire.performed -= instance.OnFire;
             @Fire.canceled -= instance.OnFire;
+            @AltFire.started -= instance.OnAltFire;
+            @AltFire.performed -= instance.OnAltFire;
+            @AltFire.canceled -= instance.OnAltFire;
+            @PlaceBuildable.started -= instance.OnPlaceBuildable;
+            @PlaceBuildable.performed -= instance.OnPlaceBuildable;
+            @PlaceBuildable.canceled -= instance.OnPlaceBuildable;
+            @RotateBuildableYaw.started -= instance.OnRotateBuildableYaw;
+            @RotateBuildableYaw.performed -= instance.OnRotateBuildableYaw;
+            @RotateBuildableYaw.canceled -= instance.OnRotateBuildableYaw;
             @CameraViewSwitch.started -= instance.OnCameraViewSwitch;
             @CameraViewSwitch.performed -= instance.OnCameraViewSwitch;
             @CameraViewSwitch.canceled -= instance.OnCameraViewSwitch;
@@ -2370,6 +2466,27 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnFire(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "AltFire" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAltFire(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "PlaceBuildable" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPlaceBuildable(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "RotateBuildableYaw" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRotateBuildableYaw(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "CameraViewSwitch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
