@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace LichLord.World
 {
-    public class ChunkReplicator_128 : ChunkReplicator
+    public class ChunkReplicator_256 : ChunkReplicator
     {
-        [Networked, Capacity(128)]
+        [Networked, Capacity(256)]
         private NetworkArray<FPropData> _propDatas { get; }
 
         public override void Spawned()
@@ -20,7 +20,7 @@ namespace LichLord.World
         {
             base.OnChunkChanged();
 
-            gameObject.name = "Chunk Rep (128):  " + ChunkID.X + ", " + ChunkID.Y;
+            gameObject.name = "Chunk Rep (256):  " + ChunkID.X + ", " + ChunkID.Y;
         }
 
         protected override void CopyDataFromChunk(Chunk chunk)

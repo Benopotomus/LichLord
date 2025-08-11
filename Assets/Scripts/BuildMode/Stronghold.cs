@@ -29,7 +29,8 @@ namespace LichLord
         private int _currentHealth { get; set; }
         public int CurrentHealth => _currentHealth;
 
-        public int _maxHealth;
+        [Networked]
+        public int _maxHealth { get; set; }
         public int MaxHealth => _maxHealth;
 
         private float _buildDistance { get; set; }

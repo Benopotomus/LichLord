@@ -5102,9 +5102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _worldSavesLoaded:
-    _serializedList:
-    - Key: LichLord
-      Value: "{\n    \"chunks\": []\n}"
+    _serializedList: []
   _npcSavesLoaded:
     _serializedList:
     - Key: LichLord
@@ -5119,9 +5117,15 @@ MonoBehaviour:
         },\n    \"moveState\": 1\n}"
     - Key: LichLord_LichLord_clone_0
       Value: "{\n    \"playerName\": \"LichLord_clone_0\",\n    \"position\": {\n       
-        \"x\": 4593.09716796875,\n        \"y\": 27.71257209777832,\n        \"z\":
-        4529.78857421875\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
-        \"y\": 0.9803122282028198,\n        \"z\": 0.0,\n        \"w\": 0.19745364785194398\n   
+        \"x\": 4650.2080078125,\n        \"y\": 35.06515884399414,\n        \"z\":
+        4559.06640625\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
+        \"y\": 0.999854326248169,\n        \"z\": 0.0,\n        \"w\": 0.01707085408270359\n   
+        },\n    \"moveState\": 3\n}"
+    - Key: LichLord_LichLord
+      Value: "{\n    \"playerName\": \"LichLord\",\n    \"position\": {\n       
+        \"x\": 4567.1904296875,\n        \"y\": 29.771766662597658,\n        \"z\":
+        4552.1376953125\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
+        \"y\": 0.7753413319587708,\n        \"z\": 0.0,\n        \"w\": 0.6315423846244812\n   
         },\n    \"moveState\": 3\n}"
 --- !u!4 &330450293
 Transform:
@@ -22440,7 +22444,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7136224720027177897, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 465fd4e57519ec44fb1a0a4afb74af8c, type: 3}
 --- !u!20 &1581192687 stripped
 Camera:
@@ -24670,13 +24678,10 @@ MonoBehaviour:
   maxGraphicsBufferCaches: 8
   _cullingCameras:
   - {fileID: 1581192687}
-  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
-    - {x: 1.7073742, y: 2.7335486, z: -5.080652, w: 0}
     fov:
-    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: 0.97427857
@@ -24695,43 +24700,20 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
-    - e00: 0.7954126
-      e01: -0.0000007252285
-      e02: 0.2673013
-      e03: -0.00000010003152
-      e10: -0.25067008
-      e11: 1.5429703
-      e12: 0.7459271
-      e13: -0.00000023228611
-      e20: -0.2837763
-      e21: -0.45433295
-      e22: 0.8444363
-      e23: 5.9565735
-      e30: -0.28377348
-      e31: -0.4543284
-      e32: 0.8444278
-      e33: 6.0166802
     calibration:
-    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.69783515, y: -2.5446606e-15, z: 0.71625835, w: 0}
-    - {x: 0.39193335, y: -0.3480319, z: 0.8516232, w: 4.6089864}
     frustumPlane1:
     - {x: -0.69783515, y: -2.5446608e-15, z: 0.71625835, w: 0}
-    - {x: -0.8266941, y: -0.3480308, z: 0.44209898, w: 4.6089864}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: -0.2672218, y: 0.544321, z: 0.7951776, w: 3.0083406}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: -0.016551703, y: -0.99864936, z: 0.049250364, w: 3.0083401}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
-    - {x: -0.28377348, y: -0.45432842, z: 0.8444278, w: 5.9865966}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
-    - {x: 0.28249547, y: 0.4549664, z: -0.8445128, w: 5997.373}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:

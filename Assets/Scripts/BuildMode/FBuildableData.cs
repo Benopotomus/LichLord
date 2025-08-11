@@ -2,6 +2,7 @@
 {
     using Fusion;
     using System.Runtime.InteropServices;
+    using UnityEngine;
 
     [StructLayout(LayoutKind.Explicit)]
     public struct FBuildableData : INetworkStruct
@@ -23,6 +24,18 @@
         {
             get => _stateData;
             set => _stateData = value;
+        }
+
+        public Vector3 Position 
+        {
+            get => _transform.Position;
+            set => _transform.Position = value;
+        }
+
+        public Quaternion Rotation
+        {
+            get => _transform.Rotation;
+            set => _transform.Rotation = value;
         }
 
         public FWorldTransform Transform

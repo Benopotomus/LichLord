@@ -1,6 +1,5 @@
 ﻿using Fusion;
-using System;
-using System.Collections.Generic;
+using LichLord.World;
 using UnityEngine;
 
 namespace LichLord.Buildables
@@ -22,7 +21,7 @@ namespace LichLord.Buildables
         {
             base.Spawned();
             _spawner.OnBuildableSpawned += OnBuildableSpawned;
-            _buildableLoadStates = new FBuildableLoadState[512];
+            _buildableLoadStates = new FBuildableLoadState[1024];
         }
 
         public void SetTriggerSize(float size)
@@ -32,6 +31,9 @@ namespace LichLord.Buildables
 
         public override void Render()
         {
+            if (!Context.IsGameplayActive())
+                return;
+
             base.Render();
 
             float renderDeltaTime = Time.deltaTime;
@@ -109,6 +111,20 @@ namespace LichLord.Buildables
 
             }
             return -1;
+        }
+
+        public void LoadBuildables(FBuildableSaveState[] buildableSaveStates)
+        {
+            for (int i = 0; i < buildableSaveStates.Length; i++)
+            {
+                FBuildableSaveState saveState = buildableSaveStates[i];
+                ref FBuildableData data = ref _buildableDatas.GetRef(i);
+
+                data.DefinitionID = (ushort)saveState.definitionId;
+                data.Position = saveState.position;
+                data.Rotation = Quaternion.Euler(saveState.eulerAngles);
+                data.StateData = (ushort)saveState.stateData;
+            }
         }
     }
 }

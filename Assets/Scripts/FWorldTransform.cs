@@ -4,41 +4,12 @@ using UnityEngine;
 
 namespace LichLord
 {
-    // Custom 24-bit signed integer struct (unchanged)
-    [StructLayout(LayoutKind.Explicit, Size = 3)]
-    public struct Int24 : INetworkStruct
-    {
-        [FieldOffset(0)] private byte byte0;
-        [FieldOffset(1)] private byte byte1;
-        [FieldOffset(2)] private byte byte2;
-
-        private const int MIN_VALUE = -8388608; // -2^23
-        private const int MAX_VALUE = 8388607;  // 2^23 - 1
-
-        public Int24(int value)
-        {
-            value = Mathf.Clamp(value, MIN_VALUE, MAX_VALUE);
-            byte0 = (byte)(value & 0xFF);
-            byte1 = (byte)((value >> 8) & 0xFF);
-            byte2 = (byte)((value >> 16) & 0xFF);
-        }
-
-        public static implicit operator int(Int24 value)
-        {
-            int result = (value.byte0 | (value.byte1 << 8) | (value.byte2 << 16));
-            if ((value.byte2 & 0x80) != 0) result |= unchecked((int)0xFF000000);
-            return result;
-        }
-
-        public static implicit operator Int24(int value) => new Int24(value);
-    }
-
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public struct FWorldTransform : INetworkStruct
     {
         [FieldOffset(0)] private FWorldPosition _position; // 7 bytes
         [FieldOffset(7)] private byte _compressedYaw; // 1 byte
-        [FieldOffset(8)] private byte _compressedPitch; // 1 byte
+        [FieldOffset(8)] private sbyte _compressedPitch; // 1 byte
         // Total: 9 bytes
 
         public float PositionX
@@ -93,13 +64,13 @@ namespace LichLord
             }
         }
 
-        public float Pitch // in degrees: -90 to 90
+        public float Pitch // -90 to 90 degrees
         {
-            get => (_compressedPitch - 127.5f) / 127.5f * 90f;
+            get => (_compressedPitch / 127f) * 90f; // exact 0 when _compressedPitch == 0
             set
             {
                 float clamped = Mathf.Clamp(value, -90f, 90f);
-                _compressedPitch = (byte)(((clamped / 90f) * 127.5f) + 127.5f);
+                _compressedPitch = (sbyte)Mathf.RoundToInt((clamped / 90f) * 127f);
             }
         }
 

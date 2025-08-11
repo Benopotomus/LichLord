@@ -19,11 +19,11 @@ namespace LichLord.World
 
             if (HasStateAuthority)
             {
-                Context.WorldSaveLoadManager.LoadChunks();
+                Context.WorldSaveLoadManager.LoadWorld();
             }
 
             Context.ChunkManager.InitializeWorldChunks();
-
+            Context.StrongholdManager.LoadStrongholds();
 
             if (HasStateAuthority)
             {

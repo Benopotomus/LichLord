@@ -44,7 +44,6 @@ namespace LichLord.Props
                 chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
             }
 
-            return;
             if (HasStateAuthority)
             {
                 var loadedChunks = Context.WorldSaveLoadManager.LoadedChunks;

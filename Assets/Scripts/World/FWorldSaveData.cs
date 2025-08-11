@@ -8,6 +8,7 @@ namespace LichLord.World
     public struct FWorldSaveData
     {
         public FChunkSaveData[] chunks;
+        public FStrongholdSaveData[] strongholds;
     }
 
     [Serializable]
@@ -38,19 +39,29 @@ namespace LichLord.World
     }
 
     [Serializable]
+    public struct FStrongholdSaveData
+    {
+        // these two identify the position datat
+        public FChunkPosition chunkCoord;
+        public int index;
+
+        public FBuildableSaveState[] buildableStates;
+    }
+
+    [Serializable]
     public struct FBuildableSaveState
     {
         public int index;
         public Vector3 position;
-        public Quaternion rotation;
+        public Vector3 eulerAngles;
         public int definitionId;
         public int stateData;
 
-        public FBuildableSaveState(int index, Vector3 position, Quaternion rotation, int definitionId, int stateData)
+        public FBuildableSaveState(int index, Vector3 position, Vector3 eulerAngles, int definitionId, int stateData)
         {
             this.index = index;
             this.position = position;
-            this.rotation = rotation;
+            this.eulerAngles = eulerAngles;
             this.definitionId = definitionId;
             this.stateData = stateData;
         }

@@ -3,7 +3,6 @@ using LichLord.Props;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using UnityEditor;
 using UnityEngine;
 
 namespace LichLord.World
@@ -51,6 +50,27 @@ namespace LichLord.World
         private List<Stronghold> _activeStrongholds = new List<Stronghold>();
         public List<Stronghold> ActiveStrongholds => _activeStrongholds;
 
+        public void LoadStrongholds()
+        {
+            if (HasStateAuthority)
+            {
+                var loadedStrongholds = Context.WorldSaveLoadManager.LoadedStrongholds;
+
+                foreach (var strongholdSaveData in loadedStrongholds)
+                {
+                    FStrongholdData strongholdData = new FStrongholdData();
+                    strongholdData.ChunkID = strongholdSaveData.chunkCoord;
+                    strongholdData.GUID = (byte)strongholdSaveData.index;
+
+                    Stronghold strongholdSpawned = SpawnStronghold(strongholdData);
+
+                    strongholdSpawned.BuildableZone.LoadBuildables(strongholdSaveData.buildableStates);
+
+                }
+                
+            }
+        }
+
         public void OnStrongholdSpawned(Stronghold stronghold)
         { 
             _activeStrongholds.Add(stronghold);
@@ -76,21 +96,28 @@ namespace LichLord.World
 
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_ActivateNexus(FStrongholdData nexusData)
+        public void RPC_ActivateNexus(FStrongholdData strongholdData)
         {
-            var position = GetStrongholdPosition(nexusData);
+            var position = GetStrongholdPosition(strongholdData);
 
             // Create particle here
 
             if (HasStateAuthority)
             {
-                Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
-                                    onBeforeSpawned: (runner, obj) =>
-                                    {
-                                        var r = obj.GetComponent<Stronghold>();
-                                        r.SetData(nexusData, 1000, 1000, 50f);
-                                    });
+                SpawnStronghold(strongholdData);
             }
+        }
+
+        public Stronghold SpawnStronghold(FStrongholdData strongholdData)
+        {
+            var position = GetStrongholdPosition(strongholdData);
+            return Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
+                                onBeforeSpawned: (runner, obj) =>
+                                {
+                                    var r = obj.GetComponent<Stronghold>();
+                                    r.SetData(strongholdData, 1000, 1000, 50f);
+                                });
+            
         }
 
         public void Predict_ActivateNexus(FStrongholdData nexusData)
