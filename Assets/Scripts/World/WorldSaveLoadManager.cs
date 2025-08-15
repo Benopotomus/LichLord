@@ -218,7 +218,7 @@ namespace LichLord.World
                 }
 
                 // --- Load stockpiles ---
-                if (saveData.stockpiles != null && Context.ContainerManager != null)
+                if (saveData.stockpiles != null)
                 {
                     foreach (var stockpileSave in saveData.stockpiles)
                     {
@@ -226,6 +226,8 @@ namespace LichLord.World
                     }
                     Debug.Log($"Loaded {saveData.stockpiles.Length} stockpiles.");
                 }
+
+                Context.ContainerManager.UpdateAllCurrencies();
 
                 Debug.Log($"Loaded {_loadedChunks.Count} chunks with {totalPropCount} props and {_loadedStrongholds.Count} strongholds for session {sessionName}.");
             }

@@ -28,14 +28,6 @@ namespace LichLord.UI
         protected override void OnTick()
         {
             base.OnTick();
-
-            PlayerCharacter pc = Context.LocalPlayerCharacter;
-
-            if (pc == null)
-                return;
-
-            //_text.text = pc.Currency.Wood.ToString();
-
         }
 
         private void LoadDefinition(CurrencyDefinition definition)

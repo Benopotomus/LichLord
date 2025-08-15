@@ -22,6 +22,8 @@ namespace LichLord
             get => _value;
             set => _value = value;
         }
+
+        public bool IsEmpty() => _currencyType == ECurrencyType.None || _value == 0;
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 8)]
@@ -87,8 +89,19 @@ namespace LichLord
                 case 3: return _pile3;
             }
 
-            return _pile0; 
-        
+            return _pile0;   
+        }
+
+        public int GetCurrencyAmount(ECurrencyType currencyType)
+        {
+            int total = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                FCurrencyStack pile = GetCurrencyStack(i);
+                if (pile.CurrencyType == currencyType)
+                    total += pile.Value;
+            }
+            return total;
         }
 
         public bool IsEmpty()
@@ -96,7 +109,7 @@ namespace LichLord
             for (int i = 0; i < 4; i++)
             {
                 var stack = GetCurrencyStack(i);
-                if (stack.CurrencyType != ECurrencyType.None || stack.Value > 0)
+                if(!stack.IsEmpty())
                     return false;
             }
             return true;

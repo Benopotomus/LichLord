@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 712800245793677823}
   - component: {fileID: 8855619867292414858}
-  - component: {fileID: 942874639530758969}
+  - component: {fileID: 5151763685469540531}
   m_Layer: 5
-  m_Name: CurrencySlot
+  m_Name: WorldCurrencySlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48,7 +48,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 31406694043155499}
   m_CullTransparentMesh: 1
---- !u!114 &942874639530758969
+--- !u!114 &5151763685469540531
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -57,10 +57,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 31406694043155499}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aebbad92be2aa9c418827af47db9de35, type: 3}
+  m_Script: {fileID: 11500000, guid: f829d95f58b7ce44d8571157d55718ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _definition: {fileID: 11400000, guid: 18f45e7cc0ae6c14fb16fcf853872b1e, type: 2}
+  _definition: {fileID: 11400000, guid: e69869166e6ac7245aad4bb8c8e4082e, type: 2}
   _text: {fileID: 2598182656458890555}
   _iconImage: {fileID: 8721602781967233861}
 --- !u!1 &5411319718879400405
@@ -245,10 +245,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 712800245793677823}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 7, y: 0}
-  m_SizeDelta: {x: 12, y: 27}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 24}
   m_Pivot: {x: 1, y: 0}
 --- !u!222 &2469175831232797594
 CanvasRenderer:
@@ -278,7 +278,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5f4920600d9049749b87657c784b477f, type: 2}
   m_sharedMaterial: {fileID: -1965957599699157825, guid: 5f4920600d9049749b87657c784b477f,
@@ -306,15 +306,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
