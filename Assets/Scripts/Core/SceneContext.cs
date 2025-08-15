@@ -26,7 +26,6 @@ namespace LichLord
         public SpawnManager SpawnManager;
         public ProjectileManager ProjectileManager;
         public PropManager PropManager;
-        public BuildableManager BuildableManager;
         public WorldSaveLoadManager WorldSaveLoadManager;
         public PlayerSaveLoadManager PlayerSaveLoadManager;
         public NonPlayerCharacterManager NonPlayerCharacterManager;
@@ -36,6 +35,7 @@ namespace LichLord
         public SceneUI UI;
         public StrongholdManager StrongholdManager;
         public InvasionManager InvasionManager;
+        public ContainerManager ContainerManager;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;

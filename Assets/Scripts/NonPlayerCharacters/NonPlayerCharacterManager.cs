@@ -112,8 +112,6 @@ namespace LichLord.NonPlayerCharacters
 
         public void LoadNPCsFromSaves()
         {
-            return;
-
             List<FNonPlayerCharacterSaveState> loadedNPCs =
                Context.WorldSaveLoadManager.LoadedNPCs;
 

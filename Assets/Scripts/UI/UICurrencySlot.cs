@@ -34,7 +34,7 @@ namespace LichLord.UI
             if (pc == null)
                 return;
 
-            _text.text = pc.Currency.Wood.ToString();
+            //_text.text = pc.Currency.Wood.ToString();
 
         }
 

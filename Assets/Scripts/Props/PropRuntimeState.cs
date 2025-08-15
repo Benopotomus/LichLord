@@ -7,7 +7,7 @@ namespace LichLord.Props
     public class PropRuntimeState
     {
         public Chunk chunk; // Owning chunk
-        public int guid; // Unique identifier
+        public int index; // Unique identifier
         public int definitionId; // PropDefinition.TableID
 
         // Not replicated
@@ -35,7 +35,7 @@ namespace LichLord.Props
             Quaternion rotation, 
             int definitionId)
         {
-            this.guid = guid;
+            this.index = guid;
             this.chunk = chunk;
             this.definitionId = definitionId;
             this.position = position;
@@ -55,7 +55,7 @@ namespace LichLord.Props
             int definitionId,
             FPropData propData)
         {
-            this.guid = guid;
+            this.index = guid;
             this.chunk = chunk;
             this.definitionId = definitionId;
             this.position = position;
@@ -67,7 +67,7 @@ namespace LichLord.Props
 
         public PropRuntimeState(PropRuntimeState other)
         {
-            this.guid = other.guid;
+            this.index = other.index;
             this.definitionId = other.definitionId;
             this.position = other.position;
             this.rotation = other.rotation;
@@ -85,7 +85,7 @@ namespace LichLord.Props
 
         public int GetHealth()
         {
-            if (Definition.PropDataDefinition is DestructibleDataDefinition destructibleDataDefinition)
+            if (Definition.PropDataDefinition is DestructiblePropDataDefinition destructibleDataDefinition)
                 return destructibleDataDefinition.GetHealth(ref _data);
 
             return 0;
@@ -93,7 +93,7 @@ namespace LichLord.Props
 
         public int GetMaxHealth()
         {
-            if (Definition.PropDataDefinition is DestructibleDataDefinition destructibleDataDefinition)
+            if (Definition.PropDataDefinition is DestructiblePropDataDefinition destructibleDataDefinition)
                 return destructibleDataDefinition.MaxHealth;
 
             return 0;
@@ -101,7 +101,7 @@ namespace LichLord.Props
 
         public void ApplyDamage(int damage, int tick)
         {
-            if (Definition.PropDataDefinition is DestructibleDataDefinition destructibleDataDefinition)
+            if (Definition.PropDataDefinition is DestructiblePropDataDefinition destructibleDataDefinition)
                 destructibleDataDefinition.ApplyDamage(ref _data, damage);
 
             _hitReactEndTick = _hitReactTicks + tick;

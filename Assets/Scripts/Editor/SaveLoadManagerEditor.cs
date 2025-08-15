@@ -2,6 +2,7 @@
 using UnityEngine;
 using LichLord;
 using System.IO;
+using System;
 
 [CustomEditor(typeof(SaveLoadManager))]
 public class SaveLoadManagerEditor : Editor
@@ -154,6 +155,20 @@ public class SaveLoadManagerEditor : Editor
             catch (System.Exception e)
             {
                 Debug.LogError($"Failed to delete player save file for key {key} via Editor button: {e.Message}");
+            }
+        }
+
+        if (GUILayout.Button("Clear ALL Saves"))
+        {
+            try
+            {
+                saveLoadManager.ClearAllData();
+                EditorUtility.SetDirty(saveLoadManager);
+                Debug.Log("All saves cleared from memory and disk via Editor button.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to clear all saves via Editor button: {e.Message}");
             }
         }
     }

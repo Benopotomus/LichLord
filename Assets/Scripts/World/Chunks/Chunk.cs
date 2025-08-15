@@ -77,8 +77,7 @@ namespace LichLord.World
 
         public void AddObject(IChunkTrackable objId)
         {
-            if (!_trackablesInChunk.Contains(objId))
-                _trackablesInChunk.Add(objId);
+            _trackablesInChunk.Add(objId);
         }
 
         public void RemoveObject(IChunkTrackable objId)
@@ -88,8 +87,8 @@ namespace LichLord.World
 
         public void AddPropRuntimeState(PropRuntimeState propState)
         {
-            _propStates[propState.guid] = propState;
-            PropLoadStates[propState.guid] = new FPropLoadState();
+            _propStates[propState.index] = propState;
+            PropLoadStates[propState.index] = new FPropLoadState();
         }
 
         public void AddInvasionSpawnPoint(InvasionSpawnPoint spawnPoint)
@@ -99,12 +98,12 @@ namespace LichLord.World
 
         public void RemoveObject(PropRuntimeState propState)
         {
-            _propStates.Remove(propState.guid);
+            _propStates.Remove(propState.index);
         }
 
         public void AddOrUpdateDeltaState(PropRuntimeState propState)
         {
-            _deltaPropStates[propState.guid] = propState;
+            _deltaPropStates[propState.index] = propState;
             _manager.DeltaChunks.Add(this);
         }
 
@@ -136,7 +135,7 @@ namespace LichLord.World
             }
 
             // if we have replication data, use that
-            ref FPropData propData = ref Replicator.GetPropData(runtimeState.guid);
+            ref FPropData propData = ref Replicator.GetPropData(runtimeState.index);
             if (propData.IsValid())
             {
                 FPropData runtimeData = runtimeState.Data;
@@ -153,7 +152,7 @@ namespace LichLord.World
         public void ReplicatePropState(PropRuntimeState replictedState)
         {
             AddOrUpdateDeltaState(replictedState);
-            ref FPropData data = ref Replicator.GetPropData(replictedState.guid);
+            ref FPropData data = ref Replicator.GetPropData(replictedState.index);
             FPropData currentData = replictedState.Data;
             data.Copy(ref currentData);
         }

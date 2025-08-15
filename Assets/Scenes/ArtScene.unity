@@ -5104,29 +5104,9 @@ MonoBehaviour:
   _worldSavesLoaded:
     _serializedList: []
   _npcSavesLoaded:
-    _serializedList:
-    - Key: LichLord
-      Value: "{\n    \"npcs\": []\n}"
+    _serializedList: []
   _playerSavesLoaded:
-    _serializedList:
-    - Key: LichLord_LichLord_Builds
-      Value: "{\n    \"playerName\": \"LichLord_Builds\",\n    \"position\": {\n       
-        \"x\": 4572.03662109375,\n        \"y\": 21.466602325439454,\n        \"z\":
-        4545.4287109375\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
-        \"y\": -0.121869295835495,\n        \"z\": 0.0,\n        \"w\": 0.9925462007522583\n   
-        },\n    \"moveState\": 1\n}"
-    - Key: LichLord_LichLord_clone_0
-      Value: "{\n    \"playerName\": \"LichLord_clone_0\",\n    \"position\": {\n       
-        \"x\": 4650.2080078125,\n        \"y\": 35.06515884399414,\n        \"z\":
-        4559.06640625\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
-        \"y\": 0.999854326248169,\n        \"z\": 0.0,\n        \"w\": 0.01707085408270359\n   
-        },\n    \"moveState\": 3\n}"
-    - Key: LichLord_LichLord
-      Value: "{\n    \"playerName\": \"LichLord\",\n    \"position\": {\n       
-        \"x\": 4567.1904296875,\n        \"y\": 29.771766662597658,\n        \"z\":
-        4552.1376953125\n    },\n    \"rotation\": {\n        \"x\": 0.0,\n       
-        \"y\": 0.7753413319587708,\n        \"z\": 0.0,\n        \"w\": 0.6315423846244812\n   
-        },\n    \"moveState\": 3\n}"
+    _serializedList: []
 --- !u!4 &330450293
 Transform:
   m_ObjectHideFlags: 0
@@ -22044,28 +22024,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: _initialSpawnCount
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: _debugSpawnDefinitions.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: _debugSpawnDefinitions.Array.data[0]
-      value: 
-      objectReference: {fileID: 11400000, guid: d2da4417b1e242e4882a796e5062ab27,
-        type: 2}
-    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: _debugSpawnDefinitions.Array.data[1]
-      value: 
-      objectReference: {fileID: 11400000, guid: e59b70e1c14ef6d48ae66d076f6581f3,
-        type: 2}
     - target: {fileID: 2255625441212249006, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -22166,11 +22124,6 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4412569713276463844, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: m_Name
-      value: PlayerHealth
-      objectReference: {fileID: 0}
     - target: {fileID: 4412569713338446277, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -22180,36 +22133,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4412569714537446215, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4412569714537446215, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4412569714537446215, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 170
-      objectReference: {fileID: 0}
-    - target: {fileID: 4412569714537446215, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 170
-      objectReference: {fileID: 0}
-    - target: {fileID: 4412569714537446215, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 85
-      objectReference: {fileID: 0}
-    - target: {fileID: 4412569714537446215, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 85
       objectReference: {fileID: 0}
     - target: {fileID: 4972031799234125260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
@@ -22441,6 +22364,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8456462539329708384, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _context.ContainerManager
+      value: 
+      objectReference: {fileID: 2061165212}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -24678,10 +24606,13 @@ MonoBehaviour:
   maxGraphicsBufferCaches: 8
   _cullingCameras:
   - {fileID: 1581192687}
+  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
+    - {x: 4659.667, y: 24.438902, z: 4534.285, w: 0}
     fov:
+    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: 0.97427857
@@ -24700,20 +24631,43 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
+    - e00: -0.7988793
+      e01: -0.0002691189
+      e02: -0.25802368
+      e03: 4892.471
+      e10: 0.12850638
+      e11: 1.6804118
+      e12: -0.3996274
+      e13: 1172.1602
+      e20: 0.29826242
+      e21: -0.24236277
+      e22: -0.9232115
+      e23: 2802.1372
+      e30: 0.29825947
+      e31: -0.24236037
+      e32: -0.9232024
+      e33: 2802.196
     calibration:
+    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.69783515, y: -2.5446606e-15, z: 0.71625835, w: 0}
+    - {x: -0.38341877, y: -0.18582702, z: -0.90468687, w: 5893.2534}
     frustumPlane1:
     - {x: -0.69783515, y: -2.5446608e-15, z: 0.71625835, w: 0}
+    - {x: 0.8402855, y: -0.18541479, z: -0.5094524, w: -1600.9167}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
+    - {x: 0.21338296, y: 0.7190258, z: -0.6614149, w: 1987.1783}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
+    - {x: 0.08487655, y: -0.9613862, z: -0.26178753, w: 815.01807}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
+    - {x: 0.29825947, y: -0.2423604, z: -0.9232024, w: 2802.1528}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
+    - {x: -0.29860857, y: 0.24280797, z: 0.9229719, w: 5954.894}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -28886,6 +28840,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2058261989}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2061165212 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2099940939551755748, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+    type: 3}
+  m_PrefabInstance: {fileID: 1581192686}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e476783db367cc4e9e63f723b345f9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &2064496040 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2349245164765783801, guid: 49cd3aec25d390e45a33c70f333ecea4,

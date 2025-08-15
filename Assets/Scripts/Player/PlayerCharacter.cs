@@ -234,7 +234,7 @@ namespace LichLord
                 newChunk.AddObject(this);
 
             var oldChunks = _cachedChunks;
-            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 2);
+            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
 
             DiffChunks(oldChunks, newChunks, out var added, out var removed);
 

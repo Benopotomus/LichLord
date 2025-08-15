@@ -6,15 +6,13 @@ namespace LichLord.World
 {
     public class ChunkManager : ContextBehaviour 
     {
-        [SerializeField] private ChunkReplicator_16 _replicator16Prefab;
-        [SerializeField] private ChunkReplicator_32 _replicator32Prefab;
         [SerializeField] private ChunkReplicator_64 _replicator64Prefab;
         [SerializeField] private ChunkReplicator_128 _replicator128Prefab;
+        [SerializeField] private ChunkReplicator_256 _replicator256Prefab;
 
-        private readonly Stack<ChunkReplicator> _pool16 = new();
-        private readonly Stack<ChunkReplicator> _pool32 = new();
         private readonly Stack<ChunkReplicator> _pool64 = new();
         private readonly Stack<ChunkReplicator> _pool128 = new();
+        private readonly Stack<ChunkReplicator> _pool256 = new();
 
         [SerializeField]
         private bool drawChunkBounds = true;
@@ -125,10 +123,9 @@ namespace LichLord.World
 
                     switch (replicator)
                     {
-                        case ChunkReplicator_16 r16: _pool16.Push(r16); break;
-                        case ChunkReplicator_32 r32: _pool32.Push(r32); break;
                         case ChunkReplicator_64 r64: _pool64.Push(r64); break;
                         case ChunkReplicator_128 r128: _pool128.Push(r128); break;
+                        case ChunkReplicator_256 r256: _pool256.Push(r256); break;
                     }
 
                     if (replicator.gameObject != null)
@@ -281,13 +278,11 @@ namespace LichLord.World
             int propCount = chunk.PropStates.Count; // or use whatever metric you track
             if (propCount == 0)
                 return EReplicatorSize.S0;
-            if (propCount <= 16)
-                return EReplicatorSize.S16;
-            if (propCount <= 32)
-                return EReplicatorSize.S32;
             if (propCount <= 64)
                 return EReplicatorSize.S64;
-            return EReplicatorSize.S128;
+            if (propCount <= 128)
+                return EReplicatorSize.S128;
+            return EReplicatorSize.S256;
         }
 
         private ChunkReplicator TryGetOrSpawnReplicator(Chunk chunk, EReplicatorSize size)
@@ -297,10 +292,9 @@ namespace LichLord.World
 
             Stack<ChunkReplicator> pool = size switch
             {
-                EReplicatorSize.S16 => _pool16,
-                EReplicatorSize.S32 => _pool32,
                 EReplicatorSize.S64 => _pool64,
                 EReplicatorSize.S128 => _pool128,
+                EReplicatorSize.S256 => _pool256,
                 _ => throw new System.ArgumentOutOfRangeException()
             };
 
@@ -317,18 +311,6 @@ namespace LichLord.World
             // Spawn the correct type via Fusion
             replicator = size switch
             {
-                EReplicatorSize.S16 => Runner.Spawn(_replicator16Prefab, chunk.Bounds.center, Quaternion.identity, null,
-                    onBeforeSpawned: (runner, obj) =>
-                    {
-                        var r = obj.GetComponent<ChunkReplicator_16>();
-                        r.SetID(chunk.ChunkID);
-                    }),
-                EReplicatorSize.S32 => Runner.Spawn(_replicator32Prefab, chunk.Bounds.center, Quaternion.identity, null,
-                    onBeforeSpawned: (runner, obj) =>
-                    {
-                        var r = obj.GetComponent<ChunkReplicator_32>();
-                        r.SetID(chunk.ChunkID);
-                    }),
                 EReplicatorSize.S64 => Runner.Spawn(_replicator64Prefab, chunk.Bounds.center, Quaternion.identity, null,
                     onBeforeSpawned: (runner, obj) =>
                     {
@@ -341,6 +323,12 @@ namespace LichLord.World
                         var r = obj.GetComponent<ChunkReplicator_128>();
                         r.SetID(chunk.ChunkID);
                     }),
+                EReplicatorSize.S256 => Runner.Spawn(_replicator256Prefab, chunk.Bounds.center, Quaternion.identity, null,
+                onBeforeSpawned: (runner, obj) =>
+                {
+                    var r = obj.GetComponent<ChunkReplicator_256>();
+                    r.SetID(chunk.ChunkID);
+                }),
                 _ => throw new System.Exception("Unhandled replicator size")
             };
 
@@ -349,10 +337,9 @@ namespace LichLord.World
         public enum EReplicatorSize
         {
             S0 = 0,
-            S16 = 16,
-            S32 = 32,
             S64 = 64,
-            S128 = 128
+            S128 = 128,
+            S256 = 256,
         }
     }
 }

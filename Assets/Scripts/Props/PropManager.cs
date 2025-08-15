@@ -74,7 +74,7 @@ namespace LichLord.Props
                 return;
             }
 
-            int guid = propRuntimeState.guid;
+            int guid = propRuntimeState.index;
             if (!chunk.PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
             {
                 Debug.LogWarning($"Missing or null PropLoadState for GUID {guid} in OnPropSpawned.", this);

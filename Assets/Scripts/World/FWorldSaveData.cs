@@ -9,6 +9,7 @@ namespace LichLord.World
     {
         public FChunkSaveData[] chunks;
         public FStrongholdSaveData[] strongholds;
+        public FStockpileSaveData[] stockpiles;
     }
 
     [Serializable]
@@ -39,12 +40,74 @@ namespace LichLord.World
     }
 
     [Serializable]
+    public struct FStockpileSaveData
+    {
+        public int index;
+        public FCurrencyStackSaveData pile0;
+        public FCurrencyStackSaveData pile1;
+        public FCurrencyStackSaveData pile2;
+        public FCurrencyStackSaveData pile3;
+
+        public FStockpileSaveData(int idx, FStockpileData data)
+        {
+            index = idx;
+            pile0 = new FCurrencyStackSaveData(data.GetCurrencyStack(0));
+            pile1 = new FCurrencyStackSaveData(data.GetCurrencyStack(1));
+            pile2 = new FCurrencyStackSaveData(data.GetCurrencyStack(2));
+            pile3 = new FCurrencyStackSaveData(data.GetCurrencyStack(3));
+        }
+
+        public FStockpileData ToNetworkStockpile()
+        {
+            FStockpileData netStockpile = new FStockpileData();
+            netStockpile.AddToStockpile(pile0.currencyType, pile0.value);
+            netStockpile.AddToStockpile(pile1.currencyType, pile1.value);
+            netStockpile.AddToStockpile(pile2.currencyType, pile2.value);
+            netStockpile.AddToStockpile(pile3.currencyType, pile3.value);
+            return netStockpile;
+        }
+    }
+
+    [Serializable]
+    public struct FCurrencyStackSaveData
+    {
+        public ECurrencyType currencyType;
+        public byte value;
+
+        public FCurrencyStackSaveData(FCurrencyStack stack)
+        {
+            currencyType = stack.CurrencyType;
+            value = stack.Value;
+        }
+
+        public FCurrencyStack ToNetworkStack()
+        {
+            return new FCurrencyStack
+            {
+                CurrencyType = currencyType,
+                Value = value
+            };
+        }
+    }
+
+    [Serializable]
+    public struct StockpileDataSave
+    {
+        public FCurrencyStackSaveData pile0;
+        public FCurrencyStackSaveData pile1;
+        public FCurrencyStackSaveData pile2;
+        public FCurrencyStackSaveData pile3;
+    }
+
+    [Serializable]
     public struct FStrongholdSaveData
     {
         // these two identify the position datat
         public FChunkPosition chunkCoord;
         public int index;
 
+        public int maxHealth;
+        public int currentHealth;
         public FBuildableSaveState[] buildableStates;
     }
 

@@ -41,9 +41,9 @@ namespace LichLord.Props
             _interactableComponent.onInteractEnd += OnInteractEnd;
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
-            _stateComponent.UpdateState(_propRuntimeState.GetState());
+            _stateComponent.UpdateState(_runtimeState.GetState());
 
-            UpdateNavmesh();
+            //UpdateNavmesh();
         }
 
         public override void StartRecycle()
@@ -72,7 +72,7 @@ namespace LichLord.Props
         {
             base.OnRender(propRuntimeState, renderDeltaTime);
 
-            _stateComponent.UpdateState(_propRuntimeState.GetState());
+            _stateComponent.UpdateState(_runtimeState.GetState());
 
             if (_interactEffect != null)
                 _interactEffect.Toggle(propRuntimeState.GetIsInteracting());
@@ -80,10 +80,10 @@ namespace LichLord.Props
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
         {
-            if (_propRuntimeState.GetIsInteracting())
+            if (_runtimeState.GetIsInteracting())
                 return false;
 
-            if (_propRuntimeState.GetIsActivated())
+            if (_runtimeState.GetIsActivated())
                 return false;
 
             return interactor != null;
@@ -91,7 +91,7 @@ namespace LichLord.Props
 
         private bool IsInteractionValid(InteractorComponent interactor)
         {
-            if (_propRuntimeState.GetIsActivated())
+            if (_runtimeState.GetIsActivated())
                 return false;
 
             return true;
@@ -116,7 +116,7 @@ namespace LichLord.Props
 
             var currencyComponent = interactor.PC.Currency;
 
-            if (!currencyComponent.HasRoomForCurrency(harvestData.CurrencyTypeHarvested, harvestData.ResourcesPerHarvest))
+            if (!currencyComponent.HasRoomForCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.ResourcesPerHarvest))
                 interactor.CancelInteract(interactable, "Inventory Full");
         }
 
@@ -133,16 +133,15 @@ namespace LichLord.Props
             if (RuntimeState.Definition.PropDataDefinition is not HarvestNodeDataDefinition harvestData)
                 return;
 
-            Prop prop = interactable.Owner;
             NetworkRunner runner = interactor.Runner;
             SceneContext context = interactor.Context;
             PlayerCharacter pc = interactor.PC;
-            context.PropManager.RPC_HarvestNode(prop.ChunkID, prop.GUID, harvestData.HarvestPointsCost, pc);
+            context.PropManager.RPC_HarvestNode(ChunkID, GUID, harvestData.HarvestPointsCost, pc);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.PropManager.Predict_HarvestNode(prop.ChunkID, prop.GUID, harvestData.HarvestPointsCost);
+                context.PropManager.Predict_HarvestNode(ChunkID, GUID, harvestData.HarvestPointsCost);
 
-            interactor.PC.Currency.AddCurrency(harvestData.CurrencyTypeHarvested, harvestData.ResourcesPerHarvest);
+            interactor.PC.Currency.AddCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.ResourcesPerHarvest);
         }
 
         public void PlayHarvestParticles(PlayerCharacter pc)

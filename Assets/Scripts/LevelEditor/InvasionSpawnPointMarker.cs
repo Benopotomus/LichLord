@@ -19,41 +19,6 @@ public class InvasionSpawnPointMarker : LevelEditorMarker
     private GameObject _editorInstance;
 
     private const float maxDrawRange = 200f;
-    private Vector3 _lastCameraPosition;
-    private const float cameraMoveThreshold = 0.5f;
-
-    private bool _refreshScheduled = false;
-
-    private void ScheduleRefreshPreview()
-    {
-        if (_refreshScheduled) return;
-        _refreshScheduled = true;
-
-        var self = this;
-
-        EditorApplication.delayCall += () =>
-        {
-            if (self == null || self.transform == null)
-                return;
-
-            _refreshScheduled = false;
-            self.DestroyPreview();
-            self.CreatePreview();
-        };
-    }
-
-    private void ScheduleDestroyPreview()
-    {
-        var self = this;
-
-        EditorApplication.delayCall += () =>
-        {
-            if (self == null || self.transform == null)
-                return;
-
-            self.DestroyPreview();
-        };
-    }
 
     private void CreatePreview()
     {
@@ -123,31 +88,6 @@ public class InvasionSpawnPointMarker : LevelEditorMarker
 
         _editorInstance = null;
     }
-
-    private void OnSceneGUI(SceneView sceneView)
-    {
-        if (sceneView.camera == null)
-            return;
-
-        Vector3 camPos = sceneView.camera.transform.position;
-        float distMoved = Vector3.Distance(camPos, _lastCameraPosition);
-
-        if (distMoved > cameraMoveThreshold)
-        {
-            _lastCameraPosition = camPos;
-            ScheduleRefreshPreview();
-        }
-
-        // Make sure preview stays at local zero
-        if (_editorInstance != null)
-        {
-            if (_editorInstance.transform.localPosition != Vector3.zero)
-            {
-                _editorInstance.transform.localPosition = Vector3.zero;
-            }
-        }
-    }
-
 
     private bool IsDraggingPrefab()
     {

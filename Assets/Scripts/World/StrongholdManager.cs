@@ -65,9 +65,7 @@ namespace LichLord.World
                     Stronghold strongholdSpawned = SpawnStronghold(strongholdData);
 
                     strongholdSpawned.BuildableZone.LoadBuildables(strongholdSaveData.buildableStates);
-
                 }
-                
             }
         }
 

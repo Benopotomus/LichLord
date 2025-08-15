@@ -161,6 +161,40 @@ namespace LichLord
             }
         }
 
+        public void ClearAllData()
+        {
+            try
+            {
+                int worldCount = _worldSavesLoaded.Count;
+                int npcCount = _npcSavesLoaded.Count;
+                int playerCount = _playerSavesLoaded.Count;
+
+                _worldSavesLoaded.Clear();
+                _npcSavesLoaded.Clear();
+                _playerSavesLoaded.Clear();
+
+                string directory = Application.persistentDataPath;
+
+                // Delete all files with matching prefixes
+                foreach (string file in Directory.GetFiles(directory, $"{worldSaveFilePrefix}*.json"))
+                    File.Delete(file);
+
+                foreach (string file in Directory.GetFiles(directory, $"{npcSaveFilePrefix}*.json"))
+                    File.Delete(file);
+
+                foreach (string file in Directory.GetFiles(directory, $"{playerSaveFilePrefix}*.json"))
+                    File.Delete(file);
+
+                Debug.Log($"Cleared {worldCount} world saves, {npcCount} NPC saves, and {playerCount} player saves, and deleted matching files from disk.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to clear all save data: {e.Message}");
+            }
+
+            PopulateSaveData();
+        }
+
         // WORLD
         public bool TryGetWorldData(string sessionName, out string json)
         {

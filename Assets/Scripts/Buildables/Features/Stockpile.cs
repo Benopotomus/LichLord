@@ -1,0 +1,184 @@
+﻿using DWD.Pooling;
+using Fusion;
+using LichLord.Props;
+using UnityEngine;
+
+namespace LichLord.Buildables
+{
+    public class Stockpile : Buildable
+    {
+        public override float BonusRadius { get { return 1; } }
+        public override bool IsAttackable => false;
+
+        [SerializeField]
+        protected BuildableHealthComponent _healthComponent;
+        public BuildableHealthComponent HealthComponent => _healthComponent;
+
+        [SerializeField]
+        private InteractableComponent _interactableComponent;
+
+        [SerializeField]
+        private VisualEffectBase _interactEffect;
+
+        private StockpileCurrencyStack[] _piles = new StockpileCurrencyStack[4];
+
+        [SerializeField]
+        private Vector3[] _pilePositions = new Vector3[4];
+
+        [SerializeField]
+        private StockpileCurrencyStack _woodPilePrefab;
+
+        [SerializeField]
+        private StockpileCurrencyStack _stonePilePrefab;
+
+        [SerializeField]
+        private int _stockpileIndex = -1;
+
+        public override void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
+        {
+            base.OnSpawned(zone, runtimeState);
+
+            _healthComponent.UpdateHealth(RuntimeState.GetHealth());
+            _stockpileIndex = RuntimeState.GetStockpileIndex();
+
+            _interactableComponent.Activate(
+                this,
+                IsPotentialInteractor,
+                IsInteractionValid,
+                GetInteractionText,
+                GetInteractionTime
+            );
+
+            _interactableComponent.onInteractStart += OnInteractStart;
+            _interactableComponent.onInteractEnd += OnInteractEnd;
+            _interactableComponent.onInteractionComplete += OnInteractionComplete;
+        }
+
+        public override void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, bool hasAuthority)
+        {
+            base.OnRender(runtimeState, renderDeltaTime, hasAuthority);
+
+            _healthComponent.UpdateHealth(RuntimeState.GetHealth());
+
+            _stockpileIndex = RuntimeState.GetStockpileIndex();
+            var stockPileData = Context.ContainerManager.GetStockPile(_stockpileIndex);
+
+            for (int i = 0; i < 4; i++)
+            {
+                FCurrencyStack currentStack = stockPileData.GetCurrencyStack(i);
+                StockpileCurrencyStack currentPile = _piles[i];
+
+                if (currentStack.Value > 0)
+                {
+                    if (currentPile == null)
+                    {
+                        StockpileCurrencyStack currencyStackPrefab = currentStack.CurrencyType switch
+                        {
+                            ECurrencyType.Wood => _woodPilePrefab,
+                            ECurrencyType.Stone => _stonePilePrefab,
+                            _ => throw new System.ArgumentOutOfRangeException()
+                        };
+
+                        Vector3 worldPos = CachedTransform.TransformPoint(_pilePositions[i]);
+                        Quaternion rotation = CachedTransform.localRotation;
+                        currentPile = DWDObjectPool.Instance.SpawnAt(currencyStackPrefab, worldPos, rotation) as StockpileCurrencyStack;
+                        currentPile.SetCurrencyCount(currentStack.Value);
+                        _piles[i] = currentPile;
+                    }
+                    else
+                    {
+                        currentPile.SetCurrencyCount(currentStack.Value);
+                    }
+                }
+                else
+                {
+
+                    if (currentPile != null)
+                    {
+                        currentPile.StartRecycle();
+                        _piles[i] = null;
+                    }
+                }
+            }
+        }
+
+        public override void StartRecycle()
+        {
+            _interactableComponent.onInteractStart -= OnInteractStart;
+            _interactableComponent.onInteractEnd -= OnInteractEnd;
+            _interactableComponent.onInteractionComplete -= OnInteractionComplete;
+
+            base.StartRecycle();
+        }
+
+        public override void OnHitTaken(ref FHitUtilityData hit)
+        {
+        }
+
+        public override void ProcessHit(ref FHitUtilityData hit)
+        {
+        }
+
+        private bool IsPotentialInteractor(InteractorComponent interactor)
+        {
+            if (RuntimeState.GetIsInteracting())
+                return false;
+
+            return interactor != null;
+        }
+
+        private bool IsInteractionValid(InteractorComponent interactor)
+        {
+            return true;
+        }
+
+        private string GetInteractionText(InteractorComponent interactor)
+        {
+            return "Stockpile";
+        }
+
+        private float GetInteractionTime(InteractorComponent interactor)
+        {
+            return 3.0f;
+        }
+
+        private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
+        {
+            Debug.Log("Interaction started with Stockpile.");
+
+            if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
+                return;
+        }
+
+        private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
+        {
+            Debug.Log("Interaction ended with Stockpile.");
+        }
+
+        private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
+        {
+            Debug.Log("Stockpile Interaction complete.");
+            // Trigger effects, state changes, or events
+
+            if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
+                return;
+
+            int stockpileIndex = RuntimeState.GetStockpileIndex();
+            NetworkRunner runner = interactor.Runner;
+            SceneContext context = interactor.Context;
+            PlayerCharacter pc = interactor.PC;
+
+            var currencyType = ECurrencyType.None;
+            var value = 0;
+            // i want to grab the first currency with a stack and add it to the stockpile 
+            pc.Currency.GetCurrencyWithCount(ref currencyType, ref value);
+
+            if (currencyType == ECurrencyType.None)
+                return;
+
+            pc.Currency.AddCurrency(currencyType, -value);
+
+            context.ContainerManager.RPC_StockpileDropOff_Player(stockpileIndex, currencyType, value, pc);
+        }
+    }
+}

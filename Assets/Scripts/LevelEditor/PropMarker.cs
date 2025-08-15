@@ -16,7 +16,7 @@ public class PropMarker : LevelEditorMarker
     private const string PreviewObjectName = "_EditorPreview";
     private GameObject _editorInstance;
 
-    private const float maxDrawRange = 200f;
+    private const float maxDrawRange = 300f;
     private Vector3 _lastCameraPosition;
     private const float cameraMoveThreshold = 0.5f;
 
@@ -57,13 +57,15 @@ public class PropMarker : LevelEditorMarker
         if (sceneCamera == null)
             return;
 
-        float dist = Vector3.Distance(sceneCamera.transform.position, transform.position);
+        
+        float sqrDist = Vector3.SqrMagnitude(sceneCamera.transform.position - transform.position);
 
-        if (dist > maxDrawRange)
+        if (sqrDist > maxDrawRange * maxDrawRange)
         {
             DestroyPreview();
             return;
         }
+        
 
         Transform existing = transform.Find(PreviewObjectName);
         if (existing != null)
@@ -116,9 +118,11 @@ public class PropMarker : LevelEditorMarker
         if (sceneView.camera == null)
             return;
 
+        /*
         Vector3 camPos = sceneView.camera.transform.position;
         float distMoved = Vector3.Distance(camPos, _lastCameraPosition);
 
+        
         if (distMoved > cameraMoveThreshold)
         {
             _lastCameraPosition = camPos;
@@ -133,6 +137,7 @@ public class PropMarker : LevelEditorMarker
                 _editorInstance.transform.localPosition = Vector3.zero;
             }
         }
+        */
     }
 
     private bool IsDraggingPrefab()

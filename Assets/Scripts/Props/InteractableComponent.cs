@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using LichLord.World;
+using System;
 using UnityEngine;
 
-namespace LichLord.Props
+namespace LichLord
 {
     public class InteractableComponent : MonoBehaviour
     {
-        public Prop Owner { get; protected set; }
+        public IChunkTrackable Owner { get; protected set; }
 
         private Func<InteractorComponent, bool> _IsPotentialInteract;
         private Func<InteractorComponent, bool> _IsInteractionValid;
@@ -22,7 +23,7 @@ namespace LichLord.Props
 
         public int InteractTick;
 
-        public void Activate(Prop owner,
+        public void Activate(IChunkTrackable owner,
             Func<InteractorComponent, bool> isPotentialInteract,
             Func<InteractorComponent, bool> isInteractionValid,
             Func<InteractorComponent, string> getInteractionText,

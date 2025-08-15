@@ -6,11 +6,11 @@
     [StructLayout(LayoutKind.Explicit)]
     public struct FPropData : INetworkStruct
     {
-        [FieldOffset(1)]
+        [FieldOffset(0)]
         private ushort _definitionId; // 2 bytes. definition id;
-        [FieldOffset(3)]
+        [FieldOffset(2)]
         private int _stateData; // 4 bytes
-        // 7
+        // 6
 
         public int DefinitionID
         {
@@ -31,7 +31,6 @@
 
         public void Copy(ref FPropData other)
         {
-
             _definitionId = other._definitionId;
             _stateData = other._stateData;
         }

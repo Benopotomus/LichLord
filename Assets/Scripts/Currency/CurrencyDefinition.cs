@@ -19,7 +19,7 @@ namespace LichLord
         public BundleObject Icon => _icon;
     }
 
-    public enum ECurrencyType
+    public enum ECurrencyType : byte
     { 
         None,
         Wood,

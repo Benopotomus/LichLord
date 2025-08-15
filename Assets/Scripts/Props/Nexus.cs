@@ -40,7 +40,7 @@ namespace LichLord.Props
             _interactableComponent.onInteractEnd += OnInteractEnd;
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
-            UpdateNavmesh();
+            //UpdateNavmesh();
         }
 
         private void UpdateNavmesh()
@@ -70,10 +70,10 @@ namespace LichLord.Props
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
         {
-            if (_propRuntimeState.GetIsInteracting())
+            if (_runtimeState.GetIsInteracting())
                 return false;
 
-            if (_propRuntimeState.GetIsActivated())
+            if (_runtimeState.GetIsActivated())
                 return false;
 
             return interactor != null;
@@ -81,7 +81,7 @@ namespace LichLord.Props
 
         private bool IsInteractionValid(InteractorComponent interactor)
         {
-            if (_propRuntimeState.GetIsActivated())
+            if (_runtimeState.GetIsActivated())
                 return false;
 
             return true;
@@ -112,18 +112,17 @@ namespace LichLord.Props
             Debug.Log("Nexus interaction complete.");
             // Trigger effects, state changes, or events
 
-            Prop prop = interactable.Owner;
             NetworkRunner runner = interactor.Runner;
             SceneContext context = interactor.Context;
 
-            context.PropManager.RPC_SetActivated(prop.ChunkID, prop.GUID, true);
+            context.PropManager.RPC_SetActivated(ChunkID, GUID, true);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.PropManager.Predict_SetActivated(prop.ChunkID, prop.GUID, true);
+                context.PropManager.Predict_SetActivated(ChunkID, GUID, true);
 
             FStrongholdData strongholdData = new FStrongholdData();
-            strongholdData.ChunkID = prop.ChunkID;
-            strongholdData.GUID = (byte)prop.GUID;
+            strongholdData.ChunkID = ChunkID;
+            strongholdData.GUID = (byte)GUID;
 
             context.StrongholdManager.RPC_ActivateNexus(strongholdData);
 

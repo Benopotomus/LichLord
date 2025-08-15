@@ -3,6 +3,8 @@ using System.IO;
 using Fusion;
 using System.Collections.Generic;
 using System;
+using LichLord.Props;
+using LichLord.Buildables;
 
 namespace LichLord.World
 {
@@ -32,7 +34,7 @@ namespace LichLord.World
         {
             if (Runner == null)
             {
-                Debug.LogWarning("No active session; cannot save chunks.");
+                Debug.LogWarning("No active session; cannot save world.");
                 return;
             }
 
@@ -41,20 +43,17 @@ namespace LichLord.World
                 string sessionName = Global.Networking.SessionName;
                 string saveFilePath = GetWorldSaveFilePath(sessionName);
 
+                // --- Save chunks ---
                 var deltaChunks = Context.ChunkManager.DeltaChunks;
-
-                // Store chunks directly in a list
                 List<FChunkSaveData> chunkSaveDatas = new List<FChunkSaveData>();
                 int totalPropCount = 0;
 
-                // Chunks
                 foreach (var chunk in deltaChunks)
                 {
                     if (chunk.DeltaPropStates == null || chunk.DeltaPropStates.Count == 0)
                         continue;
 
                     List<FPropSaveState> propList = new List<FPropSaveState>();
-
                     foreach (var deltaState in chunk.DeltaPropStates.Values)
                     {
                         if (deltaState == null)
@@ -62,9 +61,8 @@ namespace LichLord.World
                             Debug.LogWarning($"Null PropRuntimeState for chunk {chunk.ChunkID.X}/{chunk.ChunkID.Y}.");
                             continue;
                         }
-
                         propList.Add(new FPropSaveState(
-                            deltaState.guid,
+                            deltaState.index,
                             deltaState.position,
                             deltaState.rotation,
                             deltaState.definitionId,
@@ -79,28 +77,19 @@ namespace LichLord.World
                             chunkCoord = chunk.ChunkID,
                             props = propList.ToArray()
                         });
-
                         totalPropCount += propList.Count;
                     }
                 }
 
-                // Strongholds
+                // --- Save strongholds ---
                 List<FStrongholdSaveData> strongholdSaveDatas = new List<FStrongholdSaveData>();
                 foreach (var stronghold in Context.StrongholdManager.ActiveStrongholds)
                 {
-                    FStrongholdSaveData strongholdSaveData = new FStrongholdSaveData
-                    {
-                        chunkCoord = stronghold.Data.ChunkID,
-                        index = stronghold.Data.GUID
-                    };
-
                     var buildableList = new List<FBuildableSaveState>();
                     var buildData = stronghold.BuildableZone.Data;
 
                     for (int i = 0; i < buildData.Length; i++)
                     {
-                        Debug.Log("Saving Euler: " + buildData[i].Rotation.eulerAngles);
-
                         buildableList.Add(new FBuildableSaveState(
                             i,
                             buildData[i].Position,
@@ -108,29 +97,45 @@ namespace LichLord.World
                             buildData[i].DefinitionID,
                             buildData[i].StateData
                         ));
+
                     }
 
-                    strongholdSaveData.buildableStates = buildableList.ToArray();
-                    strongholdSaveDatas.Add(strongholdSaveData);
+                    strongholdSaveDatas.Add(new FStrongholdSaveData
+                    {
+                        chunkCoord = stronghold.Data.ChunkID,
+                        index = stronghold.Data.GUID,
+                        buildableStates = buildableList.ToArray()
+                    });
                 }
 
-                // Final save data
+                // --- Save stockpiles ---
+                List<FStockpileSaveData> stockpileSaves = new List<FStockpileSaveData>();
+                if (Context.ContainerManager != null)
+                {
+                    for (int i = 0; i < Context.ContainerManager.StockpileCount; i++)
+                    {
+                        ref FStockpileData stockpile = ref Context.ContainerManager.GetStockPile(i);
+                        stockpileSaves.Add(new FStockpileSaveData(i, stockpile));
+                    }
+                }
+
+                // --- Final save ---
                 FWorldSaveData saveData = new FWorldSaveData
                 {
                     chunks = chunkSaveDatas.ToArray(),
-                    strongholds = strongholdSaveDatas.ToArray()
+                    strongholds = strongholdSaveDatas.ToArray(),
+                    stockpiles = stockpileSaves.ToArray()
                 };
 
-                // Serialize and save
                 string json = JsonUtility.ToJson(saveData, true);
                 SaveLoadManager.instance.SetWorldData(sessionName, json);
                 File.WriteAllText(saveFilePath, json);
 
-                Debug.Log($"Saved {chunkSaveDatas.Count} chunks with {totalPropCount} props for session {sessionName} to {saveFilePath}.");
+                Debug.Log($"Saved world: {chunkSaveDatas.Count} chunks, {totalPropCount} props, {strongholdSaveDatas.Count} strongholds, {stockpileSaves.Count} stockpiles.");
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to save chunk states for session: {e.Message}");
+                Debug.LogError($"Failed to save world: {e}");
             }
         }
 
@@ -191,7 +196,35 @@ namespace LichLord.World
                     {
                         _loadedStrongholds.Add(strongholdData);
                         Debug.Log($"Loaded stronghold {strongholdData.index} in chunk {strongholdData.chunkCoord.X}/{strongholdData.chunkCoord.Y}");
+
+                        // Load the buildables and look for stockpiles to adjust the index
+                        foreach (var buildableSave in strongholdData.buildableStates)
+                        {
+                            if (buildableSave.definitionId == 0)
+                                continue;
+
+                            var definition = Global.Tables.BuildableTable.TryGetDefinition(buildableSave.definitionId);
+                            FBuildableData data = new FBuildableData();
+                            data.LoadFromSave(buildableSave);
+
+                            if (definition.BuildableDataDefinition is StockpileDataDefinition stockPileData)
+                            {
+                                int stockpileIndex = stockPileData.GetStockpileIndex(ref data);
+                                Context.ContainerManager.LoadStockPileBuildable(stockpileIndex);
+                            }
+                            
+                        }
                     }
+                }
+
+                // --- Load stockpiles ---
+                if (saveData.stockpiles != null && Context.ContainerManager != null)
+                {
+                    foreach (var stockpileSave in saveData.stockpiles)
+                    {
+                        Context.ContainerManager.LoadStockPileData(stockpileSave);
+                    }
+                    Debug.Log($"Loaded {saveData.stockpiles.Length} stockpiles.");
                 }
 
                 Debug.Log($"Loaded {_loadedChunks.Count} chunks with {totalPropCount} props and {_loadedStrongholds.Count} strongholds for session {sessionName}.");

@@ -1,12 +1,7 @@
 ﻿using LichLord;
 using LichLord.UI;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
@@ -18,41 +13,30 @@ namespace Assets.Scripts.UI
         [SerializeField]
         private RectTransform _layoutGroup;
 
-        private Dictionary<ECurrencyType, UIHeldCurrencySlot> _currencySlots = new Dictionary<ECurrencyType, UIHeldCurrencySlot>();
+        private readonly Dictionary<ECurrencyType, UIHeldCurrencySlot> _currencySlots
+            = new Dictionary<ECurrencyType, UIHeldCurrencySlot>();
 
         protected override void OnTick()
         {
             base.OnTick();
 
             var pc = Context.LocalPlayerCharacter;
+            if (pc == null)
+                return;
 
-            if (pc != null)
+            // Loop through the fixed stacks in PlayerCurrencyComponent
+            for (int i = 0; i < pc.Currency.CurrencyCount; i++)
             {
+                var stack = pc.Currency.GetStackAtIndex(i);
 
-                if (pc.Currency.Wood > 0)
-                    AddCurrencySlot(ECurrencyType.Wood);
+                if (stack.Value > 0)
+                {
+                    AddCurrencySlot(stack.CurrencyType);
+                }
                 else
-                    RemoveCurrencySlot(ECurrencyType.Wood);
-
-                if (pc.Currency.Stone > 0)
-                    AddCurrencySlot(ECurrencyType.Stone);
-                else
-                    RemoveCurrencySlot(ECurrencyType.Stone);
-
-                if (pc.Currency.Iron > 0)
-                    AddCurrencySlot(ECurrencyType.Iron);
-                else
-                    RemoveCurrencySlot(ECurrencyType.Iron);
-
-                if (pc.Currency.Gold > 0)
-                    AddCurrencySlot(ECurrencyType.Gold);
-                else
-                    RemoveCurrencySlot(ECurrencyType.Gold);
-
-                if (pc.Currency.Souls > 0)
-                    AddCurrencySlot(ECurrencyType.Souls);
-                else
-                    RemoveCurrencySlot(ECurrencyType.Souls);
+                {
+                    RemoveCurrencySlot(stack.CurrencyType);
+                }
             }
         }
 
@@ -62,20 +46,18 @@ namespace Assets.Scripts.UI
                 return;
 
             Destroy(slot.gameObject);
-
             _currencySlots.Remove(currencyType);
         }
 
         private void AddCurrencySlot(ECurrencyType currencyType)
         {
-            if (_currencySlots.TryGetValue(currencyType, out var slot))
+            if (_currencySlots.ContainsKey(currencyType))
                 return;
 
-            UIHeldCurrencySlot newSlot = Instantiate(_slotPrefab, _layoutGroup) as UIHeldCurrencySlot;
+            var newSlot = Instantiate(_slotPrefab, _layoutGroup);
             newSlot.SetDefinition(Context.LocalPlayerCharacter.Currency.GetCurrencyDefinition(currencyType));
             AddChild(newSlot);
             _currencySlots[currencyType] = newSlot;
-
         }
     }
 }

@@ -64,13 +64,13 @@ namespace LichLord
             }
         }
 
-        public float Pitch // -90 to 90 degrees
+        public float Pitch // -90 to +90 degrees
         {
-            get => (_compressedPitch / 127f) * 90f; // exact 0 when _compressedPitch == 0
+            get => Mathf.Clamp((_compressedPitch / 120f) * 90f, -90f, 90f);
             set
             {
                 float clamped = Mathf.Clamp(value, -90f, 90f);
-                _compressedPitch = (sbyte)Mathf.RoundToInt((clamped / 90f) * 127f);
+                _compressedPitch = (sbyte)Mathf.RoundToInt((clamped / 90f) * 120f);
             }
         }
 

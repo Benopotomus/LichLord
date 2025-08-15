@@ -11,8 +11,8 @@ namespace LichLord.Props
         public SceneContext Context => _sceneContext;
 
         [SerializeField]
-        protected PropRuntimeState _propRuntimeState;
-        public PropRuntimeState RuntimeState => _propRuntimeState;
+        protected PropRuntimeState _runtimeState;
+        public PropRuntimeState RuntimeState => _runtimeState;
 
         public FChunkPosition ChunkID;
         public int GUID;
@@ -22,11 +22,8 @@ namespace LichLord.Props
 
         // IChunkTrackable
         public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
-
-        // Extra radius added for npc maneuvers to determine if they're in range.
-        public float BonusRadius { get; }
-
         public Vector3 Position => CachedTransform.position;
+        public virtual float BonusRadius { get; } // Extra radius added for npc maneuvers to determine if they're in range.
         public virtual bool IsAttackable
         {
             get
@@ -37,15 +34,15 @@ namespace LichLord.Props
         
         public virtual void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
-            _propRuntimeState = propRuntimeState;
+            _runtimeState = propRuntimeState;
             _propManager = propManager;
             _sceneContext = propManager.Context;
 
-            CachedTransform.position = _propRuntimeState.position;
-            CachedTransform.rotation = _propRuntimeState.rotation;
+            CachedTransform.position = _runtimeState.position;
+            CachedTransform.rotation = _runtimeState.rotation;
 
             ChunkID = propRuntimeState.chunk.ChunkID;
-            GUID = propRuntimeState.guid;
+            GUID = propRuntimeState.index;
 
             CurrentChunk.AddObject(this);
         }
@@ -54,7 +51,7 @@ namespace LichLord.Props
         // Read only - no logic should update here.
         public virtual void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
         {
-            _propRuntimeState = propRuntimeState;
+            _runtimeState = propRuntimeState;
         }
 
         public virtual void StartRecycle()
