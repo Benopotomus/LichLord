@@ -1,4 +1,5 @@
-﻿using LichLord.Props;
+﻿using LichLord.Buildables;
+using LichLord.Props;
 using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
@@ -275,7 +276,22 @@ namespace LichLord.NonPlayerCharacters
                 !_hasAttackTarget)
                 return;
 
-            float sqrDist = (NPC.CachedTransform.position - _attackTarget.Position).sqrMagnitude - _attackTarget.BonusRadius;
+
+            float sqrDist;
+            Collider targetCollider = _attackTarget.HurtBoxCollider;
+
+            if (targetCollider != null) // Target has a collider
+            {
+                // Distance from my position to the closest point on target's collider
+                Vector3 closestPoint = targetCollider.ClosestPoint(NPC.CachedTransform.position);
+                sqrDist = (NPC.CachedTransform.position - closestPoint).sqrMagnitude - _attackTarget.BonusRadius;
+            }
+            else
+            {
+                // Standard distance check with bonus radius
+                sqrDist = (NPC.CachedTransform.position - _attackTarget.Position).sqrMagnitude - _attackTarget.BonusRadius;
+            }
+
             _isInMovementStopRange = sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt;
             _isInFaceTargetRange = sqrDist < _activeManeuver.Definition.FaceTargetRangeSqrt;
         }
@@ -354,7 +370,7 @@ namespace LichLord.NonPlayerCharacters
                     float distance = Vector3.Distance(NPC.CachedTransform.position, trackable.Position);
 
                     if (distance < closestDistance)
-                    {
+                    { 
                         closestDistance = distance;
                         currentTarget = trackable;
                     }
@@ -551,6 +567,9 @@ namespace LichLord.NonPlayerCharacters
             
             if (_attackTarget is Stronghold stronghold)
                 targetGO = stronghold.gameObject;
+
+            if (_attackTarget is Buildable buildable)
+                targetGO = buildable.gameObject;
 
             _moveTarget = _attackTarget.Position;
             NPC.Movement.AIFollower.destination = _moveTarget;

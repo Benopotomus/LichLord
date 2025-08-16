@@ -26,14 +26,27 @@ namespace LichLord
         public bool IsEmpty() => _currencyType == ECurrencyType.None || _value == 0;
     }
 
-    [StructLayout(LayoutKind.Explicit, Size = 8)]
+    [StructLayout(LayoutKind.Explicit, Size = 9)]
     public struct FStockpileData : INetworkStruct
     {
         [FieldOffset(0)] private FCurrencyStack _pile0;
         [FieldOffset(2)] private FCurrencyStack _pile1;
         [FieldOffset(4)] private FCurrencyStack _pile2;
         [FieldOffset(6)] private FCurrencyStack _pile3;
-        
+        [FieldOffset(8)] private NetworkBool _isAssigned;
+
+        /// <summary>
+        /// Whether this stockpile is currently assigned
+        /// </summary>
+        public bool IsAssigned
+        {
+            get => _isAssigned;
+            set => _isAssigned = value;
+        }
+
+        public void Assign() => _isAssigned = true;
+        public void Unassign() => _isAssigned = false;
+
         public int AddToStockpile(ECurrencyType currencyType, int value)
         {
             const byte MAX_PILE_AMOUNT = 250;
@@ -113,6 +126,14 @@ namespace LichLord
                     return false;
             }
             return true;
+        }
+
+        public void ClearStockpile()
+        {
+            _pile0 = new FCurrencyStack { CurrencyType = ECurrencyType.None, Value = 0 };
+            _pile1 = new FCurrencyStack { CurrencyType = ECurrencyType.None, Value = 0 };
+            _pile2 = new FCurrencyStack { CurrencyType = ECurrencyType.None, Value = 0 };
+            _pile3 = new FCurrencyStack { CurrencyType = ECurrencyType.None, Value = 0 };
         }
     }
 }

@@ -1,14 +1,13 @@
 ﻿using Fusion;
 using LichLord.Props;
 using LichLord.World;
-using NUnit.Framework.Constraints;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.Buildables
 {
     [RequireComponent(typeof(CapsuleCollider))]
-    public class BuildableZone : ContextBehaviour
+    public partial class BuildableZone : ContextBehaviour
     {
         [SerializeField] private CapsuleCollider _trigger;
 
@@ -34,6 +33,8 @@ namespace LichLord.Buildables
             _trigger.radius = size;
         }
 
+        int _lastAuthorityTick = -1;
+
         public override void Render()
         {
             if (!Context.IsGameplayActive())
@@ -43,21 +44,27 @@ namespace LichLord.Buildables
 
             bool hasAuthority = HasStateAuthority;
             float renderDeltaTime = Time.deltaTime;
+            int tick = Runner.Tick;
 
             for (int i = 0; i < _buildableDatas.Length; i++)
             {
                 var loadstate = _buildableLoadStates[i];
                 ref FBuildableData data = ref _buildableDatas.GetRef(i);
                 int definitionID = data.DefinitionID;
-
+                BuildableRuntimeState runtimeState = GetRenderState(i, ref data);
+                BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
                 bool shouldBeLoaded = definitionID > 0;
+
+                if (hasAuthority &&
+                    _lastAuthorityTick != tick)
+                {
+
+                    if(runtimeState.AuthorityUpdate(tick))
+                        ReplicateRuntimeState(runtimeState);
+                }
 
                 if (shouldBeLoaded)
                 {
-                    BuildableRuntimeState runtimeState = GetRenderState(i, ref data);
-
-                    BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
-
                     switch (loadstate.LoadState)
                     {
                         case ELoadState.None:
@@ -92,6 +99,8 @@ namespace LichLord.Buildables
                     }
                 }
             }
+
+            _lastAuthorityTick = tick;
         }
 
         private void OnBuildableSpawned(int index, Buildable buildable)
@@ -100,7 +109,7 @@ namespace LichLord.Buildables
             _buildableLoadStates[index].LoadState = ELoadState.Loaded;
  
             ref FBuildableData data = ref _buildableDatas.GetRef(index);
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(ref data);
+            _buildableRuntimeStates[index] = new BuildableRuntimeState(index, ref data);
 
             buildable.OnSpawned(this, _buildableRuntimeStates[index]);
         }
@@ -123,7 +132,7 @@ namespace LichLord.Buildables
             // Determine if theres any connectors near my connectors
 
             ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
-
+             
             data.DefinitionID = definitionID;
             data.Transform = worldTransform;
 
@@ -139,7 +148,9 @@ namespace LichLord.Buildables
 
             if (definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
             {
-                stockpileDataDefinition.SetStockpileIndex(Context.ContainerManager.AssignStockpileIndex(), ref data);
+                int freeStockpileIndex = Context.ContainerManager.FindFreeStockpileIndex();
+                stockpileDataDefinition.SetStockpileIndex(freeStockpileIndex, ref data);
+                Context.ContainerManager.AssignStockpileIndex(freeStockpileIndex);
             }
         }
 
@@ -173,7 +184,7 @@ namespace LichLord.Buildables
                 return state;
             }
 
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(ref data);
+            _buildableRuntimeStates[index] = new BuildableRuntimeState(index, ref data);
             return _buildableRuntimeStates[index];
         }
     }

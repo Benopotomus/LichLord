@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b47f5fe7e7275fa4b960e1fe84b13586, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TicksToComplete: 96
+  TicksToComplete: 64
   InteractTick: 0
 --- !u!135 &7318613764223773132
 SphereCollider:
@@ -506,6 +506,7 @@ MonoBehaviour:
   _harvestCompletePrefab: {fileID: 6300435901046798084, guid: 14153a9053a711d45a11a0e3b6816ec4,
     type: 3}
   _stateComponent: {fileID: 1094255631455831052}
+  _shakeDuration: 0.25
 --- !u!114 &1094255631455831052
 MonoBehaviour:
   m_ObjectHideFlags: 0

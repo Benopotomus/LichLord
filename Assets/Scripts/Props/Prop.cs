@@ -31,7 +31,8 @@ namespace LichLord.Props
                  return false;
             }
         }
-        
+        public virtual Collider HurtBoxCollider { get { return null; } }
+
         public virtual void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
             _runtimeState = propRuntimeState;

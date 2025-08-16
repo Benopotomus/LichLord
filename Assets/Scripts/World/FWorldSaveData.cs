@@ -47,14 +47,16 @@ namespace LichLord.World
         public FCurrencyStackSaveData pile1;
         public FCurrencyStackSaveData pile2;
         public FCurrencyStackSaveData pile3;
+        public bool isAssigned;
 
-        public FStockpileSaveData(int idx, FStockpileData data)
+        public FStockpileSaveData(int idx, FStockpileData data, bool isAssigned)
         {
             index = idx;
             pile0 = new FCurrencyStackSaveData(data.GetCurrencyStack(0));
             pile1 = new FCurrencyStackSaveData(data.GetCurrencyStack(1));
             pile2 = new FCurrencyStackSaveData(data.GetCurrencyStack(2));
             pile3 = new FCurrencyStackSaveData(data.GetCurrencyStack(3));
+            this.isAssigned = isAssigned;
         }
 
         public FStockpileData ToNetworkStockpile()
@@ -64,6 +66,7 @@ namespace LichLord.World
             netStockpile.AddToStockpile(pile1.currencyType, pile1.value);
             netStockpile.AddToStockpile(pile2.currencyType, pile2.value);
             netStockpile.AddToStockpile(pile3.currencyType, pile3.value);
+            netStockpile.IsAssigned = isAssigned;
             return netStockpile;
         }
     }
@@ -106,8 +109,9 @@ namespace LichLord.World
         public FChunkPosition chunkCoord;
         public int index;
 
-        public int maxHealth;
         public int currentHealth;
+        public int rank;
+
         public FBuildableSaveState[] buildableStates;
     }
 

@@ -103,8 +103,11 @@ namespace LichLord.World
                     strongholdSaveDatas.Add(new FStrongholdSaveData
                     {
                         chunkCoord = stronghold.Data.ChunkID,
-                        index = stronghold.Data.GUID,
+                        index = stronghold.Data.Index,
+                        currentHealth = stronghold.CurrentHealth,
+                        rank = stronghold.Rank,
                         buildableStates = buildableList.ToArray()
+
                     });
                 }
 
@@ -114,8 +117,8 @@ namespace LichLord.World
                 {
                     for (int i = 0; i < Context.ContainerManager.StockpileCount; i++)
                     {
-                        ref FStockpileData stockpile = ref Context.ContainerManager.GetStockPile(i);
-                        stockpileSaves.Add(new FStockpileSaveData(i, stockpile));
+                        ref FStockpileData stockpileData = ref Context.ContainerManager.GetStockPile(i);
+                        stockpileSaves.Add(new FStockpileSaveData(i, stockpileData, stockpileData.IsAssigned));
                     }
                 }
 
@@ -206,12 +209,13 @@ namespace LichLord.World
                             var definition = Global.Tables.BuildableTable.TryGetDefinition(buildableSave.definitionId);
                             FBuildableData data = new FBuildableData();
                             data.LoadFromSave(buildableSave);
-
+                            /*
                             if (definition.BuildableDataDefinition is StockpileDataDefinition stockPileData)
                             {
                                 int stockpileIndex = stockPileData.GetStockpileIndex(ref data);
-                                Context.ContainerManager.LoadStockPileBuildable(stockpileIndex);
+                                Context.ContainerManager.AssignStockpileIndex(stockpileIndex);
                             }
+                            */
                             
                         }
                     }

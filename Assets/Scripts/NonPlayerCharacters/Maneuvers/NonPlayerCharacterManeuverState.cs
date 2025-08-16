@@ -1,4 +1,5 @@
-﻿using LichLord.Projectiles;
+﻿using LichLord.Buildables;
+using LichLord.Projectiles;
 using LichLord.Props;
 using System;
 using System.Collections.Generic;
@@ -60,7 +61,12 @@ namespace LichLord.NonPlayerCharacters
             }
             else if (brainComponent.AttackTarget is Prop)
             {
-                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Props))
+                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Prop))
+                    return true;
+            }
+            else if (brainComponent.AttackTarget is Buildable)
+            {
+                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Buildable))
                     return true;
             }
 

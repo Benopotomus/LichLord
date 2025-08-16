@@ -1,4 +1,5 @@
-﻿using Fusion;
+﻿using DWD.Pooling;
+using Fusion;
 using LichLord.Props;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace LichLord.World
         [FieldOffset(0)]
         public FChunkPosition ChunkID;
         [FieldOffset(2)]
-        public byte GUID;
+        public byte Index;
 
         public bool IsValid()
         { 
@@ -30,7 +31,7 @@ namespace LichLord.World
         {
             if (ChunkID.X == other.ChunkID.X &&
                 ChunkID.Y == other.ChunkID.Y &&
-                GUID == other.GUID)
+                Index == other.Index)
                 return true;
 
             return false;
@@ -46,6 +47,7 @@ namespace LichLord.World
         public Action<Stronghold> onStrongholdDespawned;
 
         [SerializeField] private Stronghold _strongholdPrefab;
+        [SerializeField] private StandaloneVisualEffect _preSpawnVisualEffect;
 
         private List<Stronghold> _activeStrongholds = new List<Stronghold>();
         public List<Stronghold> ActiveStrongholds => _activeStrongholds;
@@ -56,13 +58,13 @@ namespace LichLord.World
             {
                 var loadedStrongholds = Context.WorldSaveLoadManager.LoadedStrongholds;
 
-                foreach (var strongholdSaveData in loadedStrongholds)
+                foreach (FStrongholdSaveData strongholdSaveData in loadedStrongholds)
                 {
                     FStrongholdData strongholdData = new FStrongholdData();
                     strongholdData.ChunkID = strongholdSaveData.chunkCoord;
-                    strongholdData.GUID = (byte)strongholdSaveData.index;
+                    strongholdData.Index = (byte)strongholdSaveData.index;
 
-                    Stronghold strongholdSpawned = SpawnStronghold(strongholdData);
+                    Stronghold strongholdSpawned = SpawnStronghold(strongholdData, strongholdSaveData.currentHealth, strongholdSaveData.rank);
 
                     strongholdSpawned.BuildableZone.LoadBuildables(strongholdSaveData.buildableStates);
                 }
@@ -93,27 +95,29 @@ namespace LichLord.World
         }
 
 
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_ActivateNexus(FStrongholdData strongholdData)
         {
             var position = GetStrongholdPosition(strongholdData);
 
             // Create particle here
+            StandaloneVisualEffect visualEffect = DWDObjectPool.Instance.SpawnAt(_preSpawnVisualEffect, position) as StandaloneVisualEffect;
+            visualEffect.Initialize();
 
             if (HasStateAuthority)
             {
-                SpawnStronghold(strongholdData);
+                SpawnStronghold(strongholdData, 1000, 1);
             }
         }
 
-        public Stronghold SpawnStronghold(FStrongholdData strongholdData)
+        public Stronghold SpawnStronghold(FStrongholdData strongholdData, int health, int rank)
         {
             var position = GetStrongholdPosition(strongholdData);
             return Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
                                 onBeforeSpawned: (runner, obj) =>
                                 {
                                     var r = obj.GetComponent<Stronghold>();
-                                    r.SetData(strongholdData, 1000, 1000, 50f);
+                                    r.SetSpawnData(strongholdData, health, rank);
                                 });
             
         }
@@ -151,7 +155,7 @@ namespace LichLord.World
         public PropRuntimeState GetNexusState(FStrongholdData nexusData)
         {
             Chunk chunk = Context.ChunkManager.GetChunk(nexusData.ChunkID);
-            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.GUID, out var state))
+            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.Index, out var state))
             {
                 return state;
             }

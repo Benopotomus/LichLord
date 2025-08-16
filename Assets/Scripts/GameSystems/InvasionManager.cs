@@ -49,6 +49,11 @@ namespace LichLord
             SpawnInvasionWave(InvasionSpawnWave);
         }
 
+        public void RPC_BeginInvasion(byte invasionID, FStrongholdData targetStrongholdData)
+        { 
+            
+        }
+
         public override void Render()
         {
             base.Render();

@@ -9,10 +9,6 @@ namespace LichLord
 {
     public class ContainerManager : ContextBehaviour
     {
-        [Networked]
-        [SerializeField]
-        protected byte _freeStockpileIndex { get; set; }
-
         [Networked, Capacity(128)]
         [OnChangedRender(nameof(OnRep_StockpileDatas))]
         protected virtual NetworkArray<FStockpileData> _stockpileDatas { get; }
@@ -38,11 +34,25 @@ namespace LichLord
             return ref _stockpileDatas.GetRef(index);
         }
 
-        public int AssignStockpileIndex()
+        public int FindFreeStockpileIndex()
         {
-            int freeIndex = _freeStockpileIndex;
-            _freeStockpileIndex++;
-            return freeIndex;
+            for (int i = 0; i < _stockpileDatas.Length; i++)
+            {
+                ref FStockpileData stockpile = ref _stockpileDatas.GetRef(i);
+                if (!stockpile.IsAssigned) // not taken
+                {
+                    return i;
+                }
+            }
+            return -1; // no free index found
+        }
+
+        public void AssignStockpileIndex(int index)
+        {
+            ref FStockpileData stockpile = ref _stockpileDatas.GetRef(index);
+            stockpile.Assign();
+            Debug.Log("Index assigned: " + index);
+            Debug.Log(stockpile.IsAssigned);
         }
 
         public void LoadStockPileData(FStockpileSaveData stockpileSave)
@@ -52,15 +62,11 @@ namespace LichLord
             _stockpileDatas.Set(stockpileSave.index, stockpileData);
         }
 
-        public void LoadStockPileBuildable(int stockpileIndex)
+        public void ClearStockpile(int stockpileIndex)
         {
-            if (!HasStateAuthority)
-                return;
-
-            if (_freeStockpileIndex <= stockpileIndex)
-            {
-                _freeStockpileIndex = (byte)(stockpileIndex + 1);
-            }
+            ref FStockpileData stockpileData = ref _stockpileDatas.GetRef(stockpileIndex);
+            stockpileData.ClearStockpile();
+            stockpileData.Unassign();
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]

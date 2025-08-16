@@ -36,6 +36,9 @@ namespace LichLord.NonPlayerCharacters
 
         private float _teleportDistanceSquared = 36;
 
+        private float _10hrzSendDistance = 20.0f;
+        private float _8hrzSendDistance = 50.0f;
+
         // Follow projectile yaw. Local blend on remotes
         private float _projectileFollowYawStrength;
         private float _projectileFollowYaw;
@@ -105,21 +108,6 @@ namespace LichLord.NonPlayerCharacters
                 lerpedYaw,
                 0
             );
-            /*
-            _projectileFollowYawStrength = Mathf.Clamp(_projectileFollowYawStrength - renderDeltaTime, 0.0f, 1.1f);
-
-            // Get the local projectile follow strength blended with the server position.
-            float targetYaw = Mathf.LerpAngle(data.Yaw, _projectileFollowYaw, _projectileFollowYawStrength);
-            float lerpedYaw = Mathf.LerpAngle(currentYaw, targetYaw, renderDeltaTime * 10f);
-
-            // Keep existing pitch and roll
-            Vector3 currentEuler = NPC.CachedTransform.eulerAngles;
-            NPC.CachedTransform.rotation = Quaternion.Euler(
-                0,
-                lerpedYaw,
-                0
-            );
-            */
 
             UpdateVelocity(ref data, renderDeltaTime);
             UpdateYawVelocity();
@@ -169,9 +157,9 @@ namespace LichLord.NonPlayerCharacters
             }
 
             // Now decide based on nearest player distance
-            if (minSqrDist < (40f * 40f))
+            if (minSqrDist < (_10hrzSendDistance * _10hrzSendDistance))
                 return 3; // ~10.7 Hz
-            if (minSqrDist < (80f * 80f))
+            if (minSqrDist < (_8hrzSendDistance * _8hrzSendDistance))
                 return 4; // 8 Hz
 
             return 5; // ~6.4 Hz

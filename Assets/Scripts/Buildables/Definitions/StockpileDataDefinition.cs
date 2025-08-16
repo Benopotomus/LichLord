@@ -1,7 +1,7 @@
 ﻿using LichLord.Buildables;
 using UnityEngine;
 
-namespace LichLord.Props
+namespace LichLord.Buildables
 {
     [CreateAssetMenu(fileName = "StockpileDataDefinition", menuName = "LichLord/Buildables/StockpileDataDefinition")]
     public class StockpileDataDefinition : DestructibleBuildableDataDefinition
@@ -54,5 +54,6 @@ namespace LichLord.Props
                 stateData |= (1 << IS_INTERACTING_SHIFT);
             data.StateData = stateData;
         }
+
     }
 }

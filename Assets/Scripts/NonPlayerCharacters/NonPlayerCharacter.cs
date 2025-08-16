@@ -1,5 +1,6 @@
 ﻿using DWD.Pooling;
 using Fusion;
+using LichLord.Buildables;
 using LichLord.Projectiles;
 using LichLord.Props;
 using LichLord.World;
@@ -73,6 +74,7 @@ namespace LichLord.NonPlayerCharacters
         // IChunkTrackable
         private Chunk _currentChunk;
         public Chunk CurrentChunk { get => _currentChunk; set => _currentChunk = value; }
+        public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 
         public Vector3 Position => CachedTransform.position;
         public bool IsAttackable 
@@ -240,11 +242,15 @@ namespace LichLord.NonPlayerCharacters
                 stronghold.RPC_DealDamage(hit.damageData.damageValue);
             }
             else if (hit.target is PlayerCharacter pc)
-            { 
-                if(pc.HasStateAuthority)
+            {
+                if (pc.HasStateAuthority)
                 {
-                   
+
                 }
+            }
+            else if (hit.target is Buildable buildable)
+            {
+                buildable.Zone.RPC_DealDamage(buildable.RuntimeState.index, hit.damageData.damageValue);
             }
         }
 

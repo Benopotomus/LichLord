@@ -70,6 +70,7 @@ namespace LichLord.NonPlayerCharacters
         NPC,
         PC,
         Stronghold,
-        Props,
+        Prop,
+        Buildable,
     }
 }

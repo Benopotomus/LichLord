@@ -26,6 +26,7 @@ namespace LichLord.Buildables
         public Vector3 Position => _cachedTransform.position;
         public virtual bool IsAttackable => false;
         public virtual float BonusRadius { get { return 0; } }
+        public virtual Collider HurtBoxCollider { get { return null; } }
 
         public HurtboxComponent Hurtbox;
 
@@ -38,6 +39,7 @@ namespace LichLord.Buildables
             _zone = zone;
             _sceneContext = zone.Context;
             _chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
+            _chunk.AddObject(this);
         }
 
         public virtual void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, bool hasAuthority) 
@@ -47,6 +49,7 @@ namespace LichLord.Buildables
 
         public virtual void StartRecycle()
         {
+            _chunk.RemoveObject(this);
             DWDObjectPool.Instance.Recycle(this);
         }
 

@@ -52,8 +52,6 @@ namespace LichLord.Buildables
 
             SetHealth(currentHealth - damage, ref buildableData);
 
-            //Debug.Log($"Apply Damage " + propData.GUID + ", Health: " + GetHealth(ref propData));
-
             if (GetHealth(ref buildableData) <= 0)
             {
                 SetState(TryAssignState(ref buildableData, EBuildableState.Destroyed), ref buildableData);
@@ -62,6 +60,8 @@ namespace LichLord.Buildables
             {
                 SetState(TryAssignState(ref buildableData, EBuildableState.HitReact), ref buildableData);
             }
+
+            Debug.Log($"Apply Damage " + GetState(ref buildableData) + ", Health: " + GetHealth(ref buildableData));
         }
 
         // Prioritize destroyed state

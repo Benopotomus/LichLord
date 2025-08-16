@@ -11,6 +11,7 @@ namespace LichLord
     using LichLord.Props;
     using LichLord.UI;
     using DWD.Pooling;
+    using LichLord.Buildables;
 
     public class InteractorComponent : ContextBehaviour
     {
@@ -174,6 +175,14 @@ namespace LichLord
             {
                 FloatingUI.SetTarget(_bestInteractable.transform);
             }
+
+            int stockpileIndex = -1;
+            if (_bestInteractable.Owner is Stockpile stockpile)
+            {
+                stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
+            }
+
+            FloatingUI.ShowStockpileContents(stockpileIndex);
 
             if (_currentInteractable == null)
             {

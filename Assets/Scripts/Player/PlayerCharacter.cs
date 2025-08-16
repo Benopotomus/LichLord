@@ -59,6 +59,7 @@ namespace LichLord
         public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
         public Vector3 Position => CachedTransform.position;
         public bool IsAttackable { get { return true; } }
+        public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 
         // Cached list of PropRuntimeState for current and neighboring chunks
         private List<PropRuntimeState> _cachedPropStates = new List<PropRuntimeState>();

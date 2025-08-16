@@ -7,15 +7,22 @@ namespace LichLord.Buildables
 {
     public class Stockpile : Buildable
     {
-        public override float BonusRadius { get { return 1; } }
-        public override bool IsAttackable => false;
+        public override float BonusRadius { get { return 0; } }
+        public override bool IsAttackable
+        {
+            get
+            {
+                if (_healthComponent.CurrentHealth == 0)
+                    return false;
 
-        [SerializeField]
-        protected BuildableHealthComponent _healthComponent;
-        public BuildableHealthComponent HealthComponent => _healthComponent;
+                return true;
+            }
+        }
+        public override Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 
-        [SerializeField]
-        private InteractableComponent _interactableComponent;
+        [SerializeField] protected BuildableHealthComponent _healthComponent;
+        [SerializeField] protected BuildableStateComponent _stateComponent;
+        [SerializeField]  private InteractableComponent _interactableComponent;
 
         [SerializeField]
         private VisualEffectBase _interactEffect;
@@ -39,6 +46,8 @@ namespace LichLord.Buildables
             base.OnSpawned(zone, runtimeState);
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
+            _stateComponent.UpdateState(RuntimeState.GetState());
+
             _stockpileIndex = RuntimeState.GetStockpileIndex();
 
             _interactableComponent.Activate(
@@ -59,6 +68,7 @@ namespace LichLord.Buildables
             base.OnRender(runtimeState, renderDeltaTime, hasAuthority);
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
+            _stateComponent.UpdateState(RuntimeState.GetState());
 
             _stockpileIndex = RuntimeState.GetStockpileIndex();
             var stockPileData = Context.ContainerManager.GetStockPile(_stockpileIndex);
@@ -118,6 +128,8 @@ namespace LichLord.Buildables
         public override void ProcessHit(ref FHitUtilityData hit)
         {
         }
+
+        // Interactable
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
         {

@@ -40,20 +40,6 @@ namespace LichLord.Props
             _interactableComponent.onInteractEnd += OnInteractEnd;
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
-            //UpdateNavmesh();
-        }
-
-        private void UpdateNavmesh()
-        {
-            var bounds = new Bounds(transform.position, new Vector3(5f, 5f, 5f)); // adjust size as needed
-            var guo = new GraphUpdateObject(bounds)
-            {
-                updatePhysics = true,
-                resetPenaltyOnPhysics = true,
-                modifyWalkability = true
-            };
-
-            AstarPath.active.UpdateGraphs(guo);
         }
 
         public override void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
@@ -61,11 +47,7 @@ namespace LichLord.Props
             base.OnRender(propRuntimeState, renderDeltaTime);
 
             _interactEffect.Toggle(propRuntimeState.GetIsInteracting());
-
-            float rotationSpeed = 20f; // degrees per second
-            _rocksTransform.Rotate(0f, rotationSpeed * renderDeltaTime, 0f, Space.Self);
             _rocksTransform.SetActive(!propRuntimeState.GetIsActivated());
-
         }
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
@@ -122,7 +104,7 @@ namespace LichLord.Props
 
             FStrongholdData strongholdData = new FStrongholdData();
             strongholdData.ChunkID = ChunkID;
-            strongholdData.GUID = (byte)GUID;
+            strongholdData.Index = (byte)GUID;
 
             context.StrongholdManager.RPC_ActivateNexus(strongholdData);
 
