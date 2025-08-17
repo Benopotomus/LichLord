@@ -13,12 +13,16 @@ namespace LichLord.World
         public override void Spawned()
         { 
             base.Spawned();
+
             OnChunkChanged();
             Context.ChunkManager.RegisterReplicator(this);
         }
 
         public virtual void OnRender()
         {
+            if (!Context.ChunkManager.ChunksReady)
+                return;
+
             if (_lastChunkId.IsEqual(ref ChunkID))
                 return;
 

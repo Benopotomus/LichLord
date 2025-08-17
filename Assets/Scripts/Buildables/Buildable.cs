@@ -29,6 +29,8 @@ namespace LichLord.Buildables
         public virtual Collider HurtBoxCollider { get { return null; } }
 
         public HurtboxComponent Hurtbox;
+        [SerializeField] protected BuildableSpawnTransformer _spawnTransformer;
+        public BuildableSpawnTransformer SpawnTransformer => _spawnTransformer;
 
         public virtual void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
         {
@@ -40,6 +42,8 @@ namespace LichLord.Buildables
             _sceneContext = zone.Context;
             _chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
             _chunk.AddObject(this);
+
+            _spawnTransformer.PlaySpawnAnimation();
         }
 
         public virtual void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, bool hasAuthority) 

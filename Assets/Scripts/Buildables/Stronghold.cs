@@ -62,9 +62,14 @@ namespace LichLord
         {
             base.Spawned();
 
-            _cachedTransform.position = Context.StrongholdManager.GetStrongholdPosition(_data);
-            _chunk = Context.ChunkManager.GetChunk(_data.ChunkID);
-            _chunk.AddObject(this);
+            if (Context.ChunkManager.ChunksReady)
+            {
+                OnChunksReady();
+            }
+            else
+            {
+                Context.ChunkManager.onChunksReady += OnChunksReady;
+            }
 
             _interactableComponent.Activate(
                 this,
@@ -79,6 +84,14 @@ namespace LichLord
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
             Context.StrongholdManager.OnStrongholdSpawned(this);
+        }
+
+        private void OnChunksReady()
+        {
+            Context.ChunkManager.onChunksReady -= OnChunksReady;
+            _cachedTransform.position = Context.StrongholdManager.GetStrongholdPosition(_data);
+            _chunk = Context.ChunkManager.GetChunk(_data.ChunkID);
+            _chunk.AddObject(this);
         }
 
         public void SetSpawnData(FStrongholdData data, int currentHealth, int rank)

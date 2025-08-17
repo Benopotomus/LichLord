@@ -118,7 +118,6 @@ namespace LichLord
                 {
                     // Network and authority match, prediction is valid
                     AddStockpileCurrencies(predicted);
-                    Debug.Log("Use Predicted");
                 }
                 else
                 {
@@ -144,11 +143,13 @@ namespace LichLord
                 AddStockpileCurrencies(stockpile);
             }
 
+            /*
             // Optional: Debug log totals
             foreach (var kvp in _allCurrencies)
             {
                 Debug.Log($"Currency: {kvp.Key}, Amount: {kvp.Value}");
             }
+            */
         }
 
         // Helper to add totals

@@ -7,7 +7,6 @@ namespace LichLord.Buildables
     public class BuildableStateComponent : MonoBehaviour
     {
         [SerializeField] private Buildable _buildable;
-        public Buildable Buildable => _buildable;
 
         [SerializeField] private EBuildableState _currentState = EBuildableState.Inactive;
         public EBuildableState CurrentState => _currentState;
@@ -33,6 +32,7 @@ namespace LichLord.Buildables
             {
                 case EBuildableState.Inactive:
                 case EBuildableState.Destroyed:
+                    _buildable.SpawnTransformer.PlayDestroyAnimation();
                     //gameObject.SetActive(false);
                     break;
                 case EBuildableState.Idle:

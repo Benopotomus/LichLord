@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5669841024813192744}
   - component: {fileID: 9099771928632736378}
+  - component: {fileID: 3374596139245121168}
   m_Layer: 0
   m_Name: BLD_VIS_Floor_01
   m_TagString: Untagged
@@ -47,6 +48,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cachedTransform: {fileID: 5669841024813192744}
   Hurtbox: {fileID: 0}
+  _spawnTransformer: {fileID: 3374596139245121168}
+--- !u!114 &3374596139245121168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5546409922144146193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 058025940e253754f998e28ebcce986f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _transform: {fileID: 4695974548551081560}
+  _scaleDuration: 0.5
+  _easeType: 27
 --- !u!1 &7517479796639477048
 GameObject:
   m_ObjectHideFlags: 0
@@ -60,7 +77,7 @@ GameObject:
   - component: {fileID: 7586318745588087043}
   - component: {fileID: 265866202062877655}
   m_Layer: 0
-  m_Name: BLD_VIS_Floor_01
+  m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

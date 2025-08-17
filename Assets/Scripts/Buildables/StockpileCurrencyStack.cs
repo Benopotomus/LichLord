@@ -32,7 +32,8 @@ namespace LichLord.Buildables
         }
 
         public void StartRecycle()
-        { 
+        {
+            transform.parent = owner.poolRoot;
             DWDObjectPool.Instance.Recycle(this);
         }
     }

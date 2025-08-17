@@ -69,7 +69,11 @@ namespace LichLord.Buildables
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());
+            UpdateCurrencyStacks();
+        }
 
+        private void UpdateCurrencyStacks()
+        {
             _stockpileIndex = RuntimeState.GetStockpileIndex();
             var stockPileData = Context.ContainerManager.GetStockPile(_stockpileIndex);
 
@@ -91,7 +95,7 @@ namespace LichLord.Buildables
 
                         Vector3 worldPos = CachedTransform.TransformPoint(_pilePositions[i]);
                         Quaternion rotation = CachedTransform.localRotation;
-                        currentPile = DWDObjectPool.Instance.SpawnAt(currencyStackPrefab, worldPos, rotation) as StockpileCurrencyStack;
+                        currentPile = DWDObjectPool.Instance.SpawnAttached(currencyStackPrefab, worldPos, rotation, CachedTransform) as StockpileCurrencyStack;
                         currentPile.SetCurrencyCount(currentStack.Value);
                         _piles[i] = currentPile;
                     }

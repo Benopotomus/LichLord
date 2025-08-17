@@ -1,5 +1,5 @@
-﻿using Fusion;
-using LichLord.Props;
+﻿using DWD.Pooling;
+using Fusion;
 using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +12,7 @@ namespace LichLord.Buildables
         [SerializeField] private CapsuleCollider _trigger;
 
         private BuildableSpawner _spawner = new BuildableSpawner();
+        private VisualEffectSpawner _effectSpawner = new VisualEffectSpawner();
 
         [Networked, Capacity(BuildableConstants.MAX_BUILDABLE_REPS)]
         protected virtual NetworkArray<FBuildableData> _buildableDatas { get; }
@@ -26,6 +27,8 @@ namespace LichLord.Buildables
             base.Spawned();
             _spawner.OnBuildableSpawned += OnBuildableSpawned;
             _buildableLoadStates = new FBuildableLoadState[BuildableConstants.MAX_BUILDABLE_REPS];
+
+            _effectSpawner.OnLoaded += OnBuildingVisualEffectLoaded;
         }
 
         public void SetTriggerSize(float size)
@@ -114,8 +117,8 @@ namespace LichLord.Buildables
             buildable.OnSpawned(this, _buildableRuntimeStates[index]);
         }
 
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_PlaceBuildable(ushort definitionID, FWorldTransform worldTransform)
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_PlaceBuildable(ushort definitionID, FWorldTransform buildableTransform)
         {
             int freeIndex = GetFreeIndex();
 
@@ -125,24 +128,32 @@ namespace LichLord.Buildables
                 return;
             }
 
-            // Sweep at location to make sure it can be placed
-            
-            // If i hit something, we have to make sure its not a valid snapping position
-
-            // Determine if theres any connectors near my connectors
-
-            ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
-             
-            data.DefinitionID = definitionID;
-            data.Transform = worldTransform;
-
-            BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(data.DefinitionID);
+            BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
 
             if (definition == null)
             {
                 Debug.LogWarning("No valid definition " + definitionID);
                 return;
             }
+
+            if (!IsInsideTrigger(buildableTransform.Position))
+                return;
+
+            // Sweep at location to make sure it can be placed
+
+            // If i hit something, we have to make sure its not a valid snapping position
+
+            // Determine if theres any connectors near my connectors
+
+
+
+            // Spawn VFX for defintion
+            _effectSpawner.SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
+
+            ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
+             
+            data.DefinitionID = definitionID;
+            data.Transform = buildableTransform;
 
             definition.BuildableDataDefinition.InitializeData(ref data, definition);
 
@@ -152,6 +163,21 @@ namespace LichLord.Buildables
                 stockpileDataDefinition.SetStockpileIndex(freeStockpileIndex, ref data);
                 Context.ContainerManager.AssignStockpileIndex(freeStockpileIndex);
             }
+        }
+
+        private void OnBuildingVisualEffectLoaded(GameObject loadedGameObject, Vector3 position, Quaternion rotation)
+        {
+            var poolObject = loadedGameObject.GetComponent<DWDObjectPoolObject>();
+
+            if (poolObject == null)
+            {
+                Debug.LogWarning("Could not spawn Visuals Prefab for Impact");
+                return;
+            }
+
+            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, position, rotation);
+            if (instance is StandaloneVisualEffect standaloneEffect)
+                standaloneEffect.Initialize();
         }
 
         public int GetFreeIndex()
@@ -186,6 +212,23 @@ namespace LichLord.Buildables
 
             _buildableRuntimeStates[index] = new BuildableRuntimeState(index, ref data);
             return _buildableRuntimeStates[index];
+        }
+
+        public bool IsInsideTrigger(Vector3 worldPosition)
+        {
+            // Convert to local position relative to the capsule
+            Vector3 localPoint = transform.InverseTransformPoint(worldPosition);
+
+            // Capsule extends from -height/2 to +height/2 along Y
+            float halfHeight = Mathf.Max(0, _trigger.height * 0.5f - _trigger.radius);
+
+            // Clamp the point to capsule’s central line
+            float y = Mathf.Clamp(localPoint.y, -halfHeight, halfHeight);
+            Vector3 capsuleLinePoint = new Vector3(0, y, 0);
+
+            // Distance from point to line segment, compare with radius
+            float distance = Vector3.Distance(localPoint, capsuleLinePoint);
+            return distance <= _trigger.radius;
         }
     }
 }

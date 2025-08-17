@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,6 +32,9 @@ namespace LichLord.World
 
         private List<ChunkReplicator> _replicators = new List<ChunkReplicator>();
 
+        public bool ChunksReady { get; private set; }
+        public Action onChunksReady;
+
         public void InitializeWorldChunks()
         {
             WorldSettings worldSettings = Context.WorldManager.WorldSettings;
@@ -62,6 +66,9 @@ namespace LichLord.World
                     }
                 }
             }
+
+            ChunksReady = true;
+            onChunksReady?.Invoke();
         }
 
         public void TryAddReplicatedChunks(List<Chunk> chunksToAdd)

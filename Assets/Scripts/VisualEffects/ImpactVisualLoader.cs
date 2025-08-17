@@ -37,7 +37,7 @@ namespace LichLord
             Loader = iLoader;
         }
 
-        public ImpactVisualLoader(Quaternion rotation, Vector3 position,
+        public ImpactVisualLoader( Vector3 position, Quaternion rotation,
             AssetBundleLoader iLoader)
         {
             _rotation = rotation;

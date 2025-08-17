@@ -49,6 +49,9 @@ namespace LichLord.Buildables
         [SerializeField] Vector3 _placementPosition;
         [SerializeField] Quaternion _placementRotation;
 
+        [Networked]
+        private TickTimer _buildCooldownTimer { get; set; }
+
         private BuildablePreviewLoader _loader = new BuildablePreviewLoader();
 
         private void OnBuildableSpawned(GameObject go)
@@ -177,10 +180,13 @@ namespace LichLord.Buildables
 
         private void ProcessBuildableActions(ref FGameplayInput input)
         {
-            if (!input.Fire)
+            if (!input.PlaceBuildable)
                 return;
 
             if (!_placementValid)
+                return;
+
+            if (!_buildCooldownTimer.ExpiredOrNotRunning(Runner))
                 return;
 
             FWorldTransform spawnTransform = new FWorldTransform();
@@ -188,6 +194,7 @@ namespace LichLord.Buildables
             spawnTransform.Rotation = _placementRotation;
 
             _targetZone.RPC_PlaceBuildable((ushort)_selectedDefinition.TableID, spawnTransform);
+            _buildCooldownTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
 
             if (_isDeleteMode)
             {
@@ -218,6 +225,12 @@ namespace LichLord.Buildables
             if(!UpdateBuildablePosition(cachedRaycast.position))
                 hasValidSelection = false;
 
+            if(!_buildCooldownTimer.ExpiredOrNotRunning(Runner))
+                hasValidSelection = false;
+
+            if (!_targetZone.IsInsideTrigger(cachedRaycast.position))
+                hasValidSelection = false;
+
             _placementValid = hasValidSelection;
 
             SetGhostVisibility(hasValidSelection);
@@ -245,8 +258,6 @@ namespace LichLord.Buildables
         {
             _ghostPreview.transform.position = worldPosition;
             _ghostPreview.transform.rotation = rotation;
-            
-            
         }
 
         public BuildableDefinition GetSelectedBuildable()

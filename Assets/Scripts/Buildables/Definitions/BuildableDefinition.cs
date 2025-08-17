@@ -16,6 +16,11 @@ namespace LichLord.Buildables
         protected BundleObject _prefabBundle;
         public BundleObject PrefabBundle => _prefabBundle;
 
+        [BundleObject(typeof(GameObject))]
+        [SerializeField]
+        protected BundleObject _placementVFX;
+        public BundleObject PlacementVFX => _placementVFX;
+
         //UI
         [BundleObject(typeof(Sprite))]
         [SerializeField]

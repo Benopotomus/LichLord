@@ -29,11 +29,11 @@ namespace LichLord
         [SerializeField]
         private Transform _impactAttachment;
 
-        private ImpactSpawner _visualSpawner = new ImpactSpawner();
+        private VisualEffectSpawner _visualSpawner = new VisualEffectSpawner();
 
         private void Start()
         {
-            _visualSpawner.OnImpactSpawnedAttached += OnVisualsPrefabLoadedAttached;
+            _visualSpawner.OnLoadedAttached += OnVisualsPrefabLoadedAttached;
         }
 
         public void ApplyDamage(int damage)
@@ -56,7 +56,7 @@ namespace LichLord
         {
 
             if (HitEffect.Name != "")
-                _visualSpawner.SpawnImpactVisualAttached(_impactAttachment, _impactAttachment.rotation, HitEffect);
+                _visualSpawner.SpawnVisualEffectAttached(_impactAttachment, _impactAttachment.rotation, HitEffect);
         }
 
         private void OnVisualsPrefabLoadedAttached(GameObject loadedGameObject, Transform attachment, Quaternion rotation)
@@ -76,7 +76,7 @@ namespace LichLord
 
         private void OnDestroy()
         {
-            _visualSpawner.OnImpactSpawnedAttached -= OnVisualsPrefabLoadedAttached;
+            _visualSpawner.OnLoadedAttached -= OnVisualsPrefabLoadedAttached;
         }
 
     }

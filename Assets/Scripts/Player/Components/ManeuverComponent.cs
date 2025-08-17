@@ -24,11 +24,7 @@ namespace LichLord
         [Networked, Capacity(8)]
         private NetworkDictionary<sbyte, TickTimer> _maneuverCooldownTimers { get; }
 
-        [SerializeField] private GameObject gunModel; // Gun model to toggle visibility
-        [SerializeField] private ParticleSystem gunMuzzleParticle; // ParticleSystem on gunModel for muzzle flash
-
         // Current upper body blend amount
-        private float _upperBodyBlend = 0f;
         private float _moveSpeedMultiplier = 1f;
 
         public float GetMoveSpeedMultiplier()
@@ -42,6 +38,7 @@ namespace LichLord
         public override void Spawned()
         {
             base.Spawned();
+            ReplicateToAll(false);
 
             if (HasStateAuthority)
             {
