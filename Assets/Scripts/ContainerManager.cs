@@ -9,13 +9,18 @@ namespace LichLord
 {
     public class ContainerManager : ContextBehaviour
     {
-        [Networked, Capacity(128)]
+        private const int MAX_STOCKPILES = 128;
+
+        [Networked, Capacity(MAX_STOCKPILES)]
         [OnChangedRender(nameof(OnRep_StockpileDatas))]
         protected virtual NetworkArray<FStockpileData> _stockpileDatas { get; }
 
-        private void OnRep_StockpileDatas()
+        private FStockpileData[] _authorityStockpileDatas = new FStockpileData[MAX_STOCKPILES];
+        Dictionary<int, FStockpileData> _predictedStockpileDatas = new Dictionary<int, FStockpileData>();
+
+        private void OnRep_StockpileDatas(NetworkBehaviourBuffer previous)
         {
-            UpdateAllCurrencies();
+            UpdateAllStockpiles();
         }
 
         public int StockpileCount => _stockpileDatas.Length;
@@ -26,17 +31,20 @@ namespace LichLord
         public override void Spawned()
         {
             base.Spawned();
-            UpdateAllCurrencies();
+            UpdateAllStockpiles();
         }
 
-        public ref FStockpileData GetStockPile(int index)
+        public FStockpileData GetStockPile(int index)
         {
-            return ref _stockpileDatas.GetRef(index);
+            if(_predictedStockpileDatas.TryGetValue(index, out var data))
+                return data;
+
+            return _stockpileDatas.GetRef(index);
         }
 
         public int FindFreeStockpileIndex()
         {
-            for (int i = 0; i < _stockpileDatas.Length; i++)
+            for (int i = 0; i < MAX_STOCKPILES; i++)
             {
                 ref FStockpileData stockpile = ref _stockpileDatas.GetRef(i);
                 if (!stockpile.IsAssigned) // not taken
@@ -51,8 +59,6 @@ namespace LichLord
         {
             ref FStockpileData stockpile = ref _stockpileDatas.GetRef(index);
             stockpile.Assign();
-            Debug.Log("Index assigned: " + index);
-            Debug.Log(stockpile.IsAssigned);
         }
 
         public void LoadStockPileData(FStockpileSaveData stockpileSave)
@@ -84,56 +90,85 @@ namespace LichLord
             }
         }
 
-        public int GetTotalCurrency(ECurrencyType currencyType)
+        public void Predict_StockpileDropOff_Player(int stockpileIndex, ECurrencyType currencyType, int value)
         {
-            int total = 0;
-            for (int i = 0; i < _stockpileDatas.Length; i++)
-            {
-                // Use a ref to avoid extra copies
-                ref FStockpileData stockpile = ref _stockpileDatas.GetRef(i);
-
-                if (!stockpile.IsEmpty()) // optional if you have empty/default slots
-                {
-                    total += stockpile.GetCurrencyAmount(currencyType);
-                }
-            }
-            return total;
+            FStockpileData stockpile = _stockpileDatas.Get(stockpileIndex);
+            int returnValue = stockpile.AddToStockpile(currencyType, value);
+            _predictedStockpileDatas[stockpileIndex] = stockpile;
+            UpdateAllStockpiles();
         }
 
-        public Dictionary<ECurrencyType, int> GetAllCurrencies()
+        public void UpdateAllStockpiles()
         {
-            var totals = new Dictionary<ECurrencyType, int>();
+            _allCurrencies.Clear();
 
-            for (int i = 0; i < _stockpileDatas.Length; i++)
+            // Step 1: Track which indices we already handled via predictions
+            HashSet<int> handledIndices = new HashSet<int>();
+
+            // Step 2: Collect predicted keys to iterate safely
+            int[] predictedKeys = new int[_predictedStockpileDatas.Count];
+            _predictedStockpileDatas.Keys.CopyTo(predictedKeys, 0);
+
+            foreach (int index in predictedKeys)
             {
-                ref FStockpileData stockpile = ref _stockpileDatas.GetRef(i);
+                FStockpileData predicted = _predictedStockpileDatas[index];
+                ref FStockpileData networkStockpile = ref _stockpileDatas.GetRef(index);
 
-                if (!stockpile.IsEmpty())
+                if (_authorityStockpileDatas[index].IsEqual(networkStockpile))
                 {
-                    foreach (ECurrencyType type in System.Enum.GetValues(typeof(ECurrencyType)))
-                    {
-                        int current = stockpile.GetCurrencyAmount(type);
-                        if (current > 0)
-                        {
-                            if (totals.ContainsKey(type))
-                                totals[type] += current;
-                            else
-                                totals[type] = current;
-                        }
-                    }
+                    // Network and authority match, prediction is valid
+                    AddStockpileCurrencies(predicted);
+                    Debug.Log("Use Predicted");
                 }
+                else
+                {
+                    // Authority diverged — discard prediction
+                    _predictedStockpileDatas.Remove(index);
+                    AddStockpileCurrencies(networkStockpile);
+                }
+
+                // Update authoritative cache
+                _authorityStockpileDatas[index].Copy(networkStockpile);
+                handledIndices.Add(index);
             }
 
-            return totals;
-        }
+            // Step 3: Loop through remaining network stockpiles
+            for (int i = 0; i < MAX_STOCKPILES; i++)
+            {
+                if (handledIndices.Contains(i))
+                    continue; // Already processed via predicted stockpile
 
-        public void UpdateAllCurrencies()
-        {
-            _allCurrencies = GetAllCurrencies();
+                ref FStockpileData stockpile = ref _stockpileDatas.GetRef(i);
+                _authorityStockpileDatas[i].Copy(stockpile);
+
+                AddStockpileCurrencies(stockpile);
+            }
+
+            // Optional: Debug log totals
             foreach (var kvp in _allCurrencies)
             {
                 Debug.Log($"Currency: {kvp.Key}, Amount: {kvp.Value}");
             }
         }
+
+        // Helper to add totals
+        private void AddStockpileCurrencies(FStockpileData stockpile)
+        {
+            if (stockpile.IsEmpty())
+                return;
+
+            foreach (ECurrencyType type in Enum.GetValues(typeof(ECurrencyType)))
+            {
+                int amount = stockpile.GetCurrencyAmount(type);
+                if (amount > 0)
+                {
+                    if (_allCurrencies.ContainsKey(type))
+                        _allCurrencies[type] += amount;
+                    else
+                        _allCurrencies[type] = amount;
+                }
+            }
+        }
+
     }
 }

@@ -24,6 +24,7 @@ namespace LichLord.UI
             var currencyType = _definition.CurrencyType;
             var count = stockpileData.GetCurrencyAmount(currencyType);
 
+
             _text.text = count.ToString();
         }
 

@@ -30,9 +30,12 @@ namespace LichLord.World
         protected virtual void OnChunkChanged()
         {
             Chunk chunk = Context.ChunkManager.GetChunk(ChunkID);
-            transform.position = chunk.Bounds.center;
-            chunk.Replicator = this;
-            CopyDataFromChunk(chunk);
+            if (chunk != null)
+            {
+                transform.position = chunk.Bounds.center;
+                chunk.Replicator = this;
+                CopyDataFromChunk(chunk);
+            }
         }
 
         public virtual void SetID(FChunkPosition chunkID)

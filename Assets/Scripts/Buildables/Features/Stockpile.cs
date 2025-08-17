@@ -191,6 +191,9 @@ namespace LichLord.Buildables
             pc.Currency.AddCurrency(currencyType, -value);
 
             context.ContainerManager.RPC_StockpileDropOff_Player(stockpileIndex, currencyType, value, pc);
+
+            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
+                context.ContainerManager.Predict_StockpileDropOff_Player(stockpileIndex, currencyType, value);
         }
     }
 }

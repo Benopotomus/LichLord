@@ -135,5 +135,31 @@ namespace LichLord
             _pile2 = new FCurrencyStack { CurrencyType = ECurrencyType.None, Value = 0 };
             _pile3 = new FCurrencyStack { CurrencyType = ECurrencyType.None, Value = 0 };
         }
+
+        public void Copy(FStockpileData other)
+        {
+            _pile0 = other._pile0;
+            _pile1 = other._pile1;
+            _pile2 = other._pile2;
+            _pile3 = other._pile3;
+            _isAssigned = other._isAssigned;
+        }
+
+        public bool IsEqual(FStockpileData other)
+        {
+            return _pile0.CurrencyType == other._pile0.CurrencyType &&
+                   _pile0.Value == other._pile0.Value &&
+
+                   _pile1.CurrencyType == other._pile1.CurrencyType &&
+                   _pile1.Value == other._pile1.Value &&
+
+                   _pile2.CurrencyType == other._pile2.CurrencyType &&
+                   _pile2.Value == other._pile2.Value &&
+
+                   _pile3.CurrencyType == other._pile3.CurrencyType &&
+                   _pile3.Value == other._pile3.Value &&
+
+                   _isAssigned == other._isAssigned;
+        }
     }
 }

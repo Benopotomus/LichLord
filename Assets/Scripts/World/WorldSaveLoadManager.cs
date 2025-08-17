@@ -117,7 +117,7 @@ namespace LichLord.World
                 {
                     for (int i = 0; i < Context.ContainerManager.StockpileCount; i++)
                     {
-                        ref FStockpileData stockpileData = ref Context.ContainerManager.GetStockPile(i);
+                        FStockpileData stockpileData = Context.ContainerManager.GetStockPile(i);
                         stockpileSaves.Add(new FStockpileSaveData(i, stockpileData, stockpileData.IsAssigned));
                     }
                 }
@@ -231,7 +231,7 @@ namespace LichLord.World
                     Debug.Log($"Loaded {saveData.stockpiles.Length} stockpiles.");
                 }
 
-                Context.ContainerManager.UpdateAllCurrencies();
+                //Context.ContainerManager.UpdateAllCurrencies();
 
                 Debug.Log($"Loaded {_loadedChunks.Count} chunks with {totalPropCount} props and {_loadedStrongholds.Count} strongholds for session {sessionName}.");
             }

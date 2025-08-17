@@ -584,8 +584,8 @@ GameObject:
   - component: {fileID: 5669841024813192744}
   - component: {fileID: 4404909204948502697}
   - component: {fileID: 7121969733371694190}
-  - component: {fileID: 5435625599370495509}
   - component: {fileID: 4871308346282466932}
+  - component: {fileID: 4190683328890240853}
   m_Layer: 0
   m_Name: BLD_VIS_StockPile
   m_TagString: Untagged
@@ -626,7 +626,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cachedTransform: {fileID: 5669841024813192744}
   Hurtbox: {fileID: 7154870779464640425}
-  _healthComponent: {fileID: 5435625599370495509}
+  _healthComponent: {fileID: 4190683328890240853}
   _stateComponent: {fileID: 4871308346282466932}
   _interactableComponent: {fileID: 344341044804563981}
   _interactEffect: {fileID: 0}
@@ -669,19 +669,6 @@ MonoBehaviour:
   cutsAddedGeom: 1
   updateRotationDistance: 10
   useRotationAndScale: 1
---- !u!114 &5435625599370495509
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5546409922144146193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 880e5d62cb9646648a5d7ec4797c2021, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _currentHealth: 0
 --- !u!114 &4871308346282466932
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -700,6 +687,19 @@ MonoBehaviour:
   _shakeDuration: 0.25
   _shakePositionStrength: 0.05
   _shakeRotationStrength: 1
+--- !u!114 &4190683328890240853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5546409922144146193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 880e5d62cb9646648a5d7ec4797c2021, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _currentHealth: 0
 --- !u!1 &6166233469884207845
 GameObject:
   m_ObjectHideFlags: 0

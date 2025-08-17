@@ -12,6 +12,7 @@ namespace LichLord.UI
             foreach (var slot in _stockpileCurrencySlots)
             { 
                 slot.gameObject.SetActive(stockpileIndex >= 0);
+
                 slot.AssignStockPileIndex(stockpileIndex);
             }
         }
