@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+//14 bits
+
 namespace LichLord.Buildables
 {
     [CreateAssetMenu(fileName = "DestructibleBuildableDataDefinition", menuName = "LichLord/Buildables/DestructibleBuildableDataDefinition")]
@@ -12,6 +14,10 @@ namespace LichLord.Buildables
         [SerializeField]
         protected int _damageReduction = 3;
         public int DamageReduction => _damageReduction;
+
+        [SerializeField]
+        protected float _damageResistance = 0.0f;
+        public float DamageResistance => _damageResistance;
 
         protected const int HEALTH_BITS = 12;         // 0-4095
 
@@ -49,6 +55,7 @@ namespace LichLord.Buildables
         {
             int currentHealth = GetHealth(ref buildableData);
             damage = Mathf.Max(damage - DamageReduction, 0);
+            damage = (int)((float)damage * (1.0f - DamageReduction));
 
             SetHealth(currentHealth - damage, ref buildableData);
 
