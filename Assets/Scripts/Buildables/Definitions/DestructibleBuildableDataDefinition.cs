@@ -55,7 +55,7 @@ namespace LichLord.Buildables
         {
             int currentHealth = GetHealth(ref buildableData);
             damage = Mathf.Max(damage - DamageReduction, 0);
-            damage = (int)((float)damage * (1.0f - DamageReduction));
+            damage = (int)((float)damage * (1.0f - DamageResistance));
 
             SetHealth(currentHealth - damage, ref buildableData);
 

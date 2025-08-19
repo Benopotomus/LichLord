@@ -54,7 +54,7 @@ namespace LichLord.NonPlayerCharacters
             data.Rotation = Quaternion.identity;
 
             _deltaStates[freeIndex] = data; // Store full state for persistence
-            replicator.UpdateNPCData(ref data, freeIndex);
+            replicator.SpawnNPC(ref data, freeIndex);
         }
 
         public void SpawnNPCFromSave(FNonPlayerCharacterSaveState saveState)
@@ -85,14 +85,14 @@ namespace LichLord.NonPlayerCharacters
             data.Events = (ushort)saveState.events;
 
             _deltaStates[freeIndex] = data; // Store full state for persistence
-            replicator.UpdateNPCData(ref data, freeIndex);
+            replicator.SpawnNPC(ref data, freeIndex);
         }
 
         public NonPlayerCharacterReplicator GetReplicatorWithFreeSlots()
         {
             foreach (var replicator in _replicators)
             {
-                if (replicator.FreeIndices.Count > 0)
+                if (replicator.HasFreeIndex())
                     return replicator;
             }
 

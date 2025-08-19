@@ -1,4 +1,5 @@
-﻿using LichLord.Buildables;
+﻿using Fusion;
+using LichLord.Buildables;
 using LichLord.Props;
 using LichLord.World;
 using System.Collections.Generic;
@@ -56,56 +57,70 @@ namespace LichLord.NonPlayerCharacters
             _activeManeuverState = ENonPlayerState.Inactive;
         }
 
-        public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, int tick)
+        public void AuthorityUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
         {
-            if (NPC.State.CurrentState == ENonPlayerState.Inactive ||
-                NPC.State.CurrentState == ENonPlayerState.Dead ||
-                NPC.State.CurrentState == ENonPlayerState.HitReact)
+            var currentState = runtimeState.GetState();
+            if  (currentState == ENonPlayerState.Inactive ||
+                currentState == ENonPlayerState.Dead ||
+                currentState == ENonPlayerState.HitReact)
                 return;
 
-            TargetPlayer = (data.TargetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(data.TargetPlayerIndex) : null;
+            UpdateAuthorityTick(runtimeState, tick);
+
+            int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
+            TargetPlayer = (targetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) : null;
 
             // Detect if an active state is running 
             // We don't want to update the target during this
             // since we need to wait for the hit event from animation
             // but we do want to rotate to the target
 
-            UpdateExecutingManeuver(ref data, renderDeltaTime);
+            UpdateExecutingManeuver(runtimeState, renderDeltaTime);
 
             if (NPC.State.CurrentState != ENonPlayerState.Idle)
                 return;
 
-            UpdateActiveManeuver(ref data, renderDeltaTime, tick);
+            UpdateActiveManeuver(runtimeState, renderDeltaTime, tick);
         }
 
-        public void RemoteUpdate(ref FNonPlayerCharacterData data)
+        public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState)
         {
-            TargetPlayer = (data.TargetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(data.TargetPlayerIndex) :  null;
+            if (NPC.State.CurrentState == ENonPlayerState.Dead || NPC.State.CurrentState == ENonPlayerState.Inactive)
+                return;
+
+            int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
+            TargetPlayer = (targetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) :  null;
         }
 
-        public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
+        int _lastTick = -1;
+        private void UpdateAuthorityTick(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            UpdateExecutingTimer(ref data, tick);
+            if (_lastTick == tick)
+                return;
+
+            _lastTick = tick;
+
+            UpdateExecutingTimer(runtimeState, tick);
 
             // Modify the tick by the GUID so not everyone updates at once
             tick += _npc.Index;
 
             UpdateRangesTick(tick);
-            UpdateMoveSpeedTick(ref data, tick);
+            UpdateMoveSpeedTick(runtimeState, tick);
             UpdateDestinationTick(tick);
 
             // We only tick if we're idle and ready
-            if (data.State != ENonPlayerState.Idle)
+            if (runtimeState.GetState() != ENonPlayerState.Idle)
                 return;
 
             UpdateSenses(tick);
             SelectManeuver(tick);
-            UpdateWanderMovement(ref data, tick);
+            UpdateWanderMovement(runtimeState, tick);
         }
 
-        public void UpdateExecutingTimer(ref FNonPlayerCharacterData data, int tick)
+        public void UpdateExecutingTimer(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            var executingManuever = GetManeuverFromState(data.State);
+            var executingManuever = GetManeuverFromState(runtimeState.GetState());
 
             if (executingManuever == null)
                 return;
@@ -113,12 +128,12 @@ namespace LichLord.NonPlayerCharacters
             if (executingManuever.HasExpired(tick))
             {
                 SetActiveManuever(null);
-                data.State = ENonPlayerState.Idle;
-                NPC.Replicator.UpdateNPCData(ref data, _npc.Index);
+                runtimeState.SetState(ENonPlayerState.Idle);
+                NPC.Replicator.ReplicateRuntimeState(runtimeState);
                 return;
             }
 
-            executingManuever.UpdateManeuverTick(_npc, ref data, tick);
+            executingManuever.UpdateManeuverTick(_npc, tick);
         }
 
         private void UpdateRangesTick(int tick)
@@ -142,7 +157,7 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private void UpdateMoveSpeedTick(ref FNonPlayerCharacterData data, int tick)
+        private void UpdateMoveSpeedTick(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
             if (tick % _updateSpeedTick != 0)
                 return;
@@ -150,26 +165,26 @@ namespace LichLord.NonPlayerCharacters
             if (!_isInFaceTargetRange)
             {
                 NPC.Movement.SetFollowerUpdateRotation(true);
-                NPC.Movement.SetFollowerMaxSpeed(NPC.GetDefinition(ref data).WalkSpeed);
+                NPC.Movement.SetFollowerMaxSpeed(runtimeState.Definition.WalkSpeed);
             }
             else
             {
                 NPC.Movement.SetFollowerUpdateRotation(false);
-                NPC.Movement.SetFollowerMaxSpeed(NPC.GetDefinition(ref data).WalkSpeed * 0.6f);
+                NPC.Movement.SetFollowerMaxSpeed(runtimeState.Definition.WalkSpeed * 0.6f);
             }
         }
 
-        private void UpdateWanderMovement(ref FNonPlayerCharacterData data, int tick)
+        private void UpdateWanderMovement(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
             if (_hasAttackTarget)
                 return;
 
-            NPC.Movement.AIFollower.stopDistance = 0.2f;
-            NPC.Movement.SetFollowerUpdatePosition(true);
-            NPC.Movement.SetFollowerUpdateRotation(true);
+           // NPC.Movement.AIFollower.stopDistance = 0.2f;
+          //  NPC.Movement.SetFollowerUpdatePosition(true);
+          //  NPC.Movement.SetFollowerUpdateRotation(true);
 
             // if we are an invasion npc, the target nexus position is the fallback
-            if (NonPlayerCharacterDataUtility.IsInvasionNPC(ref data))
+            if (runtimeState.IsInvasionNPC())
             {
                 var stronghold = NPC.Context.InvasionManager.TargetStronghold;
                 if (stronghold != null)
@@ -256,9 +271,9 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // Runs when active meneuver is executed (in state)
-        private void UpdateExecutingManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        private void UpdateExecutingManeuver(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime)
         {
-            var executingManuever = GetManeuverFromState(data.State);
+            var executingManuever = GetManeuverFromState(runtimeState.GetState());
 
             if (executingManuever == null)
                 return;
@@ -296,7 +311,7 @@ namespace LichLord.NonPlayerCharacters
             _isInFaceTargetRange = sqrDist < _activeManeuver.Definition.FaceTargetRangeSqrt;
         }
 
-        private void UpdateActiveManeuver(ref FNonPlayerCharacterData data, float renderDeltaTime, int tick)
+        private void UpdateActiveManeuver(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
         {
             if (!HasActiveManeuver() ||
                 !_hasAttackTarget ||
@@ -319,10 +334,10 @@ namespace LichLord.NonPlayerCharacters
                         if (_activeManeuver.Definition.RequiresLOS)
                         {
                             if (HasLineOfSight)
-                                _activeManeuver.ExecuteManeuver(NPC, ref data, tick);
+                                _activeManeuver.ExecuteManeuver(NPC, runtimeState, tick);
                         }
                         else
-                            _activeManeuver.ExecuteManeuver(NPC, ref data, tick);
+                            _activeManeuver.ExecuteManeuver(NPC, runtimeState, tick);
                     }
                 }
             }

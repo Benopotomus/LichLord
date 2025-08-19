@@ -61,7 +61,6 @@ namespace LichLord.Projectiles
 
             if (projectile is FixedUpdateProjectile fixedUpdateProjectile)
             {
-                Debug.Log("Should spawn impact at: " + impactHit.ImpactPoint);
                 definition.SpawnImpactProjectiles(ref data, ref impactHit, fixedUpdateProjectile);
             }
         }

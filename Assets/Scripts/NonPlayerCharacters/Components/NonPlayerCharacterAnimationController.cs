@@ -62,13 +62,13 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public void UpdateAnimatonForMovement(ref FNonPlayerCharacterData data, Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
+        public void UpdateAnimatonForMovement(NonPlayerCharacterRuntimeState runtimeState, Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
         {
-            if (data.State != ENonPlayerState.Idle)
+            if (runtimeState.GetState() != ENonPlayerState.Idle)
                 return;
 
             float speed = localVelocity.magnitude;
-            float walkSpeed = _npc.GetDefinition(ref data).WalkSpeed;
+            float walkSpeed = runtimeState.Definition.WalkSpeed;
 
             // Determine if the character is moving
             bool isMoving = speed > 0.1f || Mathf.Abs(yawVelocity) > 1f;

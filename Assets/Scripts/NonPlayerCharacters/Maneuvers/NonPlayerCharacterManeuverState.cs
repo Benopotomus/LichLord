@@ -83,19 +83,21 @@ namespace LichLord.NonPlayerCharacters
             return ActivationExpirationTick < tick;
         }
 
-        public bool ExecuteManeuver(NonPlayerCharacter npc, 
-            ref FNonPlayerCharacterData data, 
+        public bool ExecuteManeuver(NonPlayerCharacter npc,
+            NonPlayerCharacterRuntimeState runtimeState, 
             int tick)
         {
-            if (data.State != ENonPlayerState.Idle)
+            var oldState = runtimeState.GetState();
+
+            if (oldState != ENonPlayerState.Idle)
                 return false;
 
             if(IsOnCooldown(tick)) 
                 return false;
 
-            data.State = ActiveState;
+            runtimeState.SetState(ActiveState);
 
-            int currentAnimIndex = data.AnimationIndex;
+            int currentAnimIndex = runtimeState.GetAnimationIndex();
             int newAnimIndex = UnityEngine.Random.Range(0, Definition.AnimationTriggers.Count);
 
             // If the new index is the same as the current, increment and wrap around
@@ -104,9 +106,8 @@ namespace LichLord.NonPlayerCharacters
                 newAnimIndex = (currentAnimIndex + 1) % Definition.AnimationTriggers.Count;
             }
 
-            data.AnimationIndex = newAnimIndex;
+            runtimeState.SetAnimationIndex(newAnimIndex);
 
-            npc.Replicator.UpdateNPCData(ref data, npc.Index);
             ActivationTick = tick;
             CooldownExpirationTick = ActivationTick + Definition.CooldownTicks;
             ActivationExpirationTick = ActivationTick + Definition.StateTicks;
@@ -114,9 +115,7 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        public void UpdateManeuverTick(NonPlayerCharacter npc,
-            ref FNonPlayerCharacterData data,
-            int tick)
+        public void UpdateManeuverTick(NonPlayerCharacter npc, int tick)
         {
             int ticksSinceStart = tick - ActivationTick;
 

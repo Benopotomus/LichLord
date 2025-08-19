@@ -28,5 +28,9 @@ namespace LichLord.NonPlayerCharacters
         protected float _bonusRadius;
         public float BonusRadius => _bonusRadius;
 
+        [SerializeField]
+        protected NonPlayerCharacterDataDefinition _dataDefinition;
+        public NonPlayerCharacterDataDefinition DataDefinition => _dataDefinition;
+
     }
 }

@@ -8,13 +8,13 @@
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
-        private ushort _configuration; // 1 byte: DefinitionID (6 bits) + TeamID (2 bits)
+        private ushort _configuration; // 2 bytes
         [FieldOffset(2)]
         private FWorldTransform _transform; // 9 bytes: Position (6) + Rotation (2)
         [FieldOffset(11)]
-        private byte _condition; // 1 byte: NPCState (4 bits) + NPCStatus (4 bits)
+        private byte _condition; // 1 byte: NPCState (4 bits)// animation bits
         [FieldOffset(12)]
-        private ushort _events; // 2 bytes: Health (12 bits)
+        private ushort _events; // 2 bytes: Health (12 bits) and storage
         // Total: 14 bytes
 
         public int DefinitionID
@@ -145,6 +145,14 @@
             return NonPlayerCharacterDataUtility.IsActive(ref this);
         }
 
+        public void Copy(FNonPlayerCharacterData other)
+        {
+            _transform = other._transform;
+            _condition = other._condition;
+            _configuration = other._configuration;
+            _events = other._events;
+        }
+
         public void Copy(ref FNonPlayerCharacterData other)
         {
             _transform = other._transform;
@@ -153,12 +161,7 @@
             _events = other._events;
         }
 
-        public bool IsPropDataEqual(ref FNonPlayerCharacterData other)
-        {
-            return IsPackedDataEqual(ref other);
-        }
-
-        public bool IsPackedDataEqual(ref FNonPlayerCharacterData other)
+        public bool IsEqual(ref FNonPlayerCharacterData other)
         {
             return _condition == other._condition &&
                    _configuration == other._configuration &&
@@ -168,9 +171,7 @@
 
         public bool IsStateDataEqual(ref FNonPlayerCharacterData other)
         {
-            return _condition == other._condition &&
-                   _configuration == other._configuration &&
-                   _events == other._events;
+            return _condition == other._condition;
         }
 
         public bool IsBitSet(ref byte flags, int bit)
