@@ -92,6 +92,11 @@ namespace LichLord.NonPlayerCharacters
             return _data.Position;
         }
 
+        public void SetPosition(Vector3 position)
+        { 
+            _data.Position = position;
+        }
+
         public Quaternion GetRotation()
         {
             return _data.Rotation;

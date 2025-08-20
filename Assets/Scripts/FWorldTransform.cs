@@ -96,6 +96,17 @@ namespace LichLord
                    _compressedPitch == other._compressedPitch;
         }
 
+        public bool IsEqual(ref FWorldTransform other)
+        {
+            if (!IsPositionEqual(ref other))
+                return false;
+
+            if (!IsRotationEqual(ref other))
+                return false;
+
+            return true;
+        }
+
         public void CopyPosition(ref FWorldTransform other)
         {
             _position.CopyPosition(ref other._position);

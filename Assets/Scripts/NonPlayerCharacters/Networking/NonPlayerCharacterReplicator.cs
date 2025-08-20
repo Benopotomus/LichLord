@@ -2,6 +2,8 @@
 using LichLord.World;
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -123,12 +125,7 @@ namespace LichLord.NonPlayerCharacters
             if (!HasStateAuthority)
                 return;
 
-            if (runtimeState.Index == 0)
-                Debug.Log("Replicating " + runtimeState + Runner.Tick);
-
-            ref FNonPlayerCharacterData oldData = ref _npcDatas.GetRef(runtimeState.Index);
-            FNonPlayerCharacterData newData = runtimeState.Data;
-            oldData.Copy(runtimeState.Data);
+           _npcDatas.Set(runtimeState.Index, runtimeState.Data);
         }
 
         public bool HasFreeIndex()
@@ -261,6 +258,10 @@ namespace LichLord.NonPlayerCharacters
         {
             _activeNPCs = 0;
 
+            // Collect commands for batching
+            List<RaycastCommand> raycastCommands = new List<RaycastCommand>();
+            List<int> raycastIndices = new List<int>();
+
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++) 
             {
                 // get the data
@@ -275,10 +276,11 @@ namespace LichLord.NonPlayerCharacters
                 var localState = _localRuntimeStates[i];
                 var oldState = localState.GetState();
 
-                bool hasChanged = oldState != authorityData.State;
+
+                bool hasStateChanged = oldState != authorityData.State;
                 localState.CopyData(ref authorityData);
 
-                if (hasChanged)
+                if (hasStateChanged)
                 {
                     if (_predictedStates.TryGetValue(i, out NonPlayerCharacterRuntimeState predictedState))
                     {

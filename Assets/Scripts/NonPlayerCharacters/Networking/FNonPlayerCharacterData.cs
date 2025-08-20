@@ -166,7 +166,15 @@
             return _condition == other._condition &&
                    _configuration == other._configuration &&
                    _events == other._events &&
-                   _transform.Equals(other._transform);
+                    _transform.IsEqual(ref other._transform);
+        }
+
+        public bool IsEqual(FNonPlayerCharacterData other)
+        {
+            return _condition == other._condition &&
+                   _configuration == other._configuration &&
+                   _events == other._events &&
+                   _transform.IsEqual(ref other._transform);
         }
 
         public bool IsStateDataEqual(ref FNonPlayerCharacterData other)

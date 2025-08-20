@@ -141,14 +141,11 @@ namespace LichLord.NonPlayerCharacters
 
             int sendRateModulus = GetSendRateModulus();
 
-            //here the packets wait for modulus and are emtpy every x frame
-            //if ((tick) % sendRateModulus != 0)
-            //    return;
 
-            //here the packets seem to be teh same size but do it every frame.
             if ((tick + runtimeState.Index) % sendRateModulus != 0)
                 return;
-            
+
+
             WriteTransformData(runtimeState);
         }
 
@@ -211,7 +208,7 @@ namespace LichLord.NonPlayerCharacters
             else
             {
                 // Update rotation only if the change is significant
-                const float ROTATION_THRESHOLD_DEGREES = 5.0f;
+                const float ROTATION_THRESHOLD_DEGREES = 10.0f;
                 float yawA = NPC.CachedTransform.eulerAngles.y;
                 float yawB = data.Yaw;
 
@@ -219,6 +216,11 @@ namespace LichLord.NonPlayerCharacters
                 {
                     data.Yaw = yawA;
                 }
+            }
+
+            if (runtimeState.Index == 0)
+            {
+                Debug.Log("Writing Index 0 " + data.Position + "tick: " + _npc.Context.Runner.Tick);
             }
 
             runtimeState.CopyData(ref data);

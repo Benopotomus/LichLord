@@ -252,6 +252,9 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 1
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!114 &5813864165240207391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,6 +288,7 @@ MonoBehaviour:
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
+  _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
     ActiveState: 4
@@ -292,6 +296,7 @@ MonoBehaviour:
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 7
+  TargetPlayer: {fileID: 0}
   targetGO: {fileID: 0}
 --- !u!114 &-5226509248368517820
 MonoBehaviour:
@@ -372,6 +377,7 @@ MonoBehaviour:
     _hitEffect:
       _name: VIS_IMP_BloodBurst
       _bundle: vis_imp_bloodburst
+  _impactAttachment: {fileID: 0}
 --- !u!114 &8245235728932067376
 MonoBehaviour:
   m_ObjectHideFlags: 0
