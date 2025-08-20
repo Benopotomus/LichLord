@@ -28,6 +28,8 @@ namespace LichLord.NonPlayerCharacters
         private NonPlayerCharacterRuntimeState[] _localRuntimeStates = 
             new NonPlayerCharacterRuntimeState[NonPlayerCharacterConstants.MAX_NPC_REPS];
 
+        [SerializeField] private int _activeNPCs;
+
         public void Predict_DealDamageToNPC(int index, int damage, int hitReactIndex)
         {
             var targetData = _npcDatas.Get(index);
@@ -116,16 +118,13 @@ namespace LichLord.NonPlayerCharacters
             _npcDatas.Set(index, data);
         }
 
-        public bool GetRenderState(int index, out FNonPlayerCharacterData data)
-        {
-            data = _npcDatas.GetRef(index);
-            return true;
-        }
-
         public void ReplicateRuntimeState(NonPlayerCharacterRuntimeState runtimeState)
         {
             if (!HasStateAuthority)
                 return;
+
+            if (runtimeState.Index == 0)
+                Debug.Log("Replicating " + runtimeState + Runner.Tick);
 
             ref FNonPlayerCharacterData oldData = ref _npcDatas.GetRef(runtimeState.Index);
             FNonPlayerCharacterData newData = runtimeState.Data;
@@ -141,7 +140,7 @@ namespace LichLord.NonPlayerCharacters
         {
             for(int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                if (_npcDatas.GetRef(i).State == ENonPlayerState.Inactive)
+                if (_npcDatas.Get(i).State == ENonPlayerState.Inactive)
                     return i;
             }
 
@@ -229,6 +228,27 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
+        public override void FixedUpdateNetwork()
+        {
+            if (!Runner.IsFirstTick || !Runner.IsForward)
+                return;
+
+            int tick = Runner.Tick;
+
+            base.FixedUpdateNetwork();
+
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
+            {
+                var renderState = GetRenderState(true, i);
+                ref FNPCLoadState loadState = ref _loadStates[i];
+
+                if (loadState.LoadState == ELoadState.Loaded)
+                {
+                    loadState.NPC.Movement.TryWriteTransformData(renderState, tick);
+                }
+            }
+        }
+
         private void OnNonPlayerCharacterSpawned(FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacter character)
         {
             ref FNPCLoadState loadState = ref _loadStates[spawnParams.Index];
@@ -237,13 +257,19 @@ namespace LichLord.NonPlayerCharacters
             character.OnSpawned(ref spawnParams, this);
         }
 
-
         private void OnRep_NPCDatas()
         {
+            _activeNPCs = 0;
+
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++) 
             {
                 // get the data
-                ref FNonPlayerCharacterData authorityData = ref _npcDatas.GetRef(i);
+                FNonPlayerCharacterData authorityData = _npcDatas.Get(i);
+
+                if (authorityData.State != ENonPlayerState.Inactive)
+                { 
+                    _activeNPCs++;
+                }
 
                 // check against the local runtime state for that index
                 var localState = _localRuntimeStates[i];

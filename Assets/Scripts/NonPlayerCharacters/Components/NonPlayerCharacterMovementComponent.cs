@@ -36,8 +36,8 @@ namespace LichLord.NonPlayerCharacters
 
         private float _teleportDistanceSquared = 36;
 
-        private float _10hrzSendDistance = 20.0f;
-        private float _8hrzSendDistance = 50.0f;
+        private float _10hrzSendDistance = 30.0f;
+        private float _8hrzSendDistance = 60.0f;
 
         public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
         {
@@ -50,7 +50,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateVelocity(renderDeltaTime);
             UpdateYawVelocity();
             _npc.AnimationController.UpdateAnimatonForMovement(runtimeState, _localVelocity, _yawVelocity, renderDeltaTime);
-            TryWriteTransformData(runtimeState, tick);
+            //TryWriteTransformData(runtimeState, tick);
         }
 
         public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
@@ -141,9 +141,14 @@ namespace LichLord.NonPlayerCharacters
 
             int sendRateModulus = GetSendRateModulus();
 
-            if ((tick + _npc.Index) % sendRateModulus != 0)
-                return;
+            //here the packets wait for modulus and are emtpy every x frame
+            //if ((tick) % sendRateModulus != 0)
+            //    return;
 
+            //here the packets seem to be teh same size but do it every frame.
+            if ((tick + runtimeState.Index) % sendRateModulus != 0)
+                return;
+            
             WriteTransformData(runtimeState);
         }
 
@@ -179,7 +184,7 @@ namespace LichLord.NonPlayerCharacters
 
             // Update the runtime state
             // Update position only if the change is significant
-            const float POSITION_THRESHOLD = 0.1f;
+            const float POSITION_THRESHOLD = 0.15f;
             if (Mathf.Abs(NPC.CachedTransform.position.x - data.PositionX) > POSITION_THRESHOLD)
             {
                 data.PositionX = NPC.CachedTransform.position.x;
