@@ -33,7 +33,7 @@ namespace LichLord.NonPlayerCharacters
         private bool _isInFaceTargetRange = false;
 
         [SerializeField]
-        private ENonPlayerState _activeManeuverState = ENonPlayerState.Inactive;
+        private ENPCState _activeManeuverState = ENPCState.Inactive;
 
         [SerializeField]
         private bool _hasAttackTarget = false;
@@ -54,15 +54,15 @@ namespace LichLord.NonPlayerCharacters
             _isInMovementStopRange = false;
             _isInFaceTargetRange = false;
             _hasAttackTarget = false;
-            _activeManeuverState = ENonPlayerState.Inactive;
+            _activeManeuverState = ENPCState.Inactive;
         }
 
         public void AuthorityUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
         {
             var currentState = runtimeState.GetState();
-            if  (currentState == ENonPlayerState.Inactive ||
-                currentState == ENonPlayerState.Dead ||
-                currentState == ENonPlayerState.HitReact)
+            if  (currentState == ENPCState.Inactive ||
+                currentState == ENPCState.Dead ||
+                currentState == ENPCState.HitReact)
                 return;
 
             UpdateAuthorityTick(runtimeState, tick);
@@ -77,7 +77,7 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateExecutingManeuver(runtimeState, renderDeltaTime);
 
-            if (NPC.State.CurrentState != ENonPlayerState.Idle)
+            if (NPC.State.CurrentState != ENPCState.Idle)
                 return;
 
             UpdateActiveManeuver(runtimeState, renderDeltaTime, tick);
@@ -85,7 +85,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState)
         {
-            if (NPC.State.CurrentState == ENonPlayerState.Dead || NPC.State.CurrentState == ENonPlayerState.Inactive)
+            if (NPC.State.CurrentState == ENPCState.Dead || NPC.State.CurrentState == ENPCState.Inactive)
                 return;
 
             int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
@@ -110,7 +110,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateDestinationTick(tick);
 
             // We only tick if we're idle and ready
-            if (runtimeState.GetState() != ENonPlayerState.Idle)
+            if (runtimeState.GetState() != ENPCState.Idle)
                 return;
 
             UpdateSenses(tick);
@@ -128,7 +128,7 @@ namespace LichLord.NonPlayerCharacters
             if (executingManuever.HasExpired(tick))
             {
                 SetActiveManuever(null);
-                runtimeState.SetState(ENonPlayerState.Idle);
+                runtimeState.SetState(ENPCState.Idle);
                 NPC.Replicator.ReplicateRuntimeState(runtimeState);
                 return;
             }
@@ -257,7 +257,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (newManeuver == null)
             {
-                _activeManeuverState = ENonPlayerState.Inactive;
+                _activeManeuverState = ENPCState.Inactive;
             }
             else
             {
@@ -466,7 +466,7 @@ namespace LichLord.NonPlayerCharacters
 
         private bool HasActiveManeuver()
         {
-            if (_activeManeuverState == ENonPlayerState.Inactive)
+            if (_activeManeuverState == ENPCState.Inactive)
                 return false;
 
             if (_activeManeuver == null)
@@ -475,7 +475,7 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        public void SetAnimationForManeuver(ENonPlayerState state, int animIndex) 
+        public void SetAnimationForManeuver(ENPCState state, int animIndex) 
         {
             var maneuverState = GetManeuverFromState(state);
             if (maneuverState != null)
@@ -491,7 +491,7 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public NonPlayerCharacterManeuverState GetManeuverFromState(ENonPlayerState state)
+        public NonPlayerCharacterManeuverState GetManeuverFromState(ENPCState state)
         {
             for (int i = 0; i < _maneuvers.Count; i++)
             {

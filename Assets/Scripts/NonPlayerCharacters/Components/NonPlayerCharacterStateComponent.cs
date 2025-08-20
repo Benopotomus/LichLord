@@ -8,8 +8,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacter _npc;
         public NonPlayerCharacter NPC => _npc;
 
-        [SerializeField] private ENonPlayerState _currentState = ENonPlayerState.Inactive;
-        public ENonPlayerState CurrentState => _currentState;
+        [SerializeField] private ENPCState _currentState = ENPCState.Inactive;
+        public ENPCState CurrentState => _currentState;
 
         [SerializeField] private int _currentAnimIndex;
         public int CurrentAnimIndex => _currentAnimIndex;
@@ -19,8 +19,8 @@ namespace LichLord.NonPlayerCharacters
 
         public void UpdateStateChange(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
         {
-            ENonPlayerState oldState = _currentState;
-            ENonPlayerState newState = runtimeState.GetState();
+            ENPCState oldState = _currentState;
+            ENPCState newState = runtimeState.GetState();
             int animIndex = runtimeState.GetAnimationIndex();
 
             if (_currentState == newState &&
@@ -32,8 +32,8 @@ namespace LichLord.NonPlayerCharacters
 
             switch (oldState)
             {
-                case ENonPlayerState.Dead:
-                case ENonPlayerState.Inactive:
+                case ENPCState.Dead:
+                case ENPCState.Inactive:
                     NPC.Movement.AIFollower.Teleport(runtimeState.GetPosition());
                     //Debug.Log("teleporting " + data.Position);
                     break;
@@ -42,7 +42,7 @@ namespace LichLord.NonPlayerCharacters
 
             switch (newState)
             {
-                case ENonPlayerState.Idle:
+                case ENPCState.Idle:
                     NPC.Collider.enabled = true;
                     NPC.Hurtbox.SetHitBoxesActive(true);
 
@@ -58,7 +58,7 @@ namespace LichLord.NonPlayerCharacters
                     }
                     break;
 
-                case ENonPlayerState.Inactive:
+                case ENPCState.Inactive:
 
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     if (hasAuthority)
@@ -70,7 +70,7 @@ namespace LichLord.NonPlayerCharacters
                         NPC.Movement.SetFollowerCanMove(false);
                     }
                     break;
-                case ENonPlayerState.Dead:
+                case ENPCState.Dead:
                     _deathEndTick = tick + _deathTicks;
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.Collider.enabled = false;
@@ -85,7 +85,7 @@ namespace LichLord.NonPlayerCharacters
                         NPC.Movement.SetFollowerCanMove(false);
                     }
                     break;
-                case ENonPlayerState.HitReact:
+                case ENPCState.HitReact:
                     NPC.Collider.enabled = true;
                     NPC.HitReact.StartHitReact(newState, animIndex, tick);
 
@@ -99,10 +99,10 @@ namespace LichLord.NonPlayerCharacters
                     }
                     break;
 
-                case ENonPlayerState.Maneuver_1:
-                case ENonPlayerState.Maneuver_2:
-                case ENonPlayerState.Maneuver_3:
-                case ENonPlayerState.Maneuver_4:
+                case ENPCState.Maneuver_1:
+                case ENPCState.Maneuver_2:
+                case ENPCState.Maneuver_3:
+                case ENPCState.Maneuver_4:
                     NPC.Collider.enabled = true;
                     NPC.Brain.SetAnimationForManeuver(newState, animIndex);
 
@@ -124,14 +124,14 @@ namespace LichLord.NonPlayerCharacters
         {
             switch (_currentState)
             {
-                case ENonPlayerState.HitReact:
+                case ENPCState.HitReact:
                     NPC.HitReact.UpdateHitReactState(runtimeState, tick);
                     break;
-                case ENonPlayerState.Dead:
+                case ENPCState.Dead:
 
                     if (tick > _deathEndTick)
                     {
-                        runtimeState.SetState(ENonPlayerState.Inactive);
+                        runtimeState.SetState(ENPCState.Inactive);
                     }
 
                     break;

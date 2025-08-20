@@ -28,24 +28,6 @@
             get => Global.Tables.NonPlayerCharacterTable.TryGetDefinition(DefinitionID);
         }
 
-        public int Health
-        {
-            get => NonPlayerCharacterDataUtility.GetHealth(ref this);
-            set => NonPlayerCharacterDataUtility.SetHealth(value, ref this);
-        }
-
-        public ENonPlayerState State
-        {
-            get => NonPlayerCharacterDataUtility.GetNPCState(ref this);
-            set => NonPlayerCharacterDataUtility.SetNPCState(value, ref this);
-        }
-
-        public int AnimationIndex
-        {
-            get => NonPlayerCharacterDataUtility.GetAnimationIndex(ref this);
-            set => NonPlayerCharacterDataUtility.SetAnimationIndex(value, ref this);
-        }
-
         public FWorldTransform Transform
         {
             get => _transform;
@@ -123,26 +105,10 @@
             set => _configuration = value;
         }
 
-        public ETeamID Team
-        { 
-            get => NonPlayerCharacterDataUtility.GetTeamID(ref this);
-            set => NonPlayerCharacterDataUtility.SetTeamID(value, ref this);
-        }
-
         public ushort Events
         {
             get => _events;
             set => _events = value;
-        }
-
-        public bool IsValid()
-        {
-            return DefinitionID != 0;
-        }
-
-        public bool IsActive()
-        {
-            return NonPlayerCharacterDataUtility.IsActive(ref this);
         }
 
         public void Copy(FNonPlayerCharacterData other)

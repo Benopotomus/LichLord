@@ -48,7 +48,7 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            NonPlayerCharacterDataUtility.InitializeData(ref data, definition, teamID, isInvasionNPC);
+            definition.DataDefinition.InitializeData(ref data, definition, teamID, isInvasionNPC);
 
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;

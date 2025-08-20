@@ -11,7 +11,7 @@ namespace LichLord.NonPlayerCharacters
     public class NonPlayerCharacterManeuverState
     {
         public NonPlayerCharacterManeuverDefinition Definition;
-        public ENonPlayerState ActiveState = ENonPlayerState.Maneuver_1;
+        public ENPCState ActiveState = ENPCState.Maneuver_1;
         public int CooldownExpirationTick;
         public int ActivationExpirationTick;
         public int ActivationTick;
@@ -89,7 +89,7 @@ namespace LichLord.NonPlayerCharacters
         {
             var oldState = runtimeState.GetState();
 
-            if (oldState != ENonPlayerState.Idle)
+            if (oldState != ENPCState.Idle)
                 return false;
 
             if(IsOnCooldown(tick)) 

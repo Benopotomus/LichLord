@@ -1,9 +1,6 @@
 ﻿using Fusion;
 using LichLord.World;
-using System;
 using System.Collections.Generic;
-using Unity.Collections;
-using Unity.Jobs;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -137,7 +134,7 @@ namespace LichLord.NonPlayerCharacters
         {
             for(int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                if (_npcDatas.Get(i).State == ENonPlayerState.Inactive)
+                if (!_localRuntimeStates[i].IsActive())
                     return i;
             }
 
@@ -254,42 +251,68 @@ namespace LichLord.NonPlayerCharacters
             character.OnSpawned(ref spawnParams, this);
         }
 
+        [SerializeField] private LayerMask hitMask = ~0; // everything by default
+
+
         private void OnRep_NPCDatas()
         {
             _activeNPCs = 0;
+            int tick = Runner.Tick;
+            const int raycastInterval = 1; // Extracted magic number for clarity
 
-            // Collect commands for batching
-            List<RaycastCommand> raycastCommands = new List<RaycastCommand>();
-            List<int> raycastIndices = new List<int>();
+            // Cache frequently accessed values
+            bool hasStateAuthority = HasStateAuthority;
 
-            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++) 
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                // get the data
-                FNonPlayerCharacterData authorityData = _npcDatas.Get(i);
+                ref FNonPlayerCharacterData networkedData = ref _npcDatas.GetRef(i); // Use ref readonly for performance
+                ref var localState = ref _localRuntimeStates[i]; // Use ref to avoid struct copying
 
-                if (authorityData.State != ENonPlayerState.Inactive)
-                { 
+                var newNetworkedState = localState.GetStateFromData(ref networkedData);
+
+                // Early state check
+                if (newNetworkedState != ENPCState.Inactive)
+                {
                     _activeNPCs++;
                 }
 
-                // check against the local runtime state for that index
-                var localState = _localRuntimeStates[i];
-                var oldState = localState.GetState();
 
+                ENPCState oldState = localState.GetState();
+                
+                bool needsRaycast = !hasStateAuthority &&
+                                   (tick + i) % raycastInterval == 0 &&
+                                   localState.GetPosition() != networkedData.Position &&
+                                   newNetworkedState != ENPCState.Inactive;
+                
+                Vector3 hitPosition = Vector3.zero;
+                bool raycastHit = false;
 
-                bool hasStateChanged = oldState != authorityData.State;
-                localState.CopyData(ref authorityData);
-
-                if (hasStateChanged)
+                if (needsRaycast)
                 {
-                    if (_predictedStates.TryGetValue(i, out NonPlayerCharacterRuntimeState predictedState))
+                    // Combine offset into raycast origin
+                    if (Physics.Raycast(networkedData.Position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 6f, hitMask))
                     {
-                        if ((localState.GetState() == predictedState.GetState() && 
-                            localState.GetAnimationIndex() == predictedState.GetAnimationIndex()) ||
-                            localState.GetState() == ENonPlayerState.Dead)
-                        {
-                            _predictedStates.Remove(i);
-                        }
+                        raycastHit = true;
+                        hitPosition = hit.point;
+                    }
+                }
+
+                bool hasStateChanged = oldState != newNetworkedState;
+                localState.CopyData(ref networkedData); // Ensure this method accepts ref parameter
+
+                if (raycastHit)
+                {
+                    localState.SetPosition(hitPosition);
+                }
+
+                if (hasStateChanged &&
+                    _predictedStates.TryGetValue(i, out NonPlayerCharacterRuntimeState predictedState))
+                {
+                    if ((localState.GetState() == predictedState.GetState() &&
+                         localState.GetAnimationIndex() == predictedState.GetAnimationIndex()) ||
+                        localState.GetState() == ENPCState.Dead)
+                    {
+                        _predictedStates.Remove(i);
                     }
                 }
             }

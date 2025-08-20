@@ -30,8 +30,8 @@ namespace LichLord.NonPlayerCharacters
 
             // Initialize Condition
             npcData.Condition = 0;
-            SetNPCState(ENonPlayerState.Idle, ref npcData);
-            SetStatus(ENPCStatus.Neutral, ref npcData);
+            SetState(ENPCState.Idle, ref npcData);
+            SetStatus(EAttitude.Neutral, ref npcData);
             SetAnimationIndex(0, ref npcData);
         }
 
@@ -49,13 +49,24 @@ namespace LichLord.NonPlayerCharacters
             npcData.Configuration = config;
         }
 
-        // NPCState
-        public ENonPlayerState GetNPCState(ref FNonPlayerCharacterData npcData)
+
+        // TeamID
+        public virtual ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)
         {
-            return (ENonPlayerState)((npcData.Condition >> NPC_STATE_SHIFT) & NPC_STATE_MASK);
+            return ETeamID.PlayerTeam;
         }
 
-        public void SetNPCState(ENonPlayerState newState, ref FNonPlayerCharacterData npcData)
+        public virtual void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
+        {
+        }
+
+        // NPCState
+        public ENPCState GetState(ref FNonPlayerCharacterData npcData)
+        {
+            return (ENPCState)((npcData.Condition >> NPC_STATE_SHIFT) & NPC_STATE_MASK);
+        }
+
+        public void SetState(ENPCState newState, ref FNonPlayerCharacterData npcData)
         {
             byte condition = npcData.Condition;
             int stateValue = Mathf.Clamp((int)newState, 0, NPC_STATE_MASK);
@@ -63,19 +74,19 @@ namespace LichLord.NonPlayerCharacters
             npcData.Condition = condition;
         }
 
-        public virtual ENonPlayerState TryAssignState(ref FNonPlayerCharacterData npcData, ENonPlayerState newState)
+        public virtual ENPCState TryAssignState(ref FNonPlayerCharacterData npcData, ENPCState newState)
         {
-            ENonPlayerState currentState = GetNPCState(ref npcData);
+            ENPCState currentState = GetState(ref npcData);
 
             switch (newState)
             {
-                case ENonPlayerState.Inactive:
+                case ENPCState.Inactive:
                     return newState;
-                case ENonPlayerState.HitReact:
+                case ENPCState.HitReact:
                     switch (currentState)
                     {
-                        case ENonPlayerState.Dead:
-                        case ENonPlayerState.Inactive:
+                        case ENPCState.Dead:
+                        case ENPCState.Inactive:
                             return currentState;
                     }
                     break;
@@ -99,17 +110,26 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // Status
-        public ENPCStatus GetStatus(ref FNonPlayerCharacterData npcData)
+        public EAttitude GetStatus(ref FNonPlayerCharacterData npcData)
         {
-            return (ENPCStatus)((npcData.Condition >> STATUS_SHIFT) & STATUS_MASK);
+            return (EAttitude)((npcData.Condition >> STATUS_SHIFT) & STATUS_MASK);
         }
 
-        public void SetStatus(ENPCStatus status, ref FNonPlayerCharacterData npcData)
+        public void SetStatus(EAttitude status, ref FNonPlayerCharacterData npcData)
         {
             byte condition = npcData.Condition;
             int statusValue = Mathf.Clamp((int)status, 0, STATUS_MASK);
             condition = (byte)((condition & ~(STATUS_MASK << STATUS_SHIFT)) | (statusValue << STATUS_SHIFT));
             npcData.Condition = condition;
+        }
+
+        // Handle damage application
+        public virtual void ApplyDamage(
+            ref FNonPlayerCharacterData npcData,
+            int damage, 
+            int hitReactIndex)
+        {
+          
         }
     }
 }

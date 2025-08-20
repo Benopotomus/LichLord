@@ -40,20 +40,20 @@ namespace LichLord.NonPlayerCharacters
             _animator.SetTrigger(_animIDTrigger);
         }
 
-        public void SetAnimationForState(ENonPlayerState oldState, ENonPlayerState newState)
+        public void SetAnimationForState(ENPCState oldState, ENPCState newState)
         {
             if (oldState == newState)
                 return;
 
             switch (newState)
             {
-                case ENonPlayerState.Idle:
+                case ENPCState.Idle:
                     _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
                     _animator.SetInteger(_animIDTriggerNumber, 25);
                     _animator.SetTrigger(_animIDTrigger);
                     break;
 
-                case ENonPlayerState.Dead:
+                case ENPCState.Dead:
 
                     _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
                     _animator.SetInteger(_animIDTriggerNumber, 20);
@@ -64,7 +64,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void UpdateAnimatonForMovement(NonPlayerCharacterRuntimeState runtimeState, Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
         {
-            if (runtimeState.GetState() != ENonPlayerState.Idle)
+            if (runtimeState.GetState() != ENPCState.Idle)
                 return;
 
             float speed = localVelocity.magnitude;
@@ -91,8 +91,8 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetProjectileFrame(ProjectileDefinition definition)
         {
-            if (_npc.State.CurrentState == ENonPlayerState.Dead ||
-                _npc.State.CurrentState == ENonPlayerState.HitReact)
+            if (_npc.State.CurrentState == ENPCState.Dead ||
+                _npc.State.CurrentState == ENPCState.HitReact)
                 return;
 
             if (_animationCallbacks.TryGetValue(definition, out FAnimationCallbackData animationCallback))

@@ -36,12 +36,12 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // TeamID
-        public ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)
+        public override ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)
         {
             return (ETeamID)((npcData.Configuration >> TEAM_SHIFT) & TEAM_MASK);
         }
 
-        public void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
+        public override void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
         {
             ushort config = npcData.Configuration;
             int teamValue = Mathf.Clamp((int)teamID, 0, TEAM_MASK);
@@ -78,21 +78,22 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // Handle damage application
-        public void ApplyDamage(ref FNonPlayerCharacterData npcData,
-            NonPlayerCharacterDefinition definition,
-            int damage, int hitReactIndex)
+        public override void ApplyDamage(
+            ref FNonPlayerCharacterData npcData,
+            int damage, 
+            int hitReactIndex)
         {
             int currentHealth = GetHealth(ref npcData);
             SetHealth(currentHealth - damage, ref npcData);
 
             if (GetHealth(ref npcData) == 0)
             {
-                SetNPCState(TryAssignState(ref npcData, ENonPlayerState.Dead), ref npcData);
+                SetState(TryAssignState(ref npcData, ENPCState.Dead), ref npcData);
             }
             else
             {
-                SetNPCState(TryAssignState(ref npcData, ENonPlayerState.HitReact), ref npcData);
-                npcData.AnimationIndex = hitReactIndex;
+                SetState(TryAssignState(ref npcData, ENPCState.HitReact), ref npcData);
+                SetAnimationIndex(hitReactIndex, ref npcData);
             }
         }
     }

@@ -55,7 +55,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
         {
-            if (runtimeState.GetState() == ENonPlayerState.Dead || runtimeState.GetState() == ENonPlayerState.Inactive)
+            if (runtimeState.GetState() == ENPCState.Dead || runtimeState.GetState() == ENPCState.Inactive)
                 return;
 
             SetFollowerUpdatePosition(false);
@@ -72,12 +72,16 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             {
-                // Smooth position
-                NPC.CachedTransform.position = Vector3.Lerp(
-                    NPC.CachedTransform.position,
-                    statePosition,
-                    renderDeltaTime * 4f
-                );
+                // Smooth position with different lerp speeds for Y vs X/Z
+                Vector3 currentPos = NPC.CachedTransform.position;
+                Vector3 targetPos = statePosition;
+
+                // Lerp X and Z with base speed, Y with faster speed
+                float x = Mathf.Lerp(currentPos.x, targetPos.x, renderDeltaTime * 4f); // Base speed for X/Z
+                float y = Mathf.Lerp(currentPos.y, targetPos.y, renderDeltaTime * 8f); // Faster speed for Y (2x base)
+                float z = Mathf.Lerp(currentPos.z, targetPos.z, renderDeltaTime * 4f); // Base speed for X/Z
+
+                NPC.CachedTransform.position = new Vector3(x, y, z);
             }
 
             // Smooth yaw only
@@ -187,7 +191,7 @@ namespace LichLord.NonPlayerCharacters
                 data.PositionX = NPC.CachedTransform.position.x;
             }
 
-            if (Mathf.Abs(NPC.CachedTransform.position.y - data.PositionY) > POSITION_THRESHOLD)
+            if (Mathf.Abs(NPC.CachedTransform.position.y - data.PositionY) > (POSITION_THRESHOLD * 3))
             {
                 data.PositionY = NPC.CachedTransform.position.y;
             }
@@ -216,11 +220,6 @@ namespace LichLord.NonPlayerCharacters
                 {
                     data.Yaw = yawA;
                 }
-            }
-
-            if (runtimeState.Index == 0)
-            {
-                Debug.Log("Writing Index 0 " + data.Position + "tick: " + _npc.Context.Runner.Tick);
             }
 
             runtimeState.CopyData(ref data);

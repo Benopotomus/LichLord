@@ -86,8 +86,8 @@ namespace LichLord.NonPlayerCharacters
             {
                 switch (_stateComponent.CurrentState)
                 {
-                    case ENonPlayerState.Dead:
-                    case ENonPlayerState.Inactive:
+                    case ENPCState.Dead:
+                    case ENPCState.Inactive:
                         return false;
                     default:
                         return true;

@@ -6,61 +6,17 @@
     public static class NonPlayerCharacterDataUtility
     {
         // Bit size constants
-        private const int DEFINITION_BITS = 5;          // 0–31
-        private const int TEAM_BITS = 2;                // 0–3
-        private const int INVASION_NPC_BITS = 1;        // 0-1
-        private const int FORMATION_ID_BITS = 4;        // 0-15
-        private const int FORMATION_INDEX_BITS = 4;     // 0-15
-
+        private const int DEFINITION_BITS = 7;          // 0–127
         private const int NPC_STATE_BITS = 4;           // 0–15
-        private const int STATUS_BITS = 2;              // 0–3
-        private const int ANIMATION_INDEX_BITS = 2;     // 0–3
-
-        private const int HEALTH_BITS = 12;             // 0–4095
 
         // Bit shifts and masks for Configuration (ushort)
         private const int DEFINITION_SHIFT = 0;
-        private const int TEAM_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
-        private const int INVASION_NPC_SHIFT = TEAM_SHIFT + TEAM_BITS;
 
         private const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
-        private const byte TEAM_MASK = (1 << TEAM_BITS) - 1;
-        private const ushort INVASION_NPC_MASK = (1 << INVASION_NPC_BITS) - 1;     // 0b0000000000000001
 
         // Bit shifts and masks for Condition (byte)
         private const int NPC_STATE_SHIFT = 0;
-        private const int STATUS_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
-        private const int ANIMATION_INDEX_SHIFT = STATUS_SHIFT + STATUS_BITS;
-
         private const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
-        private const byte STATUS_MASK = (1 << STATUS_BITS) - 1;
-        private const byte ANIMATION_INDEX_MASK = (1 << ANIMATION_INDEX_BITS) - 1;
-
-        // Bit shifts and masks for Events (ushort)
-        private const int HEALTH_SHIFT = 0;
-        private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
-
-        public static void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC)
-        {
-            if (definition == null)
-                throw new ArgumentNullException(nameof(definition), "NPC definition cannot be null.");
-
-            // Initialize Configuration
-            npcData.Configuration = 0;
-            SetDefinitionID(definition.TableID, ref npcData);
-            SetTeamID(teamID, ref npcData);
-            SetInvasionNPC(isInvasionNPC, ref npcData);
-
-            // Initialize Events
-            npcData.Events = 0;
-            SetHealth(definition.MaxHealth, ref npcData);
-
-            // Initialize Condition
-            npcData.Condition = 0;
-            SetNPCState(ENonPlayerState.Idle, ref npcData);
-            SetStatus(ENPCStatus.Neutral, ref npcData);
-            SetAnimationIndex(0, ref npcData);
-        }
 
         // DefinitionID
         public static int GetDefinitionID(ref FNonPlayerCharacterData npcData)
@@ -76,138 +32,10 @@
             npcData.Configuration = config;
         }
 
-        // TeamID
-        public static ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)
-        {
-            return (ETeamID)((npcData.Configuration >> TEAM_SHIFT) & TEAM_MASK);
-        }
-
-        public static void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
-        {
-            ushort config = npcData.Configuration;
-            int teamValue = Mathf.Clamp((int)teamID, 0, TEAM_MASK);
-            config = (ushort)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
-            npcData.Configuration = config;
-        }
-
-        // Invasion NPC
-        public static bool IsInvasionNPC(ref FNonPlayerCharacterData npcData)
-        {
-            return ((npcData.Configuration >> INVASION_NPC_SHIFT) & INVASION_NPC_MASK) == 1;
-        }
-
-        public static void SetInvasionNPC(bool isInvasionNPC, ref FNonPlayerCharacterData npcData)
-        {
-            ushort config = npcData.Configuration;
-            int invasionValue = isInvasionNPC ? 1 : 0;
-            config = (ushort)((config & ~(INVASION_NPC_MASK << INVASION_NPC_SHIFT)) | (invasionValue << INVASION_NPC_SHIFT));
-            npcData.Configuration = config;
-        }
-
-        // Health
-        public static int GetHealth(ref FNonPlayerCharacterData npcData)
-        {
-            return (npcData.Events >> HEALTH_SHIFT) & HEALTH_MASK;
-        }
-
-        public static void SetHealth(int newHealth, ref FNonPlayerCharacterData npcData)
-        {
-            ushort events = npcData.Events;
-            newHealth = Mathf.Clamp(newHealth, 0, HEALTH_MASK);
-            events = (ushort)((events & ~(HEALTH_MASK << HEALTH_SHIFT)) | (newHealth << HEALTH_SHIFT));
-            npcData.Events = events;
-        }
-
-        // Status
-        public static ENPCStatus GetStatus(ref FNonPlayerCharacterData npcData)
-        {
-            return (ENPCStatus)((npcData.Condition >> STATUS_SHIFT) & STATUS_MASK);
-        }
-
-        public static void SetStatus(ENPCStatus status, ref FNonPlayerCharacterData npcData)
-        {
-            byte condition = npcData.Condition;
-            int statusValue = Mathf.Clamp((int)status, 0, STATUS_MASK);
-            condition = (byte)((condition & ~(STATUS_MASK << STATUS_SHIFT)) | (statusValue << STATUS_SHIFT));
-            npcData.Condition = condition;
-        }
-
-        // NPCState
-        public static ENonPlayerState GetNPCState(ref FNonPlayerCharacterData npcData)
-        {
-            return (ENonPlayerState)((npcData.Condition >> NPC_STATE_SHIFT) & NPC_STATE_MASK);
-        }
-
-        public static void SetNPCState(ENonPlayerState newState, ref FNonPlayerCharacterData npcData)
-        {
-            byte condition = npcData.Condition;
-            int stateValue = Mathf.Clamp((int)newState, 0, NPC_STATE_MASK);
-            condition = (byte)((condition & ~(NPC_STATE_MASK << NPC_STATE_SHIFT)) | (stateValue << NPC_STATE_SHIFT));
-            npcData.Condition = condition;
-        }
-
-        // AnimationState
-        public static int GetAnimationIndex(ref FNonPlayerCharacterData npcData)
-        {
-            return ((npcData.Condition >> ANIMATION_INDEX_SHIFT) & ANIMATION_INDEX_MASK);
-        }
-
-        public static void SetAnimationIndex(int animationState, ref FNonPlayerCharacterData npcData)
-        {
-            byte condition = npcData.Condition;
-            int stateValue = Mathf.Clamp(animationState, 0, ANIMATION_INDEX_MASK);
-            condition = (byte)((condition & ~(ANIMATION_INDEX_MASK << ANIMATION_INDEX_SHIFT)) | (stateValue << ANIMATION_INDEX_SHIFT));
-            npcData.Condition = condition;
-        }
-
-        public static bool IsActive(ref FNonPlayerCharacterData npcData)
-        {
-            return GetNPCState(ref npcData) != ENonPlayerState.Inactive;
-        }
-
-        // Handle damage application
-        public static void ApplyDamage(ref FNonPlayerCharacterData npcData,
-            NonPlayerCharacterDefinition definition,
-            int damage, int hitReactIndex)
-        {
-            int currentHealth = GetHealth(ref npcData);
-            SetHealth(currentHealth - damage, ref npcData);
-
-            if (GetHealth(ref npcData) == 0)
-            {
-                SetNPCState(TryAssignState(ref npcData, ENonPlayerState.Dead), ref npcData);
-            }
-            else
-            {
-                SetNPCState(TryAssignState(ref npcData, ENonPlayerState.HitReact), ref npcData);
-                npcData.AnimationIndex = hitReactIndex;
-            }
-        }
-
-        public static ENonPlayerState TryAssignState(ref FNonPlayerCharacterData npcData, ENonPlayerState newState)
-        {
-            ENonPlayerState currentState = GetNPCState(ref npcData);
-
-            switch (newState)
-            {
-                case ENonPlayerState.Inactive:
-                    return newState;
-                case ENonPlayerState.HitReact:
-                    switch (currentState)
-                    {
-                        case ENonPlayerState.Dead:
-                        case ENonPlayerState.Inactive:
-                            return currentState;
-                    }
-                    break;
-            }
-
-            return newState;
-        }
     }
 
     // Enums for completeness
-    public enum ENonPlayerState : byte
+    public enum ENPCState : byte
     {
         Inactive,
         Idle,
@@ -227,11 +55,11 @@
         Spawning,
     }
 
-    public enum ENPCStatus : byte
+    public enum EAttitude : byte
     {
+        None,
+        Hostile,
+        Friendly,
         Neutral,
-        Wounded,
-        Carrying,
-        Patrolling,
     }
 }

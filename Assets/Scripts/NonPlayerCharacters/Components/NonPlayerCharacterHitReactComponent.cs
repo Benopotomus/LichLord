@@ -29,12 +29,12 @@ namespace LichLord.NonPlayerCharacters
         { 
             if (tick > _hitReactEndTick)
             {
-                runtimeState.SetState(ENonPlayerState.Idle);
+                runtimeState.SetState(ENPCState.Idle);
                 _npc.Replicator.ReplicateRuntimeState(runtimeState);
             }
         }
 
-        public void StartHitReact(ENonPlayerState state, int animIndex, int tick)
+        public void StartHitReact(ENPCState state, int animIndex, int tick)
         {
             if (animIndex > _hitReacts.Count)
                 return;

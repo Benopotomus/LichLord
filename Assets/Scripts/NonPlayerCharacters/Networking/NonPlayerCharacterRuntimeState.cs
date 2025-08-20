@@ -57,33 +57,42 @@ namespace LichLord.NonPlayerCharacters
 
         public void ApplyDamage(int damage, int hitReactIndex)
         {
-            NonPlayerCharacterDataUtility.ApplyDamage(ref _data, _definition, damage, hitReactIndex);
+            DataDefinition.ApplyDamage(ref _data, damage, hitReactIndex);
             _replicator.ReplicateRuntimeState(this);
         }
 
         public bool IsActive()
         {
-            return NonPlayerCharacterDataUtility.GetNPCState(ref _data) != ENonPlayerState.Inactive;
+            return GetState() != ENPCState.Inactive;
         }
 
         public ETeamID GetTeam()
-        { 
-            return NonPlayerCharacterDataUtility.GetTeamID(ref _data);
+        {
+            return DataDefinition.GetTeamID(ref _data);
         }
 
-        public ENonPlayerState GetState()
+        public ENPCState GetState()
         {
-            return NonPlayerCharacterDataUtility.GetNPCState(ref _data);
+            if(_data.DefinitionID == 0)
+                return ENPCState.Inactive;
+
+            return Definition.DataDefinition.GetState(ref _data);
+        }
+
+        public void SetState(ENPCState newState)
+        {
+            DataDefinition.SetState(newState, ref _data);
+            _replicator.ReplicateRuntimeState(this);
         }
 
         public int GetAnimationIndex()
         {
-            return NonPlayerCharacterDataUtility.GetAnimationIndex(ref _data);
+            return DataDefinition.GetAnimationIndex(ref _data);
         }
 
         public void SetAnimationIndex(int index)
         {
-            NonPlayerCharacterDataUtility.SetAnimationIndex(index, ref _data);
+            DataDefinition.SetAnimationIndex(index, ref _data);
             _replicator.ReplicateRuntimeState(this);
         }
 
@@ -117,15 +126,21 @@ namespace LichLord.NonPlayerCharacters
             return _data.TargetPlayerIndex; 
         }
 
-        public void SetState(ENonPlayerState newState)
+        public bool IsInvasionNPC()
         {
-            NonPlayerCharacterDataUtility.SetNPCState(newState, ref _data);
-            _replicator.ReplicateRuntimeState(this);
+            if (DataDefinition is SoldierDataDefinition soldierDataDefinition)
+                return soldierDataDefinition.IsInvasionNPC(ref _data);
+
+            return false;
+
         }
 
-        public bool IsInvasionNPC()
-        { 
-            return NonPlayerCharacterDataUtility.IsInvasionNPC(ref _data);
+        public ENPCState GetStateFromData(ref FNonPlayerCharacterData otherData)
+        {
+            if (_data.DefinitionID == 0)
+                return ENPCState.Inactive;
+
+            return Definition.DataDefinition.GetState(ref otherData);
         }
     }
 }
