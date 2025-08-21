@@ -101,6 +101,11 @@ namespace LichLord.Buildables
                 return stockpileDataDefinition.GetIsInteracting(ref _data);
             }
 
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                return cryptDataDefinition.GetIsInteracting(ref _data);
+            }
+
             return false;
         }
 
@@ -114,6 +119,15 @@ namespace LichLord.Buildables
             return -1;
         }
 
+        public int GetWorkerIndex()
+        {
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                return cryptDataDefinition.GetWorkerIndex(ref _data);
+            }
+
+            return -1;
+        }
         // Runtime Values
 
         EBuildableState _currentState;

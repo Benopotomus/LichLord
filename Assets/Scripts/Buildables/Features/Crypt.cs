@@ -7,6 +7,8 @@ namespace LichLord.Buildables
 {
     public class Crypt : Buildable
     {
+        [SerializeField] private Transform _spawnTransform;
+
         public override float BonusRadius { get { return 0; } }
         public override bool IsAttackable
         {
@@ -24,12 +26,14 @@ namespace LichLord.Buildables
         [SerializeField] protected BuildableStateComponent _stateComponent;
         [SerializeField]  private InteractableComponent _interactableComponent;
 
-        [SerializeField]
-        private VisualEffectBase _interactEffect;
+        [SerializeField] private VisualEffectBase _interactEffect;
+        [SerializeField] private int _workerIndex;
 
         public override void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
         {
             base.OnSpawned(zone, runtimeState);
+
+            _workerIndex = runtimeState.GetWorkerIndex();
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());
@@ -50,6 +54,8 @@ namespace LichLord.Buildables
         public override void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, bool hasAuthority)
         {
             base.OnRender(runtimeState, renderDeltaTime, hasAuthority);
+
+            _workerIndex = runtimeState.GetWorkerIndex();
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());
@@ -101,8 +107,14 @@ namespace LichLord.Buildables
         {
             Debug.Log("Interaction started with Crypt.");
 
-            if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
-                return;
+            NetworkRunner runner = interactor.Runner;
+            SceneContext context = interactor.Context;
+            /*
+            Context.PropManager.RPC_SetInteracting(ChunkID, GUID, true);
+
+            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
+                Context.PropManager.Predict_SetInteracting(ChunkID, GUID, true);
+            */
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
@@ -115,28 +127,10 @@ namespace LichLord.Buildables
             Debug.Log("Crypt Interaction complete.");
             // Trigger effects, state changes, or events
 
-            if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
+            if (RuntimeState.DataDefinition is not CryptDataDefinition dataDefinition)
                 return;
 
-            int stockpileIndex = RuntimeState.GetStockpileIndex();
-            NetworkRunner runner = interactor.Runner;
-            SceneContext context = interactor.Context;
-            PlayerCharacter pc = interactor.PC;
-
-            var currencyType = ECurrencyType.None;
-            var value = 0;
-            // i want to grab the first currency with a stack and add it to the stockpile 
-            pc.Currency.GetCurrencyWithCount(ref currencyType, ref value);
-
-            if (currencyType == ECurrencyType.None)
-                return;
-
-            pc.Currency.AddCurrency(currencyType, -value);
-
-            context.ContainerManager.RPC_StockpileDropOff_Player(stockpileIndex, currencyType, value, pc);
-
-            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.ContainerManager.Predict_StockpileDropOff_Player(stockpileIndex, currencyType, value);
+            Context.NonPlayerCharacterManager.SpawnNPCWorker(_spawnTransform.position, dataDefinition.WorkerDefinition, ETeamID.PlayerTeam, RuntimeState.GetWorkerIndex());
         }
     }
 }

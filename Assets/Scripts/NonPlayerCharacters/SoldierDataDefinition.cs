@@ -22,7 +22,10 @@ namespace LichLord.NonPlayerCharacters
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        public override void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC)
+        public override void InitializeData(ref FNonPlayerCharacterData npcData, 
+            NonPlayerCharacterDefinition definition, 
+            ETeamID teamID, 
+            bool isInvasionNPC = false)
         {
             base.InitializeData(ref npcData, definition, teamID, isInvasionNPC);
 

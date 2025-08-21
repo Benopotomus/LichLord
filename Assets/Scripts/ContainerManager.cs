@@ -42,7 +42,7 @@ namespace LichLord
             return _stockpileDatas.GetRef(index);
         }
 
-        public int FindFreeStockpileIndex()
+        public int GetFreeStockpileIndex()
         {
             for (int i = 0; i < MAX_STOCKPILES; i++)
             {

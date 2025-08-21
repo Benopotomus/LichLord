@@ -39,20 +39,21 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public NonPlayerCharacterRuntimeState(NonPlayerCharacterReplicator replicator, int index, ref FNonPlayerCharacterData data)
+        public NonPlayerCharacterRuntimeState(NonPlayerCharacterReplicator replicator, int index)
         {
             _replicator = replicator;
             _index = index;
-            CopyData(ref data);
         }
 
         public void CopyData(ref FNonPlayerCharacterData other)
         { 
             _data.Copy(ref other);
-            _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_data.DefinitionID);
-            
-            if(_definition != null ) 
-                _dataDefinition = Definition.DataDefinition;
+
+            if (_data.DefinitionID == 0)
+                return;
+
+            _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_data.DefinitionID);    
+            _dataDefinition = Definition.DataDefinition;
         }
 
         public void ApplyDamage(int damage, int hitReactIndex)
@@ -132,7 +133,6 @@ namespace LichLord.NonPlayerCharacters
                 return soldierDataDefinition.IsInvasionNPC(ref _data);
 
             return false;
-
         }
 
         public ENPCState GetStateFromData(ref FNonPlayerCharacterData otherData)

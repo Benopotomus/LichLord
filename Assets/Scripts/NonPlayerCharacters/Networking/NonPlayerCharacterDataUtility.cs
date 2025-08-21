@@ -7,16 +7,8 @@
     {
         // Bit size constants
         private const int DEFINITION_BITS = 7;          // 0–127
-        private const int NPC_STATE_BITS = 4;           // 0–15
-
-        // Bit shifts and masks for Configuration (ushort)
         private const int DEFINITION_SHIFT = 0;
-
         private const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
-
-        // Bit shifts and masks for Condition (byte)
-        private const int NPC_STATE_SHIFT = 0;
-        private const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
 
         // DefinitionID
         public static int GetDefinitionID(ref FNonPlayerCharacterData npcData)
@@ -31,7 +23,6 @@
             config = (ushort)((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
             npcData.Configuration = config;
         }
-
     }
 
     // Enums for completeness

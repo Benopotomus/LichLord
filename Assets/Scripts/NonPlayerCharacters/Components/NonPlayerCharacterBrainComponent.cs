@@ -68,7 +68,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateAuthorityTick(runtimeState, tick);
 
             int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
-            TargetPlayer = (targetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) : null;
+            TargetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) : null;
 
             // Detect if an active state is running 
             // We don't want to update the target during this
@@ -77,7 +77,7 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateExecutingManeuver(runtimeState, renderDeltaTime);
 
-            if (NPC.State.CurrentState != ENPCState.Idle)
+            if (_npc.State.CurrentState != ENPCState.Idle)
                 return;
 
             UpdateActiveManeuver(runtimeState, renderDeltaTime, tick);
@@ -85,11 +85,11 @@ namespace LichLord.NonPlayerCharacters
 
         public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState)
         {
-            if (NPC.State.CurrentState == ENPCState.Dead || NPC.State.CurrentState == ENPCState.Inactive)
+            if (_npc.State.CurrentState == ENPCState.Dead || _npc.State.CurrentState == ENPCState.Inactive)
                 return;
 
             int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
-            TargetPlayer = (targetPlayerIndex > 0) ? NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) :  null;
+            TargetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) :  null;
         }
 
         int _lastTick = -1;
@@ -129,7 +129,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 SetActiveManuever(null);
                 runtimeState.SetState(ENPCState.Idle);
-                NPC.Replicator.ReplicateRuntimeState(runtimeState);
+                _npc.Replicator.ReplicateRuntimeState(runtimeState);
                 return;
             }
 
@@ -146,7 +146,7 @@ namespace LichLord.NonPlayerCharacters
             if (_isInFaceTargetRange)
             {
                 if (_attackTarget != null)
-                    _hasLineOfSight = GetLineOfSight(NPC.CachedTransform.position, _attackTarget.Position);
+                    _hasLineOfSight = GetLineOfSight(_npc.CachedTransform.position, _attackTarget.Position);
                 else
                     _hasLineOfSight = false;
 
@@ -164,13 +164,13 @@ namespace LichLord.NonPlayerCharacters
 
             if (!_isInFaceTargetRange)
             {
-                NPC.Movement.SetFollowerUpdateRotation(true);
-                NPC.Movement.SetFollowerMaxSpeed(runtimeState.Definition.WalkSpeed);
+                _npc.Movement.SetFollowerUpdateRotation(true);
+                _npc.Movement.SetFollowerMaxSpeed(runtimeState.Definition.WalkSpeed);
             }
             else
             {
-                NPC.Movement.SetFollowerUpdateRotation(false);
-                NPC.Movement.SetFollowerMaxSpeed(runtimeState.Definition.WalkSpeed * 0.6f);
+                _npc.Movement.SetFollowerUpdateRotation(false);
+                _npc.Movement.SetFollowerMaxSpeed(runtimeState.Definition.WalkSpeed * 0.6f);
             }
         }
 
@@ -186,7 +186,7 @@ namespace LichLord.NonPlayerCharacters
             // if we are an invasion npc, the target nexus position is the fallback
             if (runtimeState.IsInvasionNPC())
             {
-                var stronghold = NPC.Context.InvasionManager.TargetStronghold;
+                var stronghold = _npc.Context.InvasionManager.TargetStronghold;
                 if (stronghold != null)
                 {
                     var targetPosition = stronghold.CachedTransform.position;
@@ -196,13 +196,13 @@ namespace LichLord.NonPlayerCharacters
                         return;
 
                     _moveTarget = targetPosition;
-                    NPC.Movement.AIFollower.destination = _moveTarget;
+                    _npc.Movement.AIFollower.destination = _moveTarget;
                     return;
                 }
             }
             else
             {
-                if (Vector3.Distance(NPC.CachedTransform.position, _moveTarget) < 3)
+                if (Vector3.Distance(_npc.CachedTransform.position, _moveTarget) < 3)
                 {
                     _moveTarget = new Vector3(
                         Random.Range(-20f, 20f),
@@ -210,7 +210,7 @@ namespace LichLord.NonPlayerCharacters
                         Random.Range(-20f, 20f)
                     );
 
-                    NPC.Movement.AIFollower.destination = _moveTarget;
+                    _npc.Movement.AIFollower.destination = _moveTarget;
                 }
             }
         }
@@ -280,7 +280,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (_hasAttackTarget)
             {
-                NPC.Movement.SetFollowerUpdateRotation(false);
+                _npc.Movement.SetFollowerUpdateRotation(false);
                 RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
             }
         }
@@ -298,13 +298,13 @@ namespace LichLord.NonPlayerCharacters
             if (targetCollider != null) // Target has a collider
             {
                 // Distance from my position to the closest point on target's collider
-                Vector3 closestPoint = targetCollider.ClosestPoint(NPC.CachedTransform.position);
-                sqrDist = (NPC.CachedTransform.position - closestPoint).sqrMagnitude - _attackTarget.BonusRadius;
+                Vector3 closestPoint = targetCollider.ClosestPoint(_npc.CachedTransform.position);
+                sqrDist = (_npc.CachedTransform.position - closestPoint).sqrMagnitude - _attackTarget.BonusRadius;
             }
             else
             {
                 // Standard distance check with bonus radius
-                sqrDist = (NPC.CachedTransform.position - _attackTarget.Position).sqrMagnitude - _attackTarget.BonusRadius;
+                sqrDist = (_npc.CachedTransform.position - _attackTarget.Position).sqrMagnitude - _attackTarget.BonusRadius;
             }
 
             _isInMovementStopRange = sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt;
@@ -322,7 +322,7 @@ namespace LichLord.NonPlayerCharacters
             { 
                 Vector3 attackTargetPosition = _attackTarget.Position;
 
-                NPC.Movement.SetFollowerUpdateRotation(false);
+                _npc.Movement.SetFollowerUpdateRotation(false);
                 RotateTowardTarget(attackTargetPosition, renderDeltaTime);
 
                 float angle = GetAngleToTarget(attackTargetPosition);
@@ -334,10 +334,10 @@ namespace LichLord.NonPlayerCharacters
                         if (_activeManeuver.Definition.RequiresLOS)
                         {
                             if (HasLineOfSight)
-                                _activeManeuver.ExecuteManeuver(NPC, runtimeState, tick);
+                                _activeManeuver.ExecuteManeuver(_npc, runtimeState, tick);
                         }
                         else
-                            _activeManeuver.ExecuteManeuver(NPC, runtimeState, tick);
+                            _activeManeuver.ExecuteManeuver(_npc, runtimeState, tick);
                     }
                 }
             }
@@ -359,12 +359,12 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             _moveTarget = targetPosition;
-            NPC.Movement.AIFollower.destination = _moveTarget;
+            _npc.Movement.AIFollower.destination = _moveTarget;
         }
 
         public void FindCurrentTarget()
         {
-            if(NPC.CurrentChunk == null) return;
+            if(_npc.CurrentChunk == null) return;
 
             // Get current + nearby chunks
 
@@ -382,7 +382,7 @@ namespace LichLord.NonPlayerCharacters
                     if (!IsTargetValid(trackable))
                         continue;
 
-                    float distance = Vector3.Distance(NPC.CachedTransform.position, trackable.Position);
+                    float distance = Vector3.Distance(_npc.CachedTransform.position, trackable.Position);
 
                     if (distance < closestDistance)
                     { 
@@ -409,21 +409,27 @@ namespace LichLord.NonPlayerCharacters
                     return false;
             }
 
+            if(trackable is Buildable buildable)
+            if (_npc.TeamID == ETeamID.PlayerTeam)
+            { 
+            
+            }
+
             return true;
         }
 
         private void RotateTowardTarget(Vector3 targetPosition, float renderDeltaTime)
         {
-            Vector3 directionToTarget = targetPosition - NPC.CachedTransform.position;
+            Vector3 directionToTarget = targetPosition - _npc.CachedTransform.position;
             directionToTarget.y = 0f; // Zero out vertical component to keep it on the XZ plane
 
             if (directionToTarget.sqrMagnitude > 0.01f) // Avoid zero-length direction
             {
                 Quaternion targetRotation = Quaternion.LookRotation(directionToTarget.normalized);
-                Quaternion currentRotation = NPC.CachedTransform.rotation;
+                Quaternion currentRotation = _npc.CachedTransform.rotation;
 
                 // Optionally smooth with Lerp or Slerp
-                NPC.CachedTransform.rotation = Quaternion.RotateTowards(
+                _npc.CachedTransform.rotation = Quaternion.RotateTowards(
                     currentRotation,
                     targetRotation,
                     360f * renderDeltaTime // Adjust speed (degrees per second)
@@ -433,12 +439,12 @@ namespace LichLord.NonPlayerCharacters
 
         private float GetAngleToTarget(Vector3 targetPosition)
         {
-            Vector3 directionToTarget = targetPosition - NPC.CachedTransform.position;
+            Vector3 directionToTarget = targetPosition - _npc.CachedTransform.position;
             directionToTarget.y = 0f; // Flatten to horizontal plane
             float unsignedAngle = 180;
             if (directionToTarget.sqrMagnitude > 0.001f)
             {
-                Vector3 forward = NPC.CachedTransform.forward;
+                Vector3 forward = _npc.CachedTransform.forward;
                 forward.y = 0f;
 
                 unsignedAngle = Vector3.Angle(forward, directionToTarget);
@@ -487,7 +493,7 @@ namespace LichLord.NonPlayerCharacters
 
                 var animationTrigger = animationTriggers[animIndex];
 
-                NPC.AnimationController.SetAnimationForTrigger(animationTrigger);
+                _npc.AnimationController.SetAnimationForTrigger(animationTrigger);
             }
         }
 
@@ -506,11 +512,11 @@ namespace LichLord.NonPlayerCharacters
         {
             if (TargetPlayer != null)
             {
-                if (NPC.Context.LocalPlayerCharacter == TargetPlayer)
+                if (_npc.Context.LocalPlayerCharacter == TargetPlayer)
                 {
-                    float distance = Vector3.Distance(TargetPlayer.CachedTransform.position, NPC.CachedTransform.position);
+                    float distance = Vector3.Distance(TargetPlayer.CachedTransform.position, _npc.CachedTransform.position);
 
-                    var currentManeuver = GetManeuverFromState(NPC.State.CurrentState);
+                    var currentManeuver = GetManeuverFromState(_npc.State.CurrentState);
                     if (currentManeuver != null)
                     {
                         if (distance < currentManeuver.Definition.AttackRange)
@@ -587,13 +593,13 @@ namespace LichLord.NonPlayerCharacters
                 targetGO = buildable.gameObject;
 
             _moveTarget = _attackTarget.Position;
-            NPC.Movement.AIFollower.destination = _moveTarget;
+            _npc.Movement.AIFollower.destination = _moveTarget;
             UpdateRanges();
         }
 
         private void FindBetterLOSPosition()
         {
-            Vector3 origin = NPC.CachedTransform.position;
+            Vector3 origin = _npc.CachedTransform.position;
             float checkRadius = 5f; // distance to search around current position
             float stepDegrees = 30f; // spacing of test points
 
@@ -619,7 +625,7 @@ namespace LichLord.NonPlayerCharacters
             if (found)
             {
                 _moveTarget = bestSpot;
-                NPC.Movement.AIFollower.destination = _moveTarget;
+                _npc.Movement.AIFollower.destination = _moveTarget;
             }
         }
 
@@ -635,7 +641,7 @@ namespace LichLord.NonPlayerCharacters
             if (Physics.Raycast(from, dir, out RaycastHit hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
                 // If first thing we hit is ourselves, LOS is still fine — but should never happen unless origin is inside collider
-                if (hit.collider.transform.IsChildOf(NPC.gameObject.transform))
+                if (hit.collider.transform.IsChildOf(_npc.gameObject.transform))
                     return true;
 
                 // If first thing we hit is the target, LOS is fine

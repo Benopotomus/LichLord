@@ -57,6 +57,44 @@ namespace LichLord.NonPlayerCharacters
             replicator.SpawnNPC(ref data, freeIndex);
         }
 
+        public void SpawnNPCWorker(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, int workerIndex)
+        {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                Debug.Log("Cannot spawn, I'm not the master client");
+                return;
+            }
+
+            NonPlayerCharacterReplicator replicator = GetReplicatorWithFreeSlots();
+            if (replicator == null)
+                return;
+
+            int freeIndex = replicator.GetFreeIndex();
+            if (freeIndex == -1)
+            {
+                Debug.Log("Can't Spawn NPC No Free Index");
+                return;
+            }
+
+            if (definition.DataDefinition is not WorkerDataDefinition workerData)
+            {
+                Debug.Log("Trying to spawn a non-worker as a worker");
+                return;
+            }
+
+            FNonPlayerCharacterData data = new FNonPlayerCharacterData();
+            definition.DataDefinition.InitializeData(ref data, definition, teamID);
+
+            workerData.SetWorkerIndex(workerIndex, ref data);
+            Context.WorkerManager.AssignWorker(workerIndex, replicator, freeIndex);
+
+            data.Position = spawnPos;
+            data.Rotation = Quaternion.identity;
+
+            _deltaStates[freeIndex] = data; // Store full state for persistence
+            replicator.SpawnNPC(ref data, freeIndex);
+        }
+
         public void SpawnNPCFromSave(FNonPlayerCharacterSaveState saveState)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)

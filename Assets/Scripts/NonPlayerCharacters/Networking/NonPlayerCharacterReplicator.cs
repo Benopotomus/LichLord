@@ -42,7 +42,8 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             {
-                NonPlayerCharacterRuntimeState newPredictedState = new NonPlayerCharacterRuntimeState(this,index, ref targetData);
+                NonPlayerCharacterRuntimeState newPredictedState = new NonPlayerCharacterRuntimeState(this, index);
+                newPredictedState.CopyData(ref targetData);
                 newPredictedState.ApplyDamage(damage, hitReactIndex);
                 newPredictedState.PredictionTimeoutTick = Runner.Tick + predictionTicks;
                 _predictedStates[index] = newPredictedState;
@@ -67,7 +68,7 @@ namespace LichLord.NonPlayerCharacters
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
                 _loadStates[i] = new FNPCLoadState();
-                _localRuntimeStates[i] = new NonPlayerCharacterRuntimeState(this, i, ref _npcDatas.GetRef(i));
+                _localRuntimeStates[i] = new NonPlayerCharacterRuntimeState(this, i);
             }
         }
 
@@ -115,6 +116,7 @@ namespace LichLord.NonPlayerCharacters
         public void SpawnNPC(ref FNonPlayerCharacterData data, int index)
         { 
             _npcDatas.Set(index, data);
+            _localRuntimeStates[index].CopyData(ref data);
         }
 
         public void ReplicateRuntimeState(NonPlayerCharacterRuntimeState runtimeState)

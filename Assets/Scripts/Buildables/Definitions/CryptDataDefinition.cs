@@ -1,23 +1,26 @@
 ﻿using LichLord.Buildables;
+using LichLord.NonPlayerCharacters;
 using UnityEngine;
-
-//25 bits
 
 namespace LichLord.Buildables
 {
     [CreateAssetMenu(fileName = "CryptDataDefinition", menuName = "LichLord/Buildables/CryptDataDefinition")]
-    public class CryptDataDefinition : DestructibleBuildableDataDefinition
+    public class CryptDataDefinition : DestructibleBuildableDataDefinition // 14 bits
     {
-        protected const int SPAWN_STATE_BITS = 3;         // 0-7 = 17
-        protected const int NPC_INDEX_BITS = 7;         // 0-128 = 24
-        protected const int IS_INTERACTING_BITS = 1; // = 25
+        [SerializeField] private NonPlayerCharacterDefinition _workerDefinition;
+        public NonPlayerCharacterDefinition WorkerDefinition => _workerDefinition;
+
+        protected const int SPAWN_STATE_BITS = 3;         // 0-7 =w 17
+        protected const int WORKER_INDEX_BITS = 6;         // 0-63 = 23
+        protected const int IS_INTERACTING_BITS = 1; // = 24
+        //24 bits
 
         protected const int SPAWN_STATE_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
-        protected const int NPC_INDEX_SHIFT = SPAWN_STATE_SHIFT + SPAWN_STATE_BITS;
-        protected const int IS_INTERACTING_SHIFT = SPAWN_STATE_SHIFT + SPAWN_STATE_BITS;
+        protected const int WORKER_INDEX_SHIFT = SPAWN_STATE_SHIFT + SPAWN_STATE_BITS;
+        protected const int IS_INTERACTING_SHIFT = WORKER_INDEX_SHIFT + WORKER_INDEX_BITS;
 
         protected const int SPAWN_STATE_MASK = (1 << SPAWN_STATE_BITS) - 1;
-        protected const int NPC_INDEX_MASK = (1 << NPC_INDEX_BITS) - 1;
+        protected const int WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
         protected const int IS_INTERACTING_MASK = (1 << IS_INTERACTING_BITS) - 1;
 
         public override void InitializeData(ref FBuildableData buildableData, BuildableDefinition definition)
@@ -29,19 +32,20 @@ namespace LichLord.Buildables
             // Set initial values
             SetState(StartingState, ref buildableData);
             SetHealth(MaxHealth, ref buildableData); // Default health, adjust as needed
+            SetIsInteracting(false, ref buildableData);
         }
 
         // NPC Index
-        public int GetNPCIndex(ref FBuildableData data)
+        public int GetWorkerIndex(ref FBuildableData data)
         {
-            return (data.StateData >> NPC_INDEX_SHIFT) & NPC_INDEX_MASK;
+            return (data.StateData >> WORKER_INDEX_SHIFT) & WORKER_INDEX_MASK;
         }
 
-        public void SetNPCIndex(int index, ref FBuildableData buildableData)
+        public void SetWorkerIndex(int index, ref FBuildableData buildableData)
         {
-           // int stateData = buildableData.StateData;
-           // stateData = (stateData & ~(STOCKPILE_INDEX_MASK << STOCKPILE_INDEX_SHIFT)) | (index << STOCKPILE_INDEX_SHIFT);
-           // buildableData.StateData = stateData;
+           int stateData = buildableData.StateData;
+           stateData = (stateData & ~(WORKER_INDEX_MASK << WORKER_INDEX_SHIFT)) | (index << WORKER_INDEX_SHIFT);
+           buildableData.StateData = stateData;
         }
 
         // Interacting

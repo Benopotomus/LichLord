@@ -22,7 +22,7 @@ namespace LichLord.NonPlayerCharacters
         protected const byte STATUS_MASK = (1 << STATUS_BITS) - 1;
         protected const byte ANIMATION_INDEX_MASK = (1 << ANIMATION_INDEX_BITS) - 1;
 
-        public virtual void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC)
+        public virtual void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC = false)
         {
             // Initialize Configuration
             npcData.Configuration = 0;
