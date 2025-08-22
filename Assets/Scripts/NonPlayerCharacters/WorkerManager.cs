@@ -2,6 +2,7 @@
 using Fusion;
 using LichLord.Buildables;
 using System.Runtime.InteropServices;
+using LichLord.World;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -9,6 +10,13 @@ namespace LichLord.NonPlayerCharacters
     {
         [Networked, Capacity(64)]
         protected NetworkArray<FWorkerData> _workerDatas { get; }
+
+        protected NonPlayerCharacter[] _workerCharacters = new NonPlayerCharacter[64];
+
+        public override void Spawned()
+        {
+            base.Spawned();
+        }
 
         public int GetFreeIndex()
         {
@@ -25,17 +33,42 @@ namespace LichLord.NonPlayerCharacters
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
-            workerData.Zone = zone.Object.Id;
+            workerData.ZoneID = zone.ZoneID;
             workerData.BuildableIndex = (ushort)buildableIndex;
             workerData.IsAssigned = true;
         }
 
-        public void AssignWorker(int workerIndex, NonPlayerCharacterReplicator replicator, int npcIndex)
+        public Crypt GetCrypt(int workerIndex)
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
-            workerData.Replicator = replicator.Object.Id;
-            workerData.NPCIndex = (byte)npcIndex;
+            BuildableZone zone = Context.StrongholdManager.GetBuildableZone(workerData.ZoneID);
+
+            if (zone == null)
+                return null;
+
+            if (zone.LoadStates[workerData.BuildableIndex].LoadState == ELoadState.Loaded)
+            {
+                Buildable buildable = zone.LoadStates[workerData.BuildableIndex].Buildable;
+
+                if(buildable is Crypt crypt)
+                    return crypt;
+            }
+
+            return null;
+        }
+
+        public void LoadWorkerData(FWorkerSaveData workerSaveData)
+        {
+            ref FWorkerData workerData = ref _workerDatas.GetRef(workerSaveData.index);
+            workerData = workerSaveData.ToNetworkWorker();
+            _workerDatas.Set(workerSaveData.index, workerData);
+        }
+
+        public void ClearWorker(int workerIndex)
+        {
+            ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+            workerData.IsAssigned = false;
         }
     }
 
@@ -43,13 +76,9 @@ namespace LichLord.NonPlayerCharacters
     public struct FWorkerData : INetworkStruct
     {
         [FieldOffset(0)]
-        public NetworkId Zone;
-        [FieldOffset(4)]
+        public byte ZoneID;
+        [FieldOffset(1)]
         public ushort BuildableIndex; // 1 byte: NPCState (4 bits)// animation bits
-        [FieldOffset(6)]
-        public NetworkId Replicator; // 9 bytes: Position (6) + Rotation (2)
-        [FieldOffset(10)]
-        public byte NPCIndex; // 1 byte: NPCState (4 bits)// animation bits
         [FieldOffset(11)]
         private byte _state;
 

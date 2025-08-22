@@ -84,9 +84,7 @@ namespace LichLord.NonPlayerCharacters
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
             definition.DataDefinition.InitializeData(ref data, definition, teamID);
-
             workerData.SetWorkerIndex(workerIndex, ref data);
-            Context.WorkerManager.AssignWorker(workerIndex, replicator, freeIndex);
 
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;

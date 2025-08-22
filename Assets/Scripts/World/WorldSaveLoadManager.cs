@@ -103,7 +103,7 @@ namespace LichLord.World
                     strongholdSaveDatas.Add(new FStrongholdSaveData
                     {
                         chunkCoord = stronghold.Data.ChunkID,
-                        index = stronghold.Data.Index,
+                        index = stronghold.Data.ChunkIndex,
                         currentHealth = stronghold.CurrentHealth,
                         rank = stronghold.Rank,
                         buildableStates = buildableList.ToArray()

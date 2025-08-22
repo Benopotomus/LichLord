@@ -3,6 +3,7 @@ using LichLord.Buildables;
 using LichLord.Props;
 using LichLord.World;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -12,11 +13,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacter _npc;
         public NonPlayerCharacter NPC => _npc;
 
-        [SerializeField]
+        [SerializeField] 
         private Vector3 _moveTarget;
-        public Vector3 MoveTarget => _moveTarget;
 
-        [SerializeField]
         private IChunkTrackable _attackTarget;
         public IChunkTrackable AttackTarget => _attackTarget;
 
@@ -26,21 +25,19 @@ namespace LichLord.NonPlayerCharacters
         private int _updateSpeedTick = 8;
         private int _updateRangesTick = 8;
 
-        [SerializeField]
+        [SerializeField] 
         private bool _isInMovementStopRange = false;
 
-        [SerializeField]
+        [SerializeField] 
         private bool _isInFaceTargetRange = false;
 
-        [SerializeField]
+        [SerializeField] 
         private ENPCState _activeManeuverState = ENPCState.Inactive;
 
-        [SerializeField]
+        [SerializeField]  
         private bool _hasAttackTarget = false;
 
-        [SerializeField]
-        private bool _hasLineOfSight = false;
-        public bool HasLineOfSight => _hasLineOfSight;
+        [SerializeField] private bool _hasLineOfSight = false;
 
         [SerializeField]
         private List<NonPlayerCharacterManeuverState> _maneuvers = new List<NonPlayerCharacterManeuverState>();
@@ -95,8 +92,7 @@ namespace LichLord.NonPlayerCharacters
         int _lastTick = -1;
         private void UpdateAuthorityTick(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            if (_lastTick == tick)
-                return;
+            if (_lastTick == tick)  return;
 
             _lastTick = tick;
 
@@ -174,10 +170,15 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
+        [SerializeField] private bool _wanderPositionSet;
         private void UpdateWanderMovement(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
             if (_hasAttackTarget)
+            {
+                _wanderPositionSet = false;
                 return;
+            }
+
 
            // NPC.Movement.AIFollower.stopDistance = 0.2f;
           //  NPC.Movement.SetFollowerUpdatePosition(true);
@@ -186,6 +187,9 @@ namespace LichLord.NonPlayerCharacters
             // if we are an invasion npc, the target nexus position is the fallback
             if (runtimeState.IsInvasionNPC())
             {
+                if (_wanderPositionSet)
+                    return;
+
                 var stronghold = _npc.Context.InvasionManager.TargetStronghold;
                 if (stronghold != null)
                 {
@@ -197,21 +201,40 @@ namespace LichLord.NonPlayerCharacters
 
                     _moveTarget = targetPosition;
                     _npc.Movement.AIFollower.destination = _moveTarget;
+                    _wanderPositionSet = true;
                     return;
                 }
             }
-            else
+            else if(runtimeState.IsWorker())
             {
-                if (Vector3.Distance(_npc.CachedTransform.position, _moveTarget) < 3)
-                {
-                    _moveTarget = new Vector3(
-                        Random.Range(-20f, 20f),
-                        0f, // Keep Y fixed
-                        Random.Range(-20f, 20f)
-                    );
+                if (_wanderPositionSet)
+                    return;
 
+                Crypt crypt = _npc.Context.WorkerManager.GetCrypt(runtimeState.GetWorkerIndex());
+
+                if (crypt != null)
+                {
+                    _moveTarget = crypt.CachedTransform.position;
                     _npc.Movement.AIFollower.destination = _moveTarget;
+                    _wanderPositionSet = true;
+                    Debug.Log("crypt set");
                 }
+
+            }
+            else
+            { 
+                if ((tick + _npc.Index) % 64 == 0)
+                    return;
+
+                _moveTarget = new Vector3(
+                    Random.Range(-20f, 20f),
+                    0f, // Keep Y fixed
+                    Random.Range(-20f, 20f)
+                );
+
+                _moveTarget += _npc.CachedTransform.position;
+
+                _npc.Movement.AIFollower.destination = _moveTarget;
             }
         }
 
@@ -333,7 +356,7 @@ namespace LichLord.NonPlayerCharacters
                     {
                         if (_activeManeuver.Definition.RequiresLOS)
                         {
-                            if (HasLineOfSight)
+                            if (_hasLineOfSight)
                                 _activeManeuver.ExecuteManeuver(_npc, runtimeState, tick);
                         }
                         else
@@ -403,16 +426,32 @@ namespace LichLord.NonPlayerCharacters
             if (!trackable.IsAttackable)
                 return false;
 
-            if (trackable is NonPlayerCharacter targetNPC)
+            if (trackable is NonPlayerCharacter npc)
             {
-                if (targetNPC.TeamID == _npc.TeamID)
+                if (npc.TeamID == _npc.TeamID)
                     return false;
             }
 
-            if(trackable is Buildable buildable)
-            if (_npc.TeamID == ETeamID.PlayerTeam)
-            { 
-            
+            if (trackable is PlayerCharacter player)
+            {
+                if (_npc.TeamID == ETeamID.PlayerTeam)
+                    return false;
+            }
+
+            if (trackable is Buildable buildable)
+            {
+                if (_npc.TeamID == ETeamID.PlayerTeam)
+                {
+                    return false;
+                }
+            }
+
+            if (trackable is Stronghold strongHold)
+            {
+                if (_npc.TeamID == ETeamID.PlayerTeam)
+                {
+                    return false;
+                }
             }
 
             return true;

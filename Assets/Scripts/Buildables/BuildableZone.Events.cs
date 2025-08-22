@@ -4,6 +4,9 @@ namespace LichLord.Buildables
 {
     public partial class BuildableZone : ContextBehaviour
     {
+        [Networked]
+        public byte ZoneID { get; set; }
+
         public void Predict_DealDamage(int index, int damage)
         {
 

@@ -19,6 +19,7 @@ namespace LichLord.Buildables
         public NetworkArray<FBuildableData> Data => _buildableDatas;
 
         private FBuildableLoadState[] _buildableLoadStates;
+        public FBuildableLoadState[] LoadStates => _buildableLoadStates;
 
         private Dictionary<int, BuildableRuntimeState> _buildableRuntimeStates = new Dictionary<int, BuildableRuntimeState>();
 

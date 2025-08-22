@@ -120,7 +120,7 @@ namespace LichLord.Props
 
             FStrongholdData strongholdData = new FStrongholdData();
             strongholdData.ChunkID = ChunkID;
-            strongholdData.Index = (byte)GUID;
+            strongholdData.ChunkIndex = (byte)GUID;
 
             context.StrongholdManager.RPC_ActivateNexus(strongholdData);
 

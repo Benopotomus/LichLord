@@ -142,5 +142,22 @@ namespace LichLord.NonPlayerCharacters
 
             return Definition.DataDefinition.GetState(ref otherData);
         }
+
+        public bool IsWorker()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+                return true;
+
+            return false;
+        }
+
+
+        public int GetWorkerIndex()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+                return workerDataDefinition.GetWorkerIndex(ref _data);
+
+            return -1;
+        }
     }
 }
