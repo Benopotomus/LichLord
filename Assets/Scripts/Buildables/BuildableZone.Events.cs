@@ -32,7 +32,11 @@ namespace LichLord.Buildables
             {
                 int stockpileIndex = authorityState.GetStockpileIndex();
                 if(stockpileIndex >= 0) 
-                    Context.ContainerManager.ClearStockpile(stockpileIndex);     
+                    Context.ContainerManager.ClearStockpile(stockpileIndex);
+
+                int workerIndex = authorityState.GetWorkerIndex();
+                if (workerIndex >= 0)
+                    Context.WorkerManager.ClearWorker(workerIndex);
             }
 
             ReplicateRuntimeState(authorityState);

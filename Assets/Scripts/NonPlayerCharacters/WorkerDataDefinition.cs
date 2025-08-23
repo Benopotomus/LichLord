@@ -5,13 +5,9 @@ namespace LichLord.NonPlayerCharacters
     [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/WorkerDataDefinition")]
     public class WorkerDataDefinition : NonPlayerCharacterDataDefinition
     {
-        // Config (7 from base)
-        private const int TEAM_BITS = 3;                // 0–7
-        private const int TEAM_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
-        private const byte TEAM_MASK = (1 << TEAM_BITS) - 1;
 
         private const int WORKER_INDEX_BITS = 6;                // 0–63
-        private const int WORKER_INDEX_SHIFT = TEAM_SHIFT + TEAM_BITS;
+        private const int WORKER_INDEX_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
         private const byte WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
 
         // Events
@@ -34,13 +30,6 @@ namespace LichLord.NonPlayerCharacters
         {
             base.InitializeData(ref npcData, definition, teamID, isInvasionNPC);
 
-            // Initialize Config
-            SetTeamID(teamID, ref npcData);
-
-            // Get free worker index
-
-            
-
             // Initialize Events
             npcData.Events = 0;
             SetHealth(definition.MaxHealth, ref npcData);
@@ -49,15 +38,11 @@ namespace LichLord.NonPlayerCharacters
         // TeamID
         public override ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)
         {
-            return (ETeamID)((npcData.Configuration >> TEAM_SHIFT) & TEAM_MASK);
+            return ETeamID.PlayerTeam;
         }
 
         public override void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
-            int teamValue = Mathf.Clamp((int)teamID, 0, TEAM_MASK);
-            config = (ushort)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
-            npcData.Configuration = config;
         }
 
         // Worker Index
@@ -92,7 +77,12 @@ namespace LichLord.NonPlayerCharacters
         public override void ApplyDamage(ref FNonPlayerCharacterData npcData,
             int damage, int hitReactIndex)
         {
+            NonPlayerCharacterDefinition definition = npcData.Definition;
+
             int currentHealth = GetHealth(ref npcData);
+            damage = Mathf.Max(damage - definition.DamageReduction, 0);
+            damage = (int)((float)damage * (1.0f - definition.DamageResistance));
+
             SetHealth(currentHealth - damage, ref npcData);
 
             if (GetHealth(ref npcData) == 0)

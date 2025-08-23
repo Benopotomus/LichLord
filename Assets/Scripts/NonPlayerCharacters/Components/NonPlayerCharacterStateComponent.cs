@@ -28,7 +28,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             NPC.AnimationController.SetAnimationForState(oldState, newState);
-            //Debug.Log("oldState " + oldState + " to " + newState);
+
 
             switch (oldState)
             {

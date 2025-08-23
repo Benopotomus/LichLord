@@ -8,11 +8,7 @@ namespace LichLord.NonPlayerCharacters
     public class NonPlayerCharacterManeuverDefinition : ScriptableObject
     {
         [SerializeField]
-        private string ActionName;
-
-        [SerializeField]
-        private int _damage = 10;
-        public int Damage => _damage;
+        protected string ActionName;
 
         [SerializeField]
         private int _cooldownTicks = 32;
@@ -48,29 +44,15 @@ namespace LichLord.NonPlayerCharacters
         private Vector2 _validTargetDistance = Vector2.zero;
         public Vector2 ValidTargetDistance => _validTargetDistance;
 
-        [SerializeField]
-        private List<EManeuverTarget> _validTargetTypes = new List<EManeuverTarget>();
-        public List<EManeuverTarget> ValidTargetTypes => _validTargetTypes;
-
         [Header("Animations")]
         [SerializeField]
         private List<FAnimationTrigger> _animationTriggers = new List<FAnimationTrigger>();
         public List<FAnimationTrigger> AnimationTriggers => _animationTriggers;
 
-        [Header("Projectiles")]
-        [SerializeField]
-        private List<FManeuverProjectile> _maneuverProjectiles = new List<FManeuverProjectile>();
-        public List<FManeuverProjectile> ManeuverProjectiles => _maneuverProjectiles;
-
+        public virtual bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
+        {
+            return false;
+        }
     }
 
-    public enum EManeuverTarget
-    { 
-        None,
-        NPC,
-        PC,
-        Stronghold,
-        Prop,
-        Buildable,
-    }
 }

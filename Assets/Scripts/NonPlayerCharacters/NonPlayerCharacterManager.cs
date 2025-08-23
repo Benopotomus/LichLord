@@ -114,7 +114,7 @@ namespace LichLord.NonPlayerCharacters
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
 
-            data.Configuration = (byte)saveState.configuration;
+            data.Configuration = (ushort)saveState.configuration;
             data.Position = saveState.position;
             data.Rotation = saveState.rotation;
             data.Condition = (byte)saveState.condition;

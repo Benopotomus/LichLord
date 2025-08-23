@@ -30,7 +30,6 @@ namespace LichLord.NonPlayerCharacters
             if (tick > _hitReactEndTick)
             {
                 runtimeState.SetState(ENPCState.Idle);
-                _npc.Replicator.ReplicateRuntimeState(runtimeState);
             }
         }
 

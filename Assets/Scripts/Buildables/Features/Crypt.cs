@@ -1,6 +1,4 @@
-﻿using DWD.Pooling;
-using Fusion;
-using LichLord.Props;
+﻿using Fusion;
 using UnityEngine;
 
 namespace LichLord.Buildables
@@ -20,6 +18,7 @@ namespace LichLord.Buildables
                 return true;
             }
         }
+
         public override Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 
         [SerializeField] protected BuildableHealthComponent _healthComponent;

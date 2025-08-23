@@ -107,6 +107,17 @@ namespace LichLord.Props
             _hitReactEndTick = _hitReactTicks + tick;
         }
 
+        public int GetHarvestPoints()
+        {
+            if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)
+            {
+                var harvestPoints = harvestDataDefinition.GetHarvestPoints(ref _data);
+                //Debug.Log(harvestPoints);
+                return harvestPoints;
+            }
+            return -1;
+        }
+
         public void Harvest(int harvestValue, int tick)
         {
             if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)

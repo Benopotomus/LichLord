@@ -95,29 +95,38 @@ namespace LichLord.NonPlayerCharacters
             } 
         }
 
+        private int _workerIndex = -1;
+        public int WorkerIndex => _workerIndex;
+
         [SerializeField]
         private GameObject redHat;
 
         [SerializeField]
         private GameObject blueHat;
 
-        public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacterReplicator replicator)
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, NonPlayerCharacterReplicator replicator)
         {
+            _runtimeState = runtimeState;
             _context = replicator.Context;
             _replicator = replicator;
-            _movementComponent.OnSpawned(ref spawnParams);
-            _brainComponent.OnSpawned(ref spawnParams);
-            _index = spawnParams.Index;
+            _movementComponent.OnSpawned(runtimeState);
+            _brainComponent.OnSpawned(runtimeState);
+            _index = runtimeState.Index;
             UpdateChunk(_context.ChunkManager);
 
             _netObjectID.networkId = _replicator.Object.Id;
-            _netObjectID.index = (byte)spawnParams.Index;
+            _netObjectID.index = (byte)runtimeState.Index;
+
+            _workerIndex = runtimeState.GetWorkerIndex();
+            if (_workerIndex >= 0)
+            {
+                _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
+            }
         }
 
         public void OnRender(NonPlayerCharacterRuntimeState runtimeState, 
             bool hasAuthority, 
             float renderDeltaTime, 
-            float ping, 
             int tick)
         {
             _runtimeState = runtimeState;
@@ -131,6 +140,26 @@ namespace LichLord.NonPlayerCharacters
                 _movementComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
                 _stateComponent.UpdateCurrentState(runtimeState, tick);
                 _brainComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
+
+                _workerIndex = runtimeState.GetWorkerIndex();
+                if (_workerIndex >= 0)
+                {
+                    var workerData = Context.WorkerManager.GetWorkerData(_workerIndex);
+                    if (!workerData.IsAssigned)
+                    {
+                        switch(runtimeState.GetState())
+                        { 
+                            case ENPCState.Dead:
+                            case ENPCState.Inactive:
+                                break;
+                            default:
+                                _runtimeState.SetState(ENPCState.Dead);
+                                break;
+                        }
+
+                        return;
+                    }
+                }
             }
             else
             {
@@ -259,6 +288,11 @@ namespace LichLord.NonPlayerCharacters
             _movementComponent.StartRecycle();
             DWDObjectPool.Instance.Recycle(this);
             UpdateChunk(Context.ChunkManager);
+
+            if (_workerIndex >= 0)
+            {
+                _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
+            }
         }
 
         private NonPlayerCharacterDefinition _definition;

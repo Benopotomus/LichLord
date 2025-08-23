@@ -39,9 +39,9 @@ namespace LichLord.NonPlayerCharacters
         private float _10hrzSendDistance = 30.0f;
         private float _8hrzSendDistance = 60.0f;
 
-        public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
-            _lastPosition = spawnParams.Position;
+            _lastPosition = runtimeState.GetPosition();
             _transform = transform;
         }
 
@@ -50,7 +50,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateVelocity(renderDeltaTime);
             UpdateYawVelocity();
             _npc.AnimationController.UpdateAnimatonForMovement(runtimeState, _localVelocity, _yawVelocity, renderDeltaTime);
-            //TryWriteTransformData(runtimeState, tick);
+            TryWriteTransformData(runtimeState, tick);
         }
 
         public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
@@ -145,10 +145,8 @@ namespace LichLord.NonPlayerCharacters
 
             int sendRateModulus = GetSendRateModulus();
 
-
             if ((tick + runtimeState.Index) % sendRateModulus != 0)
                 return;
-
 
             WriteTransformData(runtimeState);
         }

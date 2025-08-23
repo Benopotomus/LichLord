@@ -1,6 +1,5 @@
 ﻿using DWD.Pooling;
 using Fusion;
-using LichLord.Props;
 using UnityEngine;
 
 namespace LichLord.Buildables

@@ -21,6 +21,14 @@ namespace LichLord.NonPlayerCharacters
         public int MaxHealth => _maxHealth;
 
         [SerializeField]
+        protected int _damageReduction = 3;
+        public int DamageReduction => _damageReduction;
+
+        [SerializeField]
+        protected float _damageResistance = 0.0f;
+        public float DamageResistance => _damageResistance;
+
+        [SerializeField]
         protected float _walkSpeed;
         public float WalkSpeed => _walkSpeed;
 

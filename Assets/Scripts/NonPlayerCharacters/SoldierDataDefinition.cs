@@ -86,7 +86,12 @@ namespace LichLord.NonPlayerCharacters
             int damage, 
             int hitReactIndex)
         {
+            NonPlayerCharacterDefinition definition = npcData.Definition;
+
             int currentHealth = GetHealth(ref npcData);
+            damage = Mathf.Max(damage - definition.DamageReduction, 0);
+            damage = (int)((float)damage * (1.0f - definition.DamageResistance));
+
             SetHealth(currentHealth - damage, ref npcData);
 
             if (GetHealth(ref npcData) == 0)

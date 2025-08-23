@@ -8,14 +8,20 @@ namespace LichLord.NonPlayerCharacters
 {
     public class WorkerManager : ContextBehaviour
     {
-        [Networked, Capacity(64)]
+
+        [Networked, Capacity(BuildableConstants.MAX_WORKERS)]
         protected NetworkArray<FWorkerData> _workerDatas { get; }
 
-        protected NonPlayerCharacter[] _workerCharacters = new NonPlayerCharacter[64];
+        protected NonPlayerCharacter[] _workerCharacters = new NonPlayerCharacter[BuildableConstants.MAX_WORKERS];
 
         public override void Spawned()
         {
             base.Spawned();
+        }
+
+        public ref FWorkerData GetWorkerData(int i)
+        { 
+            return ref _workerDatas.GetRef(i);
         }
 
         public int GetFreeIndex()
@@ -51,8 +57,10 @@ namespace LichLord.NonPlayerCharacters
             {
                 Buildable buildable = zone.LoadStates[workerData.BuildableIndex].Buildable;
 
-                if(buildable is Crypt crypt)
+                if (buildable is Crypt crypt)
+                {
                     return crypt;
+                }
             }
 
             return null;
@@ -60,9 +68,22 @@ namespace LichLord.NonPlayerCharacters
 
         public void LoadWorkerData(FWorkerSaveData workerSaveData)
         {
-            ref FWorkerData workerData = ref _workerDatas.GetRef(workerSaveData.index);
-            workerData = workerSaveData.ToNetworkWorker();
-            _workerDatas.Set(workerSaveData.index, workerData);
+            FWorkerData workerData = _workerDatas.GetRef(workerSaveData.index);
+            if (workerSaveData.isAssigned)
+            {
+                workerData = workerSaveData.ToNetworkWorker();
+                _workerDatas.Set(workerSaveData.index, workerData);
+            }
+        }
+
+        public void AddWorkerCharacter(NonPlayerCharacter character, int workerIndex)
+        {
+            _workerCharacters[workerIndex] = character;
+        }
+
+        public void RemoveWorkerCharacter(NonPlayerCharacter character, int workerIndex)
+        {
+            _workerCharacters[workerIndex] = null;
         }
 
         public void ClearWorker(int workerIndex)
@@ -78,8 +99,8 @@ namespace LichLord.NonPlayerCharacters
         [FieldOffset(0)]
         public byte ZoneID;
         [FieldOffset(1)]
-        public ushort BuildableIndex; // 1 byte: NPCState (4 bits)// animation bits
-        [FieldOffset(11)]
+        public ushort BuildableIndex;
+        [FieldOffset(3)]
         private byte _state;
 
         public bool IsAssigned { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }

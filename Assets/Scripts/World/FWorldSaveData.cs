@@ -102,6 +102,14 @@ namespace LichLord.World
         public int buildableIndex;
         public bool isAssigned;
 
+        public FWorkerSaveData(int idx, FWorkerData data, bool isAssigned)
+        {
+            index = idx;
+            zoneID = data.ZoneID;
+            buildableIndex = data.BuildableIndex;
+            this.isAssigned = isAssigned;
+        }
+
         public FWorkerData ToNetworkWorker()
         {
             FWorkerData netWorker = new FWorkerData();
@@ -122,6 +130,7 @@ namespace LichLord.World
 
         public int currentHealth;
         public int rank;
+        public int buildableZoneID;
 
         public FBuildableSaveState[] buildableStates;
     }

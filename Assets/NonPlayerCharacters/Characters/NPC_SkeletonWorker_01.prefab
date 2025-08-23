@@ -202,28 +202,31 @@ MonoBehaviour:
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
+  _hasHarvestTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
-  - Definition: {fileID: 11400000, guid: 08c89e9b799dfc64da43b3e986b534f5, type: 2}
+  - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
     ActiveState: 4
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 7
-  - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
+  - Definition: {fileID: 0}
     ActiveState: 5
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 0
-  - Definition: {fileID: 11400000, guid: 6eebe11c58b399840b32a8dd33e6af67, type: 2}
+  - Definition: {fileID: 0}
     ActiveState: 5
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 0
   TargetPlayer: {fileID: 0}
-  targetGO: {fileID: 0}
+  attackTargetGO: {fileID: 0}
+  harvestTargetGO: {fileID: 0}
+  _wanderPositionSet: 0
 --- !u!114 &7703171160761877983
 MonoBehaviour:
   m_ObjectHideFlags: 0
