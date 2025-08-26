@@ -9,20 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db5487f7bda4e944b960bfb3c0cc6f4c, type: 3}
-  m_Name: NPCManeuver_SwordSwingHeavy
+  m_Script: {fileID: 11500000, guid: dcb07cb40b8bbe24ca663368408614e3, type: 3}
+  m_Name: NPCManeuver_Harvest
   m_EditorClassIdentifier: 
-  ActionName: SwordSwing
-  _cooldownTicks: 128
+  ActionName: Harvest
+  _cooldownTicks: 32
   _movementStopRange: 2.5
   _attackRange: 3
-  _stateTicks: 64
+  _stateTicks: 32
   _faceTargetRange: 5
-  _requiresLOS: 1
+  _requiresLOS: 0
   _verticalAimOffset: 0
   _validTargetDistance: {x: 0, y: 100}
   _animationTriggers:
-  - Action: 15
+  - Action: 8
     Weapon: 0
     TriggerNumber: 4
     Side: 2
@@ -30,6 +30,3 @@ MonoBehaviour:
     RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
-  _damage: 10
-  _validTargetTypes: 01000000020000000300000005000000
-  _maneuverProjectiles: []

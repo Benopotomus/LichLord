@@ -274,6 +274,18 @@ namespace LichLord.NonPlayerCharacters
             _followerMaxSpeed = newSpeed;
         }
 
+        private Vector3 _moveTarget;
+        public void SetMoveTargetPosition(Vector3 newMoveTarget)
+        {
+            Vector3 delta = _moveTarget - newMoveTarget;
+            if (delta.sqrMagnitude < 0.01f)
+                return;
+
+            _moveTarget = newMoveTarget;
+
+            _npc.Movement.AIFollower.destination = _moveTarget;
+        }
+
         public void StartRecycle()
         {
 

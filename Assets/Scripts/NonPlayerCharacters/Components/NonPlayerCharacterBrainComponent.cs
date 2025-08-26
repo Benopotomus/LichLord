@@ -23,7 +23,7 @@ namespace LichLord.NonPlayerCharacters
         public IChunkTrackable HarvestTarget => _harvestTarget;
 
         // Modulus of ticks x/32
-        private int _updateSensesTick = 16;
+        private int _updateSensesTick = 32; // 1 per second
         private int _updateDestinationTick = 8;
         private int _updateSpeedTick = 8;
         private int _updateRangesTick = 8;
@@ -51,6 +51,9 @@ namespace LichLord.NonPlayerCharacters
         private NonPlayerCharacterManeuverState _activeManeuver = null;
 
         public PlayerCharacter TargetPlayer;
+
+        [SerializeField] 
+        private LayerMask _losLayerMask;
 
         [SerializeField]
         GameObject attackTargetGO;
@@ -151,19 +154,6 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             UpdateRanges();
-
-            if (_isInFaceTargetRange)
-            {
-                if (_attackTarget != null)
-                    _hasLineOfSight = GetLineOfSight(_npc.CachedTransform.position, _attackTarget.Position);
-                else
-                    _hasLineOfSight = false;
-
-                if (_hasLineOfSight)
-                {
-                    FindBetterLOSPosition();
-                }
-            }
         }
 
         private void UpdateMoveSpeedTick(NonPlayerCharacterRuntimeState runtimeState, int tick)
@@ -186,16 +176,11 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private bool _wanderPositionSet;
         private void UpdateWanderMovement(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            if (_hasAttackTarget)
+            if (HasActiveManeuver())
             {
                 _wanderPositionSet = false;
                 return;
             }
-
-
-           // NPC.Movement.AIFollower.stopDistance = 0.2f;
-          //  NPC.Movement.SetFollowerUpdatePosition(true);
-          //  NPC.Movement.SetFollowerUpdateRotation(true);
 
             // if we are an invasion npc, the target nexus position is the fallback
             if (runtimeState.IsInvasionNPC())
@@ -213,9 +198,7 @@ namespace LichLord.NonPlayerCharacters
                         return;
 
                     _moveTarget = targetPosition;
-                    _npc.Movement.AIFollower.destination = _moveTarget;
                     _wanderPositionSet = true;
-                    return;
                 }
             }
             else if(runtimeState.IsWorker())
@@ -228,7 +211,6 @@ namespace LichLord.NonPlayerCharacters
                 if (crypt != null)
                 {
                     _moveTarget = crypt.CachedTransform.position;
-                    _npc.Movement.AIFollower.destination = _moveTarget;
                     _wanderPositionSet = true;
                 }
 
@@ -245,9 +227,9 @@ namespace LichLord.NonPlayerCharacters
                 );
 
                 _moveTarget += _npc.CachedTransform.position;
-
-                _npc.Movement.AIFollower.destination = _moveTarget;
             }
+
+            _npc.Movement.SetMoveTargetPosition(_moveTarget);
         }
 
         // Only called when in idle
@@ -264,7 +246,7 @@ namespace LichLord.NonPlayerCharacters
             List<NonPlayerCharacterManeuverState> availableStates = new List<NonPlayerCharacterManeuverState>();
 
             // if there is no active maneuver, select another
-            if (!HasActiveManeuver())
+            //if (!HasActiveManeuver())
             {
                 for (int i = 0; i < _maneuvers.Count; i++)
                 { 
@@ -323,24 +305,26 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateRanges()
         {
-            if (!HasActiveManeuver() ||
-                !_hasAttackTarget)
+            if (!HasActiveManeuver())
                 return;
 
+            IChunkTrackable currentTarget = GetTargetForActiveManeuver();
+            if (currentTarget == null)
+                return;
 
             float sqrDist;
-            Collider targetCollider = _attackTarget.HurtBoxCollider;
+            Collider targetCollider = currentTarget.HurtBoxCollider;
 
             if (targetCollider != null) // Target has a collider
             {
                 // Distance from my position to the closest point on target's collider
                 Vector3 closestPoint = targetCollider.ClosestPoint(_npc.CachedTransform.position);
-                sqrDist = (_npc.CachedTransform.position - closestPoint).sqrMagnitude - _attackTarget.BonusRadius;
+                sqrDist = (_npc.CachedTransform.position - closestPoint).sqrMagnitude - currentTarget.BonusRadius;
             }
             else
             {
                 // Standard distance check with bonus radius
-                sqrDist = (_npc.CachedTransform.position - _attackTarget.Position).sqrMagnitude - _attackTarget.BonusRadius;
+                sqrDist = (_npc.CachedTransform.position - currentTarget.Position).sqrMagnitude - currentTarget.BonusRadius;
             }
 
             _isInMovementStopRange = sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt;
@@ -349,14 +333,18 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateActiveManeuver(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
         {
-            if (!HasActiveManeuver() ||
-                !_hasAttackTarget ||
-                !IsAttackTargetValid(_attackTarget))
+            if (!HasActiveManeuver())
                 return;
 
+            IChunkTrackable currentTarget = GetTargetForActiveManeuver();
+            if (currentTarget == null)
+                return;
+
+            Vector3 targetPosition = currentTarget.Position;
+
             if (_isInFaceTargetRange)
-            { 
-                Vector3 attackTargetPosition = _attackTarget.Position;
+            {
+                Vector3 attackTargetPosition = targetPosition;
 
                 _npc.Movement.SetFollowerUpdateRotation(false);
                 RotateTowardTarget(attackTargetPosition, renderDeltaTime);
@@ -384,18 +372,35 @@ namespace LichLord.NonPlayerCharacters
             if (tick % _updateDestinationTick != 0)
                 return;
 
-            if (!_hasAttackTarget)
+            if (!HasActiveManeuver())
                 return;
 
-            Vector3 targetPosition = _attackTarget.Position;
+            if (_activeManeuver.Definition is NonPlayerCharacterAttackManeuverDefinition attackManeuverDefinition)
+            {
+                if (_hasAttackTarget)
+                _moveTarget = _attackTarget.Position;
+            }
+            else if (_activeManeuver.Definition is NonPlayerCharacterHarvestManeuverDefinition harvestManeuverDefinition)
+            {
+                if (_hasHarvestTarget)
+                    _moveTarget = _harvestTarget.Position;
+            }
 
-            // If our current destination hasn't changed much, we early out
-            Vector3 delta = _moveTarget - targetPosition;
-            if (delta.sqrMagnitude < 0.01f)
-                return;
+            if (_isInFaceTargetRange)
+            {
+                _hasLineOfSight = HasLineOfSight(_npc.CachedTransform.position, _moveTarget);
 
-            _moveTarget = targetPosition;
-            _npc.Movement.AIFollower.destination = _moveTarget;
+                if (!_hasLineOfSight)
+                    FindBetterLOSPosition(_moveTarget);
+            }
+
+            if (_isInMovementStopRange)
+            {
+                if(_hasLineOfSight)
+                    _moveTarget = _npc.CachedTransform.position;
+            }
+
+            _npc.Movement.SetMoveTargetPosition(_moveTarget);
         }
 
         public void FindCurrentTargets()
@@ -411,6 +416,8 @@ namespace LichLord.NonPlayerCharacters
             IChunkTrackable currentAttackTarget = null;
             IChunkTrackable currentHarvestTarget = null;
             IChunkTrackable currentStockpileTarget = null;
+
+            bool isWorker = _npc.RuntimeState.IsWorker();
 
             foreach (var chunk in _npc.CachedChunks)
             {
@@ -431,7 +438,7 @@ namespace LichLord.NonPlayerCharacters
                         }
                     }
 
-                    if (_npc.RuntimeState.IsWorker())
+                    if (isWorker)
                     {
                         if (IsHarvestTargetValid(trackable))
                         {
@@ -448,7 +455,8 @@ namespace LichLord.NonPlayerCharacters
             }
 
             SetAttackTarget(currentAttackTarget);
-            if (_npc.RuntimeState.IsWorker())
+
+            if (isWorker)
             {
                 SetHarvestTarget(currentHarvestTarget);
             }
@@ -548,14 +556,6 @@ namespace LichLord.NonPlayerCharacters
             if (tick % _updateSensesTick == 0)
             {
                 FindCurrentTargets();
-
-                if (_hasAttackTarget)
-                {
-                    if (_attackTarget is NonPlayerCharacter npc)
-                    {
-                        _moveTarget = npc.CachedTransform.position;
-                    }
-                }
             }
         }
 
@@ -678,8 +678,6 @@ namespace LichLord.NonPlayerCharacters
             if (_attackTarget is Buildable buildable)
                 attackTargetGO = buildable.gameObject;
 
-            _moveTarget = _attackTarget.Position;
-            _npc.Movement.AIFollower.destination = _moveTarget;
             UpdateRanges();
         }
 
@@ -691,34 +689,39 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
+            _hasHarvestTarget = true;
             _harvestTarget = target;
 
             if (_harvestTarget is HarvestNode harvestNode)
                 harvestTargetGO = harvestNode.gameObject;
 
-            _moveTarget = _harvestTarget.Position;
-            _npc.Movement.AIFollower.destination = _moveTarget;
             UpdateRanges();
         }
 
-        private void FindBetterLOSPosition()
+        private void FindBetterLOSPosition(Vector3 targetPosition)
         {
-            Vector3 origin = _npc.CachedTransform.position;
-            float checkRadius = 5f; // distance to search around current position
-            float stepDegrees = 30f; // spacing of test points
+            // Search around the target instead of the NPC
+            Vector3 origin = targetPosition;
+            float checkRadius = 10f;   // how far from the target we’ll sample
+            float stepDegrees = 30f;  // angular step
 
-            Vector3 bestSpot = origin;
+            Vector3 bestSpot = _npc.CachedTransform.position; // fallback: current position
             bool found = false;
+
+            // Start from NPC’s direction relative to target
+            Vector3 toNpc = (_npc.CachedTransform.position - targetPosition).normalized;
+            Vector3 startDir = Quaternion.AngleAxis(90f, Vector3.up) * toNpc; // "right" relative to NPC-target line
 
             for (float angle = 0; angle < 360; angle += stepDegrees)
             {
-                Vector3 dir = Quaternion.Euler(0, angle, 0) * Vector3.forward;
+                Vector3 dir = Quaternion.AngleAxis(angle, Vector3.up) * startDir;
                 Vector3 candidate = origin + dir * checkRadius;
 
-                // Keep ground level
-                candidate.y = origin.y;
+                // Keep on same ground plane as NPC
+                candidate.y = _npc.CachedTransform.position.y;
 
-                if (GetLineOfSight(candidate, _attackTarget.Position))
+                // Make sure candidate has LOS back to the target
+                if (HasLineOfSight(candidate, targetPosition))
                 {
                     bestSpot = candidate;
                     found = true;
@@ -729,35 +732,61 @@ namespace LichLord.NonPlayerCharacters
             if (found)
             {
                 _moveTarget = bestSpot;
-                _npc.Movement.AIFollower.destination = _moveTarget;
+            }
+            else
+            {
+                // fallback: just move toward target if no clear spot found
+                _moveTarget = targetPosition;
             }
         }
 
-        private bool GetLineOfSight(Vector3 from, Vector3 to)
+        private bool HasLineOfSight(Vector3 from, Vector3 to)
         {
-            Vector3 dir = (to - from).normalized;
-            float distance = Vector3.Distance(from, to);
-
             // Slight eye-level offset
             from.y += 1.6f;
             to.y += 1.6f;
 
-            if (Physics.Raycast(from, dir, out RaycastHit hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            if (Physics.Linecast(from, to, out RaycastHit hit, _losLayerMask, QueryTriggerInteraction.Collide))
             {
-                // If first thing we hit is ourselves, LOS is still fine — but should never happen unless origin is inside collider
-                if (hit.collider.transform.IsChildOf(_npc.gameObject.transform))
+                // Ignore self
+                if (hit.collider.transform.IsChildOf(_npc.transform))
                     return true;
 
-                // If first thing we hit is the target, LOS is fine
+                // Target is fine
                 if (attackTargetGO != null && hit.collider.transform.IsChildOf(attackTargetGO.transform))
                     return true;
 
-                return false; // Hit something else
+                //Debug.Log($"LOS blocked by {hit.collider.name}");
+                return false;
             }
 
-            // No hit at all means nothing is blocking
+            // No hit at all = nothing blocking
             return true;
         }
 
+        public IChunkTrackable GetTargetForActiveManeuver()
+        {
+            if (!HasActiveManeuver())
+                return null;
+
+            IChunkTrackable currentTarget = null;
+
+            if (_activeManeuver.Definition is NonPlayerCharacterAttackManeuverDefinition attackManeuverDefinition)
+            {
+                if (!_hasAttackTarget || !IsAttackTargetValid(_attackTarget))
+                    return null;
+
+                currentTarget = _attackTarget;
+            }
+            else if (_activeManeuver.Definition is NonPlayerCharacterHarvestManeuverDefinition harvestManeuverDefinition)
+            {
+                if (!_hasHarvestTarget || !IsHarvestTargetValid(_harvestTarget))
+                    return null;
+
+                currentTarget = _harvestTarget;
+            }
+
+            return currentTarget;
+        }
     }
 }

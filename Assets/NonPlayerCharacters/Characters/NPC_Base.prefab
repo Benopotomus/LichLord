@@ -252,9 +252,6 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 1
-  hitMask:
-    serializedVersion: 2
-    m_Bits: 1
 --- !u!114 &5813864165240207391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,6 +285,7 @@ MonoBehaviour:
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
+  _hasHarvestTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
@@ -297,7 +295,12 @@ MonoBehaviour:
     ActivationTick: 0
     RandomAimOffset: 7
   TargetPlayer: {fileID: 0}
-  targetGO: {fileID: 0}
+  _losLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  attackTargetGO: {fileID: 0}
+  harvestTargetGO: {fileID: 0}
+  _wanderPositionSet: 0
 --- !u!114 &-5226509248368517820
 MonoBehaviour:
   m_ObjectHideFlags: 0
