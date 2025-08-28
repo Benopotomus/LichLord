@@ -3459,6 +3459,7 @@ GameObject:
   - component: {fileID: 6074217055694189224}
   - component: {fileID: 4632910898843582812}
   - component: {fileID: 1907940134008171684}
+  - component: {fileID: 4906727717878229208}
   m_Layer: 10
   m_Name: NPC_HumanSpearman_01
   m_TagString: Untagged
@@ -3501,6 +3502,7 @@ MonoBehaviour:
   _hitReactComponent: {fileID: 7366876257130086336}
   _weaponsComponent: {fileID: 6074217055694189224}
   _animationController: {fileID: 4632910898843582812}
+  _currencyComponent: {fileID: 0}
   _muzzleComponent: {fileID: 1907940134008171684}
   _animator: {fileID: 5986324606360035825}
   _transform: {fileID: 2416786617183052698}
@@ -3638,11 +3640,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 6743547951332622073}
   _moveTarget: {x: 0, y: 0, z: 0}
+  DistanceToAttackTarget: 0
+  DistanceToHarvestTarget: 0
+  DistanceToDepositTarget: 0
   _isInMovementStopRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
   _hasHarvestTarget: 0
+  _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 818d05e580698d94ba38281c20e65a6c, type: 2}
@@ -3664,8 +3670,12 @@ MonoBehaviour:
     ActivationTick: 0
     RandomAimOffset: 0
   TargetPlayer: {fileID: 0}
+  _losLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
   attackTargetGO: {fileID: 0}
   harvestTargetGO: {fileID: 0}
+  depositTargetGO: {fileID: 0}
   _wanderPositionSet: 0
 --- !u!114 &7366876257130086336
 MonoBehaviour:
@@ -3794,6 +3804,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handBoneLeft: {fileID: 0}
   _handBoneRight: {fileID: 0}
+--- !u!114 &4906727717878229208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0d23426ff1c3ba4598ad538d2f824ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 6743547951332622073}
+  _stoneGO: {fileID: 0}
+  _woodGO: {fileID: 0}
 --- !u!1 &6173624226421269209
 GameObject:
   m_ObjectHideFlags: 0

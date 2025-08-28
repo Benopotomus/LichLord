@@ -19,6 +19,10 @@ namespace LichLord.Props
         public int ResourcesPerHarvest => _resourcesPerHarvest;
 
         [SerializeField]
+        protected int _harvestProgressMax = 10;
+        public int HarvestProgressMax => _harvestProgressMax;
+
+        [SerializeField]
         protected CurrencyDefinition _currencyTypeHarvested;
         public CurrencyDefinition CurrencyTypeHarvested => _currencyTypeHarvested;
 

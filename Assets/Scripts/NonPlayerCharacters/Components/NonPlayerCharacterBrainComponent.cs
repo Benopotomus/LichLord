@@ -18,9 +18,15 @@ namespace LichLord.NonPlayerCharacters
 
         private IChunkTrackable _attackTarget;
         public IChunkTrackable AttackTarget => _attackTarget;
+        public float DistanceToAttackTarget;
 
         private IChunkTrackable _harvestTarget;
         public IChunkTrackable HarvestTarget => _harvestTarget;
+        public float DistanceToHarvestTarget;
+
+        private IChunkTrackable _depositTarget;
+        public IChunkTrackable DepositTarget => _depositTarget;
+        public float DistanceToDepositTarget;
 
         // Modulus of ticks x/32
         private int _updateSensesTick = 32; // 1 per second
@@ -43,6 +49,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private bool _hasHarvestTarget = false;
 
+        [SerializeField]
+        private bool _hasDepositTarget = false;
+
         [SerializeField] private bool _hasLineOfSight = false;
 
         [SerializeField]
@@ -60,6 +69,9 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField]
         GameObject harvestTargetGO;
+
+        [SerializeField]
+        GameObject depositTargetGO;
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
@@ -245,27 +257,60 @@ namespace LichLord.NonPlayerCharacters
 
             List<NonPlayerCharacterManeuverState> availableStates = new List<NonPlayerCharacterManeuverState>();
 
-            // if there is no active maneuver, select another
-            //if (!HasActiveManeuver())
-            {
-                for (int i = 0; i < _maneuvers.Count; i++)
-                { 
-                    var currentManeuver = _maneuvers[i];
-                    if (currentManeuver.CanBeSelected(this, tick))
+            for (int i = 0; i < _maneuvers.Count; i++)
+            { 
+                var currentManeuver = _maneuvers[i];
+                if (currentManeuver.CanBeSelected(this, tick))
+                {
+                    var nearestTargetManeuverType = ManeuverTypeForNearestTarget();
+
+                    if (currentManeuver.Definition.ManeuverType == nearestTargetManeuverType)
                     {
                         availableStates.Add(currentManeuver);
                     }
                 }
+            }
 
-                if (availableStates.Count == 0)
+            if (availableStates.Count == 0)
+            {
+                SetActiveManuever(null);
+                return;
+            }
+
+            int selectedIndex = Random.Range(0, availableStates.Count);
+            SetActiveManuever(availableStates[selectedIndex]);
+        }
+
+        private EManeuverType ManeuverTypeForNearestTarget()
+        {
+            // If we have multiple possible targets → pick nearest
+            if (_hasDepositTarget || _hasAttackTarget || _hasHarvestTarget)
+            {
+                float bestDistance = float.MaxValue;
+                EManeuverType bestType = EManeuverType.None;
+
+                if (_hasDepositTarget && DistanceToDepositTarget < bestDistance)
                 {
-                    SetActiveManuever(null);
-                    return;
+                    bestDistance = DistanceToDepositTarget;
+                    bestType = EManeuverType.Deposit;
                 }
 
-                int selectedIndex = Random.Range(0, availableStates.Count);
-                SetActiveManuever(availableStates[selectedIndex]);
+                if (_hasHarvestTarget && DistanceToHarvestTarget < bestDistance)
+                {
+                    bestDistance = DistanceToHarvestTarget;
+                    bestType = EManeuverType.Harvest;
+                }
+
+                if (_hasAttackTarget && DistanceToAttackTarget < bestDistance)
+                {
+                    bestDistance = DistanceToAttackTarget;
+                    bestType = EManeuverType.Attack;
+                }
+
+                return bestType;
             }
+
+            return EManeuverType.None;
         }
 
         private void SetActiveManuever(NonPlayerCharacterManeuverState newManeuver)
@@ -306,11 +351,19 @@ namespace LichLord.NonPlayerCharacters
         private void UpdateRanges()
         {
             if (!HasActiveManeuver())
+            {
+                _isInMovementStopRange = false;
+                _isInFaceTargetRange = false;
                 return;
+            }
 
             IChunkTrackable currentTarget = GetTargetForActiveManeuver();
             if (currentTarget == null)
+            {
+                _isInMovementStopRange = false;
+                _isInFaceTargetRange = false;
                 return;
+            }
 
             float sqrDist;
             Collider targetCollider = currentTarget.HurtBoxCollider;
@@ -375,15 +428,20 @@ namespace LichLord.NonPlayerCharacters
             if (!HasActiveManeuver())
                 return;
 
-            if (_activeManeuver.Definition is NonPlayerCharacterAttackManeuverDefinition attackManeuverDefinition)
+            switch (_activeManeuver.Definition.ManeuverType)
             {
-                if (_hasAttackTarget)
-                _moveTarget = _attackTarget.Position;
-            }
-            else if (_activeManeuver.Definition is NonPlayerCharacterHarvestManeuverDefinition harvestManeuverDefinition)
-            {
-                if (_hasHarvestTarget)
-                    _moveTarget = _harvestTarget.Position;
+                case EManeuverType.Attack:
+                    if (_hasAttackTarget)
+                        _moveTarget = _attackTarget.Position;
+                    break;
+                case EManeuverType.Harvest:
+                    if (_hasHarvestTarget)
+                        _moveTarget = _harvestTarget.Position;
+                    break;
+                case EManeuverType.Deposit:
+                    if (_hasDepositTarget)
+                        _moveTarget = _depositTarget.Position;
+                    break;
             }
 
             if (_isInFaceTargetRange)
@@ -411,11 +469,11 @@ namespace LichLord.NonPlayerCharacters
             
             float closestAttackTargetDistance = Mathf.Infinity;
             float closestHarvestTargetDistance = Mathf.Infinity;
-            float closestStockpileTargetDistance = Mathf.Infinity;
+            float closestDepositTargetDistance = Mathf.Infinity;
 
             IChunkTrackable currentAttackTarget = null;
             IChunkTrackable currentHarvestTarget = null;
-            IChunkTrackable currentStockpileTarget = null;
+            IChunkTrackable currentDepositTarget = null;
 
             bool isWorker = _npc.RuntimeState.IsWorker();
 
@@ -450,15 +508,31 @@ namespace LichLord.NonPlayerCharacters
                                 currentHarvestTarget = trackable;
                             }
                         }
+
+                        if (IsDepositTargetValid(trackable))
+                        {
+                            float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
+
+                            if (sqrDistance < closestDepositTargetDistance)
+                            {
+                                closestDepositTargetDistance = sqrDistance;
+                                currentDepositTarget = trackable;
+                            }
+                        }
                     }
                 }
             }
 
+            DistanceToAttackTarget = closestAttackTargetDistance;
             SetAttackTarget(currentAttackTarget);
 
             if (isWorker)
             {
+                DistanceToHarvestTarget = closestHarvestTargetDistance;
                 SetHarvestTarget(currentHarvestTarget);
+
+                DistanceToDepositTarget = closestDepositTargetDistance;
+                SetDepositTarget(currentDepositTarget);
             }
         }
 
@@ -510,6 +584,34 @@ namespace LichLord.NonPlayerCharacters
             {
                 if (harvestNode.RuntimeState.GetHarvestPoints() > 0)
                     return true;
+            }
+
+            return false;
+        }
+
+        private bool IsDepositTargetValid(IChunkTrackable trackable)
+        {
+            if (trackable == null)
+                return false;
+
+            // if we're not carrying anything, nothing is valid
+            var currencyType = _npc.RuntimeState.GetCarriedCurrencyType();
+            if (currencyType == ECurrencyType.None)
+                return false;
+
+            var currencyAmount = _npc.RuntimeState.GetCarriedCurrencyAmount();
+
+            if (trackable is Stockpile stockpile)
+            {
+                int stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
+
+                if (stockpileIndex >= 0)
+                {
+                    var stockpileData = _npc.Context.ContainerManager.GetStockPile(stockpileIndex);
+
+                    if (stockpileData.CanFit(currencyType, currencyAmount))
+                        return true;
+                }
             }
 
             return false;
@@ -600,7 +702,7 @@ namespace LichLord.NonPlayerCharacters
         public void OnHitFromAnimation()
         {
             var currentManeuver = GetManeuverFromState(_npc.State.CurrentState);
-            
+
             if (currentManeuver == null)
                 return;
 
@@ -626,6 +728,26 @@ namespace LichLord.NonPlayerCharacters
                 if (hitTarget != null)
                 {
                     ApplyHitToTarget(hitTarget, attackManeuverDefinition, _npc.Context.Runner.Tick);
+                }
+            }
+            else if(currentManeuver.Definition is NonPlayerCharacterHarvestManeuverDefinition harvestManeuverDefinition)
+            {
+                if (NPC.Replicator.HasStateAuthority)
+                {
+                    if(_harvestTarget is HarvestNode harvestNode)
+                        harvestNode.ProgressHarvest(NPC);
+
+                    FindCurrentTargets();
+                }
+            }
+            else if (currentManeuver.Definition is NonPlayerCharacterDepositManeuverDefinition depositManeuverDefinition)
+            {
+                if (NPC.Replicator.HasStateAuthority)
+                {
+                    if (_depositTarget is Stockpile stockpile)
+                        stockpile.DropOffCurrency(_npc);
+
+                    FindCurrentTargets();
                 }
             }
         }
@@ -677,8 +799,6 @@ namespace LichLord.NonPlayerCharacters
 
             if (_attackTarget is Buildable buildable)
                 attackTargetGO = buildable.gameObject;
-
-            UpdateRanges();
         }
 
         private void SetHarvestTarget(IChunkTrackable target)
@@ -689,11 +809,38 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
+            // harvest target changed
+            if (target != _harvestTarget)
+            {
+                _npc.RuntimeState.SetHarvestProgress(0);
+            }
+
             _hasHarvestTarget = true;
             _harvestTarget = target;
 
             if (_harvestTarget is HarvestNode harvestNode)
                 harvestTargetGO = harvestNode.gameObject;
+        }
+
+        private void SetDepositTarget(IChunkTrackable target)
+        {
+            if (target == null)
+            {
+                _hasDepositTarget = false;
+                return;
+            }
+
+            // deposit target changed
+            if (target != _depositTarget)
+            {
+              
+            }
+
+            _hasDepositTarget = true;
+            _depositTarget = target;
+
+            if (_depositTarget is Stockpile stockpile)
+                depositTargetGO = stockpile.gameObject;
 
             UpdateRanges();
         }
@@ -771,19 +918,26 @@ namespace LichLord.NonPlayerCharacters
 
             IChunkTrackable currentTarget = null;
 
-            if (_activeManeuver.Definition is NonPlayerCharacterAttackManeuverDefinition attackManeuverDefinition)
+            switch (_activeManeuver.Definition.ManeuverType)
             {
-                if (!_hasAttackTarget || !IsAttackTargetValid(_attackTarget))
-                    return null;
+                case EManeuverType.Attack:
+                    if (!_hasAttackTarget || !IsAttackTargetValid(_attackTarget))
+                        return null;
 
-                currentTarget = _attackTarget;
-            }
-            else if (_activeManeuver.Definition is NonPlayerCharacterHarvestManeuverDefinition harvestManeuverDefinition)
-            {
-                if (!_hasHarvestTarget || !IsHarvestTargetValid(_harvestTarget))
-                    return null;
+                    currentTarget = _attackTarget;
+                    break;
+                case EManeuverType.Harvest:
+                    if (!_hasHarvestTarget || !IsHarvestTargetValid(_harvestTarget))
+                        return null;
 
-                currentTarget = _harvestTarget;
+                    currentTarget = _harvestTarget;
+                    break;
+                case EManeuverType.Deposit:
+                    if (!_hasDepositTarget || !IsDepositTargetValid(_depositTarget))
+                        return null;
+
+                    currentTarget = _depositTarget;
+                    break;
             }
 
             return currentTarget;

@@ -7,9 +7,14 @@ namespace LichLord.NonPlayerCharacters
     [CreateAssetMenu(fileName = "NPCManeuver", menuName = "LichLord/Maneuvers/NPCHarvestManeuverDefinition", order = 1)]
     public class NonPlayerCharacterHarvestManeuverDefinition : NonPlayerCharacterManeuverDefinition
     {
+        public override EManeuverType ManeuverType => EManeuverType.Harvest;
 
         public override bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
+            var carriedCurrency = brainComponent.NPC.RuntimeState.GetCarriedCurrencyType();
+            if (carriedCurrency != ECurrencyType.None)
+                return false;
+
             IChunkTrackable harvestTarget = brainComponent.HarvestTarget;
             if (harvestTarget == null)
                 return false;

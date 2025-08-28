@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 8245235728932067376}
   - component: {fileID: 6470708934419270937}
   - component: {fileID: 752641511422403372}
+  - component: {fileID: 3346465133891306659}
   m_Layer: 10
   m_Name: NPC_Base
   m_TagString: Untagged
@@ -144,6 +145,7 @@ MonoBehaviour:
   _hitReactComponent: {fileID: -5226509248368517820}
   _weaponsComponent: {fileID: 8245235728932067376}
   _animationController: {fileID: 6470708934419270937}
+  _currencyComponent: {fileID: 3346465133891306659}
   _muzzleComponent: {fileID: 752641511422403372}
   _animator: {fileID: 0}
   _transform: {fileID: 682064007814798227}
@@ -281,11 +283,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 174069171961541429}
   _moveTarget: {x: 0, y: 0, z: 0}
+  DistanceToAttackTarget: 0
+  DistanceToHarvestTarget: 0
+  DistanceToDepositTarget: 0
   _isInMovementStopRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
   _hasHarvestTarget: 0
+  _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
@@ -300,6 +306,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   attackTargetGO: {fileID: 0}
   harvestTargetGO: {fileID: 0}
+  depositTargetGO: {fileID: 0}
   _wanderPositionSet: 0
 --- !u!114 &-5226509248368517820
 MonoBehaviour:
@@ -428,3 +435,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handBoneLeft: {fileID: 0}
   _handBoneRight: {fileID: 0}
+--- !u!114 &3346465133891306659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7301654162607387296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0d23426ff1c3ba4598ad538d2f824ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 174069171961541429}

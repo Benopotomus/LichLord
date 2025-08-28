@@ -1,6 +1,5 @@
 ﻿using LichLord.Buildables;
 using LichLord.Props;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +8,8 @@ namespace LichLord.NonPlayerCharacters
     [CreateAssetMenu(fileName = "NPCManeuver", menuName = "LichLord/Maneuvers/NPCAttackManeuverDefinition", order = 1)]
     public class NonPlayerCharacterAttackManeuverDefinition : NonPlayerCharacterManeuverDefinition
     {
+        public override EManeuverType ManeuverType => EManeuverType.Attack;
+
         [SerializeField]
         protected int _damage = 10;
         public int Damage => _damage;
@@ -25,6 +26,10 @@ namespace LichLord.NonPlayerCharacters
         public override bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
             if (brainComponent.AttackTarget == null)
+                return false;
+
+            var carriedCurrency = brainComponent.NPC.RuntimeState.GetCarriedCurrencyType();
+            if (carriedCurrency != ECurrencyType.None)
                 return false;
 
             float distanceToTarget = Vector3.Distance(
@@ -75,5 +80,13 @@ namespace LichLord.NonPlayerCharacters
         Prop,
         Buildable,
         HarvestNode,
+    }
+
+    public enum EManeuverType
+    {
+        None,
+        Attack,
+        Harvest,
+        Deposit,
     }
 }

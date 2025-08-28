@@ -39,6 +39,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterAnimationController _animationController;
         public NonPlayerCharacterAnimationController AnimationController => _animationController;
 
+        [SerializeField] private NonPlayerCharacterCurrencyComponent _currencyComponent;
+        public NonPlayerCharacterCurrencyComponent CurrencyComponent => _currencyComponent;
+
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 
@@ -111,6 +114,7 @@ namespace LichLord.NonPlayerCharacters
             _replicator = replicator;
             _movementComponent.OnSpawned(runtimeState);
             _brainComponent.OnSpawned(runtimeState);
+            _currencyComponent.OnSpawned();
             _index = runtimeState.Index;
             UpdateChunk(_context.ChunkManager);
 
@@ -134,6 +138,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(_context.ChunkManager);
             UpdateTeam(runtimeState);
             _stateComponent.UpdateStateChange(runtimeState, hasAuthority, tick);
+            _currencyComponent.OnRender(runtimeState);
 
             if (hasAuthority)
             {

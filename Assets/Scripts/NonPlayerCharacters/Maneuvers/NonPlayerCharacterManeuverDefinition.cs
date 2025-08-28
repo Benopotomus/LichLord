@@ -10,6 +10,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         protected string ActionName;
 
+        public virtual EManeuverType ManeuverType => EManeuverType.None;
+
         [SerializeField]
         private int _cooldownTicks = 32;
         public int CooldownTicks => _cooldownTicks;

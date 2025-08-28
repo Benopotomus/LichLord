@@ -3,7 +3,8 @@ using Fusion;
 using LichLord.World;
 using Pathfinding;
 using UnityEngine;
-using DG.Tweening; // Add DOTween namespace
+using DG.Tweening;
+using LichLord.NonPlayerCharacters; // Add DOTween namespace
 
 namespace LichLord.Props
 {
@@ -133,21 +134,52 @@ namespace LichLord.Props
             if (RuntimeState.Definition.PropDataDefinition is not HarvestNodeDataDefinition harvestData)
                 return;
 
-            NetworkRunner runner = interactor.Runner;
-            SceneContext context = interactor.Context;
             PlayerCharacter pc = interactor.PC;
-            context.PropManager.RPC_HarvestNode(ChunkID, GUID, harvestData.HarvestPointsCost, pc);
+
+            Harvest(pc);
+
+            pc.Currency.AddCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.ResourcesPerHarvest);
+        }
+
+        public void Harvest(PlayerCharacter pc)
+        {
+            if (RuntimeState.Definition.PropDataDefinition is not HarvestNodeDataDefinition harvestData)
+                return;
+
+            SceneContext context = Context;
+            NetworkRunner runner = Context.Runner;
+
+            context.PropManager.RPC_HarvestNode_PC(ChunkID, GUID, harvestData.HarvestPointsCost, pc);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                 context.PropManager.Predict_HarvestNode(ChunkID, GUID, harvestData.HarvestPointsCost);
-
-            interactor.PC.Currency.AddCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.ResourcesPerHarvest);
         }
 
-        public void PlayHarvestParticles(PlayerCharacter pc)
+        public void ProgressHarvest(NonPlayerCharacter npc)
         {
-            if (pc == null) return;
+            if (RuntimeState.Definition.PropDataDefinition is not HarvestNodeDataDefinition harvestData)
+                return;
 
+            SceneContext context = Context;
+            NetworkRunner runner = Context.Runner;
+
+            if (npc.RuntimeState.GetHarvestProgress() >= (harvestData.HarvestProgressMax - 1))
+            {
+                npc.RuntimeState.SetHarvestProgress(0);
+                npc.RuntimeState.SetCarriedCurrencyType(harvestData.CurrencyTypeHarvested.CurrencyType);
+                context.PropManager.RPC_HarvestNode_NPC(ChunkID, GUID, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
+                //Debug.Log(npc.RuntimeState.GetHarvestProgress());
+            }
+            else
+            {
+                npc.RuntimeState.AddHarvestProgress(1);
+                context.PropManager.RPC_HarvestProgress_NPC(ChunkID, GUID, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
+                //Debug.Log(npc.RuntimeState.GetHarvestProgress());
+            }
+        }
+
+        public void PlayHarvestShake()
+        {
             // Create a DOTween Sequence to handle both shake effects
             Sequence shakeSequence = DOTween.Sequence();
 
@@ -174,11 +206,13 @@ namespace LichLord.Props
             {
 
             });
+        }
 
+        public void PlayHarvestParticles(Transform suckTransform)
+        {
             RockExplosionSystem system = DWDObjectPool.Instance.SpawnAt(_harvestCompletePrefab, transform.position, Quaternion.identity) as RockExplosionSystem;
-            Debug.Log(pc);
 
-            system.player = pc.transform;
+            system.target = suckTransform;
             system.GetComponent<VisualEffectBase>().Initialize();
         }
     }

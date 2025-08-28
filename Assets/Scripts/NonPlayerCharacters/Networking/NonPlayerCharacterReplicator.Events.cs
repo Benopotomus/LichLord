@@ -10,7 +10,7 @@ namespace LichLord.NonPlayerCharacters
         {
             var targetData = _npcDatas.Get(index);
 
-            int predictionTicks = (int)(32.0f * (Runner.GetPlayerRtt(Context.LocalPlayerRef) * 4f));
+            int predictionTicks = (int)(32.0f);
 
             if (_predictedStates.TryGetValue(index, out NonPlayerCharacterRuntimeState predictedState))
             {

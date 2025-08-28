@@ -10,18 +10,18 @@ namespace LichLord.NonPlayerCharacters
         private const int WORKER_INDEX_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
         private const byte WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
 
-        // Events
-        private const int HEALTH_BITS = 8;             // 0–255
+        // Events (packed into ushort)
+        private const int HEALTH_BITS = 8;               // 0–255
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        private const int CARRIED_CURRENCY_TYPE_BITS = 4;
-        private const int CARRIED_CURRENCY_TYPE_SHIFT = HEALTH_SHIFT + HEALTH_MASK;
+        private const int CARRIED_CURRENCY_TYPE_BITS = 4; // 0–15
+        private const int CARRIED_CURRENCY_TYPE_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
         private const ushort CARRIED_CURRENCY_TYPE_MASK = (1 << CARRIED_CURRENCY_TYPE_BITS) - 1;
 
-        private const int CARRIED_CURRENCY_STACKS_BITS = 4;
-        private const int CARRIED_CURRENCY_STACKS_SHIFT = CARRIED_CURRENCY_TYPE_SHIFT + CARRIED_CURRENCY_STACKS_BITS;
-        private const ushort CARRIED_CURRENCY_STACKS_MASK = (1 << CARRIED_CURRENCY_STACKS_BITS) - 1;
+        private const int HARVEST_PROGRESS_BITS = 4; // 0–15
+        private const int HARVEST_PROGRESS_SHIFT = CARRIED_CURRENCY_TYPE_SHIFT + CARRIED_CURRENCY_TYPE_BITS;
+        private const ushort HARVEST_PROGRESS_MASK = (1 << HARVEST_PROGRESS_BITS) - 1;
 
         public override void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition, 
@@ -70,6 +70,34 @@ namespace LichLord.NonPlayerCharacters
             ushort events = npcData.Events;
             newHealth = Mathf.Clamp(newHealth, 0, HEALTH_MASK);
             events = (ushort)((events & ~(HEALTH_MASK << HEALTH_SHIFT)) | (newHealth << HEALTH_SHIFT));
+            npcData.Events = events;
+        }
+
+        // Currency Type
+        public ECurrencyType GetCurrencyType(ref FNonPlayerCharacterData npcData)
+        {
+            return (ECurrencyType)((npcData.Events >> CARRIED_CURRENCY_TYPE_SHIFT) & CARRIED_CURRENCY_TYPE_MASK);
+        }
+
+        public void SetCurrencyType(ECurrencyType newCurrencyType, ref FNonPlayerCharacterData npcData)
+        {
+            ushort events = npcData.Events;
+            int newTypeIndex = Mathf.Clamp((int)newCurrencyType, 0, CARRIED_CURRENCY_TYPE_MASK);
+            events = (ushort)((events & ~(CARRIED_CURRENCY_TYPE_MASK << CARRIED_CURRENCY_TYPE_SHIFT)) | (newTypeIndex << CARRIED_CURRENCY_TYPE_SHIFT));
+            npcData.Events = events;
+        }
+
+        // Harvest Progress
+        public int GetHarvestProgress(ref FNonPlayerCharacterData npcData)
+        {
+            return (int)((npcData.Events >> HARVEST_PROGRESS_SHIFT) & HARVEST_PROGRESS_MASK);
+        }
+
+        public void SetHarvestProgress(int newCurrencyStacks, ref FNonPlayerCharacterData npcData)
+        {
+            ushort events = npcData.Events;
+            int newStacksCount = Mathf.Clamp((int)newCurrencyStacks, 0, HARVEST_PROGRESS_MASK);
+            events = (ushort)((events & ~(HARVEST_PROGRESS_MASK << HARVEST_PROGRESS_SHIFT)) | (newStacksCount << HARVEST_PROGRESS_SHIFT));
             npcData.Events = events;
         }
 

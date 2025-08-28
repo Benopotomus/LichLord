@@ -17,6 +17,11 @@ namespace LichLord
         public Transform NeckBone;
         public Transform HeadBone;
 
+        private float _lastPitch;
+
+        /*
+        private Animator _animator;
+
         [Header("Foot IK Setup")]
         [SerializeField] private Transform leftFootTarget; // Transform at the left foot's position
         [SerializeField] private Transform rightFootTarget; // Transform at the right foot's position
@@ -25,21 +30,19 @@ namespace LichLord
         [SerializeField] private float footIKWeight = 1f; // Weight for foot IK blending
         [SerializeField] private float footPositionLerpSpeed = 10f; // Speed for smoothing foot position
 
-        private Animator _animator;
         private Vector3 _leftFootPosition;
         private Vector3 _rightFootPosition;
         private Quaternion _leftFootRotation;
         private Quaternion _rightFootRotation;
-        private float _lastPitch;
 
         private void Awake()
         {
             _animator = GetComponent<Animator>();
         }
+        */
 
         private void LateUpdate()
         {
-            
             // Existing upper body and head IK
             Quaternion pitchRotation = Quaternion.AngleAxis(_pc.Aim.PitchOffset, Vector3.right);
             Quaternion yawRotation = Quaternion.AngleAxis(_pc.Aim.YawOffset, Vector3.forward);
@@ -62,7 +65,6 @@ namespace LichLord
             HeadBone.rotation = HeadTargetTransform.rotation;
 
             _lastPitch = newPitch;
-           
         }
 
         /*

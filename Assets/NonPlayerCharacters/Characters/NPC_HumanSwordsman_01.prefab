@@ -349,13 +349,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 316668416791041741}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: -0.7372774, w: 0.67559016}
-  m_LocalPosition: {x: -0.003, y: -0.031, z: 0}
+  m_LocalRotation: {x: -0.023511508, y: -0.017820425, z: -0.79671067, w: 0.60364056}
+  m_LocalPosition: {x: -0.008, y: -0.048, z: 0.001}
   m_LocalScale: {x: 0.9375006, y: 0.93750054, z: 0.9375003}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4230026166651732542}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -95}
+  m_LocalEulerAnglesHint: {x: -3.255, y: 0.915, z: -105.726}
 --- !u!33 &7384400734361114475
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -3993,6 +3993,7 @@ GameObject:
   - component: {fileID: 6074217055694189224}
   - component: {fileID: 4632910898843582812}
   - component: {fileID: 1907940134008171684}
+  - component: {fileID: -6052169140148006727}
   m_Layer: 10
   m_Name: NPC_HumanSwordsman_01
   m_TagString: Untagged
@@ -4035,6 +4036,7 @@ MonoBehaviour:
   _hitReactComponent: {fileID: 7366876257130086336}
   _weaponsComponent: {fileID: 6074217055694189224}
   _animationController: {fileID: 4632910898843582812}
+  _currencyComponent: {fileID: -6052169140148006727}
   _muzzleComponent: {fileID: 1907940134008171684}
   _animator: {fileID: 7646857354785003770}
   _transform: {fileID: 2416786617183052698}
@@ -4172,11 +4174,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 6743547951332622073}
   _moveTarget: {x: 0, y: 0, z: 0}
+  DistanceToAttackTarget: 0
+  DistanceToHarvestTarget: 0
+  DistanceToDepositTarget: 0
   _isInMovementStopRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
   _hasHarvestTarget: 0
+  _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
@@ -4203,6 +4209,7 @@ MonoBehaviour:
     m_Bits: 257
   attackTargetGO: {fileID: 0}
   harvestTargetGO: {fileID: 0}
+  depositTargetGO: {fileID: 0}
   _wanderPositionSet: 0
 --- !u!114 &7366876257130086336
 MonoBehaviour:
@@ -4331,6 +4338,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handBoneLeft: {fileID: 4230026166651732542}
   _handBoneRight: {fileID: 4646537172173420825}
+--- !u!114 &-6052169140148006727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0d23426ff1c3ba4598ad538d2f824ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 6743547951332622073}
+  _stoneGO: {fileID: 0}
+  _woodGO: {fileID: 0}
 --- !u!1 &5914536390991823929
 GameObject:
   m_ObjectHideFlags: 0

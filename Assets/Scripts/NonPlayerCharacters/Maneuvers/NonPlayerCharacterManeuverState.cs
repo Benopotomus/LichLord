@@ -52,7 +52,6 @@ namespace LichLord.NonPlayerCharacters
             NonPlayerCharacterRuntimeState runtimeState, 
             int tick)
         {
-
             var oldState = runtimeState.GetState();
 
             if (oldState != ENPCState.Idle)

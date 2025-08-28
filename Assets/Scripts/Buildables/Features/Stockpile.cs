@@ -1,5 +1,6 @@
 ﻿using DWD.Pooling;
 using Fusion;
+using LichLord.NonPlayerCharacters;
 using UnityEngine;
 
 namespace LichLord.Buildables
@@ -178,13 +179,12 @@ namespace LichLord.Buildables
             if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
                 return;
 
-            int stockpileIndex = RuntimeState.GetStockpileIndex();
-            NetworkRunner runner = interactor.Runner;
-            SceneContext context = interactor.Context;
+            NetworkRunner runner = Context.Runner;
             PlayerCharacter pc = interactor.PC;
 
             var currencyType = ECurrencyType.None;
             var value = 0;
+
             // i want to grab the first currency with a stack and add it to the stockpile 
             pc.Currency.GetCurrencyWithCount(ref currencyType, ref value);
 
@@ -193,10 +193,28 @@ namespace LichLord.Buildables
 
             pc.Currency.AddCurrency(currencyType, -value);
 
-            context.ContainerManager.RPC_StockpileDropOff_Player(stockpileIndex, currencyType, value, pc);
+            int stockpileIndex = RuntimeState.GetStockpileIndex();
+
+            Context.ContainerManager.RPC_StockpileDropOff_Player(stockpileIndex, currencyType, value, pc);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.ContainerManager.Predict_StockpileDropOff_Player(stockpileIndex, currencyType, value);
+                Context.ContainerManager.Predict_StockpileDropOff(stockpileIndex, currencyType, value);
+
+        }
+
+        public void DropOffCurrency(NonPlayerCharacter npc)
+        {
+            var currencyType = npc.RuntimeState.GetCarriedCurrencyType();
+            var value = npc.RuntimeState.GetCarriedCurrencyAmount(); ;
+
+            if (currencyType == ECurrencyType.None)
+                return;
+
+            npc.RuntimeState.SetCarriedCurrencyType(ECurrencyType.None);
+
+            int stockpileIndex = RuntimeState.GetStockpileIndex();
+
+            int returnValue = Context.ContainerManager.AddToStockpile(stockpileIndex, currencyType, value);
         }
     }
 }

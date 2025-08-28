@@ -151,13 +151,68 @@ namespace LichLord.NonPlayerCharacters
             return false;
         }
 
-
         public int GetWorkerIndex()
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
                 return workerDataDefinition.GetWorkerIndex(ref _data);
 
             return -1;
+        }
+
+        public ECurrencyType GetCarriedCurrencyType()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+                return workerDataDefinition.GetCurrencyType(ref _data);
+
+            return ECurrencyType.None;
+        }
+
+        public void SetCarriedCurrencyType(ECurrencyType newCurrencyType)
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+            {
+                workerDataDefinition.SetCurrencyType(newCurrencyType, ref _data);
+                _replicator.ReplicateRuntimeState(this);
+            }
+        }
+
+        public int GetCarriedCurrencyAmount()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+            {
+                var currencyType = workerDataDefinition.GetCurrencyType(ref _data);
+                return Definition.GetCarryValue(currencyType);
+            }
+
+            return 0;
+        }
+
+        public int GetHarvestProgress()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+                return workerDataDefinition.GetHarvestProgress(ref _data);
+
+            return 0;
+        }
+
+        public void SetHarvestProgress(int newStacks)
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+            {
+                workerDataDefinition.SetHarvestProgress(newStacks, ref _data);
+                _replicator.ReplicateRuntimeState(this);
+            }
+        }
+
+        public void AddHarvestProgress(int newStacks)
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+            {
+                int oldStacks = workerDataDefinition.GetHarvestProgress(ref _data);
+
+                workerDataDefinition.SetHarvestProgress(oldStacks + newStacks, ref _data);
+                _replicator.ReplicateRuntimeState(this);
+            }
         }
     }
 }

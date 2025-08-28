@@ -78,8 +78,7 @@ namespace LichLord
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_StockpileDropOff_Player(int stockpileIndex, ECurrencyType currencyType, int value, PlayerCharacter pc)
         {
-            ref FStockpileData stockpile = ref _stockpileDatas.GetRef(stockpileIndex);
-            int returnValue = stockpile.AddToStockpile(currencyType, value);
+            int returnValue = AddToStockpile(stockpileIndex, currencyType, value);
 
             if (returnValue > 0)
             {
@@ -90,7 +89,13 @@ namespace LichLord
             }
         }
 
-        public void Predict_StockpileDropOff_Player(int stockpileIndex, ECurrencyType currencyType, int value)
+        public int AddToStockpile(int stockpileIndex, ECurrencyType currencyType, int value)
+        {
+            ref FStockpileData stockpile = ref _stockpileDatas.GetRef(stockpileIndex);
+            return stockpile.AddToStockpile(currencyType, value);
+        }
+
+        public void Predict_StockpileDropOff(int stockpileIndex, ECurrencyType currencyType, int value)
         {
             FStockpileData stockpile = _stockpileDatas.Get(stockpileIndex);
             int returnValue = stockpile.AddToStockpile(currencyType, value);

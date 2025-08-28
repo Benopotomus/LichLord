@@ -57,7 +57,6 @@ public class PropMarker : LevelEditorMarker
         if (sceneCamera == null)
             return;
 
-        
         float sqrDist = Vector3.SqrMagnitude(sceneCamera.transform.position - transform.position);
 
         if (sqrDist > maxDrawRange * maxDrawRange)
@@ -117,6 +116,8 @@ public class PropMarker : LevelEditorMarker
     {
         if (sceneView.camera == null)
             return;
+
+        ScheduleRefreshPreview();
 
         /*
         Vector3 camPos = sceneView.camera.transform.position;

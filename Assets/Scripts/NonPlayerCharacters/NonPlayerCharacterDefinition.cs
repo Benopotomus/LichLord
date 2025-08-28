@@ -1,5 +1,6 @@
 using DWD.Utility.Loading;
 using UnityEngine;
+using AYellowpaper.SerializedCollections;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -32,13 +33,21 @@ namespace LichLord.NonPlayerCharacters
         protected float _walkSpeed;
         public float WalkSpeed => _walkSpeed;
 
-        [SerializeField] // added radius for NPC targeting/melee
-        protected float _bonusRadius;
-        public float BonusRadius => _bonusRadius;
-
         [SerializeField]
         protected NonPlayerCharacterDataDefinition _dataDefinition;
         public NonPlayerCharacterDataDefinition DataDefinition => _dataDefinition;
+
+        [SerializeField]
+        [SerializedDictionary("CurrencyType", "CarryValue")]
+        private SerializedDictionary<ECurrencyType, int> _currencyCarryValues;
+
+        public int GetCarryValue(ECurrencyType currencyType)
+        { 
+            if(_currencyCarryValues.TryGetValue(currencyType, out var value)) 
+                return value;
+
+            return 0;
+        }
 
     }
 }
