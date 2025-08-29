@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using Fusion;
+﻿using Fusion;
 using LichLord.Buildables;
 using System.Runtime.InteropServices;
 using LichLord.World;
@@ -8,40 +7,50 @@ namespace LichLord.NonPlayerCharacters
 {
     public class WorkerManager : ContextBehaviour
     {
-
         [Networked, Capacity(BuildableConstants.MAX_WORKERS)]
         protected NetworkArray<FWorkerData> _workerDatas { get; }
+
+        [Networked]
+        public int ActiveWorkerCount { get; private set; }
+
+        [Networked]
+        public int MaxWorkerCount { get; private set; }
 
         protected NonPlayerCharacter[] _workerCharacters = new NonPlayerCharacter[BuildableConstants.MAX_WORKERS];
 
         public override void Spawned()
         {
             base.Spawned();
+            MaxWorkerCount = 5; // Set base max worker count to 5
         }
 
         public ref FWorkerData GetWorkerData(int i)
-        { 
+        {
             return ref _workerDatas.GetRef(i);
         }
 
         public int GetFreeIndex()
         {
-            for(int i = 0; i < _workerDatas.Length ; i++) 
-            { 
-                if(!_workerDatas.Get(i).IsAssigned)
-                        return i;
+            for (int i = 0; i < _workerDatas.Length; i++)
+            {
+                if (!_workerDatas.Get(i).IsAssigned)
+                    return i;
             }
-
             return -1;
         }
 
-        public void AssignWorkerIndexToBuildable(int workerIndex, BuildableZone zone, int buildableIndex)
+        public bool AssignWorkerIndexToBuildable(int workerIndex, BuildableZone zone, int buildableIndex)
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+
+            if (workerData.IsAssigned)
+                return false; // Worker already assigned
 
             workerData.ZoneID = zone.ZoneID;
             workerData.BuildableIndex = (ushort)buildableIndex;
             workerData.IsAssigned = true;
+
+            return true;
         }
 
         public Crypt GetCrypt(int workerIndex)
@@ -74,19 +83,31 @@ namespace LichLord.NonPlayerCharacters
                 workerData = workerSaveData.ToNetworkWorker();
                 _workerDatas.Set(workerSaveData.index, workerData);
             }
+            else
+            {
+                workerData.IsAssigned = false;
+                _workerDatas.Set(workerSaveData.index, workerData);
+            }
         }
 
         public void AddWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
             _workerCharacters[workerIndex] = character;
+            ActiveWorkerCount++;
         }
 
         public void RemoveWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
             _workerCharacters[workerIndex] = null;
+            ActiveWorkerCount--;
         }
 
-        public void ClearWorker(int workerIndex)
+        public bool HasWorker(int workerIndex)
+        {
+            return _workerCharacters[workerIndex] != null;
+        }
+
+        public void ClearWorkerData(int workerIndex)
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
             workerData.IsAssigned = false;

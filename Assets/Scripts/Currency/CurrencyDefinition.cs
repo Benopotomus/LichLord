@@ -19,14 +19,26 @@ namespace LichLord
         public BundleObject Icon => _icon;
     }
 
-    public enum ECurrencyType : byte
+    public enum ECurrencyType : byte // 16
     { 
         None,
         Wood,
         Stone,
         Iron,
+
         Souls,
         Gold,
+        Deathcaps,
+        Bones,
 
+        Diamonds,
+        Oil,
+        Linen,
+        Parchment,
+
+        Obsidian,
+        Ectoplasm,
+        Relics,
+        Ichor,
     }
 }

@@ -36,7 +36,7 @@ namespace LichLord.Buildables
 
                 int workerIndex = authorityState.GetWorkerIndex();
                 if (workerIndex >= 0)
-                    Context.WorkerManager.ClearWorker(workerIndex);
+                    Context.WorkerManager.ClearWorkerData(workerIndex);
             }
 
             ReplicateRuntimeState(authorityState);

@@ -129,7 +129,18 @@ namespace LichLord.Buildables
             if (RuntimeState.DataDefinition is not CryptDataDefinition dataDefinition)
                 return;
 
-            Context.NonPlayerCharacterManager.SpawnNPCWorker(_spawnTransform.position, dataDefinition.WorkerDefinition, ETeamID.PlayerTeam, RuntimeState.GetWorkerIndex());
+            var workerIndex = RuntimeState.GetWorkerIndex();
+
+            // check if there is already a worker for this
+            
+            if (Context.WorkerManager.HasWorker(workerIndex) ||
+                Context.WorkerManager.ActiveWorkerCount >= Context.WorkerManager.MaxWorkerCount)
+                return;
+            
+            Context.NonPlayerCharacterManager.SpawnNPCWorker(_spawnTransform.position, 
+                dataDefinition.WorkerDefinition, 
+                ETeamID.PlayerTeam, 
+                workerIndex);
         }
     }
 }
