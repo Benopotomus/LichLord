@@ -39,6 +39,7 @@ namespace LichLord.Props
                     chunk,
                     propMarkupData.position,
                     propMarkupData.rotation,
+                    propMarkupData.scale,
                     propMarkupData.propDefinitionId);
 
                 chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
@@ -52,7 +53,7 @@ namespace LichLord.Props
                 {
                     foreach (var savedProp in chunkSaveData.props)
                     {
-                        FPropData savedData = new FPropData { StateData = savedProp.stateData };
+                        FPropData savedData = new FPropData { StateData = (ushort)savedProp.stateData };
                         if (chunk.PropStates.TryGetValue(savedProp.guid, out PropRuntimeState state))
                         { 
                             state.CopyData(ref savedData);

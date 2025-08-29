@@ -24,7 +24,7 @@ namespace LichLord
         [Networked, Capacity(5)]
         private NetworkArray<FCurrencyStack> _currencies => default;
 
-        private int[] _currencyMax = { 100, 100, 100, 100, 100 };
+        private int[] _currencyMax = { 250, 250, 250, 250, 250 };
 
         public int CurrencyCount => _currencies.Length;
         public FCurrencyStack GetStackAtIndex(int index) => _currencies[index];

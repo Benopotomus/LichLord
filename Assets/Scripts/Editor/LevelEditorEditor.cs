@@ -12,6 +12,9 @@ public class LevelEditorEditor : Editor
     private bool isPlacing = false;
     private bool useSurfaceNormal = false;
     private Vector3 forwardDirection = Vector3.forward;
+    private int maxPropsPerChunk = 256; // Configurable max props per chunk
+    private bool blockPlacementOnLimit = false; // Toggle to block or allow placement
+    private string warningMessage = ""; // Store warning for Scene View display
 
     static LevelEditorEditor()
     {
@@ -31,18 +34,43 @@ public class LevelEditorEditor : Editor
         LevelEditor manager = (LevelEditor)target;
 
         if (target == null || manager.MarkerPrefab == null || !isPlacing)
+        {
+            warningMessage = "";
             return;
-
+        }
 
         Event e = Event.current;
 
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
 
+        // Check for mouse click to place marker
         if (e.type == EventType.MouseDown && e.button == 0 && !e.alt)
         {
             Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
+                // Get chunk coordinates for the hit position
+                FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
+                ChunkMarkupData chunkData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
+                int currentPropCount = chunkData.PropMarkupDatas != null ? chunkData.PropMarkupDatas.Length : 0;
+
+                // Check if chunk exceeds prop limit
+                if (currentPropCount >= maxPropsPerChunk)
+                {
+                    warningMessage = $"Warning: Chunk ({chunkCoord.X}, {chunkCoord.Y}) has {currentPropCount}/{maxPropsPerChunk} props. Consider reducing props.";
+                    Debug.LogWarning(warningMessage);
+
+                    if (blockPlacementOnLimit)
+                    {
+                        e.Use();
+                        return; // Block placement
+                    }
+                }
+                else
+                {
+                    warningMessage = ""; // Clear warning if under limit
+                }
+
                 Debug.Log(manager.MarkerPrefab);
                 LevelEditorMarker instance = (LevelEditorMarker)PrefabUtility.InstantiatePrefab(manager.MarkerPrefab, SceneManager.GetActiveScene());
 
@@ -50,18 +78,63 @@ public class LevelEditorEditor : Editor
                 {
                     Undo.RegisterCreatedObjectUndo(instance, "Place PropMarker");
                     instance.transform.position = hit.point;
-                    instance.transform.SetParent(manager.transform); // <-- Parent to LevelEditor
+                    instance.transform.SetParent(manager.transform); // Parent to LevelEditor
 
+                    // Apply rotation
                     Quaternion rotation = Quaternion.LookRotation(
                         (useSurfaceNormal ? hit.normal : forwardDirection).normalized,
                         Vector3.up);
+
+                    // Apply random yaw if enabled
+                    if (manager.RandomizeYaw)
+                    {
+                        float randomYaw = Random.Range(0f, 360f);
+                        rotation *= Quaternion.Euler(0f, randomYaw, 0f);
+                    }
+
                     instance.transform.rotation = rotation;
+
+                    // Apply random scale within range
+                    float randomScale = Random.Range(manager.RandomScaleRange.x, manager.RandomScaleRange.y);
+                    instance.MarkerScale = Vector3.one * randomScale;
+
+                    // Save to markup data
+                    PropMarkupData propData = new PropMarkupData
+                    {
+                        guid = currentPropCount,
+                        position = instance.transform.position,
+                        rotation = instance.transform.rotation,
+                        scale = instance.MarkerScale,
+                        propDefinition = (instance as PropMarker)?.definition,
+                        propDefinitionId = (instance as PropMarker)?.definition?.TableID ?? 0
+                    };
+
+                    // Add to chunk's PropMarkupDatas
+                    List<PropMarkupData> propList = chunkData.PropMarkupDatas?.ToList() ?? new List<PropMarkupData>();
+                    propList.Add(propData);
+                    chunkData.PropMarkupDatas = propList.ToArray();
+
+                    // Mark chunk and world settings as dirty
+                    EditorUtility.SetDirty(chunkData);
+                    EditorUtility.SetDirty(manager.WorldSettings);
                 }
 
                 e.Use();
             }
         }
+
+        // Display warning in Scene View
+        if (!string.IsNullOrEmpty(warningMessage))
+        {
+            Handles.BeginGUI();
+            GUIStyle style = new GUIStyle(EditorStyles.helpBox) { fontSize = 12, normal = { textColor = Color.yellow } };
+            GUILayout.BeginArea(new Rect(10, 10, 400, 50));
+            GUILayout.Label(warningMessage, style);
+            GUILayout.EndArea();
+            Handles.EndGUI();
+        }
     }
+
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
@@ -80,11 +153,15 @@ public class LevelEditorEditor : Editor
 
         useSurfaceNormal = EditorGUILayout.Toggle("Use Surface Normal", useSurfaceNormal);
 
-        if (!useSurfaceNormal)
-        {
-            forwardDirection = EditorGUILayout.Vector3Field("Forward Direction", forwardDirection.normalized);
-            forwardDirection = forwardDirection.normalized;
-        }
+        maxPropsPerChunk = EditorGUILayout.IntField("Max Props Per Chunk", maxPropsPerChunk);
+        blockPlacementOnLimit = EditorGUILayout.Toggle("Block Placement on Limit", blockPlacementOnLimit);
+
+        // Ensure scale range values are positive and max is not less than min
+        manager.RandomScaleRange = new Vector2(
+            Mathf.Max(0.01f, manager.RandomScaleRange.x),
+            Mathf.Max(manager.RandomScaleRange.x, manager.RandomScaleRange.y)
+        );
+        maxPropsPerChunk = Mathf.Max(1, maxPropsPerChunk); // Ensure at least 1 prop allowed
 
         GUILayout.Space(5);
         if (GUILayout.Button(isPlacing ? "Stop Placing Markers" : "Start Placing Markers", GUILayout.Height(40)))
@@ -101,7 +178,6 @@ public class LevelEditorEditor : Editor
                     "Are you sure you want to clear all markup data? This action cannot be undone.",
                     "Yes", "No"))
             {
-
                 Undo.RecordObject(manager.WorldSettings, "Clear Prop Points");
                 int clearedCount = 0;
                 foreach (ChunkMarkupData markupData in manager.WorldSettings.ChunkMarkupDatas)
@@ -135,6 +211,20 @@ public class LevelEditorEditor : Editor
         {
             RegenerateMarkers();
         }
+
+
+        GUILayout.Space(5);
+
+        if (GUILayout.Button("Clear All Previews", GUILayout.Height(40)))
+        {
+            PropPreviewManager.ClearAllPreviewsForAllMarkers();
+        }
+
+        // Mark the LevelEditor as dirty to ensure changes are saved
+        if (GUI.changed)
+        {
+            EditorUtility.SetDirty(manager);
+        }
     }
 
     private void GatherAllMarkersIntoWorldSettings(LevelEditor manager)
@@ -147,6 +237,7 @@ public class LevelEditorEditor : Editor
 
         PropMarker[] propMarkers = GameObject.FindObjectsOfType<PropMarker>(true);
         Dictionary<FChunkPosition, List<PropMarkupData>> chunkToProps = new();
+        Dictionary<FChunkPosition, int> chunkPropCounts = new(); // Track prop counts per chunk
 
         foreach (var marker in propMarkers)
         {
@@ -154,12 +245,14 @@ public class LevelEditorEditor : Editor
 
             Vector3 position = marker.transform.position;
             Quaternion rotation = marker.transform.rotation;
+            Vector3 scale = marker.MarkerScale;
             FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(position);
 
             if (!chunkToProps.TryGetValue(chunkCoord, out var list))
             {
                 list = new List<PropMarkupData>();
                 chunkToProps[chunkCoord] = list;
+                chunkPropCounts[chunkCoord] = 0; // Initialize count
             }
 
             list.Add(new PropMarkupData
@@ -167,9 +260,13 @@ public class LevelEditorEditor : Editor
                 guid = list.Count,
                 position = position,
                 rotation = rotation,
+                scale = scale,
                 propDefinition = marker.definition,
                 propDefinitionId = marker.definition.TableID
             });
+
+            // Increment prop count for the chunk
+            chunkPropCounts[chunkCoord]++;
         }
 
         InvasionSpawnPointMarker[] invasionSpawnMarkers = GameObject.FindObjectsOfType<InvasionSpawnPointMarker>(true);
@@ -192,6 +289,35 @@ public class LevelEditorEditor : Editor
                 guid = list.Count,
                 position = position,
             });
+        }
+
+        // Build message with prop counts for all chunks
+        List<string> chunkSummaries = new List<string>();
+        List<string> exceededChunks = new List<string>();
+        foreach (var kvp in chunkPropCounts)
+        {
+            string chunkStr = $"Chunk ({kvp.Key.X}, {kvp.Key.Y}) has {kvp.Value} props";
+            chunkSummaries.Add(chunkStr);
+            if (kvp.Value > maxPropsPerChunk)
+            {
+                exceededChunks.Add($"Chunk ({kvp.Key.X}, {kvp.Key.Y}) has {kvp.Value}/{maxPropsPerChunk} props");
+            }
+        }
+
+        // Set warning message with all chunk prop counts and highlight exceeded chunks
+        if (chunkSummaries.Count > 0)
+        {
+            warningMessage = $"Gathered props in chunks: {string.Join(", ", chunkSummaries)}.";
+            if (exceededChunks.Count > 0)
+            {
+                warningMessage += $"\nWarning: The following chunks exceed the prop limit of {maxPropsPerChunk}: {string.Join(", ", exceededChunks)}.";
+            }
+            Debug.Log(warningMessage);
+        }
+        else
+        {
+            warningMessage = "No props gathered.";
+            Debug.Log(warningMessage);
         }
 
         Undo.RecordObject(manager.WorldSettings, "Gather PropMarkers");
@@ -222,6 +348,9 @@ public class LevelEditorEditor : Editor
 
         EditorUtility.SetDirty(manager.WorldSettings);
         Debug.Log($"Gathered {propMarkers.Length} PropMarkers into WorldSettings.");
+
+        // Force Scene View repaint to display warning
+        SceneView.RepaintAll();
     }
 
     private void RegenerateMarkers()
@@ -259,8 +388,9 @@ public class LevelEditorEditor : Editor
                         Undo.RegisterCreatedObjectUndo(instance, "Spawn Marker from Chunk Data");
 
                         instance.transform.position = propMarkup.position;
-                        instance.transform.rotation = Quaternion.identity;
-                        instance.transform.SetParent(editor.transform); // <-- Parent to LevelEditor
+                        instance.transform.rotation = propMarkup.rotation;
+                        instance.MarkerScale = propMarkup.scale; // Apply stored scale
+                        instance.transform.SetParent(editor.transform); // Parent to LevelEditor
                     }
                 }
             }
@@ -278,7 +408,7 @@ public class LevelEditorEditor : Editor
 
                     instance.transform.position = invasionMarkup.position;
                     instance.transform.rotation = Quaternion.identity;
-                    instance.transform.SetParent(editor.transform); // <-- Parent to LevelEditor
+                    instance.transform.SetParent(editor.transform); // Parent to LevelEditor
                 }
             }
         }

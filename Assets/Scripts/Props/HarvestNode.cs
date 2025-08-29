@@ -117,7 +117,7 @@ namespace LichLord.Props
 
             var currencyComponent = interactor.PC.Currency;
 
-            if (!currencyComponent.HasRoomForCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.ResourcesPerHarvest))
+            if (!currencyComponent.HasRoomForCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.PlayerResourcesPerHarvest))
                 interactor.CancelInteract(interactable, "Inventory Full");
         }
 
@@ -138,7 +138,7 @@ namespace LichLord.Props
 
             Harvest(pc);
 
-            pc.Currency.AddCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.ResourcesPerHarvest);
+            pc.Currency.AddCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.PlayerResourcesPerHarvest);
         }
 
         public void Harvest(PlayerCharacter pc)
