@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace LichLord.UI
+﻿namespace LichLord.UI
 {
     public class UIWorldCurrencySlot : UICurrencySlot
     {

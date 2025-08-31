@@ -29,7 +29,7 @@ namespace LichLord.Props
             stateData &= ~(IS_ACTIVATED_MASK << IS_ACTIVATED_SHIFT); // clear bit
             if (isActive)
                 stateData |= (1 << IS_ACTIVATED_SHIFT);
-            propData.StateData = stateData;
+            propData.StateData = (ushort)stateData;
         }
 
         public override void InitializeData(ref FPropData propData, PropDefinition definition)
@@ -56,7 +56,7 @@ namespace LichLord.Props
             stateData &= ~(IS_INTERACTING_MASK << IS_INTERACTING_SHIFT); // clear bit
             if (isInteracting)
                 stateData |= (1 << IS_INTERACTING_SHIFT);
-            propData.StateData = stateData;
+            propData.StateData = (ushort)stateData;
         }
     }
 }

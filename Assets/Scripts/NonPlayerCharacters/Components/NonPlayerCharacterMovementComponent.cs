@@ -36,52 +36,58 @@ namespace LichLord.NonPlayerCharacters
 
         private float _teleportDistanceSquared = 36;
 
-        private float _10hrzSendDistance = 20.0f;
-        private float _8hrzSendDistance = 50.0f;
+        private float _10hrzSendDistance = 30.0f;
+        private float _8hrzSendDistance = 60.0f;
 
-        // Follow projectile yaw. Local blend on remotes
-        private float _projectileFollowYawStrength;
-        private float _projectileFollowYaw;
-
-        public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams)
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
-            _lastPosition = spawnParams.Position;
+            _lastPosition = runtimeState.GetPosition();
             _transform = transform;
         }
 
-        public void AuthorityUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        public void AuthorityUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
         {
-            UpdateVelocity(ref data, renderDeltaTime);
+            UpdateVelocity(renderDeltaTime);
             UpdateYawVelocity();
-            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, _yawVelocity, renderDeltaTime);
+            _npc.AnimationController.UpdateAnimatonForMovement(runtimeState, _localVelocity, _yawVelocity, renderDeltaTime);
+            TryWriteTransformData(runtimeState, tick);
         }
 
-        public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
+        public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
         {
+            if (runtimeState.GetState() == ENPCState.Dead || runtimeState.GetState() == ENPCState.Inactive)
+                return;
+
             SetFollowerUpdatePosition(false);
             SetFollowerUpdateRotation(false);
             SetFollowerCanMove(false);
             SetFollowerLocalAvoidance(false);
 
+            Vector3 statePosition = runtimeState.GetPosition();
+
             // If the data is too far away, teleport 
-            if ((data.Position - NPC.CachedTransform.position).sqrMagnitude > _teleportDistanceSquared)
+            if ((statePosition - NPC.CachedTransform.position).sqrMagnitude > _teleportDistanceSquared)
             {
-                NPC.CachedTransform.position = data.Position;
+                NPC.CachedTransform.position = statePosition;
             }
             else
             {
-                // Smooth position
-                NPC.CachedTransform.position = Vector3.Lerp(
-                    NPC.CachedTransform.position,
-                    data.Position,
-                    renderDeltaTime * 4f
-                );
+                // Smooth position with different lerp speeds for Y vs X/Z
+                Vector3 currentPos = NPC.CachedTransform.position;
+                Vector3 targetPos = statePosition;
+
+                // Lerp X and Z with base speed, Y with faster speed
+                float x = Mathf.Lerp(currentPos.x, targetPos.x, renderDeltaTime * 4f); // Base speed for X/Z
+                float y = Mathf.Lerp(currentPos.y, targetPos.y, renderDeltaTime * 8f); // Faster speed for Y (2x base)
+                float z = Mathf.Lerp(currentPos.z, targetPos.z, renderDeltaTime * 4f); // Base speed for X/Z
+
+                NPC.CachedTransform.position = new Vector3(x, y, z);
             }
 
             // Smooth yaw only
             float currentYaw = NPC.CachedTransform.eulerAngles.y;
-            float targetYaw = data.Yaw;
-            int targetPlayerIndex = data.TargetPlayerIndex;
+            float targetYaw = runtimeState.GetYaw();
+            int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
 
             if (targetPlayerIndex > 0)
             {
@@ -109,12 +115,12 @@ namespace LichLord.NonPlayerCharacters
                 0
             );
 
-            UpdateVelocity(ref data, renderDeltaTime);
+            UpdateVelocity(renderDeltaTime);
             UpdateYawVelocity();
-            _npc.AnimationController.UpdateAnimatonForMovement(ref data, _localVelocity, _yawVelocity, renderDeltaTime);
+            _npc.AnimationController.UpdateAnimatonForMovement(runtimeState, _localVelocity, _yawVelocity, renderDeltaTime);
         }
 
-        private void UpdateVelocity(ref FNonPlayerCharacterData data, float renderDeltaTime)
+        private void UpdateVelocity(float renderDeltaTime)
         {
             _worldVelocity = ((NPC.CachedTransform.position - _lastPosition) / renderDeltaTime);
             _lastPosition = NPC.CachedTransform.position;
@@ -129,14 +135,20 @@ namespace LichLord.NonPlayerCharacters
             _lastYaw = currentYaw;
         }
 
-        public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
+        int _lastTick = -1;
+        public void TryWriteTransformData(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            int sendRateModulus = GetSendRateModulus();
-
-            if ((tick + _npc.Index) % sendRateModulus != 0)
+            if(_lastTick == tick) 
                 return;
 
-            WriteData(ref data);
+            _lastTick = tick;
+
+            int sendRateModulus = GetSendRateModulus();
+
+            if ((tick + runtimeState.Index) % sendRateModulus != 0)
+                return;
+
+            WriteTransformData(runtimeState);
         }
 
         private int GetSendRateModulus()
@@ -165,17 +177,19 @@ namespace LichLord.NonPlayerCharacters
             return 5; // ~6.4 Hz
         }
 
-        private void WriteData(ref FNonPlayerCharacterData data)
+        private void WriteTransformData(NonPlayerCharacterRuntimeState runtimeState)
         {
+            var data = runtimeState.Data;
+
             // Update the runtime state
             // Update position only if the change is significant
-            const float POSITION_THRESHOLD = 0.1f;
+            const float POSITION_THRESHOLD = 0.15f;
             if (Mathf.Abs(NPC.CachedTransform.position.x - data.PositionX) > POSITION_THRESHOLD)
             {
                 data.PositionX = NPC.CachedTransform.position.x;
             }
 
-            if (Mathf.Abs(NPC.CachedTransform.position.y - data.PositionY) > POSITION_THRESHOLD)
+            if (Mathf.Abs(NPC.CachedTransform.position.y - data.PositionY) > (POSITION_THRESHOLD * 3))
             {
                 data.PositionY = NPC.CachedTransform.position.y;
             }
@@ -196,7 +210,7 @@ namespace LichLord.NonPlayerCharacters
             else
             {
                 // Update rotation only if the change is significant
-                const float ROTATION_THRESHOLD_DEGREES = 5.0f;
+                const float ROTATION_THRESHOLD_DEGREES = 10.0f;
                 float yawA = NPC.CachedTransform.eulerAngles.y;
                 float yawB = data.Yaw;
 
@@ -205,6 +219,9 @@ namespace LichLord.NonPlayerCharacters
                     data.Yaw = yawA;
                 }
             }
+
+            runtimeState.CopyData(ref data);
+            NPC.Replicator.ReplicateRuntimeState(runtimeState);
         }
 
         public void SetFollowerUpdatePosition(bool newEnabled)
@@ -257,18 +274,21 @@ namespace LichLord.NonPlayerCharacters
             _followerMaxSpeed = newSpeed;
         }
 
-        public void SetProjectileYaw(ref FProjectileData data)
+        private Vector3 _moveTarget;
+        public void SetMoveTargetPosition(Vector3 newMoveTarget)
         {
-            Vector3 direction = (data.TargetPosition.Position - data.Position.Position);
-            direction.y = 0;
-            float yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            Vector3 delta = _moveTarget - newMoveTarget;
+            if (delta.sqrMagnitude < 0.01f)
+                return;
 
-            _projectileFollowYaw = yaw;
-            _projectileFollowYawStrength = 1.1f;
+            _moveTarget = newMoveTarget;
+
+            _npc.Movement.AIFollower.destination = _moveTarget;
         }
 
         public void StartRecycle()
         {
+
         }
 
         public void OnStateAuthorityChanged(bool hasAuthority)

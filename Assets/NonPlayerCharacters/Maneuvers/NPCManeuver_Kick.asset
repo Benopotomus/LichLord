@@ -9,11 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4aa7cb0ed381fd848aeb8a42745d6d45, type: 3}
+  m_Script: {fileID: 11500000, guid: db5487f7bda4e944b960bfb3c0cc6f4c, type: 3}
   m_Name: NPCManeuver_Kick
   m_EditorClassIdentifier: 
   ActionName: Kick
-  _damage: 10
   _cooldownTicks: 32
   _movementStopRange: 1.5
   _attackRange: 2
@@ -21,8 +20,7 @@ MonoBehaviour:
   _faceTargetRange: 5
   _requiresLOS: 1
   _verticalAimOffset: 0
-  _validTargetDistance: {x: 0, y: 8}
-  _validTargetTypes: 02000000010000000300000005000000
+  _validTargetDistance: {x: 0, y: 50}
   _animationTriggers:
   - Action: 1
     Weapon: 0
@@ -56,4 +54,6 @@ MonoBehaviour:
     RightWeapon: 0
     IsMoving: 0
     IsBlocking: 0
+  _damage: 10
+  _validTargetTypes: 01000000020000000300000005000000
   _maneuverProjectiles: []

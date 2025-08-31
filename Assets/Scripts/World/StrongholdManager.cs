@@ -1,5 +1,6 @@
 ﻿using DWD.Pooling;
 using Fusion;
+using LichLord.Buildables;
 using LichLord.Props;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace LichLord.World
         [FieldOffset(0)]
         public FChunkPosition ChunkID;
         [FieldOffset(2)]
-        public byte Index;
+        public byte ChunkIndex;
 
         public bool IsValid()
         { 
@@ -31,7 +32,7 @@ namespace LichLord.World
         {
             if (ChunkID.X == other.ChunkID.X &&
                 ChunkID.Y == other.ChunkID.Y &&
-                Index == other.Index)
+                ChunkIndex == other.ChunkIndex)
                 return true;
 
             return false;
@@ -62,7 +63,7 @@ namespace LichLord.World
                 {
                     FStrongholdData strongholdData = new FStrongholdData();
                     strongholdData.ChunkID = strongholdSaveData.chunkCoord;
-                    strongholdData.Index = (byte)strongholdSaveData.index;
+                    strongholdData.ChunkIndex = (byte)strongholdSaveData.index;
 
                     Stronghold strongholdSpawned = SpawnStronghold(strongholdData, strongholdSaveData.currentHealth, strongholdSaveData.rank);
 
@@ -94,6 +95,16 @@ namespace LichLord.World
             return null;
         }
 
+        public BuildableZone GetBuildableZone(int zoneId)
+        {
+            foreach (var stronghold in _activeStrongholds)
+            {
+                if (stronghold.BuildableZone.ZoneID == zoneId)
+                    return stronghold.BuildableZone;
+            }
+
+            return null;
+        }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_ActivateNexus(FStrongholdData strongholdData)
@@ -117,7 +128,7 @@ namespace LichLord.World
                                 onBeforeSpawned: (runner, obj) =>
                                 {
                                     var r = obj.GetComponent<Stronghold>();
-                                    r.SetSpawnData(strongholdData, health, rank);
+                                    r.SetSpawnData(strongholdData, health, rank, _activeStrongholds.Count);
                                 });
             
         }
@@ -155,7 +166,7 @@ namespace LichLord.World
         public PropRuntimeState GetNexusState(FStrongholdData nexusData)
         {
             Chunk chunk = Context.ChunkManager.GetChunk(nexusData.ChunkID);
-            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.Index, out var state))
+            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.ChunkIndex, out var state))
             {
                 return state;
             }

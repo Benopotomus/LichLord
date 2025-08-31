@@ -16,7 +16,7 @@ namespace LichLord.Props
 
         // Bit size constants (matching PropDataDefinition)
         protected const int STATUS_BITS = 4;          // 0-15
-        protected const int HEALTH_BITS = 12;         // 0-4095
+        protected const int HEALTH_BITS = 10;         // 0-1023
 
         // Bit shifts and masks for StateData (int)
 
@@ -46,9 +46,9 @@ namespace LichLord.Props
 
         public void SetStatus(EPropStatus status, ref FPropData propData)
         {
-            int stateData = propData.StateData;
+            ushort stateData = propData.StateData;
             int statusValue = Mathf.Clamp((int)status, 0, STATUS_MASK);
-            stateData = (stateData & ~(STATUS_MASK << STATUS_SHIFT)) | (statusValue << STATUS_SHIFT);
+            stateData = (ushort)((stateData & ~(STATUS_MASK << STATUS_SHIFT)) | (statusValue << STATUS_SHIFT));
             propData.StateData = stateData;
         }
 
@@ -60,9 +60,9 @@ namespace LichLord.Props
 
         public void SetHealth(int health, ref FPropData propData)
         {
-            int stateData = propData.StateData;
+            ushort stateData = propData.StateData;
             health = Mathf.Clamp(health, 0, HEALTH_MASK);
-            stateData = (stateData & ~(HEALTH_MASK << HEALTH_SHIFT)) | (health << HEALTH_SHIFT);
+            stateData = (ushort)((stateData & ~(HEALTH_MASK << HEALTH_SHIFT)) | (health << HEALTH_SHIFT));
             propData.StateData = stateData;
         }
 

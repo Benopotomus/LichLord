@@ -39,13 +39,13 @@ namespace LichLord
         public void ApplyDamage(int damage)
         { 
             _currentHealth = Mathf.Clamp(_currentHealth - damage, 0, _maxHealth);
-            Debug.Log("Damage Taken: " + damage + ", Health: " + _currentHealth);
+           // Debug.Log("Damage Taken: " + damage + ", Health: " + _currentHealth);
 
             SpawnImpactVisualEffect(0);
 
             if (_currentHealth == 0)
             {
-                Debug.Log("Player Died");
+              //  Debug.Log("Player Died");
             }
 
             _pc.AnimationController.PlayFlinchAnimation();

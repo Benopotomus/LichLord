@@ -161,5 +161,42 @@ namespace LichLord
 
                    _isAssigned == other._isAssigned;
         }
+
+        public bool CanFit(ECurrencyType currencyType, int value)
+        {
+            const byte MAX_PILE_AMOUNT = 250;
+
+            // Copy piles into a local array
+            FCurrencyStack[] piles = { _pile0, _pile1, _pile2, _pile3 };
+
+            int remaining = value;
+
+            // Pass 1: Fill existing stacks of the same currency
+            for (int i = 0; i < piles.Length && remaining > 0; i++)
+            {
+                if (piles[i].CurrencyType == currencyType)
+                {
+                    int space = MAX_PILE_AMOUNT - piles[i].Value;
+                    if (space > 0)
+                    {
+                        int toAdd = Mathf.Min(space, remaining);
+                        remaining -= toAdd;
+                    }
+                }
+            }
+
+            // Pass 2: Fill empty piles
+            for (int i = 0; i < piles.Length && remaining > 0; i++)
+            {
+                if (piles[i].CurrencyType == ECurrencyType.None)
+                {
+                    int toAdd = Mathf.Min(MAX_PILE_AMOUNT, remaining);
+                    remaining -= toAdd;
+                }
+            }
+
+            // If nothing left, it fits
+            return remaining <= 0;
+        }
     }
 }

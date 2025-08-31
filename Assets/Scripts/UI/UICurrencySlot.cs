@@ -30,7 +30,7 @@ namespace LichLord.UI
             base.OnTick();
         }
 
-        private void LoadDefinition(CurrencyDefinition definition)
+        protected void LoadDefinition(CurrencyDefinition definition)
         {
             _definition = definition;
             LoadIcon(_definition.Icon);

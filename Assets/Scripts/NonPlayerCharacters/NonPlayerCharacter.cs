@@ -12,6 +12,9 @@ namespace LichLord.NonPlayerCharacters
 
     public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor, IChunkTrackable
     {
+        private NonPlayerCharacterRuntimeState _runtimeState;
+        public NonPlayerCharacterRuntimeState RuntimeState => _runtimeState;
+
         protected NonPlayerCharacterReplicator _replicator;
         public NonPlayerCharacterReplicator Replicator => _replicator;
 
@@ -36,6 +39,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterAnimationController _animationController;
         public NonPlayerCharacterAnimationController AnimationController => _animationController;
 
+        [SerializeField] private NonPlayerCharacterCurrencyComponent _currencyComponent;
+        public NonPlayerCharacterCurrencyComponent CurrencyComponent => _currencyComponent;
+
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 
@@ -59,7 +65,7 @@ namespace LichLord.NonPlayerCharacters
         private FNetObjectID _netObjectID = new FNetObjectID();
         public FNetObjectID NetObjectID => _netObjectID;
 
-        public float BonusRadius { get { return 2; } }
+        public float BonusRadius { get { return 1; } }
 
         private int _index;
         public int Index => _index;
@@ -83,8 +89,8 @@ namespace LichLord.NonPlayerCharacters
             {
                 switch (_stateComponent.CurrentState)
                 {
-                    case ENonPlayerState.Dead:
-                    case ENonPlayerState.Inactive:
+                    case ENPCState.Dead:
+                    case ENPCState.Inactive:
                         return false;
                     default:
                         return true;
@@ -92,68 +98,84 @@ namespace LichLord.NonPlayerCharacters
             } 
         }
 
+        private int _workerIndex = -1;
+        public int WorkerIndex => _workerIndex;
+
         [SerializeField]
         private GameObject redHat;
 
         [SerializeField]
         private GameObject blueHat;
 
-        public void OnSpawned(ref FNonPlayerCharacterSpawnParams spawnParams, NonPlayerCharacterReplicator replicator)
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, NonPlayerCharacterReplicator replicator)
         {
+            _runtimeState = runtimeState;
             _context = replicator.Context;
             _replicator = replicator;
-            _movementComponent.OnSpawned(ref spawnParams);
-            _stateComponent.OnSpawned(ref spawnParams);
-            _brainComponent.OnSpawned(ref spawnParams);
-            _index = spawnParams.Index;
+            _movementComponent.OnSpawned(runtimeState);
+            _brainComponent.OnSpawned(runtimeState);
+            _currencyComponent.OnSpawned();
+            _index = runtimeState.Index;
             UpdateChunk(_context.ChunkManager);
 
             _netObjectID.networkId = _replicator.Object.Id;
-            _netObjectID.index = (byte)spawnParams.Index;
-        }
+            _netObjectID.index = (byte)runtimeState.Index;
 
-        public void AuthorityUpdate(ref FNonPlayerCharacterData data, 
-            float renderDeltaTime, 
-            int tick)
-        {
-            var definition = GetDefinition(ref data);
-            if (definition == null)
-                return;
-
-            UpdateChunk(_context.ChunkManager);
-            UpdateTeam(ref data);
-
-            _stateComponent.UpdateState(ref data, true);
-
-            _movementComponent.AuthorityUpdate(ref data, renderDeltaTime);
-
-            _stateComponent.AuthorityUpdate(ref data, renderDeltaTime);
-
-            _brainComponent.AuthorityUpdate(ref data, renderDeltaTime, tick);
-        }
-
-        public void RemoteUpdate(ref FNonPlayerCharacterData data, float renderDeltaTime, float ping)
-        {
-            UpdateChunk(_context.ChunkManager);
-            UpdateTeam(ref data);
-
-            _stateComponent.UpdateState(ref data, false);
-
-            switch (_stateComponent.CurrentState)
+            _workerIndex = runtimeState.GetWorkerIndex();
+            if (_workerIndex >= 0)
             {
-                case ENonPlayerState.Dead:
-                case ENonPlayerState.Inactive:
-                    break;
-                default:
-                    _brainComponent.RemoteUpdate(ref data);
-                    _movementComponent.RemoteUpdate(ref data, renderDeltaTime, ping);
-                    break;
+                _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
             }
         }
 
-        private void UpdateTeam(ref FNonPlayerCharacterData data)
+        public void OnRender(NonPlayerCharacterRuntimeState runtimeState, 
+            bool hasAuthority, 
+            float renderDeltaTime, 
+            int tick)
         {
-            ETeamID newTeam = data.Team;
+            _runtimeState = runtimeState;
+
+            UpdateChunk(_context.ChunkManager);
+            UpdateTeam(runtimeState);
+            _stateComponent.UpdateStateChange(runtimeState, hasAuthority, tick);
+            _currencyComponent.OnRender(runtimeState);
+
+            if (hasAuthority)
+            {
+                _movementComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
+                _stateComponent.UpdateCurrentState(runtimeState, tick);
+                _brainComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
+
+                _workerIndex = runtimeState.GetWorkerIndex();
+                if (_workerIndex >= 0)
+                {
+                    var workerData = Context.WorkerManager.GetWorkerData(_workerIndex);
+                    if (!workerData.IsAssigned)
+                    {
+                        switch(runtimeState.GetState())
+                        { 
+                            case ENPCState.Dead:
+                            case ENPCState.Inactive:
+                                break;
+                            default:
+                                _runtimeState.SetState(ENPCState.Dead);
+                                break;
+                        }
+
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                _brainComponent.RemoteUpdate(runtimeState);
+                _movementComponent.RemoteUpdate(runtimeState, renderDeltaTime, tick);
+            }
+        }
+
+        private void UpdateTeam(NonPlayerCharacterRuntimeState runtimeState)
+        {
+            ETeamID newTeam = runtimeState.GetTeam();
 
             if (_teamId == newTeam)
                 return;
@@ -176,26 +198,13 @@ namespace LichLord.NonPlayerCharacters
             _teamId = newTeam;
         }
 
-        public void OnFixedUpdate(ref FNonPlayerCharacterData data, int tick)
-        {
-            _movementComponent.OnFixedUpdate(ref data, tick);
+        public void ProcessHit(ref FHitUtilityData hit) { }
 
-            _brainComponent.OnFixedUpdate(ref data, tick);
-        }
-
-        public void ProcessHit(ref FHitUtilityData hit)
-        {
-
-        }
-
-        public void OnHitTaken(ref FHitUtilityData hit)
-        {
-
-        }
+        public void OnHitTaken(ref FHitUtilityData hit) { }
 
         void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
         {
-            if (projectile == null) 
+            if (Replicator.HasStateAuthority)
                 return;
 
             if (definition == null)
@@ -204,10 +213,9 @@ namespace LichLord.NonPlayerCharacters
             if (!definition.ForcesRemoteAiming)
                 return;
 
-            if (Replicator.HasStateAuthority)
+            if (projectile == null) 
                 return;
 
-            Movement.SetProjectileYaw(ref data);
             AnimationController.SetProjectileFrame(definition);
         }
 
@@ -276,9 +284,20 @@ namespace LichLord.NonPlayerCharacters
 
         public void StartRecycle()
         {
+            Hurtbox.SetHitBoxesActive(false);
+            Movement.AIFollower.rvoSettings.priority = 0.5f;
+            Movement.SetFollowerUpdatePosition(false);
+            Movement.SetFollowerUpdateRotation(false);
+            Movement.SetFollowerLocalAvoidance(false);
+            Movement.SetFollowerCanMove(false);
             _movementComponent.StartRecycle();
             DWDObjectPool.Instance.Recycle(this);
             UpdateChunk(Context.ChunkManager);
+
+            if (_workerIndex >= 0)
+            {
+                _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
+            }
         }
 
         private NonPlayerCharacterDefinition _definition;

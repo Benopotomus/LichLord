@@ -2508,6 +2508,7 @@ GameObject:
   - component: {fileID: 7723641460175011890}
   - component: {fileID: 167064866010933950}
   - component: {fileID: 6749657108094526839}
+  - component: {fileID: 541806916981470579}
   m_Layer: 10
   m_Name: NPC_SkeletonArcher_01
   m_TagString: Untagged
@@ -2550,6 +2551,7 @@ MonoBehaviour:
   _hitReactComponent: {fileID: 9187171251479877575}
   _weaponsComponent: {fileID: 7723641460175011890}
   _animationController: {fileID: 167064866010933950}
+  _currencyComponent: {fileID: 541806916981470579}
   _muzzleComponent: {fileID: 6749657108094526839}
   _animator: {fileID: 8304036627096845830}
   _transform: {fileID: 8251747689170000944}
@@ -2687,10 +2689,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3183157435632504526}
   _moveTarget: {x: 0, y: 0, z: 0}
+  DistanceToAttackTarget: 0
+  DistanceToHarvestTarget: 0
+  DistanceToDepositTarget: 0
   _isInMovementStopRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
+  _hasHarvestTarget: 0
+  _hasDepositTarget: 0
+  _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 74ed21022d65fb449ab879f4650881f1, type: 2}
     ActiveState: 4
@@ -2710,7 +2718,14 @@ MonoBehaviour:
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 0
-  targetGO: {fileID: 0}
+  TargetPlayer: {fileID: 0}
+  _losLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  attackTargetGO: {fileID: 0}
+  harvestTargetGO: {fileID: 0}
+  depositTargetGO: {fileID: 0}
+  _wanderPositionSet: 0
 --- !u!114 &9187171251479877575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2843,6 +2858,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handBoneLeft: {fileID: 7133481757724558283}
   _handBoneRight: {fileID: 1423160476876499938}
+--- !u!114 &541806916981470579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7741492357796157577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0d23426ff1c3ba4598ad538d2f824ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 3183157435632504526}
 --- !u!1 &7919634645097698640
 GameObject:
   m_ObjectHideFlags: 0

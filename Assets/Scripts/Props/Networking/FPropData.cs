@@ -7,18 +7,18 @@
     public struct FPropData : INetworkStruct
     {
         [FieldOffset(0)]
-        private ushort _definitionId; // 2 bytes. definition id;
-        [FieldOffset(2)]
-        private int _stateData; // 4 bytes
-        // 6
+        private byte _definitionId; // 2 bytes. definition id;
+        [FieldOffset(1)]
+        private ushort _stateData; // 4 bytes
+        // 5
 
         public int DefinitionID
         {
             get => _definitionId;
-            set => _definitionId = (ushort)value;
+            set => _definitionId = (byte)value;
         }
 
-        public int StateData
+        public ushort StateData
         {
             get => _stateData;
             set => _stateData = value;
@@ -37,7 +37,7 @@
 
         public void Copy(PropRuntimeState state)
         {
-            _definitionId = (ushort)state.definitionId;
+            _definitionId = (byte)state.definitionId;
             _stateData = state.Data.StateData;
         }
 

@@ -225,7 +225,7 @@ namespace LichLord
 
             if (lastChunk == newChunk)
                 return;
-            
+
             CurrentChunk = newChunk;
 
             if (lastChunk != null)
@@ -234,18 +234,30 @@ namespace LichLord
             if (newChunk != null)
                 newChunk.AddObject(this);
 
-            var oldChunks = _cachedChunks;
+            var oldChunks = new List<Chunk>(_cachedChunks);
             var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
 
             DiffChunks(oldChunks, newChunks, out var added, out var removed);
 
-            if (HasStateAuthority)
-                for (int i = 0; i < removed.Count; i++)
-                    removed[i].DespawnProps();
-
             _cachedChunks = newChunks;
 
-            Debug.Log($"Chunks Added: {added.Count}, Removed: {removed.Count}");
+            /*
+            // Log removed chunks
+            string removedLog = "Chunks Removed: " + removed.Count + "\n";
+            foreach (var chunk in removed)
+            {
+                removedLog += $"  ChunkID: ({chunk.ChunkID.X}, {chunk.ChunkID.Y})\n";
+            }
+
+            // Log added chunks
+            string addedLog = "Chunks Added: " + added.Count + "\n";
+            foreach (var chunk in added)
+            {
+                addedLog += $"  ChunkID: ({chunk.ChunkID.X}, {chunk.ChunkID.Y})\n";
+            }
+
+            Debug.Log(addedLog + removedLog);
+            */
 
             Context.ChunkManager.TryRemoveReplicatedChunks(removed);
             Context.ChunkManager.TryAddReplicatedChunks(added);

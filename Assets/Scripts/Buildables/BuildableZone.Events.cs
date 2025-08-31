@@ -4,6 +4,9 @@ namespace LichLord.Buildables
 {
     public partial class BuildableZone : ContextBehaviour
     {
+        [Networked]
+        public byte ZoneID { get; set; }
+
         public void Predict_DealDamage(int index, int damage)
         {
 
@@ -29,10 +32,12 @@ namespace LichLord.Buildables
             {
                 int stockpileIndex = authorityState.GetStockpileIndex();
                 if(stockpileIndex >= 0) 
-                    Context.ContainerManager.ClearStockpile(stockpileIndex);     
-            }
+                    Context.ContainerManager.ClearStockpile(stockpileIndex);
 
-            ReplicateRuntimeState(authorityState);
+                int workerIndex = authorityState.GetWorkerIndex();
+                if (workerIndex >= 0)
+                    Context.WorkerManager.ClearWorkerData(workerIndex);
+            }
         }
 
         public void ReplicateRuntimeState(BuildableRuntimeState replictedState)

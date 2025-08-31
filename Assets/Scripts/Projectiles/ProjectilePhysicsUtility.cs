@@ -403,6 +403,13 @@
                         RaycastHit hit = rayHitsPool[i];
                         Collider hitCollider = hit.collider;
 
+                        // Fallback: if point is zero, compute closest point manually
+                        if (hit.point == Vector3.zero)
+                        {
+                            if (hit.collider != null)
+                                hit.point = hit.collider.ClosestPoint(queryShape.position);
+                        }
+
                         hitResults.Add(new FOverlapHit
                         {
                             Collider = hitCollider,
@@ -428,6 +435,13 @@
                     {
                         RaycastHit hit = sphereHitsPool[i];
                         Collider hitCollider = hit.collider;
+
+                        // Fallback: if point is zero, compute closest point manually
+                        if (hit.point == Vector3.zero)
+                        {
+                            if (hit.collider != null)
+                                hit.point = hit.collider.ClosestPoint(queryShape.position);
+                        }
 
                         hitResults.Add(new FOverlapHit
                         {

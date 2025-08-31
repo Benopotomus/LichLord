@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3784c5b7ca19fcc46ad12cc8cdd20a14, type: 3}
+  m_Name: NPC_SkeletonWorker_01
+  m_EditorClassIdentifier: 
+  _tableID: 11
+  _name: Skeleton Worker
+  _prefabBundle:
+    _name: NPC_SkeletonWorker_01
+    _bundle: npc_skeletonworker_01
+  _maxHealth: 100
+  _damageReduction: 0
+  _damageResistance: 0
+  _walkSpeed: 5
+  _dataDefinition: {fileID: 11400000, guid: 28b0e26f4ba3a3b4f952498bb6ed5789, type: 2}
+  _currencyCarryValues:
+    _serializedList:
+    - Key: 1
+      Value: 50
+    - Key: 2
+      Value: 50
+    - Key: 3
+      Value: 50

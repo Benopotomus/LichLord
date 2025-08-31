@@ -19,6 +19,7 @@ namespace LichLord.Buildables
         public NetworkArray<FBuildableData> Data => _buildableDatas;
 
         private FBuildableLoadState[] _buildableLoadStates;
+        public FBuildableLoadState[] LoadStates => _buildableLoadStates;
 
         private Dictionary<int, BuildableRuntimeState> _buildableRuntimeStates = new Dictionary<int, BuildableRuntimeState>();
 
@@ -53,18 +54,17 @@ namespace LichLord.Buildables
             {
                 var loadstate = _buildableLoadStates[i];
                 ref FBuildableData data = ref _buildableDatas.GetRef(i);
-                int definitionID = data.DefinitionID;
+
                 BuildableRuntimeState runtimeState = GetRenderState(i, ref data);
-                BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
-                bool shouldBeLoaded = definitionID > 0;
 
                 if (hasAuthority &&
                     _lastAuthorityTick != tick)
                 {
-
-                    if(runtimeState.AuthorityUpdate(tick))
-                        ReplicateRuntimeState(runtimeState);
+                    runtimeState.AuthorityUpdateTick(tick);
                 }
+
+                int definitionID = data.DefinitionID;
+                bool shouldBeLoaded = definitionID > 0;
 
                 if (shouldBeLoaded)
                 {
@@ -73,7 +73,8 @@ namespace LichLord.Buildables
                         case ELoadState.None:
 
                             _buildableLoadStates[i].LoadState = ELoadState.Loading;
-                            
+                            BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
+
                             _spawner.SpawnBuildable(this,
                                 i,
                                 definition,
@@ -86,7 +87,7 @@ namespace LichLord.Buildables
 
                         case ELoadState.Loaded:
 
-                            loadstate.Buildable.OnRender(runtimeState, renderDeltaTime, hasAuthority);
+                            loadstate.Buildable.OnRender(runtimeState, renderDeltaTime, tick, hasAuthority);
 
                             break;
                     }
@@ -112,7 +113,7 @@ namespace LichLord.Buildables
             _buildableLoadStates[index].LoadState = ELoadState.Loaded;
  
             ref FBuildableData data = ref _buildableDatas.GetRef(index);
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(index, ref data);
+            _buildableRuntimeStates[index] = new BuildableRuntimeState(this, index, ref data);
 
             buildable.OnSpawned(this, _buildableRuntimeStates[index]);
         }
@@ -151,18 +152,44 @@ namespace LichLord.Buildables
             _effectSpawner.SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
 
             ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
-             
-            data.DefinitionID = definitionID;
-            data.Transform = buildableTransform;
-
-            definition.BuildableDataDefinition.InitializeData(ref data, definition);
 
             if (definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
             {
-                int freeStockpileIndex = Context.ContainerManager.FindFreeStockpileIndex();
-                stockpileDataDefinition.SetStockpileIndex(freeStockpileIndex, ref data);
-                Context.ContainerManager.AssignStockpileIndex(freeStockpileIndex);
+                int freeStockpileIndex = Context.ContainerManager.GetFreeStockpileIndex();
+                if (freeStockpileIndex >= 0)
+                {
+                    stockpileDataDefinition.InitializeData(ref data, definition);
+                    stockpileDataDefinition.SetStockpileIndex(freeStockpileIndex, ref data);
+                    Context.ContainerManager.AssignStockpileIndex(freeStockpileIndex);
+                }
+                else
+                {
+                    Debug.Log("No Free Stockpile Index");
+                    return;
+                }
             }
+            else if (definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                int freeWorkerIndex = Context.WorkerManager.GetFreeIndex();
+                if (freeWorkerIndex >= 0)
+                {
+                    cryptDataDefinition.InitializeData(ref data, definition);
+                    cryptDataDefinition.SetWorkerIndex(freeWorkerIndex, ref data);
+                    Context.WorkerManager.AssignWorkerIndexToBuildable(freeWorkerIndex, this, freeIndex);
+                }
+                else
+                {
+                    Debug.Log("No Free Worker Index");
+                    return;
+                }
+            }
+            else
+            {
+                definition.BuildableDataDefinition.InitializeData(ref data, definition);
+            }
+
+            data.DefinitionID = definitionID;
+            data.Transform = buildableTransform;
         }
 
         private void OnBuildingVisualEffectLoaded(GameObject loadedGameObject, Vector3 position, Quaternion rotation)
@@ -210,7 +237,7 @@ namespace LichLord.Buildables
                 return state;
             }
 
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(index, ref data);
+            _buildableRuntimeStates[index] = new BuildableRuntimeState(this, index, ref data);
             return _buildableRuntimeStates[index];
         }
 

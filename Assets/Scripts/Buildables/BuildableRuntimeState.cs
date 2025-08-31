@@ -1,4 +1,5 @@
-﻿using LichLord.Props;
+﻿using LichLord.NonPlayerCharacters;
+using LichLord.Props;
 using System;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace LichLord.Buildables
         public Vector3 position; // World position
         public Quaternion rotation; // World rotation
         public int stateData;
+        public BuildableZone buildableZone;
 
         private BuildableDefinition _definition;
         public BuildableDefinition Definition
@@ -39,8 +41,9 @@ namespace LichLord.Buildables
         private FBuildableData _data = new FBuildableData();
         public FBuildableData Data => _data;
 
-        public BuildableRuntimeState(int index, ref FBuildableData buildableData)
+        public BuildableRuntimeState(BuildableZone zone, int index, ref FBuildableData buildableData)
         {
+            this.buildableZone = zone;
             this.index = index;
             _data.Copy(ref buildableData);
             definitionId = _data.DefinitionID;
@@ -64,6 +67,15 @@ namespace LichLord.Buildables
             return dataDefinition.GetState(ref _data);
         }
 
+        public void SetState(EBuildableState newState)
+        {
+            BuildableDataDefinition dataDefinition = Definition.BuildableDataDefinition;
+            dataDefinition.SetState(newState, ref _data);
+
+            if (buildableZone != null)
+                buildableZone.ReplicateRuntimeState(this);
+        }
+
         public int GetHealth()
         {
             if (Definition.BuildableDataDefinition is DestructibleBuildableDataDefinition destructibleDataDefinition)
@@ -83,14 +95,22 @@ namespace LichLord.Buildables
         public void ApplyDamage(int damage, int tick)
         {
             if (Definition.BuildableDataDefinition is DestructibleBuildableDataDefinition destructibleDataDefinition)
+            {
                 destructibleDataDefinition.ApplyDamage(ref _data, damage);
+
+                if(buildableZone != null) 
+                    buildableZone.ReplicateRuntimeState(this);
+            }
         }
 
-        public void SetInteract(bool interact, int tick)
+        public void SetInteracting(bool interact, int tick)
         {
             if (Definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
             {
                 stockpileDataDefinition.SetIsInteracting(interact, ref _data);
+
+                if (buildableZone != null)
+                    buildableZone.ReplicateRuntimeState(this);
             }
         }
 
@@ -99,6 +119,11 @@ namespace LichLord.Buildables
             if (Definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
             {
                 return stockpileDataDefinition.GetIsInteracting(ref _data);
+            }
+
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                return cryptDataDefinition.GetIsInteracting(ref _data);
             }
 
             return false;
@@ -114,6 +139,57 @@ namespace LichLord.Buildables
             return -1;
         }
 
+        public int GetWorkerIndex()
+        {
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                return cryptDataDefinition.GetWorkerIndex(ref _data);
+            }
+
+            return -1;
+        }
+
+        public EWorkerState GetWorkerState()
+        {
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                return cryptDataDefinition.GetWorkerState(ref _data);
+            }
+
+            return EWorkerState.None;
+        }
+
+        public void SetWorkerState(EWorkerState newState)
+        {
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                cryptDataDefinition.SetWorkerState(newState, ref _data);
+
+                if (buildableZone != null)
+                    buildableZone.ReplicateRuntimeState(this);
+            }
+        }
+
+        public int GetWorkerSpawnTicks()
+        {
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                return cryptDataDefinition.WorkerRespawnTicks;
+            }
+
+            return -1;
+        }
+
+        public NonPlayerCharacterDefinition GetWorkerDefinition()
+        {
+            if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            {
+                return cryptDataDefinition.WorkerDefinition;
+            }
+
+            return null;
+        }
+
         // Runtime Values
 
         EBuildableState _currentState;
@@ -125,7 +201,8 @@ namespace LichLord.Buildables
 
         // Updates on the server if the RuntimePropState is loaded
         // Does not require the monobehaviour to exist
-        public bool AuthorityUpdate(int tick)
+        // Ticks slowly
+        public bool AuthorityUpdateTick(int tick)
         {
             if (definitionId == 0)
                 return false;
@@ -139,7 +216,8 @@ namespace LichLord.Buildables
                 case EBuildableState.Idle:
                     if (GetHealth() == 0)
                     {
-                        DataDefinition.SetState(EBuildableState.Destroyed, ref _data);
+                        SetState(EBuildableState.Destroyed);
+                        return true;
                     }
                     break;
 
@@ -148,18 +226,16 @@ namespace LichLord.Buildables
 
                     if (tick > _hitReactEndTick)
                     {
-                        DataDefinition.SetState(EBuildableState.Idle, ref _data);
+                        SetState(EBuildableState.Idle);
                         return true;
                     }
                     break;
                 case EBuildableState.Destroyed:
 
-                    
                     if (tick > _destroyedEndTick)
                     {
-                        //Debug.Log("buildable destroyed " + _destroyedEndTick + ", " + tick);
-                        DataDefinition.SetState(EBuildableState.Inactive, ref _data);
                         _data.DefinitionID = 0;
+                        SetState(EBuildableState.Inactive);
                         return true;
                     }
                     break;
