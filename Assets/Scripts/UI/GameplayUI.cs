@@ -9,6 +9,9 @@ namespace LichLord.UI
         [SerializeField] private UIGameplayHUDView _gameplayHUD;
         public UIGameplayHUDView HUD => _gameplayHUD;
 
+        [SerializeField] private UIDialogView _dialogView;
+        public UIDialogView DialogView => _dialogView;
+
         [Space]
         public GameObject LastFocusedWidget;
 
@@ -25,6 +28,15 @@ namespace LichLord.UI
         protected override void OnTickInternal()
         {
             base.OnTickInternal();
+
+            if (Context.DialogTarget != null)
+            {
+                _dialogView.Open();
+            }
+            else
+            {
+                _dialogView.Close();
+            }
         }
 
         protected override void OnViewOpened(UIView view)

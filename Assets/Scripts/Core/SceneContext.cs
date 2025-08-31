@@ -42,6 +42,8 @@ namespace LichLord
         public PlayerRef LocalPlayerRef;
         [HideInInspector]
         public PlayerCharacter LocalPlayerCharacter;
+        [HideInInspector]
+        public IChunkTrackable DialogTarget;
 
         // General
         /*
