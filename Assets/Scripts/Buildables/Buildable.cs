@@ -46,7 +46,7 @@ namespace LichLord.Buildables
             _spawnTransformer.PlaySpawnAnimation();
         }
 
-        public virtual void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, bool hasAuthority) 
+        public virtual void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, int tick, bool hasAuthority) 
         {
             _runtimeState = runtimeState;
         }

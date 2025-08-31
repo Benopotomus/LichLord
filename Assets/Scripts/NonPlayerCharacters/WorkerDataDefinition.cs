@@ -60,12 +60,12 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // Health
-        public int GetHealth(ref FNonPlayerCharacterData npcData)
+        public override int GetHealth(ref FNonPlayerCharacterData npcData)
         {
             return (npcData.Events >> HEALTH_SHIFT) & HEALTH_MASK;
         }
 
-        public void SetHealth(int newHealth, ref FNonPlayerCharacterData npcData)
+        public override void SetHealth(int newHealth, ref FNonPlayerCharacterData npcData)
         {
             ushort events = npcData.Events;
             newHealth = Mathf.Clamp(newHealth, 0, HEALTH_MASK);

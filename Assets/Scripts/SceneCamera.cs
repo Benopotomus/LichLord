@@ -1,5 +1,6 @@
 using Cinemachine;
 using LichLord.Buildables;
+using LichLord.World;
 using UnityEngine;
 
 namespace LichLord
@@ -21,6 +22,7 @@ namespace LichLord
         [SerializeField] private float _minRaycastDistance = 2.7f;
         [SerializeField] private float _maxRaycastDistance = 100f;
         [SerializeField] private LayerMask raycastLayerMask;
+        [SerializeField] private LayerMask _trackableLayerMask; // New LayerMask for trackables
         private float sphereRadius = 0.1f; // Radius of the debug sphere
 
         private bool isFirstPerson = false;
@@ -115,6 +117,7 @@ namespace LichLord
 
             // Reset cached buildable zone
             _cachedRaycastHit.buildableZone = null;
+            _cachedRaycastHit.trackable = null;
 
             // OverlapSphere to detect if inside a buildable zone trigger
             Collider[] overlappingColliders = Physics.OverlapSphere(rayOrigin, 0.1f, _buildableZoneLayer);
@@ -141,6 +144,17 @@ namespace LichLord
                 if (ignoredObject != null && (hit.collider.gameObject == ignoredObject || hit.collider.transform.IsChildOf(ignoredObject.transform)))
                     continue;
 
+                // Check for trackables on _trackableLayerMask
+                if (((1 << hit.collider.gameObject.layer) & _trackableLayerMask) != 0)
+                {
+                    IChunkTrackable trackable = hit.collider.GetComponentInParent<IChunkTrackable>();
+                    if (trackable != null)
+                    {
+                        _cachedRaycastHit.trackable = trackable;
+                        //Debug.Log($"[CameraManager] Trackable hit: {hit.collider.gameObject.name}, Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+                    }
+                }
+
                 // Check if this hit is on buildable zone layer
                 if (((1 << hit.collider.gameObject.layer) & _buildableZoneLayer) != 0)
                 {
@@ -148,8 +162,6 @@ namespace LichLord
                     if (bz != null)
                     {
                         _cachedRaycastHit.buildableZone = bz;
-                        // Note: Do NOT affect closest hit with this
-                        // Just keep the buildable zone reference here
                     }
                 }
 
@@ -196,5 +208,6 @@ namespace LichLord
         public RaycastHit raycastHit;
         public Vector3 position;
         public BuildableZone buildableZone;
+        public IChunkTrackable trackable;
     }
 }

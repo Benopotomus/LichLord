@@ -131,5 +131,16 @@ namespace LichLord.NonPlayerCharacters
         {
           
         }
+
+        // Health
+        public virtual int GetHealth(ref FNonPlayerCharacterData npcData)
+        {
+            return -1;
+        }
+
+        public virtual void SetHealth(int newHealth, ref FNonPlayerCharacterData npcData)
+        {
+
+        }
     }
 }

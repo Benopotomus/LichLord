@@ -10,7 +10,6 @@ namespace LichLord.NonPlayerCharacters
         public int Index => _index;
 
         private NonPlayerCharacterReplicator _replicator;
-        public NonPlayerCharacterReplicator Replicator => _replicator;
 
         FNonPlayerCharacterData _data = new FNonPlayerCharacterData();
         public FNonPlayerCharacterData Data => _data;
@@ -125,6 +124,16 @@ namespace LichLord.NonPlayerCharacters
         public int GetTargetPlayerIndex()
         { 
             return _data.TargetPlayerIndex; 
+        }
+
+        public int GetHealth()
+        { 
+            return DataDefinition.GetHealth(ref _data);
+        }
+
+        public int GetMaxHealth()
+        {
+            return Definition.MaxHealth;
         }
 
         public bool IsInvasionNPC()

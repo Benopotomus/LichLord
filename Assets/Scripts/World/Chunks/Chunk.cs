@@ -122,8 +122,8 @@ namespace LichLord.World
                 PropLoadStates[key] = loadState; // Explicitly write back the modified value
             }
 
-            _predictedStates.Clear();
-            _localRuntimePropStates.Clear();
+            //_predictedStates.Clear();
+           // _localRuntimePropStates.Clear();
         }
 
         public void UpdatePropRuntimeState(PropRuntimeState runtimeState)
@@ -152,6 +152,10 @@ namespace LichLord.World
         public void ReplicatePropState(PropRuntimeState replictedState)
         {
             AddOrUpdateDeltaState(replictedState);
+
+            if (Replicator == null)
+                return;
+
             ref FPropData data = ref Replicator.GetPropData(replictedState.index);
             FPropData currentData = replictedState.Data;
             data.Copy(ref currentData);

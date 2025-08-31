@@ -54,18 +54,17 @@ namespace LichLord.Buildables
             {
                 var loadstate = _buildableLoadStates[i];
                 ref FBuildableData data = ref _buildableDatas.GetRef(i);
-                int definitionID = data.DefinitionID;
+
                 BuildableRuntimeState runtimeState = GetRenderState(i, ref data);
-                BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
-                bool shouldBeLoaded = definitionID > 0;
 
                 if (hasAuthority &&
                     _lastAuthorityTick != tick)
                 {
-
-                    if(runtimeState.AuthorityUpdate(tick))
-                        ReplicateRuntimeState(runtimeState);
+                    runtimeState.AuthorityUpdateTick(tick);
                 }
+
+                int definitionID = data.DefinitionID;
+                bool shouldBeLoaded = definitionID > 0;
 
                 if (shouldBeLoaded)
                 {
@@ -74,7 +73,8 @@ namespace LichLord.Buildables
                         case ELoadState.None:
 
                             _buildableLoadStates[i].LoadState = ELoadState.Loading;
-                            
+                            BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
+
                             _spawner.SpawnBuildable(this,
                                 i,
                                 definition,
@@ -87,7 +87,7 @@ namespace LichLord.Buildables
 
                         case ELoadState.Loaded:
 
-                            loadstate.Buildable.OnRender(runtimeState, renderDeltaTime, hasAuthority);
+                            loadstate.Buildable.OnRender(runtimeState, renderDeltaTime, tick, hasAuthority);
 
                             break;
                     }
@@ -113,7 +113,7 @@ namespace LichLord.Buildables
             _buildableLoadStates[index].LoadState = ELoadState.Loaded;
  
             ref FBuildableData data = ref _buildableDatas.GetRef(index);
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(index, ref data);
+            _buildableRuntimeStates[index] = new BuildableRuntimeState(this, index, ref data);
 
             buildable.OnSpawned(this, _buildableRuntimeStates[index]);
         }
@@ -237,7 +237,7 @@ namespace LichLord.Buildables
                 return state;
             }
 
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(index, ref data);
+            _buildableRuntimeStates[index] = new BuildableRuntimeState(this, index, ref data);
             return _buildableRuntimeStates[index];
         }
 

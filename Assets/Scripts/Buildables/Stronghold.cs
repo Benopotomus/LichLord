@@ -92,6 +92,9 @@ namespace LichLord
             _cachedTransform.position = Context.StrongholdManager.GetStrongholdPosition(_data);
             _chunk = Context.ChunkManager.GetChunk(_data.ChunkID);
             _chunk.AddObject(this);
+            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
+            Context.ChunkManager.TryAddReplicatedChunks(newChunks);
+
         }
 
         public void SetSpawnData(FStrongholdData data, int currentHealth, int rank, int buildableZoneId)
@@ -143,6 +146,9 @@ namespace LichLord
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
+            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
+            Context.ChunkManager.TryAddReplicatedChunks(newChunks);
+
             _interactableComponent.onInteractStart -= OnInteractStart;
             _interactableComponent.onInteractEnd -= OnInteractEnd;
             _interactableComponent.onInteractionComplete -= OnInteractionComplete;

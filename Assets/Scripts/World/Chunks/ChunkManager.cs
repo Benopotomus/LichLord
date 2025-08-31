@@ -92,7 +92,7 @@ namespace LichLord.World
                     foreach (var activeReplicator in _replicators)
                     {
                         if (activeReplicator.ChunkID.IsEqual(ref chunkId))
-                            return;
+                            continue;
                     }
 
                     var size = GetOptimalReplicatorSizeForChunk(chunk);
@@ -116,6 +116,7 @@ namespace LichLord.World
                 if (chunk.ReplicationRefCount > 0)
                     continue;
 
+                chunk.DespawnProps();
                 _replicatedChunks.Remove(chunk);
 
                 if (HasStateAuthority)
@@ -125,9 +126,9 @@ namespace LichLord.World
                     if (replicator == null)
                     {
                         //Debug.Log("No replicator");
-                        return;
+                        continue;
                     }
-
+                    
                     switch (replicator)
                     {
                         case ChunkReplicator_256 r256: _pool256.Push(r256); break;
@@ -249,7 +250,7 @@ namespace LichLord.World
             bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
 
             // Update states from player's cached list
-            foreach (Chunk chunk in pc.CachedChunks)
+            foreach (Chunk chunk in _replicatedChunks)
             {
                 chunk.OnRender(hasAuthority, renderDeltaTime);
             }

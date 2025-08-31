@@ -1,8 +1,5 @@
-﻿using DWD.Utility.Loading;
-using System;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace LichLord.UI
 {

@@ -10,6 +10,7 @@ namespace LichLord
     {
         public static SaveLoadManager instance;
 
+
         [SerializeField]
         [SerializedDictionary("SessionID", "WorldSavedData")]
         private SerializedDictionary<string, string> _worldSavesLoaded;

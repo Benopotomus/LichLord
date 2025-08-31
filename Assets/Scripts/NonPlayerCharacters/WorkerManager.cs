@@ -2,6 +2,7 @@
 using LichLord.Buildables;
 using System.Runtime.InteropServices;
 using LichLord.World;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -92,25 +93,55 @@ namespace LichLord.NonPlayerCharacters
 
         public void AddWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
+            ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+            workerData.WorkerActive = true;
+
             _workerCharacters[workerIndex] = character;
-            ActiveWorkerCount++;
+
+            if(HasStateAuthority)
+                ActiveWorkerCount++;
         }
 
         public void RemoveWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
+            ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+            workerData.WorkerActive = false;
+
             _workerCharacters[workerIndex] = null;
-            ActiveWorkerCount--;
+
+            if (HasStateAuthority)
+                ActiveWorkerCount--;
         }
 
-        public bool HasWorker(int workerIndex)
+        public bool HasActiveWorker(int workerIndex)
         {
-            return _workerCharacters[workerIndex] != null;
+            ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+            return workerData.WorkerActive;
         }
 
         public void ClearWorkerData(int workerIndex)
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
             workerData.IsAssigned = false;
+            workerData.WorkerActive = false;
+        }
+
+        public void TrySpawnWorker(int workerIndex, NonPlayerCharacterDefinition definition, Vector3 spawnPosition)
+        {
+            if (HasActiveWorker(workerIndex) ||
+                ActiveWorkerCount >= MaxWorkerCount)
+            {
+                Debug.Log("Cannot spawn. Worker is already active or count is exceeded");
+                return;
+            }
+
+            ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+            workerData.WorkerActive = true;
+
+            Context.NonPlayerCharacterManager.SpawnNPCWorker(spawnPosition,
+                definition,
+                ETeamID.PlayerTeam,
+                workerIndex);
         }
     }
 
@@ -125,6 +156,7 @@ namespace LichLord.NonPlayerCharacters
         private byte _state;
 
         public bool IsAssigned { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
+        public bool WorkerActive { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
 
         public bool IsBitSet(ref byte flags, int bit)
         {

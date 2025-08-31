@@ -11,7 +11,7 @@ public static class PropPreviewManager
     private static readonly Dictionary<PropMarker, GameObject> previewInstances = new Dictionary<PropMarker, GameObject>();
     private static readonly Dictionary<GameObject, Stack<GameObject>> prefabPool = new Dictionary<GameObject, Stack<GameObject>>();
     private static Vector3 lastCameraPosition;
-    private static readonly float maxDrawRange = 300f;
+    private static readonly float maxDrawRange = 500f;
     private static readonly float cameraMoveThreshold = 0.5f;
     private static readonly string previewObjectName = "_EditorPreview";
     private static bool isProcessing = false;

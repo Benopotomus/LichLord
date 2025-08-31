@@ -166,8 +166,6 @@ namespace LichLord
                 stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
             }
 
-            FloatingUI.ShowStockpileContents(stockpileIndex);
-
             if (_currentInteractable == null)
             {
                 FloatingUI.SetProgressBarVisible(false);

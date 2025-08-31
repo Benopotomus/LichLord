@@ -1,5 +1,4 @@
-﻿using LichLord.Buildables;
-using LichLord.NonPlayerCharacters;
+﻿using LichLord.NonPlayerCharacters;
 using UnityEngine;
 
 namespace LichLord.Buildables
@@ -10,16 +9,19 @@ namespace LichLord.Buildables
         [SerializeField] private NonPlayerCharacterDefinition _workerDefinition;
         public NonPlayerCharacterDefinition WorkerDefinition => _workerDefinition;
 
-        protected const int SPAWN_STATE_BITS = 3;         // 0-7 =w 17
-        protected const int WORKER_INDEX_BITS = 6;         // 0-63 = 23
-        protected const int IS_INTERACTING_BITS = 1; // = 24
-        //24 bits
+        [SerializeField] private int _workerRespawnTicks = 320;
+        public int WorkerRespawnTicks => _workerRespawnTicks;
 
-        protected const int SPAWN_STATE_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
-        protected const int WORKER_INDEX_SHIFT = SPAWN_STATE_SHIFT + SPAWN_STATE_BITS;
+        protected const int WORKER_STATE_BITS = 3;         // 0-7 =w 17
+        protected const int WORKER_INDEX_BITS = 7;         // 0-127 = 24
+        protected const int IS_INTERACTING_BITS = 1; // = 25
+        //25 bits
+
+        protected const int WORKER_STATE_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
+        protected const int WORKER_INDEX_SHIFT = WORKER_STATE_SHIFT + WORKER_STATE_BITS;
         protected const int IS_INTERACTING_SHIFT = WORKER_INDEX_SHIFT + WORKER_INDEX_BITS;
 
-        protected const int SPAWN_STATE_MASK = (1 << SPAWN_STATE_BITS) - 1;
+        protected const int WORKER_STATE_MASK = (1 << WORKER_STATE_BITS) - 1;
         protected const int WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
         protected const int IS_INTERACTING_MASK = (1 << IS_INTERACTING_BITS) - 1;
 
@@ -33,6 +35,7 @@ namespace LichLord.Buildables
             SetState(StartingState, ref buildableData);
             SetHealth(MaxHealth, ref buildableData); // Default health, adjust as needed
             SetIsInteracting(false, ref buildableData);
+            SetWorkerState(EWorkerState.None, ref buildableData);
         }
 
         // NPC Index
@@ -62,13 +65,26 @@ namespace LichLord.Buildables
                 stateData |= (1 << IS_INTERACTING_SHIFT);
             data.StateData = stateData;
         }
+
+        // Worker State
+        public EWorkerState GetWorkerState(ref FBuildableData data)
+        {
+            return (EWorkerState)((data.StateData >> WORKER_STATE_SHIFT) & WORKER_STATE_MASK);
+        }
+
+        public void SetWorkerState(EWorkerState newWorkerState, ref FBuildableData buildableData)
+        {
+            int stateData = buildableData.StateData;
+            stateData = (stateData & ~(WORKER_STATE_MASK << WORKER_STATE_SHIFT)) | ((int)(newWorkerState) << WORKER_STATE_SHIFT);
+            buildableData.StateData = stateData;
+        }
     }
 
-    public enum ECryptSpawnState
+    public enum EWorkerState
     { 
+        None,
         Cooldown,
-        SpawningNPC,
-        NPC_Active,
-        NPC_Inside,
+        Spawning,
+        WorkerActive,
     }
 }

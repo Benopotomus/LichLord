@@ -296,7 +296,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (_workerIndex >= 0)
             {
-                _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
+                _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
             }
         }
 

@@ -5,6 +5,7 @@ using System.Linq;
 using LichLord.Props;
 using LichLord.World;
 using UnityEngine.SceneManagement;
+using UnityEditorInternal; // Required for InternalEditorUtility
 
 [CustomEditor(typeof(LevelEditor))]
 public class LevelEditorEditor : Editor
@@ -15,6 +16,8 @@ public class LevelEditorEditor : Editor
     private int maxPropsPerChunk = 256; // Configurable max props per chunk
     private bool blockPlacementOnLimit = false; // Toggle to block or allow placement
     private string warningMessage = ""; // Store warning for Scene View display
+    private LayerMask groundLayerMask = -1; // Default to all layers
+    private float raycastDistance = 100f; // Max distance for downward raycast
 
     static LevelEditorEditor()
     {
@@ -152,6 +155,10 @@ public class LevelEditorEditor : Editor
         EditorGUILayout.LabelField("Marker Settings", EditorStyles.boldLabel);
 
         useSurfaceNormal = EditorGUILayout.Toggle("Use Surface Normal", useSurfaceNormal);
+        // Use MaskField instead of LayerMaskField for Unity 2022.3
+        int currentMask = groundLayerMask.value;
+        int newMask = EditorGUILayout.MaskField("Ground Layer Mask", currentMask, InternalEditorUtility.layers);
+        groundLayerMask = newMask;
 
         maxPropsPerChunk = EditorGUILayout.IntField("Max Props Per Chunk", maxPropsPerChunk);
         blockPlacementOnLimit = EditorGUILayout.Toggle("Block Placement on Limit", blockPlacementOnLimit);
@@ -212,6 +219,12 @@ public class LevelEditorEditor : Editor
             RegenerateMarkers();
         }
 
+        GUILayout.Space(5);
+
+        if (GUILayout.Button("Snap All Markers to Ground", GUILayout.Height(40)))
+        {
+            SnapAllMarkersToGround(manager);
+        }
 
         GUILayout.Space(5);
 
@@ -225,6 +238,103 @@ public class LevelEditorEditor : Editor
         {
             EditorUtility.SetDirty(manager);
         }
+    }
+
+    private void SnapAllMarkersToGround(LevelEditor manager)
+    {
+        if (manager.WorldSettings == null)
+        {
+            Debug.LogWarning("WorldSettings is not assigned.");
+            return;
+        }
+
+        // Find all LevelEditorMarker instances in the scene
+        LevelEditorMarker[] markers = GameObject.FindObjectsOfType<LevelEditorMarker>(true);
+        if (markers.Length == 0)
+        {
+            Debug.Log("No LevelEditorMarkers found in the scene.");
+            return;
+        }
+
+        Undo.RecordObjects(markers, "Snap Markers to Ground");
+
+        int snappedCount = 0;
+        int failedCount = 0;
+
+        // Process each marker
+        foreach (var marker in markers)
+        {
+            // Start raycast slightly above the marker to avoid self-collision
+            Vector3 rayOrigin = marker.transform.position + Vector3.up * 500;
+            Ray ray = new Ray(rayOrigin, Vector3.down);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000, groundLayerMask))
+            {
+                // Update marker position
+                marker.transform.position = hit.point;
+                snappedCount++;
+
+                // Update corresponding markup data
+                FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
+                ChunkMarkupData chunkData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
+
+                // Update PropMarkupData if this is a PropMarker
+                if (marker is PropMarker propMarker && propMarker.definition != null)
+                {
+                    SnapToGround(propMarker);
+                }
+                // Update InvasionSpawnPointMarkupData if this is an InvasionSpawnPointMarker
+                else if (marker is InvasionSpawnPointMarker)
+                {
+                    List<InvasionSpawnPointMarkupData> invasionList = chunkData.InvasionSpawnPointMarkupDatas?.ToList() ?? new List<InvasionSpawnPointMarkupData>();
+                    var invasionData = invasionList.Find(i => Vector3.Distance(i.position, marker.transform.position) < markerDetectionRadius);
+                    if (invasionData != null)
+                    {
+                        int index = invasionList.IndexOf(invasionData);
+                        invasionData.position = hit.point;
+                        invasionList[index] = invasionData;
+                        chunkData.InvasionSpawnPointMarkupDatas = invasionList.ToArray();
+                        EditorUtility.SetDirty(chunkData);
+                    }
+                }
+            }
+            else
+            {
+                failedCount++;
+                Debug.LogWarning($"Failed to snap marker at {marker.transform.position} to ground: No ground hit detected.");
+            }
+        }
+
+        // Mark WorldSettings as dirty
+        EditorUtility.SetDirty(manager.WorldSettings);
+
+        // Log results
+        Debug.Log($"Snapped {snappedCount} markers to ground. Failed to snap {failedCount} markers.");
+
+        // Force Scene View repaint
+        SceneView.RepaintAll();
+    }
+
+    private void SnapToGround(PropMarker marker)
+    {
+        Vector3 origin = marker.transform.position + Vector3.up * 500; // start a bit above
+        Vector3 direction = Vector3.down;
+        float maxDistance = 1000f;
+
+        RaycastHit[] hits = Physics.RaycastAll(origin, direction, maxDistance);
+
+        foreach (var hit in hits)
+        {
+            if (hit.collider.transform.IsChildOf(marker.transform))
+                continue;
+
+            Undo.RecordObject(marker.transform, "Snap PropMarker To Ground");
+            marker.transform.position = hit.point;
+            EditorUtility.SetDirty(marker.transform);
+            return;
+        }
+
+        Debug.LogWarning($"Snap to Ground: No ground found below PropMarker '{marker.name}' (ignoring self).");
     }
 
     private void GatherAllMarkersIntoWorldSettings(LevelEditor manager)

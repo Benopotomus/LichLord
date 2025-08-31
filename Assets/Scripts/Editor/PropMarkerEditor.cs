@@ -25,9 +25,9 @@ public class PropMarkerEditor : Editor
 
     private void SnapToGround(PropMarker marker)
     {
-        Vector3 origin = marker.transform.position + Vector3.up * 5f; // start a bit above
+        Vector3 origin = marker.transform.position + Vector3.up * 500; // start a bit above
         Vector3 direction = Vector3.down;
-        float maxDistance = 100f;
+        float maxDistance = 1000f;
 
         RaycastHit[] hits = Physics.RaycastAll(origin, direction, maxDistance);
 
