@@ -4,6 +4,7 @@ using LichLord.Props;
 using LichLord.NonPlayerCharacters;
 using System;
 using UnityEngine;
+using LichLord.Dialog;
 
 namespace LichLord
 {
@@ -18,6 +19,7 @@ namespace LichLord
         public ManeuverTable ManeuverTable;
         public InvasionTable InvasionTable;
         public CurrencyTable CurrencyTable;
+        public DialogTable DialogTable;
 
         /*
         public ItemTable ItemTable;

@@ -28,7 +28,7 @@ namespace LichLord.NonPlayerCharacters
            _debug.OnSpawned();
         }
 
-        public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC)
+        public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, EAttitude attitude, bool isInvasionNPC)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
@@ -48,7 +48,7 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, teamID, isInvasionNPC);
+            definition.DataDefinition.InitializeData(ref data, definition, teamID, attitude, isInvasionNPC);
 
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;
@@ -83,9 +83,45 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, teamID);
+            definition.DataDefinition.InitializeData(ref data, definition, teamID, EAttitude.Friendly);
             workerData.SetWorkerIndex(workerIndex, ref data);
 
+            data.Position = spawnPos;
+            data.Rotation = Quaternion.identity;
+
+            _deltaStates[freeIndex] = data; // Store full state for persistence
+            replicator.SpawnNPC(ref data, freeIndex);
+        }
+
+        public void SpawnDialogNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, EAttitude attitude, int dialogIndex, bool isInvasionNPC)
+        {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                Debug.Log("Cannot spawn, I'm not the master client");
+                return;
+            }
+
+            NonPlayerCharacterReplicator replicator = GetReplicatorWithFreeSlots();
+            if (replicator == null)
+                return;
+
+            int freeIndex = replicator.GetFreeIndex();
+            if (freeIndex == -1)
+            {
+                Debug.Log("Can't Spawn NPC No Free Index");
+                return;
+            }
+
+            if (definition.DataDefinition is not SoldierDataDefinition soldierData)
+            {
+                Debug.Log("Trying to spawn a npc as a soldier, but its not");
+                return;
+            }
+
+            FNonPlayerCharacterData data = new FNonPlayerCharacterData();
+            definition.DataDefinition.InitializeData(ref data, definition, teamID, attitude, isInvasionNPC);
+            soldierData.SetDialogIndex(dialogIndex, ref data);
+            
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;
 

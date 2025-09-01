@@ -33,7 +33,7 @@ namespace LichLord.NonPlayerCharacters
                     );
 
                     randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA, EAttitude.Hostile, false);
                 }
                 
                 for (int i = 0; i < _initialSpawnCount; i++)
@@ -46,7 +46,7 @@ namespace LichLord.NonPlayerCharacters
 
                     randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB, EAttitude.Hostile, false);
                 }
                 
             }
@@ -76,7 +76,7 @@ namespace LichLord.NonPlayerCharacters
                     );
 
                     randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA, EAttitude.Hostile, false);
                 }
                 flip = false;
             }
@@ -92,7 +92,7 @@ namespace LichLord.NonPlayerCharacters
 
                     randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB, EAttitude.Hostile, false);
                 }
                 flip = true;
             }

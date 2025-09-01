@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using LichLord.NonPlayerCharacters;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord
@@ -11,9 +12,16 @@ namespace LichLord
         public List<InvasionSpawnWaveDefinition> SpawnWaves => _spawnWaves;
 
         [SerializeField]
+        private NonPlayerCharacterDefinition _dialogNPC;
+        public NonPlayerCharacterDefinition DialogNPC => _dialogNPC;
+
+        [SerializeField]
+        private EAttitude _startingAttitude;
+        public EAttitude StartingAttitue => _startingAttitude;
+
+        [SerializeField]
         private int _ticksBetweenWaves = 160;
         public int TicksBetweenWaves => _ticksBetweenWaves;
-
 
         [SerializeField]
         private int _invasionTotalTicks = 640;

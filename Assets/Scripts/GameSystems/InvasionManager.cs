@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using LichLord.NonPlayerCharacters;
 using LichLord.Props;
 using LichLord.World;
 using Pathfinding;
@@ -192,9 +193,9 @@ namespace LichLord
             {
                 // Generate random position above ground
                 Vector3 randomPositionAbove = new Vector3(
-                    UnityEngine.Random.Range(-10f, 10f),
+                    UnityEngine.Random.Range(-5f, 5f),
                     100f, // Fixed height to raycast from
-                    UnityEngine.Random.Range(-10f, 10f)
+                    UnityEngine.Random.Range(-5f, 5f)
                 );
 
                 randomPositionAbove += stagingPosition;
@@ -216,7 +217,7 @@ namespace LichLord
 
                 // Spawn the NPC at the calculated position
                 //Debug.Log("NPC spawned at spawn position: " + spawnPosition);
-                Context.NonPlayerCharacterManager.SpawnNPC(spawnPosition, waveCharacters[i], ETeamID.EnemiesTeamA, true);
+                Context.NonPlayerCharacterManager.SpawnNPC(spawnPosition, waveCharacters[i], ETeamID.EnemiesTeamA, EAttitude.Hostile, true);
             }
 
             InvasionSpawnWave++;

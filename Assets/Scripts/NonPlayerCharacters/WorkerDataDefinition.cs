@@ -5,8 +5,8 @@ namespace LichLord.NonPlayerCharacters
     [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/WorkerDataDefinition")]
     public class WorkerDataDefinition : NonPlayerCharacterDataDefinition
     {
-
-        private const int WORKER_INDEX_BITS = 6;                // 0–63
+        // Config (7 from base)
+        private const int WORKER_INDEX_BITS = 7;                // 0–127
         private const int WORKER_INDEX_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
         private const byte WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
 
@@ -26,9 +26,10 @@ namespace LichLord.NonPlayerCharacters
         public override void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition, 
             ETeamID teamID, 
+            EAttitude attitude,
             bool isInvasionNPC = false)
         {
-            base.InitializeData(ref npcData, definition, teamID, isInvasionNPC);
+            base.InitializeData(ref npcData, definition, teamID, attitude, isInvasionNPC);
 
             // Initialize Events
             npcData.Events = 0;

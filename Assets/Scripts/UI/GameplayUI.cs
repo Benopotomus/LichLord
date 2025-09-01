@@ -29,7 +29,21 @@ namespace LichLord.UI
         {
             base.OnTickInternal();
 
-            if (Context.DialogTarget != null)
+            if (Context.DialogManager.LocalActiveDialogNode != null)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                _dialogView.SetDialogNode(Context.DialogManager.LocalActiveDialogNode);
+                _dialogView.Open();
+
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                _dialogView.Close();
+            }
+
+            /*
+            if (Context.DialogManager.LocalActiveDialogIndex >= 0)
             {
                 _dialogView.Open();
             }
@@ -37,6 +51,8 @@ namespace LichLord.UI
             {
                 _dialogView.Close();
             }
+            */
+
         }
 
         protected override void OnViewOpened(UIView view)

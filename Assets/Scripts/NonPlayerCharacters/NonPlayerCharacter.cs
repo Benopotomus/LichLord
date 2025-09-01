@@ -42,6 +42,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterCurrencyComponent _currencyComponent;
         public NonPlayerCharacterCurrencyComponent CurrencyComponent => _currencyComponent;
 
+        [SerializeField] private NonPlayerCharacterAttitudeComponent _attitudeComponent;
+        public NonPlayerCharacterAttitudeComponent AttitudeComponent => _attitudeComponent;
+
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 

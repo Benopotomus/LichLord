@@ -36,13 +36,12 @@ namespace LichLord
         public InvasionManager InvasionManager;
         public ContainerManager ContainerManager;
         public WorkerManager WorkerManager;
+        public DialogManager DialogManager;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;
         [HideInInspector]
         public PlayerCharacter LocalPlayerCharacter;
-        [HideInInspector]
-        public IChunkTrackable DialogTarget;
 
         // General
         /*

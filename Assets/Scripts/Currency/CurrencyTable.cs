@@ -7,7 +7,7 @@ namespace LichLord
     public class CurrencyTable : ScriptableObject
     {
         [SerializeField]
-        [SerializedDictionary("SessionID", "WorldSavedData")]
+        [SerializedDictionary("CurrencyType", "CurrencyDefinition")]
         private SerializedDictionary<ECurrencyType, CurrencyDefinition> _currencyDefinitions;
 
         public CurrencyDefinition GetDefinition(ECurrencyType currencyType)

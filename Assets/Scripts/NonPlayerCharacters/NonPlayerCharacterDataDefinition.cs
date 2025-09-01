@@ -12,17 +12,21 @@ namespace LichLord.NonPlayerCharacters
         // Condition (byte)
         protected const int NPC_STATE_BITS = 4;           // 0–15
         protected const int ANIMATION_INDEX_BITS = 2;     // 0–3
-        protected const int STATUS_BITS = 2;              // 0–3
+        protected const int ATTITUDE_BITS = 2;              // 0–3
 
         protected const int NPC_STATE_SHIFT = 0;
-        protected const int STATUS_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
-        protected const int ANIMATION_INDEX_SHIFT = STATUS_SHIFT + STATUS_BITS;
+        protected const int ATTITUDE_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
+        protected const int ANIMATION_INDEX_SHIFT = ATTITUDE_SHIFT + ATTITUDE_BITS;
 
         protected const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
-        protected const byte STATUS_MASK = (1 << STATUS_BITS) - 1;
+        protected const byte ATTITUDE_MASK = (1 << ATTITUDE_BITS) - 1;
         protected const byte ANIMATION_INDEX_MASK = (1 << ANIMATION_INDEX_BITS) - 1;
 
-        public virtual void InitializeData(ref FNonPlayerCharacterData npcData, NonPlayerCharacterDefinition definition, ETeamID teamID, bool isInvasionNPC = false)
+        public virtual void InitializeData(ref FNonPlayerCharacterData npcData, 
+            NonPlayerCharacterDefinition definition,
+            ETeamID teamID,
+            EAttitude attitude,
+            bool isInvasionNPC = false)
         {
             // Initialize Configuration
             npcData.Configuration = 0;
@@ -31,7 +35,7 @@ namespace LichLord.NonPlayerCharacters
             // Initialize Condition
             npcData.Condition = 0;
             SetState(ENPCState.Idle, ref npcData);
-            SetStatus(EAttitude.Neutral, ref npcData);
+            SetAttitude(EAttitude.Neutral, ref npcData);
             SetAnimationIndex(0, ref npcData);
         }
 
@@ -110,16 +114,16 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // Status
-        public EAttitude GetStatus(ref FNonPlayerCharacterData npcData)
+        public EAttitude GetAttitude(ref FNonPlayerCharacterData npcData)
         {
-            return (EAttitude)((npcData.Condition >> STATUS_SHIFT) & STATUS_MASK);
+            return (EAttitude)((npcData.Condition >> ATTITUDE_SHIFT) & ATTITUDE_MASK);
         }
 
-        public void SetStatus(EAttitude status, ref FNonPlayerCharacterData npcData)
+        public void SetAttitude(EAttitude attitude, ref FNonPlayerCharacterData npcData)
         {
             byte condition = npcData.Condition;
-            int statusValue = Mathf.Clamp((int)status, 0, STATUS_MASK);
-            condition = (byte)((condition & ~(STATUS_MASK << STATUS_SHIFT)) | (statusValue << STATUS_SHIFT));
+            int statusValue = Mathf.Clamp((int)attitude, 0, ATTITUDE_MASK);
+            condition = (byte)((condition & ~(ATTITUDE_MASK << ATTITUDE_SHIFT)) | (statusValue << ATTITUDE_SHIFT));
             npcData.Condition = condition;
         }
 

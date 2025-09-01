@@ -63,7 +63,7 @@ namespace LichLord.World
                 {
                     FStrongholdData strongholdData = new FStrongholdData();
                     strongholdData.ChunkID = strongholdSaveData.chunkCoord;
-                    strongholdData.ChunkIndex = (byte)strongholdSaveData.index;
+                    strongholdData.ChunkIndex = (ushort)strongholdSaveData.index;
 
                     Stronghold strongholdSpawned = SpawnStronghold(strongholdData, strongholdSaveData.currentHealth, strongholdSaveData.rank);
 
