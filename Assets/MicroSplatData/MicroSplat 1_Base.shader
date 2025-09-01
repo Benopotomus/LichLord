@@ -45,6 +45,17 @@ Shader "Hidden/Terrain_Base-87061357"
 
 
 
+      
+	[Header(Blight)]
+	_BlightTex("Blight Tex", 2D) = "white" {}
+	[NoScaleOffset] _BlightData("Blight Packed Data", 2D) = "grey" {}
+      	_BlightCount("Blight Count", int) = 0
+	_BlightCutoff("Blight Cutoff", Range(0,1)) = 0.5
+	_BlightPow("Blight Pow", float) = 0.5
+	_BlightBoost("Blight Boost", float) = 1.0
+
+
+
       _NoiseHeightData("Noise Height Data", Vector) = (1, 0.15, 0, 0)
       // distance resampling
       // uv scale, near, fast
@@ -585,6 +596,18 @@ Shader "Hidden/Terrain_Base-87061357"
             TEXTURE2D(_TerrainNormalmapTexture);
          #endif
       #endif
+
+      #if _BLIGHT
+
+	half4 _BlightArray[] = half4[64];
+	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
+	half4 _BlightTex_ST;
+         
+      #endif
+
+     
+
+
 
          #if _DETAILNOISE
          half3 _DetailNoiseScaleStrengthFade;
@@ -2044,6 +2067,48 @@ void PrepareStochasticUVs(float scale, float2 uv, out float2 uv1, out float2 uv2
    weights = half3(w1, w2, w3);
    
 }
+
+
+
+      #if _BLIGHT
+
+        TEXTURE2D(_BlightTex); //rgb color, a height
+	TEXTURE2D(_BlightData); //r smooth, g xNorm, b occlusion, a yNorm
+
+         void DoBlight(Input i, inout RawSamples s, Config c, float camDist, float3 worldVertexNormal, float3 worldPos)
+         {
+            	float2 uv = i.worldPos.xz * _BlightTex_ST.xy + _BlightTex_ST.zw;            
+            
+            	half4 blightColor = SAMPLE_TEXTURE2D(_BlightTex, sampler_Diffuse, uv);
+	    	half4 blightData = SAMPLE_TEXTURE2D(_BlightData, sampler_Diffuse, uv);	
+
+	    	half3 blightNormal = half3(blightData.g, blightData.a, 1.0) * 2.0.xxx - 1.0.xxx;	
+
+		half mask = 0;
+		[unroll]
+		for(int a = 0; a < 64; a++)
+		{	
+			if(a < _BlightCount)	
+			{			
+				half4 temp = _BlightArray[a];	
+				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp[a]);
+			}
+		}
+		mask *= blightColor.a; //blight mask
+		mask = saturate(mask + (pow(mask, _BlightBoost));
+		half height = max(0, o.Height - mask);
+		half finalMask = min(1, height * _BlightBoost);
+		
+		o.Albedo = lerp(o.Albedo, blightColor.rgb, finalMask);
+		o.Normal = lerp(o.Normal, blightNormal, finalMask);
+		o.Smoothness = lerp(o.Smoothness, blightData.r, finalMask);
+		o.Occlusion = lerp(o.Occlusion, blightData.b, finalMask);
+		o.Height = lerp(o.Height, blightColor.a, finalMask);
+         }
+
+      #endif
+
+     
 
 
 
@@ -6164,6 +6229,18 @@ float3 GetTessFactors ()
          #endif
       #endif
 
+      #if _BLIGHT
+
+	half4 _BlightArray[] = half4[64];
+	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
+	half4 _BlightTex_ST;
+         
+      #endif
+
+     
+
+
+
          #if _DETAILNOISE
          half3 _DetailNoiseScaleStrengthFade;
          #endif
@@ -7622,6 +7699,48 @@ void PrepareStochasticUVs(float scale, float2 uv, out float2 uv1, out float2 uv2
    weights = half3(w1, w2, w3);
    
 }
+
+
+
+      #if _BLIGHT
+
+        TEXTURE2D(_BlightTex); //rgb color, a height
+	TEXTURE2D(_BlightData); //r smooth, g xNorm, b occlusion, a yNorm
+
+         void DoBlight(Input i, inout RawSamples s, Config c, float camDist, float3 worldVertexNormal, float3 worldPos)
+         {
+            	float2 uv = i.worldPos.xz * _BlightTex_ST.xy + _BlightTex_ST.zw;            
+            
+            	half4 blightColor = SAMPLE_TEXTURE2D(_BlightTex, sampler_Diffuse, uv);
+	    	half4 blightData = SAMPLE_TEXTURE2D(_BlightData, sampler_Diffuse, uv);	
+
+	    	half3 blightNormal = half3(blightData.g, blightData.a, 1.0) * 2.0.xxx - 1.0.xxx;	
+
+		half mask = 0;
+		[unroll]
+		for(int a = 0; a < 64; a++)
+		{	
+			if(a < _BlightCount)	
+			{			
+				half4 temp = _BlightArray[a];	
+				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp[a]);
+			}
+		}
+		mask *= blightColor.a; //blight mask
+		mask = saturate(mask + (pow(mask, _BlightBoost));
+		half height = max(0, o.Height - mask);
+		half finalMask = min(1, height * _BlightBoost);
+		
+		o.Albedo = lerp(o.Albedo, blightColor.rgb, finalMask);
+		o.Normal = lerp(o.Normal, blightNormal, finalMask);
+		o.Smoothness = lerp(o.Smoothness, blightData.r, finalMask);
+		o.Occlusion = lerp(o.Occlusion, blightData.b, finalMask);
+		o.Height = lerp(o.Height, blightColor.a, finalMask);
+         }
+
+      #endif
+
+     
 
 
 
@@ -11668,6 +11787,18 @@ float3 GetTessFactors ()
          #endif
       #endif
 
+      #if _BLIGHT
+
+	half4 _BlightArray[] = half4[64];
+	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
+	half4 _BlightTex_ST;
+         
+      #endif
+
+     
+
+
+
          #if _DETAILNOISE
          half3 _DetailNoiseScaleStrengthFade;
          #endif
@@ -13126,6 +13257,48 @@ void PrepareStochasticUVs(float scale, float2 uv, out float2 uv1, out float2 uv2
    weights = half3(w1, w2, w3);
    
 }
+
+
+
+      #if _BLIGHT
+
+        TEXTURE2D(_BlightTex); //rgb color, a height
+	TEXTURE2D(_BlightData); //r smooth, g xNorm, b occlusion, a yNorm
+
+         void DoBlight(Input i, inout RawSamples s, Config c, float camDist, float3 worldVertexNormal, float3 worldPos)
+         {
+            	float2 uv = i.worldPos.xz * _BlightTex_ST.xy + _BlightTex_ST.zw;            
+            
+            	half4 blightColor = SAMPLE_TEXTURE2D(_BlightTex, sampler_Diffuse, uv);
+	    	half4 blightData = SAMPLE_TEXTURE2D(_BlightData, sampler_Diffuse, uv);	
+
+	    	half3 blightNormal = half3(blightData.g, blightData.a, 1.0) * 2.0.xxx - 1.0.xxx;	
+
+		half mask = 0;
+		[unroll]
+		for(int a = 0; a < 64; a++)
+		{	
+			if(a < _BlightCount)	
+			{			
+				half4 temp = _BlightArray[a];	
+				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp[a]);
+			}
+		}
+		mask *= blightColor.a; //blight mask
+		mask = saturate(mask + (pow(mask, _BlightBoost));
+		half height = max(0, o.Height - mask);
+		half finalMask = min(1, height * _BlightBoost);
+		
+		o.Albedo = lerp(o.Albedo, blightColor.rgb, finalMask);
+		o.Normal = lerp(o.Normal, blightNormal, finalMask);
+		o.Smoothness = lerp(o.Smoothness, blightData.r, finalMask);
+		o.Occlusion = lerp(o.Occlusion, blightData.b, finalMask);
+		o.Height = lerp(o.Height, blightColor.a, finalMask);
+         }
+
+      #endif
+
+     
 
 
 
@@ -17101,6 +17274,18 @@ float3 GetTessFactors ()
          #endif
       #endif
 
+      #if _BLIGHT
+
+	half4 _BlightArray[] = half4[64];
+	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
+	half4 _BlightTex_ST;
+         
+      #endif
+
+     
+
+
+
          #if _DETAILNOISE
          half3 _DetailNoiseScaleStrengthFade;
          #endif
@@ -18559,6 +18744,48 @@ void PrepareStochasticUVs(float scale, float2 uv, out float2 uv1, out float2 uv2
    weights = half3(w1, w2, w3);
    
 }
+
+
+
+      #if _BLIGHT
+
+        TEXTURE2D(_BlightTex); //rgb color, a height
+	TEXTURE2D(_BlightData); //r smooth, g xNorm, b occlusion, a yNorm
+
+         void DoBlight(Input i, inout RawSamples s, Config c, float camDist, float3 worldVertexNormal, float3 worldPos)
+         {
+            	float2 uv = i.worldPos.xz * _BlightTex_ST.xy + _BlightTex_ST.zw;            
+            
+            	half4 blightColor = SAMPLE_TEXTURE2D(_BlightTex, sampler_Diffuse, uv);
+	    	half4 blightData = SAMPLE_TEXTURE2D(_BlightData, sampler_Diffuse, uv);	
+
+	    	half3 blightNormal = half3(blightData.g, blightData.a, 1.0) * 2.0.xxx - 1.0.xxx;	
+
+		half mask = 0;
+		[unroll]
+		for(int a = 0; a < 64; a++)
+		{	
+			if(a < _BlightCount)	
+			{			
+				half4 temp = _BlightArray[a];	
+				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp[a]);
+			}
+		}
+		mask *= blightColor.a; //blight mask
+		mask = saturate(mask + (pow(mask, _BlightBoost));
+		half height = max(0, o.Height - mask);
+		half finalMask = min(1, height * _BlightBoost);
+		
+		o.Albedo = lerp(o.Albedo, blightColor.rgb, finalMask);
+		o.Normal = lerp(o.Normal, blightNormal, finalMask);
+		o.Smoothness = lerp(o.Smoothness, blightData.r, finalMask);
+		o.Occlusion = lerp(o.Occlusion, blightData.b, finalMask);
+		o.Height = lerp(o.Height, blightColor.a, finalMask);
+         }
+
+      #endif
+
+     
 
 
 
@@ -22531,6 +22758,18 @@ float3 GetTessFactors ()
          #endif
       #endif
 
+      #if _BLIGHT
+
+	half4 _BlightArray[] = half4[64];
+	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
+	half4 _BlightTex_ST;
+         
+      #endif
+
+     
+
+
+
          #if _DETAILNOISE
          half3 _DetailNoiseScaleStrengthFade;
          #endif
@@ -23989,6 +24228,48 @@ void PrepareStochasticUVs(float scale, float2 uv, out float2 uv1, out float2 uv2
    weights = half3(w1, w2, w3);
    
 }
+
+
+
+      #if _BLIGHT
+
+        TEXTURE2D(_BlightTex); //rgb color, a height
+	TEXTURE2D(_BlightData); //r smooth, g xNorm, b occlusion, a yNorm
+
+         void DoBlight(Input i, inout RawSamples s, Config c, float camDist, float3 worldVertexNormal, float3 worldPos)
+         {
+            	float2 uv = i.worldPos.xz * _BlightTex_ST.xy + _BlightTex_ST.zw;            
+            
+            	half4 blightColor = SAMPLE_TEXTURE2D(_BlightTex, sampler_Diffuse, uv);
+	    	half4 blightData = SAMPLE_TEXTURE2D(_BlightData, sampler_Diffuse, uv);	
+
+	    	half3 blightNormal = half3(blightData.g, blightData.a, 1.0) * 2.0.xxx - 1.0.xxx;	
+
+		half mask = 0;
+		[unroll]
+		for(int a = 0; a < 64; a++)
+		{	
+			if(a < _BlightCount)	
+			{			
+				half4 temp = _BlightArray[a];	
+				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp[a]);
+			}
+		}
+		mask *= blightColor.a; //blight mask
+		mask = saturate(mask + (pow(mask, _BlightBoost));
+		half height = max(0, o.Height - mask);
+		half finalMask = min(1, height * _BlightBoost);
+		
+		o.Albedo = lerp(o.Albedo, blightColor.rgb, finalMask);
+		o.Normal = lerp(o.Normal, blightNormal, finalMask);
+		o.Smoothness = lerp(o.Smoothness, blightData.r, finalMask);
+		o.Occlusion = lerp(o.Occlusion, blightData.b, finalMask);
+		o.Height = lerp(o.Height, blightColor.a, finalMask);
+         }
+
+      #endif
+
+     
 
 
 
@@ -27969,6 +28250,18 @@ float3 GetTessFactors ()
          #endif
       #endif
 
+      #if _BLIGHT
+
+	half4 _BlightArray[] = half4[64];
+	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
+	half4 _BlightTex_ST;
+         
+      #endif
+
+     
+
+
+
          #if _DETAILNOISE
          half3 _DetailNoiseScaleStrengthFade;
          #endif
@@ -29427,6 +29720,48 @@ void PrepareStochasticUVs(float scale, float2 uv, out float2 uv1, out float2 uv2
    weights = half3(w1, w2, w3);
    
 }
+
+
+
+      #if _BLIGHT
+
+        TEXTURE2D(_BlightTex); //rgb color, a height
+	TEXTURE2D(_BlightData); //r smooth, g xNorm, b occlusion, a yNorm
+
+         void DoBlight(Input i, inout RawSamples s, Config c, float camDist, float3 worldVertexNormal, float3 worldPos)
+         {
+            	float2 uv = i.worldPos.xz * _BlightTex_ST.xy + _BlightTex_ST.zw;            
+            
+            	half4 blightColor = SAMPLE_TEXTURE2D(_BlightTex, sampler_Diffuse, uv);
+	    	half4 blightData = SAMPLE_TEXTURE2D(_BlightData, sampler_Diffuse, uv);	
+
+	    	half3 blightNormal = half3(blightData.g, blightData.a, 1.0) * 2.0.xxx - 1.0.xxx;	
+
+		half mask = 0;
+		[unroll]
+		for(int a = 0; a < 64; a++)
+		{	
+			if(a < _BlightCount)	
+			{			
+				half4 temp = _BlightArray[a];	
+				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp[a]);
+			}
+		}
+		mask *= blightColor.a; //blight mask
+		mask = saturate(mask + (pow(mask, _BlightBoost));
+		half height = max(0, o.Height - mask);
+		half finalMask = min(1, height * _BlightBoost);
+		
+		o.Albedo = lerp(o.Albedo, blightColor.rgb, finalMask);
+		o.Normal = lerp(o.Normal, blightNormal, finalMask);
+		o.Smoothness = lerp(o.Smoothness, blightData.r, finalMask);
+		o.Occlusion = lerp(o.Occlusion, blightData.b, finalMask);
+		o.Height = lerp(o.Height, blightColor.a, finalMask);
+         }
+
+      #endif
+
+     
 
 
 

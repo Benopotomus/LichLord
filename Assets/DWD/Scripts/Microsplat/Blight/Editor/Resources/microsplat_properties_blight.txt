@@ -1,0 +1,9 @@
+
+      
+	[Header(Blight)]
+	_BlightTex("Blight Tex", 2D) = "white" {}
+	[NoScaleOffset] _BlightData("Blight Packed Data", 2D) = "grey" {}
+      	_BlightCount("Blight Count", int) = 0
+	_BlightCutoff("Blight Cutoff", Range(0,1)) = 0.5
+	_BlightPow("Blight Pow", float) = 0.5
+	_BlightBoost("Blight Boost", float) = 1.0
