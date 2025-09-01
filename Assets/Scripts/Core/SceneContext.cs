@@ -6,7 +6,6 @@
 namespace LichLord
 {
     using Fusion;
-    using LichLord.Buildables;
     using LichLord.NonPlayerCharacters;
     using LichLord.Projectiles;
     using LichLord.Props;

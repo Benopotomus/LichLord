@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -56,9 +57,12 @@ public static class PropPreviewManager
         var allPreviews = Object.FindObjectsOfType<GameObject>();
         foreach (var obj in allPreviews)
         {
-            if (obj.name == previewObjectName && obj.transform.parent != null)
+            if (obj != null)
             {
-                Object.DestroyImmediate(obj);
+                if (obj.name == previewObjectName && obj.transform.parent != null)
+                {
+                    Object.DestroyImmediate(obj);
+                }
             }
         }
 
@@ -192,3 +196,4 @@ public static class PropPreviewManager
         EditorSceneManager.MarkSceneDirty(marker.gameObject.scene);
     }
 }
+#endif

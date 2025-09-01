@@ -13,11 +13,9 @@ public class LevelEditorEditor : Editor
     private bool isPlacing = false;
     private bool useSurfaceNormal = false;
     private Vector3 forwardDirection = Vector3.forward;
-    private int maxPropsPerChunk = 256; // Configurable max props per chunk
+    private int maxPropsPerChunk = 512; // Configurable max props per chunk
     private bool blockPlacementOnLimit = false; // Toggle to block or allow placement
     private string warningMessage = ""; // Store warning for Scene View display
-    private LayerMask groundLayerMask = -1; // Default to all layers
-    private float raycastDistance = 100f; // Max distance for downward raycast
 
     static LevelEditorEditor()
     {
@@ -155,10 +153,6 @@ public class LevelEditorEditor : Editor
         EditorGUILayout.LabelField("Marker Settings", EditorStyles.boldLabel);
 
         useSurfaceNormal = EditorGUILayout.Toggle("Use Surface Normal", useSurfaceNormal);
-        // Use MaskField instead of LayerMaskField for Unity 2022.3
-        int currentMask = groundLayerMask.value;
-        int newMask = EditorGUILayout.MaskField("Ground Layer Mask", currentMask, InternalEditorUtility.layers);
-        groundLayerMask = newMask;
 
         maxPropsPerChunk = EditorGUILayout.IntField("Max Props Per Chunk", maxPropsPerChunk);
         blockPlacementOnLimit = EditorGUILayout.Toggle("Block Placement on Limit", blockPlacementOnLimit);
@@ -264,39 +258,18 @@ public class LevelEditorEditor : Editor
         // Process each marker
         foreach (var marker in markers)
         {
-            // Start raycast slightly above the marker to avoid self-collision
-            Vector3 rayOrigin = marker.transform.position + Vector3.up * 500;
-            Ray ray = new Ray(rayOrigin, Vector3.down);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 1000, groundLayerMask))
+            snappedCount++;
+
+            // Update PropMarkupData if this is a PropMarker
+            if (marker is PropMarker propMarker && propMarker.definition != null)
             {
-                // Update marker position
-                marker.transform.position = hit.point;
-                snappedCount++;
-
-                // Update corresponding markup data
-                FChunkPosition chunkCoord = manager.WorldSettings.GetChunkCoordFromPosition(hit.point);
-                ChunkMarkupData chunkData = manager.WorldSettings.GetOrCreateMarkupData(chunkCoord);
-
-                // Update PropMarkupData if this is a PropMarker
-                if (marker is PropMarker propMarker && propMarker.definition != null)
-                {
-                    SnapToGround(propMarker);
-                }
-                // Update InvasionSpawnPointMarkupData if this is an InvasionSpawnPointMarker
-                else if (marker is InvasionSpawnPointMarker)
-                {
-                    List<InvasionSpawnPointMarkupData> invasionList = chunkData.InvasionSpawnPointMarkupDatas?.ToList() ?? new List<InvasionSpawnPointMarkupData>();
-                    var invasionData = invasionList.Find(i => Vector3.Distance(i.position, marker.transform.position) < markerDetectionRadius);
-                    if (invasionData != null)
-                    {
-                        int index = invasionList.IndexOf(invasionData);
-                        invasionData.position = hit.point;
-                        invasionList[index] = invasionData;
-                        chunkData.InvasionSpawnPointMarkupDatas = invasionList.ToArray();
-                        EditorUtility.SetDirty(chunkData);
-                    }
-                }
+                SnapToGround(propMarker);
+            }
+            // Update InvasionSpawnPointMarkupData if this is an InvasionSpawnPointMarker
+            else if (marker is InvasionSpawnPointMarker)
+            {
+                
             }
             else
             {

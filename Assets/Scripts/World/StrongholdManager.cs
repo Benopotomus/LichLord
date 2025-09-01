@@ -15,7 +15,7 @@ namespace LichLord.World
         [FieldOffset(0)]
         public FChunkPosition ChunkID;
         [FieldOffset(2)]
-        public byte ChunkIndex;
+        public ushort ChunkIndex;
 
         public bool IsValid()
         { 
