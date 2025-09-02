@@ -1,5 +1,9 @@
 ﻿
 #if _BLIGHT
+	
+	//globals
+	half4 _BlightArray[64];
+	half _BlightCount;
 
 	TEXTURE2D(_BlightTex); //rgb color, a height
 	TEXTURE2D(_BlightData); //r smooth, g xNorm, b occlusion, a yNorm
@@ -20,7 +24,7 @@
 			if(a < _BlightCount)	
 			{			
 				half4 temp = _BlightArray[a];	
-				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp[a]);
+				mask += 1.0 - saturate((distance(worldPos, temp.xyz) + 0.0001) / temp.w);
 			}
 		}
 		mask *= blightColor.a; //blight mask

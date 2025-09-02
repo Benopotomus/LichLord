@@ -1,8 +1,7 @@
 ﻿
 #if _BLIGHT
-
-	uniform half4 _BlightArray[64];
-	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
+	
+	half _BlightCutoff, _BlightPow, _BlightBoost;
 	half4 _BlightTex_ST;
          
 #endif
