@@ -25,11 +25,12 @@ namespace LichLord.NonPlayerCharacters
 
         public override void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition, 
+            ENPCSpawnType spawnType,
             ETeamID teamID, 
             EAttitude attitude,
             bool isInvasionNPC = false)
         {
-            base.InitializeData(ref npcData, definition, teamID, attitude, isInvasionNPC);
+            base.InitializeData(ref npcData, definition, spawnType, teamID, attitude, isInvasionNPC);
 
             // Initialize Events
             npcData.Events = 0;
@@ -54,9 +55,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetWorkerIndex(int workerIndex, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            int config = npcData.Configuration;
             int indexValue = Mathf.Clamp((int)workerIndex, 0, WORKER_INDEX_MASK);
-            config = (ushort)((config & ~(WORKER_INDEX_MASK << WORKER_INDEX_SHIFT)) | (indexValue << WORKER_INDEX_SHIFT));
+            config = ((config & ~(WORKER_INDEX_MASK << WORKER_INDEX_SHIFT)) | (indexValue << WORKER_INDEX_SHIFT));
             npcData.Configuration = config;
         }
 

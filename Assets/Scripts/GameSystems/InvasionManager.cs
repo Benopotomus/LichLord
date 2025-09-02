@@ -217,7 +217,7 @@ namespace LichLord
 
                 // Spawn the NPC at the calculated position
                 //Debug.Log("NPC spawned at spawn position: " + spawnPosition);
-                Context.NonPlayerCharacterManager.SpawnNPC(spawnPosition, waveCharacters[i], ETeamID.EnemiesTeamA, EAttitude.Hostile, true);
+                Context.NonPlayerCharacterManager.SpawnNPC(spawnPosition, waveCharacters[i], ENPCSpawnType.Invasion, ETeamID.EnemiesTeamA, EAttitude.Hostile);
             }
 
             InvasionSpawnWave++;

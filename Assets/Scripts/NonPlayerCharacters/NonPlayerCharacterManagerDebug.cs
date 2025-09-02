@@ -33,7 +33,12 @@ namespace LichLord.NonPlayerCharacters
                     );
 
                     randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA, EAttitude.Hostile, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, 
+                        spawnDef, 
+                        ENPCSpawnType.
+                        Invasion, 
+                        ETeamID.EnemiesTeamA, 
+                        EAttitude.Hostile);
                 }
                 
                 for (int i = 0; i < _initialSpawnCount; i++)
@@ -46,7 +51,11 @@ namespace LichLord.NonPlayerCharacters
 
                     randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB, EAttitude.Hostile, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition,
+                        spawnDef, 
+                        ENPCSpawnType.Invasion, 
+                        ETeamID.EnemiesTeamB,
+                        EAttitude.Hostile);
                 }
                 
             }
@@ -76,7 +85,7 @@ namespace LichLord.NonPlayerCharacters
                     );
 
                     randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamA, EAttitude.Hostile, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ENPCSpawnType.Invasion, ETeamID.EnemiesTeamA, EAttitude.Hostile);
                 }
                 flip = false;
             }
@@ -92,7 +101,7 @@ namespace LichLord.NonPlayerCharacters
 
                     randomPosition += _debugSpawnPosition + new Vector3(-35, 0, 0);
 
-                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ETeamID.EnemiesTeamB, EAttitude.Hostile, false);
+                    Context.NonPlayerCharacterManager.SpawnNPC(randomPosition, spawnDef, ENPCSpawnType.Invasion, ETeamID.EnemiesTeamB, EAttitude.Hostile);
                 }
                 flip = true;
             }

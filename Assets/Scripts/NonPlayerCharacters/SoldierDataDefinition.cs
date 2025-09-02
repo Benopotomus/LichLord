@@ -25,11 +25,12 @@ namespace LichLord.NonPlayerCharacters
 
         public override void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition, 
+            ENPCSpawnType spawnType,
             ETeamID teamID,
             EAttitude attitude,
             bool isInvasionNPC = false)
         {
-            base.InitializeData(ref npcData, definition, teamID, attitude,isInvasionNPC);
+            base.InitializeData(ref npcData, definition, spawnType, teamID, attitude, isInvasionNPC);
 
             // Initialize Config
             SetTeamID(teamID, ref npcData);
@@ -48,7 +49,7 @@ namespace LichLord.NonPlayerCharacters
 
         public override void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            int config = npcData.Configuration;
             int teamValue = Mathf.Clamp((int)teamID, 0, TEAM_MASK);
             config = (ushort)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
             npcData.Configuration = config;
@@ -62,9 +63,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetInvasionNPC(bool isInvasionNPC, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            int config = npcData.Configuration;
             int invasionValue = isInvasionNPC ? 1 : 0;
-            config = (ushort)((config & ~(INVASION_NPC_MASK << INVASION_NPC_SHIFT)) | (invasionValue << INVASION_NPC_SHIFT));
+            config = ((config & ~(INVASION_NPC_MASK << INVASION_NPC_SHIFT)) | (invasionValue << INVASION_NPC_SHIFT));
             npcData.Configuration = config;
         }
 
@@ -76,9 +77,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetDialogIndex(int newDialogIndex, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            int config = npcData.Configuration;
             int dialogIndex = Mathf.Clamp(newDialogIndex, 0, DIALOG_INDEX_MASK);
-            config = (ushort)((config & ~(DIALOG_INDEX_MASK << DIALOG_INDEX_SHIFT)) | (dialogIndex << DIALOG_INDEX_SHIFT));
+            config = ((config & ~(DIALOG_INDEX_MASK << DIALOG_INDEX_SHIFT)) | (dialogIndex << DIALOG_INDEX_SHIFT));
             npcData.Configuration = config;
         }
 

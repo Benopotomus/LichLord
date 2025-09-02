@@ -8,14 +8,14 @@
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
-        private ushort _configuration; // 2 bytes
-        [FieldOffset(2)]
+        private int _configuration; // 4 bytes
+        [FieldOffset(4)]
         private FWorldTransform _transform; // 9 bytes: Position (6) + Rotation (2)
-        [FieldOffset(11)]
+        [FieldOffset(13)]
         private byte _condition; // 1 byte: NPCState (4 bits)// animation bits
-        [FieldOffset(12)]
+        [FieldOffset(14)]
         private ushort _events; // 2 bytes: Health (12 bits) and storage
-        // Total: 14 bytes
+        // Total: 16 bytes
 
         public int DefinitionID
         {
@@ -99,7 +99,7 @@
             set => _condition = value;
         }
 
-        public ushort Configuration
+        public int Configuration
         {
             get => _configuration;
             set => _configuration = value;

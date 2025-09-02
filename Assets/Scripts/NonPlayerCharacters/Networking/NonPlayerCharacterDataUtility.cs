@@ -18,9 +18,9 @@
 
         public static void SetDefinitionID(int definitionIndex, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            int config = npcData.Configuration;
             definitionIndex = Mathf.Clamp(definitionIndex, 0, DEFINITION_MASK);
-            config = (ushort)((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
+            config = ((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
             npcData.Configuration = config;
         }
     }
@@ -52,5 +52,13 @@
         Hostile,
         Friendly,
         Neutral,
+    }
+
+    public enum ENPCSpawnType : byte
+    {
+        Invasion, // Goes toward teh invasion manager's target
+        Worker, // Has a worker index for players
+        Guard, // Spawns at locations to guard them
+        Patrol, // Spawns at patrol points and paths to other ones
     }
 }

@@ -9,6 +9,10 @@ namespace LichLord.NonPlayerCharacters
         protected const int DEFINITION_SHIFT = 0;
         protected const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
 
+        protected const int SPAWN_TYPE_BITS = 3;          // 0–7
+        protected const int SPAWN_TYPE_SHIFT = 0;
+        protected const byte SPAWN_TYPE_MASK = (1 << SPAWN_TYPE_BITS) - 1;
+
         // Condition (byte)
         protected const int NPC_STATE_BITS = 4;           // 0–15
         protected const int ANIMATION_INDEX_BITS = 2;     // 0–3
@@ -24,6 +28,7 @@ namespace LichLord.NonPlayerCharacters
 
         public virtual void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition,
+            ENPCSpawnType spawnType,
             ETeamID teamID,
             EAttitude attitude,
             bool isInvasionNPC = false)
@@ -47,12 +52,25 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetDefinitionID(int definitionIndex, ref FNonPlayerCharacterData npcData)
         {
-            ushort config = npcData.Configuration;
+            int config = npcData.Configuration;
             definitionIndex = Mathf.Clamp(definitionIndex, 0, DEFINITION_MASK);
-            config = (ushort)((config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT));
+            config = (config & ~(DEFINITION_MASK << DEFINITION_SHIFT)) | (definitionIndex << DEFINITION_SHIFT);
             npcData.Configuration = config;
         }
 
+        // DefinitionID
+        public ENPCSpawnType GetSpawnType(ref FNonPlayerCharacterData npcData)
+        {
+            return (ENPCSpawnType)((npcData.Configuration >> SPAWN_TYPE_SHIFT) & SPAWN_TYPE_MASK);
+        }
+
+        public void SetSpawnType(ENPCSpawnType newSpawnType, ref FNonPlayerCharacterData npcData)
+        {
+            int config = npcData.Configuration;
+            int spawnType = Mathf.Clamp((int)newSpawnType, 0, SPAWN_TYPE_MASK);
+            config = (config & ~(SPAWN_TYPE_MASK << SPAWN_TYPE_SHIFT)) | (spawnType << SPAWN_TYPE_SHIFT);
+            npcData.Configuration = config;
+        }
 
         // TeamID
         public virtual ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)

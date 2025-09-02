@@ -28,7 +28,10 @@ namespace LichLord.NonPlayerCharacters
            _debug.OnSpawned();
         }
 
-        public void SpawnNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, EAttitude attitude, bool isInvasionNPC)
+        public void SpawnNPC(Vector3 spawnPos, 
+            NonPlayerCharacterDefinition definition,
+            ENPCSpawnType spawnType,
+            ETeamID teamID, EAttitude attitude)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
@@ -48,7 +51,7 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, teamID, attitude, isInvasionNPC);
+            definition.DataDefinition.InitializeData(ref data, definition, spawnType, teamID, attitude);
 
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;
@@ -83,7 +86,7 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, teamID, EAttitude.Friendly);
+            definition.DataDefinition.InitializeData(ref data, definition, ENPCSpawnType.Worker, teamID, EAttitude.Friendly);
             workerData.SetWorkerIndex(workerIndex, ref data);
 
             data.Position = spawnPos;
@@ -93,7 +96,7 @@ namespace LichLord.NonPlayerCharacters
             replicator.SpawnNPC(ref data, freeIndex);
         }
 
-        public void SpawnDialogNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, EAttitude attitude, int dialogIndex, bool isInvasionNPC)
+        public void SpawnDialogNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ENPCSpawnType spawnType, ETeamID teamID, EAttitude attitude, int dialogIndex, bool isInvasionNPC)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
@@ -119,7 +122,7 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, teamID, attitude, isInvasionNPC);
+            definition.DataDefinition.InitializeData(ref data, definition, spawnType, teamID, attitude, isInvasionNPC);
             soldierData.SetDialogIndex(dialogIndex, ref data);
             
             data.Position = spawnPos;

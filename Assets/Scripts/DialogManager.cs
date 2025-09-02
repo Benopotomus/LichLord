@@ -84,7 +84,7 @@ namespace LichLord
         {
         }
         
-        public void TrySpawnDialogNPC(NonPlayerCharacterDefinition definition, Vector3 spawnPosition, ETeamID teamID, DialogDefinition dialogDefinition)
+        public void TrySpawnDialogNPC(NonPlayerCharacterDefinition definition, Vector3 spawnPosition, ENPCSpawnType spawnType, ETeamID teamID, DialogDefinition dialogDefinition)
         {
             int freeDialogIndex = GetFreeDialogIndex();
 
@@ -98,6 +98,7 @@ namespace LichLord
             
             Context.NonPlayerCharacterManager.SpawnDialogNPC(spawnPosition,
                 definition,
+                spawnType,
                 teamID,
                 EAttitude.Neutral,
                 freeDialogIndex,
