@@ -1,11 +1,11 @@
 ﻿
-      #if _BLIGHT
+#if _BLIGHT
 
-	half4 _BlightArray[] = half4[64];
+	uniform half4 _BlightArray[64];
 	half _BlightCount, _BlightCutoff, _BlightPow, _BlightBoost;
 	half4 _BlightTex_ST;
          
-      #endif
+#endif
 
      
 

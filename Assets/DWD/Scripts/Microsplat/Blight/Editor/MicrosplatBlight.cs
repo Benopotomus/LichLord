@@ -86,6 +86,8 @@ namespace JBooth.MicroSplat
         {
             List<string> output = new List<string>();
 
+            if (blightEnabled)
+                output.Add("_BLIGHT");
             return output.ToArray();
         }
 
