@@ -7,7 +7,7 @@ namespace LichLord.NonPlayerCharacters
     {
         // Config (7 from base)
         private const int WORKER_INDEX_BITS = 7;                // 0–127
-        private const int WORKER_INDEX_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
+        private const int WORKER_INDEX_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
         private const byte WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
 
         // Events (packed into ushort)
@@ -27,24 +27,13 @@ namespace LichLord.NonPlayerCharacters
             NonPlayerCharacterDefinition definition, 
             ENPCSpawnType spawnType,
             ETeamID teamID, 
-            EAttitude attitude,
-            bool isInvasionNPC = false)
+            EAttitude attitude)
         {
-            base.InitializeData(ref npcData, definition, spawnType, teamID, attitude, isInvasionNPC);
+            base.InitializeData(ref npcData, definition, spawnType, teamID, attitude);
 
             // Initialize Events
             npcData.Events = 0;
             SetHealth(definition.MaxHealth, ref npcData);
-        }
-
-        // TeamID
-        public override ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)
-        {
-            return ETeamID.PlayerTeam;
-        }
-
-        public override void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
-        {
         }
 
         // Worker Index

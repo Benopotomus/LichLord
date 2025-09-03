@@ -26,7 +26,7 @@ namespace LichLord.NonPlayerCharacters
                 DefinitionId = data.DefinitionID,
                 Position = data.Position,
                 Rotation = data.Rotation,
-                TeamId = definition.DataDefinition.GetTeamID(ref data)
+                TeamId =  data.TeamID,
             };
 
             BundleObject prefabBundle = definition.PrefabBundle;

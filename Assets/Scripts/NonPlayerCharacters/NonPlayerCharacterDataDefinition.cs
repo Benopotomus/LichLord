@@ -5,13 +5,22 @@ namespace LichLord.NonPlayerCharacters
     public class NonPlayerCharacterDataDefinition : ScriptableObject
     {
         // Config
-        protected const int DEFINITION_BITS = 7;          // 0–127
+        protected const int DEFINITION_BITS = 8;          // 0–255
         protected const int DEFINITION_SHIFT = 0;
         protected const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
 
-        protected const int SPAWN_TYPE_BITS = 3;          // 0–7
-        protected const int SPAWN_TYPE_SHIFT = 0;
+        protected const int SPAWN_TYPE_BITS = 2;          // 0–3
+        protected const int SPAWN_TYPE_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
         protected const byte SPAWN_TYPE_MASK = (1 << SPAWN_TYPE_BITS) - 1;
+
+        protected const int TEAM_BITS = 3;                // 0–7
+        protected const int TEAM_SHIFT = SPAWN_TYPE_SHIFT + SPAWN_TYPE_BITS;
+        protected const byte TEAM_MASK = (1 << TEAM_BITS) - 1;
+
+        protected const int DIALOG_INDEX_BITS = 5;        // 0-31
+        protected const int DIALOG_INDEX_SHIFT = TEAM_SHIFT + TEAM_BITS;
+        protected const ushort DIALOG_INDEX_MASK = (1 << DIALOG_INDEX_BITS) - 1;
+        // 18 total
 
         // Condition (byte)
         protected const int NPC_STATE_BITS = 4;           // 0–15
@@ -30,12 +39,13 @@ namespace LichLord.NonPlayerCharacters
             NonPlayerCharacterDefinition definition,
             ENPCSpawnType spawnType,
             ETeamID teamID,
-            EAttitude attitude,
-            bool isInvasionNPC = false)
+            EAttitude attitude)
         {
             // Initialize Configuration
             npcData.Configuration = 0;
             SetDefinitionID(definition.TableID, ref npcData);
+            SetSpawnType(spawnType, ref npcData);
+            SetTeamID(teamID, ref npcData);
 
             // Initialize Condition
             npcData.Condition = 0;
@@ -58,7 +68,7 @@ namespace LichLord.NonPlayerCharacters
             npcData.Configuration = config;
         }
 
-        // DefinitionID
+        // Spawn Type
         public ENPCSpawnType GetSpawnType(ref FNonPlayerCharacterData npcData)
         {
             return (ENPCSpawnType)((npcData.Configuration >> SPAWN_TYPE_SHIFT) & SPAWN_TYPE_MASK);
@@ -75,11 +85,29 @@ namespace LichLord.NonPlayerCharacters
         // TeamID
         public virtual ETeamID GetTeamID(ref FNonPlayerCharacterData npcData)
         {
-            return ETeamID.PlayerTeam;
+            return (ETeamID)((npcData.Configuration >> TEAM_SHIFT) & TEAM_MASK);
         }
 
         public virtual void SetTeamID(ETeamID teamID, ref FNonPlayerCharacterData npcData)
         {
+            int config = npcData.Configuration;
+            int teamValue = Mathf.Clamp((int)teamID, 0, TEAM_MASK);
+            config = (ushort)((config & ~(TEAM_MASK << TEAM_SHIFT)) | (teamValue << TEAM_SHIFT));
+            npcData.Configuration = config;
+        }
+
+        // Dialog
+        public virtual int GetDialogIndex(ref FNonPlayerCharacterData npcData)
+        {
+            return ((npcData.Configuration >> DIALOG_INDEX_SHIFT) & DIALOG_INDEX_MASK);
+        }
+
+        public virtual void SetDialogIndex(int newDialogIndex, ref FNonPlayerCharacterData npcData)
+        {
+            int config = npcData.Configuration;
+            int dialogIndex = Mathf.Clamp(newDialogIndex, 0, DIALOG_INDEX_MASK);
+            config = ((config & ~(DIALOG_INDEX_MASK << DIALOG_INDEX_SHIFT)) | (dialogIndex << DIALOG_INDEX_SHIFT));
+            npcData.Configuration = config;
         }
 
         // NPCState

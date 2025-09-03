@@ -101,6 +101,7 @@ namespace LichLord.NonPlayerCharacters
             } 
         }
 
+        [SerializeField]
         private int _workerIndex = -1;
         public int WorkerIndex => _workerIndex;
 

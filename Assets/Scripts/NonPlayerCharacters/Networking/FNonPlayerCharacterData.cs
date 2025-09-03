@@ -28,6 +28,24 @@
             get => Global.Tables.NonPlayerCharacterTable.TryGetDefinition(DefinitionID);
         }
 
+        public ENPCSpawnType SpawnType
+        {
+            get => NonPlayerCharacterDataUtility.GetSpawnType(ref this);
+            set => NonPlayerCharacterDataUtility.SetSpawnType(value, ref this);
+        }
+
+        public NonPlayerCharacterDataDefinition DataDefinition
+        {
+            get => Definition.GetDataDefinition(SpawnType);
+        }
+
+        // TeamID
+        public ETeamID TeamID
+        {
+            get => NonPlayerCharacterDataUtility.GetTeamID(ref this);
+            set => NonPlayerCharacterDataUtility.SetTeamID(value, ref this);
+        }
+
         public FWorldTransform Transform
         {
             get => _transform;

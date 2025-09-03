@@ -48,6 +48,12 @@ namespace LichLord.NonPlayerCharacters
                     _woodGO.SetActive(false);
                     break;
                 case ECurrencyType.Wood:
+
+                    if (_stoneGO == null)
+                    {
+                        Debug.Log(runtimeState.GetSpawnType());
+                    }
+
                     _stoneGO.SetActive(false);
                     _woodGO.SetActive(true);
                     break;

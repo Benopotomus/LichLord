@@ -32,7 +32,7 @@ namespace LichLord.NonPlayerCharacters
             get
             {
                 if (_dataDefinition == null)
-                    _dataDefinition = Definition.DataDefinition;
+                    _dataDefinition = _data.DataDefinition;
 
                 return _dataDefinition;
             }
@@ -51,8 +51,8 @@ namespace LichLord.NonPlayerCharacters
             if (_data.DefinitionID == 0)
                 return;
 
-            _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_data.DefinitionID);    
-            _dataDefinition = Definition.DataDefinition;
+            _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_data.DefinitionID);
+            _dataDefinition = _data.DataDefinition;
         }
 
         public void ApplyDamage(int damage, int hitReactIndex)
@@ -71,12 +71,20 @@ namespace LichLord.NonPlayerCharacters
             return DataDefinition.GetTeamID(ref _data);
         }
 
+        public ENPCSpawnType GetSpawnType()
+        {
+            return _data.SpawnType;
+        }
+
         public ENPCState GetState()
         {
             if(_data.DefinitionID == 0)
                 return ENPCState.Inactive;
 
-            return Definition.DataDefinition.GetState(ref _data);
+            if (DataDefinition == null)
+                return ENPCState.Inactive;
+
+            return DataDefinition.GetState(ref _data);
         }
 
         public void SetState(ENPCState newState)
@@ -138,7 +146,7 @@ namespace LichLord.NonPlayerCharacters
 
         public bool IsInvasionNPC()
         {
-            if (DataDefinition is SoldierDataDefinition soldierDataDefinition)
+            if (DataDefinition is InvaderDataDefinition soldierDataDefinition)
                 return soldierDataDefinition.IsInvasionNPC(ref _data);
 
             return false;
@@ -149,7 +157,10 @@ namespace LichLord.NonPlayerCharacters
             if (_data.DefinitionID == 0)
                 return ENPCState.Inactive;
 
-            return Definition.DataDefinition.GetState(ref otherData);
+            if (DataDefinition == null)
+                return ENPCState.Inactive;
+
+            return DataDefinition.GetState(ref otherData);
         }
 
         public bool IsWorker()

@@ -34,8 +34,16 @@ namespace LichLord.NonPlayerCharacters
         public float WalkSpeed => _walkSpeed;
 
         [SerializeField]
-        protected NonPlayerCharacterDataDefinition _dataDefinition;
-        public NonPlayerCharacterDataDefinition DataDefinition => _dataDefinition;
+        [SerializedDictionary("SpawnType", "DataDefinition")]
+        private SerializedDictionary<ENPCSpawnType, NonPlayerCharacterDataDefinition> _spawnTypeDataDefinitions;
+
+        public NonPlayerCharacterDataDefinition GetDataDefinition(ENPCSpawnType spawnType)
+        {
+            if (_spawnTypeDataDefinitions.TryGetValue(spawnType, out var value))
+                return value;
+
+            return null;
+        }
 
         [SerializeField]
         [SerializedDictionary("CurrencyType", "CarryValue")]

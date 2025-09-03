@@ -1,6 +1,4 @@
-﻿using LichLord.Buildables;
-using LichLord.Projectiles;
-using LichLord.Props;
+﻿using LichLord.Projectiles;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

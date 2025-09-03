@@ -31,7 +31,8 @@ namespace LichLord.NonPlayerCharacters
         public void SpawnNPC(Vector3 spawnPos, 
             NonPlayerCharacterDefinition definition,
             ENPCSpawnType spawnType,
-            ETeamID teamID, EAttitude attitude)
+            ETeamID teamID, 
+            EAttitude attitude)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
@@ -51,8 +52,9 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, spawnType, teamID, attitude);
-
+            data.DefinitionID = definition.TableID;
+            data.SpawnType = spawnType;
+            data.DataDefinition.InitializeData(ref data, definition, spawnType, teamID, attitude);
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;
 
@@ -79,14 +81,15 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            if (definition.DataDefinition is not WorkerDataDefinition workerData)
+            WorkerDataDefinition workerData = definition.GetDataDefinition(ENPCSpawnType.Worker) as WorkerDataDefinition;
+            if (workerData == null)
             {
                 Debug.Log("Trying to spawn a non-worker as a worker");
                 return;
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, ENPCSpawnType.Worker, teamID, EAttitude.Friendly);
+            workerData.InitializeData(ref data, definition, ENPCSpawnType.Worker, teamID, EAttitude.Friendly);
             workerData.SetWorkerIndex(workerIndex, ref data);
 
             data.Position = spawnPos;
@@ -115,15 +118,18 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            if (definition.DataDefinition is not SoldierDataDefinition soldierData)
+            var dataDefinition = definition.GetDataDefinition(spawnType);
+            if (dataDefinition == null)
             {
                 Debug.Log("Trying to spawn a npc as a soldier, but its not");
                 return;
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            definition.DataDefinition.InitializeData(ref data, definition, spawnType, teamID, attitude, isInvasionNPC);
-            soldierData.SetDialogIndex(dialogIndex, ref data);
+            data.DefinitionID = definition.TableID;
+            data.SpawnType = spawnType;
+            dataDefinition.InitializeData(ref data, definition, spawnType, teamID, attitude);
+            dataDefinition.SetDialogIndex(dialogIndex, ref data);
             
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;
@@ -153,7 +159,7 @@ namespace LichLord.NonPlayerCharacters
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
 
-            data.Configuration = (ushort)saveState.configuration;
+            data.Configuration = saveState.configuration;
             data.Position = saveState.position;
             data.Rotation = saveState.rotation;
             data.Condition = (byte)saveState.condition;
