@@ -21,8 +21,6 @@ namespace LichLord.NonPlayerCharacters
         {
             base.InitializeData(ref npcData, definition, spawnType, teamID, attitude);
 
-            // Initialize Config
-            SetTeamID(teamID, ref npcData);
 
             // Initialize Events
             npcData.Events = 0;

@@ -223,6 +223,89 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2692910239584522573}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &558379459418822749
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5606130258246887507}
+  - component: {fileID: 1621507056416520430}
+  - component: {fileID: 600728881310944149}
+  m_Layer: 0
+  m_Name: AttitudeDecal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5606130258246887507
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558379459418822749}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3282022331344466140}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!33 &1621507056416520430
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558379459418822749}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &600728881310944149
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558379459418822749}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: b5442ef8f3fb44440881881a6add2600, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &821376314875511218
 GameObject:
   m_ObjectHideFlags: 0
@@ -1011,6 +1094,7 @@ GameObject:
   - component: {fileID: 3567655564029587463}
   - component: {fileID: 7889308162331754733}
   - component: {fileID: 7850887928293133023}
+  - component: {fileID: 5729182260968451425}
   m_Layer: 10
   m_Name: NPC_SkeletonWarrior_01
   m_TagString: Untagged
@@ -1033,6 +1117,7 @@ Transform:
   m_Children:
   - {fileID: 7135139440380934049}
   - {fileID: 7812457032419151436}
+  - {fileID: 5606130258246887507}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3484536114419770148
@@ -1054,11 +1139,13 @@ MonoBehaviour:
   _weaponsComponent: {fileID: 3797343846203693856}
   _animationController: {fileID: 3567655564029587463}
   _currencyComponent: {fileID: 7850887928293133023}
+  _attitudeComponent: {fileID: 5729182260968451425}
   _muzzleComponent: {fileID: 7889308162331754733}
   _animator: {fileID: 5683565048644474723}
   _transform: {fileID: 3282022331344466140}
   _hurtbox: {fileID: 2131942850854789237}
   _collider: {fileID: 1615885042697682339}
+  _workerIndex: -1
   redHat: {fileID: 0}
   blueHat: {fileID: 0}
 --- !u!136 &1615885042697682339
@@ -1368,6 +1455,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
+  _stoneGO: {fileID: 0}
+  _woodGO: {fileID: 0}
+--- !u!114 &5729182260968451425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81358e30ecbe18a4e89ecd920ffe6943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _attitude: 0
+  _indicatorRenderer: {fileID: 600728881310944149}
+  _colorProperty: _Color
 --- !u!1 &3176908961229995009
 GameObject:
   m_ObjectHideFlags: 0

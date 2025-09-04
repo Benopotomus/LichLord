@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using UnityEngine;
 
 namespace LichLord
@@ -11,16 +12,28 @@ namespace LichLord
         public Quaternion rotation;
         public EMovementState moveState;
 
+        public int tutorialProgress;
+
         public FPlayerSaveData(string playerName, 
             Vector3 position, 
             Quaternion rotation,
-            EMovementState moveState)
+            EMovementState moveState,
+            int tutorialProgress)
         {
             this.playerName = playerName;
             this.position = position;
             this.rotation = rotation;
             this.moveState = moveState;
 
+            this.tutorialProgress = tutorialProgress;
+        }
+
+        public bool IsValid()
+        {
+            if(playerName == null)
+                return false;
+        
+            return true;
         }
     }
 }

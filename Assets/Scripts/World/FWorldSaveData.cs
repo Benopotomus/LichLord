@@ -175,6 +175,19 @@ namespace LichLord.World
     }
 
     [Serializable]
+    public struct FWorldMissionSaveState
+    {
+        public int progress;
+
+
+        // Store harvesting target data here as well
+        public FWorldMissionSaveState(int progress)
+        {
+            this.progress = progress;
+        }
+    }
+
+    [Serializable]
     public struct FNPCSaveData
     {
         public FNonPlayerCharacterSaveState[] npcs;

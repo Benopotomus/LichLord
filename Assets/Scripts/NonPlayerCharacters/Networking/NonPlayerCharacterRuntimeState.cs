@@ -76,6 +76,11 @@ namespace LichLord.NonPlayerCharacters
             return _data.SpawnType;
         }
 
+        public EAttitude GetAttitude()
+        {
+            return DataDefinition.GetAttitude(ref _data);
+        }
+
         public ENPCState GetState()
         {
             if(_data.DefinitionID == 0)

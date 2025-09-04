@@ -138,9 +138,9 @@ namespace LichLord
 
         }
 
-        public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState)
+        public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState, string nickName)
         {
-
+            Nickname = nickName;
             transform.position = position;
             Movement.SetMovementState(moveState);
             Input.SetLookRotation(rotation);

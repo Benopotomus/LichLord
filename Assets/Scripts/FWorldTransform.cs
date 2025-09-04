@@ -76,7 +76,27 @@ namespace LichLord
 
         public Quaternion Rotation
         {
-            get => Quaternion.Euler(Pitch, Yaw, 0);
+            get
+            {
+                float yawRad = Yaw * Mathf.Deg2Rad;     // around Y
+                float pitchRad = Pitch * Mathf.Deg2Rad; // around X
+
+                float halfYaw = yawRad * 0.5f;
+                float halfPitch = pitchRad * 0.5f;
+
+                float sinYaw = Mathf.Sin(halfYaw);
+                float cosYaw = Mathf.Cos(halfYaw);
+                float sinPitch = Mathf.Sin(halfPitch);
+                float cosPitch = Mathf.Cos(halfPitch);
+
+                // Combine yaw (Y) then pitch (X). Roll = 0.
+                Quaternion q;
+                q.x = cosYaw * sinPitch;   // X component
+                q.y = sinYaw * cosPitch;   // Y component
+                q.z = -sinYaw * sinPitch;  // Z component
+                q.w = cosYaw * cosPitch;   // W component
+                return q;
+            }
             set
             {
                 Vector3 euler = value.eulerAngles;

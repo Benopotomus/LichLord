@@ -3,7 +3,6 @@ using System.IO;
 using Fusion;
 using System.Collections.Generic;
 using System;
-using LichLord.Props;
 using LichLord.Buildables;
 using LichLord.NonPlayerCharacters;
 
@@ -264,7 +263,6 @@ namespace LichLord.World
                 Debug.LogError($"Failed to load world states for session: {e.Message}");
             }
         }
-
 
         private void SaveNPCs()
         {

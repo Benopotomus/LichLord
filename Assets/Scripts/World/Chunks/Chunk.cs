@@ -9,8 +9,10 @@ namespace LichLord.World
     {
         private ChunkManager _manager;
         private SceneContext _context;
-        public ChunkReplicator Replicator;
-    
+        private ChunkReplicator _replicator;
+        public ChunkReplicator Replicator => _replicator;
+        private bool _hasReplicator;
+
         private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
         public List<IChunkTrackable> Trackables => _trackablesInChunk;
 
@@ -63,6 +65,18 @@ namespace LichLord.World
 
             // Create Bounds with height 1000 (as in original) for 3D space
             Bounds = new Bounds(new Vector3(center.x, 0, center.y), new Vector3(chunkSize, 1000, chunkSize));
+        }
+
+        public void SetReplicator(ChunkReplicator replicator)
+        { 
+            _replicator = replicator;
+            _hasReplicator = true;
+        }
+
+        public void ClearReplicator()
+        {
+            _replicator = null;
+            _hasReplicator = false;
         }
 
         public void IncrementReplicationRef()
@@ -128,14 +142,14 @@ namespace LichLord.World
 
         public void UpdatePropRuntimeState(PropRuntimeState runtimeState)
         {
-            if (Replicator == null)
+            if (!_hasReplicator)
             {
                 Debug.Log("No replicator " + ChunkID.X + ", " + ChunkID.Y);
                 return;
             }
 
             // if we have replication data, use that
-            ref FPropData propData = ref Replicator.GetPropData(runtimeState.index);
+            ref FPropData propData = ref _replicator.GetPropData(runtimeState.index);
             if (propData.IsValid())
             {
                 FPropData runtimeData = runtimeState.Data;
@@ -153,10 +167,10 @@ namespace LichLord.World
         {
             AddOrUpdateDeltaState(replictedState);
 
-            if (Replicator == null)
+            if (!_hasReplicator)
                 return;
 
-            ref FPropData data = ref Replicator.GetPropData(replictedState.index);
+            ref FPropData data = ref _replicator.GetPropData(replictedState.index);
             FPropData currentData = replictedState.Data;
             data.Copy(ref currentData);
         }

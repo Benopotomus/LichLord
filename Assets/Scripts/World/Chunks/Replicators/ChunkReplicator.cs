@@ -33,11 +33,17 @@ namespace LichLord.World
 
         protected virtual void OnChunkChanged()
         {
+            Chunk oldChunk = Context.ChunkManager.GetChunk(ChunkID);
+            if (oldChunk != null)
+            {
+                oldChunk.ClearReplicator();
+            }
+
             Chunk chunk = Context.ChunkManager.GetChunk(ChunkID);
             if (chunk != null)
             {
                 transform.position = chunk.Bounds.center;
-                chunk.Replicator = this;
+                chunk.SetReplicator(this);
                 CopyDataFromChunk(chunk);
             }
         }

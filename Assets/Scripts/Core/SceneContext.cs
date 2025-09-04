@@ -6,6 +6,7 @@
 namespace LichLord
 {
     using Fusion;
+    using LichLord.Missions;
     using LichLord.NonPlayerCharacters;
     using LichLord.Projectiles;
     using LichLord.Props;
@@ -37,6 +38,7 @@ namespace LichLord
         public ContainerManager ContainerManager;
         public WorkerManager WorkerManager;
         public DialogManager DialogManager;
+        public MissionManager MissionManager;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;

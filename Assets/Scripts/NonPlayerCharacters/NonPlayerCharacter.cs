@@ -119,6 +119,7 @@ namespace LichLord.NonPlayerCharacters
             _movementComponent.OnSpawned(runtimeState);
             _brainComponent.OnSpawned(runtimeState);
             _currencyComponent.OnSpawned();
+            _attitudeComponent.OnSpawned(runtimeState);
             _index = runtimeState.Index;
             UpdateChunk(_context.ChunkManager);
 
@@ -143,6 +144,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateTeam(runtimeState);
             _stateComponent.UpdateStateChange(runtimeState, hasAuthority, tick);
             _currencyComponent.OnRender(runtimeState);
+            _attitudeComponent.OnRender( runtimeState);
 
             if (hasAuthority)
             {

@@ -15,13 +15,18 @@ namespace LichLord.Props
         public Quaternion rotation; // World rotation
         public Vector3 scale; // World scale
 
+        private bool hasDefinition;
+
         private PropDefinition _definition;
         public PropDefinition Definition
         {
             get
             {
-                if (_definition == null)
+                if (!hasDefinition)
+                {
                     _definition = Global.Tables.PropTable.TryGetDefinition(definitionId);
+                    hasDefinition = true;
+                }
 
                 return _definition;
             }
@@ -210,5 +215,11 @@ namespace LichLord.Props
 
             return false;
         }
+    }
+
+    public struct FRuntimePropStateDefinition
+    {
+        bool IsValid;
+        PropDefinition Definition;
     }
 }

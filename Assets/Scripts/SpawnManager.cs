@@ -1,7 +1,4 @@
-﻿#define ENABLE_LOGS
-
-using System;
-using Fusion;
+﻿using Fusion;
 using Starter.Shooter;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -26,78 +23,54 @@ namespace LichLord
 
         public void SpawnLocalPlayer(PlayerRef playerRef)
         {
-            // Find spawn points
             _spawnPoints = FindObjectsOfType<SpawnPoint>();
-            if (_spawnPoints == null || _spawnPoints.Length == 0)
-            {
-                Debug.LogWarning("No SpawnPoint objects found in the scene!");
-            }
 
-            // Spawn the local player
+            if(LocalPlayer != null) 
+                return;
+
             if (!Runner.IsPlayerValid(Runner.LocalPlayer))
-            { 
+            {
                 Debug.LogWarning("LocalPlayer is invalid, cannot spawn player!");
                 return;
             }
 
-            // Default spawn position and rotation
+            FPlayerSaveData loadedPlayerData = Context.PlayerSaveLoadManager.LoadedPlayerSave;
+
+            if (loadedPlayerData.IsValid())
+            {
+                SpawnPlayerFromSave(playerRef, loadedPlayerData);
+            }
+            else
+            { 
+                CreateAndSpawnPlayer(playerRef);
+            }
+
+        }
+
+        private void SpawnPlayerFromSave(PlayerRef playerRef, FPlayerSaveData loadedPlayerData)
+        {
+            Vector3 spawnPosition = loadedPlayerData.position;
+            Quaternion spawnRotation = loadedPlayerData.rotation;
+            EMovementState moveState = loadedPlayerData.moveState;
+            string nickname = loadedPlayerData.playerName;
+
+            LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
+            LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState, nickname);
+
+            Debug.Log($"Spawned local player from save at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
+        }
+
+        private void CreateAndSpawnPlayer(PlayerRef playerRef)
+        {
             Vector3 spawnPosition = GetSpawnPosition();
             Quaternion spawnRotation = Quaternion.identity;
             EMovementState moveState = EMovementState.Walking;
-
-            if (Runner == null)
-            {
-                Debug.LogWarning("No active session; cannot check for saved player data.");
-            }
-
-            // Generate unique nickname based on project name
             string nickname = GetInstanceId();
 
-            // Check SaveLoadManager for saved player data
+            LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
+            LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState, nickname);
 
-            string sessionName = Global.Networking.SessionName;
-            string playerKey = $"{sessionName}_{nickname}"; // Composite key
-            if (SaveLoadManager.instance.TryGetPlayerData(playerKey, out string json))
-            {
-                try
-                {
-                    FPlayerSaveData savedData = JsonUtility.FromJson<FPlayerSaveData>(json);
-                    if (!string.IsNullOrEmpty(savedData.playerName))
-                    {
-                        spawnPosition = savedData.position;
-                        spawnRotation = savedData.rotation;
-                        moveState = savedData.moveState;
-                        Debug.Log($"Loaded saved position {spawnPosition} and rotation {spawnRotation} for player in world with key {playerKey}.");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Saved player data for key {playerKey} has invalid playerName; using default spawn.");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Failed to deserialize player save data for key {playerKey}: {e.Message}; using default spawn.");
-                }
-            }
-            else
-            {
-                Debug.Log($"No saved player data found for key {playerKey}; using default spawn.");
-            }
-
-
-            if (LocalPlayer == null)
-            {
-                LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
-            }
-
-            LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState);
-
-            // Set the unique nickname
-            LocalPlayer.Nickname = nickname;
-
-            Debug.Log($"Spawned local player for {playerRef}, Nickname: {LocalPlayer.Nickname ?? "Unknown"}, " +
-                      $"InputAuthority: {LocalPlayer.Object.InputAuthority}, " +
-                      $"StateAuthority: {LocalPlayer.Object.StateAuthority}, Position: {spawnPosition}");
+            Debug.Log($"Create local player at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
         }
 
         private string GetInstanceId()

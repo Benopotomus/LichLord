@@ -30,7 +30,8 @@ namespace LichLord.World
         private HashSet<Chunk> _loadedChunks = new HashSet<Chunk>(); // Track loaded chunks
         public HashSet<Chunk> LoadedChunks => _loadedChunks;
 
-        private List<ChunkReplicator> _replicators = new List<ChunkReplicator>();
+        private HashSet<ChunkReplicator> _replicators = new HashSet<ChunkReplicator>();
+        private HashSet<FChunkPosition> _replicatorPositions = new HashSet<FChunkPosition>();
 
         public bool ChunksReady { get; private set; }
         public Action onChunksReady;
@@ -83,21 +84,16 @@ namespace LichLord.World
 
                 chunk.IncrementReplicationRef();
 
-                _replicatedChunks.Add(chunk);
-
                 if (HasStateAuthority)
                 {
-                    var chunkId = chunk.ChunkID;
-
-                    foreach (var activeReplicator in _replicators)
-                    {
-                        if (activeReplicator.ChunkID.IsEqual(ref chunkId))
-                            continue;
-                    }
+                    if (_replicatedChunks.Contains(chunk))
+                        continue;
 
                     var size = GetOptimalReplicatorSizeForChunk(chunk);
                     ChunkReplicator replicator = TryGetOrSpawnReplicator(chunk, size);
                 }
+
+                _replicatedChunks.Add(chunk);
             }
         }
 
@@ -119,31 +115,34 @@ namespace LichLord.World
                 chunk.DespawnProps();
                 _replicatedChunks.Remove(chunk);
 
+                ChunkReplicator oldReplicator = chunk.Replicator;
+
+
                 if (HasStateAuthority)
                 {
-                    var replicator = chunk.Replicator;
-
-                    if (replicator == null)
+                    if (oldReplicator == null)
                     {
                         //Debug.Log("No replicator");
                         continue;
                     }
                     
-                    switch (replicator)
+                    switch (oldReplicator)
                     {
                         case ChunkReplicator_256 r256: _pool256.Push(r256); break;
                         case ChunkReplicator_512 r512: _pool512.Push(r512); break;
                     }
 
-                    if (replicator.gameObject != null)
+                    if (oldReplicator.gameObject != null)
                     {
-                        replicator.gameObject.SetActive(false);
+                        oldReplicator.gameObject.SetActive(false);
                     }
                     else
                     {
-                        Debug.LogWarning($"[ChunkManager] Replicator {replicator} had null gameObject. Possibly despawned?");
+                        Debug.LogWarning($"[ChunkManager] Replicator {oldReplicator} had null gameObject. Possibly despawned?");
                     }
                 }
+
+
             }
         }
   

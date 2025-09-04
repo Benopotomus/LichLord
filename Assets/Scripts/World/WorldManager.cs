@@ -20,6 +20,7 @@ namespace LichLord.World
             if (HasStateAuthority)
             {
                 Context.WorldSaveLoadManager.LoadWorld();
+                Context.MissionManager.LoadWorldMissionProgress();
             }
 
             Context.ChunkManager.InitializeWorldChunks();
@@ -30,6 +31,9 @@ namespace LichLord.World
                 Context.WorldSaveLoadManager.LoadNPCs();
                 Context.NonPlayerCharacterManager.LoadNPCsFromSaves();
             }
+
+            Context.PlayerSaveLoadManager.LoadPlayer();
+            Context.MissionManager.LoadPlayerMissionProgress();
 
             Context.SpawnManager.SpawnLocalPlayer(Runner.LocalPlayer);
         }

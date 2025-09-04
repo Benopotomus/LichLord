@@ -50,7 +50,7 @@ namespace LichLord.NonPlayerCharacters
             // Initialize Condition
             npcData.Condition = 0;
             SetState(ENPCState.Idle, ref npcData);
-            SetAttitude(EAttitude.Neutral, ref npcData);
+            SetAttitude(attitude, ref npcData);
             SetAnimationIndex(0, ref npcData);
         }
 

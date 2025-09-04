@@ -159,9 +159,6 @@ namespace LichLord.NonPlayerCharacters
 
             foreach (var player in activePlayers)
             {
-                if (player.HasStateAuthority)
-                    continue;
-
                 float sqrDist = (player.CachedTransform.position - _npc.CachedTransform.position).sqrMagnitude;
 
                 if (sqrDist < minSqrDist)
