@@ -20,6 +20,8 @@ namespace LichLord
         [SerializeField] private DialogNode _localActiveDialogNode;
         public DialogNode LocalActiveDialogNode => _localActiveDialogNode;
 
+        private int _dialogAdvanceTick;
+
         private void OnRep_DialogDatas(NetworkBehaviourBuffer previous)
         {
         }
@@ -29,6 +31,36 @@ namespace LichLord
             base.Spawned();
 
             //SpawnStaticDialog()
+        }
+
+        public override void Render()
+        {
+            base.Render();
+
+            var activeDialog = Context.DialogManager.LocalActiveDialogNode;
+
+            if (activeDialog != null)
+            {
+                if (activeDialog.RequiresResponse)
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                }
+                else
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+
+                    if (Runner.Tick > _dialogAdvanceTick)
+                    {
+                        activeDialog.InvokeAutoResponse(Context);
+                    }
+                }
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+
+
         }
 
         public FDialogData GetDialog(int index)
@@ -75,7 +107,13 @@ namespace LichLord
         }
 
         public void SetActiveDialogNode(DialogNode dialogNode)
-        { 
+        {
+            if (dialogNode != null)
+            {
+                if (!dialogNode.RequiresResponse)
+                    _dialogAdvanceTick = Runner.Tick + dialogNode.AdvanceTicks;
+            }
+
             _localActiveDialogNode = dialogNode;
         }
 
@@ -95,15 +133,7 @@ namespace LichLord
             dialogData.DialogID = dialogDefinition.TableID;
             dialogData.IsAssigned = true;
             dialogData.NPCActive = true;
-            
-            Context.NonPlayerCharacterManager.SpawnDialogNPC(spawnPosition,
-                definition,
-                spawnType,
-                teamID,
-                EAttitude.Neutral,
-                freeDialogIndex,
-                true);
-            
+                        
         }
         
     }

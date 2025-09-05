@@ -130,14 +130,44 @@ X Make bounce buildable on spawn
 X Make destroy state/animation
 X Figure out why fireball doesn't detonate at times
 
-Save Load Worker
-Save Load Stronghold ZOne ID
+X Save Load Worker
+X Save Load Stronghold ZOne ID
 
-Make starting crypt/npc helper
-Get NPC Data Definition for workers
+X Make starting crypt/npc helper
+X Get NPC Data Definition for workers
 
+X Make harvest maneuver animation index play
+X Make choice between harvest and attack.. use distance?
 
-Fix targeting stuff above with ranged attacks vs melee.
+X Make the amount harvested by type defined in the npc definition
+
+X Level editor placement Random Yaw
+X Level editor placement random scale for trees.
+
+X Fix crash on shutdown in Player
+
+X Convert the chunk replicator to 512s and make them bigger
+
+X Put max workers on the HUD
+
+X Make crypts spawn them alone.
+
+X Have crypts check in non to see if they can move to spawning.
+
+X Ensure that NPCs will always have nearby chunks replicated.
+X Fix replicator problems for chunks
+X Wrap the Chunk Replicators in a struct
+
+X Make Tutorial Dialog
+Make it so the tutorial can be toggled and saved.
+
+Tick timeout for dialog
+
+Get NPCs to respect attitude for attacking.
+
+Make the spawn point for initial spawn
+
+Make the dialog boxes
 
 Make Mini Map
 
@@ -145,20 +175,15 @@ Make gold
 
 Make Iron
 
+Make Mushrooms
 
-Level editor placement Random Yaw
-Level editor placement random scale for trees.
+Make Bones
+
+Fix targeting stuff above with ranged attacks vs melee.
 
 Add hit reacts for spells
 
-
 Do Nav mesh generation per terrain
-
-
- 
-
-Fix projectile instigator id
-
 
 Shield Block skill
 Get Ranged NPCS to back up
@@ -168,5 +193,14 @@ Ogre Hit React Fix
 
 Get Buildable validation and snapping.
 
+Make changable commands for the kind of resource to gather.
+
 I love this project
 
+Mechanim animations for workers and equipping items
+
+Spending cost for construction
+
+Destroy buildable effect
+
+add a prop count to the replicators and only update to the count

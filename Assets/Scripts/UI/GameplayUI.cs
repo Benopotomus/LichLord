@@ -31,28 +31,13 @@ namespace LichLord.UI
 
             if (Context.DialogManager.LocalActiveDialogNode != null)
             {
-                Cursor.lockState = CursorLockMode.None;
                 _dialogView.SetDialogNode(Context.DialogManager.LocalActiveDialogNode);
                 _dialogView.Open();
-
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                _dialogView.Close();
-            }
-
-            /*
-            if (Context.DialogManager.LocalActiveDialogIndex >= 0)
-            {
-                _dialogView.Open();
             }
             else
             {
                 _dialogView.Close();
             }
-            */
-
         }
 
         protected override void OnViewOpened(UIView view)

@@ -189,6 +189,9 @@ namespace LichLord
 
             var stagingPosition = GetInvasionStagingPosition();
 
+
+            Vector3 spawnPosition = Vector3.zero;
+
             for (int i = 0; i < waveCharacters.Count; i++)
             {
                 // Generate random position above ground
@@ -201,7 +204,7 @@ namespace LichLord
                 randomPositionAbove += stagingPosition;
 
                 // Raycast down to find ground
-                Vector3 spawnPosition = Vector3.zero;
+                spawnPosition = Vector3.zero;
                 RaycastHit hit;
                 if (Physics.Raycast(randomPositionAbove, Vector3.down, out hit, 200f))
                 {
@@ -217,7 +220,17 @@ namespace LichLord
 
                 // Spawn the NPC at the calculated position
                 //Debug.Log("NPC spawned at spawn position: " + spawnPosition);
-                Context.NonPlayerCharacterManager.SpawnNPC(spawnPosition, waveCharacters[i], ENPCSpawnType.Invasion, ETeamID.EnemiesTeamA, EAttitude.Hostile);
+                Context.NonPlayerCharacterManager.SpawnNPC(spawnPosition, waveCharacters[i], ENPCSpawnType.Invasion, ETeamID.EnemiesTeamA, ActiveInvasion.StartingAttitude);
+            }
+
+            if (ActiveInvasion.Dialog != null)
+            {
+                Context.NonPlayerCharacterManager.SpawnDialogNPC(spawnPosition,
+                    ActiveInvasion.DialogNPC,
+                    ENPCSpawnType.Invasion,
+                    ETeamID.EnemiesTeamA,
+                    ActiveInvasion.StartingAttitude,
+                    ActiveInvasion.Dialog);
             }
 
             InvasionSpawnWave++;

@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using LichLord.Dialog;
 using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
@@ -99,7 +100,7 @@ namespace LichLord.NonPlayerCharacters
             replicator.SpawnNPC(ref data, freeIndex);
         }
 
-        public void SpawnDialogNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ENPCSpawnType spawnType, ETeamID teamID, EAttitude attitude, int dialogIndex, bool isInvasionNPC)
+        public void SpawnDialogNPC(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ENPCSpawnType spawnType, ETeamID teamID, EAttitude attitude, DialogDefinition dialog)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
@@ -129,7 +130,7 @@ namespace LichLord.NonPlayerCharacters
             data.DefinitionID = definition.TableID;
             data.SpawnType = spawnType;
             dataDefinition.InitializeData(ref data, definition, spawnType, teamID, attitude);
-            dataDefinition.SetDialogIndex(dialogIndex, ref data);
+            //dataDefinition.SetDialogIndex(dialogIndex, ref data);
             
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;

@@ -28,6 +28,9 @@ namespace LichLord.NonPlayerCharacters
             if (brainComponent.AttackTarget == null)
                 return false;
 
+            if(brainComponent.NPC.RuntimeState.GetAttitude() != EAttitude.Hostile)
+                return false;
+
             var carriedCurrency = brainComponent.NPC.RuntimeState.GetCarriedCurrencyType();
             if (carriedCurrency != ECurrencyType.None)
                 return false;

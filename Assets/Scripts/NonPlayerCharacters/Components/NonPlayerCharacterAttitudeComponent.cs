@@ -12,7 +12,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
-            _indicatorRenderer.gameObject.SetActive(false);
+            //_indicatorRenderer.gameObject.SetActive(false);
             UpdateAttitudeChange(runtimeState);
         }
 

@@ -84,9 +84,6 @@ namespace LichLord
         [HideInInspector]
         public NetworkLobby Lobby;
                 */
-
-
-
         public bool IsGameplayActive()
         {
             return true;
@@ -101,4 +98,14 @@ namespace LichLord
             */
         }    
     }
+
+    public enum ESceneContextCategory
+    { 
+        None,
+        DialogManager,
+        MissionManager,
+        NonPlayerCharacterManager,
+        InvasionManager,
+    }
+
 }

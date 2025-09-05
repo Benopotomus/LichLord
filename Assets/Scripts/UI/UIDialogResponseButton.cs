@@ -11,6 +11,7 @@ namespace LichLord.UI
         [SerializeField] private TextMeshProUGUI _buttonText;
         [SerializeField] private Button _button;
         private DialogResponse _dialogResponse;
+        public DialogResponse DialogResponse => _dialogResponse;
 
         private void Awake()
         {

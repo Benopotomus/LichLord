@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace LichLord.World
 {
@@ -36,6 +31,9 @@ namespace LichLord.World
             Context.MissionManager.LoadPlayerMissionProgress();
 
             Context.SpawnManager.SpawnLocalPlayer(Runner.LocalPlayer);
+
+            Context.MissionManager.InitializeTutorialState();
+            Context.MissionManager.InitializeMissionState();
         }
     }
 }

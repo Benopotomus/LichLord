@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58c171caedb352a429fa543e02b32601, type: 3}
+  m_Name: DialogInvasionTest
+  m_EditorClassIdentifier: 
+  _tableID: 2
+  _spawnWaves:
+  - {fileID: 11400000, guid: 861c54381a04bd344aba388561c78b13, type: 2}
+  _startingAttitude: 3
+  _ticksBetweenWaves: 160
+  _invasionTotalTicks: 960
+  _dialogNPC: {fileID: 11400000, guid: e59b70e1c14ef6d48ae66d076f6581f3, type: 2}
+  _dialog: {fileID: 0}

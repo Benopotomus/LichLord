@@ -144,8 +144,6 @@ namespace LichLord
             transform.position = position;
             Movement.SetMovementState(moveState);
             Input.SetLookRotation(rotation);
-
-            Debug.Log("Apply: " + transform.position);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)

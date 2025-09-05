@@ -122,6 +122,7 @@ namespace LichLord.Props
             strongholdData.ChunkID = ChunkID;
             strongholdData.ChunkIndex = (ushort)GUID;
 
+            context.MissionManager.NexusInteractionComplete();
             context.StrongholdManager.RPC_ActivateNexus(strongholdData);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)

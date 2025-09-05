@@ -194,7 +194,7 @@ namespace LichLord
         {
             Debug.Log("Stronghold Interaction complete.");
             // Trigger effects, state changes, or events
-            Context.InvasionManager.BeginInvasion(1, Data);
+            Context.InvasionManager.BeginInvasion(2, Data);
 
             //_rank++;
         }
