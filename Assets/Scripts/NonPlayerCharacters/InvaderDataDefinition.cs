@@ -5,8 +5,13 @@ namespace LichLord.NonPlayerCharacters
     [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/InvaderDataDefinition")]
     public class InvaderDataDefinition : NonPlayerCharacterDataDefinition
     {
-        // Config (7 from base)
+        [Header("Formation Offsets")]
+        [SerializeField] private Vector3[] _formationOffsets = new Vector3[16];
 
+        // Config 
+        private const int FORMATION_BITS = 4;             // 0–15
+        private const int FORMATION_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
+        private const ushort FORMATION_MASK = (1 << FORMATION_BITS) - 1;
 
         // Events
         private const int HEALTH_BITS = 12;             // 0–4095
@@ -21,17 +26,38 @@ namespace LichLord.NonPlayerCharacters
         {
             base.InitializeData(ref npcData, definition, spawnType, teamID, attitude);
 
-
             // Initialize Events
             npcData.Events = 0;
             SetHealth(definition.MaxHealth, ref npcData);
         }
 
-
         // Invasion NPC
         public bool IsInvasionNPC(ref FNonPlayerCharacterData npcData)
         {
             return true;
+        }
+
+        // Formation
+        public int GetFormationIndex(ref FNonPlayerCharacterData npcData)
+        {
+            return (npcData.Configuration >> FORMATION_SHIFT) & FORMATION_MASK;
+        }
+
+        public void SetFormationIndex(int formationIndex, ref FNonPlayerCharacterData npcData)
+        {
+            int config = npcData.Configuration;
+            formationIndex = Mathf.Clamp(formationIndex, 0, FORMATION_MASK);
+            config = (config & ~(FORMATION_MASK << FORMATION_SHIFT)) | (formationIndex << FORMATION_SHIFT);
+            npcData.Configuration = config;
+        }
+
+        public Vector3 GetFormationOffset(ref FNonPlayerCharacterData npcData)
+        {
+            int index = GetFormationIndex(ref npcData);
+            if (index < 0 || index >= _formationOffsets.Length)
+                return Vector3.zero;
+
+            return _formationOffsets[index];
         }
 
         // Health

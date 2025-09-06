@@ -45,6 +45,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterAttitudeComponent _attitudeComponent;
         public NonPlayerCharacterAttitudeComponent AttitudeComponent => _attitudeComponent;
 
+        [SerializeField] private NonPlayerCharacterDialogComponent _dialogComponent;
+        public NonPlayerCharacterDialogComponent DialogComponent => _dialogComponent;
+
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 
@@ -120,6 +123,8 @@ namespace LichLord.NonPlayerCharacters
             _brainComponent.OnSpawned(runtimeState);
             _currencyComponent.OnSpawned();
             _attitudeComponent.OnSpawned(runtimeState);
+            _dialogComponent.OnSpawned(runtimeState);
+
             _index = runtimeState.Index;
             UpdateChunk(_context.ChunkManager);
 
@@ -145,6 +150,7 @@ namespace LichLord.NonPlayerCharacters
             _stateComponent.UpdateStateChange(runtimeState, hasAuthority, tick);
             _currencyComponent.OnRender(runtimeState);
             _attitudeComponent.OnRender( runtimeState);
+            _dialogComponent.OnRender(runtimeState);
 
             if (hasAuthority)
             {

@@ -4,6 +4,8 @@ namespace LichLord.NonPlayerCharacters
 {
     public class NonPlayerCharacterDataDefinition : ScriptableObject
     {
+        private const int INVALID_DIALOG_INDEX = DIALOG_INDEX_MASK; // Reserve max value as invalid
+
         // Config
         protected const int DEFINITION_BITS = 8;          // 0–255
         protected const int DEFINITION_SHIFT = 0;
@@ -46,6 +48,7 @@ namespace LichLord.NonPlayerCharacters
             SetDefinitionID(definition.TableID, ref npcData);
             SetSpawnType(spawnType, ref npcData);
             SetTeamID(teamID, ref npcData);
+            SetDialogIndex(-1, ref npcData);
 
             // Initialize Condition
             npcData.Condition = 0;
@@ -99,15 +102,29 @@ namespace LichLord.NonPlayerCharacters
         // Dialog
         public virtual int GetDialogIndex(ref FNonPlayerCharacterData npcData)
         {
-            return ((npcData.Configuration >> DIALOG_INDEX_SHIFT) & DIALOG_INDEX_MASK);
+            int index = (npcData.Configuration >> DIALOG_INDEX_SHIFT) & DIALOG_INDEX_MASK;
+            if (index == INVALID_DIALOG_INDEX)
+                return -1; // Use -1 as "no dialog"
+            return index;
         }
 
         public virtual void SetDialogIndex(int newDialogIndex, ref FNonPlayerCharacterData npcData)
         {
             int config = npcData.Configuration;
-            int dialogIndex = Mathf.Clamp(newDialogIndex, 0, DIALOG_INDEX_MASK);
-            config = ((config & ~(DIALOG_INDEX_MASK << DIALOG_INDEX_SHIFT)) | (dialogIndex << DIALOG_INDEX_SHIFT));
+            int dialogIndex;
+
+            if (newDialogIndex < 0)
+                dialogIndex = INVALID_DIALOG_INDEX; // store invalid for "no dialog"
+            else
+                dialogIndex = Mathf.Clamp(newDialogIndex, 0, DIALOG_INDEX_MASK - 1);
+
+            config = (config & ~(DIALOG_INDEX_MASK << DIALOG_INDEX_SHIFT)) | (dialogIndex << DIALOG_INDEX_SHIFT);
             npcData.Configuration = config;
+        }
+
+        public virtual bool HasDialog(ref FNonPlayerCharacterData npcData)
+        {
+            return (GetDialogIndex(ref npcData) > -1);
         }
 
         // NPCState

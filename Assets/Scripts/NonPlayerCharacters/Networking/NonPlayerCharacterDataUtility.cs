@@ -86,8 +86,8 @@
     {
         None,
         Hostile,
-        Friendly,
-        Neutral,
+        Passive,
+        Defensive,
     }
 
     public enum ENPCSpawnType : byte

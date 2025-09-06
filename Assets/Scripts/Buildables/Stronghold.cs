@@ -38,6 +38,8 @@ namespace LichLord
         private float _buildDistance { get; set; }
 
         private float _influenceDistance = 20.0f;
+        public float InfluenceDistance => _influenceDistance;
+
         private float _localInfluenceDistance = -1;
 
         // IChunkTrackable

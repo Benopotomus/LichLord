@@ -1365,6 +1365,81 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &2089777070732833746
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6070127144994747739}
+  - component: {fileID: 2614685026149571221}
+  - component: {fileID: 2939841990498711065}
+  m_Layer: 5
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6070127144994747739
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089777070732833746}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4863014460119905074}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &2614685026149571221
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089777070732833746}
+  m_CullTransparentMesh: 1
+--- !u!114 &2939841990498711065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089777070732833746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 329ed2e8b2ae97c40b730f7d36c6fda4, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &2118625356886998992
 GameObject:
   m_ObjectHideFlags: 0
@@ -4790,12 +4865,19 @@ MonoBehaviour:
   raycastLayerMask:
     serializedVersion: 2
     m_Bits: 257
-  _trackableLayerMask:
-    serializedVersion: 2
-    m_Bits: 8448
-  _buildableZoneLayer:
+  _buildableZoneLayerMask:
     serializedVersion: 2
     m_Bits: 2048
+  _trackableLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  _interactableLayerMask:
+    serializedVersion: 2
+    m_Bits: 8192
+  _cachedRaycastHit:
+    position: {x: 0, y: 0, z: 0}
+    buildableZone: {fileID: 0}
+    interactable: {fileID: 0}
 --- !u!1 &6316365414179678548
 GameObject:
   m_ObjectHideFlags: 0
@@ -5554,6 +5636,7 @@ GameObject:
   - component: {fileID: 4863014460119905074}
   - component: {fileID: 7990457202842621667}
   - component: {fileID: 7649298397924694416}
+  - component: {fileID: 8420324450649382520}
   m_Layer: 5
   m_Name: InteractTooltip
   m_TagString: Untagged
@@ -5573,6 +5656,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 6070127144994747739}
   - {fileID: 4447151280762783802}
   m_Father: {fileID: 3969455740879003944}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5619,6 +5703,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8420324450649382520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6847672132227873300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &7122151548003934881
 GameObject:
   m_ObjectHideFlags: 0
@@ -6203,7 +6300,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _target: {fileID: 0}
-  _worldOffset: {x: 0, y: 1.25, z: 0}
+  _worldOffset: {x: 0, y: 0.25, z: 0}
   _scaleDistanceCurve: {fileID: 11400000, guid: 3aa6e288e4a65914189af32a340bc68f,
     type: 2}
   _progressSlider: {fileID: 7573828791867089859}
@@ -6260,7 +6357,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6244c53b54cd534ea1a9882f5f09454, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enableTutorial: 1
+  _enableTutorial: 0
   _tutorialProgress: 0
   _tutorialDialogs:
   - {fileID: 11400000, guid: ceaa996962127c140a48734ef899fb3a, type: 2}

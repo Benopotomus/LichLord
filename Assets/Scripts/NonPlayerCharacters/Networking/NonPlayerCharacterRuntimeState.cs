@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using LichLord.Dialog;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -151,10 +152,18 @@ namespace LichLord.NonPlayerCharacters
 
         public bool IsInvasionNPC()
         {
-            if (DataDefinition is InvaderDataDefinition soldierDataDefinition)
-                return soldierDataDefinition.IsInvasionNPC(ref _data);
+            if (DataDefinition is InvaderDataDefinition invaderDataDefinition)
+                return invaderDataDefinition.IsInvasionNPC(ref _data);
 
             return false;
+        }
+
+        public Vector3 GetFormationOffset()
+        {
+            if (DataDefinition is InvaderDataDefinition invaderDataDefinition)
+                return invaderDataDefinition.GetFormationOffset(ref _data);
+
+            return Vector3.zero;
         }
 
         public ENPCState GetStateFromData(ref FNonPlayerCharacterData otherData)
@@ -238,6 +247,22 @@ namespace LichLord.NonPlayerCharacters
                 workerDataDefinition.SetHarvestProgress(oldStacks + newStacks, ref _data);
                 _replicator.ReplicateRuntimeState(this);
             }
+        }
+
+        public DialogDefinition GetDialog()
+        {
+            if(DataDefinition.HasDialog(ref _data))
+                return null;
+
+            int dialogIndex = DataDefinition.GetDialogIndex(ref _data);
+
+            return _replicator.Context.DialogManager.GetDialogDefinition(dialogIndex);
+
+        }
+
+        public bool HasDialog()
+        { 
+            return DataDefinition.HasDialog(ref _data);
         }
     }
 }

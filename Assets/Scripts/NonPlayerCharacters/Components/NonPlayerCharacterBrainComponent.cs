@@ -194,26 +194,39 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            // if we are an invasion npc, the target nexus position is the fallback
             if (runtimeState.IsInvasionNPC())
             {
-                if (_wanderPositionSet)
-                    return;
-
                 var stronghold = _npc.Context.InvasionManager.TargetStronghold;
                 if (stronghold != null)
                 {
+                    if (_wanderPositionSet)
+                        return;
+
                     var targetPosition = stronghold.CachedTransform.position;
+
+                    // Get direction from stronghold to NPC
+                    Vector3 direction = (_npc.CachedTransform.position - targetPosition).normalized;
+
+                    // Formation offset (in local formation space)
+                    Vector3 formationOffset = runtimeState.GetFormationOffset();
+
+                    // Rotate offset so it aligns with direction away from stronghold
+                    Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+                    Vector3 rotatedOffset = rotation * formationOffset;
+
+                    // Back it up ~50 units along that direction
+                    Vector3 backedUpTarget = (targetPosition + direction * stronghold.InfluenceDistance) + rotatedOffset;
+
                     // If our current destination hasn't changed much, we early out
-                    Vector3 delta = _moveTarget - targetPosition;
+                    Vector3 delta = _moveTarget - backedUpTarget;
                     if (delta.sqrMagnitude < 0.01f)
                         return;
 
-                    _moveTarget = targetPosition;
+                    _moveTarget = backedUpTarget;
                     _wanderPositionSet = true;
                 }
             }
-            else if(runtimeState.IsWorker())
+            else if (runtimeState.IsWorker())
             {
                 if (_wanderPositionSet)
                     return;
@@ -244,30 +257,23 @@ namespace LichLord.NonPlayerCharacters
             _npc.Movement.SetMoveTargetPosition(_moveTarget);
         }
 
-        // Only called when in idle
         private void SelectManeuver(int tick)
         {
-
-            // Check if the active maneuver is no longer valid
+            // Drop invalid active maneuver
             if (HasActiveManeuver())
-            { 
-                if(!_activeManeuver.CanBeSelected(this, tick))
+            {
+                if (!_activeManeuver.CanBeSelected(this, tick))
                     SetActiveManuever(null);
             }
 
+            // Gather valid maneuvers
             List<NonPlayerCharacterManeuverState> availableStates = new List<NonPlayerCharacterManeuverState>();
-
             for (int i = 0; i < _maneuvers.Count; i++)
-            { 
+            {
                 var currentManeuver = _maneuvers[i];
                 if (currentManeuver.CanBeSelected(this, tick))
                 {
-                    var nearestTargetManeuverType = ManeuverTypeForNearestTarget();
-
-                    if (currentManeuver.Definition.ManeuverType == nearestTargetManeuverType)
-                    {
-                        availableStates.Add(currentManeuver);
-                    }
+                    availableStates.Add(currentManeuver);
                 }
             }
 
@@ -277,40 +283,58 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            int selectedIndex = Random.Range(0, availableStates.Count);
-            SetActiveManuever(availableStates[selectedIndex]);
-        }
+            // Step 1: find nearest maneuver type
+            EManeuverType nearestTargetType = EManeuverType.None;
+            float bestDistance = float.MaxValue;
 
-        private EManeuverType ManeuverTypeForNearestTarget()
-        {
-            // If we have multiple possible targets → pick nearest
-            if (_hasDepositTarget || _hasAttackTarget || _hasHarvestTarget)
+            for (int i = 0; i < availableStates.Count; i++)
             {
-                float bestDistance = float.MaxValue;
-                EManeuverType bestType = EManeuverType.None;
+                var maneuver = availableStates[i];
+                float dist = DistanceToManeuverTarget(maneuver.Definition.ManeuverType);
 
-                if (_hasDepositTarget && DistanceToDepositTarget < bestDistance)
+                if (dist < bestDistance)
                 {
-                    bestDistance = DistanceToDepositTarget;
-                    bestType = EManeuverType.Deposit;
+                    bestDistance = dist;
+                    nearestTargetType = maneuver.Definition.ManeuverType;
                 }
-
-                if (_hasHarvestTarget && DistanceToHarvestTarget < bestDistance)
-                {
-                    bestDistance = DistanceToHarvestTarget;
-                    bestType = EManeuverType.Harvest;
-                }
-
-                if (_hasAttackTarget && DistanceToAttackTarget < bestDistance)
-                {
-                    bestDistance = DistanceToAttackTarget;
-                    bestType = EManeuverType.Attack;
-                }
-
-                return bestType;
             }
 
-            return EManeuverType.None;
+            // Step 2: build a list of maneuvers of that type
+            List<NonPlayerCharacterManeuverState> filteredStates = new List<NonPlayerCharacterManeuverState>();
+            if (nearestTargetType != EManeuverType.None)
+            {
+                for (int i = 0; i < availableStates.Count; i++)
+                {
+                    if (availableStates[i].Definition.ManeuverType == nearestTargetType)
+                        filteredStates.Add(availableStates[i]);
+                }
+            }
+
+            // Step 3: if none matched, fall back to all available
+            List<NonPlayerCharacterManeuverState> finalStates =
+                filteredStates.Count > 0 ? filteredStates : availableStates;
+
+            // Step 4: roll randomly within that type
+            int selectedIndex = Random.Range(0, finalStates.Count);
+            SetActiveManuever(finalStates[selectedIndex]);
+        }
+
+        private float DistanceToManeuverTarget(EManeuverType maneuverType)
+        {
+            switch (maneuverType)
+            {
+                case EManeuverType.Deposit:
+                    return _hasDepositTarget ? DistanceToDepositTarget : float.MaxValue;
+
+                case EManeuverType.Harvest:
+                    return _hasHarvestTarget ? DistanceToHarvestTarget : float.MaxValue;
+
+                case EManeuverType.Attack:
+                    return _hasAttackTarget ? DistanceToAttackTarget : float.MaxValue;
+
+                default:
+                    return float.MaxValue; // No valid target
+            }
         }
 
         private void SetActiveManuever(NonPlayerCharacterManeuverState newManeuver)
@@ -336,52 +360,57 @@ namespace LichLord.NonPlayerCharacters
         // Runs when active meneuver is executed (in state)
         private void UpdateExecutingManeuver(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime)
         {
-            var executingManuever = GetManeuverFromState(runtimeState.GetState());
+            IChunkTrackable currentTarget = GetTargetForActiveManeuver();
 
-            if (executingManuever == null)
+            if (currentTarget == null)
                 return;
 
-            if (_hasAttackTarget)
-            {
-                _npc.Movement.SetFollowerUpdateRotation(false);
-                RotateTowardTarget(_attackTarget.Position, renderDeltaTime);
-            }
+            _npc.Movement.SetFollowerUpdateRotation(false);
+            RotateTowardTarget(currentTarget.Position, renderDeltaTime);         
         }
 
         private void UpdateRanges()
         {
-            if (!HasActiveManeuver())
-            {
-                _isInMovementStopRange = false;
-                _isInFaceTargetRange = false;
-                return;
-            }
+            _isInMovementStopRange = false;
+            _isInFaceTargetRange = false;
 
-            IChunkTrackable currentTarget = GetTargetForActiveManeuver();
-            if (currentTarget == null)
-            {
-                _isInMovementStopRange = false;
-                _isInFaceTargetRange = false;
-                return;
-            }
+            float movementStopRange = 1f;
+            float faceTargetRange = 100;
+            float sqrDist = 400;
 
-            float sqrDist;
-            Collider targetCollider = currentTarget.HurtBoxCollider;
-
-            if (targetCollider != null) // Target has a collider
+            if (HasActiveManeuver())
             {
-                // Distance from my position to the closest point on target's collider
-                Vector3 closestPoint = targetCollider.ClosestPoint(_npc.CachedTransform.position);
-                sqrDist = (_npc.CachedTransform.position - closestPoint).sqrMagnitude - currentTarget.BonusRadius;
+                IChunkTrackable currentTarget = GetTargetForActiveManeuver();
+                if (currentTarget == null)
+                {
+                    _isInMovementStopRange = false;
+                    _isInFaceTargetRange = false;
+                    return;
+                }
+
+                movementStopRange = _activeManeuver.Definition.MovementStopRangeSqrt;
+                faceTargetRange = _activeManeuver.Definition.FaceTargetRangeSqrt;
+                Collider targetCollider = currentTarget.HurtBoxCollider;
+
+                if (targetCollider != null) // Target has a collider
+                {
+                    // Distance from my position to the closest point on target's collider
+                    Vector3 closestPoint = targetCollider.ClosestPoint(_npc.CachedTransform.position);
+                    sqrDist = (_npc.CachedTransform.position - closestPoint).sqrMagnitude;
+                }
+                else
+                {
+                    // Standard distance check with bonus radius
+                    sqrDist = (_npc.CachedTransform.position - currentTarget.Position).sqrMagnitude;
+                }
             }
             else
-            {
-                // Standard distance check with bonus radius
-                sqrDist = (_npc.CachedTransform.position - currentTarget.Position).sqrMagnitude - currentTarget.BonusRadius;
+            { 
+                sqrDist = (_npc.CachedTransform.position - _moveTarget).sqrMagnitude;
             }
 
-            _isInMovementStopRange = sqrDist < _activeManeuver.Definition.MovementStopRangeSqrt;
-            _isInFaceTargetRange = sqrDist < _activeManeuver.Definition.FaceTargetRangeSqrt;
+            _isInMovementStopRange = sqrDist < movementStopRange;
+            _isInFaceTargetRange = sqrDist < faceTargetRange;
         }
 
         private void UpdateActiveManeuver(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)

@@ -1,7 +1,9 @@
 using Cinemachine;
 using LichLord.Buildables;
 using LichLord.World;
+using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace LichLord
 {
@@ -21,16 +23,19 @@ namespace LichLord
         [Header("Raycast Settings")]
         [SerializeField] private float _minRaycastDistance = 2.7f;
         [SerializeField] private float _maxRaycastDistance = 100f;
+
         [SerializeField] private LayerMask raycastLayerMask;
-        [SerializeField] private LayerMask _trackableLayerMask; // New LayerMask for trackables
+        [SerializeField] private LayerMask _buildableZoneLayerMask;
+        [SerializeField] private LayerMask _trackableLayerMask;
+        [SerializeField] private LayerMask _interactableLayerMask;
+
         private float sphereRadius = 0.1f; // Radius of the debug sphere
 
         private bool isFirstPerson = false;
+
+        [SerializeField]
         private FCachedRaycast _cachedRaycastHit; // Store last hit/max range point
         public FCachedRaycast CachedRaycastHit => _cachedRaycastHit;
-
-        [SerializeField] private LayerMask _buildableZoneLayer;
-
 
         private bool lastRaycastHit; // True if last raycast hit something
 
@@ -82,22 +87,82 @@ namespace LichLord
         {
             PlayerCharacter localPlayerCreature = Context.LocalPlayerCharacter;
 
-            if(localPlayerCreature != null ) 
-                RaycastFromCameraCenter(localPlayerCreature.gameObject);
-
             Camera mainCamera = Camera.main;
-            _skydomeTransform.position = mainCamera.transform.position;
+
+            if (mainCamera == null)
+            {
+                _cachedRaycastHit.Clear();
+                return;
+            }
+
+            Transform cameraTransform = mainCamera.transform;
+            Vector3 cameraPosition = mainCamera.transform.position;
+
+            float minDistance = isFirstPerson ? 0 : _minRaycastDistance;
+            Vector3 rayOrigin = cameraTransform.position + (cameraTransform.forward * minDistance);
+            Vector3 rayDirection = cameraTransform.forward;
+
+            _skydomeTransform.position = cameraPosition;
+
+            if (localPlayerCreature == null)
+                return;
+
+            RaycastFromCameraCenter(rayOrigin, rayDirection, localPlayerCreature.gameObject);
+            CheckOverlapsAtOriginNonAlloc(cameraTransform.position, localPlayerCreature.gameObject);
 
             if(followTransform != null)
                 _cameraFollowTarget.position = followTransform.position;
         }
 
-        private void LateUpdate()
-        {
+        private Collider[] _overlapBuffer = new Collider[16]; // Reuse this buffer
 
+        private void CheckOverlapsAtOriginNonAlloc(Vector3 origin, GameObject ignoredObject)
+        {
+            // Physics.OverlapSphereNonAlloc returns the number of hits
+            int hitCount = Physics.OverlapSphereNonAlloc(
+                origin,
+                0.05f,
+                _overlapBuffer,
+                _buildableZoneLayerMask | _interactableLayerMask | _trackableLayerMask,
+                QueryTriggerInteraction.Collide
+            );
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                var col = _overlapBuffer[i];
+
+                if (ignoredObject != null && (col.gameObject == ignoredObject || col.transform.IsChildOf(ignoredObject.transform)))
+                    continue;
+
+                int colLayerBit = 1 << col.gameObject.layer;
+
+                // Buildable
+                if ((_buildableZoneLayerMask.value & colLayerBit) != 0)
+                {
+                    BuildableZone bz = col.GetComponent<BuildableZone>();
+                    if (bz != null)
+                        _cachedRaycastHit.buildableZone = bz;
+                }
+
+                // Interactable
+                if ((_interactableLayerMask.value & colLayerBit) != 0)
+                {
+                    InteractableComponent interactable = col.GetComponentInParent<InteractableComponent>();
+                    if (interactable != null && interactable.IsPotentialInteractor(Context.LocalPlayerCharacter.Interactor))
+                        _cachedRaycastHit.interactable = interactable;
+                }
+
+                // Trackable
+                if ((_trackableLayerMask.value & colLayerBit) != 0)
+                {
+                    IChunkTrackable trackable = col.GetComponentInParent<IChunkTrackable>();
+                    if (trackable != null)
+                        _cachedRaycastHit.trackable = trackable;
+                }
+            }
         }
 
-        public void RaycastFromCameraCenter(GameObject ignoredObject)
+        public void RaycastFromCameraCenter(Vector3 rayOrigin, Vector3 rayDirection, GameObject ignoredObject)
         {
             Camera mainCamera = Camera.main;
             if (mainCamera == null)
@@ -107,36 +172,25 @@ namespace LichLord
                 return;
             }
 
-            float minDistance = isFirstPerson ? 0 : _minRaycastDistance;
-            Transform cameraTransform = mainCamera.transform;
+            LayerMask combinedMask = raycastLayerMask 
+                | _buildableZoneLayerMask 
+                | _trackableLayerMask 
+                | _interactableLayerMask;
 
-            Vector3 rayOrigin = cameraTransform.position + (cameraTransform.forward * minDistance);
-            Vector3 rayDirection = cameraTransform.forward;
-
-            LayerMask combinedMask = raycastLayerMask | _buildableZoneLayer;
-
-            // Reset cached buildable zone
+            // Reset cached results
             _cachedRaycastHit.buildableZone = null;
             _cachedRaycastHit.trackable = null;
+            _cachedRaycastHit.interactable = null;
 
-            // OverlapSphere to detect if inside a buildable zone trigger
-            Collider[] overlappingColliders = Physics.OverlapSphere(rayOrigin, 0.1f, _buildableZoneLayer);
-            foreach (var collider in overlappingColliders)
-            {
-                BuildableZone bz = collider.GetComponent<BuildableZone>();
-                if (bz != null)
-                {
-                    _cachedRaycastHit.buildableZone = bz;
-                    break;
-                }
-            }
+            float closestWorldHit = float.MaxValue;
+            float closestInteractableDist = float.MaxValue;
+            float closestBuildableDist = float.MaxValue;
+            float closestTrackableDist = float.MaxValue;
 
-            // RaycastAll including triggers
             RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, _maxRaycastDistance, combinedMask, QueryTriggerInteraction.Collide);
 
             RaycastHit closestHit = new RaycastHit();
-            float closestDistance = float.MaxValue;
-            bool foundValidHit = false;
+            bool foundValidWorldHit = false;
 
             foreach (var hit in hits)
             {
@@ -144,40 +198,57 @@ namespace LichLord
                 if (ignoredObject != null && (hit.collider.gameObject == ignoredObject || hit.collider.transform.IsChildOf(ignoredObject.transform)))
                     continue;
 
-                // Check for trackables on _trackableLayerMask
+                float dist = hit.distance;
+
+                // Trackables
                 if (((1 << hit.collider.gameObject.layer) & _trackableLayerMask) != 0)
                 {
                     IChunkTrackable trackable = hit.collider.GetComponentInParent<IChunkTrackable>();
-                    if (trackable != null)
+                    if (trackable != null && dist < closestTrackableDist)
                     {
+                        closestTrackableDist = dist;
                         _cachedRaycastHit.trackable = trackable;
-                        //Debug.Log($"[CameraManager] Trackable hit: {hit.collider.gameObject.name}, Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
                     }
                 }
 
-                // Check if this hit is on buildable zone layer
-                if (((1 << hit.collider.gameObject.layer) & _buildableZoneLayer) != 0)
+                // Buildables
+                if (((1 << hit.collider.gameObject.layer) & _buildableZoneLayerMask) != 0)
                 {
                     BuildableZone bz = hit.collider.GetComponent<BuildableZone>();
-                    if (bz != null)
+                    if (bz != null && dist < closestBuildableDist)
                     {
+                        closestBuildableDist = dist;
                         _cachedRaycastHit.buildableZone = bz;
                     }
                 }
 
-                // Check if this hit is in the raycastLayerMask (excluding buildable zone layer)
+                // Interactables
+                if (((1 << hit.collider.gameObject.layer) & _interactableLayerMask) != 0)
+                {
+                    InteractableComponent interactable = hit.collider.GetComponent<InteractableComponent>();
+                    if (interactable != null && interactable.IsPotentialInteractor(Context.LocalPlayerCharacter.Interactor))
+                    {
+                        if (dist < closestInteractableDist)
+                        {
+                            closestInteractableDist = dist;
+                            _cachedRaycastHit.interactable = interactable;
+                        }
+                    }
+                }
+
+                // Generic "world" hit (e.g., terrain, wall, etc.)
                 if (((1 << hit.collider.gameObject.layer) & raycastLayerMask) != 0)
                 {
-                    if (hit.distance < closestDistance)
+                    if (dist < closestWorldHit)
                     {
+                        closestWorldHit = dist;
                         closestHit = hit;
-                        closestDistance = hit.distance;
-                        foundValidHit = true;
+                        foundValidWorldHit = true;
                     }
                 }
             }
 
-            if (foundValidHit)
+            if (foundValidWorldHit)
             {
                 _cachedRaycastHit.raycastHit = closestHit;
                 _cachedRaycastHit.position = closestHit.point;
@@ -192,6 +263,7 @@ namespace LichLord
             }
         }
 
+
         private void OnDrawGizmos()
         {
             // Draw sphere at the last raycast point
@@ -203,11 +275,20 @@ namespace LichLord
         }
     }
 
+    [Serializable]
     public struct FCachedRaycast
     { 
         public RaycastHit raycastHit;
         public Vector3 position;
         public BuildableZone buildableZone;
         public IChunkTrackable trackable;
+        public InteractableComponent interactable;
+
+        public void Clear()
+        { 
+            buildableZone = null;
+            trackable = null;
+            interactable = null;
+        }
     }
 }

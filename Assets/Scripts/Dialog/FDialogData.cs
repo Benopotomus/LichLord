@@ -9,7 +9,7 @@ namespace LichLord
     [StructLayout(LayoutKind.Explicit, Size = 9)]
     public struct FDialogData : INetworkStruct
     {
-        [FieldOffset(0)] public int DialogID;
+        [FieldOffset(0)] public int DefinitionID;
         [FieldOffset(4)] private byte _state;
 
         public bool IsAssigned { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }

@@ -2,13 +2,11 @@
 using LichLord.NonPlayerCharacters;
 using LichLord.Props;
 using LichLord.World;
-using Pathfinding;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// This class is used to spawn invasions that attack player defenses
-
 namespace LichLord
 {
     public class InvasionManager : ContextBehaviour
@@ -137,8 +135,8 @@ namespace LichLord
             }
 
             const float minNexusDistance = 100f;
-            const float maxNexusDistance = 200f;
-            const float minPlayerDistance = 150f;
+            const float maxNexusDistance = 150f;
+            const float minPlayerDistance = 100f;
 
             // 1. Filter spawn points by distance to the nexus position (min/max distance)
             var validSpawnPoints = new List<InvasionSpawnPoint>();
@@ -189,7 +187,6 @@ namespace LichLord
 
             var stagingPosition = GetInvasionStagingPosition();
 
-
             Vector3 spawnPosition = Vector3.zero;
 
             for (int i = 0; i < waveCharacters.Count; i++)
@@ -220,16 +217,20 @@ namespace LichLord
 
                 // Spawn the NPC at the calculated position
                 //Debug.Log("NPC spawned at spawn position: " + spawnPosition);
-                Context.NonPlayerCharacterManager.SpawnNPC(spawnPosition, waveCharacters[i], ENPCSpawnType.Invasion, ETeamID.EnemiesTeamA, ActiveInvasion.StartingAttitude);
+                Context.NonPlayerCharacterManager.SpawnNPCInvader(spawnPosition,
+                    waveCharacters[i], 
+                    ETeamID.EnemiesTeamA, 
+                    ActiveInvasion.StartingAttitude,
+                    i);
             }
 
             if (ActiveInvasion.Dialog != null)
             {
-                Context.NonPlayerCharacterManager.SpawnDialogNPC(spawnPosition,
+                Context.NonPlayerCharacterManager.SpawnNPCInvader(spawnPosition,
                     ActiveInvasion.DialogNPC,
-                    ENPCSpawnType.Invasion,
                     ETeamID.EnemiesTeamA,
                     ActiveInvasion.StartingAttitude,
+                    4,
                     ActiveInvasion.Dialog);
             }
 

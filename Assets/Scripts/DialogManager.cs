@@ -59,13 +59,16 @@ namespace LichLord
             {
                 Cursor.lockState = CursorLockMode.Locked;
             }
-
-
         }
 
         public FDialogData GetDialog(int index)
         {
             return _dialogDatas.GetRef(index);
+        }
+
+        public DialogDefinition GetDialogDefinition(int index)
+        {
+            return Global.Tables.DialogTable.TryGetDefinition(GetDialog(index).DefinitionID);
         }
 
         public int GetFreeDialogIndex()
@@ -79,6 +82,23 @@ namespace LichLord
                 }
             }
             return -1; // no free index found
+        }
+
+        // Returns index of the dialog for reference on an NPC
+        public int AddActiveDialog(DialogDefinition dialog)
+        {
+            int freeIndex = GetFreeDialogIndex();
+
+            if (freeIndex == -1)
+            {
+                Debug.Log("No Free Index");
+                return -1;
+            }
+
+            ref FDialogData dialogData = ref _dialogDatas.GetRef(freeIndex);
+            dialogData.DefinitionID = dialog.TableID;
+            dialogData.IsAssigned = true;
+            return freeIndex;
         }
 
         public void AssignDialogIndex(int index)
@@ -121,20 +141,6 @@ namespace LichLord
         public void RPC_SubmitDialogAnswer(int stockpileIndex, int answerID, PlayerCharacter pc)
         {
         }
-        
-        public void TrySpawnDialogNPC(NonPlayerCharacterDefinition definition, Vector3 spawnPosition, ENPCSpawnType spawnType, ETeamID teamID, DialogDefinition dialogDefinition)
-        {
-            int freeDialogIndex = GetFreeDialogIndex();
-
-            if (freeDialogIndex == -1)
-                return;
-
-            ref FDialogData dialogData = ref _dialogDatas.GetRef(freeDialogIndex);
-            dialogData.DialogID = dialogDefinition.TableID;
-            dialogData.IsAssigned = true;
-            dialogData.NPCActive = true;
-                        
-        }
-        
+                
     }
 }

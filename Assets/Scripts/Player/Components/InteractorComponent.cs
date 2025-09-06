@@ -25,7 +25,7 @@ namespace LichLord
         [SerializeField] private InteractableComponent _bestInteractable;
         [SerializeField] private InteractableComponent _currentInteractable;
 
-        private float _interactDistance = 1.0f;
+        private float _interactDistance = 5.0f;
 
         [Networked]
         private ref FWorldPosition _interactTargetPosition => ref MakeRef<FWorldPosition>();
@@ -216,54 +216,19 @@ namespace LichLord
                 return;
             }
 
-            _allInteractables.Clear();
             _bestInteractable = null;
 
-            Collider[] checkedCollisions = new Collider[8];
+            // Use the cached raycast result from the scene camera
+            var interactable = Context.Camera.CachedRaycastHit.interactable;
 
-            int hitCount = Physics.OverlapSphereNonAlloc(
-                transform.position,
-                _interactDistance,
-                checkedCollisions,
-                _interactableLayerMask,
-                QueryTriggerInteraction.Collide
-            );
-
-            float smallestDist = float.MaxValue;
-            InteractableComponent newBestInteractable = null;
-
-            for (int i = 0; i < hitCount; i++)
+            if (interactable != null && interactable.IsPotentialInteractor(this))
             {
-                Collider collider = checkedCollisions[i];
-                if (collider == null)
-                    continue;
-
-                InteractableComponent curInteractable = collider.GetComponent<InteractableComponent>();
-                if (curInteractable == null)
-                    continue;
-
-                if (!curInteractable.IsPotentialInteractor(this))
-                    continue;
-
-                var directionToInteractable = (curInteractable.transform.position - Camera.main.transform.position).normalized;
-                var cameraForward = Camera.main.transform.forward;
-                var dot = Vector3.Dot(directionToInteractable, cameraForward);
-
-                if (dot < 0.95)
-                    continue;
-
-                float testDist = Vector3.SqrMagnitude(transform.position - curInteractable.transform.position);
-
-                if (testDist < smallestDist)
+                // Optionally check distance here against _interactDistance
+                if ((interactable.transform.position - transform.position).sqrMagnitude <= _interactDistance * _interactDistance)
                 {
-                    smallestDist = testDist;
-                    newBestInteractable = curInteractable;
+                    _bestInteractable = interactable;
                 }
-
-                _allInteractables.Add(curInteractable);
             }
-
-            _bestInteractable = newBestInteractable;
         }
 
         private void SpawnBeamEffect()

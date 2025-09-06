@@ -35,10 +35,10 @@ namespace LichLord.NonPlayerCharacters
 
             switch (_attitude)
             {
-                case EAttitude.Neutral:
+                case EAttitude.Defensive:
                     targetColor = Color.yellow;
                     break;
-                case EAttitude.Friendly:
+                case EAttitude.Passive:
                     targetColor = Color.green;
                     break;
                 case EAttitude.Hostile:
