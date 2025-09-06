@@ -145,7 +145,9 @@
       "version": "file:com.jbooth.microsplat.alpha-hole",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.jbooth.microsplat.core": "3.9.0"
+      }
     },
     "com.jbooth.microsplat.anti-tile": {
       "version": "file:com.jbooth.microsplat.anti-tile",
@@ -156,7 +158,7 @@
       }
     },
     "com.jbooth.microsplat.core": {
-      "version": "file:Microsplat_Core",
+      "version": "file:com.jbooth.microsplat.core",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

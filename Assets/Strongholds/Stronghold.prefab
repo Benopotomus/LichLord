@@ -15727,7 +15727,6 @@ GameObject:
   - component: {fileID: 3375435704011219859}
   - component: {fileID: 6466698900152548025}
   - component: {fileID: 1556901566859732102}
-  - component: {fileID: -2465056842753245787}
   m_Layer: 0
   m_Name: Stronghold
   m_TagString: Untagged
@@ -15776,7 +15775,7 @@ MonoBehaviour:
   _buildableZone: {fileID: 58604191763035291}
   _terrainFlattener: {fileID: 4733492135524773368}
   _interactableComponent: {fileID: 1990070723009024549}
-  _maxHealth: 0
+  __maxHealth: 0
   Hurtbox: {fileID: 3972895102388555320}
 --- !u!114 &6466698900152548025
 MonoBehaviour:
@@ -15825,19 +15824,6 @@ MonoBehaviour:
   - {fileID: 3375435704011219859}
   - {fileID: 58604191763035291}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &-2465056842753245787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5546409922144146193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d3b6c06131e93f4f96e7e8c31f5cb87, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _blightRadius: 30
 --- !u!1 &7658633983750866466
 GameObject:
   m_ObjectHideFlags: 0
