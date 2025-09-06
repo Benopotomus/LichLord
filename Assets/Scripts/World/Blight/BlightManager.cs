@@ -127,5 +127,10 @@ namespace LichLord.World
 
             Shader.SetGlobalVectorArray(ShaderArrayID, _output);
         }
+
+        private void OnDestroy()
+        {
+            Shader.SetGlobalInt(ShaderCountID, 0);
+        }
     }
 }
