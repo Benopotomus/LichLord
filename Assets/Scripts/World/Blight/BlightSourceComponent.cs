@@ -41,5 +41,15 @@ namespace LichLord.World
         {
             return a > b ? a : b;
         }
+
+        private void OnEnable()
+        {
+            BlightManager.Instance.RegisterSource(this);
+        }
+
+        private void OnDisable()
+        {
+            BlightManager.Instance.UnregisterSource(this);
+        }
     }
 }
