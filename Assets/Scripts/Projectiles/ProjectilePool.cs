@@ -235,6 +235,7 @@ namespace LichLord.Projectiles
             data.HasImpacted = false;
             data.IsHoming = false;
             data.IsProximityFuseActive = false;
+            // TODO Fix instigator from NPCs and PCs
             data.InstigatorID = fireEvent.instigator.NetActor.NetObjectID;
             data.DefinitionID = (byte)definition.TableID;
             data.FireTick = fireEvent.fireTick;

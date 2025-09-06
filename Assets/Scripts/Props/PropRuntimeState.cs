@@ -13,6 +13,7 @@ namespace LichLord.Props
         // Not replicated
         public Vector3 position; // World position
         public Quaternion rotation; // World rotation
+        public Vector3 scale; // World scale
 
         private PropDefinition _definition;
         public PropDefinition Definition
@@ -32,7 +33,8 @@ namespace LichLord.Props
         public PropRuntimeState(int guid, 
             Chunk chunk,
             Vector3 position, 
-            Quaternion rotation, 
+            Quaternion rotation,
+            Vector3 scale,
             int definitionId)
         {
             this.index = guid;
@@ -40,6 +42,7 @@ namespace LichLord.Props
             this.definitionId = definitionId;
             this.position = position;
             this.rotation = rotation;
+            this.scale = scale;
 
             PropDefinition definition = Global.Tables.PropTable.TryGetDefinition(definitionId);
             PropDataDefinition dataDefinition = definition.PropDataDefinition;
@@ -52,6 +55,7 @@ namespace LichLord.Props
             Chunk chunk,
             Vector3 position,
             Quaternion rotation,
+            Vector3 scale,
             int definitionId,
             FPropData propData)
         {
@@ -60,6 +64,7 @@ namespace LichLord.Props
             this.definitionId = definitionId;
             this.position = position;
             this.rotation = rotation;
+            this.scale = scale;
 
             _data.Copy(ref propData);
             _data.DefinitionID = definitionId;
@@ -71,6 +76,7 @@ namespace LichLord.Props
             this.definitionId = other.definitionId;
             this.position = other.position;
             this.rotation = other.rotation;
+            this.scale = other.scale;
 
             FPropData otherData = other._data;
             _data.Copy(ref otherData);
@@ -107,6 +113,17 @@ namespace LichLord.Props
             _hitReactEndTick = _hitReactTicks + tick;
         }
 
+        public int GetHarvestPoints()
+        {
+            if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)
+            {
+                var harvestPoints = harvestDataDefinition.GetHarvestPoints(ref _data);
+                //Debug.Log(harvestPoints);
+                return harvestPoints;
+            }
+            return -1;
+        }
+
         public void Harvest(int harvestValue, int tick)
         {
             if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)
@@ -131,7 +148,6 @@ namespace LichLord.Props
 
             if (dataDefinition is NexusDataDefinition nexusDataDefinition)
             {
-                Debug.Log("Set Activated: " + activated);
                 nexusDataDefinition.SetIsActivated(activated, ref _data);
             }
         }

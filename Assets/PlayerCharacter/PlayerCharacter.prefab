@@ -270,6 +270,7 @@ GameObject:
   - component: {fileID: 8839848659093734841}
   - component: {fileID: 3816291510956059953}
   - component: {fileID: 5501363436665568790}
+  - component: {fileID: 975723772845658309}
   m_Layer: 0
   m_Name: SkeletonWizard
   m_TagString: Untagged
@@ -328,6 +329,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pc: {fileID: 2971398371087610287}
+--- !u!114 &975723772845658309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 768775516241630998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8204f4325d920141905165ea796e359, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pc: {fileID: 2971398371087610287}
+  ChestTargetTransform: {fileID: 536988984119202717}
+  ChestBone: {fileID: 4836376708090050560}
+  SpineBoneTop: {fileID: 7650269161246345248}
+  SpineBoneBottom: {fileID: 3686196781133769102}
+  CameraPivot: {fileID: 4348685969970783698}
+  HeadTargetTransform: {fileID: 1044241402898733276}
+  NeckBone: {fileID: 9166408995050002226}
+  HeadBone: {fileID: 742485161562100312}
+  leftFootTarget: {fileID: 8514952232359272259}
+  rightFootTarget: {fileID: 3705969315671663906}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  raycastHeightOffset: 0.5
+  footIKWeight: 1
+  footPositionLerpSpeed: 10
 --- !u!1 &885567648627484572
 GameObject:
   m_ObjectHideFlags: 0
@@ -11883,7 +11913,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2514133352862161986}
-  - component: {fileID: 5077866948997885989}
   m_Layer: 0
   m_Name: VisualRoot
   m_TagString: Untagged
@@ -11907,27 +11936,6 @@ Transform:
   - {fileID: 8839848659093734841}
   m_Father: {fileID: 1142867646521763857}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5077866948997885989
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3041271417471768361}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8204f4325d920141905165ea796e359, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pc: {fileID: 2971398371087610287}
-  ChestTargetTransform: {fileID: 536988984119202717}
-  ChestBone: {fileID: 4836376708090050560}
-  SpineBoneTop: {fileID: 7650269161246345248}
-  SpineBoneBottom: {fileID: 3686196781133769102}
-  CameraPivot: {fileID: 4348685969970783698}
-  HeadTargetTransform: {fileID: 1044241402898733276}
-  NeckBone: {fileID: 9166408995050002226}
-  HeadBone: {fileID: 742485161562100312}
 --- !u!1 &3123905968297068043
 GameObject:
   m_ObjectHideFlags: 0
@@ -12068,6 +12076,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 15cfb129ffdc2e94dbb04fe6e526aa2a, type: 2}
   _availableBuildableFeatures:
   - {fileID: 11400000, guid: c4c6894259e0ea643a20a357e363e490, type: 2}
+  - {fileID: 11400000, guid: 604bd05a7f09d6345bdfadb4adb7c46d, type: 2}
   _selectedDefinition: {fileID: 0}
   _targetZone: {fileID: 0}
   _placementValid: 0
@@ -12102,8 +12111,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
   - {fileID: 11400000, guid: 71c7cefcfae79134d83a32db88893771, type: 2}
   ActionSpawnPoint: {fileID: 0}
-  gunModel: {fileID: 0}
-  gunMuzzleParticle: {fileID: 0}
 --- !u!114 &4625314071529301451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12306,7 +12313,7 @@ MonoBehaviour:
   - {fileID: 7449162478297926621}
   - {fileID: 5360785679034961874}
   - {fileID: 4804172155013043321}
-  - {fileID: 5077866948997885989}
+  - {fileID: 975723772845658309}
   - {fileID: 8473141530021393840}
   - {fileID: 6231497543318802807}
   - {fileID: 5933867338918213662}
@@ -18811,8 +18818,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0.019290132, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.75, y: 1.75, z: 1.75}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 70472302334533362}
   m_Father: {fileID: 8839848659093734841}

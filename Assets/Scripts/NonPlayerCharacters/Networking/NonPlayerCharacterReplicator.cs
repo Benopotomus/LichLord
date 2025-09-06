@@ -1,13 +1,11 @@
 ﻿using Fusion;
 using LichLord.World;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
-    public class NonPlayerCharacterReplicator : ContextBehaviour, IStateAuthorityChanged
+    public partial class NonPlayerCharacterReplicator : ContextBehaviour, IStateAuthorityChanged
     {
         public struct FNPCLoadState
         {
@@ -16,6 +14,7 @@ namespace LichLord.NonPlayerCharacters
         }
 
         [Networked, Capacity(NonPlayerCharacterConstants.MAX_NPC_REPS)]
+        [OnChangedRender(nameof(OnRep_NPCDatas))]
         private NetworkArray<FNonPlayerCharacterData> _npcDatas { get; }
 
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
@@ -23,74 +22,27 @@ namespace LichLord.NonPlayerCharacters
         private FNPCLoadState[] _loadStates = new FNPCLoadState[NonPlayerCharacterConstants.MAX_NPC_REPS];
         public FNPCLoadState[] LoadStates => _loadStates;
 
-        private HashSet<int> _freeIndices = new HashSet<int>();
-        public IReadOnlyCollection<int> FreeIndices => _freeIndices;
-
         // Prediction
-        private Dictionary<int, NonPlayerCharacterState> _predictedStates = new Dictionary<int, NonPlayerCharacterState>();
-        private List<FNonPlayerCharacterData> _localNpcDatas = new List<FNonPlayerCharacterData>();
-        
-        [SerializeField]
-        private int _predictedStatesCount = 0;
+        private Dictionary<int, NonPlayerCharacterRuntimeState> _predictedStates = new Dictionary<int, NonPlayerCharacterRuntimeState>();
+        private NonPlayerCharacterRuntimeState[] _localRuntimeStates = 
+            new NonPlayerCharacterRuntimeState[NonPlayerCharacterConstants.MAX_NPC_REPS];
 
-        public void Predict_DealDamageToNPC(int guid, int damage, int hitReactIndex)
-        {
-            var targetData = _npcDatas.Get(guid);
+        [SerializeField] private int _activeNPCs;
 
-            if (_predictedStates.TryGetValue(guid, out NonPlayerCharacterState predictedState))
-            {
-                predictedState.ApplyDamage(damage, hitReactIndex);
-
-                float ping = (float)Runner.GetPlayerRtt(Context.LocalPlayerRef);
-
-                int removalTick = (Runner.Tick + Runner.TickRate);
-                predictedState.PredictionTick = removalTick;
-
-                /*
-                Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
-                    predictedData.Data.State +
-                    " Anim " + predictedData.Data.AnimationIndex +
-                    ", tick: " + Runner.Tick);
-                */
-            }
-            else
-            {
-                NonPlayerCharacterState newPredictedState = new NonPlayerCharacterState(ref targetData);
-                newPredictedState.ApplyDamage(damage, hitReactIndex);
-
-                float ping = (float)Runner.GetPlayerRtt(Context.LocalPlayerRef);
-                int removalTick = (Runner.Tick + Runner.TickRate);
-                newPredictedState.PredictionTick = removalTick;
-
-                /*
-                Debug.Log("Guid: " + guid + ", Applying Predicted State " + 
-                    newPredictedData.Data.State +
-                    " Anim " + newPredictedData.Data.AnimationIndex +
-                    ", tick: " + Runner.Tick);
-                */
-                _predictedStates.Add(guid, newPredictedState);
-            }
-        }
-
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_DealDamageToNPC(int guid, int damage, int hitReactIndex)
-        {
-            ApplyDamage(guid, damage, hitReactIndex);
-        }
+        [SerializeField] private LayerMask hitMask = ~0; // used to ground npcs on replication
 
         public override void Spawned()
         {
             base.Spawned();
 
-            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
-            {
-                _localNpcDatas.Add(new FNonPlayerCharacterData());
-                _loadStates[i] = new FNPCLoadState();
-                _freeIndices.Add(i); // Initially, all indices are free
-            }
-
             Context.NonPlayerCharacterManager.AddReplicator(this);
             _spawner.OnSpawned += OnNonPlayerCharacterSpawned;
+
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
+            {
+                _loadStates[i] = new FNPCLoadState();
+                _localRuntimeStates[i] = new NonPlayerCharacterRuntimeState(this, i);
+            }
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -112,6 +64,7 @@ namespace LichLord.NonPlayerCharacters
                         continue;
 
                     FNonPlayerCharacterSaveState saveState = new FNonPlayerCharacterSaveState(_loadStates[i].NPC, _npcDatas.Get(i));
+
                     saves.Add(saveState);
                 }
             }
@@ -125,8 +78,6 @@ namespace LichLord.NonPlayerCharacters
             if (!HasStateAuthority)
                 return;
 
-            RebuildFreeIndices();
-
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
                 if (_loadStates[i].LoadState == ELoadState.Loaded)
@@ -136,41 +87,18 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private void RebuildFreeIndices()
-        {
-            _freeIndices.Clear();
-            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
-            {
-                var data = _npcDatas.GetRef(i);
-                if (!NonPlayerCharacterDataUtility.IsActive(ref data))
-                {
-                    _freeIndices.Add(i);
-                }
-            }
+        public void SpawnNPC(ref FNonPlayerCharacterData data, int index)
+        { 
+            _npcDatas.Set(index, data);
+            _localRuntimeStates[index].CopyData(ref data);
         }
 
-        public bool TryGetNPCData(int index, out FNonPlayerCharacterData data)
+        public void ReplicateRuntimeState(NonPlayerCharacterRuntimeState runtimeState)
         {
-            data = _npcDatas.GetRef(index);
-            return true;
-        }
+            if (!HasStateAuthority)
+                return;
 
-        public void UpdateNPCData(ref FNonPlayerCharacterData updatedData, int index)
-        {
-            ref FNonPlayerCharacterData currentData = ref _npcDatas.GetRef(index);
-            bool wasActive = NonPlayerCharacterDataUtility.IsActive(ref currentData);
-            bool willBeActive = NonPlayerCharacterDataUtility.IsActive(ref updatedData);
-
-            _npcDatas.Set(index, updatedData);
-
-            if (!willBeActive && wasActive)
-            {
-                _freeIndices.Add(index); // NPC became inactive
-            }
-            else if (willBeActive && !wasActive)
-            {
-                _freeIndices.Remove(index); // NPC became active
-            }
+           _npcDatas.Set(runtimeState.Index, runtimeState.Data);
         }
 
         public bool HasFreeIndex()
@@ -180,24 +108,13 @@ namespace LichLord.NonPlayerCharacters
 
         public int GetFreeIndex()
         {
-            if (_freeIndices.Count > 0)
+            for(int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                return _freeIndices.First();
+                if (!_localRuntimeStates[i].IsActive())
+                    return i;
             }
+
             return -1;
-        }
-
-        private void TimeoutPredictedStates(int tick, float ping)
-        {
-            var keysToRemove = _predictedStates
-                .Where(kvp => tick > kvp.Value.PredictionTick)
-                .Select(kvp => kvp.Key)
-                .ToList();
-
-            foreach (var key in keysToRemove)
-            {
-                _predictedStates.Remove(key);
-            }
         }
 
         public override void Render()
@@ -207,39 +124,38 @@ namespace LichLord.NonPlayerCharacters
             if (!Context.IsGameplayActive())
                 return;
 
-            if (!PlayerCharacter.TryGetLocalPlayer(Runner, out PlayerCharacter playerCreature))
+            var playerCreature = Context.LocalPlayerCharacter;
+            if (playerCreature == null)
                 return;
-
-            _predictedStatesCount = _predictedStates.Count;
 
             Vector3 viewPosition = playerCreature.transform.position;
             float renderDeltaTime = Time.deltaTime;
             int tick = Runner.Tick;
-            float ping = (float)Runner.GetPlayerRtt(playerCreature.Object.StateAuthority);
             bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
 
-            TimeoutPredictedStates(tick, ping);
+            if (!hasAuthority)
+                TimeoutPredictedStates(tick);
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                // write to the data "_renderWriteData"
-                GetRenderData(hasAuthority, i);
+                var renderState = GetRenderState(hasAuthority, i);
+                var renderStateData = renderState.Data;
 
-                bool shouldBeActive = NonPlayerCharacterDataUtility.GetNPCState(ref _renderWriteData) != ENonPlayerState.Inactive;
+                bool shouldBeActive = renderState.IsActive();
 
                 ref FNPCLoadState loadState = ref _loadStates[i];
 
                 if (shouldBeActive && loadState.LoadState == ELoadState.None)
                 {
                     loadState.LoadState = ELoadState.Loading;
-                    _spawner.SpawnNPC(ref _renderWriteData, i);
+                    _spawner.SpawnNPC(ref renderStateData, i);
                 }
                 else if (shouldBeActive && loadState.LoadState == ELoadState.Loaded)
                 {
-                    if (hasAuthority)
-                        loadState.NPC.AuthorityUpdate(ref _renderWriteData, renderDeltaTime, tick);
-                    else
-                        loadState.NPC.RemoteUpdate(ref _renderWriteData, renderDeltaTime, ping);
+                    loadState.NPC.OnRender(renderState, 
+                        hasAuthority, 
+                        renderDeltaTime, 
+                        tick);
                 }
                 else if (!shouldBeActive && loadState.LoadState == ELoadState.Loaded)
                 {
@@ -248,25 +164,25 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public override void FixedUpdateNetwork()
+        int _timeoutPredictionTick = -1;
+        private void TimeoutPredictedStates(int tick)
         {
-            if (!Runner.IsForward || 
-                !Runner.IsFirstTick ||
-                !Context.IsGameplayActive())
+            if (_timeoutPredictionTick == tick)
                 return;
 
-            int tick = Runner.Tick;
+            _timeoutPredictionTick = tick;
 
-            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
+            // Remove expired states in one go
+            var keysToRemove = new List<int>(_predictedStates.Count);
+
+            foreach (var (key, state) in _predictedStates)
             {
-                ref FNonPlayerCharacterData data = ref _npcDatas.GetRef(i);
-                ref FNPCLoadState loadState = ref _loadStates[i];
-
-                if (loadState.LoadState == ELoadState.Loaded)
-                {
-                    loadState.NPC.OnFixedUpdate(ref data, tick);
-                }
+                if (tick > state.PredictionTimeoutTick)
+                    keysToRemove.Add(key);
             }
+
+            for (int i = 0; i < keysToRemove.Count; i++)
+                _predictedStates.Remove(keysToRemove[i]);
         }
 
         private void DespawnNPC(int index)
@@ -284,79 +200,96 @@ namespace LichLord.NonPlayerCharacters
             ref FNPCLoadState loadState = ref _loadStates[spawnParams.Index];
             loadState.NPC = character;
             loadState.LoadState = ELoadState.Loaded;
-            character.OnSpawned(ref spawnParams, this);
+
+            _localRuntimeStates[spawnParams.Index].SetPosition(spawnParams.Position);
+
+            character.OnSpawned(_localRuntimeStates[spawnParams.Index], this);
         }
 
-        public void ApplyDamage(int index, int damage, int hitReactIndex)
+        private void OnRep_NPCDatas()
         {
-            if (TryGetNPCData(index, out FNonPlayerCharacterData data))
+            _activeNPCs = 0;
+            int tick = Runner.Tick;
+            const int raycastInterval = 1; // Extracted magic number for clarity
+
+            // Cache frequently accessed values
+            bool hasStateAuthority = HasStateAuthority;
+
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                //Debug.Log("Apply Damage " + damage);
-                NonPlayerCharacterDataUtility.ApplyDamage(ref data, data.Definition, damage, hitReactIndex);
-                UpdateNPCData(ref data, index);
-            }
-        }
+                ref FNonPlayerCharacterData networkedData = ref _npcDatas.GetRef(i); // Use ref readonly for performance
+                ref var localState = ref _localRuntimeStates[i]; // Use ref to avoid struct copying
 
-        private FNonPlayerCharacterData _renderWriteData = new FNonPlayerCharacterData();
+                var newNetworkedState = localState.GetStateFromData(ref networkedData);
 
-        public void GetRenderData(bool hasAuthority, int index)
-        {
-            ref FNonPlayerCharacterData authorityData = ref _npcDatas.GetRef(index);
-            _renderWriteData.Copy(ref authorityData);
-
-            // If we are the authority, we dont need to handle prediction
-            if (hasAuthority)
-                return;
-
-            // Check for predicted data
-            bool hasPredictedData = _predictedStates.TryGetValue(index, out var predictedState);
-            FNonPlayerCharacterData localData = _localNpcDatas[index];
-
-            // Check for if local data has changed
-            if (localData.State != authorityData.State ||
-                localData.AnimationIndex != authorityData.AnimationIndex)
-            {
-                /*
-                Debug.Log("GUID: " + localData.GUID +  
-                    " Local Health: " + localData.Health + 
-                    ", Master Health: " + authorityData.Health +
-                    ", Local State: " + localData.State + 
-                    ", Master State: " + authorityData.State);
-                */
-
-                // check if the new state is our predicted state. If it is, we can clear the predicted state
-                if (hasPredictedData)
+                // Early state check
+                if (newNetworkedState != ENPCState.Inactive)
                 {
-                    if (authorityData.State == predictedState.Data.State) // &&
-                    //    authorityData.AnimationIndex == predictedState.Data.AnimationIndex)
+                    _activeNPCs++;
+                }
+
+                ENPCState oldState = localState.GetState();
+                
+                bool needsRaycast = !hasStateAuthority &&
+                                   (tick + i) % raycastInterval == 0 &&
+                                   localState.GetPosition() != networkedData.Position &&
+                                   newNetworkedState != ENPCState.Inactive;
+                
+                Vector3 hitPosition = Vector3.zero;
+                bool raycastHit = false;
+
+                if (needsRaycast)
+                {
+                    // Combine offset into raycast origin
+                    if (Physics.Raycast(networkedData.Position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 6f, hitMask))
                     {
-                        hasPredictedData = false;
-                        _predictedStates.Remove(index);
-                        /*
-                        Debug.Log("Guid: " + predictedState.Data.GUID + ", Clearing Predicted State " + predictedState.Data.State +
-                            " Anim " + predictedState.Data.AnimationIndex +
-                            ", tick: " + Runner.Tick);
-                        */
+                        raycastHit = true;
+                        hitPosition = hit.point;
                     }
                 }
 
-                localData.Copy(ref authorityData);
+                bool hasStateChanged = oldState != newNetworkedState;
+                localState.CopyData(ref networkedData); // Ensure this method accepts ref parameter
 
-                _localNpcDatas[index] = localData;
+                if (raycastHit)
+                {
+                    localState.SetPosition(hitPosition);
+                }
+
+                if (hasStateChanged &&
+                    _predictedStates.TryGetValue(i, out NonPlayerCharacterRuntimeState predictedState))
+                {
+                    if ((localState.GetState() == predictedState.GetState() &&
+                         localState.GetAnimationIndex() == predictedState.GetAnimationIndex()) ||
+                        localState.GetState() == ENPCState.Dead)
+                    {
+                        _predictedStates.Remove(i);
+                    }
+                }
             }
+        }
 
-            if (hasPredictedData)
+        public NonPlayerCharacterRuntimeState GetRenderState(bool hasAuthority, int index)
+        {
+            var localState = _localRuntimeStates[index];
+
+            // If we are the authority, we dont need to handle prediction
+            if (!hasAuthority)
             {
-                FNonPlayerCharacterData predictedData = predictedState.Data;
+                // Check for predicted data
+                if (_predictedStates.TryGetValue(index, out var predictedState))
+                {
+                    //Debug.Log("Using predicted state " + predictedState.GetState() + " Anim: " + predictedState.GetAnimationIndex() + " index: " + index);
+                    var predictedStateData = predictedState.Data;
+                    predictedStateData.Position = localState.GetPosition();
+                    predictedStateData.RawCompressedYaw = localState.GetRawCompressedYaw();
 
-                // Keep the position updates consistent with the authority
-                predictedData.PositionX = authorityData.PositionX;
-                predictedData.PositionY = authorityData.PositionY;
-                predictedData.PositionZ =  authorityData.PositionZ;
-                predictedState.CopyData(ref predictedData);
-
-                _renderWriteData.Copy(ref predictedData);
+                    predictedState.CopyData(ref predictedStateData);
+                    return predictedState;
+                }
             }
+
+            return localState;
         }
     }
 }

@@ -37,7 +37,7 @@ namespace LichLord.Props
             int stateData = propData.StateData;
             int stateValue = Mathf.Clamp((int)state, 0, STATE_MASK);
             stateData = (stateData & ~(STATE_MASK << STATE_SHIFT)) | (stateValue << STATE_SHIFT);
-            propData.StateData = stateData;
+            propData.StateData = (ushort)stateData;
         }
 
         // Prioritize destroyed state

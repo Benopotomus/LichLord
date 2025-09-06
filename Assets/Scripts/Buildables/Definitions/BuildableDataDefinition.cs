@@ -8,7 +8,7 @@ namespace LichLord.Buildables
         protected EBuildableState _startingState = EBuildableState.Idle;
         public EBuildableState StartingState => _startingState;
 
-        protected const int STATE_BITS = 4;           // 0-15
+        protected const int STATE_BITS = 2;           // 0-3
 
         protected const int STATE_SHIFT = 0;
 
@@ -71,13 +71,5 @@ namespace LichLord.Buildables
         Idle,        // Default active state
         HitReact,     // After taking damage
         Destroyed,   // Health <= 0
-    }
-
-    public enum EBuildableStatus : byte
-    {
-        Neutral,     // Default state
-        Alerted,     // Aware of interaction
-        Engaged,     // Interacting with something
-        Disabled,    // Temporarily unusable
     }
 }

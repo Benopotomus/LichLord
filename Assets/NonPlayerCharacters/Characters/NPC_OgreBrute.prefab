@@ -1010,6 +1010,7 @@ GameObject:
   - component: {fileID: 3797343846203693856}
   - component: {fileID: 3567655564029587463}
   - component: {fileID: 7889308162331754733}
+  - component: {fileID: -5343675085829805393}
   m_Layer: 10
   m_Name: NPC_OgreBrute
   m_TagString: Untagged
@@ -1052,6 +1053,7 @@ MonoBehaviour:
   _hitReactComponent: {fileID: 7703171160761877983}
   _weaponsComponent: {fileID: 3797343846203693856}
   _animationController: {fileID: 3567655564029587463}
+  _currencyComponent: {fileID: -5343675085829805393}
   _muzzleComponent: {fileID: 7889308162331754733}
   _animator: {fileID: 5683565048644474723}
   _transform: {fileID: 3282022331344466140}
@@ -1189,10 +1191,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
   _moveTarget: {x: 0, y: 0, z: 0}
+  DistanceToAttackTarget: 0
+  DistanceToHarvestTarget: 0
+  DistanceToDepositTarget: 0
   _isInMovementStopRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasAttackTarget: 0
+  _hasHarvestTarget: 0
+  _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 08c89e9b799dfc64da43b3e986b534f5, type: 2}
@@ -1214,7 +1221,13 @@ MonoBehaviour:
     ActivationTick: 0
     RandomAimOffset: 0
   TargetPlayer: {fileID: 0}
-  targetGO: {fileID: 0}
+  _losLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  attackTargetGO: {fileID: 0}
+  harvestTargetGO: {fileID: 0}
+  depositTargetGO: {fileID: 0}
+  _wanderPositionSet: 0
 --- !u!114 &7703171160761877983
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1342,6 +1355,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _handBoneLeft: {fileID: 0}
   _handBoneRight: {fileID: 0}
+--- !u!114 &-5343675085829805393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0d23426ff1c3ba4598ad538d2f824ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 0}
 --- !u!1 &3176908961229995009
 GameObject:
   m_ObjectHideFlags: 0

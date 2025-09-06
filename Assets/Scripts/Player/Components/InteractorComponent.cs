@@ -97,14 +97,6 @@ namespace LichLord
 
             _pc.Movement.LookTarget = _currentInteractable.transform;
 
-            if (interactable.Owner is Prop prop)
-            {
-                Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, true);
-
-                if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                    Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, true);
-            }
-
             _currentInteractable.InteractStart(this, tick);
         }
 
@@ -118,14 +110,6 @@ namespace LichLord
             _currentInteractable.InteractEnd(this);
             _currentInteractable = null;
             _pc.Movement.LookTarget = null;
-
-            if (interactable.Owner is Prop prop)
-            {
-                Context.PropManager.RPC_SetInteracting(prop.ChunkID, prop.GUID, false);
-
-                if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                    Context.PropManager.Predict_SetInteracting(prop.ChunkID, prop.GUID, false);
-            }
         }
 
         public void CancelInteract(InteractableComponent interactable, string warningMessage)
@@ -182,8 +166,6 @@ namespace LichLord
                 stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
             }
 
-            FloatingUI.ShowStockpileContents(stockpileIndex);
-
             if (_currentInteractable == null)
             {
                 FloatingUI.SetProgressBarVisible(false);
@@ -237,7 +219,7 @@ namespace LichLord
             _allInteractables.Clear();
             _bestInteractable = null;
 
-            Collider[] checkedCollisions = new Collider[4];
+            Collider[] checkedCollisions = new Collider[8];
 
             int hitCount = Physics.OverlapSphereNonAlloc(
                 transform.position,

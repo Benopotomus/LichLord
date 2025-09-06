@@ -36,6 +36,7 @@ namespace LichLord
         public StrongholdManager StrongholdManager;
         public InvasionManager InvasionManager;
         public ContainerManager ContainerManager;
+        public WorkerManager WorkerManager;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;

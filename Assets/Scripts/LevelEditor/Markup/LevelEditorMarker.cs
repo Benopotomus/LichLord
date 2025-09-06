@@ -10,6 +10,9 @@ using UnityEditor.Experimental.SceneManagement;
 public class LevelEditorMarker : MonoBehaviour
 {
 #if UNITY_EDITOR
+
+    public Vector3 MarkerScale = Vector3.one;
+
     private void OnEnable()
     {
         if (!Application.isPlaying)

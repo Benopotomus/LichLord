@@ -9,6 +9,7 @@ namespace LichLord.Props
         public int guid;
         public Vector3 position;
         public Quaternion rotation; // Forward direction (unit vector)
+        public Vector3 scale;
         public PropDefinition propDefinition;
         public int propDefinitionId;
     }

@@ -9,6 +9,10 @@
         public UIFloatingInteract FloatingInteract => _floatingInteract;
 
         [SerializeField]
+        private UIFloatingTooltip _floatingTooltip;
+        public UIFloatingTooltip FloatingTooltip => _floatingTooltip;
+
+        [SerializeField]
         private UIStrongholdTracker _strongholdTracker;
 
         [SerializeField]

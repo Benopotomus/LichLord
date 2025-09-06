@@ -11,7 +11,7 @@ namespace LichLord.NonPlayerCharacters
     public class NonPlayerCharacterManeuverState
     {
         public NonPlayerCharacterManeuverDefinition Definition;
-        public ENonPlayerState ActiveState = ENonPlayerState.Maneuver_1;
+        public ENPCState ActiveState = ENPCState.Maneuver_1;
         public int CooldownExpirationTick;
         public int ActivationExpirationTick;
         public int ActivationTick;
@@ -33,44 +33,9 @@ namespace LichLord.NonPlayerCharacters
             if (IsOnCooldown(tick))
                 return false;
 
-            if (brainComponent.AttackTarget == null)
-                return false;
+            bool canBeSelect = Definition.CanBeSelected(brainComponent, tick);
 
-            float distanceToTarget = Vector3.Distance(
-            brainComponent.AttackTarget.Position,
-            brainComponent.NPC.CachedTransform.position);
-
-            if (distanceToTarget < Definition.ValidTargetDistance.x ||
-                distanceToTarget > Definition.ValidTargetDistance.y)
-                return false;
-
-            if (brainComponent.AttackTarget is NonPlayerCharacter)
-            {
-                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.NPC))
-                    return true;
-            }
-            else if (brainComponent.AttackTarget is PlayerCharacter)
-            {
-                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.PC))
-                    return true;
-            }
-            else if (brainComponent.AttackTarget is Stronghold)
-            {
-                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Stronghold))
-                    return true;
-            }
-            else if (brainComponent.AttackTarget is Prop)
-            {
-                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Prop))
-                    return true;
-            }
-            else if (brainComponent.AttackTarget is Buildable)
-            {
-                if (Definition.ValidTargetTypes.Contains(EManeuverTarget.Buildable))
-                    return true;
-            }
-
-            return false;
+            return canBeSelect;
         }
 
         public bool IsOnCooldown(int tick)
@@ -83,19 +48,21 @@ namespace LichLord.NonPlayerCharacters
             return ActivationExpirationTick < tick;
         }
 
-        public bool ExecuteManeuver(NonPlayerCharacter npc, 
-            ref FNonPlayerCharacterData data, 
+        public bool ExecuteManeuver(NonPlayerCharacter npc,
+            NonPlayerCharacterRuntimeState runtimeState, 
             int tick)
         {
-            if (data.State != ENonPlayerState.Idle)
+            var oldState = runtimeState.GetState();
+
+            if (oldState != ENPCState.Idle)
                 return false;
 
             if(IsOnCooldown(tick)) 
                 return false;
 
-            data.State = ActiveState;
+            runtimeState.SetState(ActiveState);
 
-            int currentAnimIndex = data.AnimationIndex;
+            int currentAnimIndex = runtimeState.GetAnimationIndex();
             int newAnimIndex = UnityEngine.Random.Range(0, Definition.AnimationTriggers.Count);
 
             // If the new index is the same as the current, increment and wrap around
@@ -104,9 +71,8 @@ namespace LichLord.NonPlayerCharacters
                 newAnimIndex = (currentAnimIndex + 1) % Definition.AnimationTriggers.Count;
             }
 
-            data.AnimationIndex = newAnimIndex;
+            runtimeState.SetAnimationIndex(newAnimIndex);
 
-            npc.Replicator.UpdateNPCData(ref data, npc.Index);
             ActivationTick = tick;
             CooldownExpirationTick = ActivationTick + Definition.CooldownTicks;
             ActivationExpirationTick = ActivationTick + Definition.StateTicks;
@@ -114,21 +80,22 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        public void UpdateManeuverTick(NonPlayerCharacter npc,
-            ref FNonPlayerCharacterData data,
-            int tick)
+        public void UpdateManeuverTick(NonPlayerCharacter npc, int tick)
         {
             int ticksSinceStart = tick - ActivationTick;
 
-            List<FManeuverProjectile> projectiles = Definition.ManeuverProjectiles;
-
-            for (int i = 0; i < projectiles.Count; i++)
+            if (Definition is NonPlayerCharacterAttackManeuverDefinition attackManeuver)
             {
-                FManeuverProjectile projectile = projectiles[i];
+                List<FManeuverProjectile> projectiles = attackManeuver.ManeuverProjectiles;
 
-                if (projectile.SpawnTick == ticksSinceStart)
+                for (int i = 0; i < projectiles.Count; i++)
                 {
-                    SpawnProjectile(npc, projectile, tick);
+                    FManeuverProjectile projectile = projectiles[i];
+
+                    if (projectile.SpawnTick == ticksSinceStart)
+                    {
+                        SpawnProjectile(npc, projectile, tick);
+                    }
                 }
             }
         }

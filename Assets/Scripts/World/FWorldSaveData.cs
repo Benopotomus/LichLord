@@ -10,6 +10,7 @@ namespace LichLord.World
         public FChunkSaveData[] chunks;
         public FStrongholdSaveData[] strongholds;
         public FStockpileSaveData[] stockpiles;
+        public FWorkerSaveData[] workers;
     }
 
     [Serializable]
@@ -94,12 +95,30 @@ namespace LichLord.World
     }
 
     [Serializable]
-    public struct StockpileDataSave
+    public struct FWorkerSaveData
     {
-        public FCurrencyStackSaveData pile0;
-        public FCurrencyStackSaveData pile1;
-        public FCurrencyStackSaveData pile2;
-        public FCurrencyStackSaveData pile3;
+        public int index;
+        public int zoneID;
+        public int buildableIndex;
+        public bool isAssigned;
+
+        public FWorkerSaveData(int idx, FWorkerData data, bool isAssigned)
+        {
+            index = idx;
+            zoneID = data.ZoneID;
+            buildableIndex = data.BuildableIndex;
+            this.isAssigned = isAssigned;
+        }
+
+        public FWorkerData ToNetworkWorker()
+        {
+            FWorkerData netWorker = new FWorkerData();
+            netWorker.ZoneID = (byte)zoneID;
+            netWorker.BuildableIndex = (ushort)buildableIndex;
+            netWorker.IsAssigned = isAssigned;
+
+            return netWorker;
+        }
     }
 
     [Serializable]
@@ -111,6 +130,7 @@ namespace LichLord.World
 
         public int currentHealth;
         public int rank;
+        public int buildableZoneID;
 
         public FBuildableSaveState[] buildableStates;
     }

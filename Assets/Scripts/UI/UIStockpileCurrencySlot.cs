@@ -10,28 +10,19 @@ namespace LichLord.UI
     {
         private int _stockpileIndex;
 
-        protected override void OnTick()
-        {
-            base.OnTick();
-
-            if (_stockpileIndex == -1)
-            {
-                return;
-            }
-
-            FStockpileData stockpileData = Context.ContainerManager.GetStockPile(_stockpileIndex);
-
-            var currencyType = _definition.CurrencyType;
-            var count = stockpileData.GetCurrencyAmount(currencyType);
-
-
-            _text.text = count.ToString();
-        }
-
         public void AssignStockPileIndex(int index)
         { 
             _stockpileIndex = index;
         }
 
+        public void SetCurrencyType(ECurrencyType currencyType)
+        {
+            SetDefinition(Global.Tables.CurrencyTable.GetDefinition(currencyType));
+        }
+
+        public void UpdateValue(int value)
+        {
+            _text.text = value.ToString();
+        }
     }
 }

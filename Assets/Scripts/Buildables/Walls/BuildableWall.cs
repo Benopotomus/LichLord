@@ -30,9 +30,9 @@ namespace LichLord.Buildables
             _stateComponent.UpdateState(RuntimeState.GetState());
         }
 
-        public override void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, bool hasAuthority)
+        public override void OnRender(BuildableRuntimeState runtimeState, float renderDeltaTime, int tick, bool hasAuthority)
         {
-            base.OnRender(runtimeState, renderDeltaTime, hasAuthority);
+            base.OnRender(runtimeState, renderDeltaTime, tick, hasAuthority);
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());

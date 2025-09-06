@@ -12,22 +12,22 @@ namespace LichLord.NonPlayerCharacters
 
         public void SpawnNPC(ref FNonPlayerCharacterData data, int index)
         {
-            var spawnParams = new FNonPlayerCharacterSpawnParams
-            {
-                Index = index,
-                DefinitionId = NonPlayerCharacterDataUtility.GetDefinitionID(ref data),
-                Position = data.Position,
-                Rotation = data.Rotation,
-                TeamId = NonPlayerCharacterDataUtility.GetTeamID(ref data)
-            };
-
-            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(spawnParams.DefinitionId);
+            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(data.DefinitionID);
 
             if (definition == null)
             {
-                Debug.LogWarning("Trying to spawn NPC with invalid definition, id: " + spawnParams.DefinitionId);
+                Debug.LogWarning("Trying to spawn NPC with invalid definition, id: " + data.DefinitionID);
                 return;
             }
+
+            var spawnParams = new FNonPlayerCharacterSpawnParams
+            {
+                Index = index,
+                DefinitionId = data.DefinitionID,
+                Position = data.Position,
+                Rotation = data.Rotation,
+                TeamId = definition.DataDefinition.GetTeamID(ref data)
+            };
 
             BundleObject prefabBundle = definition.PrefabBundle;
 

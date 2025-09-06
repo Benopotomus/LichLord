@@ -14,8 +14,6 @@ namespace LichLord.UI
 
         [SerializeField] private TextMeshProUGUI _warningText;
 
-        [SerializeField] private UIStockpileContents _stockpileContents;
-
         protected override void OnVisible()
         {
             base.OnVisible();
@@ -52,9 +50,5 @@ namespace LichLord.UI
             _warningText.SetActive(false);
         }
 
-        public void ShowStockpileContents(int stockpileIndex)
-        {
-            _stockpileContents.ShowStockpileContents(stockpileIndex);
-        }
     }
 }

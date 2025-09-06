@@ -180,31 +180,6 @@ namespace Starter.Shooter
 			AssignAnimationIDs();
 		}
 
-		private void LateUpdate()
-		{
-			return;
-			if (Health.IsAlive == false)
-				return;
-
-			// Update camera pivot (influences ChestIK)
-			// (KCC look rotation is set earlier in Render)
-			var pitchRotation = KCC.GetLookRotation(true, false);
-			CameraPivot.localRotation = Quaternion.Euler(pitchRotation);
-
-			// Dummy IK solution, we are snapping chest bone to prepared ChestTargetPosition position
-			// Lerping blends the fixed position with little bit of animation position.
-			float blendAmount = HasStateAuthority ? 0.05f : 0.2f;
-			ChestBone.position = Vector3.Lerp(ChestTargetPosition.position, ChestBone.position, blendAmount);
-			ChestBone.rotation = Quaternion.Lerp(ChestTargetPosition.rotation, ChestBone.rotation, blendAmount);
-
-			// Only local player needs to update the camera
-			if (HasStateAuthority)
-			{
-				// Transfer properties from camera handle to Main Camera.
-				Camera.main.transform.SetPositionAndRotation(CameraHandle.position, CameraHandle.rotation);
-			}
-		}
-
 		private void ProcessInput(GameplayInput input)
 		{
 			KCC.SetLookRotation(input.LookRotation, -90f, 90f);

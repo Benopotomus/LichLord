@@ -5,6 +5,10 @@
         PlayerTeam,
         EnemiesTeamA,
         EnemiesTeamB,
-        NonAligned,
+        EnemiesTeamC,
+        EnemiesTeamD,
+        EnemiesTeamE,
+        EnemiesTeamF,
+        EnemiesTeamG,
     }
 }

@@ -48,13 +48,49 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-            NonPlayerCharacterDataUtility.InitializeData(ref data, definition, teamID, isInvasionNPC);
+            definition.DataDefinition.InitializeData(ref data, definition, teamID, isInvasionNPC);
 
             data.Position = spawnPos;
             data.Rotation = Quaternion.identity;
 
             _deltaStates[freeIndex] = data; // Store full state for persistence
-            replicator.UpdateNPCData(ref data, freeIndex);
+            replicator.SpawnNPC(ref data, freeIndex);
+        }
+
+        public void SpawnNPCWorker(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, int workerIndex)
+        {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                Debug.Log("Cannot spawn, I'm not the master client");
+                return;
+            }
+
+            NonPlayerCharacterReplicator replicator = GetReplicatorWithFreeSlots();
+            if (replicator == null)
+                return;
+
+            int freeIndex = replicator.GetFreeIndex();
+            if (freeIndex == -1)
+            {
+                Debug.Log("Can't Spawn NPC No Free Index");
+                return;
+            }
+
+            if (definition.DataDefinition is not WorkerDataDefinition workerData)
+            {
+                Debug.Log("Trying to spawn a non-worker as a worker");
+                return;
+            }
+
+            FNonPlayerCharacterData data = new FNonPlayerCharacterData();
+            definition.DataDefinition.InitializeData(ref data, definition, teamID);
+            workerData.SetWorkerIndex(workerIndex, ref data);
+
+            data.Position = spawnPos;
+            data.Rotation = Quaternion.identity;
+
+            _deltaStates[freeIndex] = data; // Store full state for persistence
+            replicator.SpawnNPC(ref data, freeIndex);
         }
 
         public void SpawnNPCFromSave(FNonPlayerCharacterSaveState saveState)
@@ -78,21 +114,21 @@ namespace LichLord.NonPlayerCharacters
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
 
-            data.Configuration = (byte)saveState.configuration;
+            data.Configuration = (ushort)saveState.configuration;
             data.Position = saveState.position;
             data.Rotation = saveState.rotation;
             data.Condition = (byte)saveState.condition;
             data.Events = (ushort)saveState.events;
 
             _deltaStates[freeIndex] = data; // Store full state for persistence
-            replicator.UpdateNPCData(ref data, freeIndex);
+            replicator.SpawnNPC(ref data, freeIndex);
         }
 
         public NonPlayerCharacterReplicator GetReplicatorWithFreeSlots()
         {
             foreach (var replicator in _replicators)
             {
-                if (replicator.FreeIndices.Count > 0)
+                if (replicator.HasFreeIndex())
                     return replicator;
             }
 

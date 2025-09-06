@@ -17,6 +17,7 @@ namespace LichLord
         public NonPlayerCharacterTable NonPlayerCharacterTable;
         public ManeuverTable ManeuverTable;
         public InvasionTable InvasionTable;
+        public CurrencyTable CurrencyTable;
 
         /*
         public ItemTable ItemTable;

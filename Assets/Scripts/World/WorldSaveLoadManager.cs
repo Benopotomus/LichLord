@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using LichLord.Props;
 using LichLord.Buildables;
+using LichLord.NonPlayerCharacters;
 
 namespace LichLord.World
 {
@@ -103,9 +104,10 @@ namespace LichLord.World
                     strongholdSaveDatas.Add(new FStrongholdSaveData
                     {
                         chunkCoord = stronghold.Data.ChunkID,
-                        index = stronghold.Data.Index,
+                        index = stronghold.Data.ChunkIndex,
                         currentHealth = stronghold.CurrentHealth,
                         rank = stronghold.Rank,
+                        buildableZoneID = stronghold.BuildableZone.ZoneID,
                         buildableStates = buildableList.ToArray()
 
                     });
@@ -122,12 +124,24 @@ namespace LichLord.World
                     }
                 }
 
+                // --- Save WorkerSpawners --- //
+                List<FWorkerSaveData> workerSaveData = new List<FWorkerSaveData>();
+                if (Context.WorkerManager != null)
+                {
+                    for (int i = 0; i < BuildableConstants.MAX_WORKERS; i++)
+                    {
+                        FWorkerData workerData = Context.WorkerManager.GetWorkerData(i);
+                        workerSaveData.Add(new FWorkerSaveData(i, workerData, workerData.IsAssigned));
+                    }
+                }
+
                 // --- Final save ---
                 FWorldSaveData saveData = new FWorldSaveData
                 {
                     chunks = chunkSaveDatas.ToArray(),
                     strongholds = strongholdSaveDatas.ToArray(),
-                    stockpiles = stockpileSaves.ToArray()
+                    stockpiles = stockpileSaves.ToArray(),
+                    workers = workerSaveData.ToArray()
                 };
 
                 string json = JsonUtility.ToJson(saveData, true);
@@ -229,6 +243,16 @@ namespace LichLord.World
                         Context.ContainerManager.LoadStockPileData(stockpileSave);
                     }
                     Debug.Log($"Loaded {saveData.stockpiles.Length} stockpiles.");
+                }
+
+                // --- Load workers ---
+                if (saveData.workers != null)
+                {
+                    foreach (var workerSave in saveData.workers)
+                    {
+                        Context.WorkerManager.LoadWorkerData(workerSave);
+                    }
+                    Debug.Log($"Loaded {saveData.workers.Length} workers.");
                 }
 
                 //Context.ContainerManager.UpdateAllCurrencies();

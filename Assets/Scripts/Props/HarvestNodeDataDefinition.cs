@@ -7,7 +7,7 @@ namespace LichLord.Props
     {
 
         [SerializeField]
-        protected int _maxHarvestPoints = 1000;
+        protected int _maxHarvestPoints = 250;
         public int MaxHarvestPoints => _maxHarvestPoints;
 
         [SerializeField] // Number of points spent from the Harvest Points each time this node is harvested
@@ -15,8 +15,12 @@ namespace LichLord.Props
         public int HarvestPointsCost => _harvestPointsCost;
 
         [SerializeField]
-        protected int _resourcesPerHarvest = 10;
-        public int ResourcesPerHarvest => _resourcesPerHarvest;
+        protected int _playerResourcesPerHarvest = 50;
+        public int PlayerResourcesPerHarvest => _playerResourcesPerHarvest;
+
+        [SerializeField]
+        protected int _harvestProgressMax = 10;
+        public int HarvestProgressMax => _harvestProgressMax;
 
         [SerializeField]
         protected CurrencyDefinition _currencyTypeHarvested;
@@ -24,7 +28,7 @@ namespace LichLord.Props
 
         // Bit size constants (matching PropDataDefinition)
         // 4 for state
-        protected const int HARVEST_POINTS_BITS = 12;         // 0-4095
+        protected const int HARVEST_POINTS_BITS = 10;         // 0-1024
         protected const int IS_INTERACTING_BITS = 1;
 
         // Bit shifts and masks for StateData (int)
@@ -53,9 +57,9 @@ namespace LichLord.Props
 
         public void SetHarvestPoints(int harvestPoints, ref FPropData propData)
         {
-            int stateData = propData.StateData;
+            ushort stateData = propData.StateData;
             harvestPoints = Mathf.Clamp(harvestPoints, 0, HARVEST_POINTS_MASK);
-            stateData = (stateData & ~(HARVEST_POINTS_MASK << HARVEST_POINTS_SHIFT)) | (harvestPoints << HARVEST_POINTS_SHIFT);
+            stateData = (ushort)((stateData & ~(HARVEST_POINTS_MASK << HARVEST_POINTS_SHIFT)) | (harvestPoints << HARVEST_POINTS_SHIFT));
             propData.StateData = stateData;
         }
 
@@ -89,7 +93,7 @@ namespace LichLord.Props
             stateData &= ~(IS_INTERACTING_MASK << IS_INTERACTING_SHIFT); // clear bit
             if (isInteracting)
                 stateData |= (1 << IS_INTERACTING_SHIFT);
-            propData.StateData = stateData;
+            propData.StateData = (ushort)stateData;
         }
     }
 }

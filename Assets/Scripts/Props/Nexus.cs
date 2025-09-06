@@ -81,12 +81,28 @@ namespace LichLord.Props
 
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
         {
+            NetworkRunner runner = interactor.Runner;
+            SceneContext context = interactor.Context;
+
             Debug.Log("Interaction started with Nexus.");
+
+            Context.PropManager.RPC_SetInteracting(ChunkID, GUID, true);
+
+            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
+                Context.PropManager.Predict_SetInteracting(ChunkID, GUID, true);        
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
         {
+            NetworkRunner runner = interactor.Runner;
+            SceneContext context = interactor.Context;
+
             Debug.Log("Interaction ended with Nexus.");
+
+            Context.PropManager.RPC_SetInteracting(ChunkID, GUID, false);
+
+            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
+                Context.PropManager.Predict_SetInteracting(ChunkID, GUID, false);
         }
 
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
@@ -104,7 +120,7 @@ namespace LichLord.Props
 
             FStrongholdData strongholdData = new FStrongholdData();
             strongholdData.ChunkID = ChunkID;
-            strongholdData.Index = (byte)GUID;
+            strongholdData.ChunkIndex = (byte)GUID;
 
             context.StrongholdManager.RPC_ActivateNexus(strongholdData);
 

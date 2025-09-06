@@ -20,6 +20,7 @@ namespace LichLord.Props
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
 
+
         // IChunkTrackable
         public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
         public Vector3 Position => CachedTransform.position;
@@ -41,6 +42,7 @@ namespace LichLord.Props
 
             CachedTransform.position = _runtimeState.position;
             CachedTransform.rotation = _runtimeState.rotation;
+            CachedTransform.localScale = _runtimeState.scale;
 
             ChunkID = propRuntimeState.chunk.ChunkID;
             GUID = propRuntimeState.index;

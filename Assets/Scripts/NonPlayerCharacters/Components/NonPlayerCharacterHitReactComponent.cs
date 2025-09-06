@@ -13,7 +13,7 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private List<NonPlayerCharacterHitReactState> _hitReacts = new List<NonPlayerCharacterHitReactState>();
 
-        float _hitReactTimer = 0.5f;
+        int _hitReactEndTick;
 
         [SerializeField]
         private Transform _impactAttachment;
@@ -25,18 +25,15 @@ namespace LichLord.NonPlayerCharacters
             _visualSpawner.OnLoadedAttached += OnVisualsPrefabLoadedAttached;
         }
 
-        public void UpdateHitReactState(ref FNonPlayerCharacterData data, float renderDeltaTime)
-        {
-            //Debug.Log(_hitReactTimer);
-            _hitReactTimer -= renderDeltaTime;
-            if (_hitReactTimer < 0f)
+        public void UpdateHitReactState(NonPlayerCharacterRuntimeState runtimeState, int tick)
+        { 
+            if (tick > _hitReactEndTick)
             {
-                data.State = ENonPlayerState.Idle;
-                _npc.Replicator.UpdateNPCData(ref data, _npc.Index);
+                runtimeState.SetState(ENPCState.Idle);
             }
         }
 
-        public void StartHitReact(ENonPlayerState state, int animIndex)
+        public void StartHitReact(ENPCState state, int animIndex, int tick)
         {
             if (animIndex > _hitReacts.Count)
                 return;
@@ -47,7 +44,7 @@ namespace LichLord.NonPlayerCharacters
             NonPlayerCharacterHitReactState hitReact = _hitReacts[animIndex];
             var animTrigger = hitReact.AnimationTrigger;
 
-            _hitReactTimer = hitReact.StateTime;
+            _hitReactEndTick = tick + (int)(hitReact.StateTime * 32);
             _npc.AnimationController.SetAnimationForTrigger(animTrigger);
 
             SpawnImpactVisualEffect(animIndex);

@@ -7,7 +7,7 @@ namespace LichLord
     {
         [SerializeField] private VisualEffectBase _visualEffectBase;
 
-        public Transform player; // Assign the player GameObject in the Unity Editor
+        public Transform target; // Assign the player GameObject in the Unity Editor
         public float explosionForce = 7f;
         public float spawnRadius = 0.5f;
         public float attractionDelayMin = 2f; // Minimum delay before attraction
@@ -68,7 +68,7 @@ namespace LichLord
                 float randomScale = Random.Range(scaleMin, scaleMax);
                 particle.transform.localScale = new Vector3(randomScale, randomScale, randomScale);
 
-                particle.Initialize(explosionDirection, player, randomDelay);
+                particle.Initialize(explosionDirection, target, randomDelay);
             }
         }
 

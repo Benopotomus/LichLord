@@ -1,4 +1,5 @@
 ﻿using Fusion;
+using LichLord.NonPlayerCharacters;
 using LichLord.World;
 
 namespace LichLord.Props
@@ -51,12 +52,13 @@ namespace LichLord.Props
         }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_HarvestNode(FChunkPosition chunkPosition, int guid, int harvestValue, PlayerCharacter pc)
+        public void RPC_HarvestNode_PC(FChunkPosition chunkPosition, int guid, int harvestValue, PlayerCharacter pc)
         {
             Chunk chunk = Context.ChunkManager.GetChunk(chunkPosition);
-            chunk.HarvestProp(guid, harvestValue, Runner.Tick);
 
-            // Get the Harvest Node GameObject
+            if (HasStateAuthority)
+                chunk.HarvestProp(guid, harvestValue, Runner.Tick);
+
 
             if (chunk.PropLoadStates.TryGetValue(guid, out var loadState))
             {
@@ -64,12 +66,57 @@ namespace LichLord.Props
                 {
                     if (loadState.Prop is HarvestNode harvestNode)
                     {
-                        harvestNode.PlayHarvestParticles(pc);
+                        harvestNode.PlayHarvestShake();
+                        harvestNode.PlayHarvestParticles(pc.CachedTransform);
                     }
-
                 }
             }
+        }
 
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Unreliable, InvokeLocal = true)]
+        public void RPC_HarvestProgress_NPC(FChunkPosition chunkPosition, int guid, int harvestValue, NonPlayerCharacterReplicator replicator, byte npcIndex)
+        {
+            Chunk chunk = Context.ChunkManager.GetChunk(chunkPosition);
+
+            // Play effects
+            if (chunk.PropLoadStates.TryGetValue(guid, out var loadState))
+            {
+                if (loadState.LoadState == ELoadState.Loaded)
+                {
+                    if (loadState.Prop is HarvestNode harvestNode)
+                    {
+                        if (replicator.LoadStates[npcIndex].LoadState == ELoadState.Loaded)
+                        {
+                            harvestNode.PlayHarvestShake();
+                        }
+                    }
+                }
+            }
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Unreliable, InvokeLocal = true)]
+        public void RPC_HarvestNode_NPC(FChunkPosition chunkPosition, int guid, int harvestValue, NonPlayerCharacterReplicator replicator, byte npcIndex)
+        {
+            Chunk chunk = Context.ChunkManager.GetChunk(chunkPosition);
+
+            if (HasStateAuthority)
+                chunk.HarvestProp(guid, harvestValue, Runner.Tick);
+
+            // Play effects
+            if (chunk.PropLoadStates.TryGetValue(guid, out var loadState))
+            {
+                if (loadState.LoadState == ELoadState.Loaded)
+                {
+                    if (loadState.Prop is HarvestNode harvestNode)
+                    {
+                        if (replicator.LoadStates[npcIndex].LoadState == ELoadState.Loaded)
+                        {
+                            harvestNode.PlayHarvestShake();
+                            harvestNode.PlayHarvestParticles(replicator.LoadStates[npcIndex].NPC.CachedTransform);
+                        }
+                    }
+                }
+            }
         }
     }
 }
