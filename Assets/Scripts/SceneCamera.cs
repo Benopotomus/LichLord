@@ -147,7 +147,7 @@ namespace LichLord
                 // Interactable
                 if ((_interactableLayerMask.value & colLayerBit) != 0)
                 {
-                    InteractableComponent interactable = col.GetComponentInParent<InteractableComponent>();
+                    InteractableComponent interactable = col.GetComponent<InteractableComponent>();
                     if (interactable != null && interactable.IsPotentialInteractor(Context.LocalPlayerCharacter.Interactor))
                         _cachedRaycastHit.interactable = interactable;
                 }

@@ -224,7 +224,7 @@ namespace LichLord
             if (interactable != null && interactable.IsPotentialInteractor(this))
             {
                 // Optionally check distance here against _interactDistance
-                if ((interactable.transform.position - transform.position).sqrMagnitude <= _interactDistance * _interactDistance)
+                //if ((interactable.transform.position - transform.position).sqrMagnitude <= _interactDistance * _interactDistance)
                 {
                     _bestInteractable = interactable;
                 }
