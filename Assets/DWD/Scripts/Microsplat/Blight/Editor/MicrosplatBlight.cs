@@ -51,7 +51,6 @@ namespace JBooth.MicroSplat
             {
                 MaterialProperty blightTex = shaderGUI.FindProp("_BlightTex", props);
                 MaterialProperty blightData = shaderGUI.FindProp("_BlightData", props);
-                MaterialProperty blightCount = shaderGUI.FindProp("_BlightCount", props);
                 MaterialProperty blightCutoff = shaderGUI.FindProp("_BlightCutoff", props);
                 MaterialProperty blightPow = shaderGUI.FindProp("_BlightPow", props);
                 MaterialProperty blightBoost = shaderGUI.FindProp("_BlightBoost", props);
@@ -59,11 +58,10 @@ namespace JBooth.MicroSplat
                 using(new EditorGUILayout.VerticalScope(GUI.skin.box))
                 {
                     materialEditor.ShaderProperty(blightTex, new GUIContent(blightTex.displayName));
-                    materialEditor.ShaderProperty(blightData, new GUIContent(blightTex.displayName));
-                    materialEditor.ShaderProperty(blightCount, new GUIContent(blightTex.displayName));
-                    materialEditor.ShaderProperty(blightCutoff, new GUIContent(blightTex.displayName));
-                    materialEditor.ShaderProperty(blightPow, new GUIContent(blightTex.displayName));
-                    materialEditor.ShaderProperty(blightBoost, new GUIContent(blightTex.displayName));
+                    materialEditor.ShaderProperty(blightData, new GUIContent(blightData.displayName));
+                    materialEditor.ShaderProperty(blightCutoff, new GUIContent(blightCutoff.displayName));
+                    materialEditor.ShaderProperty(blightPow, new GUIContent(blightPow.displayName));
+                    materialEditor.ShaderProperty(blightBoost, new GUIContent(blightBoost.displayName));
                 }
             }
         }
