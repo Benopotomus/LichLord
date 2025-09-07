@@ -108,7 +108,7 @@ namespace LichLord
                 return;
 
             RaycastFromCameraCenter(rayOrigin, rayDirection, localPlayerCreature.gameObject);
-            CheckOverlapsAtOriginNonAlloc(cameraTransform.position, localPlayerCreature.gameObject);
+            CheckOverlapsAtOriginNonAlloc(rayOrigin, localPlayerCreature.gameObject);
 
             if(followTransform != null)
                 _cameraFollowTarget.position = followTransform.position;

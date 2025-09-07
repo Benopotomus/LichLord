@@ -1,7 +1,4 @@
-﻿using JetBrains.Annotations;
-using LichLord;
-using LichLord.UI;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI; // Needed for Image
 
@@ -18,6 +15,44 @@ namespace LichLord.UI
         {
             base.OnVisible();
             _warningText.SetActive(false);
+        }
+
+        protected override void OnTick()
+        {
+            base.OnTick();
+            float localRenderTime = Context.Runner.LocalRenderTime;
+
+            PlayerCharacter pc = Context.LocalPlayerCharacter;
+
+            if (pc == null)
+            {
+                SetTarget(null);
+                return;
+            }
+
+            InteractableComponent bestInteractable = pc.Interactor.BestInteractable;
+
+            if (bestInteractable == null)
+            {
+                SetTarget(null);
+                return;
+            }
+
+            if (bestInteractable.IsInteractionValid(pc.Interactor))
+            {
+                SetTarget(bestInteractable.transform);
+            }
+
+            InteractableComponent currentInteractable = pc.Interactor.CurrentInteractable;
+
+            if (currentInteractable == null)
+            {
+                SetProgressBarVisible(false);
+                return;
+            }
+
+            SetProgressBarPercent(currentInteractable.GetPercentRemaining(localRenderTime));
+            SetProgressBarVisible(true);
         }
 
         public override void SetTarget(Transform target)

@@ -6,62 +6,39 @@
 namespace LichLord
 {
     using UnityEngine;
-    using System.Collections.Generic;
     using Fusion;
-    using LichLord.Props;
     using LichLord.UI;
     using DWD.Pooling;
-    using LichLord.Buildables;
+    using AYellowpaper.SerializedCollections;
+    using LichLord.Player;
 
     public class InteractorComponent : ContextBehaviour
     {
         [SerializeField] private PlayerCharacter _pc;
         public PlayerCharacter PC => _pc;
 
-        [SerializeField] private LayerMask _interactableLayerMask;
-
-        private List<InteractableComponent> _allInteractables = new List<InteractableComponent>();
-
         [SerializeField] private InteractableComponent _bestInteractable;
+        public InteractableComponent BestInteractable => _bestInteractable;
+
         [SerializeField] private InteractableComponent _currentInteractable;
+        public InteractableComponent CurrentInteractable => _currentInteractable;
 
         private float _interactDistance = 5.0f;
 
         [Networked]
         private ref FWorldPosition _interactTargetPosition => ref MakeRef<FWorldPosition>();
 
-        [SerializeField]
-        private float _pitchOffset = 0f;
+        [Networked]
+        private EInteractType _interactType { get; set; }
 
         [SerializeField]
-        private float _yawOffset = 0f;
-
-        [SerializeField]
-        private float _rollOffset = 0f;
+        [SerializedDictionary("InteractionType", "InteractorAction")]
+        private SerializedDictionary<EInteractType, InteractorActionDefinition> _interactorActions;
 
         [SerializeField]
         private VisualEffectBeam _beamPrefab;
 
         private VisualEffectBeam _beamInstance;
-
-        private UIFloatingInteract _floatingUI;
-        public UIFloatingInteract FloatingUI
-        {
-            get
-            {
-                if (_floatingUI == null)
-                {
-                    GameplayUI gameplayUI = Context.UI as GameplayUI;
-
-                    if (gameplayUI == null)
-                        return null;
-
-                    _floatingUI = gameplayUI.HUD.FloatingInteract;
-                }
-
-                return _floatingUI;
-            }
-        }
 
         public void ProcessInput(ref FGameplayInput input)
         {
@@ -91,6 +68,8 @@ namespace LichLord
 
             CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
 
+            _interactType = EInteractType.Dialog;
+
             state.MoveToInteract();
             _currentInteractable = _bestInteractable;
             _interactTargetPosition.CopyPosition(_currentInteractable.transform.position);
@@ -106,6 +85,8 @@ namespace LichLord
 
             CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
 
+            _interactType = EInteractType.None;
+
             state.MoveToIdle();
             _currentInteractable.InteractEnd(this);
             _currentInteractable = null;
@@ -116,8 +97,15 @@ namespace LichLord
         { 
             StopInteract(interactable);
 
-            if (FloatingUI != null)
-                FloatingUI.ShowWarningMessage(warningMessage);
+            GameplayUI gameplayUI = Context.UI as GameplayUI;
+
+            if (gameplayUI == null)
+                return;
+
+            UIFloatingInteract interactUI = gameplayUI.HUD.FloatingInteract;
+
+            if (interactUI != null)
+                interactUI.ShowWarningMessage(warningMessage);
         }
 
         public void OnFixedUpdateNetwork(int tick, float deltaTime)
@@ -140,54 +128,16 @@ namespace LichLord
             _pc.Movement.ProcessInteractMovement(interactablePosition, deltaTime);
         }
 
-        public void UpdateInteractUI(float localRenderTime)
-        {
-            if (!HasStateAuthority)
-                return;
-
-
-            if (FloatingUI == null)
-                return;
-
-            if (_bestInteractable == null)
-            {
-                FloatingUI.SetTarget(null);
-                return;
-            }
-
-            if (_bestInteractable.IsInteractionValid(this))
-            {
-                FloatingUI.SetTarget(_bestInteractable.transform);
-            }
-
-            int stockpileIndex = -1;
-            if (_bestInteractable.Owner is Stockpile stockpile)
-            {
-                stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
-            }
-
-            if (_currentInteractable == null)
-            {
-                FloatingUI.SetProgressBarVisible(false);
-                return;
-            }
-
-            FloatingUI.SetProgressBarPercent(_currentInteractable.GetPercentRemaining(localRenderTime));
-            FloatingUI.SetProgressBarVisible(true);
-        }
-
         public void OnRender(float deltaTime, float localRenderTime, int tick)
         {
-            UpdateInteractUI(localRenderTime);
         }
 
         public void OnEnterStateRender()
         {
-            _pc.AnimationController.SetAnimationForUpperBodyTrigger(5);
-            _pc.Aim.TargetPitchOffset = _pitchOffset;
-            _pc.Aim.TargetYawOffset = _yawOffset;
-            _pc.Aim.TargetRollOffset = _rollOffset;
-            SpawnBeamEffect();
+            if (_interactorActions.TryGetValue(_interactType, out InteractorActionDefinition actionDefinition))
+            {
+                actionDefinition.OnEnterStateRender(this);
+            }
         }
 
         public void OnExitStateRender()
@@ -203,6 +153,9 @@ namespace LichLord
 
         public void UpdateBeam()
         {
+            if (_beamInstance == null) 
+                return;
+
             _beamInstance.UpdateBeamPosition(
                 _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand), 
                 _interactTargetPosition.Position);
@@ -224,18 +177,18 @@ namespace LichLord
             if (interactable != null && interactable.IsPotentialInteractor(this))
             {
                 // Optionally check distance here against _interactDistance
-                //if ((interactable.transform.position - transform.position).sqrMagnitude <= _interactDistance * _interactDistance)
+                if ((interactable.transform.position - transform.position).sqrMagnitude <= _interactDistance * _interactDistance)
                 {
                     _bestInteractable = interactable;
                 }
             }
         }
 
-        private void SpawnBeamEffect()
+        public void SpawnBeamEffect(VisualEffectBeam beamPrefab)
         {
             Vector3 spawnPosition = _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand);
 
-            var instance = DWDObjectPool.Instance.SpawnAt(_beamPrefab, spawnPosition, Quaternion.identity);
+            var instance = DWDObjectPool.Instance.SpawnAt(beamPrefab, spawnPosition, Quaternion.identity);
             if (instance is VisualEffectBeam beamEffect)
             {
                 _beamInstance = beamEffect;
@@ -245,6 +198,13 @@ namespace LichLord
 
                 _beamInstance.ToggleBeam(true);
             }
+        }
+
+        public enum EInteractType : byte
+        { 
+            None,
+            HarvestNode,
+            Dialog,
         }
     }
 }

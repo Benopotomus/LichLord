@@ -186,7 +186,7 @@ namespace LichLord.NonPlayerCharacters
                 data.PositionX = NPC.CachedTransform.position.x;
             }
 
-            if (Mathf.Abs(NPC.CachedTransform.position.y - data.PositionY) > (POSITION_THRESHOLD * 3))
+            if (Mathf.Abs(NPC.CachedTransform.position.y - data.PositionY) > (POSITION_THRESHOLD * 4))
             {
                 data.PositionY = NPC.CachedTransform.position.y;
             }
