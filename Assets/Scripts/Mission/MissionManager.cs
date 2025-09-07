@@ -53,6 +53,7 @@ namespace LichLord.Missions
 
             if (_tutorialProgress == 0)
             {
+                Context.DialogManager.SetActiveDialogDefinition(_tutorialDialogs[0]);
                 Context.DialogManager.SetActiveDialogNode(_tutorialDialogs[0].StartingNode);
             }
         }
@@ -64,6 +65,7 @@ namespace LichLord.Missions
 
             if (_tutorialProgress == 1)
             {
+                Context.DialogManager.SetActiveDialogDefinition(_tutorialDialogs[1]);
                 Context.DialogManager.SetActiveDialogNode(_tutorialDialogs[1].StartingNode);
             }
         }

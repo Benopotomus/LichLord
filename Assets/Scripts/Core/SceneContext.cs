@@ -106,6 +106,7 @@ namespace LichLord
         MissionManager,
         NonPlayerCharacterManager,
         InvasionManager,
+        LocalPlayerCharacter,
     }
 
 }

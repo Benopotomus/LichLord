@@ -16,10 +16,8 @@ namespace LichLord
         private byte _localInvasionID;
 
         [Networked]
-        public int InvasionStartTick { get; set; }
-
-        [Networked]
         public byte InvasionSpawnWave { get; set; }
+        private int _localSpawnWave = -1;
 
         [Networked]
         public FWorldPosition InvasionSpawnPosition { get; set; }
@@ -28,6 +26,12 @@ namespace LichLord
         public ref FStrongholdData TargetStrongholdData => ref MakeRef<FStrongholdData>();
         private Stronghold _targetStronghold;
         public Stronghold TargetStronghold => _targetStronghold;
+
+        [Networked]
+        private EInvasionState _invasionState { get; set; }
+        public EInvasionState InvasionState => _invasionState;
+
+        private int _nextWaveTick = 0;
 
         public InvasionDefinition ActiveInvasion;
 
@@ -40,7 +44,6 @@ namespace LichLord
                 return;
 
             InvasionID = invasionID;
-            InvasionStartTick = Runner.Tick;
             InvasionSpawnWave = 0;
 
             TargetStrongholdData = targetStrongholdData;
@@ -62,6 +65,39 @@ namespace LichLord
                 _localInvasionID = InvasionID;
                 LocalInvasionChanged();
             }
+
+            if (InvasionID == 0)
+            {
+                _localSpawnWave = -1;
+                return;
+            }
+
+            ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
+
+            int tick = Runner.Tick;
+
+            if (_localSpawnWave != InvasionSpawnWave)
+            {
+                _localSpawnWave = InvasionSpawnWave;
+                _nextWaveTick = tick + ActiveInvasion.TicksBetweenWaves;
+            }
+
+            if (!HasStateAuthority)
+                return;
+
+            if (tick >= _nextWaveTick)
+            {
+                if (InvasionSpawnWave < ActiveInvasion.SpawnWaves.Count - 1)
+                {
+                    SpawnInvasionWave(InvasionSpawnWave);
+                    InvasionSpawnWave++;
+                }
+            }
+        }
+
+        public void StopInvasion()
+        { 
+        
         }
 
         private void LocalInvasionChanged()
@@ -83,30 +119,6 @@ namespace LichLord
 
         public override void FixedUpdateNetwork()
         {
-            base.FixedUpdateNetwork();
-
-            if (InvasionID == 0)
-                return;
-
-            ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
-
-            int tick = Runner.Tick;
-
-            int ticksSinceStart =  tick - InvasionStartTick;
-
-            if (ticksSinceStart > ActiveInvasion.InvasionTotalTicks)
-            {
-                InvasionID = 0;
-                return;
-            }
-
-            if (InvasionSpawnWave >= ActiveInvasion.SpawnWaves.Count)
-                return;
-
-            if (ticksSinceStart > (InvasionSpawnWave * ActiveInvasion.TicksBetweenWaves))
-            {
-                SpawnInvasionWave(InvasionSpawnWave);
-            }
         }
 
         private Vector3 GetInvasionStagingPosition()
@@ -233,8 +245,6 @@ namespace LichLord
                     4,
                     ActiveInvasion.Dialog);
             }
-
-            InvasionSpawnWave++;
         }
 
         public void LoadInvasionSpawnPointsForChunk(Chunk chunk)
@@ -260,5 +270,12 @@ namespace LichLord
             }
         }
 
+    }
+
+    public enum EInvasionState
+    { 
+        None,
+        Approaching,
+        Retreating,
     }
 }

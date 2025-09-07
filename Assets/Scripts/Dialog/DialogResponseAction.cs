@@ -49,6 +49,10 @@ namespace LichLord.Dialog
                     context.InvasionManager?.SendMessage(functionName, arg, SendMessageOptions.DontRequireReceiver);
                     break;
 
+                case ESceneContextCategory.LocalPlayerCharacter:
+                    context.LocalPlayerCharacter?.SendMessage(functionName, arg, SendMessageOptions.DontRequireReceiver);
+                    break;
+
                 default:
                     Debug.LogWarning($"FDialogResponseAction: Unknown target {target}");
                     break;

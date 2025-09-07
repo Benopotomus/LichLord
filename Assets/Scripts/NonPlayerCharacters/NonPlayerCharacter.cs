@@ -48,6 +48,10 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterDialogComponent _dialogComponent;
         public NonPlayerCharacterDialogComponent DialogComponent => _dialogComponent;
 
+        [SerializeField]
+        private InteractableComponent _interactableComponent;
+        public InteractableComponent Interactable => _interactableComponent;
+
         [SerializeField] private MuzzleComponent _muzzleComponent;
         public MuzzleComponent Muzzle => _muzzleComponent;
 
@@ -125,6 +129,20 @@ namespace LichLord.NonPlayerCharacters
             _attitudeComponent.OnSpawned(runtimeState);
             _dialogComponent.OnSpawned(runtimeState);
 
+            _interactableComponent.Activate(
+                this,
+                IsPotentialInteractor,
+                IsInteractionValid,
+                GetInteractionText,
+                GetTicksToComplete,
+                GetInteractType,
+                GetInteractDistance
+            );
+
+            _interactableComponent.onInteractStart += OnInteractStart;
+            _interactableComponent.onInteractEnd += OnInteractEnd;
+            _interactableComponent.onInteractionComplete += OnInteractionComplete;
+
             _index = runtimeState.Index;
             UpdateChunk(_context.ChunkManager);
 
@@ -132,10 +150,9 @@ namespace LichLord.NonPlayerCharacters
             _netObjectID.index = (byte)runtimeState.Index;
 
             _workerIndex = runtimeState.GetWorkerIndex();
+
             if (_workerIndex >= 0)
-            {
                 _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
-            }
         }
 
         public void OnRender(NonPlayerCharacterRuntimeState runtimeState, 
@@ -237,7 +254,7 @@ namespace LichLord.NonPlayerCharacters
             if (hit.target is NonPlayerCharacter npc)
             {
                 int currentAnimIndex = npc.State.CurrentAnimIndex;
-                int hitReactIndex = UnityEngine.Random.Range(0, 4);
+                int hitReactIndex = Random.Range(0, 4);
 
                 // If the new index is the same as the current, increment and wrap around
                 if (hitReactIndex == currentAnimIndex)
@@ -296,6 +313,10 @@ namespace LichLord.NonPlayerCharacters
 
         public void StartRecycle()
         {
+            _interactableComponent.onInteractStart -= OnInteractStart;
+            _interactableComponent.onInteractEnd -= OnInteractEnd;
+            _interactableComponent.onInteractionComplete -= OnInteractionComplete;
+
             Hurtbox.SetHitBoxesActive(false);
             Movement.AIFollower.rvoSettings.priority = 0.5f;
             Movement.SetFollowerUpdatePosition(false);
@@ -307,9 +328,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(Context.ChunkManager);
 
             if (_workerIndex >= 0)
-            {
                 _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
-            }
         }
 
         private NonPlayerCharacterDefinition _definition;
@@ -325,6 +344,84 @@ namespace LichLord.NonPlayerCharacters
             }
 
             return _definition;
+        }
+
+        // Interactable
+        private bool IsPotentialInteractor(InteractorComponent interactor)
+        {
+            if (_runtimeState.HasDialog())
+                return true;
+
+            return false;
+        }
+
+        private bool IsInteractionValid(InteractorComponent interactor)
+        {
+            if (_runtimeState.HasDialog())
+                return true;
+
+            return false;
+        }
+
+        private string GetInteractionText(InteractorComponent interactor)
+        {
+            return "NPC";
+        }
+
+        private int GetTicksToComplete(InteractorComponent interactor)
+        {
+            switch (GetInteractType(interactor))
+            {
+                case EInteractType.Dialog:
+                    return -1;
+                case EInteractType.HarvestNode:
+                    break;
+            }
+
+            return 32;
+        }
+
+        private EInteractType GetInteractType(InteractorComponent interactor)
+        {
+            if (_runtimeState.HasDialog())
+                return EInteractType.Dialog;
+
+            return EInteractType.None;
+        }
+
+        private float GetInteractDistance(InteractorComponent interactor)
+        {
+            if (_runtimeState.HasDialog())
+                return 50;
+
+            return 5;
+        }
+
+        private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
+        {
+            Debug.Log("Interaction started with NPC.");
+            if (DialogComponent.CurrentDialog == null)
+                return;
+
+            Context.DialogManager.SetActiveDialogDefinition(DialogComponent.CurrentDialog);
+            Context.DialogManager.SetActiveDialogNode(DialogComponent.CurrentDialog.StartingNode);
+        }
+
+        private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
+        {
+            Debug.Log("Interaction ended with NPC.");
+
+            // If my current open dialog is the one I'm ending interact with, close it.
+            if (Context.DialogManager.LocalActiveDialogDefinition == DialogComponent.CurrentDialog)
+            {
+                Context.DialogManager.SetActiveDialogDefinition(null);
+                Context.DialogManager.SetActiveDialogNode(null);
+            }
+        }
+
+        private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
+        {
+            Debug.Log("Interaction complete with NPC.");
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using LichLord.Buildables;
 using LichLord.NonPlayerCharacters;
+using LichLord.Dialog;
 
 namespace LichLord.World
 {
@@ -134,13 +135,25 @@ namespace LichLord.World
                     }
                 }
 
+                // --- Save DialogSaveDatas --- //
+                List<FDialogSaveData> dialogSaveDatas = new List<FDialogSaveData>();
+                if (Context.DialogManager != null)
+                {
+                    for (int i = 0; i < DialogConstants.MAX_DIALOGS; i++)
+                    {
+                        FDialogData dialogData = Context.DialogManager.GetDialog(i);
+                        dialogSaveDatas.Add(new FDialogSaveData(i, dialogData.DefinitionID, dialogData.IsAssigned));
+                    }
+                }
+
                 // --- Final save ---
                 FWorldSaveData saveData = new FWorldSaveData
                 {
                     chunks = chunkSaveDatas.ToArray(),
                     strongholds = strongholdSaveDatas.ToArray(),
                     stockpiles = stockpileSaves.ToArray(),
-                    workers = workerSaveData.ToArray()
+                    workers = workerSaveData.ToArray(),
+                    dialogs = dialogSaveDatas.ToArray(),
                 };
 
                 string json = JsonUtility.ToJson(saveData, true);
@@ -252,6 +265,16 @@ namespace LichLord.World
                         Context.WorkerManager.LoadWorkerData(workerSave);
                     }
                     Debug.Log($"Loaded {saveData.workers.Length} workers.");
+                }
+
+                // --- Load dialogs ---
+                if (saveData.dialogs != null)
+                {
+                    foreach (var dialogSave in saveData.dialogs)
+                    {
+                        Context.DialogManager.LoadDialogData(dialogSave);
+                    }
+                    Debug.Log($"Loaded {saveData.dialogs.Length} dialogs.");
                 }
 
                 //Context.ContainerManager.UpdateAllCurrencies();

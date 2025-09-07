@@ -33,7 +33,9 @@ namespace LichLord.Props
                 IsPotentialInteractor,
                 IsInteractionValid,
                 GetInteractionText,
-                GetInteractionTime
+                GetTicksToComplete,
+                GetInteractType,
+                GetInteractDistance
             );
 
             _interactableComponent.onInteractStart += OnInteractStart;
@@ -74,9 +76,19 @@ namespace LichLord.Props
             return "Activate Nexus";
         }
 
-        private float GetInteractionTime(InteractorComponent interactor)
+        private int GetTicksToComplete(InteractorComponent interactor)
         {
-            return 2.0f; // seconds to complete interaction
+            return 64; // seconds to complete interaction
+        }
+
+        private EInteractType GetInteractType(InteractorComponent interactor)
+        {
+            return EInteractType.HarvestNode;
+        }
+
+        private float GetInteractDistance(InteractorComponent interactor)
+        {
+            return 5;
         }
 
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)

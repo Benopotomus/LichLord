@@ -8,29 +8,35 @@ namespace LichLord
 {
     public class DialogManager : ContextBehaviour
     {
-        private const int MAX_DIALOGS = 32;
-
-        [Networked, Capacity(MAX_DIALOGS)]
+        [Networked, Capacity(DialogConstants.MAX_DIALOGS)]
         [OnChangedRender(nameof(OnRep_DialogDatas))]
         protected virtual NetworkArray<FDialogData> _dialogDatas { get; }
 
         [SerializeField] private int _localActiveDialogIndex = -1; 
         public int LocalActiveDialogIndex => _localActiveDialogIndex;
 
+        [SerializeField] private DialogDefinition _localActiveDialogDefinition;
+        public DialogDefinition LocalActiveDialogDefinition => _localActiveDialogDefinition;
+
         [SerializeField] private DialogNode _localActiveDialogNode;
         public DialogNode LocalActiveDialogNode => _localActiveDialogNode;
 
         private int _dialogAdvanceTick;
 
-        private void OnRep_DialogDatas(NetworkBehaviourBuffer previous)
+        [SerializeField] private DialogDefinition[] _activeDialogs = new DialogDefinition[DialogConstants.MAX_DIALOGS];
+
+        private void OnRep_DialogDatas()
         {
+            for (int i = 0; i < DialogConstants.MAX_DIALOGS; i++)
+            {
+                _activeDialogs[i] = Global.Tables.DialogTable.TryGetDefinition(_dialogDatas.GetRef(i).DefinitionID);
+            }
         }
 
         public override void Spawned()
         {
             base.Spawned();
-
-            //SpawnStaticDialog()
+            OnRep_DialogDatas();
         }
 
         public override void Render()
@@ -63,7 +69,7 @@ namespace LichLord
 
         public FDialogData GetDialog(int index)
         {
-            return _dialogDatas.GetRef(index);
+            return _dialogDatas.GetRef(index);  
         }
 
         public DialogDefinition GetDialogDefinition(int index)
@@ -73,7 +79,7 @@ namespace LichLord
 
         public int GetFreeDialogIndex()
         {
-            for (int i = 0; i < MAX_DIALOGS; i++)
+            for (int i = 0; i < DialogConstants.MAX_DIALOGS; i++)
             {
                 ref FDialogData stockpile = ref _dialogDatas.GetRef(i);
                 if (!stockpile.IsAssigned) // not taken
@@ -96,7 +102,7 @@ namespace LichLord
             }
 
             ref FDialogData dialogData = ref _dialogDatas.GetRef(freeIndex);
-            dialogData.DefinitionID = dialog.TableID;
+            dialogData.DefinitionID = (ushort)dialog.TableID;
             dialogData.IsAssigned = true;
             return freeIndex;
         }
@@ -107,11 +113,11 @@ namespace LichLord
             //dialogData.Assign();
         }
 
-        public void LoadDialogData(FStockpileSaveData stockpileSave)
+        public void LoadDialogData(FDialogSaveData dialogSave)
         {
-            //ref FDialogData dialogData = ref _dialogDatas.GetRef(stockpileSave.index);
-            //dialogData = stockpileSave.ToNetworkStockpile();
-            //_stockpileDatas.Set(stockpileSave.index, dialogData);
+            ref FDialogData dialogData = ref _dialogDatas.GetRef(dialogSave.index);
+            dialogData = dialogSave.ToNetworkDialog();
+            _dialogDatas.Set(dialogSave.index, dialogData);
         }
 
         public void ClearDialog(int dialogIndex)
@@ -121,20 +127,24 @@ namespace LichLord
             //stockpileData.Unassign();
         }
 
-        public void SpawnLocalStaticDialog(DialogDefinition dialogDefinition)
+        public void SetActiveDialogDefinition(DialogDefinition dialogDefinition)
         {
-            _localActiveDialogNode = dialogDefinition.StartingNode;
+            _localActiveDialogDefinition = dialogDefinition;
         }
 
-        public void SetActiveDialogNode(DialogNode dialogNode)
+        public void SetActiveDialogNode(DialogNode newDialogNode)
         {
-            if (dialogNode != null)
+            if (newDialogNode != null)
             {
-                if (!dialogNode.RequiresResponse)
-                    _dialogAdvanceTick = Runner.Tick + dialogNode.AdvanceTicks;
+                if (!newDialogNode.RequiresResponse)
+                    _dialogAdvanceTick = Runner.Tick + newDialogNode.AdvanceTicks;
+            }
+            else
+            { 
+                SetActiveDialogDefinition(null);
             }
 
-            _localActiveDialogNode = dialogNode;
+            _localActiveDialogNode = newDialogNode;
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]

@@ -78,7 +78,9 @@ namespace LichLord
                 IsPotentialInteractor,
                 IsInteractionValid,
                 GetInteractionText,
-                GetInteractionTime
+                GetTicksToComplete,
+                GetInteractType,
+                GetInteractDistance
             );
 
             _interactableComponent.onInteractStart += OnInteractStart;
@@ -177,9 +179,19 @@ namespace LichLord
             return "Stockpile";
         }
 
-        private float GetInteractionTime(InteractorComponent interactor)
+        private int GetTicksToComplete(InteractorComponent interactor)
         {
-            return 3.0f;
+            return 32;
+        }
+
+        private EInteractType GetInteractType(InteractorComponent interactor)
+        {
+            return EInteractType.HarvestNode;
+        }
+
+        private float GetInteractDistance(InteractorComponent interactor)
+        {
+            return 5;
         }
 
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)

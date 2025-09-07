@@ -11,6 +11,7 @@ namespace LichLord.World
         public FStrongholdSaveData[] strongholds;
         public FStockpileSaveData[] stockpiles;
         public FWorkerSaveData[] workers;
+        public FDialogSaveData[] dialogs;
     }
 
     [Serializable]
@@ -177,14 +178,67 @@ namespace LichLord.World
     [Serializable]
     public struct FWorldMissionSaveState
     {
-        public int progress;
+        public int tutorialProgress;
 
 
         // Store harvesting target data here as well
         public FWorldMissionSaveState(int progress)
         {
-            this.progress = progress;
+            this.tutorialProgress = progress;
         }
+    }
+
+    [Serializable]
+    public struct FDialogSaveData
+    {
+        public int index;
+        public int definitionID;
+        public bool isAssigned;
+
+        public FDialogSaveData(int index, int definitionId, bool isAssigned)
+        {
+            this.index = index;
+            this.definitionID = definitionId;
+            this.isAssigned = isAssigned;
+        }
+
+        public FDialogData ToNetworkDialog()
+        {
+            FDialogData netDialog = new FDialogData();
+            netDialog.DefinitionID = (ushort)definitionID;
+            netDialog.IsAssigned = isAssigned;
+
+            return netDialog;
+        }
+    }
+
+    [Serializable]
+    public struct FInvasionSaveData
+    {
+        public int definitionID;
+        public int invasionStartTick;
+        public int invasionSpawnWave;
+        public Vector3 invasionSpawnPosition;
+        public FStrongholdData targetStronghold;
+        public EInvasionState invasionState;
+
+        /*
+        public FDialogSaveData(int index, int definitionId, bool isAssigned)
+        {
+            this.index = index;
+            this.definitionID = definitionId;
+            this.isAssigned = isAssigned;
+        }
+
+        public FDialogData ToNetworkDialog()
+        {
+            FDialogData netDialog = new FDialogData();
+            netDialog.DefinitionID = (ushort)definitionID;
+            netDialog.IsAssigned = isAssigned;
+
+            return netDialog;
+        }
+        */
     }
 
     [Serializable]

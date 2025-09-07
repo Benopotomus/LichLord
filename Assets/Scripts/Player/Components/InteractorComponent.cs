@@ -23,8 +23,6 @@ namespace LichLord
         [SerializeField] private InteractableComponent _currentInteractable;
         public InteractableComponent CurrentInteractable => _currentInteractable;
 
-        private float _interactDistance = 5.0f;
-
         [Networked]
         private ref FWorldPosition _interactTargetPosition => ref MakeRef<FWorldPosition>();
 
@@ -58,32 +56,42 @@ namespace LichLord
             }
             else if (_pc.FSM.StateMachine.ActiveState is InteractingState interactingState)
             {
-                StopInteract(_bestInteractable);
+                StopInteract();
             }
         }
 
+        // Used to force the interaction stopping via dialog closing
+        public void SetInteractType(EInteractType newInteractType)
+        { 
+            _interactType = newInteractType;
+        
+        }
         private void StartInteract(InteractableComponent interactable)
         {
             int tick = Runner.Tick;
 
             CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
 
-            _interactType = EInteractType.Dialog;
-
             state.MoveToInteract();
             _currentInteractable = _bestInteractable;
+
+            if (_currentInteractable == null)
+                return;
+
             _interactTargetPosition.CopyPosition(_currentInteractable.transform.position);
-
             _pc.Movement.LookTarget = _currentInteractable.transform;
-
+            _interactType = _currentInteractable.GetInteractType(this);
             _currentInteractable.InteractStart(this, tick);
         }
 
-        private void StopInteract(InteractableComponent interactable)
+        private void StopInteract()
         {
+            if (_currentInteractable == null)
+                return;
+
             int tick = Runner.Tick;
 
-            CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
+            CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase;
 
             _interactType = EInteractType.None;
 
@@ -95,7 +103,7 @@ namespace LichLord
 
         public void CancelInteract(InteractableComponent interactable, string warningMessage)
         { 
-            StopInteract(interactable);
+            StopInteract();
 
             GameplayUI gameplayUI = Context.UI as GameplayUI;
 
@@ -110,16 +118,32 @@ namespace LichLord
 
         public void OnFixedUpdateNetwork(int tick, float deltaTime)
         {
-            if (_currentInteractable != null)
+            if (_interactType == EInteractType.None)
             {
-                RotateTowardInteract(deltaTime);
-
-                if (_currentInteractable.GetTimeRemaining(tick) <= 0f)
-                {
-                    _currentInteractable.CompleteInteract(this);
-                    StopInteract(_currentInteractable);
-                }
+                StopInteract();
             }
+
+            if (_currentInteractable == null)
+                return;
+
+            RotateTowardInteract(deltaTime);
+
+            float interactDistance = _currentInteractable.GetInteractDistance(this) * _currentInteractable.GetInteractDistance(this);
+
+            if ((_currentInteractable.transform.position - transform.position).sqrMagnitude > interactDistance)
+            {
+                StopInteract();
+                return;
+            }
+                // if ticks to complete is under zero, its infinite
+            if (_currentInteractable.GetTicksToComplete(this) < 0)
+                return;
+                
+            if (_currentInteractable.GetTimeRemaining(tick) <= 0f)
+            {
+                _currentInteractable.CompleteInteract(this);
+                StopInteract();
+            }        
         }
 
         public void RotateTowardInteract(float deltaTime)
@@ -176,8 +200,10 @@ namespace LichLord
 
             if (interactable != null && interactable.IsPotentialInteractor(this))
             {
+                float interactDistance = interactable.GetInteractDistance(this) * interactable.GetInteractDistance(this);
+
                 // Optionally check distance here against _interactDistance
-                if ((interactable.transform.position - transform.position).sqrMagnitude <= _interactDistance * _interactDistance)
+                if ((interactable.transform.position - transform.position).sqrMagnitude <= interactDistance)
                 {
                     _bestInteractable = interactable;
                 }
@@ -198,13 +224,6 @@ namespace LichLord
 
                 _beamInstance.ToggleBeam(true);
             }
-        }
-
-        public enum EInteractType : byte
-        { 
-            None,
-            HarvestNode,
-            Dialog,
         }
     }
 }

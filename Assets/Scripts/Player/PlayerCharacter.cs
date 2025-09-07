@@ -319,5 +319,10 @@ namespace LichLord
             string projectName = Path.GetFileName(Path.GetDirectoryName(path));
             return string.IsNullOrEmpty(projectName) ? "DefaultInstance" : projectName;
         }
+
+        public void DialogClosed()
+        {
+            Interactor.SetInteractType(EInteractType.None);
+        }
     }
 }

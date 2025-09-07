@@ -1941,6 +1941,73 @@ Transform:
   - {fileID: 1085713092064556984}
   m_Father: {fileID: 7661320016181326476}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2588119078394852664
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8776041161650212542}
+  - component: {fileID: 1370577029228525798}
+  - component: {fileID: 5407551961836201978}
+  m_Layer: 13
+  m_Name: Interactable
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8776041161650212542
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2588119078394852664}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2416786617183052698}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1370577029228525798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2588119078394852664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b47f5fe7e7275fa4b960e1fe84b13586, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InteractTick: 0
+--- !u!135 &5407551961836201978
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2588119078394852664}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2632616013377925983
 GameObject:
   m_ObjectHideFlags: 0
@@ -4217,6 +4284,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8776041161650212542}
   - {fileID: 2870757306215206412}
   - {fileID: 7687183678427819182}
   - {fileID: 5251962735256739724}
@@ -4244,6 +4312,7 @@ MonoBehaviour:
   _currencyComponent: {fileID: -6052169140148006727}
   _attitudeComponent: {fileID: 2504101711943739731}
   _dialogComponent: {fileID: 9184557710614446187}
+  _interactableComponent: {fileID: 1370577029228525798}
   _muzzleComponent: {fileID: 1907940134008171684}
   _animator: {fileID: 7646857354785003770}
   _transform: {fileID: 2416786617183052698}

@@ -5,15 +5,18 @@ namespace LichLord.NonPlayerCharacters
 {
     public class NonPlayerCharacterDialogComponent : MonoBehaviour
     {
-        [SerializeField] private bool _hasDialog;
-        [SerializeField] private DialogDefinition _dialog;
+        [SerializeField] private int _dialogIndex;
+        [SerializeField] private DialogDefinition _dialogDefinition;
+        public DialogDefinition CurrentDialog => _dialogDefinition;
 
         [SerializeField] private GameObject _indicator;  
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
-            _hasDialog = runtimeState.HasDialog();
-            _indicator.SetActive(_hasDialog);
+            _dialogIndex = runtimeState.GetDialogIndex();
+            _indicator.SetActive(_dialogIndex >= 0);
+
+            _dialogDefinition = runtimeState.GetDialogDefinition();
         }
 
         public void OnRender(NonPlayerCharacterRuntimeState runtimeState)
@@ -23,21 +26,22 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateDialogChange(NonPlayerCharacterRuntimeState runtimeState)
         {
-            bool oldHasDialog = _hasDialog;
-            bool newHasDialog = runtimeState.HasDialog();
+            int oldDialogIndex = _dialogIndex;
+            int newDialogIndex = runtimeState.GetDialogIndex();
 
-            if (oldHasDialog == newHasDialog)
+            if (oldDialogIndex == newDialogIndex)
                 return;
 
-            _indicator.SetActive(newHasDialog);
+            _dialogIndex = newDialogIndex;
+            _indicator.SetActive(_dialogIndex >= 0);
 
-            DialogDefinition oldDialog = _dialog;
-            DialogDefinition newDialog = runtimeState.GetDialog();
+            DialogDefinition oldDialog = _dialogDefinition;
+            DialogDefinition newDialog = runtimeState.GetDialogDefinition();
 
             if (oldDialog == newDialog)
                 return;
 
-            _dialog = newDialog;
+            _dialogDefinition = newDialog;
         }
     }
 }

@@ -17,10 +17,19 @@ MonoBehaviour:
   _statement: {fileID: 11400000, guid: 9f1f5f89c4846ba41a1abc3be2c0b563, type: 2}
   _responses:
     _serializedList:
-    - Key: {fileID: 11400000, guid: 3ff39f8cf86e67c41829c7e7730802ea, type: 2}
+    - Key: {fileID: 11400000, guid: ff07a368c96d61242b4d1476d9ecf581, type: 2}
+      Value: {fileID: 0}
+    - Key: {fileID: 11400000, guid: e951f4dca51a4ea42ab12a0ce4126177, type: 2}
+      Value: {fileID: 0}
+    - Key: {fileID: 11400000, guid: a375cd71802482a4ab7b0c3ab9ee48c0, type: 2}
       Value: {fileID: 0}
   _responseActions:
-    _serializedList: []
+    _serializedList:
+    - Key: {fileID: 11400000, guid: ff07a368c96d61242b4d1476d9ecf581, type: 2}
+      Value:
+        target: 5
+        functionName: DialogClosed
+        parameter: 
   _autoResponse:
     NextNode: {fileID: 0}
     Action:

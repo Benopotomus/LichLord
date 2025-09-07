@@ -249,15 +249,18 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public DialogDefinition GetDialog()
+        public int GetDialogIndex()
         {
-            if(DataDefinition.HasDialog(ref _data))
+            return DataDefinition.GetDialogIndex(ref _data);
+        }
+
+        public DialogDefinition GetDialogDefinition()
+        {
+            int dialogIndex = GetDialogIndex();
+            if (dialogIndex < 0)
                 return null;
 
-            int dialogIndex = DataDefinition.GetDialogIndex(ref _data);
-
             return _replicator.Context.DialogManager.GetDialogDefinition(dialogIndex);
-
         }
 
         public bool HasDialog()

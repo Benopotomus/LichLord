@@ -92,7 +92,12 @@ namespace LichLord
                 return;
 
             if (Cursor.lockState != CursorLockMode.Locked)
+            {
+                _input.LookDelta = Vector2.zero;
+                _input.MoveDirection = Vector2.zero;
+                ResetInput();
                 return;
+            }
 
             // Movement and lookZ
             _input.MoveDirection = _controls.Gameplay.Move.ReadValue<Vector2>();
