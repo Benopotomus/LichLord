@@ -188,5 +188,27 @@ namespace LichLord.NonPlayerCharacters
 
             return allSaves;
         }
+
+        public void DespawnAllInvaders()
+        {
+            if (!HasStateAuthority)
+                return;
+
+            foreach (var replicator in _replicators)
+            {
+                replicator.DespawnInvaders();
+            }
+        }
+
+        public void SetInvaderAttitude(EAttitude newAttitude)
+        {
+            if (!HasStateAuthority)
+                return;
+
+            foreach (var replicator in _replicators)
+            {
+                replicator.SetInvaderAttitude(newAttitude);
+            }
+        }
     }
 }

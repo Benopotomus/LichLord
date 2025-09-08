@@ -12,6 +12,7 @@ namespace LichLord.World
         public FStockpileSaveData[] stockpiles;
         public FWorkerSaveData[] workers;
         public FDialogSaveData[] dialogs;
+        public FInvasionSaveData[] invasion;
     }
 
     [Serializable]

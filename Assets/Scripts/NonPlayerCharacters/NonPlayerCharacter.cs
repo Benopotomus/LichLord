@@ -329,6 +329,11 @@ namespace LichLord.NonPlayerCharacters
 
             if (_workerIndex >= 0)
                 _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
+
+            int dialogIndex = _runtimeState.GetDialogIndex();
+
+            if (dialogIndex >= 0)
+                _context.DialogManager.ClearDialog(dialogIndex);
         }
 
         private NonPlayerCharacterDefinition _definition;

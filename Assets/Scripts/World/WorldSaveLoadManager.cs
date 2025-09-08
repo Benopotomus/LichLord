@@ -146,6 +146,18 @@ namespace LichLord.World
                     }
                 }
 
+                // --- Save Invasion Data --- //
+                /*
+                if (Context.DialogManager != null)
+                {
+                    for (int i = 0; i < DialogConstants.MAX_DIALOGS; i++)
+                    {
+                        FDialogData dialogData = Context.DialogManager.GetDialog(i);
+                        dialogSaveDatas.Add(new FDialogSaveData(i, dialogData.DefinitionID, dialogData.IsAssigned));
+                    }
+                }
+                */
+
                 // --- Final save ---
                 FWorldSaveData saveData = new FWorldSaveData
                 {

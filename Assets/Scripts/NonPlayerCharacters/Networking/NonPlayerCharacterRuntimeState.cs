@@ -32,6 +32,9 @@ namespace LichLord.NonPlayerCharacters
         {
             get
             {
+                if (_data.DefinitionID == 0)
+                    return null;
+
                 if (_dataDefinition == null)
                     _dataDefinition = _data.DataDefinition;
 
@@ -68,7 +71,7 @@ namespace LichLord.NonPlayerCharacters
         }
 
         public ETeamID GetTeam()
-        {
+        { 
             return DataDefinition.GetTeamID(ref _data);
         }
 
@@ -80,6 +83,12 @@ namespace LichLord.NonPlayerCharacters
         public EAttitude GetAttitude()
         {
             return DataDefinition.GetAttitude(ref _data);
+        }
+
+        public void SetAttitude(EAttitude newAttitude)
+        {
+            DataDefinition.SetAttitude(newAttitude, ref _data);
+            _replicator.ReplicateRuntimeState(this);
         }
 
         public ENPCState GetState()

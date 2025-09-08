@@ -12,9 +12,6 @@ namespace LichLord
         [OnChangedRender(nameof(OnRep_DialogDatas))]
         protected virtual NetworkArray<FDialogData> _dialogDatas { get; }
 
-        [SerializeField] private int _localActiveDialogIndex = -1; 
-        public int LocalActiveDialogIndex => _localActiveDialogIndex;
-
         [SerializeField] private DialogDefinition _localActiveDialogDefinition;
         public DialogDefinition LocalActiveDialogDefinition => _localActiveDialogDefinition;
 
@@ -123,8 +120,19 @@ namespace LichLord
         public void ClearDialog(int dialogIndex)
         {
             ref FDialogData dialogData = ref _dialogDatas.GetRef(dialogIndex);
-            //stockpileData.ClearStockpile();
-            //stockpileData.Unassign();
+
+            if (LocalActiveDialogDefinition != null)
+            {
+                int localActiveDialogDefinitionID = LocalActiveDialogDefinition.TableID;
+                if (dialogData.DefinitionID == localActiveDialogDefinitionID)
+                { 
+                    _localActiveDialogDefinition = null;
+                    _localActiveDialogNode = null;
+                }    
+            }
+
+            dialogData.DefinitionID = 0;
+            dialogData.IsAssigned = false;
         }
 
         public void SetActiveDialogDefinition(DialogDefinition dialogDefinition)

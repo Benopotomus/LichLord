@@ -26,7 +26,7 @@ namespace LichLord.NonPlayerCharacters
         private Dictionary<int, NonPlayerCharacterRuntimeState> _predictedStates = new Dictionary<int, NonPlayerCharacterRuntimeState>();
         private NonPlayerCharacterRuntimeState[] _localRuntimeStates = 
             new NonPlayerCharacterRuntimeState[NonPlayerCharacterConstants.MAX_NPC_REPS];
-
+        
         [SerializeField] private int _activeNPCs;
 
         [SerializeField] private LayerMask hitMask = ~0; // used to ground npcs on replication
@@ -91,6 +91,11 @@ namespace LichLord.NonPlayerCharacters
         { 
             _npcDatas.Set(index, data);
             _localRuntimeStates[index].CopyData(ref data);
+        }
+
+        public ref FNonPlayerCharacterData GetNPCDataRef(int index)
+        {
+            return ref _npcDatas.GetRef(index);
         }
 
         public void ReplicateRuntimeState(NonPlayerCharacterRuntimeState runtimeState)
@@ -159,7 +164,7 @@ namespace LichLord.NonPlayerCharacters
                 }
                 else if (!shouldBeActive && loadState.LoadState == ELoadState.Loaded)
                 {
-                    DespawnNPC(i);
+                    DespawnNPCGameObject(i);
                 }
             }
         }
@@ -185,7 +190,7 @@ namespace LichLord.NonPlayerCharacters
                 _predictedStates.Remove(keysToRemove[i]);
         }
 
-        private void DespawnNPC(int index)
+        private void DespawnNPCGameObject(int index)
         {
             ref FNPCLoadState loadState = ref _loadStates[index];
             if (loadState.LoadState == ELoadState.Loaded)
@@ -290,6 +295,34 @@ namespace LichLord.NonPlayerCharacters
             }
 
             return localState;
+        }
+
+        public void DespawnInvaders()
+        {
+            if (!HasStateAuthority)
+                return;
+
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
+            {
+                NonPlayerCharacterRuntimeState curState = _localRuntimeStates[i];
+
+                if (curState.IsInvasionNPC())
+                    curState.SetState(ENPCState.Inactive);
+            }
+        }
+
+        public void SetInvaderAttitude(EAttitude newAttitude)
+        {
+            if (!HasStateAuthority)
+                return;
+
+            for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
+            {
+                NonPlayerCharacterRuntimeState curState = _localRuntimeStates[i];
+
+                if (curState.IsInvasionNPC())
+                    curState.SetAttitude(newAttitude);
+            }
         }
     }
 }

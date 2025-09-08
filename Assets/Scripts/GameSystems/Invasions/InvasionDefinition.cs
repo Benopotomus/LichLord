@@ -32,5 +32,13 @@ namespace LichLord
         [SerializeField]
         private DialogDefinition _dialog;
         public DialogDefinition Dialog => _dialog;
+
+        [SerializeField] // ticks until invaders will retreat after final wave spawns
+        private int _ticksUntilRetreat = 1920;
+        public int TicksUntilRetreat => _ticksUntilRetreat;
+
+        [SerializeField] // ticks until invaders despawn after final wave spawns
+        private int _ticksUntilDespawn = 2880;
+        public int TicksUntilDespawn => _ticksUntilDespawn;
     }
 }
