@@ -20,10 +20,12 @@ namespace LichLord
         private int _localSpawnWave = -1;
 
         [Networked]
-        public FWorldPosition InvasionSpawnPosition { get; set; }
+        public ref FWorldPosition InvasionStagingPosition => ref MakeRef<FWorldPosition>();
 
         [Networked]
         public ref FStrongholdData TargetStrongholdData => ref MakeRef<FStrongholdData>();
+
+        [SerializeField]
         private Stronghold _targetStronghold;
         public Stronghold TargetStronghold => _targetStronghold;
 
@@ -40,6 +42,43 @@ namespace LichLord
         public Action<Stronghold> onInvasionStarted;
         public Action onInvasionEnded;
 
+        public void LoadInvasionData()
+        {
+            if (!HasStateAuthority)
+                return;
+
+            FInvasionSaveData saveData = Context.WorldSaveLoadManager.LoadedInvasion;
+
+            if (saveData.invasionId == 0)
+                return;
+
+            int tick = Runner.Tick;
+
+            InvasionID = (byte)saveData.invasionId;
+            ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
+
+            InvasionSpawnWave = (sbyte)saveData.invasionSpawnWave;
+            _localSpawnWave = InvasionSpawnWave; // ensure we don't respawn the wave
+            _nextWaveTick = tick + ActiveInvasion.TicksBetweenWaves;
+
+            int maxInvasionIndex = ActiveInvasion.SpawnWaves.Count - 1;
+            if (_localSpawnWave == maxInvasionIndex)
+                _retreatTick = tick + ActiveInvasion.TicksUntilRetreat;
+
+            InvasionStagingPosition.CopyPosition(saveData.invasionSpawnPosition);
+
+            TargetStrongholdData.ChunkID = saveData.targetStronghold.chunkCoord;
+            TargetStrongholdData.ChunkIndex = (ushort)saveData.targetStronghold.index;
+
+            _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdData);
+
+            InvasionState = saveData.invasionState;
+            _localInvasionState = InvasionState;
+
+            if (_localInvasionState == EInvasionState.Retreating)
+                _despawnTick = tick + ActiveInvasion.TicksUntilDespawn;
+        }
+
         public void BeginInvasion(byte invasionID, FStrongholdData targetStrongholdData)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
@@ -48,8 +87,9 @@ namespace LichLord
             InvasionID = invasionID;
             InvasionSpawnWave = 0;
             InvasionState = EInvasionState.Approaching;
-
-            TargetStrongholdData = targetStrongholdData;
+            TargetStrongholdData.Copy(targetStrongholdData);
+            InvasionStagingPosition.CopyPosition(GetInvasionStagingPosition());
+            //Debug.Log(InvasionStagingPosition.Position);
 
             SpawnInvasionWave(InvasionSpawnWave);
         }
@@ -81,11 +121,14 @@ namespace LichLord
                 LocalInvasionChanged();
             }
 
-            if (InvasionID == 0)
+            if (_localInvasionID == 0)
             {
                 _localSpawnWave = -1;
                 return;
             }
+
+            if(TargetStrongholdData.IsValid() && _targetStronghold == null)
+                _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdData);
 
             ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
 
@@ -142,7 +185,7 @@ namespace LichLord
 
         private void LocalInvasionChanged()
         {
-            if (InvasionID == 0)
+            if (_localInvasionID == 0)
             {
                 ActiveInvasion = null;
                 _targetStronghold = null;
@@ -236,11 +279,12 @@ namespace LichLord
             if (InvasionID == 0)
                 return;
 
+            if (!HasStateAuthority)
+                return;
+                
             ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
             var spawnWaveDefinition = ActiveInvasion.SpawnWaves[wave];
             var waveCharacters = spawnWaveDefinition.InvasionCharacters;
-
-            var stagingPosition = GetInvasionStagingPosition();
 
             Vector3 spawnPosition = Vector3.zero;
 
@@ -253,7 +297,7 @@ namespace LichLord
                     UnityEngine.Random.Range(-5f, 5f)
                 );
 
-                randomPositionAbove += stagingPosition;
+                randomPositionAbove += InvasionStagingPosition.Position;
 
                 // Raycast down to find ground
                 spawnPosition = Vector3.zero;
@@ -261,7 +305,6 @@ namespace LichLord
                 if (Physics.Raycast(randomPositionAbove, Vector3.down, out hit, 200f))
                 {
                     spawnPosition = hit.point;
-                    
                 }
                 else
                 {

@@ -324,6 +324,7 @@ namespace LichLord.NonPlayerCharacters
             Movement.SetFollowerLocalAvoidance(false);
             Movement.SetFollowerCanMove(false);
             _movementComponent.StartRecycle();
+            _brainComponent.StartRecycle();
             DWDObjectPool.Instance.Recycle(this);
             UpdateChunk(Context.ChunkManager);
 

@@ -285,7 +285,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void StartRecycle()
         {
-
+            SetMoveTargetPosition(Vector3.zero);
         }
 
         public void OnStateAuthorityChanged(bool hasAuthority)

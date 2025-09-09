@@ -37,6 +37,12 @@ namespace LichLord.World
 
             return false;
         }
+
+        public void Copy(FStrongholdData other)
+        {
+            this.ChunkID = other.ChunkID;
+            this.ChunkIndex = other.ChunkIndex;
+        }
     }
 
     public class StrongholdManager : ContextBehaviour
@@ -50,6 +56,7 @@ namespace LichLord.World
         [SerializeField] private Stronghold _strongholdPrefab;
         [SerializeField] private StandaloneVisualEffect _preSpawnVisualEffect;
 
+        [SerializeField]
         private List<Stronghold> _activeStrongholds = new List<Stronghold>();
         public List<Stronghold> ActiveStrongholds => _activeStrongholds;
 

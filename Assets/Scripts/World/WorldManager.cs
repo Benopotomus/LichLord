@@ -20,6 +20,7 @@ namespace LichLord.World
 
             Context.ChunkManager.InitializeWorldChunks();
             Context.StrongholdManager.LoadStrongholds();
+            Context.InvasionManager.LoadInvasionData();
 
             if (HasStateAuthority)
             {

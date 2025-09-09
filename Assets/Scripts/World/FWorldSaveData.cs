@@ -12,7 +12,7 @@ namespace LichLord.World
         public FStockpileSaveData[] stockpiles;
         public FWorkerSaveData[] workers;
         public FDialogSaveData[] dialogs;
-        public FInvasionSaveData[] invasion;
+        public FInvasionSaveData invasion;
     }
 
     [Serializable]
@@ -216,31 +216,33 @@ namespace LichLord.World
     [Serializable]
     public struct FInvasionSaveData
     {
-        public int definitionID;
-        public int invasionStartTick;
+        public int invasionId;
         public int invasionSpawnWave;
         public Vector3 invasionSpawnPosition;
-        public FStrongholdData targetStronghold;
+        public FTargetStrongholdSaveData targetStronghold;
         public EInvasionState invasionState;
 
-        /*
-        public FDialogSaveData(int index, int definitionId, bool isAssigned)
+        public FInvasionSaveData(int invasionId, 
+            int invasionSpawnWave, 
+            Vector3 invasionSpawnPosition,
+            FStrongholdData targetStronghold,
+            EInvasionState invasionState)
         {
-            this.index = index;
-            this.definitionID = definitionId;
-            this.isAssigned = isAssigned;
+            this.invasionId = invasionId;
+            this.invasionSpawnWave = invasionSpawnWave;
+            this.invasionSpawnPosition = invasionSpawnPosition;
+            this.targetStronghold.chunkCoord = targetStronghold.ChunkID;
+            this.targetStronghold.index = targetStronghold.ChunkIndex;
+            this.invasionState = invasionState;
         }
 
-        public FDialogData ToNetworkDialog()
+        [Serializable]
+        public struct FTargetStrongholdSaveData
         {
-            FDialogData netDialog = new FDialogData();
-            netDialog.DefinitionID = (ushort)definitionID;
-            netDialog.IsAssigned = isAssigned;
-
-            return netDialog;
+            public FChunkPosition chunkCoord;
+            public int index;
         }
-        */
-    }
+        }
 
     [Serializable]
     public struct FNPCSaveData

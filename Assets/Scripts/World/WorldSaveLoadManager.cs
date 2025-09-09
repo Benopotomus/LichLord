@@ -20,6 +20,9 @@ namespace LichLord.World
         private List<FNonPlayerCharacterSaveState> _loadedNPCs = new List<FNonPlayerCharacterSaveState>();
         public List<FNonPlayerCharacterSaveState> LoadedNPCs => _loadedNPCs;
 
+        private FInvasionSaveData _loadedInvasion = new FInvasionSaveData();
+        public FInvasionSaveData LoadedInvasion => _loadedInvasion;
+
         private FusionCallbacksHandler _shutdownHandler;
 
         public override void Spawned()
@@ -147,17 +150,20 @@ namespace LichLord.World
                 }
 
                 // --- Save Invasion Data --- //
-                /*
-                if (Context.DialogManager != null)
-                {
-                    for (int i = 0; i < DialogConstants.MAX_DIALOGS; i++)
-                    {
-                        FDialogData dialogData = Context.DialogManager.GetDialog(i);
-                        dialogSaveDatas.Add(new FDialogSaveData(i, dialogData.DefinitionID, dialogData.IsAssigned));
-                    }
-                }
-                */
 
+                FInvasionSaveData invasionSaveData = new FInvasionSaveData();
+
+                if (Context.InvasionManager != null)
+                {
+                    InvasionManager invasionManager = Context.InvasionManager;
+                    invasionSaveData.invasionId = invasionManager.InvasionID;
+                    invasionSaveData.invasionSpawnWave = invasionManager.InvasionSpawnWave;
+                    invasionSaveData.invasionSpawnPosition = invasionManager.InvasionStagingPosition.Position;
+                    invasionSaveData.targetStronghold.chunkCoord = invasionManager.TargetStrongholdData.ChunkID;
+                    invasionSaveData.targetStronghold.index = invasionManager.TargetStrongholdData.ChunkIndex;
+                    invasionSaveData.invasionState = invasionManager.InvasionState;
+                }
+                
                 // --- Final save ---
                 FWorldSaveData saveData = new FWorldSaveData
                 {
@@ -166,6 +172,7 @@ namespace LichLord.World
                     stockpiles = stockpileSaves.ToArray(),
                     workers = workerSaveData.ToArray(),
                     dialogs = dialogSaveDatas.ToArray(),
+                    invasion = invasionSaveData
                 };
 
                 string json = JsonUtility.ToJson(saveData, true);
@@ -288,6 +295,10 @@ namespace LichLord.World
                     }
                     Debug.Log($"Loaded {saveData.dialogs.Length} dialogs.");
                 }
+
+                // --- Load invasion ---
+
+                _loadedInvasion = saveData.invasion;
 
                 //Context.ContainerManager.UpdateAllCurrencies();
 

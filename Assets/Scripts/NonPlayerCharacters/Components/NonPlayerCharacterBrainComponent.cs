@@ -79,7 +79,17 @@ namespace LichLord.NonPlayerCharacters
             _isInFaceTargetRange = false;
             _hasAttackTarget = false;
             _hasHarvestTarget = false;
+            _wanderPositionSet = false;
             _activeManeuverState = ENPCState.Inactive;
+        }
+
+        public void StartRecycle()
+        {
+            _hasAttackTarget = false;
+            _hasHarvestTarget = false;
+            _hasDepositTarget = false;
+            _wanderPositionSet = false;
+            _moveTarget = Vector3.zero;
         }
 
         public void AuthorityUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
@@ -200,7 +210,7 @@ namespace LichLord.NonPlayerCharacters
                 if (stronghold != null)
                 {
                     if (_wanderPositionSet)
-                        return;
+                       return;
 
                     var targetPosition = stronghold.CachedTransform.position;
 
@@ -216,11 +226,6 @@ namespace LichLord.NonPlayerCharacters
 
                     // Back it up ~50 units along that direction
                     Vector3 backedUpTarget = (targetPosition + direction * stronghold.InfluenceDistance) + rotatedOffset;
-
-                    // If our current destination hasn't changed much, we early out
-                    Vector3 delta = _moveTarget - backedUpTarget;
-                    if (delta.sqrMagnitude < 0.01f)
-                        return;
 
                     _moveTarget = backedUpTarget;
                     _wanderPositionSet = true;
@@ -374,9 +379,9 @@ namespace LichLord.NonPlayerCharacters
             _isInMovementStopRange = false;
             _isInFaceTargetRange = false;
 
-            float movementStopRange = 1f;
-            float faceTargetRange = 100;
-            float sqrDist = 400;
+            float movementStopRange = 1 * 1;
+            float faceTargetRange = 20 * 20;
+            float sqrDist = 40 * 40;
 
             if (HasActiveManeuver())
             {
