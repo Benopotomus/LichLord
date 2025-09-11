@@ -320,7 +320,7 @@ namespace LichLord
             return string.IsNullOrEmpty(projectName) ? "DefaultInstance" : projectName;
         }
 
-        public void DialogClosed()
+        public void MSG_DialogClosed()
         {
             Interactor.SetInteractType(EInteractType.None);
         }

@@ -81,6 +81,7 @@ namespace LichLord.NonPlayerCharacters
             _hasHarvestTarget = false;
             _wanderPositionSet = false;
             _activeManeuverState = ENPCState.Inactive;
+            _moveTarget = Vector3.zero;
         }
 
         public void StartRecycle()
@@ -206,30 +207,14 @@ namespace LichLord.NonPlayerCharacters
 
             if (runtimeState.IsInvasionNPC())
             {
-                var stronghold = _npc.Context.InvasionManager.TargetStronghold;
-                if (stronghold != null)
-                {
-                    if (_wanderPositionSet)
-                       return;
+                InvasionManager invasionManager = NPC.Context.InvasionManager;
 
-                    var targetPosition = stronghold.CachedTransform.position;
+                if (invasionManager.InvasionID == 0)
+                    return;
 
-                    // Get direction from stronghold to NPC
-                    Vector3 direction = (_npc.CachedTransform.position - targetPosition).normalized;
-
-                    // Formation offset (in local formation space)
-                    Vector3 formationOffset = runtimeState.GetFormationOffset();
-
-                    // Rotate offset so it aligns with direction away from stronghold
-                    Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
-                    Vector3 rotatedOffset = rotation * formationOffset;
-
-                    // Back it up ~50 units along that direction
-                    Vector3 backedUpTarget = (targetPosition + direction * stronghold.InfluenceDistance) + rotatedOffset;
-
-                    _moveTarget = backedUpTarget;
-                    _wanderPositionSet = true;
-                }
+                Vector3 formationOffset = runtimeState.GetFormationOffset();
+                _moveTarget = NPC.Context.InvasionManager.GetInvasionTargetPosition(formationOffset);
+                _wanderPositionSet = true;
             }
             else if (runtimeState.IsWorker())
             {
@@ -243,7 +228,6 @@ namespace LichLord.NonPlayerCharacters
                     _moveTarget = crypt.CachedTransform.position;
                     _wanderPositionSet = true;
                 }
-
             }
             else
             { 

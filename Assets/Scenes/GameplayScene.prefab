@@ -2056,7 +2056,7 @@ GameObject:
   - component: {fileID: 722477551252766946}
   - component: {fileID: 6004003068255050606}
   m_Layer: 5
-  m_Name: InvasionTargetIconMask
+  m_Name: InvasionTargetIconMaskLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2079,7 +2079,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -175, y: 0}
+  m_AnchoredPosition: {x: -175, y: 1.378}
   m_SizeDelta: {x: 64, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7799932560138287917
@@ -2508,6 +2508,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee3e69489ab590945b5d4de3ab815f1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _transform: {fileID: 8668724679689353573}
+  _text: {fileID: 1718045798492319751}
+  _iconImages:
+  - {fileID: 7169310752488511735}
+  - {fileID: 7014052036458008417}
+  _approachingSprite: {fileID: 21300000, guid: b2dfe90da0359874bbcb4a11f26103bb, type: 3}
+  _retreatingSprite: {fileID: 21300000, guid: f77bd330d5b726c4bb3e70a08efd63ec, type: 3}
 --- !u!1 &3811523647561645693
 GameObject:
   m_ObjectHideFlags: 0
@@ -3700,13 +3707,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32
-  m_fontSizeBase: 32
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -4012,7 +4019,7 @@ GameObject:
   - component: {fileID: 9205238453984520175}
   - component: {fileID: 9182387362894977668}
   m_Layer: 5
-  m_Name: InvasionTargetIconMask (1)
+  m_Name: InvasionTargetIconMaskRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4123,7 +4130,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 45.5, y: -122.5}
+  m_AnchoredPosition: {x: 45.5, y: -102.14}
   m_SizeDelta: {x: 825, y: 115}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5850096861283360749
@@ -4186,8 +4193,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22
-  m_fontSizeBase: 22
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4476,7 +4483,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 42, y: -234.99994}
+  m_AnchoredPosition: {x: 39.7, y: -210.4}
   m_SizeDelta: {x: 818, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6417485281411981205
@@ -4505,7 +4512,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 5
+  m_Spacing: 3
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
@@ -4558,8 +4565,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _InvasionID: 0
-  _InvasionStartTick: 0
   _InvasionSpawnWave: 0
+  _targetStronghold: {fileID: 0}
+  _InvasionState: 0
+  _nextWaveTick: 0
+  _retreatTick: 0
+  _despawnTick: 0
   ActiveInvasion: {fileID: 0}
 --- !u!1 &5997713225184429534
 GameObject:
@@ -5363,7 +5374,7 @@ GameObject:
   - component: {fileID: 7169310752488511735}
   - component: {fileID: 4848248555932041677}
   m_Layer: 5
-  m_Name: InvasionTargetIcon
+  m_Name: InvasionTargetIconLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6872,8 +6883,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff0b51f96e01efe40abdd17812d3b24a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _localActiveDialogIndex: -1
+  _localActiveDialogDefinition: {fileID: 0}
   _localActiveDialogNode: {fileID: 0}
+  _activeDialogs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &8362709688206269684
 GameObject:
   m_ObjectHideFlags: 0
@@ -7118,7 +7162,7 @@ GameObject:
   - component: {fileID: 7014052036458008417}
   - component: {fileID: 1047034370190978552}
   m_Layer: 5
-  m_Name: InvasionTargetIcon
+  m_Name: InvasionTargetIconRight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7242,6 +7286,7 @@ MonoBehaviour:
     type: 3}
   _preSpawnVisualEffect: {fileID: 5894957125435778597, guid: 3260d541cc519654f832cc5a44e59db4,
     type: 3}
+  _activeStrongholds: []
 --- !u!1 &8981083752927187975
 GameObject:
   m_ObjectHideFlags: 0

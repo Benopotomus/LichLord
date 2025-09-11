@@ -68,16 +68,17 @@
         Idle,
         Dead,
         HitReact,
+
         Maneuver_1,
         Maneuver_2,
         Maneuver_3,
         Maneuver_4,
+
         Maneuver_5,
         Maneuver_6,
         Maneuver_7,
         Maneuver_8,
-        Interact_1,
-        Interact_2,
+
         Stunned,
         Spawning,
     }

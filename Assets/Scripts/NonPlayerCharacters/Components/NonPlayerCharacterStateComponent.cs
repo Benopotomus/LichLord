@@ -17,6 +17,11 @@ namespace LichLord.NonPlayerCharacters
         int _deathTicks = 64;
         int _deathEndTick;
 
+        public void StartRecycle()
+        { 
+            _currentState = ENPCState.Inactive;
+        }
+
         public void UpdateStateChange(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
         {
             ENPCState oldState = _currentState;

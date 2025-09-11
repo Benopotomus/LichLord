@@ -27,8 +27,8 @@ namespace LichLord.Dialog
 
         [SerializeField]
         [SerializedDictionary("DialogResponse", "ResponseAction")]
-        private SerializedDictionary<DialogResponse, DialogResponseAction> _responseActions;
-        public SerializedDictionary<DialogResponse, DialogResponseAction> ResponseActions => _responseActions;
+        private SerializedDictionary<DialogResponse, List<DialogResponseAction>> _responseActions;
+        public SerializedDictionary<DialogResponse, List<DialogResponseAction>> ResponseActions => _responseActions;
 
         [SerializeField]
         private AutoDialogResponse _autoResponse;
@@ -37,9 +37,12 @@ namespace LichLord.Dialog
         public void InvokeResponse(DialogResponse response, SceneContext context)
         {
             // Play response action if defined
-            if (ResponseActions.TryGetValue(response, out var action))
+            if (ResponseActions.TryGetValue(response, out var actions))
             {
-                action.Invoke(context); // or your custom execution logic
+                foreach (var responseAction in actions)
+                {
+                    responseAction.Invoke(context); // or your custom execution logic
+                }
             }
 
             // Play response action if defined

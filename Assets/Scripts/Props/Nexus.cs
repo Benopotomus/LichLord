@@ -54,6 +54,12 @@ namespace LichLord.Props
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
         {
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+            
+            if (sqrDist > interactDistance)
+                return false;
+
             if (_runtimeState.GetIsInteracting())
                 return false;
 
@@ -65,6 +71,12 @@ namespace LichLord.Props
 
         private bool IsInteractionValid(InteractorComponent interactor)
         {
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+
+            if (sqrDist > interactDistance)
+                return false;
+
             if (_runtimeState.GetIsActivated())
                 return false;
 

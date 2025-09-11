@@ -128,14 +128,13 @@ namespace LichLord
 
             RotateTowardInteract(deltaTime);
 
-            float interactDistance = _currentInteractable.GetInteractDistance(this) * _currentInteractable.GetInteractDistance(this);
-
-            if ((_currentInteractable.transform.position - transform.position).sqrMagnitude > interactDistance)
+            if (!_currentInteractable.IsInteractionValid(this))
             {
                 StopInteract();
                 return;
             }
-                // if ticks to complete is under zero, its infinite
+
+            // if ticks to complete is under zero, its infinite
             if (_currentInteractable.GetTicksToComplete(this) < 0)
                 return;
                 
@@ -200,13 +199,7 @@ namespace LichLord
 
             if (interactable != null && interactable.IsPotentialInteractor(this))
             {
-                float interactDistance = interactable.GetInteractDistance(this) * interactable.GetInteractDistance(this);
-
-                // Optionally check distance here against _interactDistance
-                if ((interactable.transform.position - transform.position).sqrMagnitude <= interactDistance)
-                {
-                    _bestInteractable = interactable;
-                }
+                _bestInteractable = interactable;
             }
         }
 

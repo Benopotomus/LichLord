@@ -93,17 +93,12 @@ namespace LichLord.NonPlayerCharacters
             _localRuntimeStates[index].CopyData(ref data);
         }
 
-        public ref FNonPlayerCharacterData GetNPCDataRef(int index)
-        {
-            return ref _npcDatas.GetRef(index);
-        }
-
         public void ReplicateRuntimeState(NonPlayerCharacterRuntimeState runtimeState)
         {
             if (!HasStateAuthority)
                 return;
 
-           _npcDatas.Set(runtimeState.Index, runtimeState.Data);
+            _npcDatas.Set(runtimeState.Index, runtimeState.Data);
         }
 
         public bool HasFreeIndex()
@@ -219,6 +214,9 @@ namespace LichLord.NonPlayerCharacters
 
             // Cache frequently accessed values
             bool hasStateAuthority = HasStateAuthority;
+            
+            if (hasStateAuthority)
+                return;
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {

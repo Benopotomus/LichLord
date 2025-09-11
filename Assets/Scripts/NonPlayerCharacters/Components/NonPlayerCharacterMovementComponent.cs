@@ -280,11 +280,15 @@ namespace LichLord.NonPlayerCharacters
 
             _moveTarget = newMoveTarget;
 
-            _npc.Movement.AIFollower.destination = _moveTarget;
+            _follower.destination = _moveTarget;
         }
 
         public void StartRecycle()
         {
+            SetFollowerUpdatePosition(false);
+            SetFollowerUpdateRotation(false);
+            SetFollowerLocalAvoidance(false);
+            SetFollowerCanMove(false);
             SetMoveTargetPosition(Vector3.zero);
         }
 

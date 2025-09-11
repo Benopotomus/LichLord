@@ -30,12 +30,12 @@ namespace LichLord.NonPlayerCharacters
         protected const int ATTITUDE_BITS = 2;              // 0–3
 
         protected const int NPC_STATE_SHIFT = 0;
-        protected const int ATTITUDE_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
-        protected const int ANIMATION_INDEX_SHIFT = ATTITUDE_SHIFT + ATTITUDE_BITS;
+        protected const int ANIMATION_INDEX_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
+        protected const int ATTITUDE_SHIFT = ANIMATION_INDEX_SHIFT + ANIMATION_INDEX_BITS;
 
         protected const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
-        protected const byte ATTITUDE_MASK = (1 << ATTITUDE_BITS) - 1;
         protected const byte ANIMATION_INDEX_MASK = (1 << ANIMATION_INDEX_BITS) - 1;
+        protected const byte ATTITUDE_MASK = (1 << ATTITUDE_BITS) - 1;
 
         public virtual void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition,
@@ -53,8 +53,8 @@ namespace LichLord.NonPlayerCharacters
             // Initialize Condition
             npcData.Condition = 0;
             SetState(ENPCState.Idle, ref npcData);
-            SetAttitude(attitude, ref npcData);
             SetAnimationIndex(0, ref npcData);
+            SetAttitude(attitude, ref npcData);
         }
 
         // DefinitionID
@@ -136,9 +136,11 @@ namespace LichLord.NonPlayerCharacters
         public void SetState(ENPCState newState, ref FNonPlayerCharacterData npcData)
         {
             byte condition = npcData.Condition;
+            //Debug.Log($"Before SetState: Condition=0x{condition:X2}, Attitude={GetAttitude(ref npcData)}");
             int stateValue = Mathf.Clamp((int)newState, 0, NPC_STATE_MASK);
             condition = (byte)((condition & ~(NPC_STATE_MASK << NPC_STATE_SHIFT)) | (stateValue << NPC_STATE_SHIFT));
             npcData.Condition = condition;
+            //Debug.Log($"After SetState: Condition=0x{condition:X2}, Attitude={GetAttitude(ref npcData)}");
         }
 
         public virtual ENPCState TryAssignState(ref FNonPlayerCharacterData npcData, ENPCState newState)
@@ -171,15 +173,21 @@ namespace LichLord.NonPlayerCharacters
         public void SetAnimationIndex(int animationState, ref FNonPlayerCharacterData npcData)
         {
             byte condition = npcData.Condition;
+            //Debug.Log($"Before SetAnimationIndex: Condition=0x{condition:X2}, Attitude={GetAttitude(ref npcData)}");
             int stateValue = Mathf.Clamp(animationState, 0, ANIMATION_INDEX_MASK);
             condition = (byte)((condition & ~(ANIMATION_INDEX_MASK << ANIMATION_INDEX_SHIFT)) | (stateValue << ANIMATION_INDEX_SHIFT));
             npcData.Condition = condition;
+            //Debug.Log($"After SetAnimationIndex: Condition=0x{condition:X2}, Attitude={GetAttitude(ref npcData)}");
         }
 
-        // Status
+        // attitude
         public EAttitude GetAttitude(ref FNonPlayerCharacterData npcData)
         {
-            return (EAttitude)((npcData.Condition >> ATTITUDE_SHIFT) & ATTITUDE_MASK);
+            int rawValue = (npcData.Condition >> ATTITUDE_SHIFT) & ATTITUDE_MASK;
+            EAttitude attitude = (EAttitude)rawValue;
+            //Debug.Log($"GetAttitude for NPC {npcData.DefinitionID}: Condition=0x{npcData.Condition:X2}, Raw Attitude Bits={rawValue}, Returned Attitude={attitude}");
+            //Debug.Assert(rawValue >= 0 && rawValue <= ATTITUDE_MASK, $"Invalid Attitude bits: {rawValue} in Condition=0x{npcData.Condition:X2}");
+            return attitude;
         }
 
         public void SetAttitude(EAttitude attitude, ref FNonPlayerCharacterData npcData)
@@ -208,6 +216,30 @@ namespace LichLord.NonPlayerCharacters
         public virtual void SetHealth(int newHealth, ref FNonPlayerCharacterData npcData)
         {
 
+        }
+
+        public void SetStateAndAnimation(ENPCState newState, int animationState, ref FNonPlayerCharacterData npcData)
+        {
+            byte condition = npcData.Condition;
+            EAttitude beforeAttitude = GetAttitude(ref npcData);
+            Debug.Log($"SetStateAndAnimation for NPC {npcData.GetHashCode()}: Before - Condition=0x{condition:X2}, State={GetState(ref npcData)}, AnimationIndex={GetAnimationIndex(ref npcData)}, Attitude={beforeAttitude}, NewState={newState}, NewAnimation={animationState}, Caller={new System.Diagnostics.StackTrace()}");
+
+            // Update State (bits 0–3)
+            int stateValue = Mathf.Clamp((int)newState, 0, NPC_STATE_MASK);
+            condition = (byte)((condition & ~(NPC_STATE_MASK << NPC_STATE_SHIFT)) | (stateValue << NPC_STATE_SHIFT));
+
+            // Update AnimationIndex (bits 6–7)
+            int animValue = Mathf.Clamp(animationState, 0, ANIMATION_INDEX_MASK);
+            condition = (byte)((condition & ~(ANIMATION_INDEX_MASK << ANIMATION_INDEX_SHIFT)) | (animValue << ANIMATION_INDEX_SHIFT));
+
+            npcData.Condition = condition;
+
+            EAttitude afterAttitude = GetAttitude(ref npcData);
+            Debug.Log($"SetStateAndAnimation: After - Condition=0x{condition:X2}, State={GetState(ref npcData)}, AnimationIndex={GetAnimationIndex(ref npcData)}, Attitude={afterAttitude}");
+            if (beforeAttitude != afterAttitude)
+            {
+                Debug.LogWarning($"Attitude changed unexpectedly from {beforeAttitude} to {afterAttitude} in SetStateAndAnimation!");
+            }
         }
     }
 }

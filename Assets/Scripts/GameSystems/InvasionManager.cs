@@ -90,8 +90,8 @@ namespace LichLord
             TargetStrongholdData.Copy(targetStrongholdData);
             InvasionStagingPosition.CopyPosition(GetInvasionStagingPosition());
             //Debug.Log(InvasionStagingPosition.Position);
-
-            SpawnInvasionWave(InvasionSpawnWave);
+            _localSpawnWave = -1;
+            //SpawnInvasionWave(InvasionSpawnWave);
         }
 
         public void RPC_BeginInvasion(byte invasionID, FStrongholdData targetStrongholdData)
@@ -144,6 +144,11 @@ namespace LichLord
                 {
                     _retreatTick = tick + ActiveInvasion.TicksUntilRetreat;
                 }
+
+                if (HasStateAuthority)
+                {
+                    SpawnInvasionWave(_localSpawnWave);
+                }
             }
 
             if (_localInvasionState != InvasionState)
@@ -151,7 +156,10 @@ namespace LichLord
                 _localInvasionState = InvasionState;
 
                 if (_localInvasionState == EInvasionState.Retreating)
+                {
                     _despawnTick = tick + ActiveInvasion.TicksUntilDespawn;
+                    Context.NonPlayerCharacterManager.SetInvaderAttitude(EAttitude.Defensive);
+                }
             }
 
             if (!HasStateAuthority)
@@ -177,8 +185,7 @@ namespace LichLord
             {
                 if (InvasionSpawnWave < maxInvasionIndex)
                 {
-                    SpawnInvasionWave(InvasionSpawnWave);
-                    InvasionSpawnWave++;
+                    InvasionSpawnWave = (sbyte)Mathf.Clamp(InvasionSpawnWave + 1, -1, maxInvasionIndex);
                 }
             }
         }
@@ -322,14 +329,17 @@ namespace LichLord
                     i);
             }
 
-            if (ActiveInvasion.Dialog != null)
+            if(wave == 0)
             {
-                Context.NonPlayerCharacterManager.SpawnNPCInvader(spawnPosition,
-                    ActiveInvasion.DialogNPC,
-                    ETeamID.EnemiesTeamA,
-                    ActiveInvasion.StartingAttitude,
-                    4,
-                    ActiveInvasion.Dialog);
+                if (ActiveInvasion.Dialog != null)
+                {
+                    Context.NonPlayerCharacterManager.SpawnNPCInvader(spawnPosition,
+                        ActiveInvasion.DialogNPC,
+                        ETeamID.EnemiesTeamA,
+                        ActiveInvasion.StartingAttitude,
+                        4,
+                        ActiveInvasion.Dialog);
+                }  
             }
         }
 
@@ -356,9 +366,53 @@ namespace LichLord
             }
         }
 
+        public Vector3 GetInvasionTargetPosition(Vector3 formationOffset)
+        {
+            switch (InvasionState)
+            {
+                case EInvasionState.Approaching:
+
+                    var targetPosition = TargetStronghold.CachedTransform.position;
+
+                    Vector3 direction = (InvasionStagingPosition.Position - targetPosition).normalized;
+
+                    Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+                    Vector3 rotatedOffset = rotation * formationOffset;
+
+                    Vector3 backedUpTarget = (targetPosition + direction * TargetStronghold.InfluenceDistance) + rotatedOffset;
+
+                    return backedUpTarget;
+                case EInvasionState.Retreating:
+                    return InvasionStagingPosition.Position;
+            }
+
+            return Vector3.zero;
+        }
+
+        public void MSG_SetInvasionRetreating()
+        {
+            RPC_SetInvasionState(EInvasionState.Retreating);
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_SetInvasionState(EInvasionState newState)
+        { 
+            InvasionState = newState;
+        }
+
+        public void MSG_SetInvadersHostile()
+        {
+            RPC_SetInvadersHostile();
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_SetInvadersHostile()
+        {
+            Context.NonPlayerCharacterManager.SetInvaderAttitude(EAttitude.Hostile);
+        }
     }
 
-    public enum EInvasionState
+    public enum EInvasionState : byte
     { 
         None,
         Approaching,

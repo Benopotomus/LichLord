@@ -10,7 +10,7 @@
         [FieldOffset(0)]
         private int _configuration; // 4 bytes
         [FieldOffset(4)]
-        private FWorldTransform _transform; // 9 bytes: Position (6) + Rotation (2)
+        private FWorldTransform _transform; // 9 bytes: Position (7) + Rotation (2)
         [FieldOffset(13)]
         private byte _condition; // 1 byte: NPCState (4 bits)// animation bits
         [FieldOffset(14)]

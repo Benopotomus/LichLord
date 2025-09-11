@@ -318,13 +318,9 @@ namespace LichLord.NonPlayerCharacters
             _interactableComponent.onInteractionComplete -= OnInteractionComplete;
 
             Hurtbox.SetHitBoxesActive(false);
-            Movement.AIFollower.rvoSettings.priority = 0.5f;
-            Movement.SetFollowerUpdatePosition(false);
-            Movement.SetFollowerUpdateRotation(false);
-            Movement.SetFollowerLocalAvoidance(false);
-            Movement.SetFollowerCanMove(false);
             _movementComponent.StartRecycle();
             _brainComponent.StartRecycle();
+            _stateComponent.StartRecycle();
             DWDObjectPool.Instance.Recycle(this);
             UpdateChunk(Context.ChunkManager);
 
@@ -355,16 +351,62 @@ namespace LichLord.NonPlayerCharacters
         // Interactable
         private bool IsPotentialInteractor(InteractorComponent interactor)
         {
-            if (_runtimeState.HasDialog())
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+
+            if (sqrDist > interactDistance)
+                return false;
+
+            if (_runtimeState.GetHealth() > 0)
+            {
+                if (!_runtimeState.HasDialog())
+                    return false;
+
+                if (_runtimeState.GetAttitude() == EAttitude.Hostile)
+                    return false;
+
+                if (_runtimeState.IsInvasionNPC())
+                {
+                    if (Context.InvasionManager.InvasionID == 0)
+                        return false;
+
+                    if (Context.InvasionManager.InvasionState == EInvasionState.Retreating)
+                        return false;
+                }
+
                 return true;
+            }
 
             return false;
         }
-
+        
         private bool IsInteractionValid(InteractorComponent interactor)
         {
-            if (_runtimeState.HasDialog())
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+
+            if (sqrDist > interactDistance)
+                return false;
+
+            if (_runtimeState.GetHealth() > 0)
+            {
+                if (!_runtimeState.HasDialog())
+                    return false;
+
+                if (_runtimeState.GetAttitude() == EAttitude.Hostile)
+                    return false;
+
+                if (_runtimeState.IsInvasionNPC())
+                {
+                    if (Context.InvasionManager.InvasionID == 0)
+                        return false;
+
+                    if (Context.InvasionManager.InvasionState == EInvasionState.Retreating)
+                        return false;
+                }
+
                 return true;
+            }
 
             return false;
         }

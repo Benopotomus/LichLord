@@ -166,11 +166,23 @@ namespace LichLord
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
         {
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+
+            if (sqrDist > interactDistance)
+                return false;
+
             return interactor != null;
         }
 
         private bool IsInteractionValid(InteractorComponent interactor)
         {
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+
+            if (sqrDist > interactDistance)
+                return false;
+
             return true;
         }
 

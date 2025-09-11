@@ -27,8 +27,19 @@ MonoBehaviour:
     _serializedList:
     - Key: {fileID: 11400000, guid: ff07a368c96d61242b4d1476d9ecf581, type: 2}
       Value:
-        target: 5
-        functionName: DialogClosed
+      - target: 5
+        functionName: MSG_DialogClosed
+        parameter: 
+      - target: 4
+        functionName: MSG_SetInvadersHostile
+        parameter: 
+    - Key: {fileID: 11400000, guid: e951f4dca51a4ea42ab12a0ce4126177, type: 2}
+      Value:
+      - target: 5
+        functionName: MSG_DialogClosed
+        parameter: 
+      - target: 4
+        functionName: MSG_SetInvasionRetreating
         parameter: 
   _autoResponse:
     NextNode: {fileID: 0}

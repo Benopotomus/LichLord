@@ -12,6 +12,9 @@ namespace LichLord.NonPlayerCharacters
 
         private NonPlayerCharacterReplicator _replicator;
 
+        private SceneContext _context;
+        public SceneContext Context => _context;
+
         FNonPlayerCharacterData _data = new FNonPlayerCharacterData();
         public FNonPlayerCharacterData Data => _data;
 
@@ -45,6 +48,7 @@ namespace LichLord.NonPlayerCharacters
         public NonPlayerCharacterRuntimeState(NonPlayerCharacterReplicator replicator, int index)
         {
             _replicator = replicator;
+            _context = replicator.Context;
             _index = index;
         }
 
@@ -63,6 +67,21 @@ namespace LichLord.NonPlayerCharacters
         {
             DataDefinition.ApplyDamage(ref _data, damage, hitReactIndex);
             _replicator.ReplicateRuntimeState(this);
+
+            if (IsInvasionNPC())
+            {
+                InvasionManager invasionManager = Context.InvasionManager;
+                if (invasionManager.HasStateAuthority)
+                {
+                    if (invasionManager.InvasionState == EInvasionState.Approaching)
+                    {
+                        if (GetAttitude() == EAttitude.Defensive)
+                        {
+                            invasionManager.RPC_SetInvadersHostile();
+                        }
+                    }
+                }
+            }
         }
 
         public bool IsActive()
