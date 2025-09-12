@@ -139,6 +139,12 @@ namespace LichLord.Buildables
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
         {
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+
+            if (sqrDist > interactDistance)
+                return false;
+
             if (RuntimeState.GetIsInteracting())
                 return false;
 
@@ -147,6 +153,12 @@ namespace LichLord.Buildables
 
         private bool IsInteractionValid(InteractorComponent interactor)
         {
+            float interactDistance = GetInteractDistance(interactor) * GetInteractDistance(interactor);
+            float sqrDist = (transform.position - interactor.transform.position).sqrMagnitude;
+
+            if (sqrDist > interactDistance)
+                return false;
+
             return true;
         }
 

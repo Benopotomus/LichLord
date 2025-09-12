@@ -440,7 +440,7 @@ namespace LichLord.NonPlayerCharacters
         private float GetInteractDistance(InteractorComponent interactor)
         {
             if (_runtimeState.HasDialog())
-                return 50;
+                return 30;
 
             return 5;
         }
@@ -451,6 +451,7 @@ namespace LichLord.NonPlayerCharacters
             if (DialogComponent.CurrentDialog == null)
                 return;
 
+            Context.DialogManager.SetActiveDialogOwner(_runtimeState.Definition.DialogOwnerInfo);
             Context.DialogManager.SetActiveDialogDefinition(DialogComponent.CurrentDialog);
             Context.DialogManager.SetActiveDialogNode(DialogComponent.CurrentDialog.StartingNode);
         }
@@ -460,8 +461,9 @@ namespace LichLord.NonPlayerCharacters
             Debug.Log("Interaction ended with NPC.");
 
             // If my current open dialog is the one I'm ending interact with, close it.
-            if (Context.DialogManager.LocalActiveDialogDefinition == DialogComponent.CurrentDialog)
+            if (Context.DialogManager.ActiveDialogDefinition == DialogComponent.CurrentDialog)
             {
+                Context.DialogManager.SetActiveDialogOwner(_runtimeState.Definition.DialogOwnerInfo);
                 Context.DialogManager.SetActiveDialogDefinition(null);
                 Context.DialogManager.SetActiveDialogNode(null);
             }

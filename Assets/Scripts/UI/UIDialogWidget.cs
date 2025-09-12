@@ -11,6 +11,7 @@ namespace LichLord.UI
         [SerializeField] private float _largeSizeY = 300;
         [SerializeField] private float _smallSizeY = 200;
 
+        [SerializeField] private Image _characterImage;
         [SerializeField] private TextMeshProUGUI _characterNameText;
         [SerializeField] private TextMeshProUGUI _statementText;
         [SerializeField] private VerticalLayoutGroup _responseLayoutGroup;
@@ -22,8 +23,15 @@ namespace LichLord.UI
         public void SetDialogNode(DialogNode dialogNode)
         {
             _currentNode = dialogNode;
-            _characterNameText.text = dialogNode.name;
             _statementText.text = dialogNode.Statement.Text;
+
+            DialogOwnerInfo dialogOwnerInfo = Context.DialogManager.ActiveDialogOwnerInfo;
+
+            if (dialogOwnerInfo != null) 
+            {
+                _characterImage.sprite = dialogOwnerInfo.sprite;
+                _characterNameText.text = dialogOwnerInfo.name;
+            }
 
             // Clear existing response buttons
             foreach (Transform child in _responseLayoutGroup.transform)

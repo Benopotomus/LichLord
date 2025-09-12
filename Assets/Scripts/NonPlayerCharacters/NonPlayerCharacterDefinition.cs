@@ -1,6 +1,7 @@
 using DWD.Utility.Loading;
 using UnityEngine;
 using AYellowpaper.SerializedCollections;
+using LichLord.Dialog;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -56,6 +57,10 @@ namespace LichLord.NonPlayerCharacters
 
             return 0;
         }
+
+        [SerializeField]
+        protected DialogOwnerInfo _dialogOwnerInfo;
+        public DialogOwnerInfo DialogOwnerInfo => _dialogOwnerInfo;
 
     }
 }

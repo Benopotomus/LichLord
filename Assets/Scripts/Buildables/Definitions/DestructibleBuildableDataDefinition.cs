@@ -68,7 +68,7 @@ namespace LichLord.Buildables
                 SetState(TryAssignState(ref buildableData, EBuildableState.HitReact), ref buildableData);
             }
 
-            Debug.Log($"Apply Damage " + GetState(ref buildableData) + ", Health: " + GetHealth(ref buildableData));
+            //Debug.Log($"Apply Damage " + GetState(ref buildableData) + ", Health: " + GetHealth(ref buildableData));
         }
 
         // Prioritize destroyed state

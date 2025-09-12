@@ -1,6 +1,5 @@
 ﻿using Fusion;
 using LichLord.Dialog;
-using LichLord.NonPlayerCharacters;
 using LichLord.World;
 using UnityEngine;
 
@@ -12,11 +11,14 @@ namespace LichLord
         [OnChangedRender(nameof(OnRep_DialogDatas))]
         protected virtual NetworkArray<FDialogData> _dialogDatas { get; }
 
-        [SerializeField] private DialogDefinition _localActiveDialogDefinition;
-        public DialogDefinition LocalActiveDialogDefinition => _localActiveDialogDefinition;
+        [SerializeField] private DialogDefinition _activeDialogDefinition;
+        public DialogDefinition ActiveDialogDefinition => _activeDialogDefinition;
+        
+        [SerializeField] private DialogOwnerInfo _activeDialogOwnerInfo;
+        public DialogOwnerInfo ActiveDialogOwnerInfo => _activeDialogOwnerInfo;
 
-        [SerializeField] private DialogNode _localActiveDialogNode;
-        public DialogNode LocalActiveDialogNode => _localActiveDialogNode;
+        [SerializeField] private DialogNode _activeDialogNode;
+        public DialogNode LocalActiveDialogNode => _activeDialogNode;
 
         private int _dialogAdvanceTick;
 
@@ -104,12 +106,6 @@ namespace LichLord
             return freeIndex;
         }
 
-        public void AssignDialogIndex(int index)
-        {
-            ref FDialogData dialogData = ref _dialogDatas.GetRef(index);
-            //dialogData.Assign();
-        }
-
         public void LoadDialogData(FDialogSaveData dialogSave)
         {
             ref FDialogData dialogData = ref _dialogDatas.GetRef(dialogSave.index);
@@ -121,13 +117,13 @@ namespace LichLord
         {
             ref FDialogData dialogData = ref _dialogDatas.GetRef(dialogIndex);
 
-            if (LocalActiveDialogDefinition != null)
+            if (ActiveDialogDefinition != null)
             {
-                int localActiveDialogDefinitionID = LocalActiveDialogDefinition.TableID;
+                int localActiveDialogDefinitionID = ActiveDialogDefinition.TableID;
                 if (dialogData.DefinitionID == localActiveDialogDefinitionID)
                 { 
-                    _localActiveDialogDefinition = null;
-                    _localActiveDialogNode = null;
+                    _activeDialogDefinition = null;
+                    _activeDialogNode = null;
                 }    
             }
 
@@ -137,7 +133,12 @@ namespace LichLord
 
         public void SetActiveDialogDefinition(DialogDefinition dialogDefinition)
         {
-            _localActiveDialogDefinition = dialogDefinition;
+            _activeDialogDefinition = dialogDefinition;
+        }
+
+        public void SetActiveDialogOwner(DialogOwnerInfo ownerInfo)
+        { 
+            _activeDialogOwnerInfo = ownerInfo;
         }
 
         public void SetActiveDialogNode(DialogNode newDialogNode)
@@ -152,13 +153,12 @@ namespace LichLord
                 SetActiveDialogDefinition(null);
             }
 
-            _localActiveDialogNode = newDialogNode;
+            _activeDialogNode = newDialogNode;
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_SubmitDialogAnswer(int stockpileIndex, int answerID, PlayerCharacter pc)
         {
         }
-                
     }
 }
