@@ -41,16 +41,9 @@ namespace LichLord.World
 
         public void OnDrawGizmos()
         {
-            // Get world size (you may need to adjust this based on how WorldSettings is accessed)
-            Vector2 worldSize = new Vector2(70500f, 70500f); // Default assumption: 235 * 300 (CHUNK_SIZE)
-                                                             // If WorldSettings is accessible in editor, uncomment and adjust the following:
-                                                             // WorldSettings worldSettings = chunkManager.Context?.WorldManager?.WorldSettings;
-                                                             // if (worldSettings != null)
-                                                             //     worldSize = worldSettings.WorldSize;
-
             // Calculate chunk grid size
-            int chunkGridSizeX = Mathf.CeilToInt(worldSize.x / WorldConstants.CHUNK_SIZE);
-            int chunkGridSizeY = Mathf.CeilToInt(worldSize.y / WorldConstants.CHUNK_SIZE);
+            int chunkGridSizeX = Mathf.CeilToInt(WorldConstants.WORLD_CHUNK_LENGTH);
+            int chunkGridSizeY = Mathf.CeilToInt(WorldConstants.WORLD_CHUNK_LENGTH);
 
             // Set Gizmos color (using green as in original OnDrawGizmos)
             Gizmos.color = Color.green;

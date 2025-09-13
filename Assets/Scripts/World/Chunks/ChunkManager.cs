@@ -18,7 +18,7 @@ namespace LichLord.World
         [SerializeField]
         private bool drawChunkBounds = true;
 
-        private Chunk[,] _worldChunks = new Chunk[235, 235];
+        private Chunk[,] _worldChunks = new Chunk[WorldConstants.WORLD_CHUNK_LENGTH, WorldConstants.WORLD_CHUNK_LENGTH];
         public Chunk[,] WorldChunks => _worldChunks;
 
         public HashSet<Chunk> _deltaChunks = new HashSet<Chunk>();
@@ -141,8 +141,6 @@ namespace LichLord.World
                         Debug.LogWarning($"[ChunkManager] Replicator {oldReplicator} had null gameObject. Possibly despawned?");
                     }
                 }
-
-
             }
         }
   

@@ -171,27 +171,31 @@ public class LevelEditorEditor : Editor
         }
 
         GUILayout.Space(5);
-
         if (GUILayout.Button("Clear All Markup Data", GUILayout.Height(40)))
         {
             if (EditorUtility.DisplayDialog(
                     "Confirm Clear",
-                    "Are you sure you want to clear all markup data? This action cannot be undone.",
+                    "Are you sure you want to clear all markup data? This will delete all PropMarkupData and InvasionSpawnPointMarkupData subassets from WorldSettings. This action cannot be undone.",
                     "Yes", "No"))
             {
-                Undo.RecordObject(manager.WorldSettings, "Clear Prop Points");
-                int clearedCount = 0;
-                foreach (ChunkMarkupData markupData in manager.WorldSettings.ChunkMarkupDatas)
+                if (manager.WorldSettings == null)
                 {
-                    if (markupData != null)
-                    {
-                        markupData.PropMarkupDatas = new PropMarkupData[0];
-                        EditorUtility.SetDirty(markupData);
-                        clearedCount++;
-                    }
+                    Debug.LogWarning("WorldSettings is not assigned.");
+                    return;
                 }
+
+                Undo.RecordObject(manager.WorldSettings, "Clear All Markup Data");
+
+                int clearedProps = 0;
+                int clearedInvasionSpawns = 0;
+
+                manager.WorldSettings.RemoveAllMarkupData();
+
                 EditorUtility.SetDirty(manager.WorldSettings);
-                Debug.Log($"Cleared markup data in {clearedCount} chunk(s).");
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                Debug.Log($"Cleared {clearedProps} PropMarkupData and {clearedInvasionSpawns} InvasionSpawnPointMarkupData subassets.");
             }
             else
             {
