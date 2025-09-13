@@ -325,12 +325,17 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(Context.ChunkManager);
 
             if (_workerIndex >= 0)
+            {
+                _runtimeState.SetCarriedCurrencyType(ECurrencyType.None);
                 _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
+            }
 
             int dialogIndex = _runtimeState.GetDialogIndex();
 
             if (dialogIndex >= 0)
                 _context.DialogManager.ClearDialog(dialogIndex);
+
+
         }
 
         private NonPlayerCharacterDefinition _definition;
