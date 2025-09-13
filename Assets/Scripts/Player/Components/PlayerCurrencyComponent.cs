@@ -11,8 +11,9 @@ namespace LichLord
             ECurrencyType.Wood,
             ECurrencyType.Stone,
             ECurrencyType.Iron,
-            ECurrencyType.Gold,   // index 3
-            ECurrencyType.Souls,  // index 4
+            ECurrencyType.Gold,  
+            ECurrencyType.Souls,  
+            ECurrencyType.Deathcaps,
         };
 
         [SerializeField] private CurrencyDefinition _woodDefinition;
@@ -20,11 +21,12 @@ namespace LichLord
         [SerializeField] private CurrencyDefinition _ironDefinition;
         [SerializeField] private CurrencyDefinition _goldDefinition;
         [SerializeField] private CurrencyDefinition _soulsDefinition;
+        [SerializeField] private CurrencyDefinition _deathcapsDefinition;
 
-        [Networked, Capacity(5)]
+        [Networked, Capacity(16)]
         private NetworkArray<FCurrencyStack> _currencies => default;
 
-        private int[] _currencyMax = { 250, 250, 250, 250, 250 };
+        private int[] _currencyMax = { 250, 250, 250, 250, 250, 250 };
 
         public int CurrencyCount => _currencies.Length;
         public FCurrencyStack GetStackAtIndex(int index) => _currencies[index];
@@ -82,6 +84,7 @@ namespace LichLord
                 ECurrencyType.Iron => _ironDefinition,
                 ECurrencyType.Gold => _goldDefinition,
                 ECurrencyType.Souls => _soulsDefinition,
+                ECurrencyType.Deathcaps => _deathcapsDefinition,
                 _ => null
             };
         }

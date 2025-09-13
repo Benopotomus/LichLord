@@ -39,6 +39,12 @@ namespace LichLord.Buildables
         private StockpileCurrencyStack _stonePilePrefab;
 
         [SerializeField]
+        private StockpileCurrencyStack _ironPilePrefab;
+
+        [SerializeField]
+        private StockpileCurrencyStack _deathcapsPilePrefab;
+
+        [SerializeField]
         private int _stockpileIndex = -1;
 
         public override void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
@@ -92,6 +98,8 @@ namespace LichLord.Buildables
                         {
                             ECurrencyType.Wood => _woodPilePrefab,
                             ECurrencyType.Stone => _stonePilePrefab,
+                            ECurrencyType.Deathcaps => _deathcapsPilePrefab,
+                            ECurrencyType.Iron => _ironPilePrefab,
                             _ => throw new System.ArgumentOutOfRangeException()
                         };
 

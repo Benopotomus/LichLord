@@ -91,17 +91,21 @@ namespace LichLord.NonPlayerCharacters
 
             if (targetPlayerIndex > 0)
             {
-                var targetPlayer = NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex);
-                if (targetPlayer != null)
+                if (runtimeState.IsInvasionNPC() && 
+                    _npc.Context.InvasionManager.InvasionState == EInvasionState.Approaching)
                 {
-                    Vector3 dir = targetPlayer.Position - NPC.CachedTransform.position;
-                    if (dir.sqrMagnitude > 0.0001f)
+                    var targetPlayer = NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex);
+                    if (targetPlayer != null)
                     {
-                        // Calculate yaw toward the target player
-                        float playerYaw = Quaternion.LookRotation(dir, Vector3.up).eulerAngles.y;
+                        Vector3 dir = targetPlayer.Position - NPC.CachedTransform.position;
+                        if (dir.sqrMagnitude > 0.0001f)
+                        {
+                            // Calculate yaw toward the target player
+                            float playerYaw = Quaternion.LookRotation(dir, Vector3.up).eulerAngles.y;
 
-                        // Blend between facing player and existing projectile follow yaw
-                        targetYaw = playerYaw;
+                            // Blend between facing player and existing projectile follow yaw
+                            targetYaw = playerYaw;
+                        }
                     }
                 }
             }
