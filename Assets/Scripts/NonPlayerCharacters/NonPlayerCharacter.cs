@@ -149,10 +149,24 @@ namespace LichLord.NonPlayerCharacters
             _netObjectID.networkId = _replicator.Object.Id;
             _netObjectID.index = (byte)runtimeState.Index;
 
-            _workerIndex = runtimeState.GetWorkerIndex();
+            if (runtimeState.IsWorker())
+            {
+                _workerIndex = runtimeState.GetWorkerIndex();
 
-            if (_workerIndex >= 0)
-                _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
+                if (_workerIndex >= 0)
+                    _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
+            }
+            else if (runtimeState.IsWarrior())
+            {
+                var pc = runtimeState.GetFollowPlayer();
+
+                if (pc != null)
+                {
+                    pc.Formation.AddCharacter(this, 
+                        runtimeState.GetFormationID(), 
+                        runtimeState.GetFormationIndex());
+                }
+            }
         }
 
         public void OnRender(NonPlayerCharacterRuntimeState runtimeState, 
@@ -324,18 +338,31 @@ namespace LichLord.NonPlayerCharacters
             DWDObjectPool.Instance.Recycle(this);
             UpdateChunk(Context.ChunkManager);
 
-            if (_workerIndex >= 0)
-            {
-                _runtimeState.SetCarriedCurrencyType(ECurrencyType.None);
-                _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
-            }
-
             int dialogIndex = _runtimeState.GetDialogIndex();
 
             if (dialogIndex >= 0)
                 _context.DialogManager.ClearDialog(dialogIndex);
 
+            if (_runtimeState.IsWorker())
+            {
+                if (_workerIndex >= 0)
+                {
+                    _runtimeState.SetCarriedCurrencyType(ECurrencyType.None);
+                    _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
+                }
+            }  
 
+            if (_runtimeState.IsWarrior())
+            {
+                var pc = _runtimeState.GetFollowPlayer();
+
+                if (pc != null)
+                {
+                    pc.Formation.RemoveCharacter(this,
+                        _runtimeState.GetFormationID(),
+                        _runtimeState.GetFormationIndex());
+                }
+            }
         }
 
         private NonPlayerCharacterDefinition _definition;
@@ -370,7 +397,7 @@ namespace LichLord.NonPlayerCharacters
                 if (_runtimeState.GetAttitude() == EAttitude.Hostile)
                     return false;
 
-                if (_runtimeState.IsInvasionNPC())
+                if (_runtimeState.IsInvader())
                 {
                     if (Context.InvasionManager.InvasionID == 0)
                         return false;
@@ -401,7 +428,7 @@ namespace LichLord.NonPlayerCharacters
                 if (_runtimeState.GetAttitude() == EAttitude.Hostile)
                     return false;
 
-                if (_runtimeState.IsInvasionNPC())
+                if (_runtimeState.IsInvader())
                 {
                     if (Context.InvasionManager.InvasionID == 0)
                         return false;

@@ -2993,7 +2993,7 @@ MonoBehaviour:
   _animationController: {fileID: 167064866010933950}
   _currencyComponent: {fileID: 541806916981470579}
   _attitudeComponent: {fileID: 5667166935012497724}
-  _dialogComponent: {fileID: 0}
+  _dialogComponent: {fileID: 8280122207182958077}
   _interactableComponent: {fileID: 1398376250750045317}
   _muzzleComponent: {fileID: 6749657108094526839}
   _animator: {fileID: 8304036627096845830}
@@ -3317,6 +3317,8 @@ MonoBehaviour:
   _npc: {fileID: 3183157435632504526}
   _stoneGO: {fileID: 0}
   _woodGO: {fileID: 0}
+  _ironGO: {fileID: 0}
+  _deathCapsGO: {fileID: 0}
 --- !u!114 &5667166935012497724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3344,8 +3346,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 439fb0c371a2a974d8cc9d9f8acd0f52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hasDialog: 0
-  _dialog: {fileID: 0}
+  _dialogIndex: 0
+  _dialogDefinition: {fileID: 0}
   _indicator: {fileID: 944516498907399490}
 --- !u!1 &7919634645097698640
 GameObject:

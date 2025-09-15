@@ -69,7 +69,7 @@ namespace LichLord.NonPlayerCharacters
                 if (runtimeState.GetAttitude() == EAttitude.Hostile)
                     return false;
 
-                if (runtimeState.IsInvasionNPC())
+                if (runtimeState.IsInvader())
                 {
                     if (runtimeState.Context.InvasionManager.InvasionID == 0)
                         return false;

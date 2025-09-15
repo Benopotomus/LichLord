@@ -86,7 +86,7 @@ namespace LichLord.NonPlayerCharacters
                     randomPosition += _debugSpawnPosition + new Vector3(35, 0, 0);
                     Context.NonPlayerCharacterManager.SpawnNPCInvader(randomPosition,
                         spawnDef,
-                        ETeamID.EnemiesTeamB,
+                        ETeamID.EnemiesTeamA,
                         EAttitude.Hostile,
                         i);
                 }

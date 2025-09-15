@@ -91,7 +91,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (targetPlayerIndex > 0)
             {
-                if (runtimeState.IsInvasionNPC() && 
+                if (runtimeState.IsInvader() && 
                     _npc.Context.InvasionManager.InvasionState == EInvasionState.Approaching)
                 {
                     var targetPlayer = NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex);

@@ -62,6 +62,7 @@ namespace LichLord.Projectiles
             if (projectile is FixedUpdateProjectile fixedUpdateProjectile)
             {
                 definition.SpawnImpactProjectiles(ref data, ref impactHit, fixedUpdateProjectile);
+                definition.TriggerImpactActions(ref data, ref impactHit, fixedUpdateProjectile);
             }
         }
 

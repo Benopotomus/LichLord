@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
   m_Name: PROJ_Witchfire
   m_EditorClassIdentifier: 
-  _tableID: 6
+  _tableID: 7
   _lifetimeTicks: 16
   _lifetimeExpiredSpawnedProjectiles: []
   _projectileMovement: {fileID: 11400000, guid: 81fb74ccbd596fa448576dabda18f8f3,
@@ -48,6 +48,7 @@ MonoBehaviour:
   _damageType: 0
   _postImpactTicks: 16
   _impactSpawnedProjectiles: []
+  _impactActions: []
   _proximityDetonationRange: 0
   _proximityDetonationTicks: 0
   _proximityDetonationProjectile: []
@@ -55,3 +56,4 @@ MonoBehaviour:
   _timedFuseTickRange: {x: 0, y: 0}
   _timedFuseDistanceRange: {x: 0, y: 0}
   _timedFuseDetonationProjectiles: []
+  _forcesRemoteAiming: 0

@@ -72,9 +72,9 @@ namespace LichLord.NonPlayerCharacters
             int formationIndex,
             DialogDefinition dialog = null)
         {
-            FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.Invasion, teamID, attitude);
+            FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.Invader, teamID, attitude);
 
-            var invaderData = definition.GetDataDefinition(ENPCSpawnType.Invasion) as InvaderDataDefinition;
+            var invaderData = definition.GetDataDefinition(ENPCSpawnType.Invader) as InvaderDataDefinition;
             if (invaderData == null)
             {
                 Debug.Log("Trying to spawn a non-invader as an invader");
@@ -107,6 +107,44 @@ namespace LichLord.NonPlayerCharacters
             }
 
             workerData.SetWorkerIndex(workerIndex, ref data);
+
+            SpawnNPC(ref data);
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = false)]
+        public void RPC_SpawnNPCWarrior(Vector3 spawnPosition,
+            ushort npcDefinitionId,
+            ETeamID teamId,
+            byte playerFollowIndex,
+            byte formationId,
+            byte formationIndex
+            )
+        { 
+            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(npcDefinitionId);
+            if (definition == null)
+                return;
+
+            SpawnNPCWarrior(spawnPosition, definition, teamId, playerFollowIndex, formationId, formationIndex);
+        }
+
+        public void SpawnNPCWarrior(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamId, int playerFollowIndex, int formationID, int formationIndex)
+        {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                return;
+
+            FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.Warrior, teamId, EAttitude.Hostile);
+
+            // Type-specific adjustment: worker index
+            var warriorData = definition.GetDataDefinition(ENPCSpawnType.Warrior) as WarriorDataDefinition;
+            if (warriorData == null)
+            {
+                Debug.Log("Trying to spawn a non-warrior as a warrior");
+                return;
+            }
+
+            warriorData.SetPlayerFollowIndex(playerFollowIndex, ref data);
+            warriorData.SetFormationID(formationID, ref data);
+            warriorData.SetFormationIndex(formationIndex, ref data);
 
             SpawnNPC(ref data);
         }

@@ -304,7 +304,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 NonPlayerCharacterRuntimeState curState = _localRuntimeStates[i];
 
-                if (curState.IsInvasionNPC())
+                if (curState.IsInvader())
                     curState.SetState(ENPCState.Inactive);
             }
         }
@@ -318,7 +318,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 NonPlayerCharacterRuntimeState curState = _localRuntimeStates[i];
 
-                if (curState.IsInvasionNPC())
+                if (curState.IsInvader())
                     curState.SetAttitude(newAttitude);
             }
         }

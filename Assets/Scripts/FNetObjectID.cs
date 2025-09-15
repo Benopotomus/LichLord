@@ -96,4 +96,10 @@ namespace LichLord
             index = 0;
         }
     }
+
+    public struct FCompressedNetObjectID : INetworkStruct
+    {
+        byte identifier;
+        byte index;
+    }
 }

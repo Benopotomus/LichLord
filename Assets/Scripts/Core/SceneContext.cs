@@ -39,6 +39,7 @@ namespace LichLord
         public WorkerManager WorkerManager;
         public DialogManager DialogManager;
         public MissionManager MissionManager;
+        public FormationManager FormationManager;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;

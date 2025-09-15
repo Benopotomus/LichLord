@@ -1,6 +1,5 @@
 ﻿namespace LichLord.NonPlayerCharacters
 {
-    using System;
     using UnityEngine;
 
     public static class NonPlayerCharacterDataUtility
@@ -10,7 +9,7 @@
         private const int DEFINITION_SHIFT = 0;
         private const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
 
-        private const int SPAWN_TYPE_BITS = 2;          // 0–3
+        private const int SPAWN_TYPE_BITS = 3;          // 0–7
         private const int SPAWN_TYPE_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
         private const byte SPAWN_TYPE_MASK = (1 << SPAWN_TYPE_BITS) - 1;
 
@@ -93,9 +92,10 @@
 
     public enum ENPCSpawnType : byte
     {
-        Invasion, // Goes toward teh invasion manager's target
+        Invader, // Goes toward teh invasion manager's target
         Worker, // Has a worker index for players
         Guard, // Spawns at locations to guard them
         Patrol, // Spawns at patrol points and paths to other ones
+        Warrior, // Summoned by the player character and attempts to follow when idle
     }
 }

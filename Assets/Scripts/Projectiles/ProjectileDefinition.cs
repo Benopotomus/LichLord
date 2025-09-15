@@ -142,6 +142,18 @@ namespace LichLord.Projectiles
             }
         }
 
+        [SerializeField]
+        protected List<ProjectileImpactActionDefinition> _impactActions = new List<ProjectileImpactActionDefinition>();
+        public List<ProjectileImpactActionDefinition> ImpactActions => _impactActions;
+
+        public void TriggerImpactActions(ref FProjectileData data, ref FPhysicsHitData impactHit, FixedUpdateProjectile projectile)
+        {
+            foreach( var action in ImpactActions)
+            {
+                action.Trigger(ref data, ref impactHit, projectile);
+            }
+        }
+
         [Header("Proximity Detonation")]
         [SerializeField]// if this range is exceeded. do something
         protected float _proximityDetonationRange;
@@ -152,7 +164,7 @@ namespace LichLord.Projectiles
         public int ProximityDetonationTicks => _proximityDetonationTicks;
 
         [SerializeField]
-        protected List<ProjectileDefinition> _proximityDetonationProjectile = new List<ProjectileDefinition>(); // projectiles spawned on deactivation (hit or not);
+        protected List<ProjectileDefinition> _proximityDetonationProjectile = new List<ProjectileDefinition>();
         public List<ProjectileDefinition> ProximityDetonationProjectile => _proximityDetonationProjectile;
 
         public void UpdateProximityFuse(ref FProjectileData data, int tick, FixedUpdateProjectile projectile)

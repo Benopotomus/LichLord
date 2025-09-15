@@ -179,24 +179,23 @@ X Make a dialog force them to retreat.
 
 X Make damaging an invasion npc cause all invaders to become hostile
 
-Get Dialog Owner Icon and Name
-Just use the definition for now
+X Get Dialog Owner Icon and Name
+X Just use the definition for now
 
-Check on remotes
-
-Make the spawn point for initial spawn
-
-Make the dialog boxes
-
-Make Mini Map
+X Check on remotes
+X Make the dialog boxes
 
 Make gold
-
-Make Iron
-
-Make Mushrooms
-
+X Make Iron
+X Make Mushrooms
 Make Bones
+
+Get tutorial icons
+
+Make Mini Map
+Make the spawn point for initial spawn
+
+Make summon skeletons spell.
 
 Fix targeting stuff above with ranged attacks vs melee.
 
@@ -223,3 +222,6 @@ Spending cost for construction
 Destroy buildable effect
 
 add a prop count to the replicators and only update to the count
+
+compress FNetObjectID to 2 bytes from 5. // saves 300 bytes for projectiles alone
+possibly compress position for projectiles

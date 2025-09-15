@@ -9,6 +9,8 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private GameObject _stoneGO;
         [SerializeField] private GameObject _woodGO;
+        [SerializeField] private GameObject _ironGO;
+        [SerializeField] private GameObject _deathCapsGO;
 
         private ECurrencyType _carriedCurrency;
 
@@ -19,6 +21,8 @@ namespace LichLord.NonPlayerCharacters
 
             _stoneGO.SetActive(false);
             _woodGO.SetActive(false);
+            _ironGO.SetActive(false);
+            _deathCapsGO.SetActive(false);
         }
 
         public void OnRender(NonPlayerCharacterRuntimeState runtimeState)
@@ -46,20 +50,32 @@ namespace LichLord.NonPlayerCharacters
                 case ECurrencyType.None:
                     _stoneGO.SetActive(false);
                     _woodGO.SetActive(false);
+                    _ironGO.SetActive(false);
+                    _deathCapsGO.SetActive(false);
                     break;
                 case ECurrencyType.Wood:
-
-                    if (_stoneGO == null)
-                    {
-                        Debug.Log(runtimeState.GetSpawnType());
-                    }
-
-                    _stoneGO.SetActive(false);
                     _woodGO.SetActive(true);
+                    _stoneGO.SetActive(false);
+                    _ironGO.SetActive(false);
+                    _deathCapsGO.SetActive(false);
                     break;
                 case ECurrencyType.Stone:
                     _stoneGO.SetActive(true);
                     _woodGO.SetActive(false);
+                    _ironGO.SetActive(false);
+                    _deathCapsGO.SetActive(false);
+                    break;
+                case ECurrencyType.Iron:
+                    _ironGO.SetActive(true);
+                    _stoneGO.SetActive(false);
+                    _woodGO.SetActive(false);
+                    _deathCapsGO.SetActive(false);
+                    break;
+                case ECurrencyType.Deathcaps:
+                    _deathCapsGO.SetActive(true);
+                    _stoneGO.SetActive(false);
+                    _woodGO.SetActive(false);
+                    _ironGO.SetActive(false);
                     break;
             }
         }

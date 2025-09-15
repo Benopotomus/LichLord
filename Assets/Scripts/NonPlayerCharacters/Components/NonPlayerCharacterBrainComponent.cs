@@ -205,7 +205,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            if (runtimeState.IsInvasionNPC())
+            if (runtimeState.IsInvader())
             {
                 InvasionManager invasionManager = NPC.Context.InvasionManager;
 
@@ -215,6 +215,23 @@ namespace LichLord.NonPlayerCharacters
                 Vector3 formationOffset = runtimeState.GetFormationOffset();
                 _moveTarget = NPC.Context.InvasionManager.GetInvasionTargetPosition(formationOffset);
                 _wanderPositionSet = true;
+            }
+            else if (runtimeState.IsWarrior())
+            {
+                PlayerCharacter pc = runtimeState.GetFollowPlayer();
+
+                if (pc != null)
+                {
+                    Vector3 direction = pc.CachedTransform.forward;
+
+
+                    Vector3 formationOffset = runtimeState.GetFormationOffset();
+                    formationOffset.z += 20f;
+
+                    _moveTarget = pc.Formation.GetFormationPosition(runtimeState.GetFormationID(),
+                        runtimeState.GetFormationIndex());
+                    //_wanderPositionSet = true;
+                }
             }
             else if (runtimeState.IsWorker())
             {
@@ -394,7 +411,11 @@ namespace LichLord.NonPlayerCharacters
                 }
             }
             else
-            { 
+            {
+                _isInMovementStopRange = false;
+                _isInFaceTargetRange = false;
+                return;
+
                 sqrDist = (_npc.CachedTransform.position - _moveTarget).sqrMagnitude;
             }
 

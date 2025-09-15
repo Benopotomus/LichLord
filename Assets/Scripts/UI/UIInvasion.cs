@@ -93,7 +93,7 @@ namespace LichLord.UI
             bounceSequence.SetLoops(bounceCount, LoopType.Restart);
             bounceSequence.Play();
 
-            Debug.Log($"UIInvasion: Bounce animation started on _transform, {bounceCount} bounces, duration={bounceDuration}s per bounce");
+            //Debug.Log($"UIInvasion: Bounce animation started on _transform, {bounceCount} bounces, duration={bounceDuration}s per bounce");
         }
     }
 }

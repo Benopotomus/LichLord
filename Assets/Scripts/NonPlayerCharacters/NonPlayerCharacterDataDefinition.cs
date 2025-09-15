@@ -11,7 +11,7 @@ namespace LichLord.NonPlayerCharacters
         protected const int DEFINITION_SHIFT = 0;
         protected const byte DEFINITION_MASK = (1 << DEFINITION_BITS) - 1;
 
-        protected const int SPAWN_TYPE_BITS = 2;          // 0–3
+        protected const int SPAWN_TYPE_BITS = 3;          // 0–7
         protected const int SPAWN_TYPE_SHIFT = DEFINITION_SHIFT + DEFINITION_BITS;
         protected const byte SPAWN_TYPE_MASK = (1 << SPAWN_TYPE_BITS) - 1;
 
@@ -22,7 +22,7 @@ namespace LichLord.NonPlayerCharacters
         protected const int DIALOG_INDEX_BITS = 5;        // 0-31
         protected const int DIALOG_INDEX_SHIFT = TEAM_SHIFT + TEAM_BITS;
         protected const ushort DIALOG_INDEX_MASK = (1 << DIALOG_INDEX_BITS) - 1;
-        // 18 total
+        // 19 total
 
         // Condition (byte)
         protected const int NPC_STATE_BITS = 4;           // 0–15

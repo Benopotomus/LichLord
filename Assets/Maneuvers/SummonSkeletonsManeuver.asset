@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
+  m_Name: SummonSkeletonsManeuver
+  m_EditorClassIdentifier: 
+  _tableID: 4
+  ManeuverName: Summon Skeletons
+  _duration: 1
+  Cooldown: 5
+  ActionSound: {fileID: 0}
+  _inputType: 0
+  _muzzle: 0
+  _muzzleEffectPrefab:
+    _name: 
+    _bundle: 
+  _icon:
+    _name: summon_skeleton_warrior
+    _bundle: summon_skeleton_warrior
+  Fullbody: 0
+  UpperbodyTriggerNumber: 1
+  UpperbodyTriggerDuration: 0
+  PitchOffset: 30
+  YawOffset: 0
+  AnimationSpeed: 1
+  MovementSpeedMultiplier: 0.35
+  _timedProjectiles:
+  - SpawnTick: 24
+    Definition: {fileID: 11400000, guid: 5ca82b4ca2dc35c4ebddd1840f85cf2b, type: 2}
+    SpawnsOnAnimationNotify: 0
+    Muzzle: 3
+    Damage:
+      DamageValue: 10
+      DamageType: 5
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+  _cycleProjectiles: []
+  _projectileCycleDelayTicks: 0
+  _projectileTicksPerCycle: 0

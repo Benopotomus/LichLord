@@ -68,7 +68,7 @@ namespace LichLord.NonPlayerCharacters
             DataDefinition.ApplyDamage(ref _data, damage, hitReactIndex);
             _replicator.ReplicateRuntimeState(this);
 
-            if (IsInvasionNPC())
+            if (IsInvader())
             {
                 InvasionManager invasionManager = Context.InvasionManager;
                 if (invasionManager.HasStateAuthority)
@@ -106,6 +106,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetAttitude(EAttitude newAttitude)
         {
+            if (_data.DefinitionID == 0)
+                return;
+
             DataDefinition.SetAttitude(newAttitude, ref _data);
             _replicator.ReplicateRuntimeState(this);
         }
@@ -123,6 +126,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetState(ENPCState newState)
         {
+            if (_data.DefinitionID == 0)
+                return;
+
             DataDefinition.SetState(newState, ref _data);
             _replicator.ReplicateRuntimeState(this);
         }
@@ -178,18 +184,49 @@ namespace LichLord.NonPlayerCharacters
             return Definition.MaxHealth;
         }
 
-        public bool IsInvasionNPC()
+        public bool IsInvader()
         {
-            if (DataDefinition is InvaderDataDefinition invaderDataDefinition)
-                return invaderDataDefinition.IsInvasionNPC(ref _data);
+            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _data) == ENPCSpawnType.Invader)
+                return true;
 
             return false;
+        }
+
+        public bool IsWarrior()
+        {
+            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _data) == ENPCSpawnType.Warrior)
+                return true;
+
+            return false;
+        }
+
+        public int GetFormationID()
+        {
+            if (DataDefinition is WarriorDataDefinition warriorDataDefinition)
+            {
+                return warriorDataDefinition.GetFormationID(ref _data);
+            }
+
+            return -1;
+        }
+
+        public int GetFormationIndex()
+        {
+            if (DataDefinition is WarriorDataDefinition warriorDataDefinition)
+            {
+                return warriorDataDefinition.GetFormationIndex(ref _data);
+            }
+
+            return -1;
         }
 
         public Vector3 GetFormationOffset()
         {
             if (DataDefinition is InvaderDataDefinition invaderDataDefinition)
                 return invaderDataDefinition.GetFormationOffset(ref _data);
+
+            if (DataDefinition is WarriorDataDefinition warriorDataDefinition)
+                return warriorDataDefinition.GetFormationOffset(ref _data);
 
             return Vector3.zero;
         }
@@ -207,7 +244,7 @@ namespace LichLord.NonPlayerCharacters
 
         public bool IsWorker()
         {
-            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _data) == ENPCSpawnType.Worker)
                 return true;
 
             return false;
@@ -294,6 +331,16 @@ namespace LichLord.NonPlayerCharacters
         public bool HasDialog()
         { 
             return DataDefinition.HasDialog(ref _data);
+        }
+
+        public PlayerCharacter GetFollowPlayer()
+        {
+            if (DataDefinition is WarriorDataDefinition warriorData)
+            {
+                return Context.NetworkGame.GetPlayerByIndex(warriorData.GetPlayerFollowIndex(ref _data));
+            }
+
+            return null;
         }
     }
 }
