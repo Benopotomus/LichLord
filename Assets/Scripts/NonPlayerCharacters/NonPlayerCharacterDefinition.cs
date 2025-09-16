@@ -35,6 +35,10 @@ namespace LichLord.NonPlayerCharacters
         public float WalkSpeed => _walkSpeed;
 
         [SerializeField]
+        protected bool _isFrontlineCombatant;
+        public bool IsFrontlineCombatant => _isFrontlineCombatant;
+
+        [SerializeField]
         [SerializedDictionary("SpawnType", "DataDefinition")]
         private SerializedDictionary<ENPCSpawnType, NonPlayerCharacterDataDefinition> _spawnTypeDataDefinitions;
 

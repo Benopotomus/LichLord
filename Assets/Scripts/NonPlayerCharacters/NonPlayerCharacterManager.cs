@@ -142,6 +142,8 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
+            var pc = Context.NetworkGame.GetPlayerByIndex(playerFollowIndex);
+
             warriorData.SetPlayerFollowIndex(playerFollowIndex, ref data);
             warriorData.SetFormationID(formationID, ref data);
             warriorData.SetFormationIndex(formationIndex, ref data);

@@ -10,7 +10,7 @@ namespace LichLord
         private Vector3[] formationOffsets = new Vector3[16]; // Kept for compatibility but unused
 
         [SerializeField]
-        private Formation[] formations = new Formation[8];
+        private Formation[] formations = new Formation[4];
 
         [SerializeField]
         private float backLineZOffset = -2f; // Offset to place the back line behind the front line
@@ -87,13 +87,6 @@ namespace LichLord
             return worldPosition;
         }
 
-        private bool IsValidFormation(int formationID, int formationIndex)
-        {
-            return formationID >= 0 && formationID < formations.Length &&
-                   formationIndex >= 0 && formationIndex < formations[formationID].Characters.Length &&
-                   formations[formationID] != null;
-        }
-
         public int GetFreeFormationID()
         {
             for (int formationID = 0; formationID < formations.Length; formationID++)
@@ -122,6 +115,59 @@ namespace LichLord
 
             Debug.LogWarning("No free formations found");
             return -1; // Return -1 if no free formation is found
+        }
+
+        public (int formationID, int formationIndex) GetFreeFrontlineIndex()
+        {
+            for (int formationID = 0; formationID < formations.Length; formationID++)
+            {
+                if (formations[formationID] == null)
+                {
+                    continue; // Skip null formations
+                }
+
+                for (int i = 0; i < 8; i++) // Only check frontline indices 0-7
+                {
+                    if (formations[formationID].Characters[i] == null)
+                    {
+                        Debug.Log($"Found free frontline slot at formationID={formationID}, formationIndex={i}");
+                        return (formationID, i);
+                    }
+                }
+            }
+
+            Debug.LogWarning("No free frontline slots found");
+            return (-1, -1); // Return (-1, -1) if no free frontline slot is found
+        }
+
+        public (int formationID, int formationIndex) GetFreeBacklineIndex()
+        {
+            for (int formationID = 0; formationID < formations.Length; formationID++)
+            {
+                if (formations[formationID] == null)
+                {
+                    continue; // Skip null formations
+                }
+
+                for (int i = 8; i < 16; i++) // Only check backline indices 8-15
+                {
+                    if (formations[formationID].Characters[i] == null)
+                    {
+                        Debug.Log($"Found free backline slot at formationID={formationID}, formationIndex={i}");
+                        return (formationID, i);
+                    }
+                }
+            }
+
+            Debug.LogWarning("No free backline slots found");
+            return (-1, -1); // Return (-1, -1) if no free backline slot is found
+        }
+
+        private bool IsValidFormation(int formationID, int formationIndex)
+        {
+            return formationID >= 0 && formationID < formations.Length &&
+                   formationIndex >= 0 && formationIndex < formations[formationID].Characters.Length &&
+                   formations[formationID] != null;
         }
     }
 
