@@ -21,7 +21,7 @@ MonoBehaviour:
   _damageReduction: 0
   _damageResistance: 0
   _walkSpeed: 5
-  _isFrontlineCombatant: 0
+  _isFrontlineCombatant: 1
   _spawnState:
     StateTime: 2
     _animationTrigger:
@@ -34,8 +34,8 @@ MonoBehaviour:
       IsMoving: 0
       IsBlocking: 0
     _spawnEffect:
-      _name: 
-      _bundle: 
+      _name: VFX_Spawning
+      _bundle: vfx_spawning
   _spawnTypeDataDefinitions:
     _serializedList:
     - Key: 0

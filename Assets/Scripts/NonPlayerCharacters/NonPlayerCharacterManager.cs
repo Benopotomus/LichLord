@@ -135,9 +135,9 @@ namespace LichLord.NonPlayerCharacters
                     continue;
 
                 Vector3 randomPosition = new Vector3(
-                Random.Range(-5f, 5f),
+                Random.Range(-2f, 2f),
                 0, // Keep Y fixed
-                Random.Range(-5f, 5f)
+                Random.Range(-2f, 2f)
                 );
 
                 // Combine offset into raycast origin

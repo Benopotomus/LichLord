@@ -17,7 +17,7 @@ MonoBehaviour:
   _lifetimeExpiredSpawnedProjectiles: []
   _projectileMovement: {fileID: 11400000, guid: 339f033f4deb71d4e9d8f12a1f09c1af,
     type: 2}
-  _speed: 100
+  _speed: 30
   _impactCollisionLayer:
     serializedVersion: 2
     m_Bits: 257
@@ -47,7 +47,8 @@ MonoBehaviour:
   _damage: 10
   _damageType: 0
   _postImpactTicks: 16
-  _impactSpawnedProjectiles: []
+  _impactSpawnedProjectiles:
+  - {fileID: 11400000, guid: 5776b41bbc5f10c458b879d3ff0c6a96, type: 2}
   _impactActions:
   - {fileID: 11400000, guid: 20a1294a4284c314ca6e8f7885e0c4c4, type: 2}
   _proximityDetonationRange: 0

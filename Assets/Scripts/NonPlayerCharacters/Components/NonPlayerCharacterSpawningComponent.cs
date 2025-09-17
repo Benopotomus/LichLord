@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DWD.Pooling;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -14,9 +15,9 @@ namespace LichLord.NonPlayerCharacters
 
         private int _spawnEndTick;
 
+
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
-
         }
 
         public void UpdateSpawningState(NonPlayerCharacterRuntimeState runtimeState, int tick)
@@ -41,7 +42,32 @@ namespace LichLord.NonPlayerCharacters
         public void SpawnImpactVisualEffect(NonPlayerCharacterSpawnState spawnState)
         {
             if (spawnState.SpawnEffect.Name != "")
+            {
+                _visualSpawner.OnLoadedAttached += OnVisualsPrefabLoadedAttached;
                 _visualSpawner.SpawnVisualEffectAttached(_spawnAttachment, _spawnAttachment.rotation, spawnState.SpawnEffect);
+            }
+        }
+
+        private void OnVisualsPrefabLoadedAttached(GameObject loadedGameObject, Transform attachment, Quaternion rotation)
+        {
+            _visualSpawner.OnLoadedAttached -= OnVisualsPrefabLoadedAttached;
+
+            var poolObject = loadedGameObject.GetComponent<DWDObjectPoolObject>();
+
+            if (poolObject == null)
+            {
+                Debug.LogWarning("Could not spawn Visuals Prefab for Impact");
+                return;
+            }
+
+            var instance = DWDObjectPool.Instance.SpawnAttached(poolObject, attachment.position, attachment.rotation, attachment);
+            if(instance is StandaloneVisualEffect standaloneEffect)
+                standaloneEffect.Initialize();
+        }
+
+        private void OnDestroy()
+        {
+            _visualSpawner.OnLoadedAttached -= OnVisualsPrefabLoadedAttached;
         }
     }
 }
