@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: M_Clouds
   m_Shader: {fileID: 4800000, guid: 6d76fe21a30e9b84b8bfc02ed440c4e1, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -17,6 +19,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -41,7 +44,7 @@ Material:
     - _AlphaClip: 0.09
     - _AlphaCutoff: 0.5
     - _CloudAlpha: 1
-    - _CloudsPower: 1.5
+    - _CloudsPower: 0.51
     - _DistortScale: 30.1
     - _EnvironmentReflections: 1
     - _OffsetIntensity: -0.1
