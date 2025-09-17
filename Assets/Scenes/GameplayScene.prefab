@@ -1696,7 +1696,7 @@ MonoBehaviour:
   _trackableDetectionRange: 75
   _trackableLayerMask:
     serializedVersion: 2
-    m_Bits: 8448
+    m_Bits: 8192
   _updateInterval: 0.1
   _boxHalfExtents: {x: 20, y: 20}
   _maxColliders: 64
@@ -2604,6 +2604,7 @@ MonoBehaviour:
     WorkerManager: {fileID: 8888138200270294323}
     DialogManager: {fileID: 754671849189099409}
     MissionManager: {fileID: 4989044316582733590}
+    FormationManager: {fileID: 0}
     LocalPlayerCharacter: {fileID: 0}
 --- !u!114 &3481607325188494411
 MonoBehaviour:
@@ -6598,6 +6599,10 @@ MonoBehaviour:
   _replicatorPrefab: {fileID: 3957007118019067033, guid: 29fc895c602f8fd4084d2ff263237ec3,
     type: 3}
   _debug: {fileID: 916566940587386260}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 1
+  raycastLength: 6
 --- !u!114 &4461914616408594622
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -39,6 +39,10 @@ namespace LichLord.NonPlayerCharacters
         public bool IsFrontlineCombatant => _isFrontlineCombatant;
 
         [SerializeField]
+        protected NonPlayerCharacterSpawnState _spawnState;
+        public NonPlayerCharacterSpawnState SpawnState => _spawnState;
+
+        [SerializeField]
         [SerializedDictionary("SpawnType", "DataDefinition")]
         private SerializedDictionary<ENPCSpawnType, NonPlayerCharacterDataDefinition> _spawnTypeDataDefinitions;
 

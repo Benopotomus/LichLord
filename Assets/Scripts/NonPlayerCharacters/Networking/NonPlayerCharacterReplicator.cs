@@ -203,7 +203,10 @@ namespace LichLord.NonPlayerCharacters
 
             _localRuntimeStates[spawnParams.Index].SetPosition(spawnParams.Position);
 
-            character.OnSpawned(_localRuntimeStates[spawnParams.Index], this);
+            bool hasAuthority = Runner.IsSharedModeMasterClient || Runner.GameMode == GameMode.Single;
+            int tick = Runner.Tick;
+
+            character.OnSpawned(_localRuntimeStates[spawnParams.Index], this, hasAuthority, tick);
         }
 
         private void OnRep_NPCDatas()

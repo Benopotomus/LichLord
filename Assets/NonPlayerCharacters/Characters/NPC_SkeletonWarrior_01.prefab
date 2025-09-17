@@ -1180,6 +1180,8 @@ GameObject:
   - component: {fileID: 7850887928293133023}
   - component: {fileID: 5729182260968451425}
   - component: {fileID: 2401479208497145895}
+  - component: {fileID: 6259089908041508983}
+  - component: {fileID: 2408611921920231200}
   m_Layer: 10
   m_Name: NPC_SkeletonWarrior_01
   m_TagString: Untagged
@@ -1228,6 +1230,8 @@ MonoBehaviour:
   _currencyComponent: {fileID: 7850887928293133023}
   _attitudeComponent: {fileID: 5729182260968451425}
   _dialogComponent: {fileID: 2401479208497145895}
+  _spawningComponent: {fileID: 6259089908041508983}
+  _lifetimeComponent: {fileID: 2408611921920231200}
   _interactableComponent: {fileID: 7459789804197456675}
   _muzzleComponent: {fileID: 7889308162331754733}
   _animator: {fileID: 5683565048644474723}
@@ -1237,6 +1241,8 @@ MonoBehaviour:
   _workerIndex: -1
   redHat: {fileID: 0}
   blueHat: {fileID: 0}
+  _formationId: 0
+  _formationIndex: 0
 --- !u!136 &1615885042697682339
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1391,7 +1397,7 @@ MonoBehaviour:
     ActivationTick: 0
     RandomAimOffset: 0
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
-    ActiveState: 5
+    ActiveState: 6
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
@@ -1578,6 +1584,32 @@ MonoBehaviour:
   _dialogIndex: 0
   _dialogDefinition: {fileID: 0}
   _indicator: {fileID: 3806545005582268681}
+--- !u!114 &6259089908041508983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ecfc55d7cf7e3c4b8795d7a7748436e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 3484536114419770148}
+  _spawnAttachment: {fileID: 3282022331344466140}
+--- !u!114 &2408611921920231200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9deb56a2042157440817bfe260192ccf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3176908961229995009
 GameObject:
   m_ObjectHideFlags: 0
@@ -1963,7 +1995,7 @@ Animator:
   m_GameObject: {fileID: 4094573104133784966}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 4c313c1a5b453304d94edc5c5a0e9d69, type: 3}
-  m_Controller: {fileID: 9100000, guid: 7ff0cf27ed8e9684b9bdd381bab1f846, type: 2}
+  m_Controller: {fileID: 9100000, guid: 9f150214475dad54a893ef671fe06cbf, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

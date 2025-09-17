@@ -1,11 +1,9 @@
-﻿
-using Fusion;
+﻿using Fusion;
 
 namespace LichLord.NonPlayerCharacters
 {
     public partial class NonPlayerCharacterReplicator : ContextBehaviour
     {
-
         public void Predict_DealDamageToNPC(int index, int damage, int hitReactIndex)
         {
             var targetData = _npcDatas.Get(index);

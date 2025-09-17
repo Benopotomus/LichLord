@@ -7,11 +7,15 @@ namespace LichLord.NonPlayerCharacters
     [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/WarriorDataDefinition")]
     public class WarriorDataDefinition : NonPlayerCharacterDataDefinition
     {
-        [Header("Formation Offsets")]
-        [SerializeField] private Vector3[] _formationOffsets = new Vector3[16];
+        [SerializeField]
+        private int _maxLifetimeProgress = 7;
+        public int MaxLifetimeProgress => _maxLifetimeProgress;
+
+        [SerializeField]
+        private int _maxLifetimeTicks = 1440;
+        public int MaximumLifetimeTicks => _maxLifetimeTicks;
 
         // Config 
-
         private const int PLAYER_FOLLOW_BITS = 4;             // 0–15
         private const int PLAYER_FOLLOW_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
         private const ushort PLAYER_FOLLOW_MASK = (1 << PLAYER_FOLLOW_BITS) - 1;
@@ -29,6 +33,10 @@ namespace LichLord.NonPlayerCharacters
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
+        private const int LIFETIME_PROGRESS_BITS = 3;             // 0–7
+        private const int LIFETIME_PROGRESS_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
+        private const ushort LIFETIME_PROGRESS_MASK = (1 << LIFETIME_PROGRESS_BITS) - 1;
+
         public override void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition, 
             ENPCSpawnType spawnType,
@@ -40,6 +48,7 @@ namespace LichLord.NonPlayerCharacters
             // Initialize Events
             npcData.Events = 0;
             SetHealth(definition.MaxHealth, ref npcData);
+            SetLifetimeProgress(0, ref npcData);
         }
 
         // Formation
@@ -83,15 +92,6 @@ namespace LichLord.NonPlayerCharacters
             npcData.Configuration = config;
         }
 
-        public Vector3 GetFormationOffset(ref FNonPlayerCharacterData npcData)
-        {
-            int index = GetFormationIndex(ref npcData);
-            if (index < 0 || index >= _formationOffsets.Length)
-                return Vector3.zero;
-
-            return _formationOffsets[index];
-        }
-
         // Health
         public override int GetHealth(ref FNonPlayerCharacterData npcData)
         {
@@ -103,6 +103,20 @@ namespace LichLord.NonPlayerCharacters
             ushort events = npcData.Events;
             newHealth = Mathf.Clamp(newHealth, 0, HEALTH_MASK);
             events = (ushort)((events & ~(HEALTH_MASK << HEALTH_SHIFT)) | (newHealth << HEALTH_SHIFT));
+            npcData.Events = events;
+        }
+
+        // Lifetime Progress
+        public int GetLifetimeProgress(ref FNonPlayerCharacterData npcData)
+        {
+            return (npcData.Events >> LIFETIME_PROGRESS_SHIFT) & LIFETIME_PROGRESS_MASK;
+        }
+
+        public void SetLifetimeProgress(int newProgress, ref FNonPlayerCharacterData npcData)
+        {
+            ushort events = npcData.Events;
+            newProgress = Mathf.Clamp(newProgress, 0, LIFETIME_PROGRESS_MASK);
+            events = (ushort)((events & ~(LIFETIME_PROGRESS_MASK << LIFETIME_PROGRESS_SHIFT)) | (newProgress << LIFETIME_PROGRESS_SHIFT));
             npcData.Events = events;
         }
 

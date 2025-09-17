@@ -11,8 +11,10 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
         [SerializeField] private NonPlayerCharacterReplicator _replicatorPrefab;
         [SerializeField] private NonPlayerCharacterManagerDebug _debug;
+        [SerializeField] private LayerMask hitMask = ~0;
+        [SerializeField] private float raycastLength = 6f; 
 
-        [SerializeField] private Dictionary<int, FNonPlayerCharacterData> _deltaStates = new Dictionary<int, FNonPlayerCharacterData>();
+        private Dictionary<int, FNonPlayerCharacterData> _deltaStates = new Dictionary<int, FNonPlayerCharacterData>();
 
         private List<NonPlayerCharacterReplicator> _replicators = new List<NonPlayerCharacterReplicator>();
 
@@ -111,20 +113,67 @@ namespace LichLord.NonPlayerCharacters
             SpawnNPC(ref data);
         }
 
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = false)]
-        public void RPC_SpawnNPCWarrior(Vector3 spawnPosition,
-            ushort npcDefinitionId,
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_SpawnNPCWarriorGroup(FWorldPosition centerPosition,
+            byte[] npcDefinitionIds,
             ETeamID teamId,
-            byte playerFollowIndex,
-            byte formationId,
-            byte formationIndex
-            )
-        { 
-            NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(npcDefinitionId);
-            if (definition == null)
+            byte playerFollowIndex
+        )
+        {
+            var pc = Context.NetworkGame.GetPlayerByIndex(playerFollowIndex);
+            if (pc == null)
                 return;
 
-            SpawnNPCWarrior(spawnPosition, definition, teamId, playerFollowIndex, formationId, formationIndex);
+            var formationComponent = pc.Formation;
+            if (formationComponent == null)
+                return;
+
+            for (int i = 0; i < npcDefinitionIds.Length; i++)
+            {
+                NonPlayerCharacterDefinition definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(npcDefinitionIds[i]);
+                if (definition == null)
+                    continue;
+
+                Vector3 randomPosition = new Vector3(
+                Random.Range(-5f, 5f),
+                0, // Keep Y fixed
+                Random.Range(-5f, 5f)
+                );
+
+                // Combine offset into raycast origin
+                if (Physics.Raycast((randomPosition + centerPosition.Position) +
+                    (Vector3.up * (raycastLength * 0.5f)),
+                    Vector3.down,
+                    out RaycastHit hit,
+                    raycastLength,
+                    hitMask))
+                {
+                    var result = definition.IsFrontlineCombatant ?
+                        formationComponent.GetFreeFrontlineIndex() :
+                        formationComponent.GetFreeBacklineIndex();
+
+                    int freeFormationId = result.formationId;
+                    int freeFormationIndex = result.formationIndex;
+
+                    // If no slot found, try the opposite
+                    if (freeFormationId == -1 || freeFormationIndex == -1)
+                    {
+                        result = definition.IsFrontlineCombatant
+                            ? formationComponent.GetFreeBacklineIndex()
+                            : formationComponent.GetFreeFrontlineIndex();
+
+                        freeFormationId = result.formationId;
+                        freeFormationIndex = result.formationIndex;
+                    }
+
+                    // If still no slot found, bail
+                    if (freeFormationId == -1 || freeFormationIndex == -1)
+                        continue;
+
+                    pc.Formation.SetFormationIndexFilled(freeFormationId, freeFormationIndex);
+                    SpawnNPCWarrior(hit.point, definition, teamId, playerFollowIndex, freeFormationId, freeFormationIndex);
+                }
+            }
         }
 
         public void SpawnNPCWarrior(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamId, int playerFollowIndex, int formationID, int formationIndex)
@@ -147,7 +196,7 @@ namespace LichLord.NonPlayerCharacters
             warriorData.SetPlayerFollowIndex(playerFollowIndex, ref data);
             warriorData.SetFormationID(formationID, ref data);
             warriorData.SetFormationIndex(formationIndex, ref data);
-
+            warriorData.SetState(ENPCState.Spawning, ref data);
             SpawnNPC(ref data);
         }
 
@@ -171,7 +220,6 @@ namespace LichLord.NonPlayerCharacters
             }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
-
             data.Configuration = saveState.configuration;
             data.Position = saveState.position;
             data.Rotation = saveState.rotation;

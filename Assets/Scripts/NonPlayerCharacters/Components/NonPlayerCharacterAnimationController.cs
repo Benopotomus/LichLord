@@ -27,12 +27,14 @@ namespace LichLord.NonPlayerCharacters
         [SerializedDictionary]
         private SerializedDictionary<ProjectileDefinition, FAnimationCallbackData> _animationCallbacks;
 
-        public void SetAnimationForTrigger(FAnimationTrigger animationTrigger)
+        public void SetAnimationForTrigger(FAnimationTrigger animationTrigger, bool forceWeaponId = false)
         {
+            int weaponId = forceWeaponId ? animationTrigger.Weapon : _npc.Weapons.GetWeaponID();
+
             _animator.SetInteger(_animIDAction, animationTrigger.Action);
             _animator.SetBool(_animIDMoving, animationTrigger.IsMoving);
             _animator.SetBool(_animIDBlocking, animationTrigger.IsBlocking);
-            _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
+            _animator.SetInteger(_animIDWeapon, weaponId);
             _animator.SetInteger(_animIDRightWeapon, animationTrigger.RightWeapon);
             _animator.SetInteger(_animIDSide, animationTrigger.Side);
             _animator.SetInteger(_animIDJumping, animationTrigger.Jumping);

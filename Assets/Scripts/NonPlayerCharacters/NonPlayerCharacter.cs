@@ -48,6 +48,12 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterDialogComponent _dialogComponent;
         public NonPlayerCharacterDialogComponent DialogComponent => _dialogComponent;
 
+        [SerializeField] private NonPlayerCharacterSpawningComponent _spawningComponent;
+        public NonPlayerCharacterSpawningComponent SpawningComponent => _spawningComponent;
+
+        [SerializeField] private NonPlayerCharacterLifetimeComponent _lifetimeComponent;
+        public NonPlayerCharacterLifetimeComponent LifetimeComponent => _lifetimeComponent;
+
         [SerializeField]
         private InteractableComponent _interactableComponent;
         public InteractableComponent Interactable => _interactableComponent;
@@ -118,7 +124,13 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private GameObject blueHat;
 
-        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, NonPlayerCharacterReplicator replicator)
+        [SerializeField]
+        private int _formationId;
+
+        [SerializeField]
+        private int _formationIndex;
+
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, NonPlayerCharacterReplicator replicator, bool hasAuthority, int tick)
         {
             _runtimeState = runtimeState;
             _context = replicator.Context;
@@ -128,6 +140,9 @@ namespace LichLord.NonPlayerCharacters
             _currencyComponent.OnSpawned();
             _attitudeComponent.OnSpawned(runtimeState);
             _dialogComponent.OnSpawned(runtimeState);
+            _lifetimeComponent.OnSpawned(runtimeState);
+            _spawningComponent.OnSpawned(runtimeState);
+            _stateComponent.OnSpawned(runtimeState, hasAuthority, tick);
 
             _interactableComponent.Activate(
                 this,
@@ -156,7 +171,8 @@ namespace LichLord.NonPlayerCharacters
                 if (_workerIndex >= 0)
                     _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
             }
-            else if (runtimeState.IsWarrior())
+            
+            if (runtimeState.IsWarrior())
             {
                 var pc = runtimeState.GetFollowPlayer();
 
@@ -182,6 +198,9 @@ namespace LichLord.NonPlayerCharacters
             _currencyComponent.OnRender(runtimeState);
             _attitudeComponent.OnRender( runtimeState);
             _dialogComponent.OnRender(runtimeState);
+
+            _formationId = runtimeState.GetFormationID();
+            _formationIndex = runtimeState.GetFormationIndex();
 
             if (hasAuthority)
             {

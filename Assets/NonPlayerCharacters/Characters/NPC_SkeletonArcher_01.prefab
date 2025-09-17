@@ -333,7 +333,7 @@ Animator:
   m_GameObject: {fileID: 657454904655504573}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: f68544d0e30403b4b835d29e79a8d965, type: 3}
-  m_Controller: {fileID: 9100000, guid: 7ff0cf27ed8e9684b9bdd381bab1f846, type: 2}
+  m_Controller: {fileID: 9100000, guid: 9f150214475dad54a893ef671fe06cbf, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2946,6 +2946,8 @@ GameObject:
   - component: {fileID: 541806916981470579}
   - component: {fileID: 5667166935012497724}
   - component: {fileID: 8280122207182958077}
+  - component: {fileID: 4261139995832820338}
+  - component: {fileID: 3078160300237640522}
   m_Layer: 10
   m_Name: NPC_SkeletonArcher_01
   m_TagString: Untagged
@@ -2994,6 +2996,8 @@ MonoBehaviour:
   _currencyComponent: {fileID: 541806916981470579}
   _attitudeComponent: {fileID: 5667166935012497724}
   _dialogComponent: {fileID: 8280122207182958077}
+  _spawningComponent: {fileID: 3078160300237640522}
+  _lifetimeComponent: {fileID: 4261139995832820338}
   _interactableComponent: {fileID: 1398376250750045317}
   _muzzleComponent: {fileID: 6749657108094526839}
   _animator: {fileID: 8304036627096845830}
@@ -3003,6 +3007,8 @@ MonoBehaviour:
   _workerIndex: -1
   redHat: {fileID: 0}
   blueHat: {fileID: 0}
+  _formationId: 0
+  _formationIndex: 0
 --- !u!136 &5013894604574849869
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3349,6 +3355,32 @@ MonoBehaviour:
   _dialogIndex: 0
   _dialogDefinition: {fileID: 0}
   _indicator: {fileID: 944516498907399490}
+--- !u!114 &4261139995832820338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7741492357796157577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9deb56a2042157440817bfe260192ccf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3078160300237640522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7741492357796157577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ecfc55d7cf7e3c4b8795d7a7748436e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 3183157435632504526}
+  _spawnAttachment: {fileID: 8251747689170000944}
 --- !u!1 &7919634645097698640
 GameObject:
   m_ObjectHideFlags: 0

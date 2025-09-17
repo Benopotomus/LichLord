@@ -4195,6 +4195,8 @@ GameObject:
   - component: {fileID: 7908220068958744013}
   - component: {fileID: 2075578949442739796}
   - component: {fileID: 5972384184150605446}
+  - component: {fileID: 3808059592538173901}
+  - component: {fileID: 3727939437294402150}
   m_Layer: 10
   m_Name: NPC_HumanArcher_01
   m_TagString: Untagged
@@ -4243,6 +4245,8 @@ MonoBehaviour:
   _currencyComponent: {fileID: 7908220068958744013}
   _attitudeComponent: {fileID: 2075578949442739796}
   _dialogComponent: {fileID: 5972384184150605446}
+  _spawningComponent: {fileID: 3808059592538173901}
+  _lifetimeComponent: {fileID: 3727939437294402150}
   _interactableComponent: {fileID: 1543758665101288144}
   _muzzleComponent: {fileID: 1907940134008171684}
   _animator: {fileID: 1849537508615831428}
@@ -4252,6 +4256,8 @@ MonoBehaviour:
   _workerIndex: -1
   redHat: {fileID: 0}
   blueHat: {fileID: 0}
+  _formationId: 0
+  _formationIndex: 0
 --- !u!136 &8408253660290609880
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4566,6 +4572,8 @@ MonoBehaviour:
   _npc: {fileID: 6743547951332622073}
   _stoneGO: {fileID: 0}
   _woodGO: {fileID: 0}
+  _ironGO: {fileID: 0}
+  _deathCapsGO: {fileID: 0}
 --- !u!114 &2075578949442739796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4593,9 +4601,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 439fb0c371a2a974d8cc9d9f8acd0f52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hasDialog: 0
-  _dialog: {fileID: 0}
+  _dialogIndex: 0
+  _dialogDefinition: {fileID: 0}
   _indicator: {fileID: 3564062059828751278}
+--- !u!114 &3808059592538173901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ecfc55d7cf7e3c4b8795d7a7748436e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 6743547951332622073}
+  _spawnAttachment: {fileID: 2416786617183052698}
+--- !u!114 &3727939437294402150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9deb56a2042157440817bfe260192ccf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5914536390991823929
 GameObject:
   m_ObjectHideFlags: 0

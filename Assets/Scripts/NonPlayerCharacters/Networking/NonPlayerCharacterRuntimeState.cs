@@ -225,9 +225,6 @@ namespace LichLord.NonPlayerCharacters
             if (DataDefinition is InvaderDataDefinition invaderDataDefinition)
                 return invaderDataDefinition.GetFormationOffset(ref _data);
 
-            if (DataDefinition is WarriorDataDefinition warriorDataDefinition)
-                return warriorDataDefinition.GetFormationOffset(ref _data);
-
             return Vector3.zero;
         }
 
