@@ -212,7 +212,7 @@ namespace LichLord.NonPlayerCharacters
                 if (invasionManager.InvasionID == 0)
                     return;
 
-                Vector3 formationOffset = runtimeState.GetFormationOffset();
+                Vector3 formationOffset = runtimeState.GetInvaderFormationOffset();
                 _moveTarget = NPC.Context.InvasionManager.GetInvasionTargetPosition(formationOffset);
                 _wanderPositionSet = true;
             }
@@ -225,7 +225,7 @@ namespace LichLord.NonPlayerCharacters
                     Vector3 direction = pc.CachedTransform.forward;
 
 
-                    Vector3 formationOffset = runtimeState.GetFormationOffset();
+                    Vector3 formationOffset = runtimeState.GetInvaderFormationOffset();
                     formationOffset.z += 20f;
 
                     _moveTarget = pc.Formation.GetFormationPosition(runtimeState.GetFormationID(),

@@ -140,7 +140,7 @@ namespace LichLord.NonPlayerCharacters
             _currencyComponent.OnSpawned();
             _attitudeComponent.OnSpawned(runtimeState);
             _dialogComponent.OnSpawned(runtimeState);
-            _lifetimeComponent.OnSpawned(runtimeState);
+            _lifetimeComponent.OnSpawned(runtimeState, tick);
             _spawningComponent.OnSpawned(runtimeState);
             _stateComponent.OnSpawned(runtimeState, hasAuthority, tick);
 
@@ -194,10 +194,11 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateChunk(_context.ChunkManager);
             UpdateTeam(runtimeState);
-            _stateComponent.UpdateStateChange(runtimeState, hasAuthority, tick);
+            _stateComponent.UpdateState(runtimeState, hasAuthority, tick);
             _currencyComponent.OnRender(runtimeState);
             _attitudeComponent.OnRender( runtimeState);
             _dialogComponent.OnRender(runtimeState);
+            _lifetimeComponent.UpdateLifetime(runtimeState, hasAuthority, tick);
 
             _formationId = runtimeState.GetFormationID();
             _formationIndex = runtimeState.GetFormationIndex();
@@ -205,26 +206,28 @@ namespace LichLord.NonPlayerCharacters
             if (hasAuthority)
             {
                 _movementComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
-                _stateComponent.UpdateCurrentState(runtimeState, tick);
                 _brainComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
 
-                _workerIndex = runtimeState.GetWorkerIndex();
-                if (_workerIndex >= 0)
+                if (runtimeState.IsWorker())
                 {
-                    var workerData = Context.WorkerManager.GetWorkerData(_workerIndex);
-                    if (!workerData.IsAssigned)
+                    _workerIndex = runtimeState.GetWorkerIndex();
+                    if (_workerIndex >= 0)
                     {
-                        switch(runtimeState.GetState())
-                        { 
-                            case ENPCState.Dead:
-                            case ENPCState.Inactive:
-                                break;
-                            default:
-                                _runtimeState.SetState(ENPCState.Dead);
-                                break;
-                        }
+                        var workerData = Context.WorkerManager.GetWorkerData(_workerIndex);
+                        if (!workerData.IsAssigned)
+                        {
+                            switch (runtimeState.GetState())
+                            {
+                                case ENPCState.Dead:
+                                case ENPCState.Inactive:
+                                    break;
+                                default:
+                                    _runtimeState.SetState(ENPCState.Dead);
+                                    break;
+                            }
 
-                        return;
+                            return;
+                        }
                     }
                 }
             }

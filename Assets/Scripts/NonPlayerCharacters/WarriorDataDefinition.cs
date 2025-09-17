@@ -8,12 +8,12 @@ namespace LichLord.NonPlayerCharacters
     public class WarriorDataDefinition : NonPlayerCharacterDataDefinition
     {
         [SerializeField]
-        private int _maxLifetimeProgress = 7;
+        private int _maxLifetimeProgress = 10;
         public int MaxLifetimeProgress => _maxLifetimeProgress;
 
         [SerializeField]
-        private int _maxLifetimeTicks = 1440;
-        public int MaximumLifetimeTicks => _maxLifetimeTicks;
+        private int _ticksPerLifetimeProgress = 32;
+        public int TicksPerLifetimeProgress => _ticksPerLifetimeProgress;
 
         // Config 
         private const int PLAYER_FOLLOW_BITS = 4;             // 0–15
@@ -33,7 +33,7 @@ namespace LichLord.NonPlayerCharacters
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        private const int LIFETIME_PROGRESS_BITS = 3;             // 0–7
+        private const int LIFETIME_PROGRESS_BITS = 4;             // 0–15
         private const int LIFETIME_PROGRESS_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
         private const ushort LIFETIME_PROGRESS_MASK = (1 << LIFETIME_PROGRESS_BITS) - 1;
 

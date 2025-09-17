@@ -220,7 +220,7 @@ namespace LichLord.NonPlayerCharacters
             return -1;
         }
 
-        public Vector3 GetFormationOffset()
+        public Vector3 GetInvaderFormationOffset()
         {
             if (DataDefinition is InvaderDataDefinition invaderDataDefinition)
                 return invaderDataDefinition.GetFormationOffset(ref _data);
@@ -239,6 +239,8 @@ namespace LichLord.NonPlayerCharacters
             return DataDefinition.GetState(ref otherData);
         }
 
+        // Worker
+
         public bool IsWorker()
         {
             if (NonPlayerCharacterDataUtility.GetSpawnType(ref _data) == ENPCSpawnType.Worker)
@@ -254,6 +256,8 @@ namespace LichLord.NonPlayerCharacters
 
             return -1;
         }
+
+        // Harvest
 
         public ECurrencyType GetCarriedCurrencyType()
         {
@@ -311,6 +315,8 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
+        // Dialog
+
         public int GetDialogIndex()
         {
             return DataDefinition.GetDialogIndex(ref _data);
@@ -330,6 +336,8 @@ namespace LichLord.NonPlayerCharacters
             return DataDefinition.HasDialog(ref _data);
         }
 
+        // Player Follow
+
         public PlayerCharacter GetFollowPlayer()
         {
             if (DataDefinition is WarriorDataDefinition warriorData)
@@ -338,6 +346,47 @@ namespace LichLord.NonPlayerCharacters
             }
 
             return null;
+        }
+
+        // Lifetime
+
+        public int GetLifetimeProgress()
+        {
+            if (DataDefinition is WarriorDataDefinition warriorData)
+            {
+                return warriorData.GetLifetimeProgress(ref _data);
+            }
+
+            return 0;
+        }
+
+        public void SetLifetimeProgress(int newProgress)
+        {
+            if (DataDefinition is WarriorDataDefinition warriorData)
+            {
+                warriorData.SetLifetimeProgress(newProgress, ref _data);
+                _replicator.ReplicateRuntimeState(this);
+            }
+        }
+
+        public int GetTicksPerLifetime()
+        {
+            if (DataDefinition is WarriorDataDefinition warriorData)
+            {
+                return warriorData.TicksPerLifetimeProgress;
+            }
+
+            return -1;
+        }
+
+        public int GetLifetimeProgressMax()
+        {
+            if (DataDefinition is WarriorDataDefinition warriorData)
+            {
+                return warriorData.MaxLifetimeProgress;
+            }
+
+            return -1;
         }
     }
 }

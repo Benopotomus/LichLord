@@ -18,7 +18,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
         {
-            UpdateStateChange(runtimeState, hasAuthority, tick);
+            UpdateState(runtimeState, hasAuthority, tick);
         }
 
         public void StartRecycle()
@@ -26,7 +26,15 @@ namespace LichLord.NonPlayerCharacters
             _currentState = ENPCState.Inactive;
         }
 
-        public void UpdateStateChange(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
+        public void UpdateState(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
+        {
+            UpdateStateChange(runtimeState, hasAuthority, tick);
+
+            if(hasAuthority) 
+                UpdateCurrentState(runtimeState, tick);
+        }
+
+        private void UpdateStateChange(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
         {
             ENPCState oldState = _currentState;
             ENPCState newState = runtimeState.GetState();
@@ -140,7 +148,7 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // State Authority Only
-        public void UpdateCurrentState(NonPlayerCharacterRuntimeState runtimeState, int tick)
+        private void UpdateCurrentState(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
             switch (_currentState)
             {
