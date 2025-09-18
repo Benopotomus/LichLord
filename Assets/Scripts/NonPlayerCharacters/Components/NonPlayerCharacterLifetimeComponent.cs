@@ -34,7 +34,7 @@ namespace LichLord.NonPlayerCharacters
                 runtimeState.SetLifetimeProgress(newlifetime);
                 _nextLifetimeProgressTick = tick + runtimeState.GetTicksPerLifetime();
 
-                if (_lifetimeProgress >= runtimeState.GetLifetimeProgressMax())
+                if (newlifetime >= runtimeState.GetLifetimeProgressMax())
                 {
                     runtimeState.SetState(ENPCState.Dead);
                 }

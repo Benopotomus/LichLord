@@ -108,7 +108,7 @@ namespace LichLord
         }
 
         // Copy from another FWorldPosition
-        public void CopyPosition(ref FWorldPosition other)
+        public void CopyPosition(in FWorldPosition other)
         {
             _gridXZ = other._gridXZ;
             _localX = other._localX;

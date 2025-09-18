@@ -42,9 +42,9 @@ namespace LichLord.Buildables
 
         public void ReplicateRuntimeState(BuildableRuntimeState replictedState)
         {
-            ref FBuildableData data = ref _buildableDatas.GetRef(replictedState.index);
+            ref FBuildableData data = ref _buildableDatas.GetRef(replictedState.Index);
             FBuildableData currentData = replictedState.Data;
-            data.Copy(ref currentData);
+            data.Copy(in currentData);
         }
     }
 }

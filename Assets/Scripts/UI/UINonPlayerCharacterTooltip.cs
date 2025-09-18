@@ -13,11 +13,24 @@ namespace LichLord.UI
 
         [SerializeField] private UIFloatingHealthbar _healthbar;
 
+        [SerializeField] private UIFloatingLifetimeBar _lifetimebar;
+
         public void SetNpcData(NonPlayerCharacter npc)
         {
             _npc = npc;
 
             _healthbar.SetHealth(npc.RuntimeState.GetHealth(), npc.RuntimeState.GetMaxHealth());
+
+            if (npc.RuntimeState.IsWarrior())
+            {
+                _lifetimebar.SetActive(true);
+                _lifetimebar.SetLifetime(npc.RuntimeState.GetLifetimeProgress(), npc.RuntimeState.GetLifetimeProgressMax());
+            }
+            else
+            {
+                _lifetimebar.SetActive(false);
+            }
+
         }
     }
 }

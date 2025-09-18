@@ -323,7 +323,7 @@ namespace LichLord.NonPlayerCharacters
             }
             else if (hit.target is Buildable buildable)
             {
-                buildable.Zone.RPC_DealDamage(buildable.RuntimeState.index, hit.damageData.damageValue);
+                buildable.Zone.RPC_DealDamage(buildable.RuntimeState.Index, hit.damageData.damageValue);
             }
         }
 

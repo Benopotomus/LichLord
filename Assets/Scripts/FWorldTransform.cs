@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LichLord
 {
-    [StructLayout(LayoutKind.Explicit, Size = 8)]
+    [StructLayout(LayoutKind.Explicit, Size = 9)]
     public struct FWorldTransform : INetworkStruct
     {
         [FieldOffset(0)] private FWorldPosition _position; // 7 bytes
@@ -129,7 +129,7 @@ namespace LichLord
 
         public void CopyPosition(ref FWorldTransform other)
         {
-            _position.CopyPosition(ref other._position);
+            _position.CopyPosition(in other._position);
         }
 
         public void CopyRotation(ref FWorldTransform other)
@@ -141,6 +141,13 @@ namespace LichLord
         public string DebugString()
         {
             return $"{_position.DebugString()}, Yaw: {Yaw:F2}°, Pitch: {Pitch:F2}° (bytes: {_compressedYaw}, {_compressedPitch})";
+        }
+
+        public void Copy(in FWorldTransform other)
+        {
+            _position.CopyPosition(in other._position);
+            _compressedYaw = other._compressedYaw;
+            _compressedPitch = other._compressedPitch;
         }
     }
 }

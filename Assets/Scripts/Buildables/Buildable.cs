@@ -35,8 +35,8 @@ namespace LichLord.Buildables
         public virtual void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
         {
             _runtimeState = runtimeState;
-            _cachedTransform.position = runtimeState.position;
-            _cachedTransform.rotation = runtimeState.rotation;
+            _cachedTransform.position = runtimeState.Data.Position;
+            _cachedTransform.rotation = runtimeState.Data.Rotation;
 
             _zone = zone;
             _sceneContext = zone.Context;

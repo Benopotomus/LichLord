@@ -1,17 +1,16 @@
 ﻿using LichLord.NonPlayerCharacters;
-using LichLord.Props;
-using System;
 using UnityEngine;
 
 namespace LichLord.Buildables
 {
     public class BuildableRuntimeState
     {
-        public int index; // index in buildable zone
-        public int definitionId;
-        public Vector3 position; // World position
-        public Quaternion rotation; // World rotation
-        public int stateData;
+        private int _index; // index in buildable zone
+        public int Index => _index;
+
+        private FBuildableData _data = new FBuildableData();
+        public FBuildableData Data => _data;
+
         public BuildableZone buildableZone;
 
         private BuildableDefinition _definition;
@@ -20,7 +19,7 @@ namespace LichLord.Buildables
             get
             {
                 if (_definition == null)
-                    _definition = Global.Tables.BuildableTable.TryGetDefinition(definitionId);
+                    _definition = Global.Tables.BuildableTable.TryGetDefinition(_data.DefinitionID);
 
                 return _definition;
             }
@@ -38,27 +37,18 @@ namespace LichLord.Buildables
             }
         }
 
-        private FBuildableData _data = new FBuildableData();
-        public FBuildableData Data => _data;
+
 
         public BuildableRuntimeState(BuildableZone zone, int index, ref FBuildableData buildableData)
         {
             this.buildableZone = zone;
-            this.index = index;
-            _data.Copy(ref buildableData);
-            definitionId = _data.DefinitionID;
-            position = _data.Position;
-            rotation = _data.Rotation;
-            stateData = _data.StateData;
+            this._index = index;
+            _data.Copy(in buildableData);
         }
 
         public void CopyData(ref FBuildableData buildableData)
         {
-            _data.Copy(ref buildableData);
-            definitionId = _data.DefinitionID;
-            position = _data.Position;
-            rotation = _data.Rotation;
-            stateData = _data.StateData;
+            _data.Copy(in buildableData);
         }
 
         public EBuildableState GetState()
@@ -204,7 +194,7 @@ namespace LichLord.Buildables
         // Ticks slowly
         public bool AuthorityUpdateTick(int tick)
         {
-            if (definitionId == 0)
+            if (_data.DefinitionID == 0)
                 return false;
 
             UpdateState(DataDefinition.GetState(ref _data), tick);

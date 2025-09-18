@@ -75,7 +75,7 @@
             return DefinitionID == other.DefinitionID && StateData == other.StateData;
         }
 
-        public void Copy(ref FBuildableData other)
+        public void Copy(in FBuildableData other)
         {
             _definitionId = other._definitionId;
             _transform = other._transform;
