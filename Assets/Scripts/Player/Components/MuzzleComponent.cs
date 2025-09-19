@@ -7,8 +7,14 @@ namespace LichLord
 {
     public class MuzzleComponent : MonoBehaviour
     {
-        [SerializeField] private Transform _handBoneLeft;
-        [SerializeField] private Transform _handBoneRight;
+        [SerializeField]
+        private PlayerCharacter _pc;
+
+        [SerializeField] 
+        private Transform _handBoneLeft;
+        
+        [SerializeField] 
+        private Transform _handBoneRight;
 
         // VISUALS
 
@@ -23,19 +29,8 @@ namespace LichLord
 
         public Vector3 GetMuzzlePosition(EMuzzle muzzle)
         {
-            switch (muzzle)
-            {
-                case EMuzzle.LeftHand:
-                    return _handBoneLeft.position;
+            return _pc.Weapons.GetMuzzlePosition(muzzle);
 
-                case EMuzzle.RightHand:
-                    return _handBoneRight.position;
-
-                case EMuzzle.LeftHand_RightHand_Blend:
-                    return Vector3.Lerp(_handBoneLeft.position, _handBoneRight.position, 0.5f);
-            }
-
-            return transform.position;
         }
 
         private void LoadMuzzleEffectVisualsPrefab(BundleObject prefabBundle)

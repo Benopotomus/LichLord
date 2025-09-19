@@ -1,7 +1,6 @@
 ﻿namespace LichLord.Items
 {
     using Fusion;
-    using UnityEngine;
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Explicit, Size = 6)]
@@ -46,6 +45,7 @@
 
             return true;
         }
+
         /*
         public void UpdateItemClass(ref Item itemClass)
         {

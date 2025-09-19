@@ -3,14 +3,14 @@
     using Fusion;
     using System.Runtime.InteropServices;
 
-    [StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Explicit, Size = 3)]
     public struct FPropData : INetworkStruct
     {
         [FieldOffset(0)]
         private byte _definitionId; // 2 bytes. definition id;
         [FieldOffset(1)]
-        private ushort _stateData; // 4 bytes
-        // 5
+        private ushort _stateData; // 2 bytes
+        // 3
 
         public int DefinitionID
         {

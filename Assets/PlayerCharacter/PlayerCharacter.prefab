@@ -11956,6 +11956,7 @@ GameObject:
   - component: {fileID: 8911782388783612553}
   - component: {fileID: 6155389979576705781}
   - component: {fileID: 3873841533538091301}
+  - component: {fileID: 8453103197528511047}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -12016,6 +12017,7 @@ MonoBehaviour:
   Nexus: {fileID: 5360785679034961874}
   Health: {fileID: 7449162478297926621}
   Formation: {fileID: 3873841533538091301}
+  Weapons: {fileID: 8453103197528511047}
   _animationController: {fileID: 2637221445499037506}
   _muzzleComponent: {fileID: 5886866483268230399}
   HeadRenderers: []
@@ -12249,6 +12251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12c05af24cb5a254f97a252501c15f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pc: {fileID: 2971398371087610287}
   _handBoneLeft: {fileID: 5362074393791706597}
   _handBoneRight: {fileID: 3423735672707374332}
 --- !u!114 &4804172155013043321
@@ -12309,6 +12312,7 @@ MonoBehaviour:
   - {fileID: 7449162478297926621}
   - {fileID: 5360785679034961874}
   - {fileID: 4804172155013043321}
+  - {fileID: 8453103197528511047}
   - {fileID: 975723772845658309}
   - {fileID: 8473141530021393840}
   - {fileID: 6231497543318802807}
@@ -12486,6 +12490,23 @@ MonoBehaviour:
     FormationOffset: {x: -10, y: 0, z: 10}
   backLineZOffset: -2
   xSpacing: 2
+--- !u!114 &8453103197528511047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c4cb38a4b9b0b44e8bc7c2ed89f9424, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weaponIndex: 0
+  _itemLeft: {fileID: 0}
+  _itemRight: {fileID: 0}
+  _handBoneLeft: {fileID: 5362074393791706597}
+  _handBoneRight: {fileID: 3423735672707374332}
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0

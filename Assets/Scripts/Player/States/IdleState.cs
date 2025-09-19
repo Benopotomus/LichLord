@@ -47,6 +47,7 @@ namespace LichLord
             // Both
             fsmRef.PC.Movement.OnRender(deltaTime);
             fsmRef.PC.Aim.OnRender(deltaTime);
+            fsmRef.PC.Weapons.OnRender(deltaTime);
 
             // Remote Only
             fsmRef.PC.Movement.UpdateRemotePosition(deltaTime);
