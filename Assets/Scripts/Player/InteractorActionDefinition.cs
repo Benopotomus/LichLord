@@ -25,7 +25,10 @@ namespace LichLord.Player
         public void OnEnterStateRender(InteractorComponent interactor)
         {
             PlayerCharacter pc = interactor.PC;
-            pc.AnimationController.SetAnimationForUpperBodyTrigger(_animationUpperBodyTriggerNumber);
+            FUpperBodyAnimationTrigger upperBodyAnimationTrigger = new FUpperBodyAnimationTrigger();
+            upperBodyAnimationTrigger.UpperbodyTriggerNumber = _animationUpperBodyTriggerNumber;
+
+            pc.AnimationController.SetAnimationForUpperBodyTrigger(upperBodyAnimationTrigger);
             pc.Aim.TargetPitchOffset = _pitchOffset;
             pc.Aim.TargetYawOffset = _yawOffset;
             pc.Aim.TargetRollOffset = _rollOffset;

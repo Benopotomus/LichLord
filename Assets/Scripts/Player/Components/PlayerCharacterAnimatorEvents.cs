@@ -40,5 +40,10 @@ namespace LichLord
 
         public void Shoot(int shooting)
         { }
+
+        public void WeaponSwitch(int newWeapon)
+        {
+            _pc.Weapons.WeaponSwitch();
+        }
     }
 }

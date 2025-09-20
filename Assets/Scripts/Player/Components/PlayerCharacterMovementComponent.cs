@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Fusion;
-using LichLord.Props;
 
 namespace LichLord
 {
@@ -9,7 +8,7 @@ namespace LichLord
         None,
         Walking,
         Jumping,
-        Flying
+        Flying,
     }
 
     public class PlayerCharacterMovementComponent : ContextBehaviour
@@ -22,9 +21,12 @@ namespace LichLord
         public CharacterController CC => _cc;
 
         [Networked]
+        [SerializeField]
         private EMovementState _currentMoveState { get; set; }
         public EMovementState CurrentMoveState => _currentMoveState;
-        private EMovementState _lastMoveState;
+
+        [SerializeField]
+        private EMovementState _lastMoveState = EMovementState.None;
 
         [Header("References")]
         public Transform ScalingRoot;
@@ -89,7 +91,7 @@ namespace LichLord
 
             if (HasStateAuthority)
                 _currentMoveState = EMovementState.Walking;
-
+            
             _jumpCount = 0;
             _localVelocity = Vector3.zero;
             _jumpBufferTimer = 0f;

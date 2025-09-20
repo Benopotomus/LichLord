@@ -10,7 +10,6 @@ namespace LichLord
         {
             if (actor is PlayerCharacter pc)
             {
-                Debug.Log(muzzle.ToString());
                 return pc.Muzzle.GetMuzzlePosition(muzzle);
             }
 

@@ -10,7 +10,7 @@ namespace LichLord
         public Action<GameObject, Transform, Quaternion> OnLoadedAttached;
         public Action<GameObject, Vector3, Quaternion> OnLoaded;
 
-        public void SpawnWeaponAttached(Transform attachment, Quaternion rotation, BundleObject prefabBundle)
+        public void SpawnItemAttached(Transform attachment, Quaternion rotation, BundleObject prefabBundle)
         {
             if (!prefabBundle.Ready)
             {
@@ -43,7 +43,7 @@ namespace LichLord
             }
         }
 
-        public void SpawnVisualEffect(Vector3 position, Quaternion rotation, BundleObject prefabBundle)
+        public void SpawnItem(Vector3 position, Quaternion rotation, BundleObject prefabBundle)
         {
             if (!prefabBundle.Ready)
             {
@@ -87,10 +87,7 @@ namespace LichLord
         {
             GameObject go = loadedBundle.GetAssetWithin<GameObject>();
 
-            if (attachment != null)
-                OnLoadedAttached?.Invoke(go, attachment, rotation);
-            else
-                OnLoaded?.Invoke(go, position, rotation);
+            OnLoadedAttached?.Invoke(go, attachment, rotation);
         }
     }
 }

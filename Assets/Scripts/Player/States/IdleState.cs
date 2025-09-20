@@ -46,6 +46,8 @@ namespace LichLord
 
             // Both
             fsmRef.PC.Movement.OnRender(deltaTime);
+            fsmRef.PC.AnimationController.UpdateAnimationForWeapon();
+
             fsmRef.PC.Aim.OnRender(deltaTime);
             fsmRef.PC.Weapons.OnRender(deltaTime);
 

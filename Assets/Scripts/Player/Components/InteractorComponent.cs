@@ -165,7 +165,8 @@ namespace LichLord
 
         public void OnExitStateRender()
         {
-            _pc.AnimationController.SetAnimationForUpperBodyTrigger(0);
+            FUpperBodyAnimationTrigger upperBodyAnimationTrigger = new FUpperBodyAnimationTrigger();
+            _pc.AnimationController.SetAnimationForUpperBodyTrigger(upperBodyAnimationTrigger);
             _pc.Aim.TargetPitchOffset = 0f;
             _pc.Aim.TargetYawOffset = 0f;
             _pc.Aim.TargetRollOffset = 0f;

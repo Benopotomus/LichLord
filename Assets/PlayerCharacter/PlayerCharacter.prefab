@@ -12106,6 +12106,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
   - {fileID: 11400000, guid: 71c7cefcfae79134d83a32db88893771, type: 2}
   - {fileID: 11400000, guid: fa5a12f2917bdad4dbc7236637674db6, type: 2}
+  _swapWeaponManeuver: {fileID: 11400000, guid: 75d7a14097cf20c4cb25edad63c0c78c,
+    type: 2}
   ActionSpawnPoint: {fileID: 0}
 --- !u!114 &4625314071529301451
 MonoBehaviour:
@@ -12503,8 +12505,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _weaponIndex: 0
-  _itemLeft: {fileID: 0}
-  _itemRight: {fileID: 0}
+  _weaponLeft:
+    LoadState: 0
+    Weapon: {fileID: 0}
+    WeaponDefinition: {fileID: 0}
+  _weaponRight:
+    LoadState: 0
+    Weapon: {fileID: 0}
+    WeaponDefinition: {fileID: 0}
   _handBoneLeft: {fileID: 5362074393791706597}
   _handBoneRight: {fileID: 3423735672707374332}
 --- !u!1 &3132438210907808134

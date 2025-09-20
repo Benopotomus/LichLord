@@ -47,14 +47,8 @@ namespace LichLord
 
         [SerializeField]
         [SerializedDictionary("WeaponID", "AnimationState")]
-        private SerializedDictionary<int, FUpperBodyAnimationState> _upperBodyAnimationStates;
-        public SerializedDictionary<int, FUpperBodyAnimationState> UpperBodyAnimationStates => _upperBodyAnimationStates;
-
-        public int UpperbodyTriggerNumber;
-        public int UpperbodyTriggerDuration;
-
-        public float PitchOffset = 0f;
-        public float YawOffset = 0f;
+        private SerializedDictionary<int, FUpperBodyAnimationTrigger> _upperBodyAnimationStates;
+        public SerializedDictionary<int, FUpperBodyAnimationTrigger> UpperBodyAnimationStates => _upperBodyAnimationStates;
 
         public float AnimationSpeed = 1f;
 
@@ -72,6 +66,9 @@ namespace LichLord
         [SerializeField]
         private int _projectileTicksPerCycle;
 
+        [SerializeField]
+        private List<ManeuverActionDefinition> _maneuverActions;
+
         public virtual void SelectAction(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
         public virtual void DeselectAction(PlayerCharacter playerCreature, NetworkRunner runner) { }
@@ -79,18 +76,15 @@ namespace LichLord
         public virtual void StartExecute(PlayerCharacter playerCharacter, NetworkRunner runner) 
         {
             playerCharacter.Maneuvers.RPC_NotifyStartExecute((ushort)TableID);
+
+            foreach (var action in _maneuverActions)
+            {
+                action.Execute(playerCharacter, runner);
+            }
         }
 
         public virtual void SustainExecute(PlayerCharacter playerCharacter, NetworkRunner runner, int ticksSinceStart)
         {
-            if (_inputType == EInputType.Pressed)
-            {
-                if (ticksSinceStart > UpperbodyTriggerDuration)
-                {
-
-                }
-            }
-
             for (int i = 0; i < _timedProjectiles.Count; i++)
             { 
                 var projectile  = _timedProjectiles[i];

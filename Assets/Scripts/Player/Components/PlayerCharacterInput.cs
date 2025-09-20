@@ -84,7 +84,7 @@ namespace LichLord
             _input.BuildMode = false;
             _input.DeleteMode = false;
             _input.Interact = false;
-
+            _input.SwapWeapon = false;
         }
 
         private void Update()
@@ -120,8 +120,8 @@ namespace LichLord
             _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();
             _input.DeleteMode |= _controls.Gameplay.DeleteMode.WasPressedThisFrame();
             _input.Interact |= _controls.Gameplay.Interact.WasPressedThisFrame();
-            _input.ShowTooltips = _controls.Gameplay.ShowTooltips.IsPressed();
-            _input.SwapWeapon = _controls.Gameplay.SwapWeapons.WasPressedThisFrame();
+            _input.ShowTooltips |= _controls.Gameplay.ShowTooltips.IsPressed();
+            _input.SwapWeapon |= _controls.Gameplay.SwapWeapons.WasPressedThisFrame();
 
             _input.PlaceBuildable |= _controls.Gameplay.PlaceBuildable.WasPressedThisFrame();
             _input.RotateBuildableYaw |= _controls.Gameplay.RotateBuildableYaw.WasPressedThisFrame();

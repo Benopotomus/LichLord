@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
-using UnityEditor.Android;
 
 namespace LichLord
 {
@@ -12,6 +11,9 @@ namespace LichLord
         [Header("Maneuvers Setup")]
         [SerializeField] private List<ManeuverDefinition> _availableManeuvers = new List<ManeuverDefinition>();
         public IReadOnlyList<ManeuverDefinition> AvailableManeuvers => _availableManeuvers;
+
+        [SerializeField]
+        private ManeuverDefinition _swapWeaponManeuver;
 
         [SerializeField] public Transform ActionSpawnPoint; // Where actions originate
 
@@ -24,6 +26,11 @@ namespace LichLord
 
         [Networked, Capacity(8)]
         private NetworkDictionary<sbyte, TickTimer> _maneuverCooldownTimers { get; }
+
+        private const sbyte SWAP_WEAPON_COOLDOWN_INDEX = 99;
+
+        [Networked]
+        private TickTimer _swapWeaponCooldownTimer { get; set; }
 
         // Current upper body blend amount
         private float _moveSpeedMultiplier = 1f;
@@ -68,6 +75,7 @@ namespace LichLord
         {
             ProcessManeuverSelection(ref input);
             ProcessManeuverActivation(ref input);
+            ProcessWeaponSwapActivation(ref input);
             ProcessActiveManeuver(ref input);
         }
 
@@ -152,8 +160,37 @@ namespace LichLord
             }
         }
 
+        private void ProcessWeaponSwapActivation(ref FGameplayInput input)
+        {
+            // If the event is on cooldown, early out
+            if (!_swapWeaponCooldownTimer.ExpiredOrNotRunning(Runner))
+            {
+                //Debug.Log("Maneuver cooldown timer is running for " + _selectedIndex);
+                return;
+            }
+
+            // Cache current selected maneuver
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+
+            if (activeManeuver != null)
+                return;
+
+            if (input.SwapWeapon)
+            {
+                _activeManeuverTick = Runner.Tick;
+                _activeManeuverIndex = SWAP_WEAPON_COOLDOWN_INDEX;
+                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _swapWeaponManeuver.Duration);
+
+                activeManeuver = GetActiveManeuver();
+                activeManeuver.StartExecute(_pc, Runner);
+            }
+        }
+
         public ManeuverDefinition GetActiveManeuver()
         {
+            if (_activeManeuverIndex == SWAP_WEAPON_COOLDOWN_INDEX)
+                return _swapWeaponManeuver;
+
             if(_activeManeuverIndex < 0)
                 return null;
 
@@ -189,11 +226,6 @@ namespace LichLord
             }
 
             return (remainingTime.Value / definition.Cooldown);
-        }
-
-        public void OnRender()
-        {
-            float deltaTime = Time.deltaTime;
         }
 
         public void UpdateMoveSpeed(float deltaTime)
@@ -277,7 +309,7 @@ namespace LichLord
 
             if (!maneuver.Fullbody)
             {
-                _pc.AnimationController.SetAnimationForUpperBodyTrigger(animationState.UpperbodyTriggerNumber);
+                _pc.AnimationController.SetAnimationForUpperBodyTrigger(animationState);
             }
 
             _pc.Aim.TargetPitchOffset = animationState.PitchOffset;
@@ -291,15 +323,23 @@ namespace LichLord
 
             if (!maneuver.Fullbody)
             {
-                _pc.AnimationController.SetAnimationForUpperBodyTrigger(0);
+                FUpperBodyAnimationTrigger upperBodyAnimationTrigger = new FUpperBodyAnimationTrigger();
+                _pc.AnimationController.SetAnimationForUpperBodyTrigger(upperBodyAnimationTrigger);
             }
 
-            if (_maneuverCooldownTimers.TryGet(_activeManeuverIndex, out TickTimer cooldownTimer))
+            if (_activeManeuverIndex == SWAP_WEAPON_COOLDOWN_INDEX)
             {
-                cooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
-                _maneuverCooldownTimers.Set(_selectedIndex, cooldownTimer);
+                _swapWeaponCooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
             }
-
+            else
+            {
+                if (_maneuverCooldownTimers.TryGet(_activeManeuverIndex, out TickTimer cooldownTimer))
+                {
+                    cooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
+                    _maneuverCooldownTimers.Set(_selectedIndex, cooldownTimer);
+                }
+            }
+            
             _pc.Aim.TargetPitchOffset = 0;
             _pc.Aim.TargetYawOffset = 0;
 
