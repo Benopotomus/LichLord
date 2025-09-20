@@ -36,7 +36,7 @@
                     "name": "Interact",
                     "type": "Button",
                     "id": "852140f2-7766-474d-8707-702459ba45f3",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "Hold",
                     "initialStateCheck": false
@@ -276,9 +276,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Interact1",
+                    "name": "ShowTooltips",
                     "type": "Button",
-                    "id": "85e706aa-6535-4558-97e2-95438dace27c",
+                    "id": "5568f9eb-9526-486d-af33-88a5e9fb0a8a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SwapWeapons",
+                    "type": "Button",
+                    "id": "6da8efcd-90c0-47db-a9d7-9dfceb2664bf",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -904,12 +913,23 @@
                 },
                 {
                     "name": "",
-                    "id": "7a4d8dc0-8ae9-43fb-af23-78e6b0d5f50f",
-                    "path": "<Keyboard>/e",
+                    "id": "cedf94a6-7fc6-40df-929d-b78e037b1346",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Interact1",
+                    "action": "ShowTooltips",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d247c112-07da-425f-ac08-16a03faf6982",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SwapWeapons",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -122,7 +122,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""Interact"",
                     ""type"": ""Button"",
                     ""id"": ""852140f2-7766-474d-8707-702459ba45f3"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": ""Hold"",
                     ""initialStateCheck"": false
@@ -362,9 +362,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Interact1"",
+                    ""name"": ""ShowTooltips"",
                     ""type"": ""Button"",
-                    ""id"": ""85e706aa-6535-4558-97e2-95438dace27c"",
+                    ""id"": ""5568f9eb-9526-486d-af33-88a5e9fb0a8a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwapWeapons"",
+                    ""type"": ""Button"",
+                    ""id"": ""6da8efcd-90c0-47db-a9d7-9dfceb2664bf"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -990,12 +999,23 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""7a4d8dc0-8ae9-43fb-af23-78e6b0d5f50f"",
-                    ""path"": ""<Keyboard>/e"",
+                    ""id"": ""cedf94a6-7fc6-40df-929d-b78e037b1346"",
+                    ""path"": ""<Keyboard>/tab"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Interact1"",
+                    ""action"": ""ShowTooltips"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d247c112-07da-425f-ac08-16a03faf6982"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""SwapWeapons"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1613,7 +1633,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_BuildCategory3 = m_Gameplay.FindAction("BuildCategory3", throwIfNotFound: true);
         m_Gameplay_BuildCategory4 = m_Gameplay.FindAction("BuildCategory4", throwIfNotFound: true);
         m_Gameplay_DeleteMode = m_Gameplay.FindAction("DeleteMode", throwIfNotFound: true);
-        m_Gameplay_Interact1 = m_Gameplay.FindAction("Interact1", throwIfNotFound: true);
+        m_Gameplay_ShowTooltips = m_Gameplay.FindAction("ShowTooltips", throwIfNotFound: true);
+        m_Gameplay_SwapWeapons = m_Gameplay.FindAction("SwapWeapons", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1737,7 +1758,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_BuildCategory3;
     private readonly InputAction m_Gameplay_BuildCategory4;
     private readonly InputAction m_Gameplay_DeleteMode;
-    private readonly InputAction m_Gameplay_Interact1;
+    private readonly InputAction m_Gameplay_ShowTooltips;
+    private readonly InputAction m_Gameplay_SwapWeapons;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1870,9 +1892,13 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @DeleteMode => m_Wrapper.m_Gameplay_DeleteMode;
         /// <summary>
-        /// Provides access to the underlying input action "Gameplay/Interact1".
+        /// Provides access to the underlying input action "Gameplay/ShowTooltips".
         /// </summary>
-        public InputAction @Interact1 => m_Wrapper.m_Gameplay_Interact1;
+        public InputAction @ShowTooltips => m_Wrapper.m_Gameplay_ShowTooltips;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/SwapWeapons".
+        /// </summary>
+        public InputAction @SwapWeapons => m_Wrapper.m_Gameplay_SwapWeapons;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1989,9 +2015,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @DeleteMode.started += instance.OnDeleteMode;
             @DeleteMode.performed += instance.OnDeleteMode;
             @DeleteMode.canceled += instance.OnDeleteMode;
-            @Interact1.started += instance.OnInteract1;
-            @Interact1.performed += instance.OnInteract1;
-            @Interact1.canceled += instance.OnInteract1;
+            @ShowTooltips.started += instance.OnShowTooltips;
+            @ShowTooltips.performed += instance.OnShowTooltips;
+            @ShowTooltips.canceled += instance.OnShowTooltips;
+            @SwapWeapons.started += instance.OnSwapWeapons;
+            @SwapWeapons.performed += instance.OnSwapWeapons;
+            @SwapWeapons.canceled += instance.OnSwapWeapons;
         }
 
         /// <summary>
@@ -2093,9 +2122,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @DeleteMode.started -= instance.OnDeleteMode;
             @DeleteMode.performed -= instance.OnDeleteMode;
             @DeleteMode.canceled -= instance.OnDeleteMode;
-            @Interact1.started -= instance.OnInteract1;
-            @Interact1.performed -= instance.OnInteract1;
-            @Interact1.canceled -= instance.OnInteract1;
+            @ShowTooltips.started -= instance.OnShowTooltips;
+            @ShowTooltips.performed -= instance.OnShowTooltips;
+            @ShowTooltips.canceled -= instance.OnShowTooltips;
+            @SwapWeapons.started -= instance.OnSwapWeapons;
+            @SwapWeapons.performed -= instance.OnSwapWeapons;
+            @SwapWeapons.canceled -= instance.OnSwapWeapons;
         }
 
         /// <summary>
@@ -2607,12 +2639,19 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDeleteMode(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Interact1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "ShowTooltips" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnInteract1(InputAction.CallbackContext context);
+        void OnShowTooltips(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SwapWeapons" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSwapWeapons(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

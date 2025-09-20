@@ -26,15 +26,31 @@ MonoBehaviour:
     _name: fireball
     _bundle: fireball
   Fullbody: 0
+  _upperBodyAnimationStates:
+    _serializedList:
+    - Key: 0
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 10
+        PitchOffset: 0
+        YawOffset: 0
+    - Key: 6
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 12
+        PitchOffset: 45
+        YawOffset: 50
   UpperbodyTriggerNumber: 2
   UpperbodyTriggerDuration: 10
+  PitchOffset: 0
+  YawOffset: 0
   AnimationSpeed: 1
   MovementSpeedMultiplier: 0.65
   _timedProjectiles:
-  - SpawnTick: 10
+  - SpawnTick: 12
     Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
     SpawnsOnAnimationNotify: 1
-    Muzzle: 3
+    Muzzle: 1
     Damage:
       DamageValue: 35
       DamageType: 2

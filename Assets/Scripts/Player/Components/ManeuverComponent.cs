@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
+using UnityEditor.Android;
 
 namespace LichLord
 {
@@ -271,13 +272,16 @@ namespace LichLord
         {
             ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(maneuverDefinitionID);
 
+            int weaponId = _pc.Weapons.GetWeaponID();
+            var animationState = maneuver.UpperBodyAnimationStates[weaponId];
+
             if (!maneuver.Fullbody)
             {
-                _pc.AnimationController.SetAnimationForUpperBodyTrigger(maneuver.UpperbodyTriggerNumber);
+                _pc.AnimationController.SetAnimationForUpperBodyTrigger(animationState.UpperbodyTriggerNumber);
             }
 
-            _pc.Aim.TargetPitchOffset = maneuver.PitchOffset;
-            _pc.Aim.TargetYawOffset = maneuver.YawOffset;
+            _pc.Aim.TargetPitchOffset = animationState.PitchOffset;
+            _pc.Aim.TargetYawOffset = animationState.YawOffset;
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

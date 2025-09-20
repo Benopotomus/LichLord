@@ -1,10 +1,5 @@
 ﻿using LichLord.NonPlayerCharacters;
 using LichLord.Projectiles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace LichLord
@@ -15,6 +10,7 @@ namespace LichLord
         {
             if (actor is PlayerCharacter pc)
             {
+                Debug.Log(muzzle.ToString());
                 return pc.Muzzle.GetMuzzlePosition(muzzle);
             }
 

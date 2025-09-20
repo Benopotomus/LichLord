@@ -26,6 +26,20 @@ MonoBehaviour:
     _name: summon_skeleton_warrior
     _bundle: summon_skeleton_warrior
   Fullbody: 0
+  _upperBodyAnimationStates:
+    _serializedList:
+    - Key: 0
+      Value:
+        UpperbodyTriggerNumber: 4
+        UpperbodyTriggerDuration: 16
+        PitchOffset: 30
+        YawOffset: 0
+    - Key: 6
+      Value:
+        UpperbodyTriggerNumber: 3
+        UpperbodyTriggerDuration: 18
+        PitchOffset: 40
+        YawOffset: 60
   UpperbodyTriggerNumber: 4
   UpperbodyTriggerDuration: 16
   PitchOffset: 30
@@ -33,10 +47,10 @@ MonoBehaviour:
   AnimationSpeed: 1
   MovementSpeedMultiplier: 0.65
   _timedProjectiles:
-  - SpawnTick: 16
+  - SpawnTick: 12
     Definition: {fileID: 11400000, guid: 5ca82b4ca2dc35c4ebddd1840f85cf2b, type: 2}
     SpawnsOnAnimationNotify: 0
-    Muzzle: 3
+    Muzzle: 1
     Damage:
       DamageValue: 10
       DamageType: 5

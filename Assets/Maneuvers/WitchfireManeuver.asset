@@ -26,6 +26,20 @@ MonoBehaviour:
     _name: Storm
     _bundle: storm
   Fullbody: 0
+  _upperBodyAnimationStates:
+    _serializedList:
+    - Key: 0
+      Value:
+        UpperbodyTriggerNumber: 1
+        UpperbodyTriggerDuration: 0
+        PitchOffset: 30
+        YawOffset: 0
+    - Key: 6
+      Value:
+        UpperbodyTriggerNumber: 1
+        UpperbodyTriggerDuration: 0
+        PitchOffset: 60
+        YawOffset: 80
   UpperbodyTriggerNumber: 1
   UpperbodyTriggerDuration: 0
   PitchOffset: 30
@@ -37,7 +51,7 @@ MonoBehaviour:
   - SpawnTick: 0
     Definition: {fileID: 11400000, guid: 8937ddf06cce60644ab8b9e5d080bbd2, type: 2}
     SpawnsOnAnimationNotify: 0
-    Muzzle: 3
+    Muzzle: 1
     Damage:
       DamageValue: 10
       DamageType: 5

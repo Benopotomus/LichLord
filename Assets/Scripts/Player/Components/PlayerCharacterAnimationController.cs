@@ -28,12 +28,14 @@ namespace LichLord
         [SerializeField] private PlayerCharacter _pc;
         [SerializeField] private Animator _animator;
 
-        public void SetAnimationForTrigger(FAnimationTrigger animationTrigger)
+        public void SetAnimationForTrigger(FAnimationTrigger animationTrigger, bool forceWeaponId = false)
         {
+            int weaponId = forceWeaponId ? animationTrigger.Weapon : _pc.Weapons.GetWeaponID();
+
             _animator.SetInteger(_animIDAction, animationTrigger.Action);
             _animator.SetBool(_animIDMoving, animationTrigger.IsMoving);
             _animator.SetBool(_animIDBlocking, animationTrigger.IsBlocking);
-            _animator.SetInteger(_animIDWeapon, 0);
+            _animator.SetInteger(_animIDWeapon, weaponId);
             _animator.SetInteger(_animIDRightWeapon, animationTrigger.RightWeapon);
             _animator.SetInteger(_animIDSide, animationTrigger.Side);
             _animator.SetInteger(_animIDJumping, animationTrigger.Jumping);
@@ -87,6 +89,7 @@ namespace LichLord
             {
                 case EMovementState.Walking:
                     //Debug.Log("Walking");
+                    _animator.SetInteger(_animIDWeapon, _pc.Weapons.GetWeaponID());
                     _animator.SetBool(_animIDMoving, true);
                     _animator.SetFloat(_animIDSpeedX, 0f);
                     _animator.SetFloat(_animIDSpeedZ, 0f);
@@ -96,7 +99,7 @@ namespace LichLord
 
                 case EMovementState.Jumping:
                     //Debug.Log("Jump Hit");
-                    _animator.SetInteger(_animIDWeapon, 0);
+                    _animator.SetInteger(_animIDWeapon, _pc.Weapons.GetWeaponID());
                     _animator.SetBool(_animIDMoving, false);
                     _animator.SetInteger(_animIDJumping, 1);
                     _animator.SetInteger(_animIDTriggerNumber, 18);
@@ -105,7 +108,7 @@ namespace LichLord
                     break;
                 case EMovementState.Flying:
                     //Debug.Log("Jump Hit");
-                    _animator.SetInteger(_animIDWeapon, 0);
+                    _animator.SetInteger(_animIDWeapon, _pc.Weapons.GetWeaponID());
                     _animator.SetBool(_animIDMoving, false);
                     _animator.SetInteger(_animIDJumping, 2);
                     _animator.SetInteger(_animIDTriggerNumber, 18);
@@ -119,10 +122,13 @@ namespace LichLord
             _animator.SetFloat(_animIDUpperBodyBlend, blendAmount);
         }
 
-        public void SetAnimationForUpperBodyTrigger(int upperbodyTriggerNumber)
+        public void SetAnimationForUpperBodyTrigger(int upperbodyTriggerNumber, bool forceWeaponId = false)
         {
+            int weaponId = _pc.Weapons.GetWeaponID();
+
             float blend = upperbodyTriggerNumber > 0 ? 0.01f : 0f;
 
+            _animator.SetInteger(_animIDWeapon, weaponId);
             _animator.SetFloat(_animIDUpperBodyBlend, blend);
             _animator.SetInteger(_animIDUpperBodyTriggerNumber, upperbodyTriggerNumber);
             _animator.SetTrigger(_animIDUpperBodyTrigger);

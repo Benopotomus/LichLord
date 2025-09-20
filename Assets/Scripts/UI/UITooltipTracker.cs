@@ -2,6 +2,7 @@
 using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LichLord.UI
 {
@@ -40,8 +41,14 @@ namespace LichLord.UI
                 return;
             }
 
+            var pc = Context.LocalPlayerCharacter;
+            if (pc == null)
+                return;
+
+            FGameplayInput input = pc.Input.CurrentInput;
+
             // Check if Tab key is held
-            bool isTabHeld = Input.GetKey(KeyCode.Tab);
+            bool isTabHeld = input.ShowTooltips;
             if (isTabHeld != _isTabHeld)
             {
                 _isTabHeld = isTabHeld;

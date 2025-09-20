@@ -30,7 +30,6 @@ namespace LichLord
         public Vector3 GetMuzzlePosition(EMuzzle muzzle)
         {
             return _pc.Weapons.GetMuzzlePosition(muzzle);
-
         }
 
         private void LoadMuzzleEffectVisualsPrefab(BundleObject prefabBundle)

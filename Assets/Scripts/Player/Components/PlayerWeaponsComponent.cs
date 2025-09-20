@@ -33,6 +33,8 @@ namespace LichLord
         [SerializeField]
         private Transform _handBoneRight;
 
+
+
         public void DropWeapons()
         {
 
@@ -40,7 +42,12 @@ namespace LichLord
 
         public int GetWeaponID()
         {
-            return _weaponIndex;
+            if (_weaponRight.LoadState == ELoadState.Loaded)
+            { 
+                return _weaponRight.WeaponDefinition.IdleAnimationID;
+            }
+
+            return 0;
         }
 
         public override void Spawned()
@@ -58,6 +65,7 @@ namespace LichLord
                 _itemSpawnerLeft.OnLoadedAttached += OnItemLoadedLeft;
                 _itemSpawnerLeft.SpawnWeaponAttached(_handBoneLeft, Quaternion.identity, item.Model);
                 _weaponLeft.LoadState = ELoadState.Loading;
+                _weaponLeft.WeaponDefinition = item as WeaponDefinition;
             }
 
             if (_itemDataRight.IsValid() && _weaponRight.LoadState == ELoadState.None)
@@ -66,6 +74,7 @@ namespace LichLord
                 _itemSpawnerRight.OnLoadedAttached += OnItemLoadedRight;
                 _itemSpawnerRight.SpawnWeaponAttached(_handBoneRight, Quaternion.identity, item.Model);
                 _weaponRight.LoadState = ELoadState.Loading;
+                _weaponRight.WeaponDefinition = item as WeaponDefinition;
             }
         }
 
@@ -139,6 +148,7 @@ namespace LichLord
         { 
             public ELoadState LoadState;
             public Weapon Weapon;
+            public WeaponDefinition WeaponDefinition;
         }
     }
 

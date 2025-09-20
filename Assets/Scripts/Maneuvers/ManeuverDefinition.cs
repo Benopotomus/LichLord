@@ -1,6 +1,8 @@
-﻿using DWD.Utility.Loading;
+﻿using AYellowpaper.SerializedCollections;
+using DWD.Utility.Loading;
 using Fusion;
 using LichLord.Projectiles;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -42,6 +44,12 @@ namespace LichLord
         public FAnimationTrigger AnimationTrigger => _animationTrigger;
 
         public bool Fullbody; // Animator trigger (e.g., "Shoot" for gun)
+
+        [SerializeField]
+        [SerializedDictionary("WeaponID", "AnimationState")]
+        private SerializedDictionary<int, FUpperBodyAnimationState> _upperBodyAnimationStates;
+        public SerializedDictionary<int, FUpperBodyAnimationState> UpperBodyAnimationStates => _upperBodyAnimationStates;
+
         public int UpperbodyTriggerNumber;
         public int UpperbodyTriggerDuration;
 

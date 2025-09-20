@@ -27,6 +27,8 @@ namespace LichLord
         public EBuildableCategory BuildCategory;
         public bool DeleteMode;
         public bool Interact;
+        public bool SwapWeapon;
+        public bool ShowTooltips;
 
     }
 }
