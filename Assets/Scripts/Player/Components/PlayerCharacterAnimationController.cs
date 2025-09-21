@@ -68,7 +68,7 @@ namespace LichLord
             float speed = localVelocity.sqrMagnitude;
             float horizontalSpeed = new Vector3(localVelocity.x, 0, localVelocity.z).sqrMagnitude;
 
-            float walkSpeed = 6f;
+            float walkSpeed = 5f;
 
             // Determine if the character is moving
             bool isMoving = horizontalSpeed > 0.0f || Mathf.Abs(yawVelocity) > 1f;

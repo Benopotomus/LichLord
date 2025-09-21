@@ -11,6 +11,7 @@ namespace LichLord
     using DWD.Pooling;
     using AYellowpaper.SerializedCollections;
     using LichLord.Player;
+    using LichLord.Projectiles;
 
     public class InteractorComponent : ContextBehaviour
     {
@@ -37,6 +38,7 @@ namespace LichLord
         private VisualEffectBeam _beamPrefab;
 
         private VisualEffectBeam _beamInstance;
+        private EMuzzle _beamMuzzle;
 
         public void ProcessInput(ref FGameplayInput input)
         {
@@ -181,7 +183,7 @@ namespace LichLord
                 return;
 
             _beamInstance.UpdateBeamPosition(
-                _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand), 
+                _pc.Muzzle.GetMuzzlePosition(_beamMuzzle), 
                 _interactTargetPosition.Position);
         }
 
@@ -204,16 +206,17 @@ namespace LichLord
             }
         }
 
-        public void SpawnBeamEffect(VisualEffectBeam beamPrefab)
+        public void SpawnBeamEffect(VisualEffectBeam beamPrefab, EMuzzle muzzle)
         {
-            Vector3 spawnPosition = _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand);
+            Vector3 spawnPosition = _pc.Muzzle.GetMuzzlePosition(muzzle);
+            _beamMuzzle = muzzle;
 
             var instance = DWDObjectPool.Instance.SpawnAt(beamPrefab, spawnPosition, Quaternion.identity);
             if (instance is VisualEffectBeam beamEffect)
             {
                 _beamInstance = beamEffect;
                 _beamInstance.UpdateBeamPosition(
-                    _pc.Muzzle.GetMuzzlePosition(Projectiles.EMuzzle.RightHand),
+                    _pc.Muzzle.GetMuzzlePosition(muzzle),
                     _interactTargetPosition.Position);
 
                 _beamInstance.ToggleBeam(true);

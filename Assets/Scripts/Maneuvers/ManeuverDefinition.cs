@@ -68,6 +68,7 @@ namespace LichLord
 
         [SerializeField]
         private List<ManeuverActionDefinition> _maneuverActions;
+        public List<ManeuverActionDefinition> ManeuverActions => _maneuverActions;
 
         public virtual void SelectAction(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
@@ -76,11 +77,6 @@ namespace LichLord
         public virtual void StartExecute(PlayerCharacter playerCharacter, NetworkRunner runner) 
         {
             playerCharacter.Maneuvers.RPC_NotifyStartExecute((ushort)TableID);
-
-            foreach (var action in _maneuverActions)
-            {
-                action.Execute(playerCharacter, runner);
-            }
         }
 
         public virtual void SustainExecute(PlayerCharacter playerCharacter, NetworkRunner runner, int ticksSinceStart)

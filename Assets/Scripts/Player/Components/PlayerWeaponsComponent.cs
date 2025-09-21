@@ -4,6 +4,7 @@ using LichLord.Items;
 using LichLord.Projectiles;
 using System;
 using UnityEngine;
+using DG.Tweening;
 
 namespace LichLord
 {
@@ -17,9 +18,11 @@ namespace LichLord
 
         [Networked]
         private ref FEquippableItem _itemDataLeft => ref MakeRef<FEquippableItem>();
+        private int _itemDefinitionLeft = -1;
 
         [Networked]
         private ref FEquippableItem _itemDataRight => ref MakeRef<FEquippableItem>();
+        private int _itemDefinitionRight = -1;
 
         [SerializeField]
         private int _weaponIndex;
@@ -56,14 +59,8 @@ namespace LichLord
             if (!HasStateAuthority)
                 return;
 
-            if (_itemDataRight.DefinitionID == 0)
-            {
-                _itemDataRight.DefinitionID = 1;
-            }
-            else
-            {
-                _itemDataRight.DefinitionID = 0;
-            }
+            // Increment DefinitionID and cycle back to 0 when reaching 3 (max is 2)
+            _itemDataRight.DefinitionID = (_itemDataRight.DefinitionID + 1) % 3;
         }
 
         public override void Spawned()
@@ -73,37 +70,58 @@ namespace LichLord
 
         public void OnRender(float deltaTime)
         {
+            // Handle left hand weapon
             if (_itemDataLeft.IsValid())
             {
-                if (_weaponLeft.LoadState == ELoadState.None)
+                int newDefinitionId = _itemDataLeft.DefinitionID;
+                if (_weaponLeft.LoadState == ELoadState.None || _itemDefinitionLeft != newDefinitionId)
                 {
-                    ItemDefinition item = Global.Tables.ItemTable.TryGetDefinition(_itemDataLeft.DefinitionID);
+                    // Unload current weapon if loaded and definition changed
+                    if (_weaponLeft.LoadState == ELoadState.Loaded && _itemDefinitionLeft != newDefinitionId)
+                    {
+                        _weaponLeft.Weapon.StartRecycle();
+                        _weaponLeft.LoadState = ELoadState.None;
+                    }
+
+                    ItemDefinition item = Global.Tables.ItemTable.TryGetDefinition(newDefinitionId);
 
                     _itemSpawnerLeft.OnLoadedAttached += OnItemLoadedLeft;
                     _weaponLeft.LoadState = ELoadState.Loading;
                     _weaponLeft.WeaponDefinition = item as WeaponDefinition;
                     _itemSpawnerLeft.SpawnItemAttached(_handBoneLeft, Quaternion.identity, item.Model);
+                    _itemDefinitionLeft = newDefinitionId; // Update stored definition
                 }
             }
             else
             {
                 if (_weaponLeft.LoadState == ELoadState.Loaded)
-                { 
+                {
                     _weaponLeft.Weapon.StartRecycle();
                     _weaponLeft.LoadState = ELoadState.None;
+                    _itemDefinitionLeft = -1; // Reset stored definition when no item
                 }
             }
 
+            // Handle right hand weapon
             if (_itemDataRight.IsValid())
             {
-                if (_weaponRight.LoadState == ELoadState.None)
+                int newDefinitionId = _itemDataRight.DefinitionID;
+                if (_weaponRight.LoadState == ELoadState.None || _itemDefinitionRight != newDefinitionId)
                 {
-                    ItemDefinition item = Global.Tables.ItemTable.TryGetDefinition(_itemDataRight.DefinitionID);
-  
+                    // Unload current weapon if loaded and definition changed
+                    if (_weaponRight.LoadState == ELoadState.Loaded && _itemDefinitionRight != newDefinitionId)
+                    {
+                        _weaponRight.Weapon.StartRecycle();
+                        _weaponRight.LoadState = ELoadState.None;
+                    }
+
+                    ItemDefinition item = Global.Tables.ItemTable.TryGetDefinition(newDefinitionId);
+
                     _itemSpawnerRight.OnLoadedAttached += OnItemLoadedRight;
                     _weaponRight.LoadState = ELoadState.Loading;
                     _weaponRight.WeaponDefinition = item as WeaponDefinition;
                     _itemSpawnerRight.SpawnItemAttached(_handBoneRight, Quaternion.identity, item.Model);
+                    _itemDefinitionRight = newDefinitionId; // Update stored definition
                 }
             }
             else
@@ -112,10 +130,9 @@ namespace LichLord
                 {
                     _weaponRight.Weapon.StartRecycle();
                     _weaponRight.LoadState = ELoadState.None;
+                    _itemDefinitionRight = -1; // Reset stored definition when no item
                 }
             }
-
-            
         }
 
         private void OnItemLoadedLeft(GameObject gameobject, Transform attachment, Quaternion rotation)
@@ -123,6 +140,15 @@ namespace LichLord
             _itemSpawnerLeft.OnLoadedAttached -= OnItemLoadedLeft;
             _weaponLeft.Weapon = OnItemLoaded(gameobject, attachment, rotation);
             _weaponLeft.LoadState = ELoadState.Loaded;
+
+            // Apply DOTween scale animation
+            if (_weaponLeft.Weapon != null)
+            {
+                _weaponLeft.Weapon.transform.localScale = Vector3.zero; 
+                _weaponLeft.Weapon.transform.DOScale(Vector3.one, 0.25f) 
+                    .SetEase(Ease.InCubic) 
+                    .SetUpdate(true);
+            }
         }
 
         private void OnItemLoadedRight(GameObject gameobject, Transform attachment, Quaternion rotation)
@@ -130,6 +156,15 @@ namespace LichLord
             _itemSpawnerRight.OnLoadedAttached -= OnItemLoadedRight;
             _weaponRight.Weapon = OnItemLoaded(gameobject, attachment, rotation);
             _weaponRight.LoadState = ELoadState.Loaded;
+
+            // Apply DOTween scale animation
+            if (_weaponRight.Weapon != null)
+            {
+                _weaponRight.Weapon.transform.localScale = Vector3.zero; 
+                _weaponRight.Weapon.transform.DOScale(Vector3.one, 0.25f) 
+                    .SetEase(Ease.InCubic) 
+                    .SetUpdate(true); 
+            }
         }
 
         private Weapon OnItemLoaded(GameObject loadedGameObject, Transform attachment, Quaternion rotation)
@@ -153,6 +188,27 @@ namespace LichLord
             }
 
             return null;
+        }
+
+        public void ScaleDownWeapons()
+        {
+            // Apply DOTween scale animation
+            if (_weaponLeft.Weapon != null)
+            {
+                _weaponLeft.Weapon.transform.localScale = Vector3.one;
+                _weaponLeft.Weapon.transform.DOScale(Vector3.zero, 0.25f)
+                    .SetEase(Ease.InCubic)
+                    .SetUpdate(true);
+            }
+
+            // Apply DOTween scale animation
+            if (_weaponRight.Weapon != null)
+            {
+                _weaponRight.Weapon.transform.localScale = Vector3.one;
+                _weaponRight.Weapon.transform.DOScale(Vector3.zero, 0.25f)
+                    .SetEase(Ease.InCubic)
+                    .SetUpdate(true);
+            }
         }
 
         public Vector3 GetMuzzlePosition(EMuzzle muzzleName)

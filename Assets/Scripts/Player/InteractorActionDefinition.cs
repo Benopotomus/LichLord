@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using AYellowpaper.SerializedCollections;
+using LichLord.Projectiles;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace LichLord.Player
 {
@@ -10,32 +13,38 @@ namespace LichLord.Player
         public VisualEffectBeam BeamPrefab => _beamPrefab;
 
         [SerializeField]
-        private int _animationUpperBodyTriggerNumber;
-        public int AnimationUpperBodyTriggerNumber => _animationUpperBodyTriggerNumber;
+        [SerializedDictionary("WeaponID", "Muzzle")]
+        private SerializedDictionary<int, EMuzzle> _beamMuzzles;
+        public SerializedDictionary<int, EMuzzle> BeamMuzzle => _beamMuzzles;
 
         [SerializeField]
-        private float _pitchOffset = 0f;
-
-        [SerializeField]
-        private float _yawOffset = 0f;
-
-        [SerializeField]
-        private float _rollOffset = 0f;
+        [SerializedDictionary("WeaponID", "AnimationTrigger")]
+        private SerializedDictionary<int, FUpperBodyAnimationTrigger> _animationUpperBodyTrigger;
+        public SerializedDictionary<int, FUpperBodyAnimationTrigger> AnimationUpperBodyTrigger => _animationUpperBodyTrigger;
 
         public void OnEnterStateRender(InteractorComponent interactor)
         {
             PlayerCharacter pc = interactor.PC;
-            FUpperBodyAnimationTrigger upperBodyAnimationTrigger = new FUpperBodyAnimationTrigger();
-            upperBodyAnimationTrigger.UpperbodyTriggerNumber = _animationUpperBodyTriggerNumber;
 
-            pc.AnimationController.SetAnimationForUpperBodyTrigger(upperBodyAnimationTrigger);
-            pc.Aim.TargetPitchOffset = _pitchOffset;
-            pc.Aim.TargetYawOffset = _yawOffset;
-            pc.Aim.TargetRollOffset = _rollOffset;
+            if(pc == null)
+                return;
+
+            int weaponId = pc.Weapons.GetWeaponID();
+
+            if (_animationUpperBodyTrigger.TryGetValue(weaponId, out var trigger))
+            {
+                pc.AnimationController.SetAnimationForUpperBodyTrigger(trigger);
+                pc.Aim.TargetPitchOffset = trigger.PitchOffset;
+                pc.Aim.TargetYawOffset = trigger.YawOffset;
+                pc.Aim.TargetRollOffset = trigger.RollOffset;
+            }
 
             if (_beamPrefab != null)
             {
-                interactor.SpawnBeamEffect(_beamPrefab);
+                if (_beamMuzzles.TryGetValue(weaponId, out var muzzle))
+                {
+                    interactor.SpawnBeamEffect(_beamPrefab, muzzle);
+                }
             }
         }
 

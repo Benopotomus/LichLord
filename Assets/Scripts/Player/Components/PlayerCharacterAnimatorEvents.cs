@@ -20,7 +20,7 @@ namespace LichLord
 
         public void Hit()
         {
-            //Debug.Log("Hit");
+            Debug.Log("Hit");
         }
 
         public void Land() 

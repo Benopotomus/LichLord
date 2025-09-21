@@ -416,7 +416,7 @@ namespace LichLord.NonPlayerCharacters
                 _isInFaceTargetRange = false;
                 return;
 
-                sqrDist = (_npc.CachedTransform.position - _moveTarget).sqrMagnitude;
+                //sqrDist = (_npc.CachedTransform.position - _moveTarget).sqrMagnitude;
             }
 
             _isInMovementStopRange = sqrDist < movementStopRange;

@@ -10,5 +10,6 @@ namespace LichLord
         public int UpperbodyTriggerDuration;
         public float PitchOffset;
         public float YawOffset;
+        public float RollOffset;
     }
 }

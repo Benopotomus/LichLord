@@ -14,6 +14,9 @@ namespace LichLord
 
         [SerializeField]
         private ManeuverDefinition _swapWeaponManeuver;
+        
+        [SerializeField]
+        private ManeuverDefinition _weaponAttackManeuver;
 
         [SerializeField] public Transform ActionSpawnPoint; // Where actions originate
 
@@ -28,9 +31,13 @@ namespace LichLord
         private NetworkDictionary<sbyte, TickTimer> _maneuverCooldownTimers { get; }
 
         private const sbyte SWAP_WEAPON_COOLDOWN_INDEX = 99;
+        private const sbyte WEAPON_ATTACK_COOLDOWN_INDEX = 100;
 
         [Networked]
         private TickTimer _swapWeaponCooldownTimer { get; set; }
+
+        [Networked]
+        private TickTimer _weaponAttackCooldownTimer { get; set; }
 
         // Current upper body blend amount
         private float _moveSpeedMultiplier = 1f;
@@ -314,6 +321,11 @@ namespace LichLord
 
             _pc.Aim.TargetPitchOffset = animationState.PitchOffset;
             _pc.Aim.TargetYawOffset = animationState.YawOffset;
+
+            foreach (var action in maneuver.ManeuverActions)
+            {
+                action.Execute(_pc, Runner);
+            }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

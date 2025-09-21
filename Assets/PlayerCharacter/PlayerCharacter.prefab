@@ -12159,9 +12159,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _pc: {fileID: 2971398371087610287}
   _cc: {fileID: 6155389979576705781}
+  __currentMoveState: 0
+  _lastMoveState: 0
   ScalingRoot: {fileID: 0}
   WalkSpeed: 5
-  SprintSpeed: 8
+  SprintSpeed: 6
   SprintAccelerationTime: 0.3
   UpGravity: -15
   DownGravity: -15
@@ -12504,6 +12506,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c4cb38a4b9b0b44e8bc7c2ed89f9424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pc: {fileID: 0}
   _weaponIndex: 0
   _weaponLeft:
     LoadState: 0
