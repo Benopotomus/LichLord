@@ -3,7 +3,7 @@ using LichLord.Buildables;
 using LichLord.World;
 using System;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.UI; // For UI elements
 
 namespace LichLord
 {
@@ -23,11 +23,12 @@ namespace LichLord
         [Header("Raycast Settings")]
         [SerializeField] private float _minRaycastDistance = 2.7f;
         [SerializeField] private float _maxRaycastDistance = 100f;
-
         [SerializeField] private LayerMask raycastLayerMask;
         [SerializeField] private LayerMask _buildableZoneLayerMask;
         [SerializeField] private LayerMask _trackableLayerMask;
         [SerializeField] private LayerMask _interactableLayerMask;
+
+        [SerializeField] private Image reticle; // Reference to the reticle UI element
 
         private float sphereRadius = 0.1f; // Radius of the debug sphere
 
@@ -54,6 +55,12 @@ namespace LichLord
             thirdPersonCam.LookAt = _cameraFollowTarget;
             firstPersonCam.Follow = _cameraFollowTarget;
             firstPersonCam.LookAt = _cameraFollowTarget;
+
+            // Ensure reticle is visible if assigned
+            if (reticle != null)
+            {
+                reticle.gameObject.SetActive(true);
+            }
         }
 
         public void ModifyCameraTargetRotation(Quaternion newRotation)
@@ -99,8 +106,11 @@ namespace LichLord
             Vector3 cameraPosition = mainCamera.transform.position;
 
             float minDistance = isFirstPerson ? 0 : _minRaycastDistance;
-            Vector3 rayOrigin = cameraTransform.position + (cameraTransform.forward * minDistance);
-            Vector3 rayDirection = cameraTransform.forward;
+            // Calculate ray origin at 60% up the viewport
+            Vector3 viewportPoint = new Vector3(0.5f, 0.6f, minDistance / mainCamera.nearClipPlane); // 0.6 = 60% up
+            Ray ray = mainCamera.ViewportPointToRay(viewportPoint);
+            Vector3 rayOrigin = ray.origin;
+            Vector3 rayDirection = ray.direction;
 
             _skydomeTransform.position = cameraPosition;
 
@@ -110,8 +120,11 @@ namespace LichLord
             RaycastFromCameraCenter(rayOrigin, rayDirection, localPlayerCreature.gameObject);
             CheckOverlapsAtOriginNonAlloc(rayOrigin, localPlayerCreature.gameObject);
 
-            if(followTransform != null)
+            if (followTransform != null)
                 _cameraFollowTarget.position = followTransform.position;
+
+            // Update reticle position
+            UpdateReticlePosition(rayOrigin, rayDirection);
         }
 
         private Collider[] _overlapBuffer = new Collider[16]; // Reuse this buffer
@@ -172,9 +185,9 @@ namespace LichLord
                 return;
             }
 
-            LayerMask combinedMask = raycastLayerMask 
-                | _buildableZoneLayerMask 
-                | _trackableLayerMask 
+            LayerMask combinedMask = raycastLayerMask
+                | _buildableZoneLayerMask
+                | _trackableLayerMask
                 | _interactableLayerMask;
 
             // Reset cached results
@@ -263,6 +276,29 @@ namespace LichLord
             }
         }
 
+        private void UpdateReticlePosition(Vector3 rayOrigin, Vector3 rayDirection)
+        {
+            if (reticle == null || Camera.main == null)
+                return;
+
+            Camera mainCamera = Camera.main;
+
+            // Project the raycast position to screen space
+            Vector3 worldPosition = _cachedRaycastHit.position;
+            Vector3 screenPosition = mainCamera.WorldToScreenPoint(worldPosition);
+
+            // Clamp to viewport to keep reticle on screen
+            Rect viewportRect = new Rect(0, 0, Screen.width, Screen.height);
+            screenPosition.x = Mathf.Clamp(screenPosition.x, viewportRect.xMin, viewportRect.xMax);
+            screenPosition.y = Mathf.Clamp(screenPosition.y, viewportRect.yMin, viewportRect.yMax);
+
+            // Set reticle position (convert to UI space, assuming Canvas is Screen Space - Overlay)
+            RectTransform reticleRectTransform = reticle.GetComponent<RectTransform>();
+            if (reticleRectTransform != null)
+            {
+                reticleRectTransform.position = screenPosition;
+            }
+        }
 
         private void OnDrawGizmos()
         {
@@ -277,7 +313,7 @@ namespace LichLord
 
     [Serializable]
     public struct FCachedRaycast
-    { 
+    {
         public RaycastHit raycastHit;
         public Vector3 position;
         public BuildableZone buildableZone;
@@ -285,7 +321,7 @@ namespace LichLord
         public InteractableComponent interactable;
 
         public void Clear()
-        { 
+        {
             buildableZone = null;
             trackable = null;
             interactable = null;

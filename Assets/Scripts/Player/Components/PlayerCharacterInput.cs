@@ -85,6 +85,7 @@ namespace LichLord
             _input.DeleteMode = false;
             _input.Interact = false;
             _input.SwapWeapon = false;
+            _input.ShowTooltips = false;
         }
 
         private void Update()
