@@ -1,10 +1,11 @@
 ﻿using DWD.Utility.Loading;
+using LichLord.Items;
 using UnityEngine;
 
 namespace LichLord
 {
     [CreateAssetMenu(fileName = "Currency", menuName = "LichLord/Currency/CurrencyDefinition", order = 1)]
-    public class CurrencyDefinition : TableObject
+    public class CurrencyDefinition : ItemDefinition
     {
         public string CurrencyName;
 
@@ -12,11 +13,6 @@ namespace LichLord
         private ECurrencyType _currencyType;
         public ECurrencyType CurrencyType => _currencyType;
 
-        //UI
-        [BundleObject(typeof(Sprite))]
-        [SerializeField]
-        protected BundleObject _icon;
-        public BundleObject Icon => _icon;
     }
 
     public enum ECurrencyType : byte // 16

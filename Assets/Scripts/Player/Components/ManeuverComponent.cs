@@ -82,6 +82,7 @@ namespace LichLord
         {
             ProcessManeuverSelection(ref input);
             ProcessManeuverActivation(ref input);
+            ProcessWeaponAttackActivation(ref input);
             ProcessWeaponSwapActivation(ref input);
             ProcessActiveManeuver(ref input);
         }
@@ -167,6 +168,32 @@ namespace LichLord
             }
         }
 
+        private void ProcessWeaponAttackActivation(ref FGameplayInput input)
+        {
+            // If the event is on cooldown, early out
+            if (!_weaponAttackCooldownTimer.ExpiredOrNotRunning(Runner))
+            {
+                //Debug.Log("Maneuver cooldown timer is running for " + _selectedIndex);
+                return;
+            }
+
+            // Cache current selected maneuver
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+
+            if (activeManeuver != null)
+                return;
+
+            if (input.AltFire)
+            {
+                _activeManeuverTick = Runner.Tick;
+                _activeManeuverIndex = WEAPON_ATTACK_COOLDOWN_INDEX;
+                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _weaponAttackManeuver.Duration);
+
+                activeManeuver = GetActiveManeuver();
+                activeManeuver.StartExecute(_pc, Runner);
+            }
+        }
+
         private void ProcessWeaponSwapActivation(ref FGameplayInput input)
         {
             // If the event is on cooldown, early out
@@ -198,7 +225,10 @@ namespace LichLord
             if (_activeManeuverIndex == SWAP_WEAPON_COOLDOWN_INDEX)
                 return _swapWeaponManeuver;
 
-            if(_activeManeuverIndex < 0)
+            if (_activeManeuverIndex == WEAPON_ATTACK_COOLDOWN_INDEX)
+                return _weaponAttackManeuver;
+
+            if (_activeManeuverIndex < 0)
                 return null;
 
             return _availableManeuvers[_activeManeuverIndex];
@@ -321,6 +351,7 @@ namespace LichLord
 
             _pc.Aim.TargetPitchOffset = animationState.PitchOffset;
             _pc.Aim.TargetYawOffset = animationState.YawOffset;
+            _pc.Aim.TargetRollOffset = animationState.RollOffset;
 
             foreach (var action in maneuver.ManeuverActions)
             {
@@ -342,6 +373,10 @@ namespace LichLord
             if (_activeManeuverIndex == SWAP_WEAPON_COOLDOWN_INDEX)
             {
                 _swapWeaponCooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
+            }
+            else if (_activeManeuverIndex == WEAPON_ATTACK_COOLDOWN_INDEX)
+            {
+                _weaponAttackCooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
             }
             else
             {

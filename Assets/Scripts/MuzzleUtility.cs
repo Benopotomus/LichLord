@@ -10,7 +10,7 @@ namespace LichLord
         {
             if (actor is PlayerCharacter pc)
             {
-                return pc.Muzzle.GetMuzzlePosition(muzzle);
+                return pc.Weapons.GetMuzzlePosition(muzzle);
             }
 
             if (actor is NonPlayerCharacter npc)

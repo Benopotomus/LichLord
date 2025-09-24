@@ -25,10 +25,8 @@
         protected BundleObject _model;
         public BundleObject Model => _model;
 
-        /*
-        [SerializeField] private ItemPickupDefinition _pickupDefinition;
-        public ItemPickupDefinition PickupDefinition => _pickupDefinition;
-        */
+        [SerializeField] private ItemDataDefinition _dataDefintion;
+        public ItemDataDefinition DataDefintion => _dataDefintion;
 
         [SerializeField]
         private int _maxStackCount;

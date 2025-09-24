@@ -17,11 +17,11 @@ namespace LichLord
         private ItemSpawner _itemSpawnerRight = new ItemSpawner();
 
         [Networked]
-        private ref FEquippableItem _itemDataLeft => ref MakeRef<FEquippableItem>();
+        private ref FItem _itemDataLeft => ref MakeRef<FItem>();
         private int _itemDefinitionLeft = -1;
 
         [Networked]
-        private ref FEquippableItem _itemDataRight => ref MakeRef<FEquippableItem>();
+        private ref FItem _itemDataRight => ref MakeRef<FItem>();
         private int _itemDefinitionRight = -1;
 
         [SerializeField]
@@ -38,6 +38,15 @@ namespace LichLord
 
         [SerializeField]
         private Transform _handBoneRight;
+
+        [SerializeField]
+        private float _weaponScaleSpeed = 0.3f;
+
+        [SerializeField]
+        private ELoadoutSlot _weaponSlotLeft;
+
+        [SerializeField]
+        private ELoadoutSlot _weaponSlotRight;
 
         public void DropWeapons()
         {
@@ -59,17 +68,40 @@ namespace LichLord
             if (!HasStateAuthority)
                 return;
 
+            switch (_weaponSlotLeft)
+            {
+                case ELoadoutSlot.Weapon_00_Left:
+                    _weaponSlotLeft = ELoadoutSlot.Weapon_01_Left;
+                    _weaponSlotRight = ELoadoutSlot.Weapon_01_Right;
+                    break;
+                case ELoadoutSlot.Weapon_01_Left:
+                    _weaponSlotLeft = ELoadoutSlot.Weapon_02_Left;
+                    _weaponSlotRight = ELoadoutSlot.Weapon_02_Right;
+                    break;
+                case ELoadoutSlot.Weapon_02_Left:
+                    _weaponSlotLeft = ELoadoutSlot.Weapon_00_Left;
+                    _weaponSlotRight = ELoadoutSlot.Weapon_00_Right;
+                    break;
+            }
             // Increment DefinitionID and cycle back to 0 when reaching 3 (max is 2)
-            _itemDataRight.DefinitionID = (_itemDataRight.DefinitionID + 1) % 3;
+           // _itemDataRight.DefinitionID = (_itemDataRight.DefinitionID + 1) % 3;
         }
 
         public override void Spawned()
         {
             base.Spawned();
+            _weaponSlotLeft = ELoadoutSlot.Weapon_00_Left;
+            _weaponSlotRight = ELoadoutSlot.Weapon_00_Right;
         }
 
         public void OnRender(float deltaTime)
         {
+            if (HasStateAuthority)
+            {
+                _itemDataLeft = _pc.Inventory.GetItemAtSlot(_weaponSlotLeft);
+                _itemDataRight = _pc.Inventory.GetItemAtSlot(_weaponSlotRight);
+            }
+
             // Handle left hand weapon
             if (_itemDataLeft.IsValid())
             {
@@ -145,8 +177,8 @@ namespace LichLord
             if (_weaponLeft.Weapon != null)
             {
                 _weaponLeft.Weapon.transform.localScale = Vector3.zero; 
-                _weaponLeft.Weapon.transform.DOScale(Vector3.one, 0.25f) 
-                    .SetEase(Ease.InCubic) 
+                _weaponLeft.Weapon.transform.DOScale(Vector3.one, _weaponScaleSpeed) 
+                    .SetEase(Ease.Linear) 
                     .SetUpdate(true);
             }
         }
@@ -161,8 +193,8 @@ namespace LichLord
             if (_weaponRight.Weapon != null)
             {
                 _weaponRight.Weapon.transform.localScale = Vector3.zero; 
-                _weaponRight.Weapon.transform.DOScale(Vector3.one, 0.25f) 
-                    .SetEase(Ease.InCubic) 
+                _weaponRight.Weapon.transform.DOScale(Vector3.one, _weaponScaleSpeed) 
+                    .SetEase(Ease.Linear) 
                     .SetUpdate(true); 
             }
         }
@@ -196,8 +228,8 @@ namespace LichLord
             if (_weaponLeft.Weapon != null)
             {
                 _weaponLeft.Weapon.transform.localScale = Vector3.one;
-                _weaponLeft.Weapon.transform.DOScale(Vector3.zero, 0.25f)
-                    .SetEase(Ease.InCubic)
+                _weaponLeft.Weapon.transform.DOScale(Vector3.zero, _weaponScaleSpeed)
+                    .SetEase(Ease.Linear)
                     .SetUpdate(true);
             }
 
@@ -205,11 +237,79 @@ namespace LichLord
             if (_weaponRight.Weapon != null)
             {
                 _weaponRight.Weapon.transform.localScale = Vector3.one;
-                _weaponRight.Weapon.transform.DOScale(Vector3.zero, 0.25f)
-                    .SetEase(Ease.InCubic)
+                _weaponRight.Weapon.transform.DOScale(Vector3.zero, _weaponScaleSpeed)
+                    .SetEase(Ease.Linear)
                     .SetUpdate(true);
             }
         }
+
+        public void OnHitFromAnimation()
+        {
+            Vector3 position = _weaponRight.Weapon.Muzzle.position;
+            var definition = _weaponRight.WeaponDefinition;
+
+            var tick = Runner.Tick;
+
+            Collider[] collidersPool = new Collider[6];
+            
+            int hitCount = Physics.OverlapSphereNonAlloc(
+                position,
+                1f,
+                collidersPool,
+                definition.OverlapCollisionLayer);
+
+
+            foreach (var collider in collidersPool)
+            {
+                if(collider == null) 
+                    continue;
+
+                var gameObjectHit = collider.gameObject;
+
+                if (gameObjectHit.tag == "Hurtbox")
+                {
+                    HurtboxOwner hitboxOwnerComp = gameObjectHit.GetComponent<HurtboxOwner>();
+                    if (hitboxOwnerComp == null)
+                        continue;
+
+                    var hitTarget = hitboxOwnerComp.HitTarget;
+
+                    if (!IsImpactObjectValid(gameObjectHit, hitTarget))
+                        continue;
+
+                    ApplyHitToTarget(hitTarget, tick);
+                }
+            }
+        }
+
+        public static bool IsImpactObjectValid(GameObject hitObject, IHitTarget hitTarget)
+        {
+            if (hitTarget is PlayerCharacter)
+                return false;
+
+            return true;
+        }
+
+        public void ApplyHitToTarget(IHitTarget hitTarget, int tick)
+        {
+            FDamageData damageData = new FDamageData();
+            damageData.damageValue = _weaponRight.WeaponDefinition.Damage;
+
+            FHitUtilityData hit = new FHitUtilityData
+            {
+                instigator = _pc,
+                target = hitTarget,
+                damageData = damageData,
+                staggerRating = 0,
+                knockbackStrength = 0,
+                impactRotation = Quaternion.identity,
+                impactPosition = Vector3.zero,
+                tick = tick,
+            };
+
+            HitUtility.ProcessHit(ref hit, Context);
+        }
+
 
         public Vector3 GetMuzzlePosition(EMuzzle muzzleName)
         {

@@ -29,6 +29,6 @@ namespace LichLord
         public bool Interact;
         public bool SwapWeapon;
         public bool ShowTooltips;
-
+        public bool InventoryToggle;
     }
 }

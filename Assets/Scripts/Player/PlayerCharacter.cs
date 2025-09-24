@@ -31,6 +31,7 @@ namespace LichLord
         public PlayerHealthComponent Health;
         public PlayerFormationComponent Formation;
         public PlayerWeaponsComponent Weapons;
+        public PlayerInventoryComponent Inventory;
 
         [SerializeField] private PlayerCharacterAnimationController _animationController;
         public PlayerCharacterAnimationController AnimationController => _animationController;

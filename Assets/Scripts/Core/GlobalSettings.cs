@@ -27,6 +27,9 @@ namespace LichLord
         [Space]
         public StandaloneConfiguration DebugConnection;
 
+        [Space]
+        public TestLoadout TestLoadout;
+
 
     }
 }

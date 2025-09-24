@@ -27,11 +27,20 @@ namespace LichLord
             
         }
 
-        public Vector3 GetMuzzlePosition(EMuzzle muzzle)
+        public Vector3 GetMuzzlePosition(EMuzzle muzzleName)
         {
-            return _pc.Weapons.GetMuzzlePosition(muzzle);
-        }
+            switch (muzzleName)
+            {
+                case EMuzzle.LeftHand:
+                    return _handBoneLeft.position;
+                case EMuzzle.RightHand:
+                    return _handBoneRight.position;
+                case EMuzzle.LeftHand_RightHand_Blend:
+                    return Vector3.Lerp(_handBoneLeft.position, _handBoneRight.position, 0.5f);
+            }
 
+            return transform.position;
+        }
         private void LoadMuzzleEffectVisualsPrefab(BundleObject prefabBundle)
         {
             ClearVisuals();

@@ -21,6 +21,7 @@ namespace LichLord
         public void Hit()
         {
             Debug.Log("Hit");
+            _pc.Weapons.OnHitFromAnimation();
         }
 
         public void Land() 

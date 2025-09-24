@@ -170,5 +170,6 @@ namespace LichLord
         None,
         HarvestNode,
         Dialog,
+        Container,
     }
 }

@@ -1,8 +1,7 @@
-﻿using LichLord.Props;
+﻿
 using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace LichLord.UI
 {

@@ -4,43 +4,43 @@
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Explicit, Size = 6)]
-    public struct FEquippableItem : INetworkStruct
+    public struct FItem : INetworkStruct
     {
         [FieldOffset(0)]
         private ushort _definitionId; // 2 bytes
         [FieldOffset(2)]
-        private int _stateData; // 4 bytes
+        private int _data; // 4 bytes
 
         // Constants for bit masks
 
         public int DefinitionID
         {
             get => _definitionId;
-            set => _definitionId = (byte)value;
+            set => _definitionId = (ushort)value;
         }
 
-        public int StateData
+        public int Data
         {
-            get => _stateData;
-            set => _stateData = value;
+            get => _data;
+            set => _data = value;
         }
 
         public bool IsValid() => _definitionId != 0;
 
         public void Clear() => _definitionId = 0;
 
-        public void Copy(in FEquippableItem copiedItem)
+        public void Copy(in FItem copiedItem)
         { 
             _definitionId = copiedItem._definitionId;
-            _stateData = copiedItem._stateData;
+            _data = copiedItem._data;
         }
 
-        public bool IsEqual(in FEquippableItem otherItem)
+        public bool IsEqual(in FItem otherItem)
         { 
             if(_definitionId != otherItem._definitionId) 
                 return false;
 
-            if (_stateData != otherItem._stateData)
+            if (_data != otherItem._data)
                 return false;
 
             return true;

@@ -6,7 +6,7 @@ namespace LichLord.UI
 
     public class UIGameplayView : UIView
     {
-        public bool BlocksHeroInput;
+        public bool UnlocksCursorWhileOpen;
 
         protected void ReturnFocusToLastWidget()
         {

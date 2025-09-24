@@ -85,13 +85,15 @@ namespace LichLord
             _input.DeleteMode = false;
             _input.Interact = false;
             _input.SwapWeapon = false;
-            _input.ShowTooltips = false;
+
         }
 
         private void Update()
         {
             if (!HasStateAuthority)
                 return;
+
+            _input.InventoryToggle = _controls.Gameplay.InventoryToggle.WasPressedThisFrame();
 
             if (Cursor.lockState != CursorLockMode.Locked)
             {
@@ -121,7 +123,10 @@ namespace LichLord
             _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();
             _input.DeleteMode |= _controls.Gameplay.DeleteMode.WasPressedThisFrame();
             _input.Interact |= _controls.Gameplay.Interact.WasPressedThisFrame();
+
+            _input.ShowTooltips = false;
             _input.ShowTooltips |= _controls.Gameplay.ShowTooltips.IsPressed();
+
             _input.SwapWeapon |= _controls.Gameplay.SwapWeapons.WasPressedThisFrame();
 
             _input.PlaceBuildable |= _controls.Gameplay.PlaceBuildable.WasPressedThisFrame();

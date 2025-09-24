@@ -46,23 +46,13 @@ namespace LichLord
 
             if (activeDialog != null)
             {
-                if (activeDialog.RequiresResponse)
+                if (!activeDialog.RequiresResponse)
                 {
-                    Cursor.lockState = CursorLockMode.None;
-                }
-                else
-                {
-                    Cursor.lockState = CursorLockMode.Locked;
-
                     if (Runner.Tick > _dialogAdvanceTick)
                     {
                         activeDialog.InvokeAutoResponse(Context);
                     }
                 }
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
             }
         }
 

@@ -12,6 +12,9 @@ namespace LichLord.UI
         [SerializeField] private UIDialogView _dialogView;
         public UIDialogView DialogView => _dialogView;
 
+        [SerializeField] private UIInventoryView _inventoryView;
+        public UIInventoryView InventoryView => _inventoryView;
+
         [Space]
         public GameObject LastFocusedWidget;
 
@@ -38,22 +41,53 @@ namespace LichLord.UI
             {
                 _dialogView.Close();
             }
+
+            if (Context.LocalPlayerCharacter.Input.CurrentInput.InventoryToggle)
+            {
+                if(_inventoryView.IsOpen) 
+                    _inventoryView.Close();
+                else
+                    _inventoryView.Open();
+            }
         }
 
         protected override void OnViewOpened(UIView view)
         {
             base.OnViewOpened(view);
+
+            if (view is UIGameplayView gameplayView)
+            { 
+                if(gameplayView.UnlocksCursorWhileOpen)
+                    Cursor.lockState = CursorLockMode.None;
+            }
         }
 
         protected override void OnViewClosed(UIView view)
         {
             base.OnViewClosed(view);
+            bool hasUnlockingView = false;
+
+            foreach (UIView currenvView in _views)
+            {
+                if (view is UIGameplayView gameplayView)
+                {
+                    if (gameplayView.IsOpen && gameplayView.UnlocksCursorWhileOpen)
+                    { 
+                        hasUnlockingView = true; 
+                        break;
+                    }
+                }
+            }
+
+            if(!hasUnlockingView)
+                Cursor.lockState = CursorLockMode.Locked;
         }
 
         public void SetLastFocusWidget()
         {
             LastFocusedWidget = EventSystem.current.currentSelectedGameObject;
         }
+
 
     }
 }

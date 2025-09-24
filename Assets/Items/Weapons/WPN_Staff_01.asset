@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6687acfeb4533f04e85ca8ed30e0b66f, type: 3}
   m_Name: WPN_Staff_01
   m_EditorClassIdentifier: 
-  _tableID: 1
+  _tableID: 7
   _displayName: Staff
   _description: Stick with power
   _icon:
@@ -21,5 +21,10 @@ MonoBehaviour:
   _model:
     _name: WPN_VIS_Staff
     _bundle: wpn_vis_staff
+  _dataDefintion: {fileID: 11400000, guid: 38350497243c7ca489cf16f867ccf4c0, type: 2}
   _maxStackCount: 1
   _idleAnimationId: 6
+  _damage: 10
+  _overlapCollisionLayer:
+    serializedVersion: 2
+    m_Bits: 256
