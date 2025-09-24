@@ -26,9 +26,11 @@ namespace LichLord
             _weapon_01_right = testLoadout.CopyLoadoutItem(ELoadoutSlot.Weapon_01_Right);
             _weapon_02_left = testLoadout.CopyLoadoutItem(ELoadoutSlot.Weapon_02_Left);
             _weapon_02_right = testLoadout.CopyLoadoutItem(ELoadoutSlot.Weapon_02_Right);
+
+            _inventoryItems = testLoadout.CopyInventory();
         }
 
-        public FItem GetItemAtSlot(ELoadoutSlot slot)
+        public FItem GetItemAtLoadoutSlot(ELoadoutSlot slot)
         {
             switch (slot)
             {
@@ -47,6 +49,14 @@ namespace LichLord
             }
 
             return new FItem();
+        }
+
+        public FItem GetItemAtInventorySlot(int slot)
+        {
+            if(slot >= _inventoryItems.Length)
+                return new FItem();
+
+            return _inventoryItems[slot];
         }
     }
 

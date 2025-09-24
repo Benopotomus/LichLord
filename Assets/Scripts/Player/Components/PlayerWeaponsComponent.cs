@@ -98,8 +98,8 @@ namespace LichLord
         {
             if (HasStateAuthority)
             {
-                _itemDataLeft = _pc.Inventory.GetItemAtSlot(_weaponSlotLeft);
-                _itemDataRight = _pc.Inventory.GetItemAtSlot(_weaponSlotRight);
+                _itemDataLeft = _pc.Inventory.GetItemAtLoadoutSlot(_weaponSlotLeft);
+                _itemDataRight = _pc.Inventory.GetItemAtLoadoutSlot(_weaponSlotRight);
             }
 
             // Handle left hand weapon

@@ -18,7 +18,7 @@ namespace LichLord.Items
         // Stack Count
         public override int GetStackCount(ref FItem itemData)
         {
-            return 1;
+            return (itemData.Data >> STACK_COUNT_SHIFT) & STACK_COUNT_MASK;
         }
 
         public override void SetStackCount(int index, ref FItem itemData)
