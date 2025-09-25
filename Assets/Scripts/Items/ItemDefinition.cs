@@ -1,6 +1,7 @@
 ﻿namespace LichLord.Items
 {
     using DWD.Utility.Loading;
+    using System.Collections.Generic;
     using UnityEngine;
 
     public class ItemDefinition : TableObject
@@ -26,11 +27,14 @@
         public BundleObject Model => _model;
 
         [SerializeField] private ItemDataDefinition _dataDefintion;
-        public ItemDataDefinition DataDefintion => _dataDefintion;
+        public ItemDataDefinition DataDefinition => _dataDefintion;
 
         [SerializeField]
         private int _maxStackCount;
         public virtual int MaxStackCount => _maxStackCount;
+
+        [SerializeField] private List<ELoadoutSlot> _validLoadoutSlots;
+        public List<ELoadoutSlot> ValidLoadoutSlots => _validLoadoutSlots;
 
         public Color GetColorByQuality(EQuality quality)
         {

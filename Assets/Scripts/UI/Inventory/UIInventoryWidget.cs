@@ -12,6 +12,7 @@ namespace LichLord.UI
         public void Awake()
         {
             _closeButton.onClick.AddListener(OnClosePressed);
+
         }
 
         private void OnClosePressed()

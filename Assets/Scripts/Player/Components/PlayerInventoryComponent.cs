@@ -58,6 +58,44 @@ namespace LichLord
 
             return _inventoryItems[slot];
         }
+
+        public void SetItemAtLoadoutSlot(ELoadoutSlot slot, in FItem itemData)
+        {
+            switch (slot)
+            {
+                case ELoadoutSlot.Weapon_00_Left:
+                    _weapon_00_left.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Weapon_00_Right:
+                    _weapon_00_right.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Weapon_01_Left:
+                    _weapon_01_left.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Weapon_01_Right:
+                    _weapon_01_right.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Weapon_02_Left:
+                    _weapon_02_left.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Weapon_02_Right:
+                    _weapon_02_right.Copy(itemData);
+                    break;
+            }
+
+        }
+        public void SetItemAtInventorySlot(int slot, in FItem itemData)
+        {
+            if (!HasStateAuthority)
+                return;
+
+            if (slot >= _inventoryItems.Length)
+                return;
+
+            _inventoryItems[slot].Copy(itemData);
+        }
+
+
     }
 
     public enum ELoadoutSlot

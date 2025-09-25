@@ -17,7 +17,7 @@ namespace LichLord
             {
                 item.DefinitionID = Definition.TableID;
 
-                Definition.DataDefintion.SetStackCount(StackCount, ref item);
+                Definition.DataDefinition.SetStackCount(StackCount, ref item);
             }
 
             return item;
