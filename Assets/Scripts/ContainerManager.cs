@@ -1,5 +1,5 @@
 ﻿using Fusion;
-using LichLord.Buildables;
+using LichLord.Items;
 using LichLord.World;
 using System;
 using System.Collections.Generic;
@@ -17,6 +17,174 @@ namespace LichLord
 
         private FStockpileData[] _authorityStockpileDatas = new FStockpileData[MAX_STOCKPILES];
         Dictionary<int, FStockpileData> _predictedStockpileDatas = new Dictionary<int, FStockpileData>();
+
+        [SerializeField] private ItemSlotReplicator _itemSlotReplicatorPrefab;
+        private List<ItemSlotReplicator> _itemSlotReplicators = new List<ItemSlotReplicator>();
+        public List<ItemSlotReplicator> ItemSlotReplicators => _itemSlotReplicators;
+
+        [SerializeField] private ContainerReplicator _containerReplicatorPrefab;
+        private List<ContainerReplicator> _containerReplicators = new List<ContainerReplicator>();
+        public List<ContainerReplicator> ContainerReplicators => _containerReplicators;
+
+        // Item Containers
+
+        public void LoadContainers()
+        {
+            var loadedContainers = Context.WorldSaveLoadManager.LoadedContainers;
+
+            foreach (var containerSaveData in loadedContainers)
+            {
+                int replicatorIndex = containerSaveData.containerFullIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
+                int localIndex = containerSaveData.containerFullIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
+
+                var replicator = GetOrCreateContainerReplicatorForIndex(containerSaveData.containerFullIndex);
+                ref FContainerSlotData data = ref replicator.GetContainerDataAtIndex(localIndex);
+                data.StartIndex = containerSaveData.startIndex;
+                data.EndIndex = containerSaveData.endIndex;
+                data.IsAssigned = true;
+            }
+        }
+
+        public void SetupContainer(int slotCount)
+        {
+            var container = GetContainerFreeReplicatorAndIndex(slotCount);
+            var itemSlots = GetItemReplicatorAndFreeSlotRange(slotCount);
+
+            var fullItemIndexStart = itemSlots.startIndex + (itemSlots.replicator.Index * ItemConstants.ITEMS_PER_REPLICATOR);
+            var fullItemIndexEnd = itemSlots.endIndex + (itemSlots.replicator.Index * ItemConstants.ITEMS_PER_REPLICATOR);
+
+            container.replicator.AssignContainerIndex(container.freeIndex, fullItemIndexStart, fullItemIndexEnd);
+            itemSlots.replicator.SetIndexesAssigned(itemSlots.startIndex, itemSlots.endIndex, true);
+        }
+
+        public (ContainerReplicator replicator, int freeIndex) 
+            GetContainerFreeReplicatorAndIndex(int count)
+        {
+            foreach (var replicator in _containerReplicators)
+            {
+                int freeIndex = replicator.GetFreeContainerIndex();
+                if (freeIndex > -1)
+                    return (replicator, freeIndex);
+            }
+
+            var newReplicator = Runner.Spawn(_containerReplicatorPrefab, Vector3.zero, Quaternion.identity);
+            if (newReplicator != null)
+            {
+                AddContainerReplicator(newReplicator);
+                return (newReplicator, 0);
+            }
+
+            Debug.Log("No replicator with free slots found");
+            return (null, -1);
+        }
+
+        public ContainerReplicator GetOrCreateContainerReplicatorForIndex(int fullIndex)
+        {
+            int replicatorIndex = fullIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
+            int localIndex = fullIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
+
+            foreach (var replicator in _containerReplicators)
+            {
+                if(replicator.Index == replicatorIndex) 
+                    return replicator;
+            }
+
+            var newReplicator = Runner.Spawn(_containerReplicatorPrefab, Vector3.zero, Quaternion.identity);
+
+            AddContainerReplicator(newReplicator);
+            return newReplicator;
+        }
+
+        public void AddContainerReplicator(ContainerReplicator replicator)
+        {
+            if (!_containerReplicators.Contains(replicator))
+            {
+                if (HasStateAuthority)
+                    replicator.Index = (byte)_containerReplicators.Count;
+
+                _containerReplicators.Add(replicator);
+            }
+        }
+
+        public FContainerSlotData GetContainerDataAtIndex(int fullIndex)
+        {
+            int localIndex = fullIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
+            int replicatorIndex = fullIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
+
+            return _containerReplicators[replicatorIndex].GetContainerDataAtIndex(localIndex);
+        }
+
+        // Item Slots
+
+        public void LoadItemSlots()
+        {
+            var loadedItemSlots = Context.WorldSaveLoadManager.LoadedItemSlots;
+
+            foreach (var itemSlotSaveData in loadedItemSlots)
+            {
+                int replicatorIndex = itemSlotSaveData.fullItemSlotIndex / ItemConstants.ITEMS_PER_REPLICATOR;
+                int localIndex = itemSlotSaveData.fullItemSlotIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+
+                var replicator = GetOrCreateItemSlotReplicatorForIndex(itemSlotSaveData.fullItemSlotIndex);
+                ref FItemSlotData data = ref replicator.GetItemSlotDataAtIndex(localIndex);
+                data.ItemData.DefinitionID = itemSlotSaveData.definitionId;
+                data.ItemData.Data = itemSlotSaveData.data;
+                data.IsAssigned = itemSlotSaveData.isAssigned;
+            }
+        }
+
+        public ItemSlotReplicator GetOrCreateItemSlotReplicatorForIndex(int fullIndex)
+        {
+            int replicatorIndex = fullIndex / ItemConstants.ITEMS_PER_REPLICATOR;
+            int localIndex = fullIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+
+            foreach (var replicator in _itemSlotReplicators)
+            {
+                if (replicator.Index == replicatorIndex)
+                    return replicator;
+            }
+
+            var newReplicator = Runner.Spawn(_itemSlotReplicatorPrefab, Vector3.zero, Quaternion.identity);
+
+            AddItemSlotReplicator(newReplicator);
+            return newReplicator;
+        }
+
+        public void AddItemSlotReplicator(ItemSlotReplicator replicator)
+        {
+            if (!_itemSlotReplicators.Contains(replicator))
+            {
+                if (HasStateAuthority)
+                    replicator.Index = (byte)_itemSlotReplicators.Count;
+
+                _itemSlotReplicators.Add(replicator);
+            }
+        }
+
+        public (ItemSlotReplicator replicator, int startIndex, int endIndex) GetItemReplicatorAndFreeSlotRange(int count)
+        {
+            foreach (var replicator in _itemSlotReplicators)
+            {
+                var itemSlotRange = replicator.GetItemSlotRange(count);
+                if (itemSlotRange.startIndex > -1)
+                    return (replicator, itemSlotRange.startIndex, itemSlotRange.endIndex);
+            }
+
+            var newReplicator = Runner.Spawn(_itemSlotReplicatorPrefab, Vector3.zero, Quaternion.identity);
+            if (newReplicator != null)
+            {
+                AddItemSlotReplicator(newReplicator);
+                var itemSlotRange = newReplicator.GetItemSlotRange(count);
+
+                return (newReplicator, itemSlotRange.startIndex, itemSlotRange.endIndex);
+            }
+            
+
+            Debug.Log("No replicator with free slots found");
+            return (null, -1, -1);
+        }
+
+        // Stockpiles
 
         private void OnRep_StockpileDatas(NetworkBehaviourBuffer previous)
         {

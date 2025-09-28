@@ -24,9 +24,9 @@ namespace LichLord
 
         public TestItem[] _items = new TestItem[36];
 
-        public FItem[] CopyInventory()
+        public FItemData[] CopyInventory()
         {
-            FItem[] itemDatas = new FItem[_items.Length];
+            FItemData[] itemDatas = new FItemData[_items.Length];
 
             for (int i = 0; i < _items.Length; i++)
             {
@@ -36,7 +36,7 @@ namespace LichLord
             return itemDatas;
         }
 
-        public FItem CopyLoadoutItem(ELoadoutSlot loadoutSlot)
+        public FItemData CopyLoadoutItem(ELoadoutSlot loadoutSlot)
         { 
             switch (loadoutSlot)
             {
@@ -53,7 +53,7 @@ namespace LichLord
                 case ELoadoutSlot.Weapon_02_Right:
                     return _weapon_02_Right.ToItemData();
             }
-            return new FItem();
+            return new FItemData();
         }
     }
 }

@@ -16,6 +16,8 @@ namespace LichLord.World
             {
                 Context.WorldSaveLoadManager.LoadWorld();
                 Context.MissionManager.LoadWorldMissionProgress();
+                Context.ContainerManager.LoadContainers();
+                Context.ContainerManager.LoadItemSlots();
             }
 
             Context.ChunkManager.InitializeWorldChunks();
@@ -24,6 +26,7 @@ namespace LichLord.World
 
             if (HasStateAuthority)
             {
+
                 Context.WorldSaveLoadManager.LoadNPCs();
                 Context.NonPlayerCharacterManager.LoadNPCsFromSaves();
             }

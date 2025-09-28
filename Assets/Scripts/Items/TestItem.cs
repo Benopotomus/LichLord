@@ -9,9 +9,9 @@ namespace LichLord
         public ItemDefinition Definition;
         public int StackCount;
 
-        public FItem ToItemData()
+        public FItemData ToItemData()
         { 
-            FItem item = new FItem();
+            FItemData item = new FItemData();
 
             if (Definition != null)
             {

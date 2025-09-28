@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9160c67cbc5289e4d9ba4376ce39b483, type: 3}
   m_Name: BLD_Wall_01
   m_EditorClassIdentifier: 
-  _tableID: 4
+  _tableID: 6
   _buildableName: Wall 01
   _prefabBundle:
     _name: BLD_VIS_Wall_01
@@ -25,3 +25,7 @@ MonoBehaviour:
     _bundle: whitebrickwall
   _buildableDataDefinition: {fileID: 11400000, guid: 1763c1890b00b5147a7d404c409d7321,
     type: 2}
+  _maxHealth: 100
+  _damageReduction: 3
+  _damageResistance: 0
+  _containerSlots: 8

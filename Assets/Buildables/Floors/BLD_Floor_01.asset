@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e3eb41a867a76a42951129ca59e69b1, type: 3}
   m_Name: BLD_Floor_01
   m_EditorClassIdentifier: 
-  _tableID: 3
+  _tableID: 5
   _buildableName: Floor 01
   _prefabBundle:
     _name: BLD_VIS_Floor_01
@@ -25,3 +25,7 @@ MonoBehaviour:
     _bundle: materials_07_bricks
   _buildableDataDefinition: {fileID: 11400000, guid: 1763c1890b00b5147a7d404c409d7321,
     type: 2}
+  _maxHealth: 100
+  _damageReduction: 3
+  _damageResistance: 0
+  _containerSlots: 8

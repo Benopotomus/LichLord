@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System;
 using LichLord.NonPlayerCharacters;
+using DWD.Utility.Loading;
+using LichLord.Items;
 
 namespace LichLord.World
 {
@@ -12,6 +14,8 @@ namespace LichLord.World
         public FStockpileSaveData[] stockpiles;
         public FWorkerSaveData[] workers;
         public FDialogSaveData[] dialogs;
+        public FContainerSaveData[] containers;
+        public FItemSlotSaveData[] itemSlots;
         public FInvasionSaveData invasion;
     }
 
@@ -120,6 +124,52 @@ namespace LichLord.World
             netWorker.IsAssigned = isAssigned;
 
             return netWorker;
+        }
+    }
+
+    [Serializable]
+    public struct FContainerSaveData
+    {
+        public int containerFullIndex;
+        public int startIndex;
+        public int endIndex;
+        public bool isAssigned;
+
+        public FContainerSaveData(int containerFullIndex, int startIndex, int endIndex, bool isAssigned)
+        {
+            this.containerFullIndex = containerFullIndex;
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+            this.isAssigned = isAssigned;
+        }
+    }
+
+    [Serializable]
+    public struct FItemSlotSaveData
+    {
+        public int fullItemSlotIndex;
+        public int definitionId;
+        public int data;
+        public bool isAssigned;
+
+        public FItemSlotSaveData(int itemFullIndex, FItemSlotData itemSlotData)
+        {
+            this.fullItemSlotIndex = itemFullIndex;
+            this.definitionId = itemSlotData.ItemData.DefinitionID;
+            this.data = itemSlotData.ItemData.Data;
+            this.isAssigned = itemSlotData.IsAssigned;
+        }
+
+        public FItemSlotData ToNetworkData()
+        { 
+            FItemSlotData itemSlotData = new FItemSlotData();
+            FItemData itemData = new FItemData();
+            itemData.DefinitionID = this.definitionId;
+            itemData.Data = this.data;
+
+            itemSlotData.ItemData = itemData;
+            itemSlotData.IsAssigned = this.isAssigned;
+            return itemSlotData;
         }
     }
 

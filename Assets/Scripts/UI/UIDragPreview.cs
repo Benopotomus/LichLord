@@ -15,7 +15,7 @@ namespace LichLord.UI
         private TextMeshProUGUI _countText;
 
         [SerializeField]
-        private FItem _itemData;
+        private FItemData _itemData;
 
         [SerializeField]
         private ItemDefinition _itemDefinition;
@@ -35,7 +35,7 @@ namespace LichLord.UI
             _canvasGroup.alpha = 0.8f; // Semi-transparent
         }
 
-        public void SetItemData(FItem itemData)
+        public void SetItemData(FItemData itemData)
         {
             _itemData.Copy(in itemData);
             _itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);

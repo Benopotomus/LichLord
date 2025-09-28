@@ -19,8 +19,8 @@ namespace LichLord.UI
         private TextMeshProUGUI _countText;
 
         [SerializeField]
-        protected FItem _itemData;
-        public ref FItem ItemData => ref _itemData;
+        protected FItemData _itemData;
+        public ref FItemData ItemData => ref _itemData;
 
         [SerializeField]
         protected ItemDefinition _itemDefinition;
@@ -45,7 +45,7 @@ namespace LichLord.UI
             }
         }
 
-        public void SetItemData(FItem itemData)
+        public void SetItemData(FItemData itemData)
         {
             _itemData.Copy(in itemData);
             _itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);

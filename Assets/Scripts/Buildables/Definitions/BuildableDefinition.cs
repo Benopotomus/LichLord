@@ -32,5 +32,25 @@ namespace LichLord.Buildables
         protected BuildableDataDefinition _buildableDataDefinition;
         public BuildableDataDefinition BuildableDataDefinition => _buildableDataDefinition;
 
+        // Health
+        [Header("Health")]
+        [SerializeField]
+        protected int _maxHealth = 100;
+        public int MaxHealth => _maxHealth;
+
+        [SerializeField]
+        protected int _damageReduction = 3;
+        public int DamageReduction => _damageReduction;
+
+        [SerializeField]
+        protected float _damageResistance = 0.0f;
+        public float DamageResistance => _damageResistance;
+
+        // Contianer
+        [Header("Container")]
+        [SerializeField]
+        protected int _containerSlots = 8;
+        public int ContainerSlots => _containerSlots;
+
     }
 }

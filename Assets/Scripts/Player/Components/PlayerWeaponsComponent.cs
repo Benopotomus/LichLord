@@ -17,11 +17,11 @@ namespace LichLord
         private ItemSpawner _itemSpawnerRight = new ItemSpawner();
 
         [Networked]
-        private ref FItem _itemDataLeft => ref MakeRef<FItem>();
+        private ref FItemData _itemDataLeft => ref MakeRef<FItemData>();
         private int _itemDefinitionLeft = -1;
 
         [Networked]
-        private ref FItem _itemDataRight => ref MakeRef<FItem>();
+        private ref FItemData _itemDataRight => ref MakeRef<FItemData>();
         private int _itemDefinitionRight = -1;
 
         [SerializeField]

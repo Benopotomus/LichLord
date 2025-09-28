@@ -8,18 +8,18 @@ namespace LichLord.Items
     public class ItemDataDefinition : ScriptableObject
     {
 
-        public virtual void InitializeData(ref FItem itemData, ItemDefinition definition)
+        public virtual void InitializeData(ref FItemData itemData, ItemDefinition definition)
         {
 
         }
 
         // Stack Count
-        public virtual int GetStackCount(ref FItem itemData)
+        public virtual int GetStackCount(ref FItemData itemData)
         {
             return 1;
         }
 
-        public virtual void SetStackCount(int count, ref FItem itemData)
+        public virtual void SetStackCount(int count, ref FItemData itemData)
         {
 
         }

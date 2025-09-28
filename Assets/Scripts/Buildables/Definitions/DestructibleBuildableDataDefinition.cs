@@ -7,19 +7,7 @@ namespace LichLord.Buildables
     [CreateAssetMenu(fileName = "DestructibleBuildableDataDefinition", menuName = "LichLord/Buildables/DestructibleBuildableDataDefinition")]
     public class DestructibleBuildableDataDefinition : BuildableDataDefinition
     {
-        [SerializeField]
-        protected int _maxHealth = 100;
-        public int MaxHealth => _maxHealth;
-
-        [SerializeField]
-        protected int _damageReduction = 3;
-        public int DamageReduction => _damageReduction;
-
-        [SerializeField]
-        protected float _damageResistance = 0.0f;
-        public float DamageResistance => _damageResistance;
-
-        protected const int HEALTH_BITS = 12;         // 0-4095
+        protected const int HEALTH_BITS = 10;         // 0-1023
 
         protected const int HEALTH_SHIFT = STATE_SHIFT + STATE_BITS;
 
@@ -33,7 +21,7 @@ namespace LichLord.Buildables
 
             // Set initial values
             SetState(StartingState, ref buildableData);
-            SetHealth(MaxHealth, ref buildableData); // Default health, adjust as needed
+            SetHealth(definition.MaxHealth, ref buildableData); // Default health, adjust as needed
         }
 
         // Health
@@ -53,9 +41,11 @@ namespace LichLord.Buildables
         // Handle damage application
         public void ApplyDamage(ref FBuildableData buildableData, int damage)
         {
+            var definition = Global.Tables.BuildableTable.TryGetDefinition(buildableData.DefinitionID);
+
             int currentHealth = GetHealth(ref buildableData);
-            damage = Mathf.Max(damage - DamageReduction, 0);
-            damage = (int)((float)damage * (1.0f - DamageResistance));
+            damage = Mathf.Max(damage - definition.DamageReduction, 0);
+            damage = (int)((float)damage * (1.0f - definition.DamageResistance));
 
             SetHealth(currentHealth - damage, ref buildableData);
 

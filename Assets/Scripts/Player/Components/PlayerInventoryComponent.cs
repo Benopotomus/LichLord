@@ -4,14 +4,14 @@ namespace LichLord
 {
     public class PlayerInventoryComponent : ContextBehaviour
     {
-        private FItem _weapon_00_left;
-        private FItem _weapon_00_right;
-        private FItem _weapon_01_left;
-        private FItem _weapon_01_right;
-        private FItem _weapon_02_left;
-        private FItem _weapon_02_right;
+        private FItemData _weapon_00_left;
+        private FItemData _weapon_00_right;
+        private FItemData _weapon_01_left;
+        private FItemData _weapon_01_right;
+        private FItemData _weapon_02_left;
+        private FItemData _weapon_02_right;
 
-        private FItem[] _inventoryItems;
+        private FItemData[] _inventoryItems;
 
         public override void Spawned()
         {
@@ -30,7 +30,7 @@ namespace LichLord
             _inventoryItems = testLoadout.CopyInventory();
         }
 
-        public FItem GetItemAtLoadoutSlot(ELoadoutSlot slot)
+        public FItemData GetItemAtLoadoutSlot(ELoadoutSlot slot)
         {
             switch (slot)
             {
@@ -48,18 +48,18 @@ namespace LichLord
                     return _weapon_02_right;
             }
 
-            return new FItem();
+            return new FItemData();
         }
 
-        public FItem GetItemAtInventorySlot(int slot)
+        public FItemData GetItemAtInventorySlot(int slot)
         {
             if(slot >= _inventoryItems.Length)
-                return new FItem();
+                return new FItemData();
 
             return _inventoryItems[slot];
         }
 
-        public void SetItemAtLoadoutSlot(ELoadoutSlot slot, in FItem itemData)
+        public void SetItemAtLoadoutSlot(ELoadoutSlot slot, in FItemData itemData)
         {
             switch (slot)
             {
@@ -84,7 +84,7 @@ namespace LichLord
             }
 
         }
-        public void SetItemAtInventorySlot(int slot, in FItem itemData)
+        public void SetItemAtInventorySlot(int slot, in FItemData itemData)
         {
             if (!HasStateAuthority)
                 return;

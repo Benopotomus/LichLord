@@ -1,5 +1,4 @@
 ﻿using LichLord.NonPlayerCharacters;
-using UnityEngine;
 
 namespace LichLord.Buildables
 {
@@ -12,6 +11,7 @@ namespace LichLord.Buildables
         public FBuildableData Data => _data;
 
         public BuildableZone buildableZone;
+        private SceneContext _context;
 
         private BuildableDefinition _definition;
         public BuildableDefinition Definition
@@ -42,6 +42,7 @@ namespace LichLord.Buildables
         public BuildableRuntimeState(BuildableZone zone, int index, ref FBuildableData buildableData)
         {
             this.buildableZone = zone;
+            _context = zone.Context;
             this._index = index;
             _data.Copy(in buildableData);
         }
@@ -77,7 +78,7 @@ namespace LichLord.Buildables
         public int GetMaxHealth()
         {
             if (Definition.BuildableDataDefinition is DestructibleBuildableDataDefinition destructibleDataDefinition)
-                return destructibleDataDefinition.MaxHealth;
+                return Definition.MaxHealth;
 
             return 100;
         }
@@ -178,6 +179,62 @@ namespace LichLord.Buildables
             }
 
             return null;
+        }
+
+        public EContainerState GetContainerState()
+        {
+            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerData)
+            {
+                return containerData.GetContainerState(ref _data);
+            }
+
+            return EContainerState.None;
+        }
+
+        public void SetContainerState(EContainerState newState)
+        {
+            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerData)
+            {
+                containerData.SetContainerState(newState, ref _data);
+            }
+
+            if (buildableZone != null)
+                buildableZone.ReplicateRuntimeState(this);
+        }
+
+        public int GetContainerIndex()
+        {
+            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerData)
+            {
+                return containerData.GetContainerIndex(ref _data);
+            }
+
+            return -1;
+        }
+
+        public void SetContainerIndex(int index)
+        {
+            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerData)
+            {
+                containerData.SetContainerIndex(index, ref _data);
+            }
+
+            if (buildableZone != null)
+                buildableZone.ReplicateRuntimeState(this);
+        }
+
+        public (int start, int end) GetItemSlotIndexes()
+        {
+            int fullContainerIndex = GetContainerIndex();
+
+            if (fullContainerIndex == -1)
+            { 
+                return (-1, -1);
+            }
+
+            var containerData = _context.ContainerManager.GetContainerDataAtIndex(fullContainerIndex);
+
+            return (containerData.StartIndex, containerData.EndIndex);
         }
 
         // Runtime Values

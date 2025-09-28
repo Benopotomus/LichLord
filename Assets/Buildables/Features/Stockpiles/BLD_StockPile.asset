@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2999c07ed91ea8d46945fe550c33d77a, type: 3}
   m_Name: BLD_StockPile
   m_EditorClassIdentifier: 
-  _tableID: 2
+  _tableID: 3
   _buildableName: Stockpile
   _prefabBundle:
     _name: BLD_VIS_StockPile
@@ -25,4 +25,8 @@ MonoBehaviour:
     _bundle: platformwithwood
   _buildableDataDefinition: {fileID: 11400000, guid: 953f16bc13b0ee142bbabf0e00512e9b,
     type: 2}
+  _maxHealth: 100
+  _damageReduction: 3
+  _damageResistance: 0
+  _containerSlots: 8
   _checkBounds: {x: 0, y: 0, z: 0}

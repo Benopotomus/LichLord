@@ -1,5 +1,6 @@
 ﻿using DWD.Pooling;
 using Fusion;
+using LichLord.Items;
 using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
@@ -156,32 +157,46 @@ namespace LichLord.Buildables
             if (definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
             {
                 int freeStockpileIndex = Context.ContainerManager.GetFreeStockpileIndex();
-                if (freeStockpileIndex >= 0)
-                {
-                    stockpileDataDefinition.InitializeData(ref data, definition);
-                    stockpileDataDefinition.SetStockpileIndex(freeStockpileIndex, ref data);
-                    Context.ContainerManager.AssignStockpileIndex(freeStockpileIndex);
-                }
-                else
+                if (freeStockpileIndex < 0)
                 {
                     Debug.Log("No Free Stockpile Index");
                     return;
                 }
+
+                stockpileDataDefinition.InitializeData(ref data, definition);
+                stockpileDataDefinition.SetStockpileIndex(freeStockpileIndex, ref data);
+                Context.ContainerManager.AssignStockpileIndex(freeStockpileIndex);
+
             }
             else if (definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
             {
                 int freeWorkerIndex = Context.WorkerManager.GetFreeIndex();
-                if (freeWorkerIndex >= 0)
-                {
-                    cryptDataDefinition.InitializeData(ref data, definition);
-                    cryptDataDefinition.SetWorkerIndex(freeWorkerIndex, ref data);
-                    Context.WorkerManager.AssignWorkerIndexToBuildable(freeWorkerIndex, this, freeIndex);
-                }
-                else
+                if (freeWorkerIndex < 0)
                 {
                     Debug.Log("No Free Worker Index");
                     return;
                 }
+ 
+                cryptDataDefinition.InitializeData(ref data, definition);
+                cryptDataDefinition.SetWorkerIndex(freeWorkerIndex, ref data);
+
+                Context.WorkerManager.AssignWorkerIndexToBuildable(freeWorkerIndex, this, freeIndex);
+            }
+            else if (definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
+            { 
+                var containerData = Context.ContainerManager.GetContainerFreeReplicatorAndIndex(definition.ContainerSlots);
+
+                if (containerData.freeIndex < 0)
+                {
+                    Debug.Log("No Free Container Index");
+                    return;
+                }
+
+                int fullContainerIndex = containerData.freeIndex + (containerData.replicator.Index * ItemConstants.CONTAINERS_PER_REPLICATOR);
+                containerDataDefinition.InitializeData(ref data, definition);
+                containerDataDefinition.SetContainerIndex(fullContainerIndex, ref data);
+
+                Context.ContainerManager.SetupContainer(definition.ContainerSlots);
             }
             else
             {

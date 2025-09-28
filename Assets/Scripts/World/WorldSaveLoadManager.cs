@@ -6,6 +6,7 @@ using System;
 using LichLord.Buildables;
 using LichLord.NonPlayerCharacters;
 using LichLord.Dialog;
+using LichLord.Items;
 
 namespace LichLord.World
 {
@@ -22,6 +23,12 @@ namespace LichLord.World
 
         private FInvasionSaveData _loadedInvasion = new FInvasionSaveData();
         public FInvasionSaveData LoadedInvasion => _loadedInvasion;
+
+        private List<FContainerSaveData> _loadedContainers = new List<FContainerSaveData>();
+        public List<FContainerSaveData> LoadedContainers => _loadedContainers;
+
+        private List<FItemSlotSaveData> _loadedItemSlots = new List<FItemSlotSaveData>();
+        public List<FItemSlotSaveData> LoadedItemSlots => _loadedItemSlots;
 
         private FusionCallbacksHandler _shutdownHandler;
 
@@ -163,7 +170,54 @@ namespace LichLord.World
                     invasionSaveData.targetStronghold.index = invasionManager.TargetStrongholdData.ChunkIndex;
                     invasionSaveData.invasionState = invasionManager.InvasionState;
                 }
-                
+
+                // --- Save Invasion Data --- //
+
+                List<FContainerSaveData> containerSaveData = new List<FContainerSaveData>();
+                List<FItemSlotSaveData> itemSlotSaveData = new List<FItemSlotSaveData>();
+
+                if (Context.ContainerManager != null)
+                {
+                    ContainerManager containerManager = Context.ContainerManager;
+
+                    foreach (var containerReplicator in containerManager.ContainerReplicators)
+                    { 
+                        var containerDatas = containerReplicator.ContainerDatas;
+
+                        for (int i = 0; i < containerDatas.Length; i++)
+                        {
+                            FContainerSlotData containerSlotData = containerDatas[i];
+                            int fullContainerIndex = i + (containerReplicator.Index * ItemConstants.CONTAINERS_PER_REPLICATOR);
+                            containerSaveData.Add(new FContainerSaveData
+                            {
+                                containerFullIndex = fullContainerIndex,
+                                startIndex = containerSlotData.StartIndex,
+                                endIndex = containerSlotData.EndIndex,
+                                isAssigned = containerSlotData.IsAssigned
+                            });
+                        }
+                    }
+
+                    foreach (var itemSlotReplicator in containerManager.ItemSlotReplicators)
+                    {
+                        var itemSlotDatas = itemSlotReplicator.ItemSlotDatas;
+
+                        for (int i = 0; i < itemSlotDatas.Length; i++)
+                        {
+                            FItemSlotData itemSlotData = itemSlotDatas[i];
+                            int fullItemSlotIndex = i + (itemSlotReplicator.Index * ItemConstants.ITEMS_PER_REPLICATOR);
+
+                            itemSlotSaveData.Add(new FItemSlotSaveData
+                            {
+                                fullItemSlotIndex = fullItemSlotIndex,
+                                definitionId = itemSlotData.ItemData.DefinitionID,
+                                data = itemSlotData.ItemData.Data,
+                                isAssigned = itemSlotData.IsAssigned,
+                            });
+                        }
+                    }
+                }
+
                 // --- Final save ---
                 FWorldSaveData saveData = new FWorldSaveData
                 {
@@ -172,7 +226,9 @@ namespace LichLord.World
                     stockpiles = stockpileSaves.ToArray(),
                     workers = workerSaveData.ToArray(),
                     dialogs = dialogSaveDatas.ToArray(),
-                    invasion = invasionSaveData
+                    invasion = invasionSaveData,
+                    containers = containerSaveData.ToArray(),
+                    itemSlots = itemSlotSaveData.ToArray(),
                 };
 
                 string json = JsonUtility.ToJson(saveData, true);
@@ -294,6 +350,26 @@ namespace LichLord.World
                         Context.DialogManager.LoadDialogData(dialogSave);
                     }
                     Debug.Log($"Loaded {saveData.dialogs.Length} dialogs.");
+                }
+
+                // --- Load Containers ---
+                if (saveData.containers != null)
+                {
+                    foreach (var containerSave in saveData.containers)
+                    {
+                        _loadedContainers.Add(containerSave);
+                    }
+                    Debug.Log($"Loaded {saveData.containers.Length} containers.");
+                }
+
+                // --- Load ItemSlots ---
+                if (saveData.itemSlots != null)
+                {
+                    foreach (var itemSlotSave in saveData.itemSlots)
+                    {
+                        _loadedItemSlots.Add(itemSlotSave);
+                    }
+                    Debug.Log($"Loaded {saveData.itemSlots.Length} item slots.");
                 }
 
                 // --- Load invasion ---

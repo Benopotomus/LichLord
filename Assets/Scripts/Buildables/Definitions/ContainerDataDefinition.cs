@@ -1,5 +1,4 @@
-﻿using LichLord.NonPlayerCharacters;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace LichLord.Buildables
 {
@@ -7,7 +6,7 @@ namespace LichLord.Buildables
     public class ContainerDataDefinition : DestructibleBuildableDataDefinition // 14 bits
     {
 
-        protected const int CONTAINER_STATE_BITS = 3;         // 0-7 
+        protected const int CONTAINER_STATE_BITS = 2;         // 0-3 
         protected const int CONTAINER_INDEX_BITS = 10;         // 0-1023
         //27 bits
 
@@ -25,7 +24,7 @@ namespace LichLord.Buildables
 
             // Set initial values
             SetState(StartingState, ref buildableData);
-            SetHealth(MaxHealth, ref buildableData); // Default health, adjust as needed
+            SetHealth(definition.MaxHealth, ref buildableData); // Default health, adjust as needed
             SetContainerState(EContainerState.None, ref buildableData);
         }
 
@@ -57,6 +56,7 @@ namespace LichLord.Buildables
         }
 
         // Interacting
+
         public bool GetIsInteracting(ref FBuildableData data)
         {
             switch (GetContainerState(ref data))

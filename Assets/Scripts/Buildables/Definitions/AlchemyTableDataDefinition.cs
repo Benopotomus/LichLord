@@ -23,7 +23,7 @@ namespace LichLord.Buildables
 
             // Set initial values
             SetState(StartingState, ref buildableData);
-            SetHealth(MaxHealth, ref buildableData); // Default health, adjust as needed
+            SetHealth(definition.MaxHealth, ref buildableData); // Default health, adjust as needed
             SetAlchemyTableState(EAlchemyTableState.None, ref buildableData);
         }
 

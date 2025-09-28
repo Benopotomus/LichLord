@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2999c07ed91ea8d46945fe550c33d77a, type: 3}
+  m_Name: BLD_StorageChest
+  m_EditorClassIdentifier: 
+  _tableID: 4
+  _buildableName: Storage Chest
+  _prefabBundle:
+    _name: BLD_VIS_StorageChest
+    _bundle: bld_vis_storagechest
+  _placementVFX:
+    _name: VFX_BuildablePlacement
+    _bundle: vfx_buildableplacement
+  _icon:
+    _name: WoodenChest
+    _bundle: woodenchest
+  _buildableDataDefinition: {fileID: 11400000, guid: 565c81e781772d14daf5cec2588b3cf5,
+    type: 2}
+  _maxHealth: 200
+  _damageReduction: 3
+  _damageResistance: 0.2
+  _containerSlots: 8
+  _checkBounds: {x: 0, y: 0, z: 0}
