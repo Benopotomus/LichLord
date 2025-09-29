@@ -24,6 +24,7 @@ namespace LichLord
         public int ActionSelection; // Index of selected action (1-9 for keys, 0 for none)
         public float ScrollDelta; // Mouse wheel delta (positive: up, negative: down)
         public bool BuildMode; // Toggles build mode
+        public bool SummonMode;
         public EBuildableCategory BuildCategory;
         public bool DeleteMode;
         public bool Interact;

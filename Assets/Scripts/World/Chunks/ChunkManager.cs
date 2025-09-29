@@ -31,7 +31,6 @@ namespace LichLord.World
         public HashSet<Chunk> LoadedChunks => _loadedChunks;
 
         private HashSet<ChunkReplicator> _replicators = new HashSet<ChunkReplicator>();
-        private HashSet<FChunkPosition> _replicatorPositions = new HashSet<FChunkPosition>();
 
         public bool ChunksReady { get; private set; }
         public Action onChunksReady;

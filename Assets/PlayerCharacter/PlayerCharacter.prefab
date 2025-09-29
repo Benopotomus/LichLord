@@ -5735,6 +5735,7 @@ GameObject:
   - component: {fileID: 5933867338918213662}
   - component: {fileID: 5189535172980925867}
   - component: {fileID: 8530991970368520409}
+  - component: {fileID: 6754216214200336027}
   m_Layer: 0
   m_Name: FSM
   m_TagString: Untagged
@@ -5823,6 +5824,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1579ed3666f63724f8c72fa8c63042a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _priority: 0
+  _checkPriorityOnExit: 1
+  fsmRef: {fileID: 6231497543318802807}
+--- !u!114 &6754216214200336027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1447467598753523381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bedab59a9f197a9478b1a44fefa366b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _priority: 0
@@ -11958,6 +11974,7 @@ GameObject:
   - component: {fileID: 3873841533538091301}
   - component: {fileID: 8453103197528511047}
   - component: {fileID: 1203748198828285372}
+  - component: {fileID: 3700213216379212753}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -12020,6 +12037,7 @@ MonoBehaviour:
   Formation: {fileID: 3873841533538091301}
   Weapons: {fileID: 8453103197528511047}
   Inventory: {fileID: 1203748198828285372}
+  Summoner: {fileID: 3700213216379212753}
   _animationController: {fileID: 2637221445499037506}
   _muzzleComponent: {fileID: 5886866483268230399}
   HeadRenderers: []
@@ -12049,6 +12067,8 @@ MonoBehaviour:
       Value: {fileID: 11400000, guid: 76f00e6e62cbd2f4fb9e3b7d31210101, type: 2}
     - Key: 2
       Value: {fileID: 11400000, guid: 638f210be42b0b248829fa83ace051f0, type: 2}
+    - Key: 3
+      Value: {fileID: 11400000, guid: d01fc407ef2e4d74089adc7feda02b63, type: 2}
   _beamPrefab: {fileID: 7466204747608180949, guid: 985795427f3341943a44989cffb6a28c,
     type: 3}
 --- !u!114 &18907217600452759
@@ -12323,12 +12343,14 @@ MonoBehaviour:
   - {fileID: 4804172155013043321}
   - {fileID: 8453103197528511047}
   - {fileID: 1203748198828285372}
+  - {fileID: 3700213216379212753}
   - {fileID: 975723772845658309}
   - {fileID: 8473141530021393840}
   - {fileID: 6231497543318802807}
   - {fileID: 5933867338918213662}
   - {fileID: 5189535172980925867}
   - {fileID: 8530991970368520409}
+  - {fileID: 6754216214200336027}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &8911782388783612553
 MonoBehaviour:
@@ -12539,6 +12561,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21d92c4c8d9ee6640953a8b747aff3de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3700213216379212753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3123905968297068043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23607951d5085dc4bb7b8b1db093015e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pc: {fileID: 2971398371087610287}
+  _availableManeuvers: []
+  _swapWeaponManeuver: {fileID: 0}
+  _weaponAttackManeuver: {fileID: 0}
+  ActionSpawnPoint: {fileID: 0}
 --- !u!1 &3132438210907808134
 GameObject:
   m_ObjectHideFlags: 0

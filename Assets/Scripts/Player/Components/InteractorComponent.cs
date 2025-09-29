@@ -29,6 +29,7 @@ namespace LichLord
 
         [Networked]
         private EInteractType _interactType { get; set; }
+        public EInteractType InteractType => _interactType;
 
         [SerializeField]
         [SerializedDictionary("InteractionType", "InteractorAction")]
@@ -56,6 +57,10 @@ namespace LichLord
             {
                 StartInteract(_bestInteractable);
             }
+            else if (_pc.FSM.StateMachine.ActiveState is SummonState summonModeState)
+            {
+                StartInteract(_bestInteractable);
+            }
             else if (_pc.FSM.StateMachine.ActiveState is InteractingState interactingState)
             {
                 StopInteract();
@@ -72,7 +77,7 @@ namespace LichLord
         {
             int tick = Runner.Tick;
 
-            CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase; ;
+            CharacterStateBase state = _pc.FSM.StateMachine.ActiveState as CharacterStateBase;
 
             state.MoveToInteract();
             _currentInteractable = _bestInteractable;
@@ -144,7 +149,7 @@ namespace LichLord
             {
                 _currentInteractable.CompleteInteract(this);
                 StopInteract();
-            }        
+            }
         }
 
         public void RotateTowardInteract(float deltaTime)

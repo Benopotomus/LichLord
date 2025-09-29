@@ -82,6 +82,7 @@ namespace LichLord
             _input.ScrollDelta = 0f;
             _input.ActionSelection = 0;
             _input.BuildMode = false;
+            _input.SummonMode = false;
             _input.DeleteMode = false;
             _input.Interact = false;
             _input.SwapWeapon = false;
@@ -121,6 +122,7 @@ namespace LichLord
             _input.Sprint = _controls.Gameplay.Sprint.IsPressed();
             _input.ToggleCameraView |= _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
             _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();
+            _input.SummonMode |= _controls.Gameplay.SummonMode.WasPressedThisFrame();
             _input.DeleteMode |= _controls.Gameplay.DeleteMode.WasPressedThisFrame();
             _input.Interact |= _controls.Gameplay.Interact.WasPressedThisFrame();
 

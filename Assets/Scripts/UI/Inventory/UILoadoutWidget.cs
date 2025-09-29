@@ -19,8 +19,8 @@ namespace LichLord.UI
         private void OnClosePressed()
         {
             if (Context.UI is GameplayUI gameplayUI)
-            { 
-                gameplayUI.Close(gameplayUI.InventoryView);
+            {
+                gameplayUI.CloseInventoryWindow();
             }
         }
 

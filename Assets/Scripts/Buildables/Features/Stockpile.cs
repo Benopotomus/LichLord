@@ -177,12 +177,12 @@ namespace LichLord.Buildables
 
         private int GetTicksToComplete(InteractorComponent interactor)
         {
-            return 32;
+            return -1;
         }
 
         private EInteractType GetInteractType(InteractorComponent interactor)
         {
-            return EInteractType.HarvestNode;
+            return EInteractType.Container;
         }
 
         private float GetInteractDistance(InteractorComponent interactor)

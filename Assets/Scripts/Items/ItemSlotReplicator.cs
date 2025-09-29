@@ -39,9 +39,15 @@ namespace LichLord.Items
         
         }
 
-        public void SetItemData(int index, FItemSlotData itemData)
+        public void SetItemSlotData(int index, FItemSlotData itemSlotData)
         {
-            _itemSlotDatas.Set(index, itemData);
+            _itemSlotDatas.Set(index, itemSlotData);
+        }
+
+        public void SetItemData(int index, FItemData itemData)
+        {
+            ref FItemSlotData itemSlotData = ref _itemSlotDatas.GetRef(index);
+            itemSlotData.ItemData = itemData;
         }
 
         public (int startIndex, int endIndex) GetItemSlotRange(int count)

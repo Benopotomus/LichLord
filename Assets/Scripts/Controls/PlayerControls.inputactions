@@ -301,6 +301,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SummonMode",
+                    "type": "Button",
+                    "id": "b8984e21-a0f4-4138-8b12-0bc5de7613bb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -857,7 +866,7 @@
                 {
                     "name": "",
                     "id": "60739c61-0cde-46c5-9cb1-a59c1bd49852",
-                    "path": "<Keyboard>/r",
+                    "path": "<Keyboard>/b",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -950,6 +959,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "InventoryToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "598662c2-7ed6-4b7c-9f24-3ab0339d5fd5",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SummonMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

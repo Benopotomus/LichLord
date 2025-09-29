@@ -11,6 +11,12 @@ namespace LichLord
         private FItemData _weapon_02_left;
         private FItemData _weapon_02_right;
 
+        private FItemData _summon_00;
+        private FItemData _summon_01;
+        private FItemData _summon_02;
+        private FItemData _summon_03;
+        private FItemData _summon_04;
+
         private FItemData[] _inventoryItems;
 
         public override void Spawned()
@@ -26,6 +32,12 @@ namespace LichLord
             _weapon_01_right = testLoadout.CopyLoadoutItem(ELoadoutSlot.Weapon_01_Right);
             _weapon_02_left = testLoadout.CopyLoadoutItem(ELoadoutSlot.Weapon_02_Left);
             _weapon_02_right = testLoadout.CopyLoadoutItem(ELoadoutSlot.Weapon_02_Right);
+
+            _summon_00 = testLoadout.CopyLoadoutItem(ELoadoutSlot.Summon_00);
+            _summon_01 = testLoadout.CopyLoadoutItem(ELoadoutSlot.Summon_01);
+            _summon_02 = testLoadout.CopyLoadoutItem(ELoadoutSlot.Summon_02);
+            _summon_03 = testLoadout.CopyLoadoutItem(ELoadoutSlot.Summon_03);
+            _summon_04 = testLoadout.CopyLoadoutItem(ELoadoutSlot.Summon_04);
 
             _inventoryItems = testLoadout.CopyInventory();
         }
@@ -46,6 +58,17 @@ namespace LichLord
                     return _weapon_02_left;
                 case ELoadoutSlot.Weapon_02_Right:
                     return _weapon_02_right;
+
+                case ELoadoutSlot.Summon_00:
+                    return _summon_00;
+                case ELoadoutSlot.Summon_01:
+                    return _summon_01;
+                case ELoadoutSlot.Summon_02:
+                    return _summon_02;
+                case ELoadoutSlot.Summon_03:
+                    return _summon_03;
+                case ELoadoutSlot.Summon_04:
+                    return _summon_04;
             }
 
             return new FItemData();
@@ -81,6 +104,22 @@ namespace LichLord
                 case ELoadoutSlot.Weapon_02_Right:
                     _weapon_02_right.Copy(itemData);
                     break;
+
+                case ELoadoutSlot.Summon_00:
+                    _summon_00.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Summon_01:
+                    _summon_01.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Summon_02:
+                    _summon_02.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Summon_03:
+                    _summon_03.Copy(itemData);
+                    break;
+                case ELoadoutSlot.Summon_04:
+                    _summon_04.Copy(itemData);
+                    break;
             }
 
         }
@@ -95,7 +134,6 @@ namespace LichLord
             _inventoryItems[slot].Copy(itemData);
         }
 
-
     }
 
     public enum ELoadoutSlot
@@ -107,6 +145,11 @@ namespace LichLord
         Weapon_01_Right,
         Weapon_02_Left,
         Weapon_02_Right,
+        Summon_00,
+        Summon_01, 
+        Summon_02,
+        Summon_03,
+        Summon_04,
     }
 }
 

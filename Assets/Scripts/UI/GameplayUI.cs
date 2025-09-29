@@ -42,12 +42,40 @@ namespace LichLord.UI
                 _dialogView.Close();
             }
 
-            if (Context.LocalPlayerCharacter.Input.CurrentInput.InventoryToggle)
+            PlayerCharacter pc = Context.LocalPlayerCharacter;
+            if (pc != null)
             {
-                if(_inventoryView.IsOpen) 
-                    _inventoryView.Close();
-                else
-                    _inventoryView.Open();
+                if (pc.Input.CurrentInput.InventoryToggle)
+                {
+                    if (_inventoryView.IsOpen)
+                        CloseInventoryWindow();
+                    else
+                        _inventoryView.Open();
+                }
+
+                if (pc.Interactor.CurrentInteractable != null)
+                {
+                    if (pc.Interactor.InteractType == EInteractType.Container) 
+                    {
+                        if (!_inventoryView.IsOpen)
+                            _inventoryView.Open();
+                    }
+                }
+            }
+        }
+
+        public void CloseInventoryWindow()
+        {
+            PlayerCharacter pc = Context.LocalPlayerCharacter;
+            if (pc == null)
+                return;
+
+            if (_inventoryView.IsOpen)
+                _inventoryView.Close();
+
+            if (pc.Interactor.InteractType == EInteractType.Container)
+            {
+                pc.Interactor.SetInteractType(EInteractType.None);
             }
         }
 

@@ -1,7 +1,6 @@
 ﻿
 using LichLord.Items;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord
@@ -21,6 +20,21 @@ namespace LichLord
         public TestWeapon _weapon_02_Left;
         [Header("Tertiary Right Weapon")]
         public TestWeapon _weapon_02_Right;
+
+        [Header("Summmon 00")]
+        public TestSummonable _summon_00;
+
+        [Header("Summmon 00")]
+        public TestSummonable _summon_01;
+
+        [Header("Summmon 00")]
+        public TestSummonable _summon_02;
+
+        [Header("Summmon 00")]
+        public TestSummonable _summon_03;
+
+        [Header("Summmon 00")]
+        public TestSummonable _summon_04;
 
         public TestItem[] _items = new TestItem[36];
 
@@ -52,6 +66,18 @@ namespace LichLord
                     return _weapon_02_Left.ToItemData();
                 case ELoadoutSlot.Weapon_02_Right:
                     return _weapon_02_Right.ToItemData();
+
+                case ELoadoutSlot.Summon_00:
+                    return _summon_00.ToItemData();
+                case ELoadoutSlot.Summon_01:
+                    return _summon_01.ToItemData();
+                case ELoadoutSlot.Summon_02:
+                    return _summon_02.ToItemData();
+                case ELoadoutSlot.Summon_03:
+                    return _summon_03.ToItemData();
+                case ELoadoutSlot.Summon_04:
+                    return _summon_04.ToItemData();
+
             }
             return new FItemData();
         }

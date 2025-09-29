@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using LichLord.Items;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace LichLord.UI
@@ -33,6 +34,13 @@ namespace LichLord.UI
             {
                 inventory.SetItemAtInventorySlot(inventorySlot.SlotIndex, in _itemData);
                 inventory.SetItemAtInventorySlot(_slotIndex, in inventorySlot.ItemData);
+            }
+
+            if (targetSlot is UIContainerSlot containerSlot)
+            {
+                FItemData containerSlotItem = containerSlot.ItemData;
+                Context.ContainerManager.RPC_SetItemSlotData(containerSlot.FullItemSlotIndex, _itemData);
+                inventory.SetItemAtInventorySlot(_slotIndex, in containerSlotItem);
             }
 
             if (targetSlot is UILoadoutSlot loadoutSlot)

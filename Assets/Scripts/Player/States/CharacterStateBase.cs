@@ -56,5 +56,10 @@ namespace LichLord
         {
             fsmRef.StateMachine.TryActivateState<BuildModeState>();
         }
+
+        public void MoveToSummonMode()
+        {
+            fsmRef.StateMachine.TryActivateState<SummonState>();
+        }
     }
 }
