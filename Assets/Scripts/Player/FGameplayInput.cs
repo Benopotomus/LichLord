@@ -31,5 +31,6 @@ namespace LichLord
         public bool SwapWeapon;
         public bool ShowTooltips;
         public bool InventoryToggle;
+        public bool Cancel;
     }
 }

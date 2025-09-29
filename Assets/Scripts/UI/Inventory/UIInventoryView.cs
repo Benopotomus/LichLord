@@ -32,6 +32,19 @@ namespace LichLord.UI
             }
         }
 
+        protected override void OnTick()
+        {
+            base.OnTick(); 
+
+            if (_storageChestWidget.isActiveAndEnabled &&
+                !ShouldOpenStorageWidget())
+            {
+                if (Context.UI is GameplayUI gameplayUI)
+                    gameplayUI.CloseInventoryWindow();
+            }
+            
+        }
+
         public bool ShouldOpenStorageWidget()
         {
             PlayerCharacter pc = Context.LocalPlayerCharacter;
