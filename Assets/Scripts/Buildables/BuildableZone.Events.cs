@@ -22,7 +22,7 @@ namespace LichLord.Buildables
         public void ApplyDamageToBuildable(int index, int damage, int tick)
         {
             // Find the state
-            BuildableRuntimeState authorityState = _buildableRuntimeStates[index];
+            BuildableRuntimeState authorityState = _runtimeStates[index];
 
             // Apply the damage
             authorityState.ApplyDamage(damage, tick);

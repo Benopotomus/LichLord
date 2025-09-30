@@ -96,9 +96,20 @@ namespace LichLord.Buildables
 
         public void SetInteracting(bool interact, int tick)
         {
+            if (_data.DefinitionID == 0)
+                return;
+
             if (Definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
             {
                 stockpileDataDefinition.SetIsInteracting(interact, ref _data);
+
+                if (buildableZone != null)
+                    buildableZone.ReplicateRuntimeState(this);
+            }
+
+            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
+            {
+                containerDataDefinition.SetIsInteracting(interact, ref _data);
 
                 if (buildableZone != null)
                     buildableZone.ReplicateRuntimeState(this);
@@ -184,27 +195,6 @@ namespace LichLord.Buildables
             }
 
             return null;
-        }
-
-        public EContainerState GetContainerState()
-        {
-            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerData)
-            {
-                return containerData.GetContainerState(ref _data);
-            }
-
-            return EContainerState.None;
-        }
-
-        public void SetContainerState(EContainerState newState)
-        {
-            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerData)
-            {
-                containerData.SetContainerState(newState, ref _data);
-            }
-
-            if (buildableZone != null)
-                buildableZone.ReplicateRuntimeState(this);
         }
 
         public int GetContainerIndex()

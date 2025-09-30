@@ -22,7 +22,8 @@ namespace LichLord.Buildables
         private FBuildableLoadState[] _buildableLoadStates;
         public FBuildableLoadState[] LoadStates => _buildableLoadStates;
 
-        private Dictionary<int, BuildableRuntimeState> _buildableRuntimeStates = new Dictionary<int, BuildableRuntimeState>();
+        private Dictionary<int, BuildableRuntimeState> _runtimeStates = new Dictionary<int, BuildableRuntimeState>();
+        public Dictionary<int, BuildableRuntimeState> RuntimeStates => _runtimeStates;
 
         public override void Spawned()
         {
@@ -114,9 +115,9 @@ namespace LichLord.Buildables
             _buildableLoadStates[index].LoadState = ELoadState.Loaded;
  
             ref FBuildableData data = ref _buildableDatas.GetRef(index);
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(this, index, ref data);
+            _runtimeStates[index] = new BuildableRuntimeState(this, index, ref data);
 
-            buildable.OnSpawned(this, _buildableRuntimeStates[index]);
+            buildable.OnSpawned(this, _runtimeStates[index]);
         }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
@@ -246,14 +247,14 @@ namespace LichLord.Buildables
 
         private BuildableRuntimeState GetRenderState(int index, ref FBuildableData data)
         {
-            if (_buildableRuntimeStates.TryGetValue(index, out BuildableRuntimeState state)) 
+            if (_runtimeStates.TryGetValue(index, out BuildableRuntimeState state)) 
             {
                 state.CopyData(ref data);
                 return state;
             }
 
-            _buildableRuntimeStates[index] = new BuildableRuntimeState(this, index, ref data);
-            return _buildableRuntimeStates[index];
+            _runtimeStates[index] = new BuildableRuntimeState(this, index, ref data);
+            return _runtimeStates[index];
         }
 
         public bool IsInsideTrigger(Vector3 worldPosition)

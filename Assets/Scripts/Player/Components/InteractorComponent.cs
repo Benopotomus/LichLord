@@ -202,6 +202,9 @@ namespace LichLord
 
             _bestInteractable = null;
 
+            if (Cursor.lockState != CursorLockMode.Locked)
+                return;
+
             // Use the cached raycast result from the scene camera
             var interactable = Context.Camera.CachedRaycastHit.interactable;
 

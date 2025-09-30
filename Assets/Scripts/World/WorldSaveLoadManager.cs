@@ -97,18 +97,23 @@ namespace LichLord.World
                 foreach (var stronghold in Context.StrongholdManager.ActiveStrongholds)
                 {
                     var buildableList = new List<FBuildableSaveState>();
-                    var buildData = stronghold.BuildableZone.Data;
+                    var buildableZone = stronghold.BuildableZone;
+                    var buildData = buildableZone.Data;
 
                     for (int i = 0; i < buildData.Length; i++)
                     {
-                        buildableList.Add(new FBuildableSaveState(
-                            i,
-                            buildData[i].Position,
-                            buildData[i].Rotation.eulerAngles,
-                            buildData[i].DefinitionID,
-                            buildData[i].StateData
-                        ));
+                        if (buildableZone.RuntimeStates.TryGetValue(i, out BuildableRuntimeState runtimeState))
+                        {
+                            runtimeState.SetInteracting(false, 0);
 
+                            buildableList.Add(new FBuildableSaveState(
+                                i,
+                                runtimeState.Data.Position,
+                                runtimeState.Data.Rotation.eulerAngles,
+                                runtimeState.Data.DefinitionID,
+                                runtimeState.Data.StateData
+                            ));
+                        }
                     }
 
                     strongholdSaveDatas.Add(new FStrongholdSaveData

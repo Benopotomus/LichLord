@@ -12,6 +12,7 @@ namespace LichLord.Buildables
         protected const int HEALTH_SHIFT = STATE_SHIFT + STATE_BITS;
 
         protected const int HEALTH_MASK = (1 << HEALTH_BITS) - 1;
+        // 12 bits
 
         public override void InitializeData(ref FBuildableData buildableData, BuildableDefinition definition)
         {

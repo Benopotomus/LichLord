@@ -65,6 +65,12 @@ namespace LichLord.UI
                     {
                         if (!_inventoryView.IsOpen)
                             _inventoryView.Open();
+
+                        if (pc.Input.CurrentInput.Interact)
+                        {
+                            if (_inventoryView.IsOpen)
+                                CloseInventoryWindow();
+                        }
                     }
                 }
             }

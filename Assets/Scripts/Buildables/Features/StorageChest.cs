@@ -182,7 +182,7 @@ namespace LichLord.Buildables
             if (RuntimeState.DataDefinition is not ContainerDataDefinition dataDefinition)
                 return;
 
-            RuntimeState.SetContainerState(EContainerState.Interacting);
+            RuntimeState.SetInteracting(true, Context.Runner.Tick);
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
@@ -192,7 +192,7 @@ namespace LichLord.Buildables
             if (RuntimeState.DataDefinition is not ContainerDataDefinition dataDefinition)
                 return;
 
-            RuntimeState.SetContainerState(EContainerState.None);
+            RuntimeState.SetInteracting(false, Context.Runner.Tick);
         }
 
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
