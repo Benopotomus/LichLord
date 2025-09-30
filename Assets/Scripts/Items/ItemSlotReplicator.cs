@@ -50,6 +50,13 @@ namespace LichLord.Items
             itemSlotData.ItemData = itemData;
         }
 
+        public void ClearItemData(int index)
+        {
+            ref FItemSlotData itemSlotData = ref _itemSlotDatas.GetRef(index);
+            itemSlotData.IsAssigned = false;
+            itemSlotData.ItemData = new FItemData();
+        }
+
         public (int startIndex, int endIndex) GetItemSlotRange(int count)
         {
             if (count <= 0 || count > ItemConstants.ITEMS_PER_REPLICATOR)

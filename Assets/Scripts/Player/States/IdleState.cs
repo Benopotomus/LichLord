@@ -1,3 +1,4 @@
+using Fusion;
 using Fusion.Addons.FSM;
 using UnityEngine;
 
@@ -9,6 +10,12 @@ namespace LichLord
         protected override void OnEnterStateRender()
         {
             //anim.CrossFadeInFixedTime(animState, 4f / 60f);
+        }
+
+        protected override void OnExitState()
+        {
+            base.OnExitState();
+            fsmRef.PC.Maneuvers.OnExitState();
         }
 
         protected override void OnFixedUpdate()
@@ -31,7 +38,7 @@ namespace LichLord
             fsmRef.PC.Interactor.RefreshInteractables();
             fsmRef.PC.Interactor.ProcessInput(ref input);
 
-            CheckBuildModeToggle(ref input);
+            CheckModeChange(ref input);
 
             fsmRef.PC.Input.ResetInput();
         }

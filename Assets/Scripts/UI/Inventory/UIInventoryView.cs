@@ -42,7 +42,6 @@ namespace LichLord.UI
                 if (Context.UI is GameplayUI gameplayUI)
                     gameplayUI.CloseInventoryWindow();
             }
-            
         }
 
         public bool ShouldOpenStorageWidget()

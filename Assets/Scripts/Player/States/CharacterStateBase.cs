@@ -16,23 +16,26 @@ namespace LichLord
             FGameplayInput input = fsmRef.PC.Input.CurrentInput;
         }
 
-        protected virtual void CheckBuildModeToggle(ref FGameplayInput input)
+        protected virtual void CheckModeChange(ref FGameplayInput input)
         {
-            if (fsmRef.StateMachine.ActiveState is IdleState)
+            if (input.BuildMode)
             {
-                if (input.BuildMode)
-                {
-                    MoveToBuildMode();
-                    return;
-                }
-            }
-            else if (fsmRef.StateMachine.ActiveState is BuildModeState)
-            {
-                if (input.BuildMode)
-                {
+                if (fsmRef.StateMachine.ActiveState is BuildModeState)
                     MoveToIdle();
-                    return;
-                }
+                else
+                    MoveToBuildMode();
+                    
+                return;
+            }
+
+            if (input.SummonMode)
+            {
+                if (fsmRef.StateMachine.ActiveState is SummonModeState)
+                    MoveToIdle();
+                else
+                    MoveToSummonMode();
+
+                return;
             }
         }
 
@@ -59,7 +62,7 @@ namespace LichLord
 
         public void MoveToSummonMode()
         {
-            fsmRef.StateMachine.TryActivateState<SummonState>();
+            fsmRef.StateMachine.TryActivateState<SummonModeState>();
         }
     }
 }

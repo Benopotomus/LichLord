@@ -14,6 +14,7 @@ namespace LichLord.UI
 
         [SerializeField]
         private Image _iconImage;
+        public Image IconImage => _iconImage;
 
         [SerializeField]
         private TextMeshProUGUI _countText;
@@ -47,6 +48,9 @@ namespace LichLord.UI
 
         public void SetItemData(FItemData itemData)
         {
+            if (_itemData.IsEqual(itemData))
+                return;
+
             _itemData.Copy(in itemData);
             _itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
 

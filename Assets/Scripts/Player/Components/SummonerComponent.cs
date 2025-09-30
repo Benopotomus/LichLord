@@ -10,6 +10,27 @@ namespace LichLord
 
         [Networked] 
         private sbyte _selectedIndex { get; set; }
+        public ELoadoutSlot SelectedSlot
+        {
+            get
+            {
+                switch (_selectedIndex)
+                {
+                    case 0:
+                        return ELoadoutSlot.Summon_00;
+                    case 1:
+                        return ELoadoutSlot.Summon_01;
+                    case 2:
+                        return ELoadoutSlot.Summon_02;
+                    case 3:
+                        return ELoadoutSlot.Summon_03;
+                    case 4:
+                        return ELoadoutSlot.Summon_04;
+                    default:
+                        return ELoadoutSlot.None;
+                }
+            }
+        }
 
         [Networked] 
         private sbyte _activeSummoningIndex { get; set; }
@@ -33,12 +54,6 @@ namespace LichLord
         {
             base.Spawned();
             ReplicateToAll(false);
-
-            if (HasStateAuthority)
-            {
-
-
-            }
         }
 
         public void ProcessInput(ref FGameplayInput input)
@@ -95,67 +110,102 @@ namespace LichLord
         {
 
         }
-     
+
+        private List<int> GetValidSummonIndexes()
+        {
+            List<int> actions = new List<int>();
+
+            if (_pc.Inventory.GetItemAtLoadoutSlot(ELoadoutSlot.Summon_00).IsValid())
+                actions.Add(0);
+            if (_pc.Inventory.GetItemAtLoadoutSlot(ELoadoutSlot.Summon_01).IsValid())
+                actions.Add(1);
+            if (_pc.Inventory.GetItemAtLoadoutSlot(ELoadoutSlot.Summon_02).IsValid())
+                actions.Add(2);
+            if (_pc.Inventory.GetItemAtLoadoutSlot(ELoadoutSlot.Summon_03).IsValid())
+                actions.Add(3);
+            if (_pc.Inventory.GetItemAtLoadoutSlot(ELoadoutSlot.Summon_04).IsValid())
+                actions.Add(4);
+
+            return actions;
+        }
 
         private void ProcessSummonSelection(ref FGameplayInput input)
         {
-            /*
-            int newIndex = -1;
-            if (input.ScrollDelta != 0 && _availableManeuvers.Count > 1)
-            {
-                int delta = input.ScrollDelta > 0 ? 1 : -1;
-                newIndex = (_selectedIndex + delta + _availableManeuvers.Count) % _availableManeuvers.Count;
-                //Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
-            }
+            List<int> validActions = GetValidSummonIndexes();
 
-            if (input.ActionSelection > 0)
+            // If no valid actions, reset _selectedIndex and exit
+            if (validActions.Count == 0)
             {
-                //Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}");
-                newIndex = input.ActionSelection - 1;
-            }
-
-            if (newIndex >= _availableManeuvers.Count)
-            {
-                //Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (exceeds availableActions.Count={availableActions.Count})");
+                _selectedIndex = -1;
+                UpdateActionSelection(_selectedIndex);
                 return;
             }
 
+            // Check if current _selectedIndex is invalid
+            if (!validActions.Contains(_selectedIndex))
+            {
+                // Find the next valid index
+                int currentPos = 0;
+                if (_selectedIndex >= 0)
+                {
+                    // Try to find the next valid index after the current _selectedIndex
+                    for (int i = 0; i < validActions.Count; i++)
+                    {
+                        if (validActions[i] > _selectedIndex)
+                        {
+                            currentPos = i;
+                            break;
+                        }
+                    }
+                }
+                // Update to the next valid index
+                _selectedIndex = (sbyte)validActions[currentPos];
+                UpdateActionSelection(_selectedIndex);
+                //Debug.Log($"[ActionManager] Current index {_selectedIndex} was invalid, cycled to {validActions[currentPos]}");
+            }
+
+            int newIndex = -1;
+            if (input.ScrollDelta != 0)
+            {
+                // Find the current position in validActions
+                int currentPos = validActions.IndexOf(_selectedIndex);
+                // Move to next/previous valid index based on scroll direction
+                int delta = input.ScrollDelta > 0 ? 1 : -1;
+                currentPos = (currentPos + delta + validActions.Count) % validActions.Count;
+                newIndex = validActions[currentPos];
+                //Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, CurrentPos={currentPos}, NewIndex={newIndex}");
+            }
+            else if (input.ActionSelection > 0)
+            {
+                // Check if the selected index is valid
+                int selectedIndex = input.ActionSelection - 1;
+                if (validActions.Contains(selectedIndex))
+                {
+                    newIndex = selectedIndex;
+                    //Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}, NewIndex={newIndex}");
+                }
+                else
+                {
+                    //Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (not in validActions)");
+                    return;
+                }
+            }
+
+            // If no valid new index, exit
             if (newIndex < 0)
                 return;
 
+            // If the new index is the same as the current, exit
             if (newIndex == _selectedIndex)
                 return;
 
+            // Update to the new valid index
             UpdateActionSelection(newIndex);
-            */
         }
 
         private void UpdateActionSelection(int newIndex)
         {
-            /*
-            if (HasStateAuthority)
-            {
-                if (_selectedIndex >= 0 && _selectedIndex < _availableManeuvers.Count)
-                {
-                    _availableManeuvers[_selectedIndex].DeselectAction(_pc, Runner);
-                }
-
-                _selectedIndex = (sbyte)newIndex;
-                if (newIndex >= 0 && newIndex < _availableManeuvers.Count)
-                {
-                    _availableManeuvers[newIndex].SelectAction(_pc, Runner);
-                }
-
-                if (newIndex >= 0 && newIndex < _availableManeuvers.Count)
-                {
-                    Debug.Log($"[ActionManager] Selected action: {_availableManeuvers[newIndex].ManeuverName} (Index: {newIndex})");
-                }
-                else
-                {
-                    Debug.Log("[ActionManager] Action selection cleared");
-                }
-            }
-            */
+            _selectedIndex = (sbyte)newIndex;
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

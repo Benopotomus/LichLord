@@ -7,11 +7,13 @@ namespace LichLord.UI
     public class UIActionsSection : UIWidget
     {
         [SerializeField] private HorizontalLayoutGroup _maneuverIconsSection;
+        [SerializeField] private HorizontalLayoutGroup _summonIconsSection;
         [SerializeField] private HorizontalLayoutGroup _buildIconsSection;
         [SerializeField] private HorizontalLayoutGroup _buildCategorySection;
 
         [SerializeField] private Image _manueverIcon;
         [SerializeField] private Image _buildIcon;
+
 
         private EActiveLayout _layout;
 
@@ -34,6 +36,10 @@ namespace LichLord.UI
             {
                 SetLayout(EActiveLayout.Buildables);
             }
+            else if (state is SummonModeState)
+            {
+                SetLayout(EActiveLayout.Summoning);
+            }
             else
             {
                 SetLayout(EActiveLayout.None);
@@ -51,6 +57,7 @@ namespace LichLord.UI
                     _maneuverIconsSection.SetActive(false);
                     _manueverIcon.SetActive(false);
                     _buildIconsSection.SetActive(false);
+                    _summonIconsSection.SetActive(false);
                     _buildCategorySection.SetActive(false);
                     _buildIcon.SetActive(false);
                     break;
@@ -58,6 +65,7 @@ namespace LichLord.UI
                     _maneuverIconsSection.SetActive(true);
                     _manueverIcon.SetActive(false);
                     _buildIconsSection.SetActive(false);
+                    _summonIconsSection.SetActive(false);
                     _buildCategorySection.SetActive(false);
                     _buildIcon.SetActive(true);
                     break;
@@ -65,8 +73,17 @@ namespace LichLord.UI
                     _buildIconsSection.SetActive(true);
                     _buildIcon.SetActive(false);
                     _maneuverIconsSection.SetActive(false);
+                    _summonIconsSection.SetActive(false);
                     _buildCategorySection.SetActive(true);
                     _manueverIcon.SetActive(true);
+                    break;
+                case EActiveLayout.Summoning:
+                    _summonIconsSection.SetActive(true);
+                    _buildIconsSection.SetActive(false);
+                    _buildIcon.SetActive(false);
+                    _maneuverIconsSection.SetActive(false);
+                    _buildCategorySection.SetActive(false);
+                    _manueverIcon.SetActive(false);
                     break;
             }
 
@@ -78,6 +95,7 @@ namespace LichLord.UI
             None,
             Maneuvers,
             Buildables,
+            Summoning,
         }
     }
 }

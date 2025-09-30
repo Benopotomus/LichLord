@@ -57,7 +57,7 @@ namespace LichLord
             {
                 StartInteract(_bestInteractable);
             }
-            else if (_pc.FSM.StateMachine.ActiveState is SummonState summonModeState)
+            else if (_pc.FSM.StateMachine.ActiveState is SummonModeState summonModeState)
             {
                 StartInteract(_bestInteractable);
             }

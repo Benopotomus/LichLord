@@ -37,6 +37,10 @@ namespace LichLord.Buildables
                 int workerIndex = authorityState.GetWorkerIndex();
                 if (workerIndex >= 0)
                     Context.WorkerManager.ClearWorkerData(workerIndex);
+
+                int containerIndex = authorityState.GetContainerIndex();
+                if (containerIndex >= 0)
+                    Context.ContainerManager.ClearContainer(containerIndex);
             }
         }
 

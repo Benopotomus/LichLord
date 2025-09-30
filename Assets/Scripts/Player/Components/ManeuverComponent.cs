@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
+using PlasticPipe.PlasticProtocol.Messages;
 
 namespace LichLord
 {
@@ -124,6 +125,15 @@ namespace LichLord
                 activeManeuver.EndExecute(_pc, Runner);
                 return;
             }
+        }
+
+        public void OnExitState()
+        {
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+            if (activeManeuver == null)
+                return;
+
+            activeManeuver.EndExecute(_pc, Runner);
         }
 
         private void ProcessManeuverActivation(ref FGameplayInput input)

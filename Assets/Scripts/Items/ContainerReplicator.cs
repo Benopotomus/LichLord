@@ -45,5 +45,11 @@ namespace LichLord.Items
             containerData.StartIndex = startIndex;
             containerData.EndIndex = endIndex;
         }
+
+        public void ClearContainer(int index)
+        {
+            ref FContainerSlotData containerData = ref _containerDatas.GetRef(index);
+            containerData.IsAssigned = false;
+        }
     }
 }

@@ -61,7 +61,63 @@ namespace LichLord
             itemSlots.replicator.SetIndexesAssigned(itemSlots.startIndex, itemSlots.endIndex, true);
         }
 
-        public (ContainerReplicator replicator, int freeIndex) 
+        public void ClearContainer(int containerIndex)
+        {
+            // Get the container data for the given stockpile index
+            FContainerSlotData containerData = GetContainerDataAtIndex(containerIndex);
+
+            if (!containerData.IsAssigned)
+            {
+                Debug.LogWarning($"Container at index {containerIndex} is not assigned, cannot clear.");
+                return;
+            }
+
+            // Calculate replicator and local index for the container
+            int replicatorIndex = containerIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
+            int localIndex = containerIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
+
+            if (replicatorIndex >= _containerReplicators.Count)
+            {
+                Debug.LogError($"No container replicator found for index {containerIndex}");
+                return;
+            }
+
+            // Get the container replicator
+            var containerReplicator = _containerReplicators[replicatorIndex];
+
+            // Unassign the container
+            containerReplicator.ClearContainer(localIndex);
+
+            // Get the item slot range for the container
+            int startItemIndex = containerData.StartIndex;
+            int endItemIndex = containerData.EndIndex;
+
+            // Calculate the item slot replicator index
+            int itemReplicatorIndex = startItemIndex / ItemConstants.ITEMS_PER_REPLICATOR;
+
+            if (itemReplicatorIndex >= _itemSlotReplicators.Count)
+            {
+                Debug.LogError($"No item slot replicator found for start index {startItemIndex}");
+                return;
+            }
+
+            // Get the item slot replicator
+            var itemSlotReplicator = _itemSlotReplicators[itemReplicatorIndex];
+
+            // Unassign all item slots in the range
+            itemSlotReplicator.SetIndexesAssigned(startItemIndex % ItemConstants.ITEMS_PER_REPLICATOR,
+                                                endItemIndex % ItemConstants.ITEMS_PER_REPLICATOR,
+                                                false);
+
+            // Clear item data for each slot in the range
+            for (int fullItemIndex = startItemIndex; fullItemIndex <= endItemIndex; fullItemIndex++)
+            {
+                int localItemIndex = fullItemIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+                itemSlotReplicator.ClearItemData(localItemIndex);
+            }
+        }
+
+        public (ContainerReplicator replicator, int freeIndex)
             GetContainerFreeReplicatorAndIndex(int count)
         {
             foreach (var replicator in _containerReplicators)
@@ -105,7 +161,7 @@ namespace LichLord
 
             foreach (var replicator in _containerReplicators)
             {
-                if(replicator.Index == replicatorIndex) 
+                if (replicator.Index == replicatorIndex)
                     return replicator;
             }
 
@@ -214,7 +270,7 @@ namespace LichLord
 
                 return (newReplicator, itemSlotRange.startIndex, itemSlotRange.endIndex);
             }
-            
+
 
             Debug.Log("No replicator with free slots found");
             return (null, -1, -1);
@@ -251,7 +307,7 @@ namespace LichLord
             for (int fullItemIndex = startIndex; fullItemIndex <= endIndex; fullItemIndex++)
             {
                 int localIndex = fullItemIndex % ItemConstants.ITEMS_PER_REPLICATOR;
-         
+
                 // Get the item slot data at the local index
                 FItemSlotData itemSlotData = itemSlotReplicator.GetItemSlotDataAtIndex(localIndex);
                 itemSlotDatas.Add(itemSlotData);
@@ -260,7 +316,7 @@ namespace LichLord
             return itemSlotDatas;
         }
 
-        public FItemSlotData GetItemSlotData(int fullIndex) 
+        public FItemSlotData GetItemSlotData(int fullIndex)
         {
             int replicatorIndex = fullIndex / ItemConstants.ITEMS_PER_REPLICATOR;
             int localIndex = fullIndex % ItemConstants.ITEMS_PER_REPLICATOR;
@@ -284,9 +340,9 @@ namespace LichLord
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_SetItemSlotData(int fullIndex, FItemData itemData)
-        { 
+        {
             SetItemSlotData(fullIndex, itemData);
-           // ref FItemSlotData = GetItemSlotData(fullIndex);
+            // ref FItemSlotData = GetItemSlotData(fullIndex);
         }
 
         // Stockpiles
@@ -309,7 +365,7 @@ namespace LichLord
 
         public FStockpileData GetStockPile(int index)
         {
-            if(_predictedStockpileDatas.TryGetValue(index, out var data))
+            if (_predictedStockpileDatas.TryGetValue(index, out var data))
                 return data;
 
             return _stockpileDatas.GetRef(index);

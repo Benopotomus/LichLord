@@ -1,7 +1,6 @@
-﻿using DWD.Pooling;
-using Fusion;
-using LichLord.NonPlayerCharacters;
+﻿using Fusion;
 using UnityEngine;
+using DG.Tweening; // Added for DOTween
 
 namespace LichLord.Buildables
 {
@@ -34,6 +33,12 @@ namespace LichLord.Buildables
 
         [SerializeField]
         private int _itemSlotIndexEnd = -1;
+
+        [SerializeField]
+        private Transform _lidTransform;
+
+        [SerializeField]
+        private bool _isInteracting;
 
         public override void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
         {
@@ -68,14 +73,49 @@ namespace LichLord.Buildables
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());
+
+            bool newIsInteracting = RuntimeState.GetIsInteracting();
+
+            if (_isInteracting != newIsInteracting)
+            {
+                OnInteractingChanged(newIsInteracting);
+                _isInteracting = newIsInteracting;
+            }
         }
 
+        private void OnInteractingChanged(bool newIsInteracting)
+        {
+            if (_lidTransform == null)
+                return;
+
+            // Kill any existing tween to prevent conflicts
+            _lidTransform.DOKill();
+
+            if (newIsInteracting)
+            {
+                // Rotate lid to 40 degrees on local X axis when interacting
+                _lidTransform.DOLocalRotate(new Vector3(40f, 0f, 0f), 0.5f, RotateMode.Fast)
+                    .SetEase(Ease.OutQuad);
+            }
+            else
+            {
+                // Rotate lid back to 0 degrees on local X axis when interaction ends
+                _lidTransform.DOLocalRotate(Vector3.zero, 0.5f, RotateMode.Fast)
+                    .SetEase(Ease.OutQuad);
+            }
+        }
 
         public override void StartRecycle()
         {
             _interactableComponent.onInteractStart -= OnInteractStart;
             _interactableComponent.onInteractEnd -= OnInteractEnd;
             _interactableComponent.onInteractionComplete -= OnInteractionComplete;
+
+            // Clean up any ongoing tweens
+            if (_lidTransform != null)
+            {
+                _lidTransform.DOKill();
+            }
 
             base.StartRecycle();
         }
@@ -139,13 +179,20 @@ namespace LichLord.Buildables
         {
             Debug.Log("Interaction started with " + this);
 
-            if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
+            if (RuntimeState.DataDefinition is not ContainerDataDefinition dataDefinition)
                 return;
+
+            RuntimeState.SetContainerState(EContainerState.Interacting);
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
         {
             Debug.Log("Interaction ended with " + this);
+
+            if (RuntimeState.DataDefinition is not ContainerDataDefinition dataDefinition)
+                return;
+
+            RuntimeState.SetContainerState(EContainerState.None);
         }
 
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
@@ -160,9 +207,6 @@ namespace LichLord.Buildables
             PlayerCharacter pc = interactor.PC;
 
             // Open the container UI
-
-
-
         }
     }
 }

@@ -117,6 +117,11 @@ namespace LichLord.Buildables
                 return cryptDataDefinition.GetIsInteracting(ref _data);
             }
 
+            if (Definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
+            {
+                return containerDataDefinition.GetIsInteracting(ref _data);
+            }
+
             return false;
         }
 

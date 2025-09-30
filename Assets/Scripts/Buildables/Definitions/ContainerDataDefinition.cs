@@ -11,7 +11,7 @@ namespace LichLord.Buildables
         //27 bits
 
         protected const int CONTAINER_STATE_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
-        protected const int CONTAINER_INDEX_SHIFT = CONTAINER_INDEX_BITS + CONTAINER_STATE_BITS;
+        protected const int CONTAINER_INDEX_SHIFT = CONTAINER_STATE_SHIFT + CONTAINER_STATE_BITS;
 
         protected const int CONTAINER_STATE_MASK = (1 << CONTAINER_STATE_BITS) - 1;
         protected const int CONTAINER_INDEX_MASK = (1 << CONTAINER_INDEX_BITS) - 1;
