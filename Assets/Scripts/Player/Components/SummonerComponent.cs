@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
+using LichLord.Items;
 
 namespace LichLord
 {
@@ -33,18 +34,18 @@ namespace LichLord
         }
 
         [Networked] 
-        private sbyte _activeSummoningIndex { get; set; }
+        private ushort _activeSummoningManeuverId { get; set; }
 
-        [Networked]
         private TickTimer _activeManeuverTimer { get; set; }
         private int _activeManeuverTick;
+        private ELoadoutSlot _activeManeuverSlot;
 
         // Current upper body blend amount
         private float _moveSpeedMultiplier = 1f;
 
         public float GetMoveSpeedMultiplier()
         { 
-            if(_activeSummoningIndex < 0)
+            if(_activeSummoningManeuverId < 0)
                 return 1f;
 
             return _moveSpeedMultiplier;
@@ -66,49 +67,6 @@ namespace LichLord
         public void OnFixedUpdate()
         {
             ProcessManeuverExpiration();
-        }
-
-        private void ProcessActiveManeuver(ref FGameplayInput input)
-        {
-            /*
-            ManeuverDefinition activeManeuver = GetActiveManeuver();
-            if (activeManeuver == null)
-                return;
-
-            if (activeManeuver.InputType == EInputType.Held)
-            {
-                if (input.FireHeld)
-                {
-                    _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
-                }
-            }
-
-            if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
-            {
-                int ticksSinceStart = Runner.Tick - _activeManeuverTick;
-                activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
-            }
-            */
-        }
-
-        private void ProcessManeuverExpiration()
-        {
-            /*
-            ManeuverDefinition activeManeuver = GetActiveManeuver();
-            if (activeManeuver == null)
-                return;
-
-            if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
-            {
-                activeManeuver.EndExecute(_pc, Runner);
-                return;
-            }
-            */
-        }
-
-        private void ProcessManeuverActivation(ref FGameplayInput input)
-        {
-
         }
 
         private List<int> GetValidSummonIndexes()
@@ -137,7 +95,6 @@ namespace LichLord
             if (validActions.Count == 0)
             {
                 _selectedIndex = -1;
-                UpdateActionSelection(_selectedIndex);
                 return;
             }
 
@@ -160,8 +117,6 @@ namespace LichLord
                 }
                 // Update to the next valid index
                 _selectedIndex = (sbyte)validActions[currentPos];
-                UpdateActionSelection(_selectedIndex);
-                //Debug.Log($"[ActionManager] Current index {_selectedIndex} was invalid, cycled to {validActions[currentPos]}");
             }
 
             int newIndex = -1;
@@ -173,7 +128,6 @@ namespace LichLord
                 int delta = input.ScrollDelta > 0 ? 1 : -1;
                 currentPos = (currentPos + delta + validActions.Count) % validActions.Count;
                 newIndex = validActions[currentPos];
-                //Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, CurrentPos={currentPos}, NewIndex={newIndex}");
             }
             else if (input.ActionSelection > 0)
             {
@@ -182,36 +136,104 @@ namespace LichLord
                 if (validActions.Contains(selectedIndex))
                 {
                     newIndex = selectedIndex;
-                    //Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}, NewIndex={newIndex}");
                 }
                 else
                 {
-                    //Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (not in validActions)");
                     return;
                 }
             }
 
-            // If no valid new index, exit
             if (newIndex < 0)
                 return;
 
-            // If the new index is the same as the current, exit
             if (newIndex == _selectedIndex)
                 return;
 
-            // Update to the new valid index
-            UpdateActionSelection(newIndex);
+            _selectedIndex = (sbyte)newIndex;
         }
 
-        private void UpdateActionSelection(int newIndex)
+        private void ProcessManeuverActivation(ref FGameplayInput input)
         {
-            _selectedIndex = (sbyte)newIndex;
+            if (!input.Fire)
+                return;
+
+            if (_selectedIndex == -1)
+                return;
+
+            FItemData itemData = _pc.Inventory.GetItemAtLoadoutSlot(SelectedSlot);
+
+            if (!itemData.IsValid())
+                return;
+
+            ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
+
+            if (itemDefinition == null)
+                return;
+
+            if (itemDefinition is not SummonableDefinition summonable)
+                return;
+
+            ManeuverDefinition maneuverDefinition = summonable.ManeuverDefinition;
+
+            if (maneuverDefinition == null)
+                return;
+
+            _activeManeuverTick = Runner.Tick;
+            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, maneuverDefinition.Duration);
+            _activeManeuverSlot = SelectedSlot;
+
+            _activeSummoningManeuverId = (ushort)maneuverDefinition.TableID;
+
+            maneuverDefinition.StartExecute(_pc, this, Runner);
+        }
+
+        private void ProcessActiveManeuver(ref FGameplayInput input)
+        {
+            SummonableManeuverDefinition activeManeuver = GetActiveManeuver();
+            if (activeManeuver == null)
+                return;
+
+            if (activeManeuver.InputType == EInputType.Held)
+            {
+                if (input.FireHeld)
+                {
+                    _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                }
+            }
+
+            if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+            {
+                int ticksSinceStart = Runner.Tick - _activeManeuverTick;
+                activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
+                activeManeuver.CheckExpiredItem(_pc, _activeManeuverSlot, Runner, ticksSinceStart);
+            }
+        }
+
+        private SummonableManeuverDefinition GetActiveManeuver()
+        {
+            if (_activeSummoningManeuverId == 0)
+                return null;
+
+            return Global.Tables.ManeuverTable.TryGetDefinition(_activeSummoningManeuverId) as SummonableManeuverDefinition;
+        }
+
+        private void ProcessManeuverExpiration()
+        {
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+            if (activeManeuver == null)
+                return;
+
+            if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+            {
+                activeManeuver.EndExecute(_pc, this, Runner);
+                return;
+            }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         public void RPC_NotifyStartExecute(ushort maneuverDefinitionID)
         {
-            ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(maneuverDefinitionID);
+            ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(_activeSummoningManeuverId);
 
             int weaponId = _pc.Weapons.GetWeaponID();
             var animationState = maneuver.UpperBodyAnimationStates[weaponId];
@@ -234,11 +256,15 @@ namespace LichLord
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         public void RPC_NotifyEndExecute(ushort maneuverDefinitionID)
         {
+            ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(maneuverDefinitionID);
 
+            FUpperBodyAnimationTrigger upperBodyAnimationTrigger = new FUpperBodyAnimationTrigger();
+            _pc.AnimationController.SetAnimationForUpperBodyTrigger(upperBodyAnimationTrigger);
+            
             _pc.Aim.TargetPitchOffset = 0;
             _pc.Aim.TargetYawOffset = 0;
 
-            _activeSummoningIndex = -1;
+            _activeSummoningManeuverId = 0;
         }
 
     }

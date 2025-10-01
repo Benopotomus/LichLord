@@ -87,7 +87,6 @@ namespace LichLord
             _input.DeleteMode = false;
             _input.Interact = false;
             _input.SwapWeapon = false;
-
         }
 
         private void Update()
@@ -127,7 +126,6 @@ namespace LichLord
             _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();
             _input.SummonMode |= _controls.Gameplay.SummonMode.WasPressedThisFrame();
             _input.DeleteMode |= _controls.Gameplay.DeleteMode.WasPressedThisFrame();
-
 
             _input.SwapWeapon |= _controls.Gameplay.SwapWeapons.WasPressedThisFrame();
 

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
-using PlasticPipe.PlasticProtocol.Messages;
 
 namespace LichLord
 {
@@ -122,7 +121,7 @@ namespace LichLord
 
             if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
             {
-                activeManeuver.EndExecute(_pc, Runner);
+                activeManeuver.EndExecute(_pc, this, Runner);
                 return;
             }
         }
@@ -133,7 +132,7 @@ namespace LichLord
             if (activeManeuver == null)
                 return;
 
-            activeManeuver.EndExecute(_pc, Runner);
+            activeManeuver.EndExecute(_pc, this, Runner);
         }
 
         private void ProcessManeuverActivation(ref FGameplayInput input)
@@ -174,7 +173,7 @@ namespace LichLord
                 _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Duration);
 
                 activeManeuver = GetActiveManeuver();
-                activeManeuver.StartExecute(_pc, Runner);
+                activeManeuver.StartExecute(_pc, this, Runner);
             }
         }
 
@@ -200,7 +199,7 @@ namespace LichLord
                 _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _weaponAttackManeuver.Duration);
 
                 activeManeuver = GetActiveManeuver();
-                activeManeuver.StartExecute(_pc, Runner);
+                activeManeuver.StartExecute(_pc, this, Runner);
             }
         }
 
@@ -226,7 +225,7 @@ namespace LichLord
                 _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _swapWeaponManeuver.Duration);
 
                 activeManeuver = GetActiveManeuver();
-                activeManeuver.StartExecute(_pc, Runner);
+                activeManeuver.StartExecute(_pc, this, Runner);
             }
         }
 

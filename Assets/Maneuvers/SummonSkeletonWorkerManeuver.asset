@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fc1e2bf877386b458948e20958dcaf5, type: 3}
+  m_Name: SummonSkeletonWorkerManeuver
+  m_EditorClassIdentifier: 
+  _tableID: 3
+  ManeuverName: Summon Skeleton Worker
+  _duration: 0.6
+  Cooldown: 1
+  ActionSound: {fileID: 0}
+  _inputType: 0
+  _muzzle: 0
+  _muzzleEffectPrefab:
+    _name: 
+    _bundle: 
+  _icon:
+    _name: summon_skeleton_warrior
+    _bundle: summon_skeleton_warrior
+  Fullbody: 0
+  _upperBodyAnimationStates:
+    _serializedList:
+    - Key: 0
+      Value:
+        UpperbodyTriggerNumber: 4
+        UpperbodyTriggerDuration: 16
+        PitchOffset: 30
+        YawOffset: 0
+        RollOffset: 0
+    - Key: 6
+      Value:
+        UpperbodyTriggerNumber: 3
+        UpperbodyTriggerDuration: 18
+        PitchOffset: 40
+        YawOffset: 60
+        RollOffset: 0
+    - Key: 7
+      Value:
+        UpperbodyTriggerNumber: 3
+        UpperbodyTriggerDuration: 18
+        PitchOffset: 40
+        YawOffset: 60
+        RollOffset: 0
+  AnimationSpeed: 1
+  MovementSpeedMultiplier: 0.75
+  _timedProjectiles:
+  - SpawnTick: 12
+    Definition: {fileID: 11400000, guid: 5ca82b4ca2dc35c4ebddd1840f85cf2b, type: 2}
+    SpawnsOnAnimationNotify: 0
+    Muzzle: 1
+    Damage:
+      DamageValue: 10
+      DamageType: 5
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+  _cycleProjectiles: []
+  _projectileCycleDelayTicks: 0
+  _projectileTicksPerCycle: 0
+  _maneuverActions: []
+  _expendItemTick: 12

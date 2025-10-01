@@ -74,9 +74,16 @@ namespace LichLord
 
         public virtual void DeselectAction(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
-        public virtual void StartExecute(PlayerCharacter playerCharacter, NetworkRunner runner) 
+        public virtual void StartExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 
         {
-            playerCharacter.Maneuvers.RPC_NotifyStartExecute((ushort)TableID);
+            if (component == null)
+                return;
+
+            if(component is ManeuverComponent maneuverComponent)
+                maneuverComponent.RPC_NotifyStartExecute((ushort)TableID);
+
+            if (component is SummonerComponent summonerComponent)
+                summonerComponent.RPC_NotifyStartExecute((ushort)TableID);
         }
 
         public virtual void SustainExecute(PlayerCharacter playerCharacter, NetworkRunner runner, int ticksSinceStart)
@@ -108,9 +115,16 @@ namespace LichLord
             }
         }
 
-        public virtual void EndExecute(PlayerCharacter playerCharacter, NetworkRunner runner) 
+        public virtual void EndExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 
         {
-            playerCharacter.Maneuvers.RPC_NotifyEndExecute((ushort)TableID);
+            if (component == null)
+                return;
+
+            if (component is ManeuverComponent maneuverComponent)
+                maneuverComponent.RPC_NotifyEndExecute((ushort)TableID);
+
+            if (component is SummonerComponent summonerComponent)
+                summonerComponent.RPC_NotifyEndExecute((ushort)TableID);
         }
 
         private void SpawnProjectile(PlayerCharacter pc, ref FManeuverProjectile projectileData, int tick)
