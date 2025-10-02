@@ -38,6 +38,12 @@ namespace LichLord.UI
 
             if (targetSlot is UIContainerSlot containerSlot)
             {
+                if (targetSlot is UIStrongholdWorkerItemSlot workerItemSlot)
+                {
+                    if (_itemDefinition is not SummonableDefinition summonableDefinition)
+                        return;
+                }
+
                 FItemData containerSlotItem = containerSlot.ItemData;
                 Context.ContainerManager.RPC_SetItemSlotData(containerSlot.FullItemSlotIndex, _itemData);
                 inventory.SetItemAtInventorySlot(_slotIndex, in containerSlotItem);
@@ -51,6 +57,8 @@ namespace LichLord.UI
                     inventory.SetItemAtInventorySlot(_slotIndex, in loadoutSlot.ItemData);
                 }
             }
+
+
         }
     }
 }

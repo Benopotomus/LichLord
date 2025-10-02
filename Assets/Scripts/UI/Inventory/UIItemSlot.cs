@@ -10,14 +10,14 @@ namespace LichLord.UI
     public class UIItemSlot : UIWidget, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
     {
         [SerializeField]
-        private UIButton _button;
+        protected UIButton _button;
 
         [SerializeField]
-        private Image _iconImage;
+        protected Image _iconImage;
         public Image IconImage => _iconImage;
 
         [SerializeField]
-        private TextMeshProUGUI _countText;
+        protected TextMeshProUGUI _countText;
 
         [SerializeField]
         protected FItemData _itemData;
@@ -46,7 +46,7 @@ namespace LichLord.UI
             }
         }
 
-        public void SetItemData(FItemData itemData)
+        public virtual void SetItemData(FItemData itemData)
         {
             if (_itemData.IsEqual(itemData))
                 return;
@@ -68,20 +68,20 @@ namespace LichLord.UI
             }
         }
 
-        private void LoadIcon(BundleObject prefabBundle)
+        protected void LoadIcon(BundleObject prefabBundle)
         {
             _iconLoader.OnLoaded += OnIconLoaded;
             _iconLoader.LoadIcon(prefabBundle);
         }
 
-        private void OnIconLoaded(IconLoader iconLoader, Sprite sprite)
+        protected void OnIconLoaded(IconLoader iconLoader, Sprite sprite)
         {
             _iconLoader.OnLoaded -= OnIconLoaded;
             _iconImage.sprite = sprite;
             _iconImage.enabled = true;
         }
 
-        private void OnClick()
+        protected void OnClick()
         {
             _button.PlayClickSound();
         }
@@ -110,7 +110,7 @@ namespace LichLord.UI
             }
         }
 
-        private Vector2 ScreenToLocalPosition(Vector2 screenPosition, RectTransform targetRect, Canvas canvas)
+        protected Vector2 ScreenToLocalPosition(Vector2 screenPosition, RectTransform targetRect, Canvas canvas)
         {
             // Get Canvas RectTransform
             RectTransform canvasRect = canvas.GetComponent<RectTransform>();

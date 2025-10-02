@@ -1,5 +1,6 @@
 ﻿
 using Fusion;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,14 +12,35 @@ namespace LichLord.Items
         [Networked]
         public byte Index { get; set; }
 
-        [Networked, Capacity(ItemConstants.ITEMS_PER_REPLICATOR)]
+        [Networked, Capacity(ItemConstants.ITEMS_PER_REPLICATOR), OnChangedRender(nameof(OnItemSlotDataChanged))]
         protected virtual NetworkArray<FItemSlotData> _itemSlotDatas { get; }
+
         public NetworkArray<FItemSlotData> ItemSlotDatas => _itemSlotDatas;
+
+        protected ArrayReader<FItemSlotData> _dataBufferReader;
+
+        private FItemSlotData[] _localItemSlotDatas = new FItemSlotData[ItemConstants.ITEMS_PER_REPLICATOR];
+
+        public Action<int, FItemSlotData> OnItemSlotChanged;
 
         public override void Spawned()
         {
             base.Spawned();
             Context.ContainerManager.AddItemSlotReplicator(this);
+            OnItemSlotDataChanged();
+        }
+
+        private void OnItemSlotDataChanged()
+        {
+            for (int i = 0; i < ItemConstants.ITEMS_PER_REPLICATOR; i++)
+            {
+                var networkedSlot = ItemSlotDatas[i];
+                if (!_localItemSlotDatas[i].IsEqual(networkedSlot))
+                {
+                    _localItemSlotDatas[i].Copy(networkedSlot);
+                    OnItemSlotChanged?.Invoke(i + (Index * ItemConstants.ITEMS_PER_REPLICATOR), networkedSlot);
+                }
+            }
         }
 
         public ref FItemSlotData GetItemSlotDataAtIndex(int index)

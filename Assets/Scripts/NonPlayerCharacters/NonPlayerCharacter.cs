@@ -114,6 +114,15 @@ namespace LichLord.NonPlayerCharacters
             } 
         }
 
+        [Header("Worker Data")]
+        [SerializeField]
+        private int _strongholdId = -1;
+        public int StrongholdId => _strongholdId;
+
+        [SerializeField]
+        private Stronghold _stronghold;
+        public Stronghold Stronghold => _stronghold;
+
         [SerializeField]
         private int _workerIndex = -1;
         public int WorkerIndex => _workerIndex;
@@ -166,10 +175,8 @@ namespace LichLord.NonPlayerCharacters
 
             if (runtimeState.IsWorker())
             {
-                _workerIndex = runtimeState.GetWorkerIndex();
-
-                if (_workerIndex >= 0)
-                    _context.WorkerManager.AddWorkerCharacter(this, _workerIndex);
+                UpdateWorkerData();
+                _stronghold.WorkerComponent.AddWorkerCharacter(this, _workerIndex);
             }
             
             if (runtimeState.IsWarrior())
@@ -210,10 +217,9 @@ namespace LichLord.NonPlayerCharacters
 
                 if (runtimeState.IsWorker())
                 {
-                    _workerIndex = runtimeState.GetWorkerIndex();
-                    if (_workerIndex >= 0)
+                    if (_strongholdId >= 0)
                     {
-                        var workerData = Context.WorkerManager.GetWorkerData(_workerIndex);
+                        var workerData = _stronghold.WorkerComponent.GetWorkerData(_workerIndex);
                         if (!workerData.IsAssigned)
                         {
                             switch (runtimeState.GetState())
@@ -235,6 +241,18 @@ namespace LichLord.NonPlayerCharacters
             {
                 _brainComponent.RemoteUpdate(runtimeState);
                 _movementComponent.RemoteUpdate(runtimeState, renderDeltaTime, tick);
+            }
+        }
+
+        private void UpdateWorkerData()
+        {
+            if (RuntimeState.IsWorker())
+            {
+                _strongholdId = RuntimeState.GetWorkerStrongholdId();
+                _workerIndex = RuntimeState.GetWorkerIndex();
+
+                if(_strongholdId >= 0 && _stronghold == null)
+                    _stronghold = Context.StrongholdManager.GetStronghold(_strongholdId);
             }
         }
 
@@ -370,7 +388,7 @@ namespace LichLord.NonPlayerCharacters
                 if (_workerIndex >= 0)
                 {
                     _runtimeState.SetCarriedCurrencyType(ECurrencyType.None);
-                    _context.WorkerManager.RemoveWorkerCharacter(this, _workerIndex);
+                    _stronghold.WorkerComponent.RemoveWorkerCharacter(this, _workerIndex);
                 }
             }  
 

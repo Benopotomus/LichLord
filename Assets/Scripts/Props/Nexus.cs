@@ -110,10 +110,10 @@ namespace LichLord.Props
 
             Debug.Log("Interaction started with Nexus.");
 
-            Context.PropManager.RPC_SetInteracting(ChunkID, GUID, true);
+            Context.PropManager.RPC_SetInteracting(ChunkID, Index, true);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                Context.PropManager.Predict_SetInteracting(ChunkID, GUID, true);        
+                Context.PropManager.Predict_SetInteracting(ChunkID, Index, true);        
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
@@ -123,10 +123,10 @@ namespace LichLord.Props
 
             Debug.Log("Interaction ended with Nexus.");
 
-            Context.PropManager.RPC_SetInteracting(ChunkID, GUID, false);
+            Context.PropManager.RPC_SetInteracting(ChunkID, Index, false);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                Context.PropManager.Predict_SetInteracting(ChunkID, GUID, false);
+                Context.PropManager.Predict_SetInteracting(ChunkID, Index, false);
         }
 
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
@@ -137,21 +137,17 @@ namespace LichLord.Props
             NetworkRunner runner = interactor.Runner;
             SceneContext context = interactor.Context;
 
-            context.PropManager.RPC_SetActivated(ChunkID, GUID, true);
+            context.PropManager.RPC_SetActivated(ChunkID, Index, true);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.PropManager.Predict_SetActivated(ChunkID, GUID, true);
+                context.PropManager.Predict_SetActivated(ChunkID, Index, true);
 
-            FStrongholdData strongholdData = new FStrongholdData();
-            strongholdData.ChunkID = ChunkID;
-            strongholdData.ChunkIndex = (ushort)GUID;
+            FStaticPropPosition staticPropPosition = new FStaticPropPosition();
+            staticPropPosition.ChunkID = ChunkID;
+            staticPropPosition.Index = (ushort)Index;
 
             context.MissionManager.NexusInteractionComplete();
-            context.StrongholdManager.RPC_ActivateNexus(strongholdData);
-
-            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.StrongholdManager.Predict_ActivateNexus(strongholdData);
-
+            context.StrongholdManager.RPC_ActivateNexus(staticPropPosition);
         }
     }
 }

@@ -201,10 +201,10 @@ namespace LichLord
 
             if (hit.target is Prop prop)
             {
-                Context.PropManager.RPC_DealDamage(prop.ChunkID, prop.GUID, hit.damageData.damageValue);
+                Context.PropManager.RPC_DealDamage(prop.ChunkID, prop.Index, hit.damageData.damageValue);
 
                 if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                    Context.PropManager.Predict_DealDamage(prop.ChunkID, prop.GUID, hit.damageData.damageValue);
+                    Context.PropManager.Predict_DealDamage(prop.ChunkID, prop.Index, hit.damageData.damageValue);
             }
         }
 

@@ -105,6 +105,7 @@ namespace LichLord.Buildables
                 case EWorkerState.Spawning:
                     if(hasAuthority)
                     {
+                        /*
                         if (Context.WorkerManager.ActiveWorkerCount >= Context.WorkerManager.MaxWorkerCount)
                             return;
 
@@ -114,18 +115,21 @@ namespace LichLord.Buildables
                             SpawnWorker();
                             RuntimeState.SetWorkerState(EWorkerState.WorkerActive);
                         }
+                        */
 
                     }
                     break;
                 case EWorkerState.WorkerActive:
                     if (hasAuthority)
                     {
+                        /*
                         if (!Context.WorkerManager.HasActiveWorker(_workerIndex))
                         {
                             //Debug.Log("Worker Active but also failed");
                             RuntimeState.SetWorkerState(EWorkerState.Cooldown);
                            
                         }
+                        */
                     }
                         break;
                 case EWorkerState.Cooldown:
@@ -226,7 +230,7 @@ namespace LichLord.Buildables
             var workerDefinition = RuntimeState.GetWorkerDefinition();
 
             // check if there is already a worker for this
-            Context.WorkerManager.TrySpawnWorker(workerIndex, workerDefinition, _spawnTransform.position);
+            //Context.WorkerManager.TrySpawnWorker(workerIndex, workerDefinition, _spawnTransform.position);
         }
     }
 }

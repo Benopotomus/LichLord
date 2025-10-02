@@ -14,56 +14,85 @@ namespace LichLord.UI
         [SerializeField]
         private UIStorageChestWidget _storageChestWidget;
 
+        [SerializeField]
+        private UIStrongholdContainerWidget _strongholdContainerWidget;
+
         protected override void OnOpen()
         {
             base.OnOpen();
 
             _inventoryWidget.SetActive(true);
 
-            if (ShouldOpenStorageWidget())
+            switch (GetContainerTypeWidget())
             {
-                _storageChestWidget.SetActive(true);
-                _loadoutWidget.SetActive(false);
-            }
-            else
-            {
-                _storageChestWidget.SetActive(false);
-                _loadoutWidget.SetActive(true);
+                case EContainerWidgetType.None:
+                    _loadoutWidget.SetActive(true);
+                    _storageChestWidget.SetActive(false);
+                    _strongholdContainerWidget.SetActive(false);
+                    break;
+                case EContainerWidgetType.Storage:
+                    _storageChestWidget.SetActive(true);
+                    _loadoutWidget.SetActive(false);
+                    _strongholdContainerWidget.SetActive(false);
+                    break;
+                case EContainerWidgetType.Stronghold:
+                    _strongholdContainerWidget.SetActive(true);
+                    _storageChestWidget.SetActive(false);
+                    _loadoutWidget.SetActive(false);
+                    break;
             }
         }
 
         protected override void OnTick()
         {
-            base.OnTick(); 
+            base.OnTick();
 
-            if (_storageChestWidget.isActiveAndEnabled &&
-                !ShouldOpenStorageWidget())
+            switch (GetContainerTypeWidget())
             {
-                if (Context.UI is GameplayUI gameplayUI)
-                    gameplayUI.CloseInventoryWindow();
+                case EContainerWidgetType.None:
+                    if (_storageChestWidget.isActiveAndEnabled)
+                    {
+                        if (Context.UI is GameplayUI gameplayUI)
+                            gameplayUI.CloseInventoryWindow();
+                    }
+
+                    if (_strongholdContainerWidget.isActiveAndEnabled)
+                    {
+                        if (Context.UI is GameplayUI gameplayUI)
+                            gameplayUI.CloseInventoryWindow();
+                    }
+
+                    break;
             }
         }
 
-        public bool ShouldOpenStorageWidget()
+        private EContainerWidgetType GetContainerTypeWidget()
         {
             PlayerCharacter pc = Context.LocalPlayerCharacter;
             if (pc == null)
-                return false;
+                return EContainerWidgetType.None;
 
             InteractorComponent interactor = pc.Interactor;
             if (interactor == null)
-                return false;
+                return EContainerWidgetType.None;
 
             InteractableComponent interactable = pc.Interactor.CurrentInteractable;
             if (interactable == null)
-                return false;
+                return EContainerWidgetType.None;
 
             if (interactable.Owner is StorageChest storageChest)
-            { 
-                return true;
-            }
+                return EContainerWidgetType.Storage;
+            else if (interactable.Owner is Stronghold stronghold)
+                return EContainerWidgetType.Stronghold;
 
-            return false;
+            return EContainerWidgetType.None;
+        }
+
+        public enum EContainerWidgetType
+        { 
+            None,
+            Storage,
+            Stronghold,
         }
     }
 }

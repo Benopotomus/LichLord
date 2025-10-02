@@ -1,50 +1,14 @@
 ﻿using DWD.Pooling;
 using Fusion;
 using LichLord.Buildables;
+using LichLord.Items;
 using LichLord.Props;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace LichLord.World
 {
-    [StructLayout(LayoutKind.Explicit)]
-    public struct FStrongholdData : INetworkStruct
-    {
-        [FieldOffset(0)]
-        public FChunkPosition ChunkID;
-        [FieldOffset(2)]
-        public ushort ChunkIndex;
-
-        public bool IsValid()
-        { 
-            if(ChunkID.X < 0)
-                return false;
-
-            if(ChunkID.Y < 0)
-                return false;
-
-            return true;
-        }
-
-        public bool IsEqual(FStrongholdData other)
-        {
-            if (ChunkID.X == other.ChunkID.X &&
-                ChunkID.Y == other.ChunkID.Y &&
-                ChunkIndex == other.ChunkIndex)
-                return true;
-
-            return false;
-        }
-
-        public void Copy(FStrongholdData other)
-        {
-            this.ChunkID = other.ChunkID;
-            this.ChunkIndex = other.ChunkIndex;
-        }
-    }
-
     public class StrongholdManager : ContextBehaviour
     {
         private List<PropRuntimeState> _authorityNexusStates = new List<PropRuntimeState>();
@@ -62,36 +26,47 @@ namespace LichLord.World
 
         public void LoadStrongholds()
         {
-            if (HasStateAuthority)
+            if (!HasStateAuthority)
+                return;
+
+            var loadedStrongholds = Context.WorldSaveLoadManager.LoadedStrongholds;
+
+            foreach (FStrongholdSaveData strongholdSaveData in loadedStrongholds)
             {
-                var loadedStrongholds = Context.WorldSaveLoadManager.LoadedStrongholds;
+                FStaticPropPosition propPosition  = new FStaticPropPosition();
+                propPosition.ChunkID = strongholdSaveData.chunkCoord;
+                propPosition.Index = (ushort)strongholdSaveData.index;
 
-                foreach (FStrongholdSaveData strongholdSaveData in loadedStrongholds)
-                {
-                    FStrongholdData strongholdData = new FStrongholdData();
-                    strongholdData.ChunkID = strongholdSaveData.chunkCoord;
-                    strongholdData.ChunkIndex = (ushort)strongholdSaveData.index;
+                Stronghold strongholdSpawned = SpawnStronghold(strongholdSaveData.strongholdId, 
+                    propPosition, 
+                    strongholdSaveData.currentHealth, 
+                    strongholdSaveData.rank,
+                    strongholdSaveData.containerIndex);
 
-                    Stronghold strongholdSpawned = SpawnStronghold(strongholdData, strongholdSaveData.currentHealth, strongholdSaveData.rank);
-
-                    strongholdSpawned.BuildableZone.LoadBuildables(strongholdSaveData.buildableStates);
-                }
+                strongholdSpawned.BuildableZone.LoadBuildables(strongholdSaveData.buildableStates);
+                strongholdSpawned.WorkerComponent.LoadWorkerData(strongholdSaveData.workerSaveDatas);
             }
         }
 
         public void OnStrongholdSpawned(Stronghold stronghold)
-        { 
+        {
+            if (_activeStrongholds.Contains(stronghold))
+                return;
+
             _activeStrongholds.Add(stronghold);
             onStrongholdSpawned?.Invoke(stronghold);
         }
 
         public void OnStrongholdDespawned(Stronghold stronghold)
         {
+            if (!_activeStrongholds.Contains(stronghold))
+                return;
+
             _activeStrongholds.Remove(stronghold);
             onStrongholdDespawned?.Invoke(stronghold);
         }
 
-        public Stronghold GetStronghold(FStrongholdData strongholdData)
+        public Stronghold GetStronghold(FStaticPropPosition strongholdData)
         {
             foreach(var stronghold in  _activeStrongholds) 
             {
@@ -102,11 +77,11 @@ namespace LichLord.World
             return null;
         }
 
-        public BuildableZone GetBuildableZone(int zoneId)
+        public BuildableZone GetBuildableZone(int strongholdId)
         {
             foreach (var stronghold in _activeStrongholds)
             {
-                if (stronghold.BuildableZone.ZoneID == zoneId)
+                if (stronghold.StrongholdID == strongholdId)
                     return stronghold.BuildableZone;
             }
 
@@ -114,35 +89,41 @@ namespace LichLord.World
         }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_ActivateNexus(FStrongholdData strongholdData)
+        public void RPC_ActivateNexus(FStaticPropPosition staticPropPosition)
         {
-            var position = GetStrongholdPosition(strongholdData);
+            var position = staticPropPosition.GetPosition(Context, HasStateAuthority);
 
             // Create particle here
             StandaloneVisualEffect visualEffect = DWDObjectPool.Instance.SpawnAt(_preSpawnVisualEffect, position) as StandaloneVisualEffect;
             visualEffect.Initialize();
 
+            var containerData = Context.ContainerManager.GetContainerFreeReplicatorAndIndex(BuildableConstants.MAX_WORKERS_PER_STRONGHOLD);
+
+            if (containerData.freeIndex < 0)
+            {
+                Debug.Log("No Free Container Index");
+                return;
+            }
+
+            int containerIndex = (ushort)(containerData.freeIndex + (containerData.replicator.Index * ItemConstants.CONTAINERS_PER_REPLICATOR));
+            Context.ContainerManager.SetupContainer(BuildableConstants.MAX_WORKERS_PER_STRONGHOLD);
+
             if (HasStateAuthority)
             {
-                SpawnStronghold(strongholdData, 1000, 1);
+                SpawnStronghold(_activeStrongholds.Count, staticPropPosition, 1000, 1, containerIndex);
             }
         }
 
-        public Stronghold SpawnStronghold(FStrongholdData strongholdData, int health, int rank)
+        public Stronghold SpawnStronghold(int strongholdId, FStaticPropPosition strongholdData, int health, int rank, int containerIndex)
         {
             var position = GetStrongholdPosition(strongholdData);
             return Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
                                 onBeforeSpawned: (runner, obj) =>
                                 {
                                     var r = obj.GetComponent<Stronghold>();
-                                    r.SetSpawnData(strongholdData, health, rank, _activeStrongholds.Count);
+                                    r.SetSpawnData(strongholdId, strongholdData, health, rank, containerIndex);
                                 });
             
-        }
-
-        public void Predict_ActivateNexus(FStrongholdData nexusData)
-        {
-            _predictedStates.Add(GetNexusState(nexusData));
         }
 
         // Get the nearest runtime state for a nexus
@@ -170,10 +151,10 @@ namespace LichLord.World
             return nearestNexus;
         }
 
-        public PropRuntimeState GetNexusState(FStrongholdData nexusData)
+        public PropRuntimeState GetNexusState(FStaticPropPosition nexusData)
         {
             Chunk chunk = Context.ChunkManager.GetChunk(nexusData.ChunkID);
-            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.ChunkIndex, out var state))
+            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.Index, out var state))
             {
                 return state;
             }
@@ -181,11 +162,20 @@ namespace LichLord.World
             return null;
         }
 
-        public Vector3 GetStrongholdPosition(FStrongholdData strongholdData)
+        public Stronghold GetStronghold(int strongholdId)
         {
-            PropRuntimeState nexusState = GetNexusState(strongholdData);
-            if (nexusState != null)
-                return nexusState.position;
+            foreach (var stronghold in _activeStrongholds)
+            { 
+                if(stronghold.StrongholdID == strongholdId)
+                    return stronghold;
+            }
+
+            return null;
+        }
+
+        public Vector3 GetStrongholdPosition(FStaticPropPosition strongholdData)
+        {
+
 
             return Vector3.zero;
         }

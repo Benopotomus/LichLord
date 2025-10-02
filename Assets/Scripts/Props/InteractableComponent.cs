@@ -171,5 +171,6 @@ namespace LichLord
         HarvestNode,
         Dialog,
         Container,
+        Stronghold
     }
 }

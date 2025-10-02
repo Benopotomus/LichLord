@@ -10,6 +10,7 @@ namespace LichLord.Buildables
     [RequireComponent(typeof(CapsuleCollider))]
     public partial class BuildableZone : ContextBehaviour
     {
+
         [SerializeField] private CapsuleCollider _trigger;
 
         private BuildableSpawner _spawner = new BuildableSpawner();
@@ -171,6 +172,7 @@ namespace LichLord.Buildables
             }
             else if (definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
             {
+                /*
                 int freeWorkerIndex = Context.WorkerManager.GetFreeIndex();
                 if (freeWorkerIndex < 0)
                 {
@@ -182,6 +184,7 @@ namespace LichLord.Buildables
                 cryptDataDefinition.SetWorkerIndex(freeWorkerIndex, ref data);
 
                 Context.WorkerManager.AssignWorkerIndexToBuildable(freeWorkerIndex, this, freeIndex);
+                */
             }
             else if (definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
             { 

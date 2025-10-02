@@ -36,7 +36,6 @@ namespace LichLord
         public StrongholdManager StrongholdManager;
         public InvasionManager InvasionManager;
         public ContainerManager ContainerManager;
-        public WorkerManager WorkerManager;
         public DialogManager DialogManager;
         public MissionManager MissionManager;
         public FormationManager FormationManager;

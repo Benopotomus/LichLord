@@ -82,6 +82,7 @@ namespace LichLord.NonPlayerCharacters
             _wanderPositionSet = false;
             _activeManeuverState = ENPCState.Inactive;
             _moveTarget = Vector3.zero;
+            _activeManeuver = null;
         }
 
         public void StartRecycle()
@@ -90,6 +91,7 @@ namespace LichLord.NonPlayerCharacters
             _hasHarvestTarget = false;
             _hasDepositTarget = false;
             _wanderPositionSet = false;
+            _activeManeuver = null;
             _moveTarget = Vector3.zero;
         }
 
@@ -131,7 +133,8 @@ namespace LichLord.NonPlayerCharacters
         int _lastTick = -1;
         private void UpdateAuthorityTick(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            if (_lastTick == tick)  return;
+            if (_lastTick == tick)  
+                return;
 
             _lastTick = tick;
 
@@ -235,6 +238,7 @@ namespace LichLord.NonPlayerCharacters
             }
             else if (runtimeState.IsWorker())
             {
+                /*
                 if (_wanderPositionSet)
                     return;
 
@@ -245,6 +249,7 @@ namespace LichLord.NonPlayerCharacters
                     _moveTarget = crypt.CachedTransform.position;
                     _wanderPositionSet = true;
                 }
+                */
             }
             else
             { 

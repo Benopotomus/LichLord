@@ -116,15 +116,24 @@ namespace LichLord.World
                         }
                     }
 
+                    List<FWorkerSaveData> workerSaveData = new List<FWorkerSaveData>();
+
+                    for (int i = 0; i < BuildableConstants.MAX_WORKERS_PER_STRONGHOLD; i++)
+                    {
+                        FWorkerData workerData = stronghold.WorkerComponent.GetWorkerData(i);
+                        workerSaveData.Add(new FWorkerSaveData(i, workerData, workerData.IsAssigned));
+                    }
+
                     strongholdSaveDatas.Add(new FStrongholdSaveData
                     {
                         chunkCoord = stronghold.Data.ChunkID,
-                        index = stronghold.Data.ChunkIndex,
+                        index = stronghold.Data.Index,
                         currentHealth = stronghold.CurrentHealth,
                         rank = stronghold.Rank,
-                        buildableZoneID = stronghold.BuildableZone.ZoneID,
-                        buildableStates = buildableList.ToArray()
-
+                        strongholdId = stronghold.StrongholdID,
+                        containerIndex = stronghold.ContainerIndex,
+                        buildableStates = buildableList.ToArray(),
+                        workerSaveDatas = workerSaveData.ToArray()
                     });
                 }
 
@@ -136,17 +145,6 @@ namespace LichLord.World
                     {
                         FStockpileData stockpileData = Context.ContainerManager.GetStockPile(i);
                         stockpileSaves.Add(new FStockpileSaveData(i, stockpileData, stockpileData.IsAssigned));
-                    }
-                }
-
-                // --- Save WorkerSpawners --- //
-                List<FWorkerSaveData> workerSaveData = new List<FWorkerSaveData>();
-                if (Context.WorkerManager != null)
-                {
-                    for (int i = 0; i < BuildableConstants.MAX_WORKERS; i++)
-                    {
-                        FWorkerData workerData = Context.WorkerManager.GetWorkerData(i);
-                        workerSaveData.Add(new FWorkerSaveData(i, workerData, workerData.IsAssigned));
                     }
                 }
 
@@ -171,8 +169,7 @@ namespace LichLord.World
                     invasionSaveData.invasionId = invasionManager.InvasionID;
                     invasionSaveData.invasionSpawnWave = invasionManager.InvasionSpawnWave;
                     invasionSaveData.invasionSpawnPosition = invasionManager.InvasionStagingPosition.Position;
-                    invasionSaveData.targetStronghold.chunkCoord = invasionManager.TargetStrongholdData.ChunkID;
-                    invasionSaveData.targetStronghold.index = invasionManager.TargetStrongholdData.ChunkIndex;
+                    invasionSaveData.targetStrongholdId = invasionManager.TargetStrongholdID;
                     invasionSaveData.invasionState = invasionManager.InvasionState;
                 }
 
@@ -229,7 +226,6 @@ namespace LichLord.World
                     chunks = chunkSaveDatas.ToArray(),
                     strongholds = strongholdSaveDatas.ToArray(),
                     stockpiles = stockpileSaves.ToArray(),
-                    workers = workerSaveData.ToArray(),
                     dialogs = dialogSaveDatas.ToArray(),
                     invasion = invasionSaveData,
                     containers = containerSaveData.ToArray(),
@@ -315,14 +311,6 @@ namespace LichLord.World
                             var definition = Global.Tables.BuildableTable.TryGetDefinition(buildableSave.definitionId);
                             FBuildableData data = new FBuildableData();
                             data.LoadFromSave(buildableSave);
-                            /*
-                            if (definition.BuildableDataDefinition is StockpileDataDefinition stockPileData)
-                            {
-                                int stockpileIndex = stockPileData.GetStockpileIndex(ref data);
-                                Context.ContainerManager.AssignStockpileIndex(stockpileIndex);
-                            }
-                            */
-                            
                         }
                     }
                 }
@@ -335,16 +323,6 @@ namespace LichLord.World
                         Context.ContainerManager.LoadStockPileData(stockpileSave);
                     }
                     Debug.Log($"Loaded {saveData.stockpiles.Length} stockpiles.");
-                }
-
-                // --- Load workers ---
-                if (saveData.workers != null)
-                {
-                    foreach (var workerSave in saveData.workers)
-                    {
-                        Context.WorkerManager.LoadWorkerData(workerSave);
-                    }
-                    Debug.Log($"Loaded {saveData.workers.Length} workers.");
                 }
 
                 // --- Load dialogs ---

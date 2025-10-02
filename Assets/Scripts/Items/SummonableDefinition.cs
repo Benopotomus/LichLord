@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using LichLord.NonPlayerCharacters;
+using UnityEngine;
 
 namespace LichLord.Items
 {
@@ -9,5 +10,9 @@ namespace LichLord.Items
         private ManeuverDefinition _maneuverDefinition;
         public ManeuverDefinition ManeuverDefinition => _maneuverDefinition;
 
+
+        [SerializeField]
+        private NonPlayerCharacterDefinition _nonPlayerCharacterDefinition;
+        public NonPlayerCharacterDefinition NonPlayerCharacterDefinition => _nonPlayerCharacterDefinition;
     }
 }

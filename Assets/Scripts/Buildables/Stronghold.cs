@@ -1,5 +1,7 @@
 ﻿using Fusion;
 using LichLord.Buildables;
+using LichLord.Items;
+using LichLord.NonPlayerCharacters;
 using LichLord.World;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -8,6 +10,12 @@ namespace LichLord
 {
     public class Stronghold : ContextBehaviour, IChunkTrackable, IHitTarget
     {
+        [Networked]
+        public byte StrongholdID { get; set; }
+
+        [Networked]
+        public ushort ContainerIndex { get; set; }
+
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
 
@@ -20,9 +28,13 @@ namespace LichLord
 
         [SerializeField] private InteractableComponent _interactableComponent;
 
+        [SerializeField] 
+        private WorkerComponent _workerComponent;
+        public WorkerComponent WorkerComponent => _workerComponent;
+
         [Networked]
-        private ref FStrongholdData _data => ref MakeRef<FStrongholdData>();
-        public FStrongholdData Data => _data;
+        private ref FStaticPropPosition _data => ref MakeRef<FStaticPropPosition>();
+        public FStaticPropPosition Data => _data;
 
         [Networked]
         private int _currentHealth { get; set; }
@@ -42,11 +54,15 @@ namespace LichLord
 
         private float _localInfluenceDistance = -1;
 
+        [SerializeField]
+        private FContainerSlotData _containerSlotData = new FContainerSlotData();
+        public FContainerSlotData ContainerSlotData => _containerSlotData;
+
         // IChunkTrackable
         public Chunk CurrentChunk { get { return _chunk; } set { } }
         private Chunk _chunk;
         public Vector3 Position => _cachedTransform.position;
-        public float BonusRadius { get { return 4f; } }
+
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
         public bool IsAttackable {
             get
@@ -87,28 +103,30 @@ namespace LichLord
             _interactableComponent.onInteractEnd += OnInteractEnd;
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
+            _cachedTransform.position = _data.GetPosition(Context, HasStateAuthority);
+            _containerSlotData = Context.ContainerManager.GetContainerDataAtIndex(ContainerIndex);
             Context.StrongholdManager.OnStrongholdSpawned(this);
         }
 
         private void OnChunksReady()
         {
             Context.ChunkManager.onChunksReady -= OnChunksReady;
-            _cachedTransform.position = Context.StrongholdManager.GetStrongholdPosition(_data);
+            _cachedTransform.position = _data.GetPosition(Context, HasStateAuthority);
             _chunk = Context.ChunkManager.GetChunk(_data.ChunkID);
             _chunk.AddObject(this);
             var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
             Context.ChunkManager.TryAddReplicatedChunks(newChunks);
-
         }
 
-        public void SetSpawnData(FStrongholdData data, int currentHealth, int rank, int buildableZoneId)
+        public void SetSpawnData(int strongholdId, FStaticPropPosition positionData, int currentHealth, int rank,int containerIndex)
         { 
-            _data = data;
+            _data = positionData;
             _currentHealth = currentHealth;
             _rank = rank;
             _maxHealth = 1000 + ((rank - 1) * 100);
             _influenceDistance = 20 + ((rank - 1) * 5);
-            _buildableZone.ZoneID = (byte)buildableZoneId;
+            StrongholdID = (byte)strongholdId;
+            ContainerIndex = (ushort)containerIndex;
         }
 
         public override void Render()
@@ -188,17 +206,17 @@ namespace LichLord
 
         private string GetInteractionText(InteractorComponent interactor)
         {
-            return "Stockpile";
+            return "" + this;
         }
 
         private int GetTicksToComplete(InteractorComponent interactor)
         {
-            return 32;
+            return -1;
         }
 
         private EInteractType GetInteractType(InteractorComponent interactor)
         {
-            return EInteractType.HarvestNode;
+            return EInteractType.Stronghold;
         }
 
         private float GetInteractDistance(InteractorComponent interactor)
@@ -208,19 +226,19 @@ namespace LichLord
 
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
         {
-            Debug.Log("Interaction started with Stronghold.");
+            Debug.Log("Interaction started with " + this);
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
         {
-            Debug.Log("Interaction ended with Stronghold.");
+            Debug.Log("Interaction ended with " + this);
         }
 
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
         {
-            Debug.Log("Stronghold Interaction complete.");
+            Debug.Log("Interaction complete with " + this);
             // Trigger effects, state changes, or events
-            Context.InvasionManager.BeginInvasion(2, Data);
+            Context.InvasionManager.BeginInvasion(2, StrongholdID);
 
             //_rank++;
         }

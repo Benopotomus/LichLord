@@ -5,9 +5,13 @@ namespace LichLord.NonPlayerCharacters
     [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/WorkerDataDefinition")]
     public class WorkerDataDefinition : NonPlayerCharacterDataDefinition
     {
-        // Config (7 from base)
-        private const int WORKER_INDEX_BITS = 7;                // 0–127
-        private const int WORKER_INDEX_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
+        // Config (19 from base)
+        private const int STRONGHOLD_ID_BITS = 4;                // 0–15
+        private const int STRONGHOLD_ID_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
+        private const byte STRONGHOLD_ID_MASK = (1 << STRONGHOLD_ID_BITS) - 1;
+
+        private const int WORKER_INDEX_BITS = 6;                // 0–63
+        private const int WORKER_INDEX_SHIFT = STRONGHOLD_ID_SHIFT + STRONGHOLD_ID_BITS;
         private const byte WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
 
         // Events (packed into ushort)
@@ -34,6 +38,20 @@ namespace LichLord.NonPlayerCharacters
             // Initialize Events
             npcData.Events = 0;
             SetHealth(definition.MaxHealth, ref npcData);
+        }
+
+        // Worker Stronghold Id
+        public int GetStrongholdId(ref FNonPlayerCharacterData npcData)
+        {
+            return (int)((npcData.Configuration >> STRONGHOLD_ID_SHIFT) & STRONGHOLD_ID_MASK);
+        }
+
+        public void SetStrongholdId(int strongholdId, ref FNonPlayerCharacterData npcData)
+        {
+            int config = npcData.Configuration;
+            int newValue = Mathf.Clamp((int)strongholdId, 0, STRONGHOLD_ID_MASK);
+            config = ((config & ~(STRONGHOLD_ID_MASK << STRONGHOLD_ID_SHIFT)) | (newValue << STRONGHOLD_ID_SHIFT));
+            npcData.Configuration = config;
         }
 
         // Worker Index

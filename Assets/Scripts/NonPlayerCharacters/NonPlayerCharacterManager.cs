@@ -93,7 +93,7 @@ namespace LichLord.NonPlayerCharacters
             SpawnNPC(ref data);
         }
 
-        public void SpawnNPCWorker(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, int workerIndex)
+        public void SpawnNPCWorker(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, int strongholdId, int workerIndex)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                 return;
@@ -108,8 +108,9 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
+            workerData.SetState(ENPCState.Spawning, ref data);
+            workerData.SetStrongholdId(strongholdId, ref data);
             workerData.SetWorkerIndex(workerIndex, ref data);
-
             SpawnNPC(ref data);
         }
 

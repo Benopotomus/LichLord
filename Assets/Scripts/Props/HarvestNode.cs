@@ -173,10 +173,10 @@ namespace LichLord.Props
             SceneContext context = Context;
             NetworkRunner runner = Context.Runner;
 
-            context.PropManager.RPC_HarvestNode_PC(ChunkID, GUID, harvestData.HarvestPointsCost, pc);
+            context.PropManager.RPC_HarvestNode_PC(ChunkID, Index, harvestData.HarvestPointsCost, pc);
 
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                context.PropManager.Predict_HarvestNode(ChunkID, GUID, harvestData.HarvestPointsCost);
+                context.PropManager.Predict_HarvestNode(ChunkID, Index, harvestData.HarvestPointsCost);
         }
 
         public void ProgressHarvest(NonPlayerCharacter npc)
@@ -191,13 +191,13 @@ namespace LichLord.Props
             {
                 npc.RuntimeState.SetHarvestProgress(0);
                 npc.RuntimeState.SetCarriedCurrencyType(harvestData.CurrencyTypeHarvested.CurrencyType);
-                context.PropManager.RPC_HarvestNode_NPC(ChunkID, GUID, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
+                context.PropManager.RPC_HarvestNode_NPC(ChunkID, Index, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
                 //Debug.Log(npc.RuntimeState.GetHarvestProgress());
             }
             else
             {
                 npc.RuntimeState.AddHarvestProgress(1);
-                context.PropManager.RPC_HarvestProgress_NPC(ChunkID, GUID, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
+                context.PropManager.RPC_HarvestProgress_NPC(ChunkID, Index, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
                 //Debug.Log(npc.RuntimeState.GetHarvestProgress());
             }
         }

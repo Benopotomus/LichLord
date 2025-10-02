@@ -12,9 +12,9 @@ namespace LichLord.UI
         {
             base.OnTick();
 
-            var workerCount = Context.WorkerManager.ActiveWorkerCount;
-            var maxWorkers = Context.WorkerManager.MaxWorkerCount;
-            _text.text = workerCount + " / " + maxWorkers;
+            //var workerCount = Context.WorkerManager.ActiveWorkerCount;
+            //var maxWorkers = Context.WorkerManager.MaxWorkerCount;
+            //_text.text = workerCount + " / " + maxWorkers;
         }
     }
 }

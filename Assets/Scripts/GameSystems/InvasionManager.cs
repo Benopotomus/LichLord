@@ -23,7 +23,7 @@ namespace LichLord
         public ref FWorldPosition InvasionStagingPosition => ref MakeRef<FWorldPosition>();
 
         [Networked]
-        public ref FStrongholdData TargetStrongholdData => ref MakeRef<FStrongholdData>();
+        public sbyte TargetStrongholdID { get; set; }
 
         [SerializeField]
         private Stronghold _targetStronghold;
@@ -67,10 +67,9 @@ namespace LichLord
 
             InvasionStagingPosition.CopyPosition(saveData.invasionSpawnPosition);
 
-            TargetStrongholdData.ChunkID = saveData.targetStronghold.chunkCoord;
-            TargetStrongholdData.ChunkIndex = (ushort)saveData.targetStronghold.index;
+            TargetStrongholdID =(sbyte)saveData.targetStrongholdId;
 
-            _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdData);
+            _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
 
             InvasionState = saveData.invasionState;
             _localInvasionState = InvasionState;
@@ -79,7 +78,7 @@ namespace LichLord
                 _despawnTick = tick + ActiveInvasion.TicksUntilDespawn;
         }
 
-        public void BeginInvasion(byte invasionID, FStrongholdData targetStrongholdData)
+        public void BeginInvasion(byte invasionID, int targetStrongholdId)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                 return;
@@ -87,14 +86,14 @@ namespace LichLord
             InvasionID = invasionID;
             InvasionSpawnWave = 0;
             InvasionState = EInvasionState.Approaching;
-            TargetStrongholdData.Copy(targetStrongholdData);
+            TargetStrongholdID = (sbyte)targetStrongholdId;
             InvasionStagingPosition.CopyPosition(GetInvasionStagingPosition());
             //Debug.Log(InvasionStagingPosition.Position);
             _localSpawnWave = -1;
             //SpawnInvasionWave(InvasionSpawnWave);
         }
 
-        public void RPC_BeginInvasion(byte invasionID, FStrongholdData targetStrongholdData)
+        public void RPC_BeginInvasion(byte invasionID, FStaticPropPosition targetStrongholdData)
         { 
             
         }
@@ -127,8 +126,8 @@ namespace LichLord
                 return;
             }
 
-            if(TargetStrongholdData.IsValid() && _targetStronghold == null)
-                _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdData);
+            if(TargetStrongholdID > 0 && _targetStronghold == null)
+                _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
 
             ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
 
@@ -201,7 +200,7 @@ namespace LichLord
             else
             {
                 ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
-                _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdData);
+                _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
 
                 onInvasionStarted?.Invoke(_targetStronghold);
             }
@@ -214,10 +213,10 @@ namespace LichLord
         private Vector3 GetInvasionStagingPosition()
         {
             var players = Context.NetworkGame.ActivePlayers;
-            var state = Context.StrongholdManager.GetNexusState(TargetStrongholdData);
+            var stronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
 
-            Chunk strongholdChunk = state.chunk;
-            Vector3 strongholdPosition = state.position;
+            Chunk strongholdChunk = stronghold.CurrentChunk;
+            Vector3 strongholdPosition = stronghold.Position;
 
             var nearbyChunks = Context.ChunkManager.GetNearbyChunks(strongholdChunk.ChunkID,2);
             var nearbyInvasionSpawns = new List<InvasionSpawnPoint>();

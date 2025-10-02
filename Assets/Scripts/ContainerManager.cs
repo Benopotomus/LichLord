@@ -1,6 +1,7 @@
 ﻿using Fusion;
 using LichLord.Items;
 using LichLord.World;
+using Pathfinding.RVO;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,7 +31,9 @@ namespace LichLord
         private List<ContainerReplicator> _containerReplicators = new List<ContainerReplicator>();
         public List<ContainerReplicator> ContainerReplicators => _containerReplicators;
 
-        // Item Containers
+        public Action<int, FItemSlotData> OnItemSlotChanged;
+
+        // Containers
 
         public void LoadContainers()
         {
@@ -251,6 +254,7 @@ namespace LichLord
                 _itemSlotReplicators.Add(replicator);
                 // Sort the list by Index
                 _itemSlotReplicators.Sort((a, b) => a.Index.CompareTo(b.Index));
+                replicator.OnItemSlotChanged += (fullIndex, itemSlotData) => OnItemSlotChanged?.Invoke(fullIndex, itemSlotData);
             }
         }
 

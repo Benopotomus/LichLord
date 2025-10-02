@@ -18,7 +18,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
         {
-            UpdateState(runtimeState, hasAuthority, tick);
+            UpdateState(runtimeState, hasAuthority, tick, true);
         }
 
         public void StartRecycle()
@@ -26,23 +26,26 @@ namespace LichLord.NonPlayerCharacters
             _currentState = ENPCState.Inactive;
         }
 
-        public void UpdateState(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
+        public void UpdateState(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick, bool forceUpdate = false)
         {
-            UpdateStateChange(runtimeState, hasAuthority, tick);
+            UpdateStateChange(runtimeState, hasAuthority, tick, forceUpdate);
 
             if(hasAuthority) 
                 UpdateCurrentState(runtimeState, tick);
         }
 
-        private void UpdateStateChange(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
+        private void UpdateStateChange(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick, bool forceUpdate = false)
         {
             ENPCState oldState = _currentState;
             ENPCState newState = runtimeState.GetState();
             int animIndex = runtimeState.GetAnimationIndex();
 
-            if (_currentState == newState &&
-                _currentAnimIndex == animIndex)
-                return;
+            if (!forceUpdate)
+            {
+                if (_currentState == newState &&
+                    _currentAnimIndex == animIndex)
+                    return;
+            }
 
             NPC.AnimationController.SetAnimationForState(oldState, newState);
 
@@ -98,6 +101,7 @@ namespace LichLord.NonPlayerCharacters
                         NPC.Movement.SetFollowerLocalAvoidance(false);
                         NPC.Movement.SetFollowerCanMove(false);
                     }
+
                     break;
                 case ENPCState.HitReact:
                     NPC.Collider.enabled = true;
@@ -143,6 +147,11 @@ namespace LichLord.NonPlayerCharacters
                     break;
             }
 
+            if (runtimeState.IsWorker())
+            {
+                runtimeState.SendWorkerStateChanged(newState);
+            }
+
             _currentAnimIndex = animIndex;
             _currentState = newState;
         }
@@ -150,7 +159,7 @@ namespace LichLord.NonPlayerCharacters
         // State Authority Only
         private void UpdateCurrentState(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            switch (_currentState)
+            switch (runtimeState.GetState())
             {
                 case ENPCState.Spawning:
                     NPC.SpawningComponent.UpdateSpawningState(runtimeState, tick);

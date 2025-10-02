@@ -15,7 +15,7 @@ namespace LichLord.Props
         public PropRuntimeState RuntimeState => _runtimeState;
 
         public FChunkPosition ChunkID;
-        public int GUID;
+        public int Index;
 
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
@@ -45,7 +45,7 @@ namespace LichLord.Props
             CachedTransform.localScale = _runtimeState.scale;
 
             ChunkID = propRuntimeState.chunk.ChunkID;
-            GUID = propRuntimeState.index;
+            Index = propRuntimeState.index;
 
             CurrentChunk.AddObject(this);
         }

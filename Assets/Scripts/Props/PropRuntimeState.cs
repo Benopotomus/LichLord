@@ -35,14 +35,14 @@ namespace LichLord.Props
         private FPropData _data = new FPropData();
         public FPropData Data => _data;
 
-        public PropRuntimeState(int guid, 
+        public PropRuntimeState(int index, 
             Chunk chunk,
             Vector3 position, 
             Quaternion rotation,
             Vector3 scale,
             int definitionId)
         {
-            this.index = guid;
+            this.index = index;
             this.chunk = chunk;
             this.definitionId = definitionId;
             this.position = position;

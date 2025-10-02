@@ -12,7 +12,6 @@ namespace LichLord.World
         public FChunkSaveData[] chunks;
         public FStrongholdSaveData[] strongholds;
         public FStockpileSaveData[] stockpiles;
-        public FWorkerSaveData[] workers;
         public FDialogSaveData[] dialogs;
         public FContainerSaveData[] containers;
         public FItemSlotSaveData[] itemSlots;
@@ -104,23 +103,20 @@ namespace LichLord.World
     public struct FWorkerSaveData
     {
         public int index;
-        public int zoneID;
-        public int buildableIndex;
+        public int strongholdId;
         public bool isAssigned;
 
         public FWorkerSaveData(int idx, FWorkerData data, bool isAssigned)
         {
             index = idx;
-            zoneID = data.ZoneID;
-            buildableIndex = data.BuildableIndex;
+            strongholdId = data.StrongholdID;
             this.isAssigned = isAssigned;
         }
 
         public FWorkerData ToNetworkWorker()
         {
             FWorkerData netWorker = new FWorkerData();
-            netWorker.ZoneID = (byte)zoneID;
-            netWorker.BuildableIndex = (ushort)buildableIndex;
+            netWorker.StrongholdID = (byte)strongholdId;
             netWorker.IsAssigned = isAssigned;
 
             return netWorker;
@@ -182,9 +178,11 @@ namespace LichLord.World
 
         public int currentHealth;
         public int rank;
-        public int buildableZoneID;
+        public int strongholdId;
+        public int containerIndex;
 
         public FBuildableSaveState[] buildableStates;
+        public FWorkerSaveData[] workerSaveDatas;
     }
 
     [Serializable]
@@ -269,30 +267,22 @@ namespace LichLord.World
         public int invasionId;
         public int invasionSpawnWave;
         public Vector3 invasionSpawnPosition;
-        public FTargetStrongholdSaveData targetStronghold;
+        public int targetStrongholdId;
         public EInvasionState invasionState;
 
         public FInvasionSaveData(int invasionId, 
             int invasionSpawnWave, 
             Vector3 invasionSpawnPosition,
-            FStrongholdData targetStronghold,
+            int targetStrongholdId,
             EInvasionState invasionState)
         {
             this.invasionId = invasionId;
             this.invasionSpawnWave = invasionSpawnWave;
             this.invasionSpawnPosition = invasionSpawnPosition;
-            this.targetStronghold.chunkCoord = targetStronghold.ChunkID;
-            this.targetStronghold.index = targetStronghold.ChunkIndex;
+            this.targetStrongholdId = targetStrongholdId;
             this.invasionState = invasionState;
         }
-
-        [Serializable]
-        public struct FTargetStrongholdSaveData
-        {
-            public FChunkPosition chunkCoord;
-            public int index;
-        }
-        }
+    }
 
     [Serializable]
     public struct FNPCSaveData

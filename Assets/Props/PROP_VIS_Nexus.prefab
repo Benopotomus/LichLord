@@ -10227,7 +10227,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 2.5
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1990070723009024549
 MonoBehaviour:
@@ -10241,7 +10241,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b47f5fe7e7275fa4b960e1fe84b13586, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TicksToComplete: 96
   InteractTick: 0
 --- !u!1 &4339960414536405305
 GameObject:
@@ -17498,7 +17497,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5669841024813192744}
   - component: {fileID: 3375435704011219859}
-  - component: {fileID: 6466698900152548025}
+  - component: {fileID: 1611124334070902398}
   m_Layer: 0
   m_Name: PROP_VIS_Nexus
   m_TagString: Untagged
@@ -17540,12 +17539,12 @@ MonoBehaviour:
   ChunkID:
     X: 0
     Y: 0
-  GUID: 0
+  Index: 0
   _cachedTransform: {fileID: 5669841024813192744}
   _interactableComponent: {fileID: 1990070723009024549}
   _interactEffect: {fileID: 5818596669073881103}
   _rocksTransform: {fileID: 8950003989043818726}
---- !u!114 &6466698900152548025
+--- !u!114 &1611124334070902398
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -17554,24 +17553,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 5546409922144146193}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 560112f876f5746c780eca0d404e7139, type: 3}
+  m_Script: {fileID: 11500000, guid: 6bee0a6fa1f5d4f4db481219040523c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1073741824
-  radiusBackingField: 1.5
-  heightBackingField: 2
-  centerBackingField: 1
-  locked: 0
-  lockWhenNotMoving: 0
-  agentTimeHorizon: 2
-  obstacleTimeHorizon: 0.5
-  maxNeighbours: 10
-  layer: 1
-  collidesWith: -1
-  wallAvoidForce: 1
-  wallAvoidFalloff: 1
-  priority: 0.5
-  debug: 0
+  graphMask:
+    value: -1
+  type: 4
+  mesh: {fileID: 0}
+  rectangleSize: {x: 1, y: 1}
+  circleRadius: 1
+  circleResolution: 6
+  height: 1
+  meshScale: 1
+  center: {x: 0, y: 0, z: 0}
+  updateDistance: 0.4
+  isDual: 0
+  radiusExpansionMode: 1
+  cutsAddedGeom: 1
+  updateRotationDistance: 10
+  useRotationAndScale: 0
 --- !u!1 &5924432081982649605
 GameObject:
   m_ObjectHideFlags: 0

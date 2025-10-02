@@ -129,6 +129,11 @@ namespace LichLord.NonPlayerCharacters
             if (_data.DefinitionID == 0)
                 return;
 
+            if (newState == ENPCState.Inactive)
+            {
+                Debug.Log("Something set me inactive");
+            }
+
             DataDefinition.SetState(newState, ref _data);
             _replicator.ReplicateRuntimeState(this);
         }
@@ -249,6 +254,14 @@ namespace LichLord.NonPlayerCharacters
             return false;
         }
 
+        public int GetWorkerStrongholdId()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+                return workerDataDefinition.GetStrongholdId(ref _data);
+
+            return -1;
+        }
+
         public int GetWorkerIndex()
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
@@ -257,6 +270,14 @@ namespace LichLord.NonPlayerCharacters
             return -1;
         }
 
+        public void SendWorkerStateChanged(ENPCState newState)
+        {
+            if (!IsWorker())
+                return;
+
+            Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
+            stronghold.WorkerComponent.OnWorkerStateChanged(GetWorkerIndex(), newState);
+        }
         // Harvest
 
         public ECurrencyType GetCarriedCurrencyType()
