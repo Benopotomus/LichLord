@@ -1,5 +1,6 @@
 ﻿using Fusion;
 using LichLord.World;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace LichLord.NonPlayerCharacters
 {
     public partial class NonPlayerCharacterReplicator : ContextBehaviour, IStateAuthorityChanged
     {
+        [Serializable]
         public struct FNPCLoadState
         {
             public NonPlayerCharacter NPC;
@@ -19,6 +21,7 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
 
+        [SerializeField]
         private FNPCLoadState[] _loadStates = new FNPCLoadState[NonPlayerCharacterConstants.MAX_NPC_REPS];
         public FNPCLoadState[] LoadStates => _loadStates;
 
@@ -110,7 +113,7 @@ namespace LichLord.NonPlayerCharacters
         {
             for(int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                if (!_localRuntimeStates[i].IsActive())
+                if (_localRuntimeStates[i].GetStateFromData(ref _npcDatas.GetRef(i)) == ENPCState.Inactive)
                     return i;
             }
 
@@ -144,6 +147,11 @@ namespace LichLord.NonPlayerCharacters
                 bool shouldBeActive = renderState.IsActive();
 
                 ref FNPCLoadState loadState = ref _loadStates[i];
+
+                if (shouldBeActive)
+                {
+                    //Debug.Log("Active Index " + i);
+                }
 
                 if (shouldBeActive && loadState.LoadState == ELoadState.None)
                 {

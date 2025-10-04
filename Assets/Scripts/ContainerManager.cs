@@ -1,7 +1,6 @@
 ﻿using Fusion;
 using LichLord.Items;
 using LichLord.World;
-using Pathfinding.RVO;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,6 +31,8 @@ namespace LichLord
         public List<ContainerReplicator> ContainerReplicators => _containerReplicators;
 
         public Action<int, FItemSlotData> OnItemSlotChanged;
+
+        private Dictionary<int, FPredictedItemData> _predictedItemSlots = new Dictionary<int, FPredictedItemData>();
 
         // Containers
 
@@ -188,7 +189,7 @@ namespace LichLord
             int localIndex = fullIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
             int replicatorIndex = fullIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
 
-            if (_containerReplicators.Count < replicatorIndex)
+            if (_containerReplicators.Count <= replicatorIndex)
                 return new FContainerSlotData();
 
             return _containerReplicators[replicatorIndex].GetContainerDataAtIndex(localIndex);
@@ -254,8 +255,22 @@ namespace LichLord
                 _itemSlotReplicators.Add(replicator);
                 // Sort the list by Index
                 _itemSlotReplicators.Sort((a, b) => a.Index.CompareTo(b.Index));
-                replicator.OnItemSlotChanged += (fullIndex, itemSlotData) => OnItemSlotChanged?.Invoke(fullIndex, itemSlotData);
+                replicator.OnItemSlotChanged += OnItemReplictorSlotChanged;
             }
+        }
+
+        private void OnItemReplictorSlotChanged(int fullIndex, FItemSlotData itemSlotData)
+        {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                if (_predictedItemSlots.TryGetValue(fullIndex, out FPredictedItemData predictedData))
+                {
+                    OnItemSlotChanged?.Invoke(fullIndex, predictedData.ItemSlotData);
+                    return;
+                }
+            }
+
+            OnItemSlotChanged?.Invoke(fullIndex, itemSlotData);
         }
 
         public (ItemSlotReplicator replicator, int startIndex, int endIndex) GetItemReplicatorAndFreeSlotRange(int count)
@@ -310,10 +325,8 @@ namespace LichLord
             // Iterate through the item slot range
             for (int fullItemIndex = startIndex; fullItemIndex <= endIndex; fullItemIndex++)
             {
-                int localIndex = fullItemIndex % ItemConstants.ITEMS_PER_REPLICATOR;
-
                 // Get the item slot data at the local index
-                FItemSlotData itemSlotData = itemSlotReplicator.GetItemSlotDataAtIndex(localIndex);
+                FItemSlotData itemSlotData = GetItemSlotData(fullItemIndex);
                 itemSlotDatas.Add(itemSlotData);
             }
 
@@ -322,10 +335,18 @@ namespace LichLord
 
         public FItemSlotData GetItemSlotData(int fullIndex)
         {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                if (_predictedItemSlots.TryGetValue(fullIndex, out FPredictedItemData predictedData))
+                {
+                    return predictedData.ItemSlotData;
+                }
+            }
+
             int replicatorIndex = fullIndex / ItemConstants.ITEMS_PER_REPLICATOR;
             int localIndex = fullIndex % ItemConstants.ITEMS_PER_REPLICATOR;
 
-            if (_itemSlotReplicators.Count < replicatorIndex)
+            if (_itemSlotReplicators.Count <= replicatorIndex)
                 return new FItemSlotData();
 
             return _itemSlotReplicators[replicatorIndex].GetItemSlotDataAtIndex(localIndex);
@@ -345,8 +366,45 @@ namespace LichLord
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_SetItemSlotData(int fullIndex, FItemData itemData)
         {
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                _predictedItemSlots[fullIndex] = new FPredictedItemData
+                {
+                    EndTick = Runner.Tick + 32,
+                    ItemSlotData = new FItemSlotData
+                    {
+                        ItemData = itemData,
+                        IsAssigned = true
+                    }
+                };
+
             SetItemSlotData(fullIndex, itemData);
-            // ref FItemSlotData = GetItemSlotData(fullIndex);
+        }
+
+        public override void Render()
+        {
+            base.Render();
+
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                Debug.Log(_predictedItemSlots.Count);
+                int tick = Runner.Tick;
+
+                var keysToRemove = new List<int>();
+                foreach (var predictedSlot in _predictedItemSlots)
+                {
+                    int index = predictedSlot.Key;
+                    if (tick >= predictedSlot.Value.EndTick)
+                    {
+                        OnItemSlotChanged?.Invoke(index, GetItemSlotData(index));
+                        keysToRemove.Add(index);
+                    }
+                }
+
+                foreach (var key in keysToRemove)
+                {
+                    _predictedItemSlots.Remove(key);
+                }
+            }
         }
 
         // Stockpiles

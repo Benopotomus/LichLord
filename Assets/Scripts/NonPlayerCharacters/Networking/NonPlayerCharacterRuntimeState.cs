@@ -129,11 +129,6 @@ namespace LichLord.NonPlayerCharacters
             if (_data.DefinitionID == 0)
                 return;
 
-            if (newState == ENPCState.Inactive)
-            {
-                Debug.Log("Something set me inactive");
-            }
-
             DataDefinition.SetState(newState, ref _data);
             _replicator.ReplicateRuntimeState(this);
         }

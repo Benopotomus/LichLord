@@ -104,7 +104,7 @@ namespace LichLord.NonPlayerCharacters
                 {
                     workerData.RespawnProgress++;
                     _nextRespawnProgressTick[i] = Runner.Tick + _ticksPerRespawnProgress;
-                    Debug.Log(workerData.RespawnProgress);
+                    //Debug.Log(workerData.RespawnProgress);
 
                     if (workerData.RespawnProgress > _maxRespawnProgress)
                     {
@@ -165,7 +165,6 @@ namespace LichLord.NonPlayerCharacters
         public void AddWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
-            workerData.WorkerActive = true;
 
             if (HasStateAuthority)
             {
@@ -184,7 +183,6 @@ namespace LichLord.NonPlayerCharacters
         public void RemoveWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
-            workerData.WorkerActive = false;
 
             _workerCharacters[workerIndex] = null;
 
@@ -207,9 +205,6 @@ namespace LichLord.NonPlayerCharacters
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
             if (workerData.WorkerActive)
-                return;
-
-            if (_workerCharacters[workerIndex] != null)
                 return;
 
             workerData.WorkerActive = true;
