@@ -25,11 +25,6 @@ namespace LichLord.NonPlayerCharacters
 
         protected NonPlayerCharacter[] _workerCharacters = new NonPlayerCharacter[BuildableConstants.MAX_WORKERS_PER_STRONGHOLD];
        
-        protected int[] _nextRespawnProgressTick = new int[BuildableConstants.MAX_WORKERS_PER_STRONGHOLD];
-
-        private int _ticksPerRespawnProgress = 32;
-        private int _maxRespawnProgress = 10;
-
         public override void Spawned()
         {
             base.Spawned();
@@ -40,14 +35,6 @@ namespace LichLord.NonPlayerCharacters
         {
             base.Despawned(runner, hasState);
             Context.ContainerManager.OnItemSlotChanged -= OnItemSlotChanged;
-        }
-
-        public override void Render()
-        {
-            base.Render();
-            int tick = Runner.Tick;
-
-            UpdateRespawns(tick);
         }
 
         private void OnItemSlotChanged(int fullIndex, FItemSlotData data)
@@ -82,44 +69,15 @@ namespace LichLord.NonPlayerCharacters
         private FItemSlotData GetItemSlotDataForWorkerIndex(int workerIndex)
         {
             FContainerSlotData containerSlotData = _stronghold.ContainerSlotData;
-
             int fullIndex =  containerSlotData.StartIndex + workerIndex;
-
             return Context.ContainerManager.GetItemSlotData(fullIndex);
         }
 
-        public void UpdateRespawns(int tick)
+        private void DestroyItemForWorker(int workerIndex)
         {
-            for (int i = 0; i < BuildableConstants.MAX_WORKERS_PER_STRONGHOLD; i++)
-            {
-                ref FWorkerData workerData = ref _workerDatas.GetRef(i);
-
-                if (!workerData.IsAssigned)
-                    continue;
-
-                if(!workerData.IsRespawning)
-                    continue;
-
-                if (tick > _nextRespawnProgressTick[i])
-                {
-                    workerData.RespawnProgress++;
-                    _nextRespawnProgressTick[i] = Runner.Tick + _ticksPerRespawnProgress;
-                    //Debug.Log(workerData.RespawnProgress);
-
-                    if (workerData.RespawnProgress > _maxRespawnProgress)
-                    {
-                        var itemSlotData = GetItemSlotDataForWorkerIndex(i);
-                        if (itemSlotData.ItemData.IsValid())
-                        {
-                            SummonableDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(itemSlotData.ItemData.DefinitionID) as SummonableDefinition;
-                            if (summableDefinition == null)
-                                continue;
-
-                            TrySpawnWorker(_stronghold.StrongholdID, i, summableDefinition.NonPlayerCharacterDefinition);
-                        }
-                    }
-                }
-            }
+            FContainerSlotData containerSlotData = _stronghold.ContainerSlotData;
+            int fullIndex = containerSlotData.StartIndex + workerIndex;
+            Context.ContainerManager.SetItemSlotData(fullIndex, new FItemData());
         }
 
         public void OnWorkerStateChanged(int workerIndex, ENPCState newState)
@@ -136,13 +94,7 @@ namespace LichLord.NonPlayerCharacters
                 case ENPCState.Inactive:
                 case ENPCState.Dead:
 
-                    if (workerData.IsRespawning)
-                        return;
-
-                    workerData.WorkerActive = false;
-                    workerData.IsRespawning = true;
-                    workerData.RespawnProgress = 0;
-                    _nextRespawnProgressTick[workerIndex] = Runner.Tick + _ticksPerRespawnProgress;
+                    DestroyItemForWorker(workerIndex);
                     break;
 
             }

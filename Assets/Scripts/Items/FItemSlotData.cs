@@ -3,12 +3,12 @@
     using Fusion;
     using System.Runtime.InteropServices;
 
-    [StructLayout(LayoutKind.Explicit, Size = 7)]
+    [StructLayout(LayoutKind.Explicit, Size = 5)]
     public struct FItemSlotData : INetworkStruct
     {
         [FieldOffset(0)]
-        public FItemData ItemData; // 6 bytes
-        [FieldOffset(6)]
+        public FItemData ItemData; // 4 bytes
+        [FieldOffset(4)]
         public NetworkBool IsAssigned; // 1 byte
 
         public bool IsEqual(FItemSlotData other)

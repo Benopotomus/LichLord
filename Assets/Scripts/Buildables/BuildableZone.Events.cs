@@ -27,11 +27,12 @@ namespace LichLord.Buildables
             // Handle destroyed
             if (authorityState.GetState() == EBuildableState.Destroyed)
             {
+                /*
                 int stockpileIndex = authorityState.GetStockpileIndex();
                 if(stockpileIndex >= 0) 
                     Context.ContainerManager.ClearStockpile(stockpileIndex);
 
-                /*
+                
                 int workerIndex = authorityState.GetWorkerIndex();
                 if (workerIndex >= 0)
                     Context.WorkerManager.ClearWorkerData(workerIndex);

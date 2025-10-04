@@ -11,7 +11,7 @@
         [FieldOffset(2)]
         private ushort _endIndex; // 2 bytes
         [FieldOffset(4)]
-        private NetworkBool _isAssigned;
+        private byte _state;
 
         // Constants for bit masks
 
@@ -27,10 +27,60 @@
             set => _endIndex = (ushort)value;
         }
 
-        public bool IsAssigned
+        public bool IsAssigned { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
+        public bool IsStockpile { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
+
+        public bool IsBitSet(ref byte flags, int bit)
         {
-            get => _isAssigned;
-            set => _isAssigned = value;
+            return (flags & (1 << bit)) == (1 << bit);
+        }
+
+        public byte SetBit(ref byte flags, int bit, bool value)
+        {
+            if (value == true)
+            {
+                return flags |= (byte)(1 << bit);
+            }
+            else
+            {
+                return flags &= unchecked((byte)~(1 << bit));
+            }
+        }
+
+        public byte SetBitNoRef(byte flags, int bit, bool value)
+        {
+            if (value == true)
+            {
+                return flags |= (byte)(1 << bit);
+            }
+            else
+            {
+                return flags &= unchecked((byte)~(1 << bit));
+            }
+        }
+
+        public bool IsEqual(FContainerSlotData other)
+        {
+            if (IsAssigned != other.IsAssigned)
+                return false;
+
+            if(IsStockpile != other.IsStockpile)
+                return false;
+
+            if (_startIndex != other._startIndex)
+                return false;
+
+            if (_endIndex != other._endIndex)
+                return false;
+
+            return true;
+        }
+
+        public void Copy(FContainerSlotData other)
+        {
+            _state = other._state;
+            _startIndex = other._startIndex;
+            _endIndex = other._endIndex;
         }
     }
 }

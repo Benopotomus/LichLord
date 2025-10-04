@@ -99,14 +99,6 @@ namespace LichLord.Buildables
             if (_data.DefinitionID == 0)
                 return;
 
-            if (Definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
-            {
-                stockpileDataDefinition.SetIsInteracting(interact, ref _data);
-
-                if (buildableZone != null)
-                    buildableZone.ReplicateRuntimeState(this);
-            }
-
             if (Definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
             {
                 containerDataDefinition.SetIsInteracting(interact, ref _data);
@@ -118,11 +110,6 @@ namespace LichLord.Buildables
 
         public bool GetIsInteracting()
         {
-            if (Definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
-            {
-                return stockpileDataDefinition.GetIsInteracting(ref _data);
-            }
-
             if (Definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
             {
                 return cryptDataDefinition.GetIsInteracting(ref _data);
@@ -134,16 +121,6 @@ namespace LichLord.Buildables
             }
 
             return false;
-        }
-
-        public int GetStockpileIndex()
-        {
-            if (Definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
-            {
-                return stockpileDataDefinition.GetStockpileIndex(ref _data);
-            }
-
-            return -1;
         }
 
         public int GetWorkerIndex()
@@ -202,6 +179,16 @@ namespace LichLord.Buildables
             if (Definition.BuildableDataDefinition is ContainerDataDefinition containerData)
             {
                 return containerData.GetContainerIndex(ref _data);
+            }
+
+            return -1;
+        }
+
+        public int GetRefinerProgress()
+        {
+            if (Definition.BuildableDataDefinition is RefinerDataDefinition refinerData)
+            {
+                return refinerData.GetRefinerProgress(ref _data);
             }
 
             return -1;

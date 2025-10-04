@@ -1,4 +1,5 @@
 ﻿using LichLord.Buildables;
+using LichLord.Items;
 using LichLord.Props;
 using LichLord.World;
 using UnityEngine;
@@ -30,21 +31,30 @@ namespace LichLord.NonPlayerCharacters
 
             if (depositTarget is Stockpile stockpile)
             {
-                int stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
+                int containerIndex = stockpile.RuntimeState.GetContainerIndex();
 
-                if (stockpileIndex >= 0)
+                if (containerIndex >= 0)
                 {
+                    ContainerManager containerManager = brainComponent.NPC.Context.ContainerManager;
+
                     var currencyAmount = brainComponent.NPC.RuntimeState.GetCarriedCurrencyAmount();
 
-                    var stockpileData = brainComponent.NPC.Context.ContainerManager.GetStockPile(stockpileIndex);
+                    var containerData = containerManager.GetContainerDataAtIndex(containerIndex);
 
-                    if (stockpileData.CanFit(carriedCurrency, currencyAmount))
+                    FItemData tempItemData = new FItemData();
+                    CurrencyDefinition currencyDef = Global.Tables.CurrencyTable.TryGetDefinition(carriedCurrency);
+                    tempItemData.DefinitionID = currencyDef.TableID;
+                    currencyDef.DataDefinition.SetStackCount(currencyAmount, ref tempItemData);
+
+                    if (containerManager.CanStackAndFitContainer(containerIndex, tempItemData))
                         return true;
                 }
             }
 
             return false;
         }
+
+      
     }
 
 }

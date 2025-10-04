@@ -12,14 +12,11 @@ namespace LichLord.Items
         [Networked]
         public byte Index { get; set; }
 
-        [Networked, Capacity(ItemConstants.ITEMS_PER_REPLICATOR), OnChangedRender(nameof(OnItemSlotDataChanged))]
+        [Networked, Capacity(ContainerConstants.ITEMS_PER_REPLICATOR), OnChangedRender(nameof(OnItemSlotDataChanged))]
         protected virtual NetworkArray<FItemSlotData> _itemSlotDatas { get; }
-
         public NetworkArray<FItemSlotData> ItemSlotDatas => _itemSlotDatas;
 
-        protected ArrayReader<FItemSlotData> _dataBufferReader;
-
-        private FItemSlotData[] _localItemSlotDatas = new FItemSlotData[ItemConstants.ITEMS_PER_REPLICATOR];
+        private FItemSlotData[] _localItemSlotDatas = new FItemSlotData[ContainerConstants.ITEMS_PER_REPLICATOR];
 
         public Action<int, FItemSlotData> OnItemSlotChanged;
 
@@ -32,13 +29,13 @@ namespace LichLord.Items
 
         private void OnItemSlotDataChanged()
         {
-            for (int i = 0; i < ItemConstants.ITEMS_PER_REPLICATOR; i++)
+            for (int i = 0; i < ContainerConstants.ITEMS_PER_REPLICATOR; i++)
             {
                 var networkedSlot = ItemSlotDatas[i];
                 if (!_localItemSlotDatas[i].IsEqual(networkedSlot))
                 {
                     _localItemSlotDatas[i].Copy(networkedSlot);
-                    OnItemSlotChanged?.Invoke(i + (Index * ItemConstants.ITEMS_PER_REPLICATOR), networkedSlot);
+                    OnItemSlotChanged?.Invoke(i + (Index * ContainerConstants.ITEMS_PER_REPLICATOR), networkedSlot);
                 }
             }
         }
@@ -81,7 +78,7 @@ namespace LichLord.Items
 
         public (int startIndex, int endIndex) GetItemSlotRange(int count)
         {
-            if (count <= 0 || count > ItemConstants.ITEMS_PER_REPLICATOR)
+            if (count <= 0 || count > ContainerConstants.ITEMS_PER_REPLICATOR)
             {
                 return (-1, -1); // Invalid count, return invalid range
             }
@@ -89,7 +86,7 @@ namespace LichLord.Items
             int start = -1;
             int currentCount = 0;
 
-            for (int i = 0; i < ItemConstants.ITEMS_PER_REPLICATOR; i++)
+            for (int i = 0; i < ContainerConstants.ITEMS_PER_REPLICATOR; i++)
             {
                 if (!_itemSlotDatas[i].IsAssigned)
                 {

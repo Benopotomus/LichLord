@@ -1,23 +1,14 @@
 ﻿using Fusion;
 using LichLord.Items;
-using LichLord.World;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 namespace LichLord
 {
     public class ContainerManager : ContextBehaviour
     {
-        private const int MAX_STOCKPILES = 128;
-
-        [Networked, Capacity(MAX_STOCKPILES)]
-        [OnChangedRender(nameof(OnRep_StockpileDatas))]
-        protected virtual NetworkArray<FStockpileData> _stockpileDatas { get; }
-
-        private FStockpileData[] _authorityStockpileDatas = new FStockpileData[MAX_STOCKPILES];
-        Dictionary<int, FStockpileData> _predictedStockpileDatas = new Dictionary<int, FStockpileData>();
-
         [SerializeField] private ItemSlotReplicator _itemSlotReplicatorPrefab;
 
         [SerializeField]
@@ -30,9 +21,13 @@ namespace LichLord
         private List<ContainerReplicator> _containerReplicators = new List<ContainerReplicator>();
         public List<ContainerReplicator> ContainerReplicators => _containerReplicators;
 
+        public Action<int, FContainerSlotData> OnContainerSlotChanged;
         public Action<int, FItemSlotData> OnItemSlotChanged;
 
         private Dictionary<int, FPredictedItemData> _predictedItemSlots = new Dictionary<int, FPredictedItemData>();
+
+        private Dictionary<CurrencyDefinition, int> _stockpileCurrencyTotals = new Dictionary<CurrencyDefinition, int>();
+        public Dictionary<CurrencyDefinition, int> StockpileCurrencyTotals => _stockpileCurrencyTotals;
 
         // Containers
 
@@ -42,26 +37,27 @@ namespace LichLord
 
             foreach (var containerSaveData in loadedContainers)
             {
-                int replicatorIndex = containerSaveData.containerFullIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
-                int localIndex = containerSaveData.containerFullIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
+                int replicatorIndex = containerSaveData.containerFullIndex / ContainerConstants.CONTAINERS_PER_REPLICATOR;
+                int localIndex = containerSaveData.containerFullIndex % ContainerConstants.CONTAINERS_PER_REPLICATOR;
 
                 var replicator = GetOrCreateContainerReplicatorForIndex(containerSaveData.containerFullIndex);
                 ref FContainerSlotData data = ref replicator.GetContainerDataAtIndex(localIndex);
                 data.StartIndex = containerSaveData.startIndex;
                 data.EndIndex = containerSaveData.endIndex;
                 data.IsAssigned = containerSaveData.isAssigned;
+                data.IsStockpile = containerSaveData.isStockpile;
             }
         }
 
-        public void SetupContainer(int slotCount)
+        public void SetupContainer(int slotCount, bool isStockpile = false)
         {
             var container = GetContainerFreeReplicatorAndIndex(slotCount);
             var itemSlots = GetItemReplicatorAndFreeSlotRange(slotCount);
 
-            var fullItemIndexStart = itemSlots.startIndex + (itemSlots.replicator.Index * ItemConstants.ITEMS_PER_REPLICATOR);
-            var fullItemIndexEnd = itemSlots.endIndex + (itemSlots.replicator.Index * ItemConstants.ITEMS_PER_REPLICATOR);
+            var fullItemIndexStart = itemSlots.startIndex + (itemSlots.replicator.Index * ContainerConstants.ITEMS_PER_REPLICATOR);
+            var fullItemIndexEnd = itemSlots.endIndex + (itemSlots.replicator.Index * ContainerConstants.ITEMS_PER_REPLICATOR);
 
-            container.replicator.AssignContainerIndex(container.freeIndex, fullItemIndexStart, fullItemIndexEnd);
+            container.replicator.AssignContainerIndex(container.freeIndex, fullItemIndexStart, fullItemIndexEnd, isStockpile);
             itemSlots.replicator.SetIndexesAssigned(itemSlots.startIndex, itemSlots.endIndex, true);
         }
 
@@ -77,8 +73,8 @@ namespace LichLord
             }
 
             // Calculate replicator and local index for the container
-            int replicatorIndex = containerIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
-            int localIndex = containerIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
+            int replicatorIndex = containerIndex / ContainerConstants.CONTAINERS_PER_REPLICATOR;
+            int localIndex = containerIndex % ContainerConstants.CONTAINERS_PER_REPLICATOR;
 
             if (replicatorIndex >= _containerReplicators.Count)
             {
@@ -97,7 +93,7 @@ namespace LichLord
             int endItemIndex = containerData.EndIndex;
 
             // Calculate the item slot replicator index
-            int itemReplicatorIndex = startItemIndex / ItemConstants.ITEMS_PER_REPLICATOR;
+            int itemReplicatorIndex = startItemIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
 
             if (itemReplicatorIndex >= _itemSlotReplicators.Count)
             {
@@ -109,14 +105,14 @@ namespace LichLord
             var itemSlotReplicator = _itemSlotReplicators[itemReplicatorIndex];
 
             // Unassign all item slots in the range
-            itemSlotReplicator.SetIndexesAssigned(startItemIndex % ItemConstants.ITEMS_PER_REPLICATOR,
-                                                endItemIndex % ItemConstants.ITEMS_PER_REPLICATOR,
+            itemSlotReplicator.SetIndexesAssigned(startItemIndex % ContainerConstants.ITEMS_PER_REPLICATOR,
+                                                endItemIndex % ContainerConstants.ITEMS_PER_REPLICATOR,
                                                 false);
 
             // Clear item data for each slot in the range
             for (int fullItemIndex = startItemIndex; fullItemIndex <= endItemIndex; fullItemIndex++)
             {
-                int localItemIndex = fullItemIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+                int localItemIndex = fullItemIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
                 itemSlotReplicator.ClearItemData(localItemIndex);
             }
         }
@@ -160,8 +156,8 @@ namespace LichLord
 
         public ContainerReplicator GetOrCreateContainerReplicatorForIndex(int fullIndex)
         {
-            int replicatorIndex = fullIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
-            int localIndex = fullIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
+            int replicatorIndex = fullIndex / ContainerConstants.CONTAINERS_PER_REPLICATOR;
+            int localIndex = fullIndex % ContainerConstants.CONTAINERS_PER_REPLICATOR;
 
             foreach (var replicator in _containerReplicators)
             {
@@ -181,13 +177,21 @@ namespace LichLord
                 _containerReplicators.Add(replicator);
                 // Sort the list by Index
                 _containerReplicators.Sort((a, b) => a.Index.CompareTo(b.Index));
+                replicator.OnContainerSlotChanged += OnContainerReplictorSlotChanged;
+                UpdateStockpileCurrencyTotals(); // Initial update after loading.
             }
+        }
+
+        private void OnContainerReplictorSlotChanged(int fullIndex, FContainerSlotData containerSlotData)
+        {
+
+            OnContainerSlotChanged?.Invoke(fullIndex, containerSlotData);
         }
 
         public FContainerSlotData GetContainerDataAtIndex(int fullIndex)
         {
-            int localIndex = fullIndex % ItemConstants.CONTAINERS_PER_REPLICATOR;
-            int replicatorIndex = fullIndex / ItemConstants.CONTAINERS_PER_REPLICATOR;
+            int localIndex = fullIndex % ContainerConstants.CONTAINERS_PER_REPLICATOR;
+            int replicatorIndex = fullIndex / ContainerConstants.CONTAINERS_PER_REPLICATOR;
 
             if (_containerReplicators.Count <= replicatorIndex)
                 return new FContainerSlotData();
@@ -203,8 +207,8 @@ namespace LichLord
 
             foreach (var itemSlotSaveData in loadedItemSlots)
             {
-                int replicatorIndex = itemSlotSaveData.fullItemSlotIndex / ItemConstants.ITEMS_PER_REPLICATOR;
-                int localIndex = itemSlotSaveData.fullItemSlotIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+                int replicatorIndex = itemSlotSaveData.fullItemSlotIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
+                int localIndex = itemSlotSaveData.fullItemSlotIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
 
                 var replicator = GetOrCreateItemSlotReplicatorForIndex(itemSlotSaveData.fullItemSlotIndex);
                 ref FItemSlotData data = ref replicator.GetItemSlotDataAtIndex(localIndex);
@@ -216,8 +220,8 @@ namespace LichLord
 
         public ItemSlotReplicator GetOrCreateItemSlotReplicatorForIndex(int fullIndex)
         {
-            int replicatorIndex = fullIndex / ItemConstants.ITEMS_PER_REPLICATOR;
-            int localIndex = fullIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+            int replicatorIndex = fullIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
+            int localIndex = fullIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
 
             foreach (var replicator in _itemSlotReplicators)
             {
@@ -271,6 +275,12 @@ namespace LichLord
             }
 
             OnItemSlotChanged?.Invoke(fullIndex, itemSlotData);
+
+            // Check if this slot change affects a stockpile and update totals if so.
+            if (IsItemSlotInStockpile(fullIndex))
+            {
+                UpdateStockpileCurrencyTotals();
+            }
         }
 
         public (ItemSlotReplicator replicator, int startIndex, int endIndex) GetItemReplicatorAndFreeSlotRange(int count)
@@ -312,9 +322,9 @@ namespace LichLord
             int startIndex = containerData.StartIndex;
             int endIndex = containerData.EndIndex;
 
-            int replicatorIndex = startIndex / ItemConstants.ITEMS_PER_REPLICATOR;
+            int replicatorIndex = startIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
 
-            if (_itemSlotReplicators.Count < replicatorIndex)
+            if (_itemSlotReplicators.Count <= replicatorIndex)
             {
                 Debug.LogWarning("Trying to get a replicator but not right index. " + startIndex);
                 return itemSlotDatas;
@@ -343,8 +353,8 @@ namespace LichLord
                 }
             }
 
-            int replicatorIndex = fullIndex / ItemConstants.ITEMS_PER_REPLICATOR;
-            int localIndex = fullIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+            int replicatorIndex = fullIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
+            int localIndex = fullIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
 
             if (_itemSlotReplicators.Count <= replicatorIndex)
                 return new FItemSlotData();
@@ -354,11 +364,21 @@ namespace LichLord
 
         public void SetItemSlotData(int fullIndex, FItemData itemData)
         {
-            int replicatorIndex = fullIndex / ItemConstants.ITEMS_PER_REPLICATOR;
-            int localIndex = fullIndex % ItemConstants.ITEMS_PER_REPLICATOR;
+            int replicatorIndex = fullIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
+            int localIndex = fullIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
 
-            if (_itemSlotReplicators.Count < replicatorIndex)
+            if (_itemSlotReplicators.Count <= replicatorIndex)
                 return;
+
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                _predictedItemSlots[fullIndex] = new FPredictedItemData
+                {
+                    EndTick = Runner.Tick + 32,
+                    ItemSlotData = new FItemSlotData
+                    {
+                        ItemData = itemData
+                    }
+                };
 
             _itemSlotReplicators[replicatorIndex].SetItemData(localIndex, itemData);
         }
@@ -366,17 +386,6 @@ namespace LichLord
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_SetItemSlotData(int fullIndex, FItemData itemData)
         {
-            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                _predictedItemSlots[fullIndex] = new FPredictedItemData
-                {
-                    EndTick = Runner.Tick + 32,
-                    ItemSlotData = new FItemSlotData
-                    {
-                        ItemData = itemData,
-                        IsAssigned = true
-                    }
-                };
-
             SetItemSlotData(fullIndex, itemData);
         }
 
@@ -386,7 +395,6 @@ namespace LichLord
 
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
             {
-                Debug.Log(_predictedItemSlots.Count);
                 int tick = Runner.Tick;
 
                 var keysToRemove = new List<int>();
@@ -407,165 +415,309 @@ namespace LichLord
             }
         }
 
-        // Stockpiles
-
-        private void OnRep_StockpileDatas(NetworkBehaviourBuffer previous)
+        // Check all indexes in container for stack and fit. return true if any can
+        public bool CanStackAndFitContainer(int containerIndex, FItemData otherItem)
         {
-            UpdateAllStockpiles();
-        }
+            if (!otherItem.IsValid())
+                return false; // Nothing to stack.
 
-        public int StockpileCount => _stockpileDatas.Length;
+            var containerSlotData = GetContainerDataAtIndex(containerIndex);
+            if (containerSlotData.StartIndex > containerSlotData.EndIndex)
+                return false; // Invalid container.
 
-        private Dictionary<ECurrencyType, int> _allCurrencies = new Dictionary<ECurrencyType, int>();
-        public Dictionary<ECurrencyType, int> AllCurrencies => _allCurrencies;
-
-        public override void Spawned()
-        {
-            base.Spawned();
-            UpdateAllStockpiles();
-        }
-
-        public FStockpileData GetStockPile(int index)
-        {
-            if (_predictedStockpileDatas.TryGetValue(index, out var data))
-                return data;
-
-            return _stockpileDatas.GetRef(index);
-        }
-
-        public int GetFreeStockpileIndex()
-        {
-            for (int i = 0; i < MAX_STOCKPILES; i++)
+            // Check each slot in the container range.
+            for (int fullIndex = containerSlotData.StartIndex; fullIndex <= containerSlotData.EndIndex; fullIndex++)
             {
-                ref FStockpileData stockpile = ref _stockpileDatas.GetRef(i);
-                if (!stockpile.IsAssigned) // not taken
+                if (CanStackAndFit(fullIndex, otherItem))
+                    return true; // Any slot that fits works.
+            }
+
+            return false; // No slots can stack/fit.
+        }
+
+        public bool CanStackAndFit(int fullIndex, FItemData otherItem)
+        {
+            var itemAtSlot = GetItemSlotData(fullIndex).ItemData;
+            if (!itemAtSlot.IsValid())
+                return true; // Empty slot can always accept.
+
+            if (!CanStack(fullIndex, otherItem))
+                return false;
+
+            var itemAtSlotDef = Global.Tables.ItemTable.TryGetDefinition(itemAtSlot.DefinitionID);
+            var otherItemDef = Global.Tables.ItemTable.TryGetDefinition(otherItem.DefinitionID);
+
+            // General stack check: Can we fit the other item on top without exceeding max?
+            var currentStackCount = itemAtSlotDef.DataDefinition.GetStackCount(ref itemAtSlot);
+            var otherStackCount = otherItemDef.DataDefinition.GetStackCount(ref otherItem); // Fixed ref param.
+            var maxStackCount = itemAtSlotDef.MaxStackCount; // Assuming this is a int property.
+
+            return (currentStackCount + otherStackCount) <= maxStackCount;
+        }
+
+        public bool CanStack(int fullIndex, FItemData otherItem)
+        {
+            var itemAtSlot = GetItemSlotData(fullIndex).ItemData;
+            if (!itemAtSlot.IsValid())
+                return true; // Empty slot can always accept.
+
+            var itemAtSlotDef = Global.Tables.ItemTable.TryGetDefinition(itemAtSlot.DefinitionID);
+            var otherItemDef = Global.Tables.ItemTable.TryGetDefinition(otherItem.DefinitionID);
+
+            if (itemAtSlotDef != otherItemDef)
+                return false; // Definitions must match exactly.
+
+            return true;
+        }
+
+        public FItemData StackItem(int fullIndex, FItemData otherItem)
+        {
+            if (!otherItem.IsValid())
+                return otherItem; // Nothing to stack.
+
+            var itemAtSlot = GetItemSlotData(fullIndex).ItemData;
+            var isSlotEmpty = !itemAtSlot.IsValid();
+
+            var otherItemDef = Global.Tables.ItemTable.TryGetDefinition(otherItem.DefinitionID);
+            if (otherItemDef == null)
+                return otherItem; // Invalid other item.
+
+            // If slot is empty, just place the whole item there (no stacking needed).
+            if (isSlotEmpty)
+            {
+                SetItemSlotData(fullIndex, otherItem); // Assuming you have a setter method.
+                return default; // Or new FItemData() for invalid/no excess.
+            }
+
+            var itemAtSlotDef = Global.Tables.ItemTable.TryGetDefinition(itemAtSlot.DefinitionID);
+            if (itemAtSlotDef == null || itemAtSlotDef != otherItemDef)
+                return otherItem; // Can't stack: return unchanged.
+
+            // Special currency type check.
+            if (itemAtSlotDef is CurrencyDefinition slotCurrencyDef &&
+                otherItemDef is CurrencyDefinition otherCurrencyDef)
+            {
+                if (slotCurrencyDef.CurrencyType != otherCurrencyDef.CurrencyType)
+                    return otherItem;
+            }
+
+            // Proceed with stacking.
+            var currentStackCount = itemAtSlotDef.DataDefinition.GetStackCount(ref itemAtSlot);
+            var otherStackCount = otherItemDef.DataDefinition.GetStackCount(ref otherItem);
+            var maxStackCount = itemAtSlotDef.MaxStackCount;
+            var newTotal = currentStackCount + otherStackCount;
+
+            FItemData excessItem = default;
+            if (newTotal > maxStackCount)
+            {
+                // Stack up to max, create excess.
+                itemAtSlotDef.DataDefinition.SetStackCount(maxStackCount, ref itemAtSlot);
+                excessItem = otherItem; // Copy base.
+                otherItemDef.DataDefinition.SetStackCount(newTotal - maxStackCount, ref excessItem);
+            }
+            else
+            {
+                // Fully stack.
+                itemAtSlotDef.DataDefinition.SetStackCount(newTotal, ref itemAtSlot);
+            }
+
+            // Update the slot with the (possibly updated) itemAtSlot.
+            SetItemSlotData(fullIndex, itemAtSlot); // Assuming setter exists.
+
+            return excessItem; // Invalid if no excess.
+        }
+
+        public List<int> GetAllStockpileContainers()
+        {
+            List<int> stockpileIndices = new List<int>();
+
+            foreach (var replicator in _containerReplicators)
+            {
+                for (int localIndex = 0; localIndex < ContainerConstants.CONTAINERS_PER_REPLICATOR; localIndex++)
                 {
-                    return i;
+                    var data = replicator.GetContainerDataAtIndex(localIndex);
+                    if (data.IsAssigned && data.IsStockpile)
+                    {
+                        int fullIndex = replicator.Index * ContainerConstants.CONTAINERS_PER_REPLICATOR + localIndex;
+                        stockpileIndices.Add(fullIndex);
+                    }
                 }
             }
-            return -1; // no free index found
+
+            return stockpileIndices;
         }
 
-        public void AssignStockpileIndex(int index)
+        public List<FItemData> GetAllItemsInStockpiles()
         {
-            ref FStockpileData stockpile = ref _stockpileDatas.GetRef(index);
-            stockpile.Assign();
-        }
+            List<FItemData> allItems = new List<FItemData>();
 
-        public void LoadStockPileData(FStockpileSaveData stockpileSave)
-        {
-            ref FStockpileData stockpileData = ref _stockpileDatas.GetRef(stockpileSave.index);
-            stockpileData = stockpileSave.ToNetworkStockpile();
-            _stockpileDatas.Set(stockpileSave.index, stockpileData);
-        }
-
-        public void ClearStockpile(int stockpileIndex)
-        {
-            ref FStockpileData stockpileData = ref _stockpileDatas.GetRef(stockpileIndex);
-            stockpileData.ClearStockpile();
-            stockpileData.Unassign();
-        }
-
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_StockpileDropOff_Player(int stockpileIndex, ECurrencyType currencyType, int value, PlayerCharacter pc)
-        {
-            int returnValue = AddToStockpile(stockpileIndex, currencyType, value);
-
-            if (returnValue > 0)
+            var stockpileContainers = GetAllStockpileContainers();
+            foreach (int containerIndex in stockpileContainers)
             {
-                if (HasStateAuthority)
+                var slotDatas = GetItemSlotDatasFromContainerIndex(containerIndex);
+                foreach (var slotData in slotDatas)
                 {
-                    pc.Currency.RPC_AddCurrency(currencyType, returnValue);
+                    if (slotData.ItemData.IsValid())
+                    {
+                        allItems.Add(slotData.ItemData);
+                    }
                 }
             }
+
+            return allItems;
         }
 
-        public int AddToStockpile(int stockpileIndex, ECurrencyType currencyType, int value)
+        private void UpdateStockpileCurrencyTotals()
         {
-            ref FStockpileData stockpile = ref _stockpileDatas.GetRef(stockpileIndex);
-            return stockpile.AddToStockpile(currencyType, value);
-        }
-
-        public void Predict_StockpileDropOff(int stockpileIndex, ECurrencyType currencyType, int value)
-        {
-            FStockpileData stockpile = _stockpileDatas.Get(stockpileIndex);
-            int returnValue = stockpile.AddToStockpile(currencyType, value);
-            _predictedStockpileDatas[stockpileIndex] = stockpile;
-            UpdateAllStockpiles();
-        }
-
-        public void UpdateAllStockpiles()
-        {
-            _allCurrencies.Clear();
-
-            // Step 1: Track which indices we already handled via predictions
-            HashSet<int> handledIndices = new HashSet<int>();
-
-            // Step 2: Collect predicted keys to iterate safely
-            int[] predictedKeys = new int[_predictedStockpileDatas.Count];
-            _predictedStockpileDatas.Keys.CopyTo(predictedKeys, 0);
-
-            foreach (int index in predictedKeys)
+            _stockpileCurrencyTotals.Clear();
+            var allItems = GetAllItemsInStockpiles();
+            foreach (var item in allItems)
             {
-                FStockpileData predicted = _predictedStockpileDatas[index];
-                ref FStockpileData networkStockpile = ref _stockpileDatas.GetRef(index);
-
-                if (_authorityStockpileDatas[index].IsEqual(networkStockpile))
+                var itemDef = Global.Tables.ItemTable.TryGetDefinition(item.DefinitionID);
+                if (itemDef is CurrencyDefinition currencyDef)
                 {
-                    // Network and authority match, prediction is valid
-                    AddStockpileCurrencies(predicted);
-                }
-                else
-                {
-                    // Authority diverged — discard prediction
-                    _predictedStockpileDatas.Remove(index);
-                    AddStockpileCurrencies(networkStockpile);
-                }
-
-                // Update authoritative cache
-                _authorityStockpileDatas[index].Copy(networkStockpile);
-                handledIndices.Add(index);
-            }
-
-            // Step 3: Loop through remaining network stockpiles
-            for (int i = 0; i < MAX_STOCKPILES; i++)
-            {
-                if (handledIndices.Contains(i))
-                    continue; // Already processed via predicted stockpile
-
-                ref FStockpileData stockpile = ref _stockpileDatas.GetRef(i);
-                _authorityStockpileDatas[i].Copy(stockpile);
-
-                AddStockpileCurrencies(stockpile);
-            }
-
-            /*
-            // Optional: Debug log totals
-            foreach (var kvp in _allCurrencies)
-            {
-                Debug.Log($"Currency: {kvp.Key}, Amount: {kvp.Value}");
-            }
-            */
-        }
-
-        // Helper to add totals
-        private void AddStockpileCurrencies(FStockpileData stockpile)
-        {
-            if (stockpile.IsEmpty())
-                return;
-
-            foreach (ECurrencyType type in Enum.GetValues(typeof(ECurrencyType)))
-            {
-                int amount = stockpile.GetCurrencyAmount(type);
-                if (amount > 0)
-                {
-                    if (_allCurrencies.ContainsKey(type))
-                        _allCurrencies[type] += amount;
+                    FItemData localItem = item; // Copy for ref compatibility in loop.
+                    var stackCount = itemDef.DataDefinition.GetStackCount(ref localItem);
+                    if (_stockpileCurrencyTotals.TryGetValue(currencyDef, out int currentTotal))
+                    {
+                        _stockpileCurrencyTotals[currencyDef] = currentTotal + stackCount;
+                    }
                     else
-                        _allCurrencies[type] = amount;
+                    {
+                        _stockpileCurrencyTotals[currencyDef] = stackCount;
+                    }
                 }
+            }
+            _stockpileCurrencyTotals = new Dictionary<CurrencyDefinition, int>(_stockpileCurrencyTotals); // Shallow copy for immutability.
+        }
+
+        private bool IsItemSlotInStockpile(int fullItemIndex)
+        {
+            var stockpileContainers = GetAllStockpileContainers();
+            foreach (int containerIndex in stockpileContainers)
+            {
+                var containerData = GetContainerDataAtIndex(containerIndex);
+                if (fullItemIndex >= containerData.StartIndex && fullItemIndex <= containerData.EndIndex)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public FItemData AddItemToContainer(int fullContainerIndex, FItemData item)
+        {
+            if (!item.IsValid())
+            {
+                Debug.LogWarning("Cannot add invalid item to container.");
+                return item;
+            }
+
+            var containerData = GetContainerDataAtIndex(fullContainerIndex);
+            if (!containerData.IsAssigned || containerData.StartIndex > containerData.EndIndex)
+            {
+                Debug.LogWarning($"Cannot add item to invalid container {fullContainerIndex}.");
+                return item;
+            }
+
+            FItemData remainingItem = item;
+
+            // Try stacking.
+            for (int fullIndex = containerData.StartIndex; fullIndex <= containerData.EndIndex && remainingItem.IsValid(); fullIndex++)
+            {
+                // we ignore invalid item slots for this
+                var itemAtSlot = GetItemSlotData(fullIndex).ItemData;
+                if (!itemAtSlot.IsValid())
+                    continue;
+
+                if (CanStackAndFit(fullIndex, remainingItem))
+                {
+                    remainingItem = StackItem(fullIndex, remainingItem);
+                    if (!remainingItem.IsValid())
+                        return default; // fully placed
+                }
+            }
+
+            //  Try empty slots.
+            for (int fullIndex = containerData.StartIndex; fullIndex <= containerData.EndIndex && remainingItem.IsValid(); fullIndex++)
+            {
+                var itemAtSlot = GetItemSlotData(fullIndex).ItemData;
+                if (!itemAtSlot.IsValid()) // Empty slot
+                {
+                    SetItemSlotData(fullIndex, remainingItem);
+                    remainingItem = default;
+                    break;
+                }
+            }
+
+            if (remainingItem.IsValid())
+            {
+                Debug.LogWarning($"Could not fully place item in container {fullContainerIndex}; leftover: {remainingItem}");
+            }
+
+            return remainingItem;
+        }
+
+
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_StackOrSwapItemAtSlot(byte playerIndex, ushort fullIndex, FItemData itemToStack)
+        {
+            if (!CanStack(fullIndex, itemToStack))
+            {
+                FItemData itemAtSlot = GetItemSlotData(fullIndex).ItemData;
+
+                SetItemSlotData(fullIndex, itemToStack);
+
+                if (itemAtSlot.IsValid())
+                {
+                    if (HasStateAuthority)
+                        RPC_RefundItem(playerIndex, itemAtSlot);
+                }
+
+                return;
+            }
+
+            // On authority/local: perform the stack (excess discarded in RPC, but local caller gets it via public method).
+            FItemData returned = StackItem(fullIndex, itemToStack);
+
+            if (returned.IsValid())
+            {
+                if(HasStateAuthority) 
+                    RPC_RefundItem(playerIndex, returned);
             }
         }
 
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_RefundItem(byte playerIndex, FItemData returned)
+        {
+            var pc = Context.NetworkGame.GetPlayerByIndex(playerIndex);
+            if (pc != null)
+            {
+                pc.Inventory.AddItemToInventory(returned);
+            }
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_StackOrSwapItemsAtSlots(ushort fromSlot, ushort toSlot)
+        {
+            // Grab current items
+            FItemData toItem = GetItemSlotData(toSlot).ItemData;
+            FItemData fromItem = GetItemSlotData(fromSlot).ItemData;
+
+            if (CanStack(toSlot, fromItem))
+            {
+                // StackItem returns any excess that couldn't fit (or invalid if fully stacked)
+                FItemData excess = StackItem(toSlot, fromItem);
+                SetItemSlotData(fromSlot, excess);
+                return;
+            }
+
+            SetItemSlotData(toSlot, fromItem);
+
+            if (toItem.IsValid())
+                SetItemSlotData(toSlot, toItem);
+            else
+                SetItemSlotData(fromSlot, new FItemData());
+        }
     }
 }

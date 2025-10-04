@@ -137,17 +137,6 @@ namespace LichLord.World
                     });
                 }
 
-                // --- Save stockpiles ---
-                List<FStockpileSaveData> stockpileSaves = new List<FStockpileSaveData>();
-                if (Context.ContainerManager != null)
-                {
-                    for (int i = 0; i < Context.ContainerManager.StockpileCount; i++)
-                    {
-                        FStockpileData stockpileData = Context.ContainerManager.GetStockPile(i);
-                        stockpileSaves.Add(new FStockpileSaveData(i, stockpileData, stockpileData.IsAssigned));
-                    }
-                }
-
                 // --- Save DialogSaveDatas --- //
                 List<FDialogSaveData> dialogSaveDatas = new List<FDialogSaveData>();
                 if (Context.DialogManager != null)
@@ -189,13 +178,14 @@ namespace LichLord.World
                         for (int i = 0; i < containerDatas.Length; i++)
                         {
                             FContainerSlotData containerSlotData = containerDatas[i];
-                            int fullContainerIndex = i + (containerReplicator.Index * ItemConstants.CONTAINERS_PER_REPLICATOR);
+                            int fullContainerIndex = i + (containerReplicator.Index * ContainerConstants.CONTAINERS_PER_REPLICATOR);
                             containerSaveData.Add(new FContainerSaveData
                             {
                                 containerFullIndex = fullContainerIndex,
                                 startIndex = containerSlotData.StartIndex,
                                 endIndex = containerSlotData.EndIndex,
-                                isAssigned = containerSlotData.IsAssigned
+                                isAssigned = containerSlotData.IsAssigned,
+                                isStockpile = containerSlotData.IsStockpile
                             });
                         }
                     }
@@ -207,7 +197,7 @@ namespace LichLord.World
                         for (int i = 0; i < itemSlotDatas.Length; i++)
                         {
                             FItemSlotData itemSlotData = itemSlotDatas[i];
-                            int fullItemSlotIndex = i + (itemSlotReplicator.Index * ItemConstants.ITEMS_PER_REPLICATOR);
+                            int fullItemSlotIndex = i + (itemSlotReplicator.Index * ContainerConstants.ITEMS_PER_REPLICATOR);
 
                             itemSlotSaveData.Add(new FItemSlotSaveData
                             {
@@ -225,7 +215,6 @@ namespace LichLord.World
                 {
                     chunks = chunkSaveDatas.ToArray(),
                     strongholds = strongholdSaveDatas.ToArray(),
-                    stockpiles = stockpileSaves.ToArray(),
                     dialogs = dialogSaveDatas.ToArray(),
                     invasion = invasionSaveData,
                     containers = containerSaveData.ToArray(),
@@ -236,7 +225,7 @@ namespace LichLord.World
                 SaveLoadManager.instance.SetWorldData(sessionName, json);
                 File.WriteAllText(saveFilePath, json);
 
-                Debug.Log($"Saved world: {chunkSaveDatas.Count} chunks, {totalPropCount} props, {strongholdSaveDatas.Count} strongholds, {stockpileSaves.Count} stockpiles.");
+                Debug.Log($"Saved world: {chunkSaveDatas.Count} chunks, {totalPropCount} props, {strongholdSaveDatas.Count} strongholds");
             }
             catch (Exception e)
             {
@@ -313,16 +302,6 @@ namespace LichLord.World
                             data.LoadFromSave(buildableSave);
                         }
                     }
-                }
-
-                // --- Load stockpiles ---
-                if (saveData.stockpiles != null)
-                {
-                    foreach (var stockpileSave in saveData.stockpiles)
-                    {
-                        Context.ContainerManager.LoadStockPileData(stockpileSave);
-                    }
-                    Debug.Log($"Loaded {saveData.stockpiles.Length} stockpiles.");
                 }
 
                 // --- Load dialogs ---

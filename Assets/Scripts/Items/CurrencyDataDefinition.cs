@@ -7,7 +7,7 @@ namespace LichLord.Items
     public class CurrencyDataDefinition : ItemDataDefinition
     {
         protected const int STACK_COUNT_BITS = 10;         // 0-1023
-        protected const int STACK_COUNT_SHIFT = 0;
+        protected const int STACK_COUNT_SHIFT = 10; // Definition Bits
         protected const int STACK_COUNT_MASK = (1 << STACK_COUNT_BITS) - 1;
 
         public override void InitializeData(ref FItemData itemData, ItemDefinition definition)

@@ -65,13 +65,15 @@ namespace LichLord.UI
                         pc.Interactor.InteractType == EInteractType.Stronghold) 
                     {
                         if (!_inventoryView.IsOpen)
-                            _inventoryView.Open();
-
-                        if (pc.Input.CurrentInput.Interact)
                         {
-                            if (_inventoryView.IsOpen)
+                            _inventoryView.Open();
+                        }
+                        else
+                        { 
+                            if (pc.Input.CurrentInput.UI_Interact)
                                 CloseInventoryWindow();
                         }
+                        
                     }
                 }
             }

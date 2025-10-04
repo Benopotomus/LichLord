@@ -97,7 +97,7 @@ namespace LichLord
             _input.InventoryToggle = _controls.Gameplay.InventoryToggle.WasPressedThisFrame();
             _input.ShowTooltips = _controls.Gameplay.ShowTooltips.IsPressed();
             _input.Cancel = _controls.UI.Cancel.WasPressedThisFrame();
-            _input.Interact |= _controls.Gameplay.Interact.WasPressedThisFrame();
+            _input.UI_Interact = _controls.UI.Interact.WasPressedThisFrame();
 
             if (Cursor.lockState != CursorLockMode.Locked)
             {
@@ -128,6 +128,7 @@ namespace LichLord
             _input.DeleteMode |= _controls.Gameplay.DeleteMode.WasPressedThisFrame();
 
             _input.SwapWeapon |= _controls.Gameplay.SwapWeapons.WasPressedThisFrame();
+            _input.Interact |= _controls.Gameplay.Interact.WasPressedThisFrame();
 
             _input.PlaceBuildable |= _controls.Gameplay.PlaceBuildable.WasPressedThisFrame();
             _input.RotateBuildableYaw |= _controls.Gameplay.RotateBuildableYaw.WasPressedThisFrame();

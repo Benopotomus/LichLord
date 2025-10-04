@@ -52,5 +52,9 @@ namespace LichLord.Buildables
         protected int _containerSlots = 8;
         public int ContainerSlots => _containerSlots;
 
+        [SerializeField]
+        protected bool _isStockpile;
+        public bool IsStockpile => _isStockpile;
+
     }
 }

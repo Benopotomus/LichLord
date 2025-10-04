@@ -26,7 +26,7 @@
             var playerValue = currencyComponent.GetCurrencyCount(currencyType);
             int newValue = playerValue;
 
-            if (Context.ContainerManager.AllCurrencies.TryGetValue(currencyType, out int worldValue))
+            if (Context.ContainerManager.StockpileCurrencyTotals.TryGetValue(_definition, out int worldValue))
                 newValue += worldValue;
 
             if (newValue != _localValue)

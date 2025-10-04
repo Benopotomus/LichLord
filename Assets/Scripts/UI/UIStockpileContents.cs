@@ -13,7 +13,7 @@ namespace LichLord.UI
             { 
                 slot.gameObject.SetActive(stockpileIndex >= 0);
 
-                slot.AssignStockPileIndex(stockpileIndex);
+                slot.AssignContainerIndex(stockpileIndex);
             }
         }
     }

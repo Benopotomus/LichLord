@@ -33,6 +33,10 @@
         private int _maxStackCount;
         public virtual int MaxStackCount => _maxStackCount;
 
+        [SerializeField]
+        private int _weightPerStack;
+        public virtual int WeightPerStack => _weightPerStack;
+
         [SerializeField] private List<ELoadoutSlot> _validLoadoutSlots;
         public List<ELoadoutSlot> ValidLoadoutSlots => _validLoadoutSlots;
 

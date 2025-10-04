@@ -10,7 +10,7 @@ namespace LichLord
         [SerializedDictionary("CurrencyType", "CurrencyDefinition")]
         private SerializedDictionary<ECurrencyType, CurrencyDefinition> _currencyDefinitions;
 
-        public CurrencyDefinition GetDefinition(ECurrencyType currencyType)
+        public CurrencyDefinition TryGetDefinition(ECurrencyType currencyType)
         {
             return _currencyDefinitions[currencyType];
         }

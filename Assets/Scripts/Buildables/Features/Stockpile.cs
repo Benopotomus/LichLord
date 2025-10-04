@@ -1,6 +1,8 @@
 ﻿using DWD.Pooling;
 using Fusion;
+using LichLord.Items;
 using LichLord.NonPlayerCharacters;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.Buildables
@@ -45,7 +47,13 @@ namespace LichLord.Buildables
         private StockpileCurrencyStack _deathcapsPilePrefab;
 
         [SerializeField]
-        private int _stockpileIndex = -1;
+        private int _containerIndex = -1;
+
+        [SerializeField]
+        private int _itemSlotIndexStart = -1;
+
+        [SerializeField]
+        private int _itemSlotIndexEnd = -1;
 
         public override void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
         {
@@ -54,7 +62,10 @@ namespace LichLord.Buildables
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());
 
-            _stockpileIndex = RuntimeState.GetStockpileIndex();
+            _containerIndex = RuntimeState.GetContainerIndex();
+            var indexes = RuntimeState.GetItemSlotIndexes();
+            _itemSlotIndexStart = indexes.start;
+            _itemSlotIndexEnd = indexes.end;
 
             _interactableComponent.Activate(
                 this,
@@ -82,41 +93,69 @@ namespace LichLord.Buildables
 
         private void UpdateCurrencyStacks()
         {
-            _stockpileIndex = RuntimeState.GetStockpileIndex();
-            var stockPileData = Context.ContainerManager.GetStockPile(_stockpileIndex);
+            _containerIndex = RuntimeState.GetContainerIndex();
+            var indexes = RuntimeState.GetItemSlotIndexes();
+            _itemSlotIndexStart = indexes.start;
+            _itemSlotIndexEnd = indexes.end;
 
-            for (int i = 0; i < 4; i++)
+            List<FItemSlotData> itemSlots = Context.ContainerManager.GetItemSlotDatasFromContainerIndex(_containerIndex);
+
+            for (int i = 0; i < itemSlots.Count; i++)
             {
-                FCurrencyStack currentStack = stockPileData.GetCurrencyStack(i);
+                FItemSlotData currentSlotData = itemSlots[i];
                 StockpileCurrencyStack currentPile = _piles[i];
 
-                if (currentStack.Value > 0)
+                if (!currentSlotData.ItemData.IsValid())
                 {
+                    if (currentPile != null)
+                    {
+                        currentPile.StartRecycle();
+                        _piles[i] = null;
+                    }
+                    continue;
+                }
+
+                CurrencyDefinition currencyDef = Global.Tables.ItemTable.TryGetDefinition(currentSlotData.ItemData.DefinitionID) as CurrencyDefinition;
+                int stackCount = currencyDef.DataDefinition.GetStackCount(ref currentSlotData.ItemData);
+
+                if (stackCount > 0)
+                {
+                    // Check if we need to swap type
+                    if (currentPile != null && currentPile.CurrencyType != currencyDef.CurrencyType)
+                    {
+                        // Different type – recycle the old pile
+                        currentPile.StartRecycle();
+                        _piles[i] = null;
+                        currentPile = null;
+                    }
+
                     if (currentPile == null)
                     {
-                        StockpileCurrencyStack currencyStackPrefab = currentStack.CurrencyType switch
+                        StockpileCurrencyStack currencyStackPrefab = currencyDef.CurrencyType switch
                         {
                             ECurrencyType.Wood => _woodPilePrefab,
                             ECurrencyType.Stone => _stonePilePrefab,
                             ECurrencyType.Deathcaps => _deathcapsPilePrefab,
-                            ECurrencyType.Iron => _ironPilePrefab,
+                            ECurrencyType.IronOre => _ironPilePrefab,
                             _ => throw new System.ArgumentOutOfRangeException()
                         };
 
                         Vector3 worldPos = CachedTransform.TransformPoint(_pilePositions[i]);
                         Quaternion rotation = CachedTransform.localRotation;
+
                         currentPile = DWDObjectPool.Instance.SpawnAttached(currencyStackPrefab, worldPos, rotation, CachedTransform) as StockpileCurrencyStack;
-                        currentPile.SetCurrencyCount(currentStack.Value);
+                        currentPile.SetCurrencyCount(stackCount);
                         _piles[i] = currentPile;
                     }
                     else
                     {
-                        currentPile.SetCurrencyCount(currentStack.Value);
+                        // Same type – just update the count
+                        currentPile.SetCurrencyCount(stackCount);
                     }
                 }
                 else
                 {
-
+                    // Empty slot – recycle
                     if (currentPile != null)
                     {
                         currentPile.StartRecycle();
@@ -125,6 +164,7 @@ namespace LichLord.Buildables
                 }
             }
         }
+
 
         public override void StartRecycle()
         {
@@ -206,47 +246,32 @@ namespace LichLord.Buildables
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
         {
             Debug.Log("Stockpile Interaction complete.");
-            // Trigger effects, state changes, or events
-
-            if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
-                return;
-
-            NetworkRunner runner = Context.Runner;
-            PlayerCharacter pc = interactor.PC;
-
-            var currencyType = ECurrencyType.None;
-            var value = 0;
-
-            // i want to grab the first currency with a stack and add it to the stockpile 
-            pc.Currency.GetCurrencyWithCount(ref currencyType, ref value);
-
-            if (currencyType == ECurrencyType.None)
-                return;
-
-            pc.Currency.AddCurrency(currencyType, -value);
-
-            int stockpileIndex = RuntimeState.GetStockpileIndex();
-
-            Context.ContainerManager.RPC_StockpileDropOff_Player(stockpileIndex, currencyType, value, pc);
-
-            if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
-                Context.ContainerManager.Predict_StockpileDropOff(stockpileIndex, currencyType, value);
-
         }
 
         public void DropOffCurrency(NonPlayerCharacter npc)
         {
             var currencyType = npc.RuntimeState.GetCarriedCurrencyType();
-            var value = npc.RuntimeState.GetCarriedCurrencyAmount(); ;
-
             if (currencyType == ECurrencyType.None)
+                return;
+
+            var count = npc.RuntimeState.GetCarriedCurrencyAmount(); ;
+            CurrencyDefinition definition = Global.Tables.CurrencyTable.TryGetDefinition(currencyType);
+            if (definition == null)
                 return;
 
             npc.RuntimeState.SetCarriedCurrencyType(ECurrencyType.None);
 
-            int stockpileIndex = RuntimeState.GetStockpileIndex();
+            int containerIndex = RuntimeState.GetContainerIndex();
 
-            int returnValue = Context.ContainerManager.AddToStockpile(stockpileIndex, currencyType, value);
+            if (containerIndex >= 0)
+            {
+                FItemData tempItemData = new FItemData();
+                CurrencyDefinition currencyDef = Global.Tables.CurrencyTable.TryGetDefinition(currencyType);
+                tempItemData.DefinitionID = currencyDef.TableID;
+                currencyDef.DataDefinition.SetStackCount(count, ref tempItemData);
+
+                Context.ContainerManager.AddItemToContainer(containerIndex, tempItemData);
+            }
         }
     }
 }

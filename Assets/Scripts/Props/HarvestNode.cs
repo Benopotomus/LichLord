@@ -4,7 +4,8 @@ using LichLord.World;
 using Pathfinding;
 using UnityEngine;
 using DG.Tweening;
-using LichLord.NonPlayerCharacters; // Add DOTween namespace
+using LichLord.NonPlayerCharacters;
+using LichLord.Items; // Add DOTween namespace
 
 namespace LichLord.Props
 {
@@ -162,7 +163,15 @@ namespace LichLord.Props
 
             Harvest(pc);
 
-            pc.Currency.AddCurrency(harvestData.CurrencyTypeHarvested.CurrencyType, harvestData.PlayerResourcesPerHarvest);
+            CurrencyDefinition currencyDef = harvestData.CurrencyTypeHarvested;
+            if (currencyDef == null)
+                return;
+
+            FItemData tempItemData = new FItemData();
+            tempItemData.DefinitionID = currencyDef.TableID;
+            currencyDef.DataDefinition.SetStackCount(harvestData.PlayerResourcesPerHarvest, ref tempItemData);
+
+            pc.Inventory.AddItemToInventory(tempItemData);
         }
 
         public void Harvest(PlayerCharacter pc)

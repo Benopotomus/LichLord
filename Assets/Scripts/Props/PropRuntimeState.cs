@@ -129,6 +129,16 @@ namespace LichLord.Props
             return -1;
         }
 
+        public CurrencyDefinition GetHarvestCurrency()
+        {
+            if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)
+            {
+                return harvestDataDefinition.CurrencyTypeHarvested;
+            }
+
+            return null;
+        }
+
         public void Harvest(int harvestValue, int tick)
         {
             if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)

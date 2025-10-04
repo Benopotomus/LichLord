@@ -1,5 +1,6 @@
 ﻿using Fusion;
 using LichLord.Buildables;
+using LichLord.Items;
 using LichLord.Props;
 using LichLord.World;
 using System.Collections.Generic;
@@ -647,13 +648,21 @@ namespace LichLord.NonPlayerCharacters
 
             if (trackable is Stockpile stockpile)
             {
-                int stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
+                int containerIndex = stockpile.RuntimeState.GetContainerIndex();
 
-                if (stockpileIndex >= 0)
+                if (containerIndex >= 0)
                 {
-                    var stockpileData = _npc.Context.ContainerManager.GetStockPile(stockpileIndex);
+                    ContainerManager containerManager = NPC.Context.ContainerManager;
 
-                    if (stockpileData.CanFit(currencyType, currencyAmount))
+                    var containerData = containerManager.GetContainerDataAtIndex(containerIndex);
+
+                    FItemData tempItemData = new FItemData();
+                    CurrencyDefinition currencyDef = Global.Tables.CurrencyTable.TryGetDefinition(currencyType);
+
+                    tempItemData.DefinitionID = currencyDef.TableID;
+                    currencyDef.DataDefinition.SetStackCount(currencyAmount, ref tempItemData);
+
+                    if (containerManager.CanStackAndFitContainer(containerIndex, tempItemData))
                         return true;
                 }
             }

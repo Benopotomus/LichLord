@@ -32,5 +32,6 @@ namespace LichLord
         public bool ShowTooltips;
         public bool InventoryToggle;
         public bool Cancel;
+        public bool UI_Interact; // Interact while UI is open.
     }
 }

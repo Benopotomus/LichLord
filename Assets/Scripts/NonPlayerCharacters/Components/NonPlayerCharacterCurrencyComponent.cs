@@ -65,7 +65,7 @@ namespace LichLord.NonPlayerCharacters
                     _ironGO.SetActive(false);
                     _deathCapsGO.SetActive(false);
                     break;
-                case ECurrencyType.Iron:
+                case ECurrencyType.IronOre:
                     _ironGO.SetActive(true);
                     _stoneGO.SetActive(false);
                     _woodGO.SetActive(false);

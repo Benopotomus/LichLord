@@ -1,4 +1,6 @@
-﻿using LichLord.Items;
+﻿using JetBrains.Annotations;
+using LichLord.Items;
+using UnityEngine;
 
 namespace LichLord
 {
@@ -18,6 +20,12 @@ namespace LichLord
         private FItemData _summon_04;
 
         private FItemData[] _inventoryItems;
+
+        private int _carryWeight;
+        public int CarryWeight => _carryWeight;
+
+        private int _maxCarryWeight;
+        public int MaxCarryWeight => _maxCarryWeight;
 
         public override void Spawned()
         {
@@ -132,6 +140,154 @@ namespace LichLord
                 return;
 
             _inventoryItems[slot].Copy(itemData);
+        }
+
+        public FItemData AddItemToInventory(FItemData item)
+        {
+            if (!item.IsValid())
+            {
+                Debug.LogWarning("Cannot add invalid item to inventory.");
+                return item; // Return unchanged.
+            }
+
+            if (!HasStateAuthority)
+            {
+                Debug.LogWarning("Cannot add item to inventory without state authority.");
+                return item;
+            }
+
+            FItemData remainingItem = item; // Start with full item; reduce as we place.
+            int slotsChecked = 0;
+            const int MAX_SLOTS_TO_CHECK = 100; // Safety cap (inventory likely small).
+
+            var otherItemDef = Global.Tables.ItemTable.TryGetDefinition(item.DefinitionID);
+            if (otherItemDef == null)
+            {
+                Debug.LogWarning("Cannot add item with invalid definition to inventory.");
+                return item;
+            }
+
+            // Loop through inventory slots: prefer stacking, then empty.
+            for (int slot = 0; slot < _inventoryItems.Length && remainingItem.IsValid() && slotsChecked < MAX_SLOTS_TO_CHECK; slot++, slotsChecked++)
+            {
+                var itemAtSlot = _inventoryItems[slot];
+                var isSlotEmpty = !itemAtSlot.IsValid();
+
+                if (isSlotEmpty)
+                {
+                    // Place entire remaining item in empty slot.
+                    _inventoryItems[slot].Copy(remainingItem);
+                    remainingItem = default; // All placed.
+                    break; // Done.
+                }
+                else
+                {
+                    var itemAtSlotDef = Global.Tables.ItemTable.TryGetDefinition(itemAtSlot.DefinitionID);
+                    if (itemAtSlotDef == null || itemAtSlotDef != otherItemDef)
+                        continue; // Can't stack: skip.
+
+                    // Special currency type check.
+                    if (itemAtSlotDef is CurrencyDefinition slotCurrencyDef &&
+                        otherItemDef is CurrencyDefinition otherCurrencyDef)
+                    {
+                        if (slotCurrencyDef.CurrencyType != otherCurrencyDef.CurrencyType)
+                            continue; // Can't stack: skip.
+                    }
+
+                    // Check if can stack.
+                    FItemData localSlotItem = itemAtSlot; // Copy for ref.
+                    var currentStackCount = itemAtSlotDef.DataDefinition.GetStackCount(ref localSlotItem);
+                    FItemData localRemainingItem = remainingItem; // Copy for ref.
+                    var remainingStackCount = otherItemDef.DataDefinition.GetStackCount(ref localRemainingItem);
+                    var maxStackCount = itemAtSlotDef.MaxStackCount;
+
+                    if ((currentStackCount + remainingStackCount) <= maxStackCount)
+                    {
+                        // Fully stack.
+                        var newTotal = currentStackCount + remainingStackCount;
+                        itemAtSlotDef.DataDefinition.SetStackCount(newTotal, ref localSlotItem);
+                        _inventoryItems[slot].Copy(localSlotItem);
+                        remainingItem = default; // All placed.
+                        break; // Done.
+                    }
+                    else
+                    {
+                        // Partial stack: fill to max, reduce remaining.
+                        itemAtSlotDef.DataDefinition.SetStackCount(maxStackCount, ref localSlotItem);
+                        _inventoryItems[slot].Copy(localSlotItem);
+                        var excessCount = (currentStackCount + remainingStackCount) - maxStackCount;
+                        otherItemDef.DataDefinition.SetStackCount(excessCount, ref localRemainingItem);
+                        remainingItem.Copy(localRemainingItem); // Update remaining with excess.
+                                                                // Continue to next slot with excess.
+                    }
+                }
+            }
+
+            if (remainingItem.IsValid())
+            {
+                FItemData localRemaining = remainingItem; // Copy for ref.
+                var remainingStackCount = otherItemDef.DataDefinition.GetStackCount(ref localRemaining);
+                Debug.LogWarning($"Could not fully place item in inventory; {remainingStackCount} of {otherItemDef.DisplayName} left over.");
+            }
+
+            return remainingItem; // Return any unplaced excess (for caller to handle, e.g., drop or add to stockpile).
+        }
+
+        public FItemData StackItem(int index, ref FItemData otherItem)
+        {
+            if (!otherItem.IsValid())
+                return otherItem; // Nothing to stack.
+
+            var itemAtSlot = _inventoryItems[index];
+            var isSlotEmpty = !itemAtSlot.IsValid();
+
+            var otherItemDef = Global.Tables.ItemTable.TryGetDefinition(otherItem.DefinitionID);
+            if (otherItemDef == null)
+                return otherItem; // Invalid other item.
+
+            // If slot is empty, just place the whole item there (no stacking needed).
+            if (isSlotEmpty)
+            {
+                _inventoryItems[index] = otherItem; // Assuming you have a setter method.
+                return default; // Or new FItemData() for invalid/no excess.
+            }
+
+            var itemAtSlotDef = Global.Tables.ItemTable.TryGetDefinition(itemAtSlot.DefinitionID);
+            if (itemAtSlotDef == null || itemAtSlotDef != otherItemDef)
+                return otherItem; // Can't stack: return unchanged.
+
+            // Special currency type check.
+            if (itemAtSlotDef is CurrencyDefinition slotCurrencyDef &&
+                otherItemDef is CurrencyDefinition otherCurrencyDef)
+            {
+                if (slotCurrencyDef.CurrencyType != otherCurrencyDef.CurrencyType)
+                    return otherItem;
+            }
+
+            // Proceed with stacking.
+            var currentStackCount = itemAtSlotDef.DataDefinition.GetStackCount(ref itemAtSlot);
+            var otherStackCount = otherItemDef.DataDefinition.GetStackCount(ref otherItem);
+            var maxStackCount = itemAtSlotDef.MaxStackCount;
+            var newTotal = currentStackCount + otherStackCount;
+
+            FItemData excessItem = default;
+            if (newTotal > maxStackCount)
+            {
+                // Stack up to max, create excess.
+                itemAtSlotDef.DataDefinition.SetStackCount(maxStackCount, ref itemAtSlot);
+                excessItem = otherItem; // Copy base.
+                otherItemDef.DataDefinition.SetStackCount(newTotal - maxStackCount, ref excessItem);
+            }
+            else
+            {
+                // Fully stack.
+                itemAtSlotDef.DataDefinition.SetStackCount(newTotal, ref itemAtSlot);
+            }
+
+            // Update the slot with the (possibly updated) itemAtSlot.
+            _inventoryItems[index] = itemAtSlot; // Assuming setter exists.
+
+            return excessItem; // Invalid if no excess.
         }
 
     }

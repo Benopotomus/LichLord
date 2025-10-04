@@ -32,8 +32,8 @@ namespace LichLord.UI
 
             if (targetSlot is UIInventorySlot inventorySlot)
             {
-                inventory.SetItemAtInventorySlot(inventorySlot.SlotIndex, in _itemData);
-                inventory.SetItemAtInventorySlot(_slotIndex, in inventorySlot.ItemData);
+                FItemData refund = inventory.StackItem(inventorySlot.SlotIndex, ref _itemData);
+                inventory.SetItemAtInventorySlot(_slotIndex, in refund);
             }
 
             if (targetSlot is UIContainerSlot containerSlot)
@@ -44,9 +44,26 @@ namespace LichLord.UI
                         return;
                 }
 
+                if (targetSlot is UIStockpileSlot stockpileSlot)
+                {
+                    if (_itemDefinition is not CurrencyDefinition currencyDefinition)
+                        return;
+
+                    switch (currencyDefinition.CurrencyType)
+                    {
+                        case ECurrencyType.Wood:
+                        case ECurrencyType.Stone:
+                        case ECurrencyType.IronOre:
+                        case ECurrencyType.Deathcaps:
+                            break;
+                        default:
+                            return;
+                    }
+                }
+
                 FItemData containerSlotItem = containerSlot.ItemData;
-                Context.ContainerManager.RPC_SetItemSlotData(containerSlot.FullItemSlotIndex, _itemData);
-                inventory.SetItemAtInventorySlot(_slotIndex, in containerSlotItem);
+                Context.ContainerManager.RPC_StackOrSwapItemAtSlot((byte)pc.PlayerIndex, (ushort)containerSlot.FullItemSlotIndex, _itemData);
+                inventory.SetItemAtInventorySlot(_slotIndex, new FItemData());
             }
 
             if (targetSlot is UILoadoutSlot loadoutSlot)
@@ -57,6 +74,8 @@ namespace LichLord.UI
                     inventory.SetItemAtInventorySlot(_slotIndex, in loadoutSlot.ItemData);
                 }
             }
+
+
 
 
         }

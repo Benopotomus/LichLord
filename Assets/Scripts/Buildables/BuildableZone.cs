@@ -1,4 +1,5 @@
 ﻿using DWD.Pooling;
+using DWD.Utility.Loading;
 using Fusion;
 using LichLord.Items;
 using LichLord.World;
@@ -158,16 +159,7 @@ namespace LichLord.Buildables
 
             if (definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
             {
-                int freeStockpileIndex = Context.ContainerManager.GetFreeStockpileIndex();
-                if (freeStockpileIndex < 0)
-                {
-                    Debug.Log("No Free Stockpile Index");
-                    return;
-                }
 
-                stockpileDataDefinition.InitializeData(ref data, definition);
-                stockpileDataDefinition.SetStockpileIndex(freeStockpileIndex, ref data);
-                Context.ContainerManager.AssignStockpileIndex(freeStockpileIndex);
 
             }
             else if (definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
@@ -196,11 +188,11 @@ namespace LichLord.Buildables
                     return;
                 }
 
-                int fullContainerIndex = containerData.freeIndex + (containerData.replicator.Index * ItemConstants.CONTAINERS_PER_REPLICATOR);
+                int fullContainerIndex = containerData.freeIndex + (containerData.replicator.Index * ContainerConstants.CONTAINERS_PER_REPLICATOR);
                 containerDataDefinition.InitializeData(ref data, definition);
                 containerDataDefinition.SetContainerIndex(fullContainerIndex, ref data);
 
-                Context.ContainerManager.SetupContainer(definition.ContainerSlots);
+                Context.ContainerManager.SetupContainer(definition.ContainerSlots, definition.IsStockpile);
             }
             else
             {

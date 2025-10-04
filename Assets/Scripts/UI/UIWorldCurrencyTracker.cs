@@ -13,8 +13,8 @@ namespace Assets.Scripts.UI
         [SerializeField]
         private RectTransform _layoutGroup;
 
-        private readonly Dictionary<ECurrencyType, UIWorldCurrencySlot> _currencySlots
-            = new Dictionary<ECurrencyType, UIWorldCurrencySlot>();
+        private readonly Dictionary<CurrencyDefinition, UIWorldCurrencySlot> _currencySlots
+            = new Dictionary<CurrencyDefinition, UIWorldCurrencySlot>();
 
         protected override void OnTick()
         {
@@ -24,33 +24,22 @@ namespace Assets.Scripts.UI
             if (pc == null)
                 return;
 
-            // Get all possible currency types from the player's currency component
-            for (int i = 0; i < pc.Currency.CurrencyCount; i++)
+            foreach (var currency in Context.ContainerManager.StockpileCurrencyTotals)
             {
-                var stack = pc.Currency.GetStackAtIndex(i);
-                var currencyType = stack.CurrencyType;
-
-                // Calculate total value (player + world)
-                int playerValue = stack.Value;
-                int totalValue = playerValue;
-                if (Context.ContainerManager.AllCurrencies.TryGetValue(currencyType, out int worldValue))
-                {
-                    totalValue += worldValue;
-                }
-
+                int total = currency.Value;
                 // Add or remove slot based on total value
-                if (totalValue > 0)
+                if (total > 0)
                 {
-                    AddCurrencySlot(currencyType);
+                    AddCurrencySlot(currency.Key);
                 }
                 else
                 {
-                    RemoveCurrencySlot(currencyType);
+                    RemoveCurrencySlot(currency.Key);
                 }
             }
         }
 
-        private void RemoveCurrencySlot(ECurrencyType currencyType)
+        private void RemoveCurrencySlot(CurrencyDefinition currencyType)
         {
             if (!_currencySlots.TryGetValue(currencyType, out var slot))
                 return;
@@ -59,13 +48,13 @@ namespace Assets.Scripts.UI
             _currencySlots.Remove(currencyType);
         }
 
-        private void AddCurrencySlot(ECurrencyType currencyType)
+        private void AddCurrencySlot(CurrencyDefinition currencyType)
         {
             if (_currencySlots.ContainsKey(currencyType))
                 return;
 
             var newSlot = Instantiate(_slotPrefab, _layoutGroup);
-            newSlot.SetDefinition(Context.LocalPlayerCharacter.Currency.GetCurrencyDefinition(currencyType));
+            newSlot.SetDefinition(currencyType);
             AddChild(newSlot);
             _currencySlots[currencyType] = newSlot;
         }

@@ -1,23 +1,29 @@
-﻿namespace LichLord.Items
-{
-    using Fusion;
-    using System.Runtime.InteropServices;
+﻿using Fusion;
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using UnityEngine;
 
-    [StructLayout(LayoutKind.Explicit, Size = 6)]
+namespace LichLord.Items
+{
+    [StructLayout(LayoutKind.Explicit)]
     public struct FItemData : INetworkStruct
     {
         [FieldOffset(0)]
-        private ushort _definitionId; // 2 bytes
-        [FieldOffset(2)]
-        private int _data; // 4 bytes
+        private int _data;
 
-        // Constants for bit masks
+        // Bit field layout
+        private const int DEFINITION_BITS = 10;  // up to 1024 defs
+        private const int DEFINITION_MASK = (1 << DEFINITION_BITS) - 1; // 0x3FF
+        private const int DEFINITION_SHIFT = 0;
 
-        public int DefinitionID
-        {
-            get => _definitionId;
-            set => _definitionId = (ushort)value;
-        }
+        // remaining 22 bits for other encoded data
+        private const int ITEMDATA_SHIFT = DEFINITION_BITS;
+        private const int ITEMDATA_MASK = ~DEFINITION_MASK;
+
+        public bool IsValid() => DefinitionID != 0;
+
+        public void Clear() => _data = 0;
 
         public int Data
         {
@@ -25,26 +31,22 @@
             set => _data = value;
         }
 
-        public bool IsValid() => _definitionId != 0;
-
-        public void Clear() => _definitionId = 0;
-
-        public void Copy(in FItemData copiedItem)
-        { 
-            _definitionId = copiedItem._definitionId;
-            _data = copiedItem._data;
+        public int DefinitionID
+        {
+            get => (_data >> DEFINITION_SHIFT) & DEFINITION_MASK;
+            set
+            {
+                int defValue = Mathf.Clamp(value, 0, DEFINITION_MASK);
+                _data = (_data & ~DEFINITION_MASK) | (defValue << DEFINITION_SHIFT);
+            }
         }
 
-        public bool IsEqual(in FItemData otherItem)
-        { 
-            if(_definitionId != otherItem._definitionId) 
-                return false;
 
-            if (_data != otherItem._data)
-                return false;
-
-            return true;
+        public void Copy(in FItemData copied)
+        {
+            _data = copied._data;
         }
 
+        public bool IsEqual(in FItemData other) => _data == other._data;
     }
 }

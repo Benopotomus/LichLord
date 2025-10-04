@@ -105,7 +105,7 @@ namespace LichLord.World
                 return;
             }
 
-            int containerIndex = (ushort)(containerData.freeIndex + (containerData.replicator.Index * ItemConstants.CONTAINERS_PER_REPLICATOR));
+            int containerIndex = (ushort)(containerData.freeIndex + (containerData.replicator.Index * ContainerConstants.CONTAINERS_PER_REPLICATOR));
             Context.ContainerManager.SetupContainer(BuildableConstants.MAX_WORKERS_PER_STRONGHOLD);
 
             if (HasStateAuthority)

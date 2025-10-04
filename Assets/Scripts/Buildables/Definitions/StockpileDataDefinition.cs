@@ -1,5 +1,4 @@
-﻿using LichLord.Buildables;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace LichLord.Buildables
 {

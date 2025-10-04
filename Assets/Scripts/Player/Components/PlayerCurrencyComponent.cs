@@ -5,14 +5,14 @@ namespace LichLord
 {
     public class PlayerCurrencyComponent : ContextBehaviour
     {
-        // Fixed slot order (indexes 0..4)
+        // Fixed slot order for iteration/enumeration (if needed for UI/order).
         private static readonly ECurrencyType[] kSlotOrder =
         {
             ECurrencyType.Wood,
             ECurrencyType.Stone,
-            ECurrencyType.Iron,
-            ECurrencyType.Gold,  
-            ECurrencyType.Souls,  
+            ECurrencyType.IronOre,
+            ECurrencyType.Gold,
+            ECurrencyType.Souls,
             ECurrencyType.Deathcaps,
         };
 
@@ -24,40 +24,41 @@ namespace LichLord
         [SerializeField] private CurrencyDefinition _deathcapsDefinition;
 
         [Networked, Capacity(16)]
-        private NetworkArray<FCurrencyStack> _currencies => default;
+        private NetworkDictionary<ECurrencyType, byte> _currencyAmounts => default;
 
-        private int[] _currencyMax = { 250, 250, 250, 250, 250, 250 };
+        private const int CURRENCY_MAX = 250; // Fixed max for all currencies (can be per-type dict if needed later).
 
-        public int CurrencyCount => _currencies.Length;
-        public FCurrencyStack GetStackAtIndex(int index) => _currencies[index];
+        public int CurrencyCount => kSlotOrder.Length; // Retained for compatibility; actual unique count is _currencyAmounts.Count.
+        public int NonZeroCurrencyCount => GetNonZeroCount();
+
+        public byte GetAmount(ECurrencyType type) => _currencyAmounts.TryGet(type, out byte amount) ? amount : (byte)0;
 
         public override void Spawned()
         {
             base.Spawned();
 
-            // Initialize each slot with its fixed currency type
-            for (int i = 0; i < kSlotOrder.Length; i++)
+            // No fixed init needed; dict starts empty. Optionally pre-populate with 0s for known types.
+            foreach (var type in kSlotOrder)
             {
-                _currencies.Set(i, new FCurrencyStack { CurrencyType = kSlotOrder[i], Value = 0 });
+                _currencyAmounts.Set(type, 0);
             }
         }
 
         public bool HasRoomForCurrency(ECurrencyType type, int amount)
         {
-            int idx = TypeToIndex(type);
-            if (idx < 0) return false;
-            return _currencyMax[idx] >= (_currencies[idx].Value + amount);
+            if (type == ECurrencyType.None) return false;
+            var current = GetAmount(type);
+            return CURRENCY_MAX >= (current + amount);
         }
 
         public void GetCurrencyWithCount(ref ECurrencyType currencyType, ref int value)
         {
-            for (int i = 0; i < _currencies.Length; i++)
+            foreach (var kvp in _currencyAmounts)
             {
-                var stack = _currencies[i];
-                if (stack.Value > 0)
+                if (kvp.Value > 0)
                 {
-                    currencyType = stack.CurrencyType;
-                    value = stack.Value;
+                    currencyType = kvp.Key;
+                    value = kvp.Value;
                     return;
                 }
             }
@@ -67,12 +68,11 @@ namespace LichLord
 
         public void AddCurrency(ECurrencyType type, int amount)
         {
-            int idx = TypeToIndex(type);
-            if (idx < 0) return;
+            if (type == ECurrencyType.None || amount <= 0) return;
 
-            var stack = _currencies[idx];
-            stack.Value = (byte)Mathf.Min(stack.Value + amount, _currencyMax[idx]);
-            _currencies.Set(idx, stack);
+            var current = GetAmount(type);
+            var newAmount = (byte)Mathf.Min(current + amount, CURRENCY_MAX);
+            _currencyAmounts.Set(type, newAmount);
         }
 
         public CurrencyDefinition GetCurrencyDefinition(ECurrencyType type)
@@ -81,7 +81,7 @@ namespace LichLord
             {
                 ECurrencyType.Wood => _woodDefinition,
                 ECurrencyType.Stone => _stoneDefinition,
-                ECurrencyType.Iron => _ironDefinition,
+                ECurrencyType.IronOre => _ironDefinition,
                 ECurrencyType.Gold => _goldDefinition,
                 ECurrencyType.Souls => _soulsDefinition,
                 ECurrencyType.Deathcaps => _deathcapsDefinition,
@@ -91,14 +91,12 @@ namespace LichLord
 
         public int GetCurrencyCount(ECurrencyType type)
         {
-            int idx = TypeToIndex(type);
-            return idx >= 0 ? _currencies[idx].Value : 0;
+            return GetAmount(type);
         }
 
         public int GetCurrencyMax(ECurrencyType type)
         {
-            int idx = TypeToIndex(type);
-            return idx >= 0 ? _currencyMax[idx] : 0;
+            return type != ECurrencyType.None ? CURRENCY_MAX : 0;
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
@@ -107,12 +105,25 @@ namespace LichLord
             AddCurrency(currencyType, value);
         }
 
-        private static int TypeToIndex(ECurrencyType type)
+        // Legacy compatibility: Get by fixed index (maps to kSlotOrder).
+        public FCurrencyStack GetStackAtIndex(int index)
         {
-            if (type == ECurrencyType.None) return -1;
-            for (int i = 0; i < kSlotOrder.Length; i++)
-                if (kSlotOrder[i] == type) return i;
-            return -1;
+            if (index < 0 || index >= kSlotOrder.Length)
+                return default;
+
+            var type = kSlotOrder[index];
+            var amount = GetAmount(type);
+            return new FCurrencyStack { CurrencyType = type, Value = amount };
+        }
+
+        private int GetNonZeroCount()
+        {
+            int count = 0;
+            foreach (var kvp in _currencyAmounts)
+            {
+                if (kvp.Value > 0) count++;
+            }
+            return count;
         }
     }
 }

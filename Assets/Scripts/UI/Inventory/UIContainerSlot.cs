@@ -54,8 +54,8 @@ namespace LichLord.UI
                 FItemData otherSlotItem = containerSlot.ItemData;
                 FItemData thisSlotItem = _itemData;
 
-                Context.ContainerManager.RPC_SetItemSlotData(FullItemSlotIndex, otherSlotItem);
-                Context.ContainerManager.RPC_SetItemSlotData(containerSlot.FullItemSlotIndex, thisSlotItem);
+                Context.ContainerManager.RPC_StackOrSwapItemsAtSlots((ushort)FullItemSlotIndex, (ushort)containerSlot.FullItemSlotIndex);
+
             }
         }
     }

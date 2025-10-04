@@ -1,8 +1,7 @@
-﻿using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using LichLord.Buildables;
-using UnityEngine.UI;
+using LichLord.Items;
 
 namespace LichLord.UI
 {
@@ -12,28 +11,46 @@ namespace LichLord.UI
 
         [SerializeField] private UIStockpileCurrencySlot _stockpileCurrencyPrefab;
 
-        private Dictionary<ECurrencyType, UIStockpileCurrencySlot> _stockpileSlots = new Dictionary<ECurrencyType, UIStockpileCurrencySlot>();
+        private Dictionary<CurrencyDefinition, UIStockpileCurrencySlot> _stockpileSlots = 
+            new Dictionary<CurrencyDefinition, UIStockpileCurrencySlot>();
 
         public void SetStockpileData(Stockpile stockpile)
         {
-            int stockpileIndex = stockpile.RuntimeState.GetStockpileIndex();
-            // Get the stockpile data
-            FStockpileData stockpileData = Context.ContainerManager.GetStockPile(stockpileIndex);
+            int containerIndex = stockpile.RuntimeState.GetContainerIndex();
+            bool isValidStockpile = containerIndex >= 0;
 
             // Create a set of currency types that are currently in the stockpile with non-zero values
-            Dictionary<ECurrencyType, int> currencyAmounts = new Dictionary<ECurrencyType, int>();
-            for (int i = 0; i < 4; i++)
+            Dictionary<CurrencyDefinition, int> currencyAmounts = new Dictionary<CurrencyDefinition, int>();
+
+            if (isValidStockpile)
             {
-                FCurrencyStack stack = stockpileData.GetCurrencyStack(i);
-                if (!stack.IsEmpty() && stack.Value > 0)
+                // Get all item slots in this stockpile's container.
+                var slotDatas = Context.ContainerManager.GetItemSlotDatasFromContainerIndex(containerIndex);
+
+                // Sum currency stacks across all valid item slots.
+                foreach (var slotData in slotDatas)
                 {
-                    if (currencyAmounts.ContainsKey(stack.CurrencyType))
+                    if (!slotData.ItemData.IsValid())
+                        continue;
+
+                    var itemDef = Global.Tables.ItemTable.TryGetDefinition(slotData.ItemData.DefinitionID);
+                    if (itemDef is CurrencyDefinition currencyDef)
                     {
-                        currencyAmounts[stack.CurrencyType] += stack.Value;
-                    }
-                    else
-                    {
-                        currencyAmounts.Add(stack.CurrencyType, stack.Value);
+                        FItemData tempData = slotData.ItemData;
+                        var stackCount = itemDef.DataDefinition.GetStackCount(ref tempData);
+                        if (stackCount > 0)
+                        {
+      
+                            var currencyType = currencyDef.CurrencyType;
+                            if (currencyAmounts.TryGetValue(currencyDef, out int currentTotal))
+                            {
+                                currencyAmounts[currencyDef] = currentTotal + stackCount;
+                            }
+                            else
+                            {
+                                currencyAmounts.Add(currencyDef, stackCount);
+                            }
+                        }
                     }
                 }
             }
@@ -41,28 +58,27 @@ namespace LichLord.UI
             // Create or update slots for non-zero currencies
             foreach (var currency in currencyAmounts)
             {
-                ECurrencyType currencyType = currency.Key;
+                CurrencyDefinition currencyDef = currency.Key;
                 int value = currency.Value;
 
-                if (_stockpileSlots.ContainsKey(currencyType))
+                if (_stockpileSlots.TryGetValue(currencyDef, out var existingSlot))
                 {
                     // Update existing slot
-                    _stockpileSlots[currencyType].UpdateValue(value);
+                    existingSlot.UpdateValue(value);
                 }
                 else
                 {
                     // Create new slot
                     UIStockpileCurrencySlot newSlot = Instantiate(_stockpileCurrencyPrefab, _layoutGroup);
-                    newSlot.AssignStockPileIndex(stockpileIndex);
-                    newSlot.SetCurrencyType(currencyType);
+                    newSlot.AssignContainerIndex(containerIndex);
+                    newSlot.SetDefinition(currencyDef);
                     newSlot.UpdateValue(value);
-                    _stockpileSlots.Add(currencyType, newSlot);
+                    _stockpileSlots[currencyDef] = newSlot;
                 }
-                _stockpileSlots[currencyType].gameObject.SetActive(stockpileIndex >= 0);
             }
 
             // Remove slots for currencies that are no longer in the stockpile
-            List<ECurrencyType> currenciesToRemove = new List<ECurrencyType>();
+            List<CurrencyDefinition> currenciesToRemove = new List<CurrencyDefinition>();
             foreach (var slot in _stockpileSlots)
             {
                 if (!currencyAmounts.ContainsKey(slot.Key))
@@ -73,7 +89,10 @@ namespace LichLord.UI
 
             foreach (var currencyType in currenciesToRemove)
             {
-                Destroy(_stockpileSlots[currencyType].gameObject);
+                if (_stockpileSlots.TryGetValue(currencyType, out var slotToRemove))
+                {
+                    Destroy(slotToRemove.gameObject);
+                }
                 _stockpileSlots.Remove(currencyType);
             }
         }

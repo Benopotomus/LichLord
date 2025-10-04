@@ -9,6 +9,10 @@ namespace LichLord.Buildables
         [SerializeField]
         private GameObject[] _visuals;
 
+        [SerializeField]
+        private ECurrencyType _currencyType;
+        public ECurrencyType CurrencyType => _currencyType;
+
         public void SetCurrencyCount(int currencyCount)
         {
             int totalVisuals = _visuals.Length;

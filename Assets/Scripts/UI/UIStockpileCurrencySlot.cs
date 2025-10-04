@@ -8,16 +8,11 @@ namespace LichLord.UI
 {
     public class UIStockpileCurrencySlot : UICurrencySlot
     {
-        private int _stockpileIndex;
+        private int _containerIndex;
 
-        public void AssignStockPileIndex(int index)
+        public void AssignContainerIndex(int index)
         { 
-            _stockpileIndex = index;
-        }
-
-        public void SetCurrencyType(ECurrencyType currencyType)
-        {
-            SetDefinition(Global.Tables.CurrencyTable.GetDefinition(currencyType));
+            _containerIndex = index;
         }
 
         public void UpdateValue(int value)

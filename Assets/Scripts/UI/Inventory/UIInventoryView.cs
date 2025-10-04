@@ -17,28 +17,46 @@ namespace LichLord.UI
         [SerializeField]
         private UIStrongholdContainerWidget _strongholdContainerWidget;
 
+        [SerializeField]
+        private UIStockpileWidget _stockpileWidget;
+
         protected override void OnOpen()
         {
             base.OnOpen();
 
             _inventoryWidget.SetActive(true);
 
-            switch (GetContainerTypeWidget())
+            switch (GetRightWidgetType())
             {
-                case EContainerWidgetType.None:
+                case ERightWidgetType.None:
+                    _loadoutWidget.SetActive(false);
+                    _storageChestWidget.SetActive(false);
+                    _strongholdContainerWidget.SetActive(false);
+                    _stockpileWidget.SetActive(false);
+                    break;
+                case ERightWidgetType.Loadout:
                     _loadoutWidget.SetActive(true);
                     _storageChestWidget.SetActive(false);
                     _strongholdContainerWidget.SetActive(false);
+                    _stockpileWidget.SetActive(false);
                     break;
-                case EContainerWidgetType.Storage:
+                case ERightWidgetType.StorageChest:
                     _storageChestWidget.SetActive(true);
                     _loadoutWidget.SetActive(false);
                     _strongholdContainerWidget.SetActive(false);
+                    _stockpileWidget.SetActive(false);
                     break;
-                case EContainerWidgetType.Stronghold:
+                case ERightWidgetType.Stronghold:
                     _strongholdContainerWidget.SetActive(true);
                     _storageChestWidget.SetActive(false);
                     _loadoutWidget.SetActive(false);
+                    _stockpileWidget.SetActive(false);
+                    break;
+                case ERightWidgetType.Stockpile:
+                    _stockpileWidget.SetActive(true);
+                    _storageChestWidget.SetActive(false);
+                    _loadoutWidget.SetActive(false);
+                    _strongholdContainerWidget.SetActive(false);
                     break;
             }
         }
@@ -47,9 +65,9 @@ namespace LichLord.UI
         {
             base.OnTick();
 
-            switch (GetContainerTypeWidget())
+            switch (GetRightWidgetType())
             {
-                case EContainerWidgetType.None:
+                case ERightWidgetType.None:
                     if (_storageChestWidget.isActiveAndEnabled)
                     {
                         if (Context.UI is GameplayUI gameplayUI)
@@ -66,33 +84,37 @@ namespace LichLord.UI
             }
         }
 
-        private EContainerWidgetType GetContainerTypeWidget()
+        private ERightWidgetType GetRightWidgetType()
         {
             PlayerCharacter pc = Context.LocalPlayerCharacter;
             if (pc == null)
-                return EContainerWidgetType.None;
+                return ERightWidgetType.Loadout;
 
             InteractorComponent interactor = pc.Interactor;
             if (interactor == null)
-                return EContainerWidgetType.None;
+                return ERightWidgetType.Loadout;
 
             InteractableComponent interactable = pc.Interactor.CurrentInteractable;
             if (interactable == null)
-                return EContainerWidgetType.None;
+                return ERightWidgetType.Loadout;
 
             if (interactable.Owner is StorageChest storageChest)
-                return EContainerWidgetType.Storage;
+                return ERightWidgetType.StorageChest;
             else if (interactable.Owner is Stronghold stronghold)
-                return EContainerWidgetType.Stronghold;
+                return ERightWidgetType.Stronghold;
+            else if (interactable.Owner is Stockpile stockpile)
+                return ERightWidgetType.Stockpile;
 
-            return EContainerWidgetType.None;
+                return ERightWidgetType.None;
         }
 
-        public enum EContainerWidgetType
+        public enum ERightWidgetType
         { 
             None,
-            Storage,
+            Loadout,
+            StorageChest,
             Stronghold,
+            Stockpile,
         }
     }
 }

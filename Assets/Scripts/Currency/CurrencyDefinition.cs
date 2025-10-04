@@ -20,14 +20,14 @@ namespace LichLord
         None,
         Wood,
         Stone,
-        Iron,
+        IronOre,
 
         Souls,
         Gold,
         Deathcaps,
         Bones,
 
-        Diamonds,
+        IronBar,
         Oil,
         Linen,
         Parchment,
