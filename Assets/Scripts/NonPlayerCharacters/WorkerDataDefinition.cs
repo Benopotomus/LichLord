@@ -15,11 +15,11 @@ namespace LichLord.NonPlayerCharacters
         private const byte WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
 
         // Events (packed into ushort)
-        private const int HEALTH_BITS = 8;               // 0–255
+        private const int HEALTH_BITS = 7;               // 0–127
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        private const int CARRIED_CURRENCY_TYPE_BITS = 4; // 0–15
+        private const int CARRIED_CURRENCY_TYPE_BITS = 5; // 0–31
         private const int CARRIED_CURRENCY_TYPE_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
         private const ushort CARRIED_CURRENCY_TYPE_MASK = (1 << CARRIED_CURRENCY_TYPE_BITS) - 1;
 

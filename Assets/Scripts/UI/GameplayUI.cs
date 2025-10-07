@@ -62,7 +62,8 @@ namespace LichLord.UI
                 if (pc.Interactor.CurrentInteractable != null)
                 {
                     if (pc.Interactor.InteractType == EInteractType.Container ||
-                        pc.Interactor.InteractType == EInteractType.Stronghold) 
+                        pc.Interactor.InteractType == EInteractType.Stronghold ||
+                        pc.Interactor.InteractType == EInteractType.Refinery) 
                     {
                         if (!_inventoryView.IsOpen)
                         {
@@ -89,7 +90,8 @@ namespace LichLord.UI
                 _inventoryView.Close();
 
             if (pc.Interactor.InteractType == EInteractType.Container ||
-                pc.Interactor.InteractType == EInteractType.Stronghold)
+                pc.Interactor.InteractType == EInteractType.Stronghold ||
+                pc.Interactor.InteractType == EInteractType.Refinery)
             {
                 pc.Interactor.SetInteractType(EInteractType.None);
             }

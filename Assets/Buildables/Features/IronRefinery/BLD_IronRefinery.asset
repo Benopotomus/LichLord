@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6be659a987d58e84daf7d9e187a4712d, type: 3}
   m_Name: BLD_IronRefinery
   m_EditorClassIdentifier: 
-  _tableID: -1
+  _tableID: 4
   _buildableName: 
   _prefabBundle:
-    _name: 
-    _bundle: 
+    _name: BLD_VIS_IronRefinery
+    _bundle: bld_vis_ironrefinery
   _placementVFX:
-    _name: 
-    _bundle: 
+    _name: VFX_BuildablePlacement
+    _bundle: vfx_buildableplacement
   _icon:
     _name: Forge
     _bundle: forge
@@ -28,9 +28,11 @@ MonoBehaviour:
   _maxHealth: 100
   _damageReduction: 3
   _damageResistance: 0
-  _containerSlots: 8
+  _containerSlots: 3
   _isStockpile: 0
+  _checkBounds: {x: 0, y: 0, z: 0}
   _ticksPerProgress: 32
+  _maxProgress: 10
   _recipes:
   - InItems:
     - Item: {fileID: 11400000, guid: e69869166e6ac7245aad4bb8c8e4082e, type: 2}
@@ -40,3 +42,5 @@ MonoBehaviour:
     OutItems:
     - Item: {fileID: 11400000, guid: 9e5a8643ab7daa8488851fe9113ed2ce, type: 2}
       Count: 1
+  _inSlots: 2
+  _outSlots: 1

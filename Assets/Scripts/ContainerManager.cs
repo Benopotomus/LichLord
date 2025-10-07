@@ -383,6 +383,87 @@ namespace LichLord
             _itemSlotReplicators[replicatorIndex].SetItemData(localIndex, itemData);
         }
 
+        public void AddItemToSlot(int fullIndex, FItemData addedItemData)
+        {
+            int replicatorIndex = fullIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
+            int localIndex = fullIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
+
+            if (_itemSlotReplicators.Count <= replicatorIndex)
+                return;
+
+            FItemSlotData itemAtSlot = GetItemSlotData(fullIndex);
+
+            if (itemAtSlot.ItemData.DefinitionID == addedItemData.DefinitionID)
+            {
+                ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemAtSlot.ItemData.DefinitionID);
+                int stackCount = itemDefinition.DataDefinition.GetStackCount(ref itemAtSlot.ItemData);
+                int stacksToAdd = itemDefinition.DataDefinition.GetStackCount(ref addedItemData);
+
+                itemDefinition.DataDefinition.SetStackCount(stackCount + stacksToAdd, ref addedItemData);
+            }
+
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+                _predictedItemSlots[fullIndex] = new FPredictedItemData
+                {
+                    EndTick = Runner.Tick + 32,
+                    ItemSlotData = new FItemSlotData
+                    {
+                        ItemData = addedItemData
+                    }
+                };
+
+            _itemSlotReplicators[replicatorIndex].SetItemData(localIndex, addedItemData);
+        }
+
+        public void RemoveItemStacksFromSlot(int fullIndex, int stacksToRemove)
+        {
+            int replicatorIndex = fullIndex / ContainerConstants.ITEMS_PER_REPLICATOR;
+            int localIndex = fullIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
+
+            if (_itemSlotReplicators.Count <= replicatorIndex)
+                return;
+
+            // Get current item at the slot
+            FItemSlotData itemAtSlot = GetItemSlotData(fullIndex);
+            FItemData updatedItemData = itemAtSlot.ItemData;
+
+            if (!updatedItemData.IsValid())
+                return; // nothing to remove
+
+            ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(updatedItemData.DefinitionID);
+            if (itemDefinition == null)
+                return;
+
+            int currentCount = itemDefinition.DataDefinition.GetStackCount(ref updatedItemData);
+            int newCount = currentCount - stacksToRemove;
+
+            if (newCount > 0)
+            {
+                itemDefinition.DataDefinition.SetStackCount(newCount, ref updatedItemData);
+            }
+            else
+            {
+                // stack depleted → clear the slot
+                updatedItemData = default;
+            }
+
+            // Predictive update for clients
+            if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
+            {
+                _predictedItemSlots[fullIndex] = new FPredictedItemData
+                {
+                    EndTick = Runner.Tick + 32,
+                    ItemSlotData = new FItemSlotData
+                    {
+                        ItemData = updatedItemData
+                    }
+                };
+            }
+
+            // Commit to the actual replicator
+            _itemSlotReplicators[replicatorIndex].SetItemData(localIndex, updatedItemData);
+        }
+
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_SetItemSlotData(int fullIndex, FItemData itemData)
         {

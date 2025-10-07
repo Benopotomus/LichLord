@@ -3,26 +3,12 @@ using UnityEngine;
 
 namespace LichLord.UI
 { 
-    public class UILoadoutWidget : UIWidget
+    public class UILoadoutWidget : UIInventoryContextWidget
     {
-        [SerializeField] private UIButton _closeButton;
 
         [SerializeField]
         [SerializedDictionary("Loadout Slot", "SlotWidget")]
         private SerializedDictionary<ELoadoutSlot, UIItemSlot> _loadoutSlots;
-
-        public void Awake()
-        {
-            _closeButton.onClick.AddListener(OnClosePressed);
-        }
-
-        private void OnClosePressed()
-        {
-            if (Context.UI is GameplayUI gameplayUI)
-            {
-                gameplayUI.CloseInventoryWindow();
-            }
-        }
 
         protected override void OnTick()
         {

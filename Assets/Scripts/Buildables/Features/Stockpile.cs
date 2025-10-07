@@ -41,7 +41,10 @@ namespace LichLord.Buildables
         private StockpileCurrencyStack _stonePilePrefab;
 
         [SerializeField]
-        private StockpileCurrencyStack _ironPilePrefab;
+        private StockpileCurrencyStack _ironOrePilePrefab;
+
+        [SerializeField]
+        private StockpileCurrencyStack _ironBarPilePrefab;
 
         [SerializeField]
         private StockpileCurrencyStack _deathcapsPilePrefab;
@@ -136,7 +139,8 @@ namespace LichLord.Buildables
                             ECurrencyType.Wood => _woodPilePrefab,
                             ECurrencyType.Stone => _stonePilePrefab,
                             ECurrencyType.Deathcaps => _deathcapsPilePrefab,
-                            ECurrencyType.IronOre => _ironPilePrefab,
+                            ECurrencyType.IronOre => _ironOrePilePrefab,
+                            ECurrencyType.IronBar => _ironBarPilePrefab,
                             _ => throw new System.ArgumentOutOfRangeException()
                         };
 

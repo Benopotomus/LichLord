@@ -1,24 +1,16 @@
-﻿using LichLord.Buildables;
+﻿using AYellowpaper.SerializedCollections;
+using LichLord.Buildables;
 using UnityEngine;
+using System.Linq;
 
 namespace LichLord.UI
 {
     public class UIInventoryView : UIGameplayView
     {
-        [SerializeField]
-        private UIInventoryWidget _inventoryWidget;
+        [SerializeField] private UIInventoryWidget _inventoryWidget;
 
-        [SerializeField]
-        private UILoadoutWidget _loadoutWidget;
-
-        [SerializeField]
-        private UIStorageChestWidget _storageChestWidget;
-
-        [SerializeField]
-        private UIStrongholdContainerWidget _strongholdContainerWidget;
-
-        [SerializeField]
-        private UIStockpileWidget _stockpileWidget;
+        [SerializeField, SerializedDictionary("RightWidgetType", "Widget")]
+        private SerializedDictionary<ERightWidgetType, UIInventoryContextWidget> _inventoryContextWidget;
 
         protected override void OnOpen()
         {
@@ -26,61 +18,36 @@ namespace LichLord.UI
 
             _inventoryWidget.SetActive(true);
 
-            switch (GetRightWidgetType())
-            {
-                case ERightWidgetType.None:
-                    _loadoutWidget.SetActive(false);
-                    _storageChestWidget.SetActive(false);
-                    _strongholdContainerWidget.SetActive(false);
-                    _stockpileWidget.SetActive(false);
-                    break;
-                case ERightWidgetType.Loadout:
-                    _loadoutWidget.SetActive(true);
-                    _storageChestWidget.SetActive(false);
-                    _strongholdContainerWidget.SetActive(false);
-                    _stockpileWidget.SetActive(false);
-                    break;
-                case ERightWidgetType.StorageChest:
-                    _storageChestWidget.SetActive(true);
-                    _loadoutWidget.SetActive(false);
-                    _strongholdContainerWidget.SetActive(false);
-                    _stockpileWidget.SetActive(false);
-                    break;
-                case ERightWidgetType.Stronghold:
-                    _strongholdContainerWidget.SetActive(true);
-                    _storageChestWidget.SetActive(false);
-                    _loadoutWidget.SetActive(false);
-                    _stockpileWidget.SetActive(false);
-                    break;
-                case ERightWidgetType.Stockpile:
-                    _stockpileWidget.SetActive(true);
-                    _storageChestWidget.SetActive(false);
-                    _loadoutWidget.SetActive(false);
-                    _strongholdContainerWidget.SetActive(false);
-                    break;
-            }
+            ERightWidgetType currentType = GetRightWidgetType();
+
+            // --- Deactivate all right-hand widgets ---
+            foreach (var widget in _inventoryContextWidget.Values)
+                widget.SetActive(false);
+
+            // --- Activate the one that matches currentType ---
+            if (_inventoryContextWidget.TryGetValue(currentType, out var activeWidget))
+                activeWidget.SetActive(true);
         }
 
         protected override void OnTick()
         {
             base.OnTick();
 
-            switch (GetRightWidgetType())
+            ERightWidgetType currentType = GetRightWidgetType();
+
+            // --- Close UI if the current interactable is gone ---
+            if (currentType == ERightWidgetType.None)
             {
-                case ERightWidgetType.None:
-                    if (_storageChestWidget.isActiveAndEnabled)
+                foreach (var kvp in _inventoryContextWidget)
+                {
+                    var widget = kvp.Value;
+                    if (widget.isActiveAndEnabled)
                     {
                         if (Context.UI is GameplayUI gameplayUI)
                             gameplayUI.CloseInventoryWindow();
+                        break;
                     }
-
-                    if (_strongholdContainerWidget.isActiveAndEnabled)
-                    {
-                        if (Context.UI is GameplayUI gameplayUI)
-                            gameplayUI.CloseInventoryWindow();
-                    }
-
-                    break;
+                }
             }
         }
 
@@ -90,31 +57,32 @@ namespace LichLord.UI
             if (pc == null)
                 return ERightWidgetType.Loadout;
 
-            InteractorComponent interactor = pc.Interactor;
+            var interactor = pc.Interactor;
             if (interactor == null)
                 return ERightWidgetType.Loadout;
 
-            InteractableComponent interactable = pc.Interactor.CurrentInteractable;
+            var interactable = interactor.CurrentInteractable;
             if (interactable == null)
                 return ERightWidgetType.Loadout;
 
-            if (interactable.Owner is StorageChest storageChest)
-                return ERightWidgetType.StorageChest;
-            else if (interactable.Owner is Stronghold stronghold)
-                return ERightWidgetType.Stronghold;
-            else if (interactable.Owner is Stockpile stockpile)
-                return ERightWidgetType.Stockpile;
-
-                return ERightWidgetType.None;
+            return interactable.Owner switch
+            {
+                StorageChest => ERightWidgetType.StorageChest,
+                Stronghold => ERightWidgetType.Stronghold,
+                Stockpile => ERightWidgetType.Stockpile,
+                Refinery => ERightWidgetType.IronRefinery,
+                _ => ERightWidgetType.None
+            };
         }
 
         public enum ERightWidgetType
-        { 
+        {
             None,
             Loadout,
             StorageChest,
             Stronghold,
             Stockpile,
+            IronRefinery,
         }
     }
 }

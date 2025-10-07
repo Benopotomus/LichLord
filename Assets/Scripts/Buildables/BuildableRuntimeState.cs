@@ -1,4 +1,6 @@
-﻿using LichLord.NonPlayerCharacters;
+﻿using LichLord.Items;
+using LichLord.NonPlayerCharacters;
+using System.Collections.Generic;
 
 namespace LichLord.Buildables
 {
@@ -12,6 +14,7 @@ namespace LichLord.Buildables
 
         public BuildableZone buildableZone;
         private SceneContext _context;
+        public SceneContext Context => _context;
 
         private BuildableDefinition _definition;
         public BuildableDefinition Definition
@@ -184,14 +187,136 @@ namespace LichLord.Buildables
             return -1;
         }
 
-        public int GetRefinerProgress()
+        public bool IsRefinery()
         {
-            if (Definition.BuildableDataDefinition is RefinerDataDefinition refinerData)
+            if (Definition is RefineryDefinition refineryDefinition)
             {
-                return refinerData.GetRefinerProgress(ref _data);
+                return true;
+            }
+
+            return false;
+        }
+
+        public ERefineryState GetRefineryState()
+        {
+            if (Definition.BuildableDataDefinition is RefineryDataDefinition refineryData)
+            {
+                return refineryData.GetRefineryState(ref _data);
+            }
+
+            return ERefineryState.None;
+        }
+
+        public void SetRefineryState(ERefineryState newRefineryState)
+        {
+            if (Definition.BuildableDataDefinition is RefineryDataDefinition refineryData)
+            {
+                refineryData.SetRefineryState(newRefineryState, ref _data);
+
+                if (buildableZone != null)
+                    buildableZone.ReplicateRuntimeState(this);
+            }
+        }
+
+        public int GetRefineryInSlots()
+        {
+            if (Definition is RefineryDefinition refineryDefinition)
+            {
+                return refineryDefinition.InSlots;
             }
 
             return -1;
+        }
+
+        public int GetRefineryOutSlots()
+        {
+            if (Definition is RefineryDefinition refineryDefinition)
+            {
+                return refineryDefinition.OutSlots;
+            }
+
+            return -1;
+        }
+
+        public List<(int, FItemSlotData)> GetRefineryInItemSlotDatas()
+        {
+            List<(int, FItemSlotData)> inSlots = new List<(int, FItemSlotData)>();
+
+            if (Definition is not RefineryDefinition)
+                return inSlots;
+
+            ContainerManager containerManager = _context.ContainerManager;
+            FContainerSlotData containerSlotData = containerManager.GetContainerDataAtIndex(GetContainerIndex());
+
+            int startIndex = containerSlotData.StartIndex;
+            int inSlotCount = GetRefineryInSlots();
+
+            for (int i = startIndex; i < startIndex + inSlotCount; i++)
+            {
+                inSlots.Add((i,containerManager.GetItemSlotData(i)));
+            }
+
+            return inSlots;
+        }
+
+        public List<(int, FItemSlotData)> GetRefineryOutItemSlotDatas()
+        {
+            List<(int, FItemSlotData)> outSlots = new List<(int, FItemSlotData)>();
+
+            if (Definition is not RefineryDefinition)
+                return outSlots;
+
+            ContainerManager containerManager = _context.ContainerManager;
+            FContainerSlotData containerSlotData = containerManager.GetContainerDataAtIndex(GetContainerIndex());
+
+            int startIndex = containerSlotData.StartIndex + GetRefineryInSlots();
+            int outSlotCount = GetRefineryOutSlots();
+
+            for (int i = startIndex; i < startIndex + outSlotCount; i++)
+            {
+                outSlots.Add((i, containerManager.GetItemSlotData(i)));
+            }
+
+            return outSlots;
+        }
+
+        public int GetRefineryProgress()
+        {
+            if (Definition.BuildableDataDefinition is RefineryDataDefinition refineryData)
+            {
+                return refineryData.GetRefineryProgress(ref _data);
+            }
+
+            return -1;
+        }
+
+        public float GetRefineryProgressPercent()
+        {
+            if (Definition is not RefineryDefinition refineryDefinition)
+            {
+                return 0;
+            }
+
+            if (Definition.BuildableDataDefinition is RefineryDataDefinition refineryData)
+            {
+                 int progress = refineryData.GetRefineryProgress(ref _data);
+                 int maxProgress = refineryDefinition.MaxProgress;
+
+                return (float)progress / (float)maxProgress;
+            }
+
+            return 0;
+        }
+
+        public void SetRefineryProgress(int newProgress)
+        {
+            if (Definition.BuildableDataDefinition is RefineryDataDefinition refineryData)
+            {
+                refineryData.SetRefineryProgress(newProgress, ref _data);
+
+                if (buildableZone != null)
+                    buildableZone.ReplicateRuntimeState(this);
+            }
         }
 
         public void SetContainerIndex(int index)

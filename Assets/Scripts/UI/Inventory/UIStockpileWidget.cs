@@ -5,21 +5,13 @@ using UnityEngine;
 
 namespace LichLord.UI
 { 
-    public class UIStockpileWidget : UIWidget
+    public class UIStockpileWidget : UIInventoryContextWidget
     {
-        [SerializeField] 
-        private UIButton _closeButton;
-
         [SerializeField] 
         private List<UIStockpileSlot> _stockpileItemSlot = new List<UIStockpileSlot>();
 
         [SerializeField]
         private int _containerIndex;
-
-        public void Awake()
-        {
-            _closeButton.onClick.AddListener(OnClosePressed);
-        }
 
         protected override void OnVisible()
         {
