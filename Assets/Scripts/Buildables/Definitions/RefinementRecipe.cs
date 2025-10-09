@@ -1,24 +1,36 @@
 ﻿using LichLord.Items;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace LichLord
 {
     [Serializable]
     public class RefinementRecipe
     {
-        public List<FItemRecipeValue> InItems;
-        public List<FItemRecipeValue> OutItems;
+        [SerializeField]
+        private int _arcaneLevelRequirement;
+
+        [SerializeField]
+        private List<FItemRecipeValue> _inItems;
+
+        [SerializeField]
+        private List<FItemRecipeValue> _outItems;
 
         public bool IsRecipeValid(List<(int, FItemSlotData)> itemDatas)
         {
-            if (InItems == null || InItems.Count == 0)
+            if (_inItems == null || _inItems.Count == 0)
                 return false;
 
-            if (itemDatas == null || itemDatas.Count == 0)
-                return false;
+            if (itemDatas == null || itemDatas.Count < _inItems.Count)
+                return false; // Not enough slots to match all required items
 
-            foreach (var required in InItems)
+            // Create a list of available slots that can be assigned
+            List<(int slotIndex, FItemSlotData slotData)> availableSlots = new List<(int, FItemSlotData)>(itemDatas);
+            List<(int, FItemSlotData)> usedSlots = new List<(int, FItemSlotData)>();
+
+            // Try to match each required item to a unique slot
+            foreach (var required in _inItems)
             {
                 if (required.Item == null)
                     return false;
@@ -27,9 +39,13 @@ namespace LichLord
                 int requiredCount = required.Count;
                 bool hasMatch = false;
 
-                for (int i = 0; i < itemDatas.Count; i++)
+                for (int i = 0; i < availableSlots.Count; i++)
                 {
-                    FItemData itemData = itemDatas[i].Item2.ItemData;
+                    var (slotIndex, slotData) = availableSlots[i];
+                    FItemData itemData = slotData.ItemData;
+                    if (!itemData.IsValid())
+                        continue;
+
                     ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
                     if (itemDefinition == null)
                         continue;
@@ -40,6 +56,8 @@ namespace LichLord
                         if (itemCount >= requiredCount)
                         {
                             hasMatch = true;
+                            usedSlots.Add((slotIndex, slotData));
+                            availableSlots.RemoveAt(i); // Remove the slot so it can't be reused
                             break;
                         }
                     }
@@ -54,10 +72,12 @@ namespace LichLord
 
         public int GetStacksToRemove(ItemDefinition itemDefinition)
         {
-            for (int i = 0; i < InItems.Count; i++)
+            foreach (var recipeItem in _inItems)
             {
-                if (itemDefinition == InItems[i].Item)
-                    return InItems[i].Count;
+                if (itemDefinition == recipeItem.Item)
+                {
+                    return recipeItem.Count;
+                }
             }
 
             return 0;
@@ -65,7 +85,6 @@ namespace LichLord
 
         public bool CanProgress(List<(int, FItemSlotData)> outSlots)
         {
-
             foreach (var (_, slot) in outSlots)
             {
                 // Ignore empty output slots — these are fine to fill
@@ -78,7 +97,7 @@ namespace LichLord
 
                 bool isPartOfRecipe = false;
 
-                foreach (var recipeOut in OutItems)
+                foreach (var recipeOut in _outItems)
                 {
                     if (recipeOut.Item.TableID == slotDefinition.TableID)
                     {
@@ -102,21 +121,20 @@ namespace LichLord
             return true;
         }
 
-
         public List<FItemData> GetCompletedItems()
         {
-            List<FItemData> completedItems = new List <FItemData>();
+            List<FItemData> completedItems = new List<FItemData>();
 
-            foreach (var outItems in OutItems)
+            foreach (var outItem in _outItems)
             {
-                if (outItems.Item == null)
+                if (outItem.Item == null)
                     continue;
 
                 FItemData completedItem = new FItemData();
-                completedItem.DefinitionID = outItems.Item.TableID;
-                outItems.Item.DataDefinition.SetStackCount (outItems.Count, ref completedItem);
+                completedItem.DefinitionID = outItem.Item.TableID;
+                outItem.Item.DataDefinition.SetStackCount(outItem.Count, ref completedItem);
 
-                completedItems.Add (completedItem);
+                completedItems.Add(completedItem);
             }
 
             return completedItems;

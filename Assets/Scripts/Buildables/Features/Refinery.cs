@@ -1,7 +1,5 @@
 ﻿using Fusion;
 using UnityEngine;
-using LichLord.Items;
-using System.Collections.Generic;
 
 namespace LichLord.Buildables
 {
@@ -41,8 +39,6 @@ namespace LichLord.Buildables
 
         [SerializeField]
         private bool _isInteracting;
-
-
 
         public override void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
         {

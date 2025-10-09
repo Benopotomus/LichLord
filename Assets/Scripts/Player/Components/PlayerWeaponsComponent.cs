@@ -152,8 +152,11 @@ namespace LichLord
                     _itemSpawnerRight.OnLoadedAttached += OnItemLoadedRight;
                     _weaponRight.LoadState = ELoadState.Loading;
                     _weaponRight.WeaponDefinition = item as WeaponDefinition;
-                    _itemSpawnerRight.SpawnItemAttached(_handBoneRight, Quaternion.identity, item.Model);
-                    _itemDefinitionRight = newDefinitionId; // Update stored definition
+                    if (item != null)
+                    {
+                        _itemSpawnerRight.SpawnItemAttached(_handBoneRight, Quaternion.identity, item.Model);
+                        _itemDefinitionRight = newDefinitionId; // Update stored definition
+                    }
                 }
             }
             else

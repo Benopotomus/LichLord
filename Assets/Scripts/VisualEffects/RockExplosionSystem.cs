@@ -67,7 +67,7 @@ namespace LichLord
 
                 float randomScale = Random.Range(scaleMin, scaleMax);
                 particle.transform.localScale = new Vector3(randomScale, randomScale, randomScale);
-
+                particle.enabled = true;
                 particle.Initialize(explosionDirection, target, randomDelay);
             }
         }

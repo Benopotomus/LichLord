@@ -15,7 +15,7 @@ namespace LichLord
 
     }
 
-    public enum ECurrencyType : byte // 16
+    public enum ECurrencyType : byte // 32
     { 
         None,
         Wood,
@@ -28,13 +28,13 @@ namespace LichLord
         Bones,
 
         IronBar,
-        Oil,
+        Charcoal,
         Linen,
         Parchment,
 
         Obsidian,
         Ectoplasm,
-        Relics,
+        Fiber,
         Ichor,
     }
 }

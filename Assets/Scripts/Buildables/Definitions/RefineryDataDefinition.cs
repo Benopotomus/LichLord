@@ -2,19 +2,19 @@
 
 namespace LichLord.Buildables
 {
-    [CreateAssetMenu(fileName = "RefinerDataDefinition", menuName = "LichLord/Buildables/RefinerDataDefinition")]
+    [CreateAssetMenu(fileName = "RefineryDataDefinition", menuName = "LichLord/Buildables/RefineryDataDefinition")]
     public class RefineryDataDefinition : ContainerDataDefinition // 23 bits
     {
 
-        protected const int REFINER_STATE_BITS = 2; // 0-3
-        protected const int REFINDER_PROGRESS_BITS = 4; // 0-15
-        //29 bits.. three bits left
+        protected const int REFINERY_STATE_BITS = 2; // 0-3
+        protected const int REFINDERY_PROGRESS_BITS = 7; // 0-127
+        //32 bits
 
         protected const int REFINER_STATE_SHIFT = CONTAINER_INDEX_SHIFT + CONTAINER_INDEX_BITS;
-        protected const int REFINDER_PROGRESS_SHIFT = REFINER_STATE_SHIFT + REFINER_STATE_BITS;
+        protected const int REFINDER_PROGRESS_SHIFT = REFINER_STATE_SHIFT + REFINERY_STATE_BITS;
 
-        protected const int REFINER_STATE_MASK = (1 << REFINER_STATE_BITS) - 1;
-        protected const int REFINDER_PROGRESS_MASK = (1 << REFINDER_PROGRESS_BITS) - 1;
+        protected const int REFINER_STATE_MASK = (1 << REFINERY_STATE_BITS) - 1;
+        protected const int REFINDER_PROGRESS_MASK = (1 << REFINDERY_PROGRESS_BITS) - 1;
 
         public override void InitializeData(ref FBuildableData buildableData, BuildableDefinition definition)
         {

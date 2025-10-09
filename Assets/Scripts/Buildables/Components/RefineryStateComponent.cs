@@ -8,7 +8,8 @@ namespace LichLord.Buildables
 {
     public class RefineryStateComponent : MonoBehaviour
     {
-        [SerializeField] private Buildable _buildable;
+        [SerializeField] private Refinery _refinery;
+
         [SerializeField] private ERefineryState _currentState = ERefineryState.None;
         public ERefineryState CurrentState => _currentState;
 
@@ -18,9 +19,10 @@ namespace LichLord.Buildables
         private readonly List<Tween> _lightTweens = new();
 
         [SerializeField] private int _localProgress = -1;
-        [SerializeField] public int LocalProgress => LocalProgress;
+        public int LocalProgress => _localProgress;
 
         [SerializeField] private int _nextProgressTick = -1;
+        public int NextProgressTick => _nextProgressTick;
 
         public void UpdateRefineryState(BuildableRuntimeState runtimeState, int tick, bool hasAuthority)
         {
@@ -158,40 +160,58 @@ namespace LichLord.Buildables
                 _nextProgressTick = tick + refineryDefinition.TicksPerProgress;
             }
 
+            if (!hasAuthority)
+                return;
+
             if (tick >= _nextProgressTick)
             {
-                if (hasAuthority)
+                currentProgress++;
+                runtimeState.SetRefineryProgress(currentProgress);
+
+                if (currentProgress >= refineryDefinition.MaxProgress)
                 {
-                    currentProgress++;
-                    runtimeState.SetRefineryProgress(currentProgress);
+                    ContainerManager containerManager = runtimeState.Context.ContainerManager;
+                    List<(int, FItemSlotData)> inSlots = runtimeState.GetRefineryInItemSlotDatas();
+                    List<(int, FItemSlotData)> outSlots = runtimeState.GetRefineryOutItemSlotDatas();
 
-                    if (currentProgress >= refineryDefinition.MaxProgress)
+                    RefinementRecipe validRecipe = refineryDefinition.GetValidRecipe(inSlots);
+                    List<FItemData> completedItems = validRecipe.GetCompletedItems();
+
+                    for (int i = 0; i < inSlots.Count; i++)
                     {
-                        ContainerManager containerManager = runtimeState.Context.ContainerManager;
-                        List<(int, FItemSlotData)> inSlots = runtimeState.GetRefineryInItemSlotDatas();
-                        List<(int, FItemSlotData)> outSlots = runtimeState.GetRefineryOutItemSlotDatas();
+                        FItemData itemData = inSlots[i].Item2.ItemData;
+                        ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
 
-                        RefinementRecipe validRecipe = refineryDefinition.GetValidRecipe(inSlots);
-                        List<FItemData> completedItems = validRecipe.GetCompletedItems();
-
-                        for (int i = 0; i < inSlots.Count; i++)
-                        {
-                            FItemData itemData = inSlots[i].Item2.ItemData;
-                            ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
-
-                            int stacks = validRecipe.GetStacksToRemove(itemDefinition);
-                            containerManager.RemoveItemStacksFromSlot(inSlots[i].Item1, stacks);
-                        }
-
-                        for (int i = 0; i < completedItems.Count; i++)
-                        {
-                            containerManager.AddItemToSlot(outSlots[i].Item1, completedItems[i]);
-                        }
-
-                        runtimeState.SetRefineryProgress(0);
+                        int stacks = validRecipe.GetStacksToRemove(itemDefinition);
+                        containerManager.RemoveItemStacksFromSlot(inSlots[i].Item1, stacks);
                     }
+
+                    for (int i = 0; i < completedItems.Count; i++)
+                    {
+                        containerManager.AddItemToSlot(outSlots[i].Item1, completedItems[i]);
+                    }
+
+                    runtimeState.SetRefineryProgress(0);
                 }
             }
+            
+        }
+
+        public float GetLocalRefineryProgress()
+        {
+            if (CurrentState != ERefineryState.Active)
+                return 0f;
+
+            if (_refinery.RuntimeState.Definition is not RefineryDefinition refineryDefinition)
+                return 0f;
+
+            float progressPercent = (float)LocalProgress / (float)refineryDefinition.MaxProgress;
+            int ticksToNextProgress = (NextProgressTick - _refinery.Context.Runner.Tick);
+
+            float progressStep = (1f / (float)refineryDefinition.MaxProgress);
+            float additionalProgress = (1f - ((float)ticksToNextProgress / refineryDefinition.TicksPerProgress)) * progressStep;
+
+            return progressPercent + additionalProgress;
         }
     }
 }

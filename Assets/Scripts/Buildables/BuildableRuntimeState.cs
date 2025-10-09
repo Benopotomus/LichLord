@@ -299,13 +299,23 @@ namespace LichLord.Buildables
 
             if (Definition.BuildableDataDefinition is RefineryDataDefinition refineryData)
             {
-                 int progress = refineryData.GetRefineryProgress(ref _data);
-                 int maxProgress = refineryDefinition.MaxProgress;
+                int progress = refineryData.GetRefineryProgress(ref _data);
+                int maxProgress = refineryDefinition.MaxProgress;
 
                 return (float)progress / (float)maxProgress;
             }
 
             return 0;
+        }
+
+        public int GetRefineryMaxProgress()
+        {
+            if (Definition is RefineryDefinition refineryDefinition)
+            {
+                return refineryDefinition.MaxProgress;
+            }
+
+            return -1;
         }
 
         public void SetRefineryProgress(int newProgress)

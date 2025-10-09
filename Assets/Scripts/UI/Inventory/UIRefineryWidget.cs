@@ -39,7 +39,7 @@ namespace LichLord.UI
 
             _refinery = refinery;
             _containerIndex = refinery.RuntimeState.GetContainerIndex();
-            _progressSlider.value = _refinery.RuntimeState.GetRefineryProgressPercent();
+            _progressSlider.value = _refinery.RefineryStateComponent.GetLocalRefineryProgress();
 
             RefreshSlots();
         }
@@ -49,7 +49,7 @@ namespace LichLord.UI
             base.OnTick();
             RefreshStorageItems();
 
-            _progressSlider.value = _refinery.RuntimeState.GetRefineryProgressPercent();
+            _progressSlider.value = _refinery.RefineryStateComponent.GetLocalRefineryProgress();
         }
 
         private void RefreshSlots()

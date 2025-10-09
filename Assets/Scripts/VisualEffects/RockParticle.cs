@@ -29,6 +29,8 @@ namespace LichLord
 
         private void RecycleDelay()
         {
+            isAttracted = false;
+            this.enabled = false;
             DWDObjectPool.Instance.Recycle(this);
         }
 
