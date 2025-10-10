@@ -12,10 +12,16 @@ namespace LichLord
         private int _arcaneLevelRequirement;
 
         [SerializeField]
+        private int _ticksPerProgress = 32;
+        public int TicksPerProgress => _ticksPerProgress;
+
+        [SerializeField]
         private List<FItemRecipeValue> _inItems;
+        public List<FItemRecipeValue> InItems => _inItems;
 
         [SerializeField]
         private List<FItemRecipeValue> _outItems;
+        public List<FItemRecipeValue> OutItems => _outItems;
 
         public bool IsRecipeValid(List<(int, FItemSlotData)> itemDatas)
         {

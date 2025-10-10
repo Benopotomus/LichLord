@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace LichLord.UI
 {
-    public class UILoadoutSlot : UIItemSlot 
+    public class UILoadoutSlot : UIDraggableItemSlot 
     {
         [SerializeField]
         private ELoadoutSlot _loadoutSlot = ELoadoutSlot.None;

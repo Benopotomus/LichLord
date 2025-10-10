@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace LichLord.UI
 {
-    public class UIContainerSlot : UIItemSlot
+    public class UIContainerSlot : UIDraggableItemSlot
     {
         [SerializeField]
         private int _containerIndex = -1;
@@ -51,6 +51,9 @@ namespace LichLord.UI
 
             if (targetSlot is UIContainerSlot containerSlot)
             {
+                if (targetSlot is UIRefineryOutSlot outSlot)
+                    return;
+
                 FItemData otherSlotItem = containerSlot.ItemData;
                 FItemData thisSlotItem = _itemData;
 

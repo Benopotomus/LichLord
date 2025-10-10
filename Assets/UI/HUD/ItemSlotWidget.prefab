@@ -109,8 +109,8 @@ RectTransform:
   m_Children:
   - {fileID: 7400625436613504730}
   - {fileID: 8745178585645816038}
-  - {fileID: 6433507115532545302}
   - {fileID: 3220431335855498211}
+  - {fileID: 6433507115532545302}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -138,12 +138,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12ed1d3f389742049a6bbe4bcb8be5cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _button: {fileID: -4351029019564868331}
   _iconImage: {fileID: 8270722428880856255}
   _countText: {fileID: 2293970503239029685}
   _itemDefinition: {fileID: 0}
-  _dragPreviewPrefab: {fileID: 2177514698004881798, guid: b8379ab2975550f4dba8cdcd4e92ee04,
-    type: 3}
 --- !u!114 &-4351029019564868331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -236,7 +233,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3220431335855498211
 RectTransform:
   m_ObjectHideFlags: 0
@@ -445,7 +442,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8745178585645816038
 RectTransform:
   m_ObjectHideFlags: 0

@@ -21,7 +21,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MI_Castle_Jewelry_Gold
-  m_Shader: {fileID: -6465566751694194690, guid: 7759558812c7224468eca9e51d672aed, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 7759558812c7224468eca9e51d672aed,
+    type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -74,6 +75,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _PASGBasePBROpaqueORM_65a53f0dc42548d8af356cfcee93394c_EmissiveMap_3204051104_Texture2D:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SlopeNoiseTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -93,6 +98,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _AOIntensity: 1
+    - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _BUILTIN_AlphaClip: 0
     - _BUILTIN_Blend: 0
     - _BUILTIN_CullMode: 2
@@ -104,10 +111,15 @@ Material:
     - _BUILTIN_ZTest: 4
     - _BUILTIN_ZWrite: 1
     - _BUILTIN_ZWriteControl: 0
+    - _Blend: 0
+    - _BlendModePreserveSpecular: 0
+    - _CastShadows: 1
     - _CoverageMetallicIntensity: 0
     - _CoverageNormalIntensity: 0
     - _CoverageRoughnessIntensity: 0
     - _CoverageSize: 0
+    - _Cull: 2
+    - _DstBlend: 0
     - _EDGEBLENDING: 0
     - _EmissiveIntensity: 0
     - _EmissiveIntensity_1: 0.5
@@ -115,12 +127,19 @@ Material:
     - _MetallicIntensity: 1
     - _NoiseTextureSize: 100
     - _NormalIntensity: 1
-    - _QueueControl: -1
+    - _QueueControl: 0
     - _QueueOffset: 0
+    - _ReceiveShadows: 1
     - _RoughnessIntensity: 1
     - _SloapContrast: 1
     - _SloapOffset: 0
+    - _SrcBlend: 1
+    - _Surface: 0
     - _UV_Size: 1
+    - _WorkflowMode: 1
+    - _ZTest: 4
+    - _ZWrite: 1
+    - _ZWriteControl: 0
     m_Colors:
     - _ColorTint: {r: 1, g: 1, b: 1, a: 0}
     - _EmissiveColor: {r: 1, g: 1, b: 1, a: 0}
