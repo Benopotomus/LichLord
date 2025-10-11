@@ -12,36 +12,36 @@ namespace LichLord.UI
         [SerializeField, SerializedDictionary("RightWidgetType", "Widget")]
         private SerializedDictionary<ERightWidgetType, UIInventoryContextWidget> _inventoryContextWidget;
 
+        private ERightWidgetType _lastWidgetType = ERightWidgetType.None;
+
         protected override void OnOpen()
         {
             base.OnOpen();
 
             _inventoryWidget.SetActive(true);
 
-            ERightWidgetType currentType = GetRightWidgetType();
+            var currentType = GetRightWidgetType();
+            _lastWidgetType = currentType;
 
-            // --- Deactivate all right-hand widgets ---
-            foreach (var widget in _inventoryContextWidget.Values)
-                widget.SetActive(false);
-
-            // --- Activate the one that matches currentType ---
-            if (_inventoryContextWidget.TryGetValue(currentType, out var activeWidget))
-                activeWidget.SetActive(true);
+            UpdateActiveWidget(currentType);
         }
 
         protected override void OnTick()
         {
             base.OnTick();
 
-            ERightWidgetType currentType = GetRightWidgetType();
+            var currentType = GetRightWidgetType();
 
-            // --- Close UI if the current interactable is gone ---
+            // --- Only run if type changed ---
+            if (currentType == _lastWidgetType)
+                return;
+
+            // --- Handle closing if current became None ---
             if (currentType == ERightWidgetType.None)
             {
-                foreach (var kvp in _inventoryContextWidget)
+                foreach (var widget in _inventoryContextWidget.Values)
                 {
-                    var widget = kvp.Value;
-                    if (widget.isActiveAndEnabled)
+                    if (widget != null && widget.isActiveAndEnabled)
                     {
                         if (Context.UI is GameplayUI gameplayUI)
                             gameplayUI.CloseInventoryWindow();
@@ -49,6 +49,24 @@ namespace LichLord.UI
                     }
                 }
             }
+            else
+            {
+                // --- Switch to new widget ---
+                UpdateActiveWidget(currentType);
+            }
+
+            _lastWidgetType = currentType;
+        }
+
+        private void UpdateActiveWidget(ERightWidgetType currentType)
+        {
+            // Deactivate all
+            foreach (var widget in _inventoryContextWidget.Values)
+                widget.SetActive(false);
+
+            // Activate current
+            if (_inventoryContextWidget.TryGetValue(currentType, out var activeWidget))
+                activeWidget.SetActive(true);
         }
 
         private ERightWidgetType GetRightWidgetType()

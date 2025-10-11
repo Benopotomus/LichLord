@@ -226,6 +226,7 @@ namespace LichLord.NonPlayerCharacters
             data.Rotation = saveState.rotation;
             data.Condition = (byte)saveState.condition;
             data.Events = (ushort)saveState.events;
+            data.CarriedItem = saveState.carriedItem.ToNetworkItem();
 
             _deltaStates[freeIndex] = data; // Store full state for persistence
             replicator.SpawnNPC(ref data, freeIndex);

@@ -138,6 +138,7 @@
             _condition = other._condition;
             _configuration = other._configuration;
             _events = other._events;
+            CarriedItem = other.CarriedItem;
         }
 
         public void Copy(ref FNonPlayerCharacterData other)
@@ -146,6 +147,7 @@
             _condition = other._condition;
             _configuration = other._configuration;
             _events = other._events;
+            CarriedItem = other.CarriedItem;
         }
 
         public bool IsEqual(ref FNonPlayerCharacterData other)

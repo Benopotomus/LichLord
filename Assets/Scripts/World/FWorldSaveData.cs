@@ -163,6 +163,7 @@ namespace LichLord.World
         public int configuration;
         public int condition;
         public int events;
+        public FItemSaveData carriedItem;
 
         // Store harvesting target data here as well
         public FNonPlayerCharacterSaveState(NonPlayerCharacter npc, FNonPlayerCharacterData data)
@@ -172,6 +173,28 @@ namespace LichLord.World
             this.configuration = data.Configuration;
             this.condition = data.Condition;
             this.events = data.Events;
+            this.carriedItem = new FItemSaveData(data.CarriedItem);
+        }
+    }
+
+    [Serializable]
+    public struct FItemSaveData
+    {
+        public int definitionId;
+        public int data;
+
+        public FItemSaveData(FItemData fromItem)
+        {
+            this.definitionId = fromItem.DefinitionID;
+            this.data = fromItem.Data;
+        }
+
+        public FItemData ToNetworkItem()
+        { 
+            FItemData itemData = new FItemData();
+            itemData.DefinitionID = this.definitionId;
+            itemData.Data = this.data;
+            return itemData;
         }
     }
 
@@ -235,6 +258,7 @@ namespace LichLord.World
         }
     }
 
+    
     [Serializable]
     public struct FNPCSaveData
     {
