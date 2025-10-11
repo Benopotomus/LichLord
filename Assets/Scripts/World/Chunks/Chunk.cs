@@ -258,7 +258,7 @@ namespace LichLord.World
 
                     _context.PropManager.SpawnProp(usedState);
                 }
-                else if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
+                else if (propLoadState.LoadState == ELoadState.Loaded)
                 {
                     propLoadState.Prop.OnRender(usedState, renderDeltaTime);
                 }                

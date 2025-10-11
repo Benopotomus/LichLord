@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
-    public class NonPlayerCharacterCurrencyComponent : MonoBehaviour
+    public class NonPlayerCharacterCarriedItemComponent : MonoBehaviour
     {
         [SerializeField] private NonPlayerCharacter _npc;
 
@@ -13,8 +13,12 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private GameObject _ironGO;
         [SerializeField] private GameObject _deathCapsGO;
 
+
         private FItemData _carriedItem;
         public FItemData CarriedItem => _carriedItem;
+
+        [SerializeField]
+        private ItemDefinition _definition;
 
         public void OnSpawned()
         {
@@ -39,7 +43,6 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateCarriedCurrencyChange(NonPlayerCharacterRuntimeState runtimeState)
         {
-            return;
             FItemData oldItem = _carriedItem;
             FItemData newItem = runtimeState.GetCarriedItem();
 
@@ -58,7 +61,9 @@ namespace LichLord.NonPlayerCharacters
             }
 
             ItemDefinition definition = Global.Tables.ItemTable.TryGetDefinition(_carriedItem.DefinitionID);
-            if (definition != null)
+            _definition = definition;
+
+            if (definition == null)
                 return;
 
             if (definition is CurrencyDefinition currencyDefinition)

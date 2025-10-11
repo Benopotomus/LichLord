@@ -40,8 +40,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterAnimationController _animationController;
         public NonPlayerCharacterAnimationController AnimationController => _animationController;
 
-        [SerializeField] private NonPlayerCharacterCurrencyComponent _currencyComponent;
-        public NonPlayerCharacterCurrencyComponent CurrencyComponent => _currencyComponent;
+        [SerializeField] private NonPlayerCharacterCarriedItemComponent _currencyComponent;
+        public NonPlayerCharacterCarriedItemComponent CurrencyComponent => _currencyComponent;
 
         [SerializeField] private NonPlayerCharacterAttitudeComponent _attitudeComponent;
         public NonPlayerCharacterAttitudeComponent AttitudeComponent => _attitudeComponent;
