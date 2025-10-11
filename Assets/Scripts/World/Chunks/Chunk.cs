@@ -19,8 +19,8 @@ namespace LichLord.World
         private List<InvasionSpawnPoint> _invasionSpawnPoints = new List<InvasionSpawnPoint>();
         public List<InvasionSpawnPoint> InvasionSpawnPoints => _invasionSpawnPoints;
 
-        private Dictionary<int, PropRuntimeState> _propStates = new Dictionary<int, PropRuntimeState>();
-        public Dictionary<int, PropRuntimeState> PropStates => _propStates;
+        private PropRuntimeState[] _propRuntimeStates;
+        public PropRuntimeState[] PropStates => _propRuntimeStates;
 
         private Dictionary<int, PropRuntimeState> _deltaPropStates = new Dictionary<int, PropRuntimeState>();
         public Dictionary<int, PropRuntimeState> DeltaPropStates => _deltaPropStates;
@@ -30,7 +30,7 @@ namespace LichLord.World
 
         public ELoadState LoadState { get; set; }
 
-        public Dictionary<int, FPropLoadState> PropLoadStates = new Dictionary<int, FPropLoadState>();
+        public FPropLoadState[] PropLoadStates;
 
         // Total number of players that should be replicating this
         public int ReplicationRefCount { get; private set; } = 0;
@@ -99,20 +99,36 @@ namespace LichLord.World
             _trackablesInChunk.Remove(objId);
         }
 
-        public void AddPropRuntimeState(PropRuntimeState propState)
+        public void InitializeRuntimeStates(PropMarkupData[] propMarkupDatas)
         {
-            _propStates[propState.index] = propState;
-            PropLoadStates[propState.index] = new FPropLoadState();
+            _propRuntimeStates = new PropRuntimeState[propMarkupDatas.Length];
+            PropLoadStates = new FPropLoadState[propMarkupDatas.Length];
+
+            for (int i = 0; i < propMarkupDatas.Length; i++)
+            {
+                PropMarkupData propMarkupData = propMarkupDatas[i];
+                if (propMarkupData == null)
+                {
+                    continue;
+                }
+
+                PropRuntimeState propRuntimeState = new PropRuntimeState(
+                    propMarkupData.guid,
+                    this,
+                    propMarkupData.position,
+                    propMarkupData.rotation,
+                    propMarkupData.scale,
+                    propMarkupData.propDefinitionId);
+
+                _propRuntimeStates[i] = propRuntimeState;
+                PropLoadStates[i] = new FPropLoadState();
+            }
         }
+
 
         public void AddInvasionSpawnPoint(InvasionSpawnPoint spawnPoint)
         {
             _invasionSpawnPoints.Add(spawnPoint);
-        }
-
-        public void RemoveObject(PropRuntimeState propState)
-        {
-            _propStates.Remove(propState.index);
         }
 
         public void AddOrUpdateDeltaState(PropRuntimeState propState)
@@ -123,21 +139,17 @@ namespace LichLord.World
 
         public void DespawnProps()
         {
-            var keys = new List<int>(PropLoadStates.Keys); // Create a list to avoid modifying collection during enumeration
-
-            foreach (var key in keys)
+            for (int i = 0; i < PropLoadStates.Length; i++)
             {
-                var loadState = PropLoadStates[key];
+                var loadState = PropLoadStates[i];
 
                 if(loadState.LoadState == ELoadState.Loaded)
                     loadState.Prop.StartRecycle();
 
                 loadState.LoadState = ELoadState.None;
-                PropLoadStates[key] = loadState; // Explicitly write back the modified value
+                loadState.Prop = null;
+                PropLoadStates[i] = loadState; // Explicitly write back the modified value
             }
-
-            //_predictedStates.Clear();
-           // _localRuntimePropStates.Clear();
         }
 
         public void UpdatePropRuntimeState(PropRuntimeState runtimeState)
@@ -175,14 +187,9 @@ namespace LichLord.World
             data.Copy(ref currentData);
         }
          
-        public bool GetRenderState(bool hasAuthority, int guid, out PropRuntimeState usedState)
+        public bool GetRenderState(bool hasAuthority, int index, out PropRuntimeState usedState)
         {
-            if (!PropStates.TryGetValue(guid, out PropRuntimeState authorityState))
-            {
-                usedState = null;
-                Debug.Log("Get Render State: Trying to get runtime data but its not loaded " + guid);
-                return false;
-            }
+            PropRuntimeState authorityState = _propRuntimeStates[index];
 
             // Update the authority state if there's a replicated value    
             UpdatePropRuntimeState(authorityState);
@@ -194,13 +201,13 @@ namespace LichLord.World
                 return true;
 
             // Check for predicted data
-            bool hasPredictedState = _predictedStates.TryGetValue(guid, out PropRuntimeState predictedState);
-            bool hasLocalState = _localRuntimePropStates.TryGetValue(guid, out PropRuntimeState localState);
+            bool hasPredictedState = _predictedStates.TryGetValue(index, out PropRuntimeState predictedState);
+            bool hasLocalState = _localRuntimePropStates.TryGetValue(index, out PropRuntimeState localState);
 
             // If there's no local state for this guid, create one and return
             if (!hasLocalState)
             {
-                _localRuntimePropStates[guid] = new PropRuntimeState(authorityState);
+                _localRuntimePropStates[index] = new PropRuntimeState(authorityState);
                 return true;
             }
 
@@ -211,13 +218,13 @@ namespace LichLord.World
                 if (hasPredictedState)
                 {
                     hasPredictedState = false;
-                    _predictedStates.Remove(guid);
+                    _predictedStates.Remove(index);
                 }
 
                 // update the local state data
                 FPropData authorityData = authorityState.Data;
                 localState.CopyData(ref authorityData);
-                _localRuntimePropStates[guid] = localState;
+                _localRuntimePropStates[index] = localState;
             }
 
             // if we still have a predicted state after checking authority changes
@@ -233,35 +240,28 @@ namespace LichLord.World
 
         public void OnRender(bool hasAuthority, float renderDeltaTime)
         {
-            foreach (var kvp in PropStates)
+            for (int i = 0; i < _propRuntimeStates.Length; i++)
             {
-                int guid = kvp.Key;
-
-                if (!GetRenderState(hasAuthority, guid, out var usedState))
+                if (!GetRenderState(hasAuthority, i, out var usedState))
                 {
-                    Debug.LogWarning($"Null PropRuntimeState for GUID {guid} in Render.");
+                    Debug.LogWarning($"Null PropRuntimeState for GUID {i} in Render.");
                     continue;
                 }
 
-                // if we have no loader for guid, create one
-                if (!PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
-                {
-                    propLoadState = new FPropLoadState();
-                    PropLoadStates[guid] = propLoadState;
-                }
+                FPropLoadState propLoadState =  PropLoadStates[i];
 
-                if (propLoadState.LoadState == ELoadState.None)
+                switch (propLoadState.LoadState)
                 {
-                    // Set the state to loading
-                    propLoadState.LoadState = ELoadState.Loading;
-                    PropLoadStates[guid] = propLoadState;
+                    case ELoadState.None:
+                        propLoadState.LoadState = ELoadState.Loading;
+                        PropLoadStates[i] = propLoadState;
 
-                    _context.PropManager.SpawnProp(usedState);
-                }
-                else if (propLoadState.LoadState == ELoadState.Loaded)
-                {
-                    propLoadState.Prop.OnRender(usedState, renderDeltaTime);
-                }                
+                        _context.PropManager.SpawnProp(usedState);
+                        break;
+                    case ELoadState.Loaded:
+                        propLoadState.Prop.OnRender(usedState, renderDeltaTime);
+                        break;
+                }             
             }
         }
 

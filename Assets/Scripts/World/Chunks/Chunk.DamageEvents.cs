@@ -1,17 +1,14 @@
-﻿using UnityEngine;
-using Fusion;
-using System.Collections.Generic;
-using LichLord.Props;
+﻿using LichLord.Props;
 
 namespace LichLord.World
 {
     public partial class Chunk
     {
         // This happens on the authority only
-        public void ApplyDamageToProp(int guid, int damage, int tick)
+        public void ApplyDamageToProp(int index, int damage, int tick)
         {
             // Find the state
-            PropRuntimeState authorityState = _propStates[guid];
+            PropRuntimeState authorityState = _propRuntimeStates[index];
 
             // Apply the damage
             authorityState.ApplyDamage(damage, tick);
@@ -19,15 +16,11 @@ namespace LichLord.World
             ReplicatePropState(authorityState);
         }
 
-        public void Predict_ApplyDamageToProp(int guid, int damage, int tick)
+        public void Predict_ApplyDamageToProp(int index, int damage, int tick)
         {
-            if (!PropStates.TryGetValue(guid, out PropRuntimeState authorityState))
-            {
-                Debug.Log("trying to predict a state that hasn't been loaded");
-                return;
-            }
+            PropRuntimeState authorityState = _propRuntimeStates[index];
 
-            if (_predictedStates.TryGetValue(guid, out var predictedState))
+            if (_predictedStates.TryGetValue(index, out var predictedState))
             {
                 predictedState.ApplyDamage(damage, tick);
             }
@@ -37,7 +30,7 @@ namespace LichLord.World
                 newPredictedState.ApplyDamage(damage, tick);
 
                 //Debug.Log("Creating Predicted Data");
-                _predictedStates.Add(guid, newPredictedState);
+                _predictedStates.Add(index, newPredictedState);
             }
         }
     }

@@ -59,16 +59,14 @@ namespace LichLord.Props
             if (HasStateAuthority)
                 chunk.HarvestProp(guid, harvestValue, Runner.Tick);
 
+            var loadState = chunk.PropLoadStates[guid];
 
-            if (chunk.PropLoadStates.TryGetValue(guid, out var loadState))
+            if (loadState.LoadState == ELoadState.Loaded)
             {
-                if (loadState.LoadState == ELoadState.Loaded)
+                if (loadState.Prop is HarvestNode harvestNode)
                 {
-                    if (loadState.Prop is HarvestNode harvestNode)
-                    {
-                        harvestNode.PlayHarvestShake();
-                        harvestNode.PlayHarvestParticles(pc.CachedTransform);
-                    }
+                    harvestNode.PlayHarvestShake();
+                    harvestNode.PlayHarvestParticles(pc.CachedTransform);
                 }
             }
         }
@@ -78,20 +76,19 @@ namespace LichLord.Props
         {
             Chunk chunk = Context.ChunkManager.GetChunk(chunkPosition);
 
-            // Play effects
-            if (chunk.PropLoadStates.TryGetValue(guid, out var loadState))
+            var loadState = chunk.PropLoadStates[guid];
+
+            if (loadState.LoadState == ELoadState.Loaded)
             {
-                if (loadState.LoadState == ELoadState.Loaded)
+                if (loadState.Prop is HarvestNode harvestNode)
                 {
-                    if (loadState.Prop is HarvestNode harvestNode)
+                    if (replicator.LoadStates[npcIndex].LoadState == ELoadState.Loaded)
                     {
-                        if (replicator.LoadStates[npcIndex].LoadState == ELoadState.Loaded)
-                        {
-                            harvestNode.PlayHarvestShake();
-                        }
+                        harvestNode.PlayHarvestShake();
                     }
                 }
             }
+            
         }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Unreliable, InvokeLocal = true)]
@@ -102,18 +99,16 @@ namespace LichLord.Props
             if (HasStateAuthority)
                 chunk.HarvestProp(guid, harvestValue, Runner.Tick);
 
-            // Play effects
-            if (chunk.PropLoadStates.TryGetValue(guid, out var loadState))
+            var loadState = chunk.PropLoadStates[guid];
+            
+            if (loadState.LoadState == ELoadState.Loaded)
             {
-                if (loadState.LoadState == ELoadState.Loaded)
+                if (loadState.Prop is HarvestNode harvestNode)
                 {
-                    if (loadState.Prop is HarvestNode harvestNode)
+                    if (replicator.LoadStates[npcIndex].LoadState == ELoadState.Loaded)
                     {
-                        if (replicator.LoadStates[npcIndex].LoadState == ELoadState.Loaded)
-                        {
-                            harvestNode.PlayHarvestShake();
-                            harvestNode.PlayHarvestParticles(replicator.LoadStates[npcIndex].NPC.CachedTransform);
-                        }
+                        harvestNode.PlayHarvestShake();
+                        harvestNode.PlayHarvestParticles(replicator.LoadStates[npcIndex].NPC.CachedTransform);
                     }
                 }
             }

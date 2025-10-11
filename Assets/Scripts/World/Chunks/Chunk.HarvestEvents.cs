@@ -8,10 +8,10 @@ namespace LichLord.World
     public partial class Chunk
     {
         // This happens on the authority only
-        public void HarvestProp(int guid, int harvestValue, int tick)
+        public void HarvestProp(int index, int harvestValue, int tick)
         {
             // Find the state
-            PropRuntimeState authorityState = _propStates[guid];
+            PropRuntimeState authorityState = _propRuntimeStates[index];
 
             // Apply the damage
             authorityState.Harvest(harvestValue, tick);
@@ -19,15 +19,11 @@ namespace LichLord.World
             ReplicatePropState(authorityState);
         }
 
-        public void Predict_HarvestProp(int guid, int harvestValue, int tick)
+        public void Predict_HarvestProp(int index, int harvestValue, int tick)
         {
-            if (!PropStates.TryGetValue(guid, out PropRuntimeState authorityState))
-            {
-                Debug.Log("trying to predict a state that hasn't been loaded");
-                return;
-            }
+            PropRuntimeState authorityState = _propRuntimeStates[index];
 
-            if (_predictedStates.TryGetValue(guid, out var predictedState))
+            if (_predictedStates.TryGetValue(index, out var predictedState))
             {
                 predictedState.Harvest(harvestValue, tick);
             }
@@ -37,7 +33,7 @@ namespace LichLord.World
                 newPredictedState.Harvest(harvestValue, tick);
 
                 //Debug.Log("Creating Predicted Data");
-                _predictedStates.Add(guid, newPredictedState);
+                _predictedStates.Add(index, newPredictedState);
             }
         }
     }

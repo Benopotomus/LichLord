@@ -24,25 +24,8 @@ namespace LichLord.Props
             if (baseMarkupData == null)
                 return;
 
-            for (int i = 0; i < baseMarkupData.PropMarkupDatas.Length; i++)
-            {
-                PropMarkupData propMarkupData = baseMarkupData.PropMarkupDatas[i];
-                if (propMarkupData == null)
-                {
-                    continue;
-                }
-
-                PropRuntimeState propRuntimeState = new PropRuntimeState(
-                    propMarkupData.guid,
-                    chunk,
-                    propMarkupData.position,
-                    propMarkupData.rotation,
-                    propMarkupData.scale,
-                    propMarkupData.propDefinitionId);
-
-                chunk.AddPropRuntimeState(propRuntimeState); // Add to chunk's PropStates
-            }
-
+            chunk.InitializeRuntimeStates(baseMarkupData.PropMarkupDatas);
+            
             if (HasStateAuthority)
             {
                 var loadedChunks = Context.WorldSaveLoadManager.LoadedChunks;
@@ -51,16 +34,15 @@ namespace LichLord.Props
                 {
                     foreach (var savedProp in chunkSaveData.props)
                     {
+                        PropRuntimeState state = chunk.PropStates[savedProp.guid];
                         FPropData savedData = new FPropData { StateData = (ushort)savedProp.stateData };
-                        if (chunk.PropStates.TryGetValue(savedProp.guid, out PropRuntimeState state))
-                        { 
-                            state.CopyData(ref savedData);
-                            chunk.UpdatePropRuntimeState(state);
-                            chunk.DeltaPropStates[savedProp.guid] = state;
-                        }
+                        state.CopyData(ref savedData);
+                        chunk.UpdatePropRuntimeState(state);
+                        chunk.DeltaPropStates[savedProp.guid] = state;
                     }
                 }
             }
+            
         }
 
         private void OnPropSpawned(PropRuntimeState propRuntimeState, Prop prop)
@@ -73,32 +55,23 @@ namespace LichLord.Props
                 return;
             }
 
-            int guid = propRuntimeState.index;
-            if (!chunk.PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
-            {
-                Debug.LogWarning($"Missing or null PropLoadState for GUID {guid} in OnPropSpawned.", this);
-                return;
-            }
+            int index = propRuntimeState.index;
 
-            propLoadState.Prop = prop;
-            propLoadState.LoadState = ELoadState.Loaded;
-            chunk.PropLoadStates[guid] = propLoadState; 
+            chunk.PropLoadStates[index].Prop = prop;
+            chunk.PropLoadStates[index].LoadState = ELoadState.Loaded; 
 
             prop.OnSpawned(propRuntimeState, this);
         }
 
-        public void DespawnProp(Chunk chunk, int guid)
+        public void DespawnProp(Chunk chunk, int index)
         {
-            if (!chunk.PropLoadStates.TryGetValue(guid, out FPropLoadState propLoadState))
-            {
-                Debug.LogWarning($"Missing or null PropLoadState for GUID {guid} in DespawnProp.", this);
-                return;
-            }
+            FPropLoadState propLoadState = chunk.PropLoadStates[index];
 
             if (propLoadState.LoadState == ELoadState.Loaded && propLoadState.Prop != null)
             {
                 propLoadState.Prop.StartRecycle();
                 propLoadState.LoadState = ELoadState.None;
+                chunk.PropLoadStates[index] = propLoadState;
             }
         }
     }

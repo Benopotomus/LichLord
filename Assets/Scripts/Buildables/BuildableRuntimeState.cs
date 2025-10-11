@@ -52,6 +52,9 @@ namespace LichLord.Buildables
 
         public void CopyData(ref FBuildableData buildableData)
         {
+            if (_data.IsBuildDataEqual(ref buildableData))
+                return;
+
             _data.Copy(in buildableData);
         }
 

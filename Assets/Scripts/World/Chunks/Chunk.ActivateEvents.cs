@@ -6,22 +6,18 @@ namespace LichLord.World
     public partial class Chunk
     {
         // This happens on the authority only
-        public void SetActivated(int guid, bool isInteracting, int tick)
+        public void SetActivated(int index, bool isInteracting, int tick)
         {
-            PropRuntimeState authorityState = _propStates[guid];
+            PropRuntimeState authorityState = _propRuntimeStates[index];
             authorityState.SetActivated(isInteracting, tick);
             ReplicatePropState(authorityState);
         }
 
-        public void Predict_SetActivated(int guid, bool isActivated, int tick)
+        public void Predict_SetActivated(int index, bool isActivated, int tick)
         {
-            if (!PropStates.TryGetValue(guid, out PropRuntimeState authorityState))
-            {
-                Debug.Log("trying to predict a state that hasn't been loaded");
-                return;
-            }
+            PropRuntimeState authorityState = _propRuntimeStates[index];
 
-            if (_predictedStates.TryGetValue(guid, out var predictedState))
+            if (_predictedStates.TryGetValue(index, out var predictedState))
             {
                 predictedState.SetActivated(isActivated, tick);
             }
@@ -29,7 +25,7 @@ namespace LichLord.World
             {
                 var newPredictedState = new PropRuntimeState(authorityState);
                 newPredictedState.SetActivated(isActivated, tick);
-                _predictedStates.Add(guid, newPredictedState);
+                _predictedStates.Add(index, newPredictedState);
             }
         }
     }

@@ -98,22 +98,21 @@ namespace LichLord.World
                 {
                     var buildableList = new List<FBuildableSaveState>();
                     var buildableZone = stronghold.BuildableZone;
-                    var buildData = buildableZone.Data;
+                    var buildDatas = buildableZone.Data;
 
-                    for (int i = 0; i < buildData.Length; i++)
+                    for (int i = 0; i < buildDatas.Length; i++)
                     {
-                        if (buildableZone.RuntimeStates.TryGetValue(i, out BuildableRuntimeState runtimeState))
-                        {
-                            runtimeState.SetInteracting(false, 0);
+                        BuildableRuntimeState runtimeState = buildableZone.RuntimeStates[i];
 
-                            buildableList.Add(new FBuildableSaveState(
-                                i,
-                                runtimeState.Data.Position,
-                                runtimeState.Data.Rotation.eulerAngles,
-                                runtimeState.Data.DefinitionID,
-                                runtimeState.Data.StateData
-                            ));
-                        }
+                        runtimeState.SetInteracting(false, 0);
+
+                        buildableList.Add(new FBuildableSaveState(
+                            i,
+                            runtimeState.Data.Position,
+                            runtimeState.Data.Rotation.eulerAngles,
+                            runtimeState.Data.DefinitionID,
+                            runtimeState.Data.StateData
+                        ));
                     }
 
                     List<FWorkerSaveData> workerSaveData = new List<FWorkerSaveData>();

@@ -1,5 +1,4 @@
 ﻿using DWD.Pooling;
-using DWD.Utility.Loading;
 using Fusion;
 using LichLord.Items;
 using LichLord.World;
@@ -20,18 +19,26 @@ namespace LichLord.Buildables
         [Networked, Capacity(BuildableConstants.MAX_BUILDABLE_REPS)]
         protected virtual NetworkArray<FBuildableData> _buildableDatas { get; }
         public NetworkArray<FBuildableData> Data => _buildableDatas;
+        private FBuildableData[] _localBuildableDatas;
 
-        private FBuildableLoadState[] _buildableLoadStates;
-        public FBuildableLoadState[] LoadStates => _buildableLoadStates;
+        private FBuildableLoadState[] _loadStates;
+        public FBuildableLoadState[] LoadStates => _loadStates;
 
-        private Dictionary<int, BuildableRuntimeState> _runtimeStates = new Dictionary<int, BuildableRuntimeState>();
-        public Dictionary<int, BuildableRuntimeState> RuntimeStates => _runtimeStates;
+        private BuildableRuntimeState[] _runtimeStates;
+        public BuildableRuntimeState[] RuntimeStates => _runtimeStates;
 
         public override void Spawned()
         {
             base.Spawned();
             _spawner.OnBuildableSpawned += OnBuildableSpawned;
-            _buildableLoadStates = new FBuildableLoadState[BuildableConstants.MAX_BUILDABLE_REPS];
+            _localBuildableDatas = new FBuildableData[BuildableConstants.MAX_BUILDABLE_REPS];
+
+            _runtimeStates = new BuildableRuntimeState[BuildableConstants.MAX_BUILDABLE_REPS];
+
+            for (int i = 0; i < _runtimeStates.Length; i++)
+                _runtimeStates[i] = new BuildableRuntimeState(this, i, ref _localBuildableDatas[i]);
+
+            _loadStates = new FBuildableLoadState[BuildableConstants.MAX_BUILDABLE_REPS];
 
             _effectSpawner.OnLoaded += OnBuildingVisualEffectLoaded;
         }
@@ -56,7 +63,7 @@ namespace LichLord.Buildables
 
             for (int i = 0; i < _buildableDatas.Length; i++)
             {
-                var loadstate = _buildableLoadStates[i];
+                var loadstate = _loadStates[i];
                 ref FBuildableData data = ref _buildableDatas.GetRef(i);
 
                 BuildableRuntimeState runtimeState = GetRenderState(i, ref data);
@@ -76,7 +83,7 @@ namespace LichLord.Buildables
                     {
                         case ELoadState.None:
 
-                            _buildableLoadStates[i].LoadState = ELoadState.Loading;
+                            _loadStates[i].LoadState = ELoadState.Loading;
                             BuildableDefinition definition = Global.Tables.BuildableTable.TryGetDefinition(definitionID);
 
                             _spawner.SpawnBuildable(this,
@@ -103,7 +110,7 @@ namespace LichLord.Buildables
                         loadstate.LoadState = ELoadState.None;
                         loadstate.Buildable.StartRecycle();
                         loadstate.Buildable = null;
-                        _buildableLoadStates[i] = loadstate;
+                        _loadStates[i] = loadstate;
                     }
                 }
             }
@@ -113,8 +120,8 @@ namespace LichLord.Buildables
 
         private void OnBuildableSpawned(int index, Buildable buildable)
         {
-            _buildableLoadStates[index].Buildable = buildable;
-            _buildableLoadStates[index].LoadState = ELoadState.Loaded;
+            _loadStates[index].Buildable = buildable;
+            _loadStates[index].LoadState = ELoadState.Loaded;
  
             ref FBuildableData data = ref _buildableDatas.GetRef(index);
             _runtimeStates[index] = new BuildableRuntimeState(this, index, ref data);
@@ -155,23 +162,7 @@ namespace LichLord.Buildables
 
             ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
 
-            if (definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
-            {
-                /*
-                int freeWorkerIndex = Context.WorkerManager.GetFreeIndex();
-                if (freeWorkerIndex < 0)
-                {
-                    Debug.Log("No Free Worker Index");
-                    return;
-                }
- 
-                cryptDataDefinition.InitializeData(ref data, definition);
-                cryptDataDefinition.SetWorkerIndex(freeWorkerIndex, ref data);
-
-                Context.WorkerManager.AssignWorkerIndexToBuildable(freeWorkerIndex, this, freeIndex);
-                */
-            }
-            else if (definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
+            if (definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
             { 
                 var containerData = Context.ContainerManager.GetContainerFreeReplicatorAndIndex(definition.ContainerSlots);
 
@@ -235,14 +226,9 @@ namespace LichLord.Buildables
 
         private BuildableRuntimeState GetRenderState(int index, ref FBuildableData data)
         {
-            if (_runtimeStates.TryGetValue(index, out BuildableRuntimeState state)) 
-            {
-                state.CopyData(ref data);
-                return state;
-            }
-
-            _runtimeStates[index] = new BuildableRuntimeState(this, index, ref data);
-            return _runtimeStates[index];
+            BuildableRuntimeState state = _runtimeStates[index];
+            state.CopyData(ref data);
+            return state;
         }
 
         public bool IsInsideTrigger(Vector3 worldPosition)
