@@ -3,8 +3,9 @@
     using Fusion;
     using UnityEngine;
     using System.Runtime.InteropServices;
+    using LichLord.Items;
 
-    [StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Explicit, Size = 20)]
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
@@ -15,7 +16,9 @@
         private byte _condition; // 1 byte: NPCState (4 bits)// animation bits
         [FieldOffset(14)]
         private ushort _events; // 2 bytes: Health (12 bits) and storage
-        // Total: 16 bytes
+        [FieldOffset(16)]
+        public FItemData CarriedItem; // 4 bytes: Item
+        // Total: 20 bytes
 
         public int DefinitionID
         {

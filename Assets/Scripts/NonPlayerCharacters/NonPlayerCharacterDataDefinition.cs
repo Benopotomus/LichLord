@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using LichLord.Items;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -240,6 +241,18 @@ namespace LichLord.NonPlayerCharacters
             {
                 Debug.LogWarning($"Attitude changed unexpectedly from {beforeAttitude} to {afterAttitude} in SetStateAndAnimation!");
             }
+        }
+
+        // Item
+
+        public virtual FItemData GetCarriedItem(ref FNonPlayerCharacterData npcData)
+        {
+            return npcData.CarriedItem;
+        }
+
+        public virtual void SetCarriedItem(FItemData itemData, ref FNonPlayerCharacterData npcData)
+        {
+            npcData.CarriedItem = itemData;
         }
     }
 }

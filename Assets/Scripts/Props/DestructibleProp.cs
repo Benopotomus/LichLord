@@ -14,8 +14,6 @@ namespace LichLord.Props
 
         public HurtboxComponent Hurtbox;
 
-        public override float BonusRadius { get { return 0; } }
-
         public override void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
         {
            base.OnSpawned(propRuntimeState, propManager);

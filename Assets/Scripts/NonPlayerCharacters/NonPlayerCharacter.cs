@@ -1,6 +1,7 @@
 ﻿using DWD.Pooling;
 using Fusion;
 using LichLord.Buildables;
+using LichLord.Items;
 using LichLord.Projectiles;
 using LichLord.Props;
 using LichLord.World;
@@ -387,7 +388,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 if (_workerIndex >= 0)
                 {
-                    _runtimeState.SetCarriedCurrencyType(ECurrencyType.None);
+                    _runtimeState.SetCarriedItem(new FItemData());
                     _stronghold.WorkerComponent.RemoveWorkerCharacter(this, _workerIndex);
                 }
             }  

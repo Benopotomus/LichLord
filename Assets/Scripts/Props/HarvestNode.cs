@@ -1,11 +1,9 @@
 ﻿using DWD.Pooling;
 using Fusion;
-using LichLord.World;
-using Pathfinding;
 using UnityEngine;
 using DG.Tweening;
 using LichLord.NonPlayerCharacters;
-using LichLord.Items; // Add DOTween namespace
+using LichLord.Items;
 
 namespace LichLord.Props
 {
@@ -46,8 +44,6 @@ namespace LichLord.Props
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
             _stateComponent.UpdateState(_runtimeState.GetState());
-
-            //UpdateNavmesh();
         }
 
         public override void StartRecycle()
@@ -59,27 +55,14 @@ namespace LichLord.Props
             base.StartRecycle();
         }
 
-        private void UpdateNavmesh()
-        {
-            var bounds = new Bounds(transform.position, new Vector3(5f, 5f, 5f)); // adjust size as needed
-            var guo = new GraphUpdateObject(bounds)
-            {
-                updatePhysics = true,
-                resetPenaltyOnPhysics = true,
-                modifyWalkability = true
-            };
-
-            AstarPath.active.UpdateGraphs(guo);
-        }
-
         public override void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
         {
             base.OnRender(propRuntimeState, renderDeltaTime);
 
             _stateComponent.UpdateState(_runtimeState.GetState());
 
-            if (_interactEffect != null)
-                _interactEffect.Toggle(propRuntimeState.GetIsInteracting());
+            //if (_interactEffect != null)
+            //    _interactEffect.Toggle(propRuntimeState.GetIsInteracting());
         }
 
         private bool IsPotentialInteractor(InteractorComponent interactor)
@@ -198,8 +181,14 @@ namespace LichLord.Props
 
             if (npc.RuntimeState.GetHarvestProgress() >= (harvestData.HarvestProgressMax - 1))
             {
+                CurrencyDefinition currencyDefinition = Global.Tables.CurrencyTable.TryGetDefinition(harvestData.CurrencyTypeHarvested.CurrencyType);
+
+                FItemData constructedItem = new FItemData();
+                constructedItem.DefinitionID = currencyDefinition.TableID;
+                currencyDefinition.DataDefinition.SetStackCount(25, ref constructedItem);
+
                 npc.RuntimeState.SetHarvestProgress(0);
-                npc.RuntimeState.SetCarriedCurrencyType(harvestData.CurrencyTypeHarvested.CurrencyType);
+                npc.RuntimeState.SetCarriedItem(constructedItem);
                 context.PropManager.RPC_HarvestNode_NPC(ChunkID, Index, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
                 //Debug.Log(npc.RuntimeState.GetHarvestProgress());
             }

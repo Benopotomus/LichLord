@@ -1,4 +1,5 @@
 ﻿using LichLord.Dialog;
+using LichLord.Items;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -15,8 +16,8 @@ namespace LichLord.NonPlayerCharacters
         private SceneContext _context;
         public SceneContext Context => _context;
 
-        FNonPlayerCharacterData _data = new FNonPlayerCharacterData();
-        public FNonPlayerCharacterData Data => _data;
+        FNonPlayerCharacterData _npcData = new FNonPlayerCharacterData();
+        public FNonPlayerCharacterData Data => _npcData;
 
         private NonPlayerCharacterDefinition _definition;
         public NonPlayerCharacterDefinition Definition
@@ -24,7 +25,7 @@ namespace LichLord.NonPlayerCharacters
             get
             {
                 if (_definition == null)
-                    _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_data.DefinitionID);
+                    _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_npcData.DefinitionID);
 
                 return _definition;
             }
@@ -35,11 +36,11 @@ namespace LichLord.NonPlayerCharacters
         {
             get
             {
-                if (_data.DefinitionID == 0)
+                if (_npcData.DefinitionID == 0)
                     return null;
 
                 if (_dataDefinition == null)
-                    _dataDefinition = _data.DataDefinition;
+                    _dataDefinition = _npcData.DataDefinition;
 
                 return _dataDefinition;
             }
@@ -54,18 +55,18 @@ namespace LichLord.NonPlayerCharacters
 
         public void CopyData(ref FNonPlayerCharacterData other)
         { 
-            _data.Copy(ref other);
+            _npcData.Copy(ref other);
 
-            if (_data.DefinitionID == 0)
+            if (_npcData.DefinitionID == 0)
                 return;
 
-            _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_data.DefinitionID);
-            _dataDefinition = _data.DataDefinition;
+            _definition = Global.Tables.NonPlayerCharacterTable.TryGetDefinition(_npcData.DefinitionID);
+            _dataDefinition = _npcData.DataDefinition;
         }
 
         public void ApplyDamage(int damage, int hitReactIndex)
         {
-            DataDefinition.ApplyDamage(ref _data, damage, hitReactIndex);
+            DataDefinition.ApplyDamage(ref _npcData, damage, hitReactIndex);
             _replicator.ReplicateRuntimeState(this);
 
             if (IsInvader())
@@ -91,92 +92,92 @@ namespace LichLord.NonPlayerCharacters
 
         public ETeamID GetTeam()
         { 
-            return DataDefinition.GetTeamID(ref _data);
+            return DataDefinition.GetTeamID(ref _npcData);
         }
 
         public ENPCSpawnType GetSpawnType()
         {
-            return _data.SpawnType;
+            return _npcData.SpawnType;
         }
 
         public EAttitude GetAttitude()
         {
-            return DataDefinition.GetAttitude(ref _data);
+            return DataDefinition.GetAttitude(ref _npcData);
         }
 
         public void SetAttitude(EAttitude newAttitude)
         {
-            if (_data.DefinitionID == 0)
+            if (_npcData.DefinitionID == 0)
                 return;
 
-            DataDefinition.SetAttitude(newAttitude, ref _data);
+            DataDefinition.SetAttitude(newAttitude, ref _npcData);
             _replicator.ReplicateRuntimeState(this);
         }
 
         public ENPCState GetState()
         {
-            if(_data.DefinitionID == 0)
+            if(_npcData.DefinitionID == 0)
                 return ENPCState.Inactive;
 
             if (DataDefinition == null)
                 return ENPCState.Inactive;
 
-            return DataDefinition.GetState(ref _data);
+            return DataDefinition.GetState(ref _npcData);
         }
 
         public void SetState(ENPCState newState)
         {
-            if (_data.DefinitionID == 0)
+            if (_npcData.DefinitionID == 0)
                 return;
 
-            DataDefinition.SetState(newState, ref _data);
+            DataDefinition.SetState(newState, ref _npcData);
             _replicator.ReplicateRuntimeState(this);
         }
 
         public int GetAnimationIndex()
         {
-            return DataDefinition.GetAnimationIndex(ref _data);
+            return DataDefinition.GetAnimationIndex(ref _npcData);
         }
 
         public void SetAnimationIndex(int index)
         {
-            DataDefinition.SetAnimationIndex(index, ref _data);
+            DataDefinition.SetAnimationIndex(index, ref _npcData);
             _replicator.ReplicateRuntimeState(this);
         }
 
         public Vector3 GetPosition()
         {
-            return _data.Position;
+            return _npcData.Position;
         }
 
         public void SetPosition(Vector3 position)
         { 
-            _data.Position = position;
+            _npcData.Position = position;
         }
 
         public Quaternion GetRotation()
         {
-            return _data.Rotation;
+            return _npcData.Rotation;
         }
 
         public float GetYaw()
         {
-            return _data.Yaw;
+            return _npcData.Yaw;
         }
 
         public byte GetRawCompressedYaw()
         {
-            return _data.RawCompressedYaw;
+            return _npcData.RawCompressedYaw;
         }
 
         public int GetTargetPlayerIndex()
         { 
-            return _data.TargetPlayerIndex; 
+            return _npcData.TargetPlayerIndex; 
         }
 
         public int GetHealth()
         { 
-            return DataDefinition.GetHealth(ref _data);
+            return DataDefinition.GetHealth(ref _npcData);
         }
 
         public int GetMaxHealth()
@@ -186,7 +187,7 @@ namespace LichLord.NonPlayerCharacters
 
         public bool IsInvader()
         {
-            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _data) == ENPCSpawnType.Invader)
+            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _npcData) == ENPCSpawnType.Invader)
                 return true;
 
             return false;
@@ -194,7 +195,7 @@ namespace LichLord.NonPlayerCharacters
 
         public bool IsWarrior()
         {
-            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _data) == ENPCSpawnType.Warrior)
+            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _npcData) == ENPCSpawnType.Warrior)
                 return true;
 
             return false;
@@ -204,7 +205,7 @@ namespace LichLord.NonPlayerCharacters
         {
             if (DataDefinition is WarriorDataDefinition warriorDataDefinition)
             {
-                return warriorDataDefinition.GetFormationID(ref _data);
+                return warriorDataDefinition.GetFormationID(ref _npcData);
             }
 
             return -1;
@@ -214,7 +215,7 @@ namespace LichLord.NonPlayerCharacters
         {
             if (DataDefinition is WarriorDataDefinition warriorDataDefinition)
             {
-                return warriorDataDefinition.GetFormationIndex(ref _data);
+                return warriorDataDefinition.GetFormationIndex(ref _npcData);
             }
 
             return -1;
@@ -223,14 +224,14 @@ namespace LichLord.NonPlayerCharacters
         public Vector3 GetInvaderFormationOffset()
         {
             if (DataDefinition is InvaderDataDefinition invaderDataDefinition)
-                return invaderDataDefinition.GetFormationOffset(ref _data);
+                return invaderDataDefinition.GetFormationOffset(ref _npcData);
 
             return Vector3.zero;
         }
 
         public ENPCState GetStateFromData(ref FNonPlayerCharacterData otherData)
         {
-            if (_data.DefinitionID == 0)
+            if (_npcData.DefinitionID == 0)
                 return ENPCState.Inactive;
 
             if (DataDefinition == null)
@@ -243,7 +244,7 @@ namespace LichLord.NonPlayerCharacters
 
         public bool IsWorker()
         {
-            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _data) == ENPCSpawnType.Worker)
+            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _npcData) == ENPCSpawnType.Worker)
                 return true;
 
             return false;
@@ -252,7 +253,7 @@ namespace LichLord.NonPlayerCharacters
         public int GetWorkerStrongholdId()
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
-                return workerDataDefinition.GetStrongholdId(ref _data);
+                return workerDataDefinition.GetStrongholdId(ref _npcData);
 
             return -1;
         }
@@ -260,9 +261,17 @@ namespace LichLord.NonPlayerCharacters
         public int GetWorkerIndex()
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
-                return workerDataDefinition.GetWorkerIndex(ref _data);
+                return workerDataDefinition.GetWorkerIndex(ref _npcData);
 
             return -1;
+        }
+
+        public Stronghold GetWorkerStronghold()
+        {
+            if (!IsWorker())
+                return null;
+
+            return Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
         }
 
         public void SendWorkerStateChanged(ENPCState newState)
@@ -273,40 +282,26 @@ namespace LichLord.NonPlayerCharacters
             Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
             stronghold.WorkerComponent.OnWorkerStateChanged(GetWorkerIndex(), newState);
         }
+
         // Harvest
 
-        public ECurrencyType GetCarriedCurrencyType()
+        public FItemData GetCarriedItem()
         {
-            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
-                return workerDataDefinition.GetCurrencyType(ref _data);
+            if (_npcData.DefinitionID == 0)
+                return new FItemData();
 
-            return ECurrencyType.None;
+            return _dataDefinition.GetCarriedItem(ref _npcData);
         }
 
-        public void SetCarriedCurrencyType(ECurrencyType newCurrencyType)
+        public void SetCarriedItem(FItemData newItem)
         {
-            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
-            {
-                workerDataDefinition.SetCurrencyType(newCurrencyType, ref _data);
-                _replicator.ReplicateRuntimeState(this);
-            }
-        }
-
-        public int GetCarriedCurrencyAmount()
-        {
-            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
-            {
-                var currencyType = workerDataDefinition.GetCurrencyType(ref _data);
-                return Definition.GetCarryValue(currencyType);
-            }
-
-            return 0;
+            DataDefinition.SetCarriedItem( newItem, ref _npcData);
         }
 
         public int GetHarvestProgress()
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
-                return workerDataDefinition.GetHarvestProgress(ref _data);
+                return workerDataDefinition.GetHarvestProgress(ref _npcData);
 
             return 0;
         }
@@ -315,7 +310,7 @@ namespace LichLord.NonPlayerCharacters
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
             {
-                workerDataDefinition.SetHarvestProgress(newStacks, ref _data);
+                workerDataDefinition.SetHarvestProgress(newStacks, ref _npcData);
                 _replicator.ReplicateRuntimeState(this);
             }
         }
@@ -324,9 +319,9 @@ namespace LichLord.NonPlayerCharacters
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
             {
-                int oldStacks = workerDataDefinition.GetHarvestProgress(ref _data);
+                int oldStacks = workerDataDefinition.GetHarvestProgress(ref _npcData);
 
-                workerDataDefinition.SetHarvestProgress(oldStacks + newStacks, ref _data);
+                workerDataDefinition.SetHarvestProgress(oldStacks + newStacks, ref _npcData);
                 _replicator.ReplicateRuntimeState(this);
             }
         }
@@ -335,7 +330,7 @@ namespace LichLord.NonPlayerCharacters
 
         public int GetDialogIndex()
         {
-            return DataDefinition.GetDialogIndex(ref _data);
+            return DataDefinition.GetDialogIndex(ref _npcData);
         }
 
         public DialogDefinition GetDialogDefinition()
@@ -349,7 +344,7 @@ namespace LichLord.NonPlayerCharacters
 
         public bool HasDialog()
         { 
-            return DataDefinition.HasDialog(ref _data);
+            return DataDefinition.HasDialog(ref _npcData);
         }
 
         // Player Follow
@@ -358,7 +353,7 @@ namespace LichLord.NonPlayerCharacters
         {
             if (DataDefinition is WarriorDataDefinition warriorData)
             {
-                return Context.NetworkGame.GetPlayerByIndex(warriorData.GetPlayerFollowIndex(ref _data));
+                return Context.NetworkGame.GetPlayerByIndex(warriorData.GetPlayerFollowIndex(ref _npcData));
             }
 
             return null;
@@ -370,7 +365,7 @@ namespace LichLord.NonPlayerCharacters
         {
             if (DataDefinition is WarriorDataDefinition warriorData)
             {
-                return warriorData.GetLifetimeProgress(ref _data);
+                return warriorData.GetLifetimeProgress(ref _npcData);
             }
 
             return 0;
@@ -380,7 +375,7 @@ namespace LichLord.NonPlayerCharacters
         {
             if (DataDefinition is WarriorDataDefinition warriorData)
             {
-                warriorData.SetLifetimeProgress(newProgress, ref _data);
+                warriorData.SetLifetimeProgress(newProgress, ref _npcData);
                 _replicator.ReplicateRuntimeState(this);
             }
         }

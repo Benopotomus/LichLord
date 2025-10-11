@@ -150,19 +150,12 @@ namespace LichLord.Buildables
 
             // Determine if theres any connectors near my connectors
 
-
-
             // Spawn VFX for defintion
             _effectSpawner.SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
 
             ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
 
-            if (definition.BuildableDataDefinition is StockpileDataDefinition stockpileDataDefinition)
-            {
-
-
-            }
-            else if (definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
+            if (definition.BuildableDataDefinition is CryptDataDefinition cryptDataDefinition)
             {
                 /*
                 int freeWorkerIndex = Context.WorkerManager.GetFreeIndex();

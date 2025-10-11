@@ -141,7 +141,7 @@ namespace LichLord.Buildables
                             ECurrencyType.Deathcaps => _deathcapsPilePrefab,
                             ECurrencyType.IronOre => _ironOrePilePrefab,
                             ECurrencyType.IronBar => _ironBarPilePrefab,
-                            _ => throw new System.ArgumentOutOfRangeException()
+                            _ => _woodPilePrefab
                         };
 
                         Vector3 worldPos = CachedTransform.TransformPoint(_pilePositions[i]);
@@ -237,9 +237,6 @@ namespace LichLord.Buildables
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
         {
             Debug.Log("Interaction started with Stockpile.");
-
-            if (RuntimeState.DataDefinition is not StockpileDataDefinition dataDefinition)
-                return;
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
@@ -254,27 +251,22 @@ namespace LichLord.Buildables
 
         public void DropOffCurrency(NonPlayerCharacter npc)
         {
-            var currencyType = npc.RuntimeState.GetCarriedCurrencyType();
-            if (currencyType == ECurrencyType.None)
+            var carriedItem = npc.RuntimeState.GetCarriedItem();
+            if (!carriedItem.IsValid())
                 return;
 
-            var count = npc.RuntimeState.GetCarriedCurrencyAmount(); ;
-            CurrencyDefinition definition = Global.Tables.CurrencyTable.TryGetDefinition(currencyType);
+            CurrencyDefinition definition = Global.Tables.ItemTable.TryGetDefinition(carriedItem.DefinitionID) as CurrencyDefinition;
             if (definition == null)
                 return;
 
-            npc.RuntimeState.SetCarriedCurrencyType(ECurrencyType.None);
+            npc.RuntimeState.SetCarriedItem(new FItemData());
 
             int containerIndex = RuntimeState.GetContainerIndex();
 
             if (containerIndex >= 0)
             {
-                FItemData tempItemData = new FItemData();
-                CurrencyDefinition currencyDef = Global.Tables.CurrencyTable.TryGetDefinition(currencyType);
-                tempItemData.DefinitionID = currencyDef.TableID;
-                currencyDef.DataDefinition.SetStackCount(count, ref tempItemData);
 
-                Context.ContainerManager.AddItemToContainer(containerIndex, tempItemData);
+                Context.ContainerManager.AddItemToContainer(containerIndex, carriedItem);
             }
         }
     }

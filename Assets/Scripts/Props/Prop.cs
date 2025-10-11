@@ -20,18 +20,12 @@ namespace LichLord.Props
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
 
-
         // IChunkTrackable
         public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
         public Vector3 Position => CachedTransform.position;
-        public virtual float BonusRadius { get; } // Extra radius added for npc maneuvers to determine if they're in range.
-        public virtual bool IsAttackable
-        {
-            get
-            {
-                 return false;
-            }
-        }
+
+        public virtual bool IsAttackable => false;
+
         public virtual Collider HurtBoxCollider { get { return null; } }
 
         public virtual void OnSpawned(PropRuntimeState propRuntimeState, PropManager propManager)
@@ -50,8 +44,6 @@ namespace LichLord.Props
             CurrentChunk.AddObject(this);
         }
 
-        // This is the visuals for authority and client.
-        // Read only - no logic should update here.
         public virtual void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
         {
             _runtimeState = propRuntimeState;

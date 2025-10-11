@@ -82,20 +82,6 @@ namespace LichLord.NonPlayerCharacters
             npcData.Events = events;
         }
 
-        // Currency Type
-        public ECurrencyType GetCurrencyType(ref FNonPlayerCharacterData npcData)
-        {
-            return (ECurrencyType)((npcData.Events >> CARRIED_CURRENCY_TYPE_SHIFT) & CARRIED_CURRENCY_TYPE_MASK);
-        }
-
-        public void SetCurrencyType(ECurrencyType newCurrencyType, ref FNonPlayerCharacterData npcData)
-        {
-            ushort events = npcData.Events;
-            int newTypeIndex = Mathf.Clamp((int)newCurrencyType, 0, CARRIED_CURRENCY_TYPE_MASK);
-            events = (ushort)((events & ~(CARRIED_CURRENCY_TYPE_MASK << CARRIED_CURRENCY_TYPE_SHIFT)) | (newTypeIndex << CARRIED_CURRENCY_TYPE_SHIFT));
-            npcData.Events = events;
-        }
-
         // Harvest Progress
         public int GetHarvestProgress(ref FNonPlayerCharacterData npcData)
         {

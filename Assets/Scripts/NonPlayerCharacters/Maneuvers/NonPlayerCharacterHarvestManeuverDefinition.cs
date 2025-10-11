@@ -11,8 +11,9 @@ namespace LichLord.NonPlayerCharacters
 
         public override bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
-            var carriedCurrency = brainComponent.NPC.RuntimeState.GetCarriedCurrencyType();
-            if (carriedCurrency != ECurrencyType.None)
+            // If my hands are full I can't harvest
+            var carriedItem = brainComponent.NPC.RuntimeState.GetCarriedItem();
+            if (carriedItem.IsValid())
                 return false;
 
             IChunkTrackable harvestTarget = brainComponent.HarvestTarget;

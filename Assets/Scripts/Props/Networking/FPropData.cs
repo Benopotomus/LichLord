@@ -46,7 +46,7 @@
             if(_definitionId != other._definitionId)
                 return false;
 
-            if (!IsPackedDataEqual(ref other))
+            if (_stateData != other._stateData)
                 return false;
 
             return true;

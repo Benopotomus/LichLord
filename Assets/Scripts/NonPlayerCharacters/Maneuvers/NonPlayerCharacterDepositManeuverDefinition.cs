@@ -13,8 +13,9 @@ namespace LichLord.NonPlayerCharacters
 
         public override bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
-            var carriedCurrency = brainComponent.NPC.RuntimeState.GetCarriedCurrencyType();
-            if(carriedCurrency == ECurrencyType.None ) 
+            // if my hands aren't full, can't deposit.
+            var carriedItem = brainComponent.NPC.RuntimeState.GetCarriedItem();
+            if(!carriedItem.IsValid()) 
                 return false;
 
             IChunkTrackable depositTarget = brainComponent.DepositTarget;
@@ -37,16 +38,9 @@ namespace LichLord.NonPlayerCharacters
                 {
                     ContainerManager containerManager = brainComponent.NPC.Context.ContainerManager;
 
-                    var currencyAmount = brainComponent.NPC.RuntimeState.GetCarriedCurrencyAmount();
-
                     var containerData = containerManager.GetContainerDataAtIndex(containerIndex);
 
-                    FItemData tempItemData = new FItemData();
-                    CurrencyDefinition currencyDef = Global.Tables.CurrencyTable.TryGetDefinition(carriedCurrency);
-                    tempItemData.DefinitionID = currencyDef.TableID;
-                    currencyDef.DataDefinition.SetStackCount(currencyAmount, ref tempItemData);
-
-                    if (containerManager.CanStackAndFitContainer(containerIndex, tempItemData))
+                    if (containerManager.CanStackAndFitContainer(containerIndex, carriedItem))
                         return true;
                 }
             }

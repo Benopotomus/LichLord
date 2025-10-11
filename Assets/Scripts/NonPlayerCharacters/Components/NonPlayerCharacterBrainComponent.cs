@@ -521,6 +521,7 @@ namespace LichLord.NonPlayerCharacters
             IChunkTrackable currentDepositTarget = null;
 
             bool isWorker = _npc.RuntimeState.IsWorker();
+            FItemData carriedItem = _npc.CurrencyComponent.CarriedItem;
 
             foreach (var chunk in _npc.CachedChunks)
             {
@@ -543,7 +544,8 @@ namespace LichLord.NonPlayerCharacters
 
                     if (isWorker)
                     {
-                        if (IsHarvestTargetValid(trackable))
+
+                        if (IsHarvestTargetValid(trackable, carriedItem))
                         {
                             float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
 
@@ -554,7 +556,7 @@ namespace LichLord.NonPlayerCharacters
                             }
                         }
 
-                        if (IsDepositTargetValid(trackable))
+                        if (IsDepositTargetValid(trackable, carriedItem))
                         {
                             float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
 
@@ -620,9 +622,13 @@ namespace LichLord.NonPlayerCharacters
             return true;
         }
 
-        private bool IsHarvestTargetValid(IChunkTrackable trackable)
+        private bool IsHarvestTargetValid(IChunkTrackable trackable, FItemData carriedItem)
         {
             if (trackable == null)
+                return false;
+
+            // if we're carrying anything, nothing is valid
+            if (carriedItem.IsValid())
                 return false;
 
             if (trackable is HarvestNode harvestNode)
@@ -634,17 +640,14 @@ namespace LichLord.NonPlayerCharacters
             return false;
         }
 
-        private bool IsDepositTargetValid(IChunkTrackable trackable)
+        private bool IsDepositTargetValid(IChunkTrackable trackable, FItemData carriedItem)
         {
             if (trackable == null)
                 return false;
 
             // if we're not carrying anything, nothing is valid
-            var currencyType = _npc.RuntimeState.GetCarriedCurrencyType();
-            if (currencyType == ECurrencyType.None)
+            if (!carriedItem.IsValid())
                 return false;
-
-            var currencyAmount = _npc.RuntimeState.GetCarriedCurrencyAmount();
 
             if (trackable is Stockpile stockpile)
             {
@@ -656,13 +659,7 @@ namespace LichLord.NonPlayerCharacters
 
                     var containerData = containerManager.GetContainerDataAtIndex(containerIndex);
 
-                    FItemData tempItemData = new FItemData();
-                    CurrencyDefinition currencyDef = Global.Tables.CurrencyTable.TryGetDefinition(currencyType);
-
-                    tempItemData.DefinitionID = currencyDef.TableID;
-                    currencyDef.DataDefinition.SetStackCount(currencyAmount, ref tempItemData);
-
-                    if (containerManager.CanStackAndFitContainer(containerIndex, tempItemData))
+                    if (containerManager.CanStackAndFitContainer(containerIndex, carriedItem))
                         return true;
                 }
             }
@@ -970,6 +967,7 @@ namespace LichLord.NonPlayerCharacters
                 return null;
 
             IChunkTrackable currentTarget = null;
+            FItemData carriedItem = _npc.CurrencyComponent.CarriedItem;
 
             switch (_activeManeuver.Definition.ManeuverType)
             {
@@ -980,13 +978,13 @@ namespace LichLord.NonPlayerCharacters
                     currentTarget = _attackTarget;
                     break;
                 case EManeuverType.Harvest:
-                    if (!_hasHarvestTarget || !IsHarvestTargetValid(_harvestTarget))
+                    if (!_hasHarvestTarget || !IsHarvestTargetValid(_harvestTarget, carriedItem))
                         return null;
 
                     currentTarget = _harvestTarget;
                     break;
                 case EManeuverType.Deposit:
-                    if (!_hasDepositTarget || !IsDepositTargetValid(_depositTarget))
+                    if (!_hasDepositTarget || !IsDepositTargetValid(_depositTarget, carriedItem))
                         return null;
 
                     currentTarget = _depositTarget;

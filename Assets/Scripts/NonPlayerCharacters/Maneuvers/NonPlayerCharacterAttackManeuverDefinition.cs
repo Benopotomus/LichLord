@@ -31,8 +31,8 @@ namespace LichLord.NonPlayerCharacters
             if(brainComponent.NPC.RuntimeState.GetAttitude() != EAttitude.Hostile)
                 return false;
 
-            var carriedCurrency = brainComponent.NPC.RuntimeState.GetCarriedCurrencyType();
-            if (carriedCurrency != ECurrencyType.None)
+            var carriedItem = brainComponent.NPC.RuntimeState.GetCarriedItem();
+            if (carriedItem.IsValid())
                 return false;
 
             float distanceToTarget = Vector3.Distance(

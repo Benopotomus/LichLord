@@ -1,23 +1,19 @@
 ﻿using Fusion;
+using LichLord.Items;
 using System.Runtime.InteropServices;
 
 namespace LichLord.NonPlayerCharacters
 {
-    [StructLayout(LayoutKind.Explicit, Size = 4)]
+    [StructLayout(LayoutKind.Explicit, Size = 6)]
     public struct FWorkerData : INetworkStruct
     {
         [FieldOffset(0)]
         public byte StrongholdID;
         [FieldOffset(1)]
-        public ECommandTask CommandTask;
-        [FieldOffset(2)]
-        public byte RespawnProgress;
-        [FieldOffset(3)]
         private byte _state;
 
         public bool IsAssigned { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
         public bool WorkerActive { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
-        public bool IsRespawning { get { return IsBitSet(ref _state, 3); } set { SetBit(ref _state, 3, value); } }
 
         public bool IsBitSet(ref byte flags, int bit)
         {

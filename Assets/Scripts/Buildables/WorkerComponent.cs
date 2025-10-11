@@ -3,7 +3,6 @@ using LichLord.Buildables;
 using LichLord.Items;
 using LichLord.World;
 using Pathfinding;
-using System.Net.NetworkInformation;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -66,13 +65,6 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private FItemSlotData GetItemSlotDataForWorkerIndex(int workerIndex)
-        {
-            FContainerSlotData containerSlotData = _stronghold.ContainerSlotData;
-            int fullIndex =  containerSlotData.StartIndex + workerIndex;
-            return Context.ContainerManager.GetItemSlotData(fullIndex);
-        }
-
         private void DestroyItemForWorker(int workerIndex)
         {
             FContainerSlotData containerSlotData = _stronghold.ContainerSlotData;
@@ -82,8 +74,6 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnWorkerStateChanged(int workerIndex, ENPCState newState)
         {
-            //Debug.Log("worker state changed " + newState);
-
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
             if (!workerData.IsAssigned)
@@ -146,7 +136,6 @@ namespace LichLord.NonPlayerCharacters
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
             workerData.IsAssigned = false;
             workerData.WorkerActive = false;
-            workerData.IsRespawning = false;
         }
 
         public void TrySpawnWorker(int strongholdId, int workerIndex, NonPlayerCharacterDefinition definition)
@@ -160,7 +149,6 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             workerData.WorkerActive = true;
-            workerData.IsRespawning = false;
 
             Vector3 randomOffset = new Vector3(
                     Random.Range(-0.25f, 0.25f),

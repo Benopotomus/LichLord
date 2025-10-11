@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using UnityEngine;
 
 namespace LichLord.Buildables
 {
+    [CreateAssetMenu(fileName = "TaskMasterDataDefinition", menuName = "LichLord/Buildables/TaskMasterDataDefinition")]
     public class TaskMasterDataDefinition : DestructibleBuildableDataDefinition
     {
     }
