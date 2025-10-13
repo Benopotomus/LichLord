@@ -227,6 +227,7 @@ namespace LichLord
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
         {
             Debug.Log("Interaction started with " + this);
+            //Context.InvasionManager.BeginInvasion(2, StrongholdID);
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
@@ -238,7 +239,7 @@ namespace LichLord
         {
             Debug.Log("Interaction complete with " + this);
             // Trigger effects, state changes, or events
-            Context.InvasionManager.BeginInvasion(2, StrongholdID);
+
 
             //_rank++;
         }

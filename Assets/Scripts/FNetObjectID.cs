@@ -1,16 +1,55 @@
 ﻿using Fusion;
 using LichLord.NonPlayerCharacters;
+using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace LichLord
 {
+    [StructLayout(LayoutKind.Explicit, Size = 5)]
     public struct FNetObjectID : INetworkStruct
     {
-        public NetworkId networkId;
-        public byte index;
+        [FieldOffset(0)]
+        public ushort _data;
+
+        private const int TYPE_BITS = 4;                // 0–15
+        private const int TYPE_SHIFT = 0;
+        private const ushort TYPE_MASK = (1 << TYPE_BITS) - 1;
+
+        private const int INDEX_BITS = 10;                // 0–1023
+        private const int INDEX_SHIFT = TYPE_SHIFT + TYPE_BITS;
+        private const ushort INDEX_MASK = (1 << INDEX_BITS) - 1;
+
+        // Type
+        public EObjectType GetObjectType()
+        {
+            return (EObjectType)((_data >> TYPE_SHIFT) & TYPE_MASK);
+        }
+
+        public void SetObjectType(EObjectType objectType)
+        {
+            int config = _data;
+            int newValue = Mathf.Clamp((int)objectType, 0, TYPE_MASK);
+            config = ((config & ~(TYPE_MASK << TYPE_SHIFT)) | (newValue << TYPE_SHIFT));
+            _data = (ushort)config;
+        }
+
+        // Index
+        public int GetIndex()
+        {
+            return (_data >> INDEX_SHIFT) & INDEX_MASK;
+        }
+
+        public void SetIndex(int index)
+        {
+            int config = _data;
+            int newValue = Mathf.Clamp((int)index, 0, INDEX_MASK);
+            config = ((config & ~(INDEX_MASK << INDEX_SHIFT)) | (newValue << INDEX_SHIFT));
+            _data = (ushort)config;
+        }
 
         public bool IsValid()
         {
-            if (networkId.Raw <= 0)
+            if (_data == 0)
                 return false;
 
             return true;
@@ -18,54 +57,50 @@ namespace LichLord
 
         public void Copy(FNetObjectID otherObjectID)
         {
-            networkId = otherObjectID.networkId;
-            index = otherObjectID.index;
+            this._data = otherObjectID._data;
         }
 
         public bool IsEqual(FNetObjectID otherObjectID)
         {
-            if (networkId.Raw != otherObjectID.networkId.Raw)
-                return false;
-
-            if (index != otherObjectID.index)
+            if (this._data != otherObjectID._data)
                 return false;
 
             return true;
         }
 
-        public NetworkObject GetNetObject(NetworkRunner runner)
+        public Component GetSceneContextObject(SceneContext context)
         {
-            return IsValid() ? runner.FindObject(networkId) : null;
-        }
-
-        public T GetComponent<T>(NetworkRunner runner) where T : class
-        {
-            var netObject = GetNetObject(runner);
-            return netObject != null ? netObject.GetComponent<T>() : null;
-        }
-
-        public IHitInstigator GetHitInstigator(NetworkRunner runner)
-        {
-            var netObject = GetNetObject(runner);
-            if (netObject == null)
-                return null;
-
-            // Use TryGetComponent if using Unity 2020.3+ for performance
-            if (netObject.TryGetComponent<NonPlayerCharacterReplicator>(out var npcReplicator))
+            switch (GetObjectType())
             {
-                if (npcReplicator.LoadStates[index].LoadState != ELoadState.Loaded)
-                    return null;
-             
-                return npcReplicator.LoadStates[index].NPC;
+                case EObjectType.Player:
+                    return context.NetworkGame;
+                case EObjectType.NonPlayerCharacter:
+                    return context.NonPlayerCharacterManager;
+                case EObjectType.Buildable_Stronghold_1:
+                    return context.StrongholdManager;
             }
 
-            // Fallback: direct component lookup
-            return netObject.GetComponent<IHitInstigator>();
+            return null;
         }
 
-        public IHitTarget GetHitTarget(NetworkRunner runner)
+        public IHitInstigator GetHitInstigator(SceneContext context)
         {
-            return GetComponent<IHitTarget>(runner);
+            Component component = GetSceneContextObject(context);
+            if (component == null) 
+                return null;
+
+            switch (GetObjectType())
+            {
+                case EObjectType.Player:
+                    var networkGame = context.NetworkGame;
+                    return networkGame.GetPlayerByIndex(GetIndex());
+                case EObjectType.NonPlayerCharacter:
+                    var npcManager = context.NonPlayerCharacterManager;
+                    return npcManager.GetNpcAtIndex(GetIndex());
+            }
+
+            return null;
+
         }
 
         // Override Equals
@@ -78,28 +113,21 @@ namespace LichLord
             return false;
         }
 
-        // Override GetHashCode
-        public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hash = 17;
-                hash = hash * 31 + networkId.Raw.GetHashCode();
-                hash = hash * 31 + index.GetHashCode();
-                return hash;
-            }
-        }
 
         public void Clear()
         {
-            networkId.Raw = 0;
-            index = 0;
+            _data = 0;
         }
     }
 
-    public struct FCompressedNetObjectID : INetworkStruct
+    public enum EObjectType : byte
     {
-        byte identifier;
-        byte index;
+        None,
+        Player,
+        NonPlayerCharacter,
+        Buildable_Stronghold_0,
+        Buildable_Stronghold_1,
+        Buildable_Stronghold_3,
+        Buildable_Stronghold_4,
     }
 }

@@ -189,13 +189,13 @@ namespace LichLord.Props
 
                 npc.RuntimeState.SetHarvestProgress(0);
                 npc.RuntimeState.SetCarriedItem(constructedItem);
-                context.PropManager.RPC_HarvestNode_NPC(ChunkID, Index, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
+                context.PropManager.RPC_HarvestNode_NPC(ChunkID, Index, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.LocalIndex);
                 //Debug.Log(npc.RuntimeState.GetHarvestProgress());
             }
             else
             {
                 npc.RuntimeState.AddHarvestProgress(1);
-                context.PropManager.RPC_HarvestProgress_NPC(ChunkID, Index, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.Index);
+                context.PropManager.RPC_HarvestProgress_NPC(ChunkID, Index, harvestData.HarvestPointsCost, npc.Replicator, (byte)npc.LocalIndex);
                 //Debug.Log(npc.RuntimeState.GetHarvestProgress());
             }
         }

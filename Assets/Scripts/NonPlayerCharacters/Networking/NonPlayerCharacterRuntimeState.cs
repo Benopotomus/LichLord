@@ -8,8 +8,11 @@ namespace LichLord.NonPlayerCharacters
     {
         public int PredictionTimeoutTick; // Max lifetime of predictive state
 
-        private int _index;
-        public int Index => _index;
+        private int _localIndex;
+        public int LocalIndex => _localIndex;
+
+        private int _fullIndex;
+        public int FullIndex => _fullIndex;
 
         private NonPlayerCharacterReplicator _replicator;
 
@@ -46,11 +49,12 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public NonPlayerCharacterRuntimeState(NonPlayerCharacterReplicator replicator, int index)
+        public NonPlayerCharacterRuntimeState(NonPlayerCharacterReplicator replicator, int localIndex, int fullIndex)
         {
             _replicator = replicator;
             _context = replicator.Context;
-            _index = index;
+            _localIndex = localIndex;
+            _fullIndex = fullIndex;
         }
 
         public void CopyData(ref FNonPlayerCharacterData other)
@@ -250,6 +254,14 @@ namespace LichLord.NonPlayerCharacters
             return false;
         }
 
+        public bool IsWorkerValid()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+                return workerDataDefinition.IsValid(ref _npcData);
+
+            return false;
+        }
+
         public int GetWorkerStrongholdId()
         {
             if (DataDefinition is WorkerDataDefinition workerDataDefinition)
@@ -266,6 +278,15 @@ namespace LichLord.NonPlayerCharacters
             return -1;
         }
 
+        public void InvalidateWorker()
+        {
+            if (DataDefinition is WorkerDataDefinition workerDataDefinition)
+            {
+                workerDataDefinition.SetInvalid(ref _npcData);
+                _replicator.ReplicateRuntimeState(this);
+            }
+        }
+
         public Stronghold GetWorkerStronghold()
         {
             if (!IsWorker())
@@ -276,7 +297,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void SendWorkerStateChanged(ENPCState newState)
         {
-            if (!IsWorker())
+            if (!IsWorker() || !IsWorkerValid())
                 return;
 
             Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());

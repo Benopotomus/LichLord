@@ -34,7 +34,7 @@ namespace LichLord.Projectiles
 
         public void SetData(ref FProjectileData data)
         {
-            Instigator = data.InstigatorID.GetHitInstigator(Runner);
+            Instigator = data.InstigatorID.GetHitInstigator(Context);
             Definition = Global.Tables.ProjectileTable.TryGetDefinition(data.DefinitionID);
             Timestamp = data.FireTick * Runner.DeltaTime;
             FireTick = data.FireTick;

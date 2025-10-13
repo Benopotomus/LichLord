@@ -84,8 +84,13 @@ namespace LichLord.NonPlayerCharacters
 
         public float BonusRadius { get { return 1; } }
 
-        private int _index;
-        public int Index => _index;
+        [SerializeField]
+        private int _localIndex;
+        public int LocalIndex => _localIndex;
+
+        [SerializeField]
+        private int _fullIndex;
+        public int FullIndex => _fullIndex;
 
         private ETeamID _teamId;
         public ETeamID TeamID => _teamId;
@@ -168,13 +173,15 @@ namespace LichLord.NonPlayerCharacters
             _interactableComponent.onInteractEnd += OnInteractEnd;
             _interactableComponent.onInteractionComplete += OnInteractionComplete;
 
-            _index = runtimeState.Index;
+            _localIndex = runtimeState.LocalIndex;
+            _fullIndex = runtimeState.FullIndex;
+
             UpdateChunk(_context.ChunkManager);
 
-            _netObjectID.networkId = _replicator.Object.Id;
-            _netObjectID.index = (byte)runtimeState.Index;
+            _netObjectID.SetObjectType(EObjectType.NonPlayerCharacter);
+            _netObjectID.SetIndex(runtimeState.LocalIndex);
 
-            if (runtimeState.IsWorker())
+            if (runtimeState.IsWorker() && runtimeState.IsWorkerValid())
             {
                 UpdateWorkerData();
                 _stronghold.WorkerComponent.AddWorkerCharacter(this, _workerIndex);
@@ -216,25 +223,23 @@ namespace LichLord.NonPlayerCharacters
                 _movementComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
                 _brainComponent.AuthorityUpdate(runtimeState, renderDeltaTime, tick);
 
-                if (runtimeState.IsWorker())
+                if (runtimeState.IsWorker() && runtimeState.IsWorkerValid())
                 {
-                    if (_strongholdId >= 0)
+                    var workerData = _stronghold.WorkerComponent.GetWorkerData(_workerIndex);
+                    if (!workerData.IsAssigned)
                     {
-                        var workerData = _stronghold.WorkerComponent.GetWorkerData(_workerIndex);
-                        if (!workerData.IsAssigned)
+                        switch (runtimeState.GetState())
                         {
-                            switch (runtimeState.GetState())
-                            {
-                                case ENPCState.Dead:
-                                case ENPCState.Inactive:
-                                    break;
-                                default:
-                                    _runtimeState.SetState(ENPCState.Dead);
-                                    break;
-                            }
-
-                            return;
+                            case ENPCState.Dead:
+                            case ENPCState.Inactive:
+                                break;
+                            default:
+                                Debug.Log("setting state to dead");
+                                _runtimeState.SetState(ENPCState.Dead);
+                                break;
                         }
+
+                        return;
                     }
                 }
             }
@@ -245,16 +250,16 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private void UpdateWorkerData()
+        public void UpdateWorkerData()
         {
-            if (RuntimeState.IsWorker())
-            {
-                _strongholdId = RuntimeState.GetWorkerStrongholdId();
-                _workerIndex = RuntimeState.GetWorkerIndex();
+            if (!RuntimeState.IsWorker())
+                return;
 
-                if(_strongholdId >= 0 && _stronghold == null)
-                    _stronghold = Context.StrongholdManager.GetStronghold(_strongholdId);
-            }
+            _strongholdId = RuntimeState.GetWorkerStrongholdId();
+            _workerIndex = RuntimeState.GetWorkerIndex();
+
+            if(_strongholdId >= 0)
+                _stronghold = Context.StrongholdManager.GetStronghold(_strongholdId);
         }
 
         private void UpdateTeam(NonPlayerCharacterRuntimeState runtimeState)
@@ -317,10 +322,10 @@ namespace LichLord.NonPlayerCharacters
                     hitReactIndex = (currentAnimIndex + 1) % 4;
                 }
 
-                npc.Replicator.RPC_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
+                npc.Replicator.RPC_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
 
                 if (!runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
             }
             else if (hit.target is Prop prop)
             {
@@ -384,13 +389,10 @@ namespace LichLord.NonPlayerCharacters
             if (dialogIndex >= 0)
                 _context.DialogManager.ClearDialog(dialogIndex);
 
-            if (_runtimeState.IsWorker())
+            if (_runtimeState.IsWorker() && _runtimeState.IsWorkerValid())
             {
-                if (_workerIndex >= 0)
-                {
-                    _runtimeState.SetCarriedItem(new FItemData());
-                    _stronghold.WorkerComponent.RemoveWorkerCharacter(this, _workerIndex);
-                }
+                _runtimeState.SetCarriedItem(new FItemData());
+                _stronghold.WorkerComponent.RemoveWorkerCharacter(this, _workerIndex);
             }  
 
             if (_runtimeState.IsWarrior())

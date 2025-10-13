@@ -8,6 +8,8 @@ namespace LichLord.World
         private WorldSettings _worldSettings;
         public WorldSettings WorldSettings => _worldSettings;
 
+        public bool Loaded = false;
+
         public override void Spawned()
         {
             base.Spawned();
@@ -18,18 +20,13 @@ namespace LichLord.World
                 Context.MissionManager.LoadWorldMissionProgress();
                 Context.ContainerManager.LoadContainers();
                 Context.ContainerManager.LoadItemSlots();
+                Context.WorldSaveLoadManager.LoadNPCs();
+                Context.NonPlayerCharacterManager.SpawnNPCsFromSaves();
             }
 
             Context.ChunkManager.InitializeWorldChunks();
             Context.StrongholdManager.LoadStrongholds();
             Context.InvasionManager.LoadInvasionData();
-
-            if (HasStateAuthority)
-            {
-
-                Context.WorldSaveLoadManager.LoadNPCs();
-                Context.NonPlayerCharacterManager.LoadNPCsFromSaves();
-            }
 
             Context.PlayerSaveLoadManager.LoadPlayer();
             Context.MissionManager.LoadPlayerMissionProgress();
@@ -38,6 +35,8 @@ namespace LichLord.World
 
             Context.MissionManager.InitializeTutorialState();
             Context.MissionManager.InitializeMissionState();
+
+            Loaded = true;
         }
     }
 }

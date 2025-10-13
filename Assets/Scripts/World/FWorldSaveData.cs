@@ -47,15 +47,19 @@ namespace LichLord.World
     [Serializable]
     public struct FWorkerSaveData
     {
-        public int index;
+        public int workerIndex;
         public int strongholdId;
         public bool isAssigned;
+        public bool workerActive;
+        public int npcIndex;
 
-        public FWorkerSaveData(int idx, FWorkerData data, bool isAssigned)
+        public FWorkerSaveData(int workerIndex, FWorkerData data)
         {
-            index = idx;
+            this.workerIndex = workerIndex;
             strongholdId = data.StrongholdID;
-            this.isAssigned = isAssigned;
+            this.isAssigned = data.IsAssigned;
+            this.workerActive = data.WorkerActive;
+            this.npcIndex = data.NPCIndex;
         }
 
         public FWorkerData ToNetworkWorker()
@@ -63,7 +67,8 @@ namespace LichLord.World
             FWorkerData netWorker = new FWorkerData();
             netWorker.StrongholdID = (byte)strongholdId;
             netWorker.IsAssigned = isAssigned;
-
+            netWorker.WorkerActive = workerActive;
+            netWorker.NPCIndex = (ushort)npcIndex;
             return netWorker;
         }
     }
@@ -158,6 +163,7 @@ namespace LichLord.World
     [Serializable]
     public struct FNonPlayerCharacterSaveState
     {
+        public int fullIndex;
         public Vector3 position;
         public Quaternion rotation;
         public int configuration;
@@ -168,6 +174,7 @@ namespace LichLord.World
         // Store harvesting target data here as well
         public FNonPlayerCharacterSaveState(NonPlayerCharacter npc, FNonPlayerCharacterData data)
         {
+            this.fullIndex = npc.FullIndex;
             position = data.Position;
             rotation = data.Rotation;
             this.configuration = data.Configuration;

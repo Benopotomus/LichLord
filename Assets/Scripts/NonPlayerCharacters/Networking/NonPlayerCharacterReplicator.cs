@@ -8,6 +8,10 @@ namespace LichLord.NonPlayerCharacters
 {
     public partial class NonPlayerCharacterReplicator : ContextBehaviour, IStateAuthorityChanged
     {
+        [SerializeField]
+        [Networked]
+        public byte Index { get; set; }
+
         [Serializable]
         public struct FNPCLoadState
         {
@@ -22,15 +26,13 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterSpawner _spawner;
 
         [SerializeField]
-        private FNPCLoadState[] _loadStates = new FNPCLoadState[NonPlayerCharacterConstants.MAX_NPC_REPS];
+        private FNPCLoadState[] _loadStates;
         public FNPCLoadState[] LoadStates => _loadStates;
 
         // Prediction
         private Dictionary<int, NonPlayerCharacterRuntimeState> _predictedStates = new Dictionary<int, NonPlayerCharacterRuntimeState>();
         private NonPlayerCharacterRuntimeState[] _localRuntimeStates = 
             new NonPlayerCharacterRuntimeState[NonPlayerCharacterConstants.MAX_NPC_REPS];
-        
-        [SerializeField] private int _activeNPCs;
 
         [SerializeField] private LayerMask hitMask = ~0; // used to ground npcs on replication
 
@@ -40,11 +42,13 @@ namespace LichLord.NonPlayerCharacters
 
             Context.NonPlayerCharacterManager.AddReplicator(this);
             _spawner.OnSpawned += OnNonPlayerCharacterSpawned;
+            _loadStates = new FNPCLoadState[NonPlayerCharacterConstants.MAX_NPC_REPS];
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
+                int fullIndex = i + (NonPlayerCharacterConstants.MAX_NPC_REPS * Index);
                 _loadStates[i] = new FNPCLoadState();
-                _localRuntimeStates[i] = new NonPlayerCharacterRuntimeState(this, i);
+                _localRuntimeStates[i] = new NonPlayerCharacterRuntimeState(this, i, fullIndex);
             }
         }
 
@@ -101,12 +105,30 @@ namespace LichLord.NonPlayerCharacters
             if (!HasStateAuthority)
                 return;
 
-            _npcDatas.Set(runtimeState.Index, runtimeState.Data);
+            _npcDatas.Set(runtimeState.LocalIndex, runtimeState.Data);
         }
 
         public bool HasFreeIndex()
         {
             return GetFreeIndex() >= 0;
+        }
+
+        public ref FNonPlayerCharacterData GetNpcData(int index)
+        { 
+            return ref _npcDatas.GetRef(index);
+        }
+
+        public NonPlayerCharacter GetNpc(int index)
+        {
+            if (_loadStates[index].LoadState != ELoadState.Loaded)
+                return null;
+
+            return _loadStates[index].NPC;
+        }
+
+        public NonPlayerCharacterRuntimeState GetNpcRuntimeState(int index)
+        {
+            return _localRuntimeStates[index];
         }
 
         public int GetFreeIndex()
@@ -147,11 +169,6 @@ namespace LichLord.NonPlayerCharacters
                 bool shouldBeActive = renderState.IsActive();
 
                 ref FNPCLoadState loadState = ref _loadStates[i];
-
-                if (shouldBeActive)
-                {
-                    //Debug.Log("Active Index " + i);
-                }
 
                 if (shouldBeActive && loadState.LoadState == ELoadState.None)
                 {
@@ -200,6 +217,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 loadState.NPC.StartRecycle();
                 loadState.LoadState = ELoadState.None;
+                loadState.NPC = null;
             }
         }
 
@@ -219,7 +237,6 @@ namespace LichLord.NonPlayerCharacters
 
         private void OnRep_NPCDatas()
         {
-            _activeNPCs = 0;
             int tick = Runner.Tick;
             const int raycastInterval = 1; // Extracted magic number for clarity
 
@@ -235,12 +252,6 @@ namespace LichLord.NonPlayerCharacters
                 ref var localState = ref _localRuntimeStates[i]; // Use ref to avoid struct copying
 
                 var newNetworkedState = localState.GetStateFromData(ref networkedData);
-
-                // Early state check
-                if (newNetworkedState != ENPCState.Inactive)
-                {
-                    _activeNPCs++;
-                }
 
                 ENPCState oldState = localState.GetState();
                 

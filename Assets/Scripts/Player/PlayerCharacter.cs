@@ -49,9 +49,15 @@ namespace LichLord
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
 
-        public FNetObjectID NetObjectID
+        public FNetObjectID NetObjectID 
         {
-            get => Object != null ? new FNetObjectID { networkId = Object.Id } : default;
+            get
+            {
+                FNetObjectID newId = new FNetObjectID();
+                newId.SetObjectType(EObjectType.Player);
+                newId.SetIndex(PlayerIndex);
+                return newId;
+            }
         }
 
         public float BonusRadius { get { return 0; } }
@@ -139,7 +145,6 @@ namespace LichLord
             }
 
             SpawnComplete = true;
-
         }
 
         public void ApplySpawnParameters(Vector3 position, Quaternion rotation, EMovementState moveState, string nickName)
@@ -193,10 +198,10 @@ namespace LichLord
                     hitReactIndex = (currentAnimIndex + 1) % 4;
                 }
 
-                npc.Replicator.RPC_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
+                npc.Replicator.RPC_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
 
                 if (!Runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.Index, hit.damageData.damageValue, hitReactIndex);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
             }
 
             if (hit.target is Prop prop)

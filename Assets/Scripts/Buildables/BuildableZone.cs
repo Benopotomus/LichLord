@@ -2,7 +2,6 @@
 using Fusion;
 using LichLord.Items;
 using LichLord.World;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.Buildables
@@ -10,8 +9,12 @@ namespace LichLord.Buildables
     [RequireComponent(typeof(CapsuleCollider))]
     public partial class BuildableZone : ContextBehaviour
     {
+        [SerializeField] 
+        private Stronghold _stronghold;
+        public Stronghold Stronghold => _stronghold;
 
-        [SerializeField] private CapsuleCollider _trigger;
+        [SerializeField] 
+        private CapsuleCollider _trigger;
 
         private BuildableSpawner _spawner = new BuildableSpawner();
         private VisualEffectSpawner _effectSpawner = new VisualEffectSpawner();

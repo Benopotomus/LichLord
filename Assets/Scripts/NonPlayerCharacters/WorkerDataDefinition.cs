@@ -9,22 +9,20 @@ namespace LichLord.NonPlayerCharacters
         private const int STRONGHOLD_ID_BITS = 4;                // 0–15
         private const int STRONGHOLD_ID_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
         private const byte STRONGHOLD_ID_MASK = (1 << STRONGHOLD_ID_BITS) - 1;
+        private const int STRONGHOLD_ID_INVALID = STRONGHOLD_ID_MASK; // 15
 
-        private const int WORKER_INDEX_BITS = 6;                // 0–63
+        private const int WORKER_INDEX_BITS = 5;                // 0–31
         private const int WORKER_INDEX_SHIFT = STRONGHOLD_ID_SHIFT + STRONGHOLD_ID_BITS;
         private const byte WORKER_INDEX_MASK = (1 << WORKER_INDEX_BITS) - 1;
+        private const int WORKER_INDEX_INVALID = WORKER_INDEX_MASK; // 31
 
         // Events (packed into ushort)
-        private const int HEALTH_BITS = 7;               // 0–127
+        private const int HEALTH_BITS = 8;               // 0–255
         private const int HEALTH_SHIFT = 0;
         private const ushort HEALTH_MASK = (1 << HEALTH_BITS) - 1;
 
-        private const int CARRIED_CURRENCY_TYPE_BITS = 5; // 0–31
-        private const int CARRIED_CURRENCY_TYPE_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
-        private const ushort CARRIED_CURRENCY_TYPE_MASK = (1 << CARRIED_CURRENCY_TYPE_BITS) - 1;
-
         private const int HARVEST_PROGRESS_BITS = 4; // 0–15
-        private const int HARVEST_PROGRESS_SHIFT = CARRIED_CURRENCY_TYPE_SHIFT + CARRIED_CURRENCY_TYPE_BITS;
+        private const int HARVEST_PROGRESS_SHIFT = HEALTH_SHIFT + HEALTH_BITS;
         private const ushort HARVEST_PROGRESS_MASK = (1 << HARVEST_PROGRESS_BITS) - 1;
 
         public override void InitializeData(ref FNonPlayerCharacterData npcData, 
@@ -66,6 +64,20 @@ namespace LichLord.NonPlayerCharacters
             int indexValue = Mathf.Clamp((int)workerIndex, 0, WORKER_INDEX_MASK);
             config = ((config & ~(WORKER_INDEX_MASK << WORKER_INDEX_SHIFT)) | (indexValue << WORKER_INDEX_SHIFT));
             npcData.Configuration = config;
+        }
+
+        // Check if the worker data is valid (i.e., not using invalid indices)
+        public bool IsValid(ref FNonPlayerCharacterData npcData)
+        {
+            return GetStrongholdId(ref npcData) != STRONGHOLD_ID_INVALID &&
+                   GetWorkerIndex(ref npcData) != WORKER_INDEX_INVALID;
+        }
+
+        // Set both StrongholdId and WorkerIndex to their invalid values
+        public void SetInvalid(ref FNonPlayerCharacterData npcData)
+        {
+            SetStrongholdId(STRONGHOLD_ID_INVALID, ref npcData);
+            SetWorkerIndex(WORKER_INDEX_INVALID, ref npcData);
         }
 
         // Health

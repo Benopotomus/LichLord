@@ -18,6 +18,11 @@ namespace LichLord.NonPlayerCharacters
         protected BundleObject _prefabBundle;
         public BundleObject PrefabBundle => _prefabBundle;
 
+        [BundleObject(typeof(Sprite))]
+        [SerializeField]
+        protected BundleObject _icon;
+        public BundleObject Icon => _icon;
+
         [SerializeField]
         protected int _maxHealth;
         public int MaxHealth => _maxHealth;
@@ -70,5 +75,8 @@ namespace LichLord.NonPlayerCharacters
         protected DialogOwnerInfo _dialogOwnerInfo;
         public DialogOwnerInfo DialogOwnerInfo => _dialogOwnerInfo;
 
+        [SerializeField]
+        private ECommandTask[] _tasks;
+        public ECommandTask[] Tasks => _tasks;
     }
 }

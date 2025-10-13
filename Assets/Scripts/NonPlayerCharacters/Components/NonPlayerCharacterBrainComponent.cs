@@ -142,7 +142,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateExecutingTimer(runtimeState, tick);
 
             // Modify the tick by the GUID so not everyone updates at once
-            tick += _npc.Index;
+            tick += _npc.LocalIndex;
 
             UpdateRangesTick(tick);
             UpdateMoveSpeedTick(runtimeState, tick);
@@ -254,7 +254,7 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             { 
-                if ((tick + _npc.Index) % 64 == 0)
+                if ((tick + _npc.LocalIndex) % 64 == 0)
                     return;
 
                 _moveTarget = new Vector3(

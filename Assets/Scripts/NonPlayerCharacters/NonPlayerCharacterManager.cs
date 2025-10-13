@@ -14,8 +14,6 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private LayerMask hitMask = ~0;
         [SerializeField] private float raycastLength = 6f; 
 
-        private Dictionary<int, FNonPlayerCharacterData> _deltaStates = new Dictionary<int, FNonPlayerCharacterData>();
-
         private List<NonPlayerCharacterReplicator> _replicators = new List<NonPlayerCharacterReplicator>();
 
         public void AddReplicator(NonPlayerCharacterReplicator replicator)
@@ -63,7 +61,6 @@ namespace LichLord.NonPlayerCharacters
             int freeIndex = replicator.GetFreeIndex();
             if (freeIndex == -1) return;
 
-            _deltaStates[freeIndex] = data;
             replicator.SpawnNPC(ref data, freeIndex);
         }
 
@@ -90,6 +87,7 @@ namespace LichLord.NonPlayerCharacters
                 int freeIndex = Context.DialogManager.AddActiveDialog(dialog);
                 invaderData.SetDialogIndex(freeIndex, ref data);
             }
+
             SpawnNPC(ref data);
         }
 
@@ -111,6 +109,8 @@ namespace LichLord.NonPlayerCharacters
             workerData.SetState(ENPCState.Spawning, ref data);
             workerData.SetStrongholdId(strongholdId, ref data);
             workerData.SetWorkerIndex(workerIndex, ref data);
+
+
             SpawnNPC(ref data);
         }
 
@@ -209,16 +209,15 @@ namespace LichLord.NonPlayerCharacters
                 return;
             }
 
-            NonPlayerCharacterReplicator replicator = GetReplicatorWithFreeSlots();
+            int fullIndex = saveState.fullIndex;
+
+            int localIndex = fullIndex % NonPlayerCharacterConstants.MAX_NPC_REPS;
+            int replicatorIndex = fullIndex / NonPlayerCharacterConstants.MAX_NPC_REPS;
+
+
+            NonPlayerCharacterReplicator replicator = GetReplicatorForIndex(replicatorIndex);
             if (replicator == null)
                 return;
-
-            int freeIndex = replicator.GetFreeIndex();
-            if (freeIndex == -1)
-            {
-                Debug.Log("Can't Spawn NPC No Free Index");
-                return;
-            }
 
             FNonPlayerCharacterData data = new FNonPlayerCharacterData();
             data.Configuration = saveState.configuration;
@@ -228,8 +227,32 @@ namespace LichLord.NonPlayerCharacters
             data.Events = (ushort)saveState.events;
             data.CarriedItem = saveState.carriedItem.ToNetworkItem();
 
-            _deltaStates[freeIndex] = data; // Store full state for persistence
-            replicator.SpawnNPC(ref data, freeIndex);
+            replicator.SpawnNPC(ref data, localIndex);
+        }
+
+        public NonPlayerCharacterReplicator GetReplicatorForIndex(int replicatorIndex)
+        {
+            foreach (var replicator in _replicators)
+            {
+                if (replicator.Index == replicatorIndex)
+                    return replicator;
+            }
+
+            var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity, null,
+                                onBeforeSpawned: (runner, obj) =>
+                                {
+                                    var r = obj.GetComponent<NonPlayerCharacterReplicator>();
+                                    r.Index = (byte)replicatorIndex;
+                                }
+            );
+
+            if (newReplicator != null)
+            {
+                AddReplicator(newReplicator);
+                return newReplicator;
+            }
+            
+            return null;
         }
 
         public NonPlayerCharacterReplicator GetReplicatorWithFreeSlots()
@@ -242,7 +265,14 @@ namespace LichLord.NonPlayerCharacters
 
             if (_replicators.Count < NonPlayerCharacterConstants.MAX_REPLICATORS)
             {
-                var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity);
+                var newReplicator = Runner.Spawn(_replicatorPrefab, Vector3.zero, Quaternion.identity, null,
+                                    onBeforeSpawned: (runner, obj) =>
+                                    {
+                                        var r = obj.GetComponent<NonPlayerCharacterReplicator>();
+                                        r.Index = (byte)_replicators.Count;
+                                    }
+                );
+
                 if (newReplicator != null)
                 {
                     AddReplicator(newReplicator);
@@ -254,7 +284,7 @@ namespace LichLord.NonPlayerCharacters
             return null;
         }
 
-        public void LoadNPCsFromSaves()
+        public void SpawnNPCsFromSaves()
         {
             List<FNonPlayerCharacterSaveState> loadedNPCs =
                Context.WorldSaveLoadManager.LoadedNPCs;
@@ -299,6 +329,39 @@ namespace LichLord.NonPlayerCharacters
             {
                 replicator.SetInvaderAttitude(newAttitude);
             }
+        }
+
+        public FNonPlayerCharacterData GetNpcDataAtIndex(int fullIndex)
+        {
+            int localIndex = fullIndex % NonPlayerCharacterConstants.MAX_NPC_REPS;
+            int replicatorIndex = fullIndex / NonPlayerCharacterConstants.MAX_NPC_REPS;
+
+            if (_replicators.Count <= replicatorIndex)
+                return new FNonPlayerCharacterData();
+
+            return _replicators[replicatorIndex].GetNpcData(localIndex);
+        }
+
+        public NonPlayerCharacterRuntimeState GetNpcRuntimeStateAtIndex(int fullIndex)
+        {
+            int localIndex = fullIndex % NonPlayerCharacterConstants.MAX_NPC_REPS;
+            int replicatorIndex = fullIndex / NonPlayerCharacterConstants.MAX_NPC_REPS;
+
+            if (_replicators.Count <= replicatorIndex)
+                return null;
+
+            return _replicators[replicatorIndex].GetNpcRuntimeState(localIndex);
+        }
+
+        public NonPlayerCharacter GetNpcAtIndex(int fullIndex)
+        {
+            int localIndex = fullIndex % NonPlayerCharacterConstants.MAX_NPC_REPS;
+            int replicatorIndex = fullIndex / NonPlayerCharacterConstants.MAX_NPC_REPS;
+
+            if (_replicators.Count <= replicatorIndex)
+                return null;
+
+            return _replicators[replicatorIndex].GetNpc(localIndex);
         }
     }
 }

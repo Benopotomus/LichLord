@@ -1,11 +1,10 @@
 ﻿
 using Fusion;
 using UnityEngine;
-using DG.Tweening;
 
 namespace LichLord.Buildables
 {
-    public class Taskmaster : Buildable
+    public class TaskMaster : Buildable
     {
         [SerializeField] protected BuildableHealthComponent _healthComponent;
         [SerializeField] protected BuildableStateComponent _stateComponent;

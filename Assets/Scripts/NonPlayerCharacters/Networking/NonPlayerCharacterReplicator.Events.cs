@@ -17,7 +17,8 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             {
-                NonPlayerCharacterRuntimeState newPredictedState = new NonPlayerCharacterRuntimeState(this, index);
+                int fullIndex = index + (NonPlayerCharacterConstants.MAX_NPC_REPS * Index);
+                NonPlayerCharacterRuntimeState newPredictedState = new NonPlayerCharacterRuntimeState(this, index, fullIndex);
                 newPredictedState.CopyData(ref targetData);
                 newPredictedState.ApplyDamage(damage, hitReactIndex);
                 newPredictedState.PredictionTimeoutTick = Runner.Tick + predictionTicks;

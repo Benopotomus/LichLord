@@ -88,7 +88,8 @@ namespace LichLord.UI
                 StorageChest => ERightWidgetType.StorageChest,
                 Stronghold => ERightWidgetType.Stronghold,
                 Stockpile => ERightWidgetType.Stockpile,
-                Refinery => ERightWidgetType.IronRefinery,
+                Refinery => ERightWidgetType.Refinery,
+                TaskMaster => ERightWidgetType.TaskMaster,
                 _ => ERightWidgetType.None
             };
         }
@@ -100,7 +101,8 @@ namespace LichLord.UI
             StorageChest,
             Stronghold,
             Stockpile,
-            IronRefinery,
+            Refinery,
+            TaskMaster,
         }
     }
 }

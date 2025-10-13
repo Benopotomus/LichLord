@@ -1,16 +1,19 @@
 ﻿using Fusion;
-using LichLord.Items;
 using System.Runtime.InteropServices;
 
 namespace LichLord.NonPlayerCharacters
 {
-    [StructLayout(LayoutKind.Explicit, Size = 6)]
+    [StructLayout(LayoutKind.Explicit, Size = 5)]
     public struct FWorkerData : INetworkStruct
     {
         [FieldOffset(0)]
         public byte StrongholdID;
         [FieldOffset(1)]
         private byte _state;
+        [FieldOffset(2)]
+        public FWorkerTasksData TasksData;
+        [FieldOffset(3)]
+        public ushort NPCIndex;
 
         public bool IsAssigned { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
         public bool WorkerActive { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
@@ -48,12 +51,13 @@ namespace LichLord.NonPlayerCharacters
     public enum ECommandTask : byte
     { 
         None,
-        Lumbering,
-        StoneMining,
-        IronMining,
-        Foraging,
-        Transporting,
-        Kindling,
-        Smithing,
+        Wood,
+        Stone,
+        IronOre,
+        Deathcaps,
+        Bones,
+        Fiber,
+        Transport,
+
     }
 }

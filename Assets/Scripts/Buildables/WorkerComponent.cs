@@ -3,6 +3,7 @@ using LichLord.Buildables;
 using LichLord.Items;
 using LichLord.World;
 using Pathfinding;
+using System;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -22,8 +23,12 @@ namespace LichLord.NonPlayerCharacters
         private int _activeWorkerCount;
         public int ActiveWorkerCount => _activeWorkerCount;
 
+        [SerializeField]
         protected NonPlayerCharacter[] _workerCharacters = new NonPlayerCharacter[BuildableConstants.MAX_WORKERS_PER_STRONGHOLD];
-       
+        public NonPlayerCharacter[] WorkerCharacters => _workerCharacters;
+
+        public Action<NonPlayerCharacter[]> OnWorkersChanged;
+
         public override void Spawned()
         {
             base.Spawned();
@@ -86,7 +91,6 @@ namespace LichLord.NonPlayerCharacters
 
                     DestroyItemForWorker(workerIndex);
                     break;
-
             }
         }
 
@@ -100,12 +104,14 @@ namespace LichLord.NonPlayerCharacters
             foreach (FWorkerSaveData workerSaveData in workerSaveDatas)
             {
                 FWorkerData workerData = workerSaveData.ToNetworkWorker();
-                _workerDatas.Set(workerSaveData.index, workerData);
+                _workerDatas.Set(workerSaveData.workerIndex, workerData);
             }
         }
 
         public void AddWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
+            Debug.Log("Add Worker " + character.LocalIndex + ", " + workerIndex);
+
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
             if (HasStateAuthority)
@@ -118,21 +124,30 @@ namespace LichLord.NonPlayerCharacters
             }
 
             _workerCharacters[workerIndex] = character;
-
+            OnWorkersChanged?.Invoke(_workerCharacters);
             _activeWorkerCount++;
         }
 
         public void RemoveWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
+            Debug.Log("Remove Worker " + character.LocalIndex + ", " + workerIndex);
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
             _workerCharacters[workerIndex] = null;
-
+            OnWorkersChanged?.Invoke(_workerCharacters);
             _activeWorkerCount--;
         }
 
         public void ClearWorkerData(int workerIndex)
         {
+            if (_workerCharacters[workerIndex] != null)
+            {
+                _workerCharacters[workerIndex].RuntimeState.SetState(ENPCState.Dead);
+                _workerCharacters[workerIndex].RuntimeState.InvalidateWorker();
+                _workerCharacters[workerIndex].UpdateWorkerData();
+                _workerCharacters[workerIndex] = null;
+            }
+
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
             workerData.IsAssigned = false;
             workerData.WorkerActive = false;
@@ -145,15 +160,24 @@ namespace LichLord.NonPlayerCharacters
 
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
+            // Check to see if NPC data already exists for me
+            var npcRuntimeState = Context.NonPlayerCharacterManager.GetNpcRuntimeStateAtIndex(workerData.NPCIndex);
+
+            if (npcRuntimeState != null)
+            {
+                if (npcRuntimeState.GetWorkerIndex() == workerIndex)
+                    return;
+            }
+
             if (workerData.WorkerActive)
                 return;
 
             workerData.WorkerActive = true;
 
             Vector3 randomOffset = new Vector3(
-                    Random.Range(-0.25f, 0.25f),
+                    UnityEngine.Random.Range(-0.25f, 0.25f),
                     0f, // Keep Y fixed
-                    Random.Range(-0.25f, 0.25f)
+                    UnityEngine.Random.Range(-0.25f, 0.25f)
                 );
 
             Vector3 spawnPosition = GetNavMeshPosition(_stronghold.Position, _stronghold.Position + randomOffset);
@@ -199,6 +223,11 @@ namespace LichLord.NonPlayerCharacters
             }
 
             return samplePosition;
+        }
+
+        public void RPC_ToggleTask(byte workerIndex, byte taskIndex, NetworkBool toggle)
+        { 
+        
         }
     }
 }

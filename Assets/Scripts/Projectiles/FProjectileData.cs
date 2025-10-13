@@ -27,19 +27,19 @@ namespace LichLord.Projectiles
         public FWorldPosition TargetPosition;
         [FieldOffset(20)]
         public FNetObjectID InstigatorID; // this can be reduced down to 2 bytes
-        [FieldOffset(25)]
+        [FieldOffset(22)]
 
         // Custom Data
         public FFuseData FuseData;
-        [FieldOffset(25)]
+        [FieldOffset(22)]
         public FBounceData BounceData;
-        [FieldOffset(25)]
+        [FieldOffset(22)]
         public FEncircleData EncircleData;
-        [FieldOffset(25)]
+        [FieldOffset(22)]
         public FHomingData HomingData;
-        [FieldOffset(25)]
+        [FieldOffset(22)]
         public FDyamicSpeedData DynamicSpeedData;
-        [FieldOffset(25)]
+        [FieldOffset(22)]
         public FBeamData BeamData;
 
         //30

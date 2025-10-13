@@ -149,7 +149,7 @@ namespace LichLord.NonPlayerCharacters
 
             int sendRateModulus = GetSendRateModulus();
 
-            if ((tick + runtimeState.Index) % sendRateModulus != 0)
+            if ((tick + runtimeState.LocalIndex) % sendRateModulus != 0)
                 return;
 
             WriteTransformData(runtimeState);

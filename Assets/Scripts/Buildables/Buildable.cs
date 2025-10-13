@@ -12,6 +12,9 @@ namespace LichLord.Buildables
         private BuildableZone _zone;
         public BuildableZone Zone => _zone;
 
+        private Stronghold _stronghold;
+        public Stronghold Stronghold => _stronghold;
+
         [SerializeField]
         protected BuildableRuntimeState _runtimeState;
         public BuildableRuntimeState RuntimeState => _runtimeState;
@@ -39,6 +42,7 @@ namespace LichLord.Buildables
             _cachedTransform.rotation = runtimeState.Data.Rotation;
 
             _zone = zone;
+            _stronghold = zone.Stronghold;
             _sceneContext = zone.Context;
             _chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
             _chunk.AddObject(this);

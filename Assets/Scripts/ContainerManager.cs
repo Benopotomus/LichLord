@@ -184,7 +184,6 @@ namespace LichLord
 
         private void OnContainerReplictorSlotChanged(int fullIndex, FContainerSlotData containerSlotData)
         {
-
             OnContainerSlotChanged?.Invoke(fullIndex, containerSlotData);
         }
 

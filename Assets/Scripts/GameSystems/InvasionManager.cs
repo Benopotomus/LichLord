@@ -93,7 +93,7 @@ namespace LichLord
             //SpawnInvasionWave(InvasionSpawnWave);
         }
 
-        public void RPC_BeginInvasion(byte invasionID, FStaticPropPosition targetStrongholdData)
+        public void RPC_BeginInvasion(byte invasionID, FStaticPropPosition targetPropPosition)
         { 
             
         }

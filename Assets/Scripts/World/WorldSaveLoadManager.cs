@@ -120,7 +120,7 @@ namespace LichLord.World
                     for (int i = 0; i < BuildableConstants.MAX_WORKERS_PER_STRONGHOLD; i++)
                     {
                         FWorkerData workerData = stronghold.WorkerComponent.GetWorkerData(i);
-                        workerSaveData.Add(new FWorkerSaveData(i, workerData, workerData.IsAssigned));
+                        workerSaveData.Add(new FWorkerSaveData(i, workerData));
                     }
 
                     strongholdSaveDatas.Add(new FStrongholdSaveData

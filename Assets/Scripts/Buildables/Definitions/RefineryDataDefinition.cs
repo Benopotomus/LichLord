@@ -7,14 +7,15 @@ namespace LichLord.Buildables
     {
 
         protected const int REFINERY_STATE_BITS = 2; // 0-3
-        protected const int REFINDERY_PROGRESS_BITS = 7; // 0-127
-        //32 bits
+        protected const int REFINERY_PROGRESS_BITS = 4; // 0-16
+        //29 bits
+        //3 Valid Recipe
 
-        protected const int REFINER_STATE_SHIFT = CONTAINER_INDEX_SHIFT + CONTAINER_INDEX_BITS;
-        protected const int REFINDER_PROGRESS_SHIFT = REFINER_STATE_SHIFT + REFINERY_STATE_BITS;
+        protected const int REFINERY_STATE_SHIFT = CONTAINER_INDEX_SHIFT + CONTAINER_INDEX_BITS;
+        protected const int REFINERY_PROGRESS_SHIFT = REFINERY_STATE_SHIFT + REFINERY_STATE_BITS;
 
-        protected const int REFINER_STATE_MASK = (1 << REFINERY_STATE_BITS) - 1;
-        protected const int REFINDER_PROGRESS_MASK = (1 << REFINDERY_PROGRESS_BITS) - 1;
+        protected const int REFINERY_STATE_MASK = (1 << REFINERY_STATE_BITS) - 1;
+        protected const int REFINDERY_PROGRESS_MASK = (1 << REFINERY_PROGRESS_BITS) - 1;
 
         public override void InitializeData(ref FBuildableData buildableData, BuildableDefinition definition)
         {
@@ -31,14 +32,14 @@ namespace LichLord.Buildables
 
         public ERefineryState GetRefineryState(ref FBuildableData buildableData)
         {
-            return (ERefineryState)((buildableData.StateData >> REFINER_STATE_SHIFT) & REFINER_STATE_MASK);
+            return (ERefineryState)((buildableData.StateData >> REFINERY_STATE_SHIFT) & REFINERY_STATE_MASK);
         }
 
         public void SetRefineryState(ERefineryState newRefinerState, ref FBuildableData propData)
         {
             int stateData = propData.StateData;
-            int stateValue = Mathf.Clamp((int)newRefinerState, 0, REFINER_STATE_MASK);
-            stateData = (stateData & ~(REFINER_STATE_MASK << REFINER_STATE_SHIFT)) | (stateValue << REFINER_STATE_SHIFT);
+            int stateValue = Mathf.Clamp((int)newRefinerState, 0, REFINERY_STATE_MASK);
+            stateData = (stateData & ~(REFINERY_STATE_MASK << REFINERY_STATE_SHIFT)) | (stateValue << REFINERY_STATE_SHIFT);
             propData.StateData = stateData;
         }
 
@@ -46,13 +47,13 @@ namespace LichLord.Buildables
 
         public int GetRefineryProgress(ref FBuildableData data)
         {
-            return (data.StateData >> REFINDER_PROGRESS_SHIFT) & REFINDER_PROGRESS_MASK;
+            return (data.StateData >> REFINERY_PROGRESS_SHIFT) & REFINDERY_PROGRESS_MASK;
         }
 
         public void SetRefineryProgress(int index, ref FBuildableData buildableData)
         {
             int stateData = buildableData.StateData;
-            stateData = (stateData & ~(REFINDER_PROGRESS_MASK << REFINDER_PROGRESS_SHIFT)) | (index << REFINDER_PROGRESS_SHIFT);
+            stateData = (stateData & ~(REFINDERY_PROGRESS_MASK << REFINERY_PROGRESS_SHIFT)) | (index << REFINERY_PROGRESS_SHIFT);
             buildableData.StateData = stateData;
         }
     }
