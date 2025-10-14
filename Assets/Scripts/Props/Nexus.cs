@@ -143,8 +143,8 @@ namespace LichLord.Props
                 context.PropManager.Predict_SetActivated(ChunkID, Index, true);
 
             FStaticPropPosition staticPropPosition = new FStaticPropPosition();
-            staticPropPosition.ChunkID = ChunkID;
-            staticPropPosition.Index = (ushort)Index;
+            staticPropPosition.ChunkPosition = ChunkID;
+            staticPropPosition.PropIndex = (ushort)Index;
 
             context.MissionManager.NexusInteractionComplete();
             context.StrongholdManager.RPC_ActivateNexus(staticPropPosition);

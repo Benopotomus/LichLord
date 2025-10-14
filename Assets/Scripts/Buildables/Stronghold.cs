@@ -112,7 +112,7 @@ namespace LichLord
         {
             Context.ChunkManager.onChunksReady -= OnChunksReady;
             _cachedTransform.position = _data.GetPosition(Context, HasStateAuthority);
-            _chunk = Context.ChunkManager.GetChunk(_data.ChunkID);
+            _chunk = Context.ChunkManager.GetChunk(_data.ChunkPosition);
             _chunk.AddObject(this);
             var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
             Context.ChunkManager.TryAddReplicatedChunks(newChunks);

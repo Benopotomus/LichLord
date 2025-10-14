@@ -76,7 +76,7 @@ namespace LichLord.NonPlayerCharacters
         public DialogOwnerInfo DialogOwnerInfo => _dialogOwnerInfo;
 
         [SerializeField]
-        private ECommandTask[] _tasks;
-        public ECommandTask[] Tasks => _tasks;
+        private CommandTaskDefinition[] _tasks;
+        public CommandTaskDefinition[] CommandTasks => _tasks;
     }
 }

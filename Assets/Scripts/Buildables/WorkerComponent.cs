@@ -159,6 +159,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+            workerData.TasksData.RawData = 255;
 
             // Check to see if NPC data already exists for me
             var npcRuntimeState = Context.NonPlayerCharacterManager.GetNpcRuntimeStateAtIndex(workerData.NPCIndex);
@@ -225,9 +226,11 @@ namespace LichLord.NonPlayerCharacters
             return samplePosition;
         }
 
-        public void RPC_ToggleTask(byte workerIndex, byte taskIndex, NetworkBool toggle)
-        { 
-        
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_ToggleTask(byte workerIndex, byte taskIndex)
+        {
+            ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
+            workerData.TasksData.ToggleTask(taskIndex);
         }
     }
 }

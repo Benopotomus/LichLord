@@ -9,16 +9,16 @@ namespace LichLord.World
     public struct FStaticPropPosition : INetworkStruct
     {
         [FieldOffset(0)]
-        public FChunkPosition ChunkID;
+        public FChunkPosition ChunkPosition;
         [FieldOffset(2)]
-        public ushort Index;
+        public ushort PropIndex;
 
         public bool IsValid()
         {
-            if (ChunkID.X < 0)
+            if (ChunkPosition.X < 0)
                 return false;
 
-            if (ChunkID.Y < 0)
+            if (ChunkPosition.Y < 0)
                 return false;
 
             return true;
@@ -26,9 +26,9 @@ namespace LichLord.World
 
         public bool IsEqual(FStaticPropPosition other)
         {
-            if (ChunkID.X == other.ChunkID.X &&
-                ChunkID.Y == other.ChunkID.Y &&
-                Index == other.Index)
+            if (ChunkPosition.X == other.ChunkPosition.X &&
+                ChunkPosition.Y == other.ChunkPosition.Y &&
+                PropIndex == other.PropIndex)
                 return true;
 
             return false;
@@ -36,14 +36,14 @@ namespace LichLord.World
 
         public void Copy(FStaticPropPosition other)
         {
-            this.ChunkID = other.ChunkID;
-            this.Index = other.Index;
+            this.ChunkPosition = other.ChunkPosition;
+            this.PropIndex = other.PropIndex;
         }
 
         public PropRuntimeState GetPropRuntimeState(SceneContext context, bool hasAuthority)
         {
-            Chunk chunk = context.ChunkManager.GetChunk(ChunkID);
-            if (chunk != null && chunk.GetRenderState(hasAuthority, Index, out var state))
+            Chunk chunk = context.ChunkManager.GetChunk(ChunkPosition);
+            if (chunk != null && chunk.GetRenderState(hasAuthority, PropIndex, out var state))
             {
                 return state;
             }

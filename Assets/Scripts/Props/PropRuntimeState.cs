@@ -129,6 +129,16 @@ namespace LichLord.Props
             return -1;
         }
 
+        public ECommandTaskType GetValidTaskType()
+        {
+            if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)
+            {
+                return harvestDataDefinition.TaskType;
+            }
+
+            return ECommandTaskType.None;
+        }
+
         public CurrencyDefinition GetHarvestCurrency()
         {
             if (Definition.PropDataDefinition is HarvestNodeDataDefinition harvestDataDefinition)

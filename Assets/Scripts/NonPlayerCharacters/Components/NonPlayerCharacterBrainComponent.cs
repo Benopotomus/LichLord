@@ -239,18 +239,16 @@ namespace LichLord.NonPlayerCharacters
             }
             else if (runtimeState.IsWorker())
             {
-                /*
                 if (_wanderPositionSet)
                     return;
 
-                Crypt crypt = _npc.Context.WorkerManager.GetCrypt(runtimeState.GetWorkerIndex());
+                Stronghold stronghold = runtimeState.GetWorkerStronghold();
 
-                if (crypt != null)
+                if (stronghold != null)
                 {
-                    _moveTarget = crypt.CachedTransform.position;
+                    _moveTarget = stronghold.CachedTransform.position;
                     _wanderPositionSet = true;
                 }
-                */
             }
             else
             { 
@@ -633,8 +631,11 @@ namespace LichLord.NonPlayerCharacters
 
             if (trackable is HarvestNode harvestNode)
             {
-                if (harvestNode.RuntimeState.GetHarvestPoints() > 0)
-                    return true;
+                var harvestNodeRuntimeState = harvestNode.RuntimeState;
+                if (harvestNodeRuntimeState.GetHarvestPoints() <= 0)
+                    return false;
+
+                 return(_npc.RuntimeState.IsHarvestNodeValid(harvestNodeRuntimeState));
             }
 
             return false;

@@ -34,8 +34,8 @@ namespace LichLord.World
             foreach (FStrongholdSaveData strongholdSaveData in loadedStrongholds)
             {
                 FStaticPropPosition propPosition  = new FStaticPropPosition();
-                propPosition.ChunkID = strongholdSaveData.chunkCoord;
-                propPosition.Index = (ushort)strongholdSaveData.index;
+                propPosition.ChunkPosition = strongholdSaveData.chunkCoord;
+                propPosition.PropIndex = (ushort)strongholdSaveData.index;
 
                 Stronghold strongholdSpawned = SpawnStronghold(strongholdSaveData.strongholdId, 
                     propPosition, 
@@ -153,8 +153,8 @@ namespace LichLord.World
 
         public PropRuntimeState GetNexusState(FStaticPropPosition nexusData)
         {
-            Chunk chunk = Context.ChunkManager.GetChunk(nexusData.ChunkID);
-            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.Index, out var state))
+            Chunk chunk = Context.ChunkManager.GetChunk(nexusData.ChunkPosition);
+            if (chunk != null && chunk.GetRenderState(HasStateAuthority, nexusData.PropIndex, out var state))
             {
                 return state;
             }

@@ -28,6 +28,8 @@ namespace LichLord.UI
         {
             _workerComponent = workerComponent;
             _workerIndex = workerIndex;
+            UpdateWorkerIcon();
+            UpdateTasks();
         }
 
         protected override void OnTick()
@@ -59,29 +61,36 @@ namespace LichLord.UI
             if (_workerComponent == null)
                 return;
 
-            var workerData = _workerComponent.GetWorkerData(_workerIndex);
+            if (_worker == null)
+                return;
 
+            var workerData = _workerComponent.GetWorkerData(_workerIndex);
             var workerDefinition = _worker.RuntimeState.Definition;
+            var tasks = _worker.RuntimeState.GetCommandTasks();
+
+            //Debug.Log(tasks.Length);
 
             for (int i = 0; i < 8; i++)
             {
-                if (i >= workerDefinition.Tasks.Length)
+                if (_taskToggles[i] == null)
+                    continue;
+
+                if (i >= tasks.Length)
+
                 {
                     _taskToggles[i].SetActive(false);
                     continue;
                 }
+                
+                var task = tasks[i];
+                _taskToggles[i].SetCommandTask(_workerComponent, 
+                    _workerIndex,
+                    i,
+                    task, 
+                    workerData.TasksData.IsTaskActive(i));
 
-                var task = workerDefinition.Tasks[i];
-                switch (task)
-                {
-                    case ECommandTask.Wood:
-
-                        break;
-
-                }
+                _taskToggles[i].SetActive(true);
             }
-
-
         }
 
         protected void LoadIcon(BundleObject prefabBundle)

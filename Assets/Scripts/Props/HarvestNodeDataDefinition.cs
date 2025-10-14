@@ -26,6 +26,10 @@ namespace LichLord.Props
         protected CurrencyDefinition _currencyTypeHarvested;
         public CurrencyDefinition CurrencyTypeHarvested => _currencyTypeHarvested;
 
+        [SerializeField]
+        protected ECommandTaskType _taskType;
+        public ECommandTaskType TaskType => _taskType;
+
         // Bit size constants (matching PropDataDefinition)
         // 4 for state
         protected const int HARVEST_POINTS_BITS = 10;         // 0-1024

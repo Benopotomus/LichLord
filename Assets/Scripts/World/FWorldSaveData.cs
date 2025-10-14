@@ -48,27 +48,39 @@ namespace LichLord.World
     public struct FWorkerSaveData
     {
         public int workerIndex;
-        public int strongholdId;
         public bool isAssigned;
         public bool workerActive;
         public int npcIndex;
+        public int taskData;
+        // target node
+        public int chunkX;
+        public int chunkY;
+        public int nodeIndex;
 
         public FWorkerSaveData(int workerIndex, FWorkerData data)
         {
             this.workerIndex = workerIndex;
-            strongholdId = data.StrongholdID;
             this.isAssigned = data.IsAssigned;
             this.workerActive = data.WorkerActive;
             this.npcIndex = data.NPCIndex;
+            this.taskData = data.TasksData.RawData;
+
+            this.chunkX = data.TargetNode.ChunkPosition.X;
+            this.chunkY = data.TargetNode.ChunkPosition.Y;
+            this.nodeIndex = data.TargetNode.PropIndex;
         }
 
         public FWorkerData ToNetworkWorker()
         {
             FWorkerData netWorker = new FWorkerData();
-            netWorker.StrongholdID = (byte)strongholdId;
             netWorker.IsAssigned = isAssigned;
             netWorker.WorkerActive = workerActive;
             netWorker.NPCIndex = (ushort)npcIndex;
+            netWorker.TasksData.RawData = (byte)taskData;
+
+            netWorker.TargetNode.ChunkPosition.X = (byte)chunkX;
+            netWorker.TargetNode.ChunkPosition.Y = (byte)chunkY;
+            netWorker.TargetNode.PropIndex = (ushort)nodeIndex;
             return netWorker;
         }
     }

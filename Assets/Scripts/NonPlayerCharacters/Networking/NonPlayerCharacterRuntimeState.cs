@@ -1,5 +1,8 @@
-﻿using LichLord.Dialog;
+﻿using LichLord.Buildables;
+using LichLord.Dialog;
 using LichLord.Items;
+using LichLord.Props;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -302,6 +305,40 @@ namespace LichLord.NonPlayerCharacters
 
             Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
             stronghold.WorkerComponent.OnWorkerStateChanged(GetWorkerIndex(), newState);
+        }
+
+        public CommandTaskDefinition[] GetCommandTasks()
+        {
+            if (DataDefinition is not WorkerDataDefinition workerDataDefinition)
+                return new CommandTaskDefinition[0];
+
+            return Definition.CommandTasks;
+        }
+
+        public bool IsHarvestNodeValid(PropRuntimeState runtimeState)
+        {
+            if (!IsWorker())
+                return false;
+
+            Stronghold stronghold = GetWorkerStronghold();
+            var workerData = stronghold.WorkerComponent.GetWorkerData(GetWorkerIndex());
+            var tasks = GetCommandTasks();
+
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                bool isActive = workerData.TasksData.IsTaskActive(i);
+
+                if(!isActive)
+                    continue;
+
+                var task = tasks[i];
+
+                if (task.TaskType == runtimeState.GetValidTaskType())
+                    return true;
+            }
+
+            return false;
+
         }
 
         // Harvest
