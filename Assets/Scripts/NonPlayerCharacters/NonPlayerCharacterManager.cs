@@ -110,9 +110,9 @@ namespace LichLord.NonPlayerCharacters
             workerData.SetStrongholdId(strongholdId, ref data);
             workerData.SetWorkerIndex(workerIndex, ref data);
 
-
             SpawnNPC(ref data);
         }
+
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_SpawnNPCWarriorGroup(FWorldPosition centerPosition,

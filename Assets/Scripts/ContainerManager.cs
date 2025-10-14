@@ -738,6 +738,27 @@ namespace LichLord
             return remainingItem;
         }
 
+        public int GetEmptyItemIndex(int fullContainerIndex)
+        {
+            var containerData = GetContainerDataAtIndex(fullContainerIndex);
+            if (!containerData.IsAssigned || containerData.StartIndex > containerData.EndIndex)
+            {
+                Debug.LogWarning($"Cannot add item to invalid container {fullContainerIndex}.");
+                return -1;
+            }
+
+            //  Try empty slots.
+            for (int fullIndex = containerData.StartIndex; fullIndex <= containerData.EndIndex; fullIndex++)
+            {
+                var itemAtSlot = GetItemSlotData(fullIndex).ItemData;
+                if (!itemAtSlot.IsValid()) // Empty slot
+                {
+                    return fullIndex;
+                }
+            }
+
+            return -1;
+        }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_StackOrSwapItemAtSlot(byte playerIndex, ushort fullIndex, FItemData itemToStack)

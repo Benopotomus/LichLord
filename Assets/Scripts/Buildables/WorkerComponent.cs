@@ -62,7 +62,7 @@ namespace LichLord.NonPlayerCharacters
                 ref FWorkerData workerData = ref _workerDatas.GetRef(localIndex);
                 workerData.IsAssigned = true;
 
-                TrySpawnWorker(_stronghold.StrongholdID, localIndex, summableDefinition.NonPlayerCharacterDefinition);
+                TrySpawnWorkerFromCenter(_stronghold.StrongholdID, localIndex, summableDefinition.NonPlayerCharacterDefinition);
             }
             else
             {
@@ -153,7 +153,47 @@ namespace LichLord.NonPlayerCharacters
             workerData.WorkerActive = false;
         }
 
-        public void TrySpawnWorker(int strongholdId, int workerIndex, NonPlayerCharacterDefinition definition)
+        public void TrySpawnWorkerFromCenter(int strongholdId, int workerIndex, NonPlayerCharacterDefinition definition)
+        {
+            Vector3 randomOffset = new Vector3(
+                UnityEngine.Random.Range(-0.25f, 0.25f),
+                0f, // Keep Y fixed
+                UnityEngine.Random.Range(-0.25f, 0.25f)
+            );
+
+            Vector3 spawnPosition = GetNavMeshPosition(_stronghold.Position, _stronghold.Position + randomOffset);
+
+            TrySpawnWorker(spawnPosition, strongholdId, workerIndex, definition);
+        }
+
+        public void SummonWorker(Vector3 spawnPosition, FItemData itemData)
+        {
+            FContainerSlotData containerSlotData = _stronghold.ContainerSlotData;
+            int emptyIndex = Context.ContainerManager.GetEmptyItemIndex(_stronghold.ContainerIndex);
+
+            if (emptyIndex == -1)
+                return;
+
+            int localIndex = emptyIndex - containerSlotData.StartIndex;
+
+            if (localIndex < 0 || localIndex > BuildableConstants.MAX_WORKERS_PER_STRONGHOLD)
+                return;
+
+            if (itemData.IsValid())
+            {
+                SummonableDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID) as SummonableDefinition;
+                if (summableDefinition == null)
+                    return;
+
+                ref FWorkerData workerData = ref _workerDatas.GetRef(localIndex);
+                workerData.IsAssigned = true;
+
+                TrySpawnWorker(spawnPosition, _stronghold.StrongholdID, localIndex, summableDefinition.NonPlayerCharacterDefinition);
+                Context.ContainerManager.AddItemToContainer(_stronghold.ContainerIndex, itemData);
+            }
+        }
+
+        public void TrySpawnWorker(Vector3 spawnPosition, int strongholdId, int workerIndex, NonPlayerCharacterDefinition definition)
         {
             if (!HasStateAuthority)
                 return;
@@ -174,14 +214,6 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             workerData.WorkerActive = true;
-
-            Vector3 randomOffset = new Vector3(
-                    UnityEngine.Random.Range(-0.25f, 0.25f),
-                    0f, // Keep Y fixed
-                    UnityEngine.Random.Range(-0.25f, 0.25f)
-                );
-
-            Vector3 spawnPosition = GetNavMeshPosition(_stronghold.Position, _stronghold.Position + randomOffset);
 
             Context.NonPlayerCharacterManager.SpawnNPCWorker(spawnPosition,
                 definition,

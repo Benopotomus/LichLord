@@ -16,9 +16,31 @@ namespace LichLord
         {
             if (ticksSinceStart > _expendItemTick)
             {
+                FItemData itemData = playerCharacter.Inventory.GetItemAtLoadoutSlot(loadoutSlot);
+                SpawnNPCFromItem(playerCharacter, ref itemData, ticksSinceStart);
                 playerCharacter.Inventory.SetItemAtLoadoutSlot(loadoutSlot, new FItemData());
             
             }
+        }
+
+        private void SpawnNPCFromItem(PlayerCharacter pc, ref FItemData itemData, int tick)
+        {
+
+            Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;
+
+            ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
+
+            if (itemDefinition is not SummonableDefinition summonable)
+                return;
+
+            var npcDefinition = summonable.NonPlayerCharacterDefinition;
+
+            var nearestStronghold = pc.Context.StrongholdManager.GetNearestStronghold(targetPos);
+
+            if (nearestStronghold == null)
+                return;
+
+            nearestStronghold.WorkerComponent.SummonWorker(targetPos, itemData);
         }
     }
 }

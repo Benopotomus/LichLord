@@ -127,28 +127,25 @@ namespace LichLord.World
         }
 
         // Get the nearest runtime state for a nexus
-        public PropRuntimeState GetNearestNexus(Vector3 playerPosition)
+        public Stronghold GetNearestStronghold(Vector3 playerPosition)
         {
-            PropRuntimeState nearestNexus = null; // Reset to null each frame
+            Stronghold nearestStronghold = null; // Reset to null each frame
             float minSqrDistance = float.MaxValue;
 
-            List<PropRuntimeState> allNexusStates = new List<PropRuntimeState>(_authorityNexusStates);
-            allNexusStates.AddRange(_predictedStates);
-
-            foreach (var state in allNexusStates)
+            foreach (var stronghold in _activeStrongholds)
             {
-                float sqrDist = Vector3.SqrMagnitude(state.position - playerPosition);
+                float sqrDist = Vector3.SqrMagnitude(stronghold.Position - playerPosition);
                 // Debug.Log($"Nexus {nexusData.GUID} Health: {state.GetHealth()}"); // Uncomment for debugging
 
                 if (sqrDist < minSqrDistance)
                 {
                     minSqrDistance = sqrDist;
-                    nearestNexus = state;
+                    nearestStronghold = stronghold;
                 }
                 
             }
 
-            return nearestNexus;
+            return nearestStronghold;
         }
 
         public PropRuntimeState GetNexusState(FStaticPropPosition nexusData)
