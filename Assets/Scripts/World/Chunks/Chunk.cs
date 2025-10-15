@@ -19,7 +19,7 @@ namespace LichLord.World
         private List<InvasionSpawnPoint> _invasionSpawnPoints = new List<InvasionSpawnPoint>();
         public List<InvasionSpawnPoint> InvasionSpawnPoints => _invasionSpawnPoints;
 
-        private PropRuntimeState[] _propRuntimeStates;
+        private PropRuntimeState[] _propRuntimeStates = new PropRuntimeState[0];
         public PropRuntimeState[] PropStates => _propRuntimeStates;
 
         private Dictionary<int, PropRuntimeState> _deltaPropStates = new Dictionary<int, PropRuntimeState>();
@@ -30,7 +30,7 @@ namespace LichLord.World
 
         public ELoadState LoadState { get; set; }
 
-        public FPropLoadState[] PropLoadStates;
+        public FPropLoadState[] PropLoadStates = new FPropLoadState[0];
 
         // Total number of players that should be replicating this
         public int ReplicationRefCount { get; private set; } = 0;

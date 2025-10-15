@@ -1,5 +1,6 @@
 ﻿namespace LichLord.UI
 {
+    using TMPro;
     using UnityEngine;
 
     public class UIGameplayHUDView : UIGameplayView
@@ -18,6 +19,9 @@
         [SerializeField]
         private UIInvasion _invasion;
 
+        [SerializeField]
+        private UIWarningText _warningText;
+
         protected override void OnVisible()
         {
             base.OnVisible();
@@ -27,13 +31,31 @@
 
             foreach(var stronghold in Context.StrongholdManager.ActiveStrongholds)
                 _strongholdTracker.OnStrongholdSpawned(stronghold);
+
+            _warningText.SetActive(false);
         }
 
         protected override void OnTick()
         {
             base.OnTick();
 
+            int tick = Context.Runner.Tick;
+
             _invasion.SetActive(Context.InvasionManager.InvasionID > 0);
+
+            if (_warningText.isActiveAndEnabled)
+            {
+                if (tick > _warningText.TimeoutTick)
+                {
+                    _warningText.SetActive(false);
+                }
+            }
+        }
+
+        public void ShowWarningText(string text, string subtext)
+        { 
+            _warningText.ShowWarningText(text, subtext);
+            _warningText.SetActive(true);
         }
     }
 }

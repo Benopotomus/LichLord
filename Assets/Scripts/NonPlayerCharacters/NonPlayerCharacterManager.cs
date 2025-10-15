@@ -50,18 +50,22 @@ namespace LichLord.NonPlayerCharacters
             return data;
         }
 
-        private void SpawnNPC(ref FNonPlayerCharacterData data)
+        private int SpawnNPC(ref FNonPlayerCharacterData data)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                return;
+                return - 1;
 
             NonPlayerCharacterReplicator replicator = GetReplicatorWithFreeSlots();
-            if (replicator == null) return;
+            if (replicator == null) 
+                return -1;
 
-            int freeIndex = replicator.GetFreeIndex();
-            if (freeIndex == -1) return;
+            int freeLocalIndex = replicator.GetFreeIndex();
+            if (freeLocalIndex == -1) 
+                return - 1;
 
-            replicator.SpawnNPC(ref data, freeIndex);
+            int fullIndex = freeLocalIndex + (replicator.Index * NonPlayerCharacterConstants.MAX_NPC_REPS);
+            replicator.SpawnNPC(ref data, freeLocalIndex);
+            return fullIndex;
         }
 
         public void SpawnNPCInvader(Vector3 spawnPos,
@@ -91,10 +95,10 @@ namespace LichLord.NonPlayerCharacters
             SpawnNPC(ref data);
         }
 
-        public void SpawnNPCWorker(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, int strongholdId, int workerIndex)
+        public int SpawnNPCWorker(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamID, int strongholdId, int workerIndex)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
-                return;
+                return -1;
 
             FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.Worker, teamID, EAttitude.Passive);
 
@@ -103,14 +107,14 @@ namespace LichLord.NonPlayerCharacters
             if (workerData == null)
             {
                 Debug.Log("Trying to spawn a non-worker as a worker");
-                return;
+                return -1;
             }
 
             workerData.SetState(ENPCState.Spawning, ref data);
             workerData.SetStrongholdId(strongholdId, ref data);
             workerData.SetWorkerIndex(workerIndex, ref data);
 
-            SpawnNPC(ref data);
+            return SpawnNPC(ref data);
         }
 
 

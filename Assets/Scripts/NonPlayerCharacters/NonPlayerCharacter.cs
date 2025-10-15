@@ -151,7 +151,7 @@ namespace LichLord.NonPlayerCharacters
             _context = replicator.Context;
             _replicator = replicator;
             _movementComponent.OnSpawned(runtimeState);
-            _brainComponent.OnSpawned(runtimeState);
+            _brainComponent.OnSpawned(runtimeState, hasAuthority);
             _currencyComponent.OnSpawned();
             _attitudeComponent.OnSpawned(runtimeState);
             _dialogComponent.OnSpawned(runtimeState);
@@ -434,22 +434,31 @@ namespace LichLord.NonPlayerCharacters
 
             if (_runtimeState.GetHealth() > 0)
             {
-                if (!_runtimeState.HasDialog())
-                    return false;
-
-                if (_runtimeState.GetAttitude() == EAttitude.Hostile)
-                    return false;
-
-                if (_runtimeState.IsInvader())
+                if (_runtimeState.HasDialog())
                 {
-                    if (Context.InvasionManager.InvasionID == 0)
+
+                    if (_runtimeState.GetAttitude() == EAttitude.Hostile)
                         return false;
 
-                    if (Context.InvasionManager.InvasionState == EInvasionState.Retreating)
-                        return false;
+                    if (_runtimeState.IsInvader())
+                    {
+                        if (Context.InvasionManager.InvasionID == 0)
+                            return false;
+
+                        if (Context.InvasionManager.InvasionState == EInvasionState.Retreating)
+                            return false;
+                    }
+
+                    return true;
                 }
 
-                return true;
+                if (_runtimeState.IsWorker())
+                {
+                    if (_runtimeState.GetState() == ENPCState.Dead)
+                        return false;
+
+                    return true;
+                }
             }
 
             return false;
@@ -465,22 +474,31 @@ namespace LichLord.NonPlayerCharacters
 
             if (_runtimeState.GetHealth() > 0)
             {
-                if (!_runtimeState.HasDialog())
-                    return false;
-
-                if (_runtimeState.GetAttitude() == EAttitude.Hostile)
-                    return false;
-
-                if (_runtimeState.IsInvader())
+                if (_runtimeState.HasDialog())
                 {
-                    if (Context.InvasionManager.InvasionID == 0)
+
+                    if (_runtimeState.GetAttitude() == EAttitude.Hostile)
                         return false;
 
-                    if (Context.InvasionManager.InvasionState == EInvasionState.Retreating)
-                        return false;
+                    if (_runtimeState.IsInvader())
+                    {
+                        if (Context.InvasionManager.InvasionID == 0)
+                            return false;
+
+                        if (Context.InvasionManager.InvasionState == EInvasionState.Retreating)
+                            return false;
+                    }
+
+                    return true;
                 }
 
-                return true;
+                if (_runtimeState.IsWorker())
+                {
+                    if(_runtimeState.GetState() == ENPCState.Dead)
+                        return false;
+
+                    return true;
+                }
             }
 
             return false;
@@ -509,6 +527,9 @@ namespace LichLord.NonPlayerCharacters
             if (_runtimeState.HasDialog())
                 return EInteractType.Dialog;
 
+            if(_runtimeState.IsWorker())
+                return EInteractType.HarvestNode;
+
             return EInteractType.None;
         }
 
@@ -517,36 +538,58 @@ namespace LichLord.NonPlayerCharacters
             if (_runtimeState.HasDialog())
                 return 30;
 
+            if (_runtimeState.IsWorker())
+                return 30;
+
             return 5;
         }
 
         private void OnInteractStart(InteractableComponent interactable, InteractorComponent interactor)
         {
-            Debug.Log("Interaction started with NPC.");
-            if (DialogComponent.CurrentDialog == null)
-                return;
+            if (_runtimeState.HasDialog())
+            {
+                Debug.Log("Interaction started with NPC.");
+                if (DialogComponent.CurrentDialog == null)
+                    return;
 
-            Context.DialogManager.SetActiveDialogOwner(_runtimeState.Definition.DialogOwnerInfo);
-            Context.DialogManager.SetActiveDialogDefinition(DialogComponent.CurrentDialog);
-            Context.DialogManager.SetActiveDialogNode(DialogComponent.CurrentDialog.StartingNode);
+                Context.DialogManager.SetActiveDialogOwner(_runtimeState.Definition.DialogOwnerInfo);
+                Context.DialogManager.SetActiveDialogDefinition(DialogComponent.CurrentDialog);
+                Context.DialogManager.SetActiveDialogNode(DialogComponent.CurrentDialog.StartingNode);
+            }
+
         }
 
         private void OnInteractEnd(InteractableComponent interactable, InteractorComponent interactor)
         {
-            Debug.Log("Interaction ended with NPC.");
-
-            // If my current open dialog is the one I'm ending interact with, close it.
-            if (Context.DialogManager.ActiveDialogDefinition == DialogComponent.CurrentDialog)
+            if (_runtimeState.HasDialog())
             {
-                Context.DialogManager.SetActiveDialogOwner(_runtimeState.Definition.DialogOwnerInfo);
-                Context.DialogManager.SetActiveDialogDefinition(null);
-                Context.DialogManager.SetActiveDialogNode(null);
+                Debug.Log("Interaction ended with NPC.");
+
+                // If my current open dialog is the one I'm ending interact with, close it.
+                if (Context.DialogManager.ActiveDialogDefinition == DialogComponent.CurrentDialog)
+                {
+                    Context.DialogManager.SetActiveDialogOwner(_runtimeState.Definition.DialogOwnerInfo);
+                    Context.DialogManager.SetActiveDialogDefinition(null);
+                    Context.DialogManager.SetActiveDialogNode(null);
+                }
             }
         }
-
+        
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
         {
             Debug.Log("Interaction complete with NPC.");
+
+            if (_runtimeState.IsWorker())
+            {
+                var stronghold = _runtimeState.GetWorkerStronghold();
+
+                if (stronghold == null)
+                    return;
+
+                stronghold.WorkerComponent.RPC_PickupWorker((byte)interactor.PC.PlayerIndex, (ushort)_runtimeState.FullIndex);
+                
+
+            }
         }
     }
 }

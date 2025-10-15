@@ -75,7 +75,7 @@ namespace LichLord.World
             FWorkerData netWorker = new FWorkerData();
             netWorker.IsAssigned = isAssigned;
             netWorker.WorkerActive = workerActive;
-            netWorker.NPCIndex = (ushort)npcIndex;
+            netWorker.NPCIndex = (short)npcIndex;
             netWorker.TasksData.RawData = (byte)taskData;
 
             netWorker.TargetNode.ChunkPosition.X = (byte)chunkX;

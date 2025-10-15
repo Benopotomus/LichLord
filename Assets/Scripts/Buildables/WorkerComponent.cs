@@ -17,13 +17,12 @@ namespace LichLord.NonPlayerCharacters
         protected NetworkArray<FWorkerData> _workerDatas { get; }
 
         [Networked]
-        public int MaxWorkerCount { get; private set; } = 8;
+        public int MaxWorkerCount { get; private set; } = 6;
 
         [SerializeField]
         private int _activeWorkerCount;
         public int ActiveWorkerCount => _activeWorkerCount;
 
-        [SerializeField]
         protected NonPlayerCharacter[] _workerCharacters = new NonPlayerCharacter[BuildableConstants.MAX_WORKERS_PER_STRONGHOLD];
         public NonPlayerCharacter[] WorkerCharacters => _workerCharacters;
 
@@ -110,8 +109,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void AddWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
-            Debug.Log("Add Worker " + character.LocalIndex + ", " + workerIndex);
-
+            //Debug.Log("Add Worker " + character.LocalIndex + ", " + workerIndex);
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
             if (HasStateAuthority)
@@ -130,7 +128,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void RemoveWorkerCharacter(NonPlayerCharacter character, int workerIndex)
         {
-            Debug.Log("Remove Worker " + character.LocalIndex + ", " + workerIndex);
+            //Debug.Log("Remove Worker " + character.LocalIndex + ", " + workerIndex);
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
 
             _workerCharacters[workerIndex] = null;
@@ -166,30 +164,72 @@ namespace LichLord.NonPlayerCharacters
             TrySpawnWorker(spawnPosition, strongholdId, workerIndex, definition);
         }
 
-        public void SummonWorker(Vector3 spawnPosition, FItemData itemData)
+        public int GetEmptyWorkerSlot()
         {
             FContainerSlotData containerSlotData = _stronghold.ContainerSlotData;
             int emptyIndex = Context.ContainerManager.GetEmptyItemIndex(_stronghold.ContainerIndex);
 
             if (emptyIndex == -1)
-                return;
+                return -1;
 
             int localIndex = emptyIndex - containerSlotData.StartIndex;
 
-            if (localIndex < 0 || localIndex > BuildableConstants.MAX_WORKERS_PER_STRONGHOLD)
+            if (localIndex < 0 || localIndex > MaxWorkerCount)
+                return -1;
+
+            return localIndex;
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_SummonWorker(byte playerIndex, FWorldPosition compressedSpawnPosition, FItemData itemData)
+        {
+            Vector3 spawnPosition = compressedSpawnPosition.Position;
+
+            //spawnPosition = GetNavMeshPosition(spawnPosition, spawnPosition);
+
+            int emptyWorkerSlot = GetEmptyWorkerSlot();
+
+            if (emptyWorkerSlot == -1)
                 return;
 
-            if (itemData.IsValid())
+            if (!itemData.IsValid())
+                return;
+
+            SummonableDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID) as SummonableDefinition;
+            if (summableDefinition == null)
+                return;
+
+            ref FWorkerData workerData = ref _workerDatas.GetRef(emptyWorkerSlot);
+            workerData.IsAssigned = true;
+            
+            //workerData.CommandTargetPosition = compressedSpawnPosition;
+            
+
+            TrySpawnWorker(spawnPosition, _stronghold.StrongholdID, emptyWorkerSlot, summableDefinition.NonPlayerCharacterDefinition);
+            Context.ContainerManager.AddItemToContainer(_stronghold.ContainerIndex, itemData); 
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_PickupWorker(byte playerIndex, ushort npcFullIndex)
+        {
+            var pc = Context.NetworkGame.GetPlayerByIndex(playerIndex);
+            if (pc == null)
+                return;
+
+            // Get worker for full index
+            for (int i = 0; i < MaxWorkerCount; i++)
             {
-                SummonableDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID) as SummonableDefinition;
-                if (summableDefinition == null)
-                    return;
+                ref FWorkerData workerData = ref _workerDatas.GetRef(i);
+                if (workerData.NPCIndex != npcFullIndex)
+                    continue;
 
-                ref FWorkerData workerData = ref _workerDatas.GetRef(localIndex);
-                workerData.IsAssigned = true;
+                var fullItemIndex = GetFullItemIndexForWorker(i);
 
-                TrySpawnWorker(spawnPosition, _stronghold.StrongholdID, localIndex, summableDefinition.NonPlayerCharacterDefinition);
-                Context.ContainerManager.AddItemToContainer(_stronghold.ContainerIndex, itemData);
+                var itemAtIndex = Context.ContainerManager.GetItemSlotData(fullItemIndex);
+
+                pc.Inventory.AddItemToInventory(itemAtIndex.ItemData);
+
+                Context.ContainerManager.SetItemSlotData(fullItemIndex, new FItemData());
             }
         }
 
@@ -215,7 +255,7 @@ namespace LichLord.NonPlayerCharacters
 
             workerData.WorkerActive = true;
 
-            Context.NonPlayerCharacterManager.SpawnNPCWorker(spawnPosition,
+            workerData.NPCIndex = (short)Context.NonPlayerCharacterManager.SpawnNPCWorker(spawnPosition,
                 definition,
                 ETeamID.PlayerTeam,
                 strongholdId,
@@ -263,6 +303,21 @@ namespace LichLord.NonPlayerCharacters
         {
             ref FWorkerData workerData = ref _workerDatas.GetRef(workerIndex);
             workerData.TasksData.ToggleTask(taskIndex);
+        }
+
+        public int GetFullItemIndexForWorker(int workerIndex)
+        {
+            if (workerIndex < 0 || workerIndex > MaxWorkerCount)
+                return -1;
+
+            FContainerSlotData containerSlotData = _stronghold.ContainerSlotData;
+            int fullIndex = containerSlotData.StartIndex + workerIndex;
+
+            // Validate the full index is within container bounds
+            if (fullIndex < containerSlotData.StartIndex || fullIndex > containerSlotData.EndIndex)
+                return -1;
+
+            return fullIndex;
         }
     }
 }

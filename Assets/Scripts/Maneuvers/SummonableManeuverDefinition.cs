@@ -1,5 +1,6 @@
 ﻿using Fusion;
 using LichLord.Items;
+using LichLord.UI;
 using UnityEngine;
 
 namespace LichLord
@@ -14,33 +15,60 @@ namespace LichLord
 
         public void CheckExpiredItem(PlayerCharacter playerCharacter, ELoadoutSlot loadoutSlot, NetworkRunner runner, int ticksSinceStart)
         {
-            if (ticksSinceStart > _expendItemTick)
-            {
-                FItemData itemData = playerCharacter.Inventory.GetItemAtLoadoutSlot(loadoutSlot);
-                SpawnNPCFromItem(playerCharacter, ref itemData, ticksSinceStart);
-                playerCharacter.Inventory.SetItemAtLoadoutSlot(loadoutSlot, new FItemData());
+            if (ticksSinceStart != _expendItemTick)
+                return;
             
+            FItemData itemData = playerCharacter.Inventory.GetItemAtLoadoutSlot(loadoutSlot);
+
+            var result = TrySpawnNPCFromItem(playerCharacter, ref itemData, ticksSinceStart);
+
+            if (result.Item1)
+            {
+                playerCharacter.Inventory.SetItemAtLoadoutSlot(loadoutSlot, new FItemData());
+            }
+            else
+            {
+                if (playerCharacter.Context.UI is GameplayUI gameplayUI)
+                {
+                    gameplayUI.HUD.ShowWarningText("Cannot Spawn", result.Item2);
+                }
+
             }
         }
 
-        private void SpawnNPCFromItem(PlayerCharacter pc, ref FItemData itemData, int tick)
+        private (bool, string) TrySpawnNPCFromItem(PlayerCharacter pc, ref FItemData itemData, int tick)
         {
-
-            Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;
+            if (!itemData.IsValid())
+                return (false, "Item Invalid");
 
             ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
 
             if (itemDefinition is not SummonableDefinition summonable)
-                return;
+                return (false, "Item Invalid");
 
-            var npcDefinition = summonable.NonPlayerCharacterDefinition;
+            Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;
 
             var nearestStronghold = pc.Context.StrongholdManager.GetNearestStronghold(targetPos);
 
             if (nearestStronghold == null)
-                return;
+            {
+                return (false, "No Stronghold found");
+            }
+            
+            var workerComponent = nearestStronghold.WorkerComponent;
 
-            nearestStronghold.WorkerComponent.SummonWorker(targetPos, itemData);
+            if (workerComponent.GetEmptyWorkerSlot() == -1)
+            {
+                return (false, "No Free Worker Slot");
+            }
+
+            var npcDefinition = summonable.NonPlayerCharacterDefinition;
+
+            FWorldPosition compressedPosition = new FWorldPosition();
+            compressedPosition.CopyPosition(targetPos);
+
+            workerComponent.RPC_SummonWorker((byte)pc.PlayerIndex, compressedPosition, itemData);
+            return (true, "");
         }
     }
 }

@@ -36,8 +36,16 @@ namespace LichLord.UI
 
                 List<FItemSlotData> itemSlots = Context.ContainerManager.GetItemSlotDatasFromContainerIndex(_containerIndex);
 
+                var workerComponent = stronghold.WorkerComponent;
+
                 for (int i = 0; i < _workerItemSlots.Count; i++)
                 {
+                    if (i >= workerComponent.MaxWorkerCount)
+                    {
+                        _workerItemSlots[i].SetActive(false);
+                        continue;
+                    }
+
                     if (i <= itemSlotCount)
                     {
                         _workerItemSlots[i].SetItemSlotData(_containerIndex, containerData.StartIndex + i);

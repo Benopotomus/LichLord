@@ -278,7 +278,11 @@ namespace LichLord.World
 
         private EReplicatorSize GetOptimalReplicatorSizeForChunk(Chunk chunk)
         {
+            if (chunk.PropStates == null)
+                return EReplicatorSize.S0;
+
             int propCount = chunk.PropStates.Length; // or use whatever metric you track
+            
             if (propCount == 0)
                 return EReplicatorSize.S0;
             if (propCount <= 256)

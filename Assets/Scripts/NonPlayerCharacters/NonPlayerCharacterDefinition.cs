@@ -2,6 +2,7 @@ using DWD.Utility.Loading;
 using UnityEngine;
 using AYellowpaper.SerializedCollections;
 using LichLord.Dialog;
+using LichLord.Items;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -78,5 +79,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private CommandTaskDefinition[] _tasks;
         public CommandTaskDefinition[] CommandTasks => _tasks;
+
+        [SerializeField]
+        private SummonableDefinition _summonableItem;
+        public SummonableDefinition SummonableItem => _summonableItem;
     }
 }

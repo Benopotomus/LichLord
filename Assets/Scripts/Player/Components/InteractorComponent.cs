@@ -133,6 +133,8 @@ namespace LichLord
             if (_currentInteractable == null)
                 return;
 
+            _interactTargetPosition.CopyPosition(_currentInteractable.transform.position);
+
             RotateTowardInteract(deltaTime);
 
             if (!_currentInteractable.IsInteractionValid(this))
@@ -186,7 +188,7 @@ namespace LichLord
         {
             if (_beamInstance == null) 
                 return;
-
+            
             _beamInstance.UpdateBeamPosition(
                 _pc.Muzzle.GetMuzzlePosition(_beamMuzzle), 
                 _interactTargetPosition.Position);

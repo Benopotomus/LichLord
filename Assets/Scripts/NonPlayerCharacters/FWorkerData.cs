@@ -12,7 +12,7 @@ namespace LichLord.NonPlayerCharacters
         [FieldOffset(1)]
         public FWorkerTasksData TasksData;
         [FieldOffset(2)]
-        public ushort NPCIndex;
+        public short NPCIndex;
         [FieldOffset(4)]
         public FStaticPropPosition TargetNode;
 

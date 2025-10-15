@@ -2,6 +2,7 @@
 using LichLord.Dialog;
 using LichLord.Items;
 using LichLord.Props;
+using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -305,6 +306,16 @@ namespace LichLord.NonPlayerCharacters
 
             Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
             stronghold.WorkerComponent.OnWorkerStateChanged(GetWorkerIndex(), newState);
+        }
+
+        public FStaticPropPosition GetWorkerTargetNodePosition()
+        {
+            if (!IsWorker() || !IsWorkerValid())
+                new FStaticPropPosition();
+
+            Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
+            FWorkerData workerData = stronghold.WorkerComponent.GetWorkerData(GetWorkerIndex());
+            return workerData.TargetNode;
         }
 
         public CommandTaskDefinition[] GetCommandTasks()

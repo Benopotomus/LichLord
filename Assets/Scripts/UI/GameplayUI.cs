@@ -133,7 +133,5 @@ namespace LichLord.UI
         {
             LastFocusedWidget = EventSystem.current.currentSelectedGameObject;
         }
-
-
     }
 }

@@ -74,7 +74,7 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         GameObject depositTargetGO;
 
-        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority)
         {
             _isInMovementStopRange = false;
             _isInFaceTargetRange = false;
@@ -84,6 +84,9 @@ namespace LichLord.NonPlayerCharacters
             _activeManeuverState = ENPCState.Inactive;
             _moveTarget = Vector3.zero;
             _activeManeuver = null;
+
+            if(hasAuthority)
+                FindCurrentTargets();
         }
 
         public void StartRecycle()
