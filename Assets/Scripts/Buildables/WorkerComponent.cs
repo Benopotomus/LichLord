@@ -1,6 +1,7 @@
 ﻿using Fusion;
 using LichLord.Buildables;
 using LichLord.Items;
+using LichLord.Props;
 using LichLord.World;
 using Pathfinding;
 using System;
@@ -27,6 +28,9 @@ namespace LichLord.NonPlayerCharacters
         public NonPlayerCharacter[] WorkerCharacters => _workerCharacters;
 
         public Action<NonPlayerCharacter[]> OnWorkersChanged;
+
+        [SerializeField] private LayerMask _interactableLayerMask;
+        [SerializeField] private float _commandOverlapDistance = 5;
 
         public override void Spawned()
         {
@@ -174,7 +178,7 @@ namespace LichLord.NonPlayerCharacters
 
             int localIndex = emptyIndex - containerSlotData.StartIndex;
 
-            if (localIndex < 0 || localIndex > MaxWorkerCount)
+            if (localIndex < 0 || localIndex >= MaxWorkerCount)
                 return -1;
 
             return localIndex;
@@ -185,9 +189,10 @@ namespace LichLord.NonPlayerCharacters
         {
             Vector3 spawnPosition = compressedSpawnPosition.Position;
 
-            //spawnPosition = GetNavMeshPosition(spawnPosition, spawnPosition);
+            spawnPosition = GetNavMeshPosition(spawnPosition, spawnPosition);
 
             int emptyWorkerSlot = GetEmptyWorkerSlot();
+            Debug.Log(emptyWorkerSlot);
 
             if (emptyWorkerSlot == -1)
                 return;
@@ -201,9 +206,29 @@ namespace LichLord.NonPlayerCharacters
 
             ref FWorkerData workerData = ref _workerDatas.GetRef(emptyWorkerSlot);
             workerData.IsAssigned = true;
-            
-            //workerData.CommandTargetPosition = compressedSpawnPosition;
-            
+
+            Collider[] colliders = Physics.OverlapSphere(spawnPosition, _commandOverlapDistance, _interactableLayerMask);
+
+            foreach (Collider collider in colliders)
+            {
+                var interactable = collider.GetComponent<InteractableComponent>();
+                if(interactable == null) 
+                    continue;
+
+                var targetObject = interactable.Owner;
+
+                Chunk chunk = targetObject.CurrentChunk;
+                if (chunk == null) 
+                    continue;
+
+                if (targetObject is Prop prop)
+                {
+                    workerData.TargetNode.ChunkPosition = prop.ChunkID;
+                    workerData.TargetNode.PropIndex = (ushort)prop.Index;
+                    workerData.HasTargetNode = true;
+                    Debug.Log("targeted prop" + prop);
+                }
+            }
 
             TrySpawnWorker(spawnPosition, _stronghold.StrongholdID, emptyWorkerSlot, summableDefinition.NonPlayerCharacterDefinition);
             Context.ContainerManager.AddItemToContainer(_stronghold.ContainerIndex, itemData); 
@@ -224,9 +249,7 @@ namespace LichLord.NonPlayerCharacters
                     continue;
 
                 var fullItemIndex = GetFullItemIndexForWorker(i);
-
                 var itemAtIndex = Context.ContainerManager.GetItemSlotData(fullItemIndex);
-
                 pc.Inventory.AddItemToInventory(itemAtIndex.ItemData);
 
                 Context.ContainerManager.SetItemSlotData(fullItemIndex, new FItemData());
@@ -266,36 +289,13 @@ namespace LichLord.NonPlayerCharacters
         {
             var graph = AstarPath.active;
             if (graph == null)
-            {
-                return samplePosition;
-            }
+                return centerPosition;
 
+            // Find the nearest node and project onto its surface
             NNInfo info = graph.GetNearest(samplePosition, NNConstraint.Walkable);
 
-            if (info.node is TriangleMeshNode triangleMeshNode)
-            {
-                // Get the triangle's vertices
-                Int3[] vertices = new Int3[3];
-                triangleMeshNode.GetVertices(out vertices[0], out vertices[1], out vertices[2]);
-
-                // Choose the closest vertex to the candidate position
-                int closestVertexIndex = 0;
-                float minDistance = Vector3.Distance(centerPosition, (Vector3)vertices[0]);
-                for (int i = 1; i < 3; i++)
-                {
-                    float distance = Vector3.Distance(centerPosition, (Vector3)vertices[i]);
-                    if (distance < minDistance)
-                    {
-                        minDistance = distance;
-                        closestVertexIndex = i;
-                    }
-                }
-
-                return (Vector3)vertices[closestVertexIndex];
-
-            }
-
-            return samplePosition;
+            // This is the actual point on the navmesh surface
+            return info.position;
         }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]

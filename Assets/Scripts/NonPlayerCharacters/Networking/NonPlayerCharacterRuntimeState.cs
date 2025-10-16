@@ -308,14 +308,15 @@ namespace LichLord.NonPlayerCharacters
             stronghold.WorkerComponent.OnWorkerStateChanged(GetWorkerIndex(), newState);
         }
 
-        public FStaticPropPosition GetWorkerTargetNodePosition()
+        public (bool, FStaticPropPosition) GetWorkerTargetNodePosition()
         {
             if (!IsWorker() || !IsWorkerValid())
-                new FStaticPropPosition();
+                return (false, new FStaticPropPosition());
 
             Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
             FWorkerData workerData = stronghold.WorkerComponent.GetWorkerData(GetWorkerIndex());
-            return workerData.TargetNode;
+
+            return (workerData.HasTargetNode, workerData.TargetNode);
         }
 
         public CommandTaskDefinition[] GetCommandTasks()

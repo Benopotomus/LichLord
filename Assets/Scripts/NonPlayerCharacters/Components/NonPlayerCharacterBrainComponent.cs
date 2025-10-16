@@ -1,10 +1,8 @@
-﻿using Fusion;
-using LichLord.Buildables;
+﻿using LichLord.Buildables;
 using LichLord.Items;
 using LichLord.Props;
 using LichLord.World;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -127,7 +125,8 @@ namespace LichLord.NonPlayerCharacters
 
         public void RemoteUpdate(NonPlayerCharacterRuntimeState runtimeState)
         {
-            if (_npc.State.CurrentState == ENPCState.Dead || _npc.State.CurrentState == ENPCState.Inactive)
+            if (_npc.State.CurrentState == ENPCState.Dead ||
+                _npc.State.CurrentState == ENPCState.Inactive)
                 return;
 
             int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
@@ -522,7 +521,22 @@ namespace LichLord.NonPlayerCharacters
             IChunkTrackable currentDepositTarget = null;
 
             bool isWorker = _npc.RuntimeState.IsWorker();
+            
             FItemData carriedItem = _npc.CurrencyComponent.CarriedItem;
+            
+            bool hasCommandTargetNode = false;
+
+            if (isWorker)
+            {
+                var commandTargetNode = GetCommandTargetNode();
+                IChunkTrackable commandTarget = commandTargetNode.Item2;
+
+                if (IsHarvestTargetValid(commandTarget, carriedItem))
+                {
+                    hasCommandTargetNode = true;
+                    currentHarvestTarget = commandTarget;
+                }
+            }
 
             foreach (var chunk in _npc.CachedChunks)
             {
@@ -545,15 +559,17 @@ namespace LichLord.NonPlayerCharacters
 
                     if (isWorker)
                     {
-
-                        if (IsHarvestTargetValid(trackable, carriedItem))
+                        if (!hasCommandTargetNode)
                         {
-                            float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
-
-                            if (sqrDistance < closestHarvestTargetDistance)
+                            if (IsHarvestTargetValid(trackable, carriedItem))
                             {
-                                closestHarvestTargetDistance = sqrDistance;
-                                currentHarvestTarget = trackable;
+                                float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
+
+                                if (sqrDistance < closestHarvestTargetDistance)
+                                {
+                                    closestHarvestTargetDistance = sqrDistance;
+                                    currentHarvestTarget = trackable;
+                                }
                             }
                         }
 
@@ -582,6 +598,27 @@ namespace LichLord.NonPlayerCharacters
                 DistanceToDepositTarget = closestDepositTargetDistance;
                 SetDepositTarget(currentDepositTarget);
             }
+        }
+
+        private (bool, IChunkTrackable) GetCommandTargetNode()
+        {
+            // If we have a current harvest target
+            var targetPosition = _npc.RuntimeState.GetWorkerTargetNodePosition();
+
+            if (!targetPosition.Item1)
+                return (false, null);
+
+            Chunk chunk = _npc.Context.ChunkManager.GetChunk(targetPosition.Item2.ChunkPosition);
+
+            if (chunk == null)
+                return (false, null);
+
+            FPropLoadState loadstate = chunk.PropLoadStates[targetPosition.Item2.PropIndex];
+
+            if (loadstate.LoadState != ELoadState.Loaded)
+                return (false, null);
+
+            return (true, loadstate.Prop);
         }
 
         private bool IsAttackTargetValid(IChunkTrackable trackable)

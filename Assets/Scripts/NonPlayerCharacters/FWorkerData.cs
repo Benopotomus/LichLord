@@ -18,6 +18,7 @@ namespace LichLord.NonPlayerCharacters
 
         public bool IsAssigned { get { return IsBitSet(ref _state, 1); } set { SetBit(ref _state, 1, value); } }
         public bool WorkerActive { get { return IsBitSet(ref _state, 2); } set { SetBit(ref _state, 2, value); } }
+        public bool HasTargetNode { get { return IsBitSet(ref _state, 3); } set { SetBit(ref _state, 3, value); } }
 
         public bool IsBitSet(ref byte flags, int bit)
         {

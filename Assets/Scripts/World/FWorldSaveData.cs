@@ -50,6 +50,8 @@ namespace LichLord.World
         public int workerIndex;
         public bool isAssigned;
         public bool workerActive;
+        public bool hasTargetNode;
+
         public int npcIndex;
         public int taskData;
         // target node
@@ -62,6 +64,7 @@ namespace LichLord.World
             this.workerIndex = workerIndex;
             this.isAssigned = data.IsAssigned;
             this.workerActive = data.WorkerActive;
+            this.hasTargetNode = data.HasTargetNode;
             this.npcIndex = data.NPCIndex;
             this.taskData = data.TasksData.RawData;
 
@@ -75,6 +78,7 @@ namespace LichLord.World
             FWorkerData netWorker = new FWorkerData();
             netWorker.IsAssigned = isAssigned;
             netWorker.WorkerActive = workerActive;
+            netWorker.HasTargetNode = hasTargetNode;
             netWorker.NPCIndex = (short)npcIndex;
             netWorker.TasksData.RawData = (byte)taskData;
 
