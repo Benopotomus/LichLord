@@ -38,7 +38,7 @@ namespace LichLord
         public ContainerManager ContainerManager;
         public DialogManager DialogManager;
         public MissionManager MissionManager;
-        public FormationManager FormationManager;
+        public DebugConsole DebugConsole;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;

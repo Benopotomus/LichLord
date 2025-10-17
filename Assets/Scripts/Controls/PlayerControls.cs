@@ -1163,6 +1163,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugConsole"",
+                    ""type"": ""Button"",
+                    ""id"": ""e92b850a-ff55-4718-8516-52b48a6a32d7"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1594,6 +1603,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c4b97de2-a21e-4d12-8a11-9096e808f3df"",
+                    ""path"": ""<Keyboard>/backquote"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugConsole"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -1710,6 +1730,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_UI_TrackedDevicePosition = m_UI.FindAction("TrackedDevicePosition", throwIfNotFound: true);
         m_UI_TrackedDeviceOrientation = m_UI.FindAction("TrackedDeviceOrientation", throwIfNotFound: true);
         m_UI_Interact = m_UI.FindAction("Interact", throwIfNotFound: true);
+        m_UI_DebugConsole = m_UI.FindAction("DebugConsole", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -2261,6 +2282,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_TrackedDevicePosition;
     private readonly InputAction m_UI_TrackedDeviceOrientation;
     private readonly InputAction m_UI_Interact;
+    private readonly InputAction m_UI_DebugConsole;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -2316,6 +2338,10 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "UI/Interact".
         /// </summary>
         public InputAction @Interact => m_Wrapper.m_UI_Interact;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/DebugConsole".
+        /// </summary>
+        public InputAction @DebugConsole => m_Wrapper.m_UI_DebugConsole;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -2375,6 +2401,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
+            @DebugConsole.started += instance.OnDebugConsole;
+            @DebugConsole.performed += instance.OnDebugConsole;
+            @DebugConsole.canceled += instance.OnDebugConsole;
         }
 
         /// <summary>
@@ -2419,6 +2448,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
+            @DebugConsole.started -= instance.OnDebugConsole;
+            @DebugConsole.performed -= instance.OnDebugConsole;
+            @DebugConsole.canceled -= instance.OnDebugConsole;
         }
 
         /// <summary>
@@ -2847,5 +2879,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInteract(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DebugConsole" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDebugConsole(InputAction.CallbackContext context);
     }
 }

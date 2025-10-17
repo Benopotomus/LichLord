@@ -1,4 +1,5 @@
-﻿using Fusion;
+﻿using DWD.Utility.Loading;
+using Fusion;
 using LichLord.Buildables;
 using LichLord.Items;
 using LichLord.Props;
@@ -31,6 +32,11 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private LayerMask _interactableLayerMask;
         [SerializeField] private float _commandOverlapDistance = 5;
+
+        [BundleObject(typeof(GameObject))]
+        [SerializeField]
+        protected BundleObject _commandTargetVFX;
+        public BundleObject CommandTargetVFX => _commandTargetVFX;
 
         public override void Spawned()
         {
@@ -187,13 +193,9 @@ namespace LichLord.NonPlayerCharacters
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_SummonWorker(byte playerIndex, FWorldPosition compressedSpawnPosition, FItemData itemData)
         {
-            Vector3 spawnPosition = compressedSpawnPosition.Position;
-
-            spawnPosition = GetNavMeshPosition(spawnPosition, spawnPosition);
+            Vector3 spawnPosition = GetNavMeshPosition(compressedSpawnPosition.Position, compressedSpawnPosition.Position);
 
             int emptyWorkerSlot = GetEmptyWorkerSlot();
-            Debug.Log(emptyWorkerSlot);
-
             if (emptyWorkerSlot == -1)
                 return;
 
@@ -209,29 +211,47 @@ namespace LichLord.NonPlayerCharacters
 
             Collider[] colliders = Physics.OverlapSphere(spawnPosition, _commandOverlapDistance, _interactableLayerMask);
 
+            InteractableComponent nearestInteractable = null;
+            float nearestDistanceSqr = float.MaxValue;
+
             foreach (Collider collider in colliders)
             {
                 var interactable = collider.GetComponent<InteractableComponent>();
-                if(interactable == null) 
+                if (interactable == null)
                     continue;
 
                 var targetObject = interactable.Owner;
-
                 Chunk chunk = targetObject.CurrentChunk;
-                if (chunk == null) 
+                if (chunk == null)
                     continue;
+
+                float distSqr = (collider.transform.position - spawnPosition).sqrMagnitude;
+                if (distSqr < nearestDistanceSqr)
+                {
+                    nearestDistanceSqr = distSqr;
+                    nearestInteractable = interactable;
+                }
+            }
+
+            if (nearestInteractable != null)
+            {
+                var targetObject = nearestInteractable.Owner;
 
                 if (targetObject is Prop prop)
                 {
                     workerData.TargetNode.ChunkPosition = prop.ChunkID;
                     workerData.TargetNode.PropIndex = (ushort)prop.Index;
                     workerData.HasTargetNode = true;
-                    Debug.Log("targeted prop" + prop);
+
+                    if (Context.LocalPlayerCharacter.PlayerIndex == playerIndex)
+                    {
+                        _stronghold.BuildableZone.SpawnVisualEffect(prop.CachedTransform.position, Quaternion.identity, CommandTargetVFX);
+                    }
                 }
             }
 
             TrySpawnWorker(spawnPosition, _stronghold.StrongholdID, emptyWorkerSlot, summableDefinition.NonPlayerCharacterDefinition);
-            Context.ContainerManager.AddItemToContainer(_stronghold.ContainerIndex, itemData); 
+            Context.ContainerManager.AddItemToContainer(_stronghold.ContainerIndex, itemData);
         }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]

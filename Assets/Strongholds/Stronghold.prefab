@@ -15832,7 +15832,10 @@ MonoBehaviour:
   _interactableLayerMask:
     serializedVersion: 2
     m_Bits: 8192
-  _maxRaycastDistance: 10
+  _commandOverlapDistance: 5
+  _commandTargetVFX:
+    _name: VFX_TargetingCircle
+    _bundle: vfx_targetingcircle
 --- !u!1 &7658633983750866466
 GameObject:
   m_ObjectHideFlags: 0

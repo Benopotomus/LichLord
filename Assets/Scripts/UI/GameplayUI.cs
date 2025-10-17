@@ -15,6 +15,9 @@ namespace LichLord.UI
         [SerializeField] private UIInventoryView _inventoryView;
         public UIInventoryView InventoryView => _inventoryView;
 
+        [SerializeField] private UIDebugConsoleView _debugConsoleView;
+        public UIDebugConsoleView DebugConsoleView => _debugConsoleView;
+
         [Space]
         public GameObject LastFocusedWidget;
 
@@ -45,6 +48,14 @@ namespace LichLord.UI
             PlayerCharacter pc = Context.LocalPlayerCharacter;
             if (pc != null)
             {
+                if (pc.Input.CurrentInput.UI_DebugConsole)
+                {
+                    if (_debugConsoleView.IsOpen)
+                        _debugConsoleView.Close();
+                    else
+                        _debugConsoleView.Open();
+                }
+
                 if (pc.Input.CurrentInput.InventoryToggle)
                 {
                     if (_inventoryView.IsOpen)

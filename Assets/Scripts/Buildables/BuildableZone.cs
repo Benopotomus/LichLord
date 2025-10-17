@@ -1,4 +1,5 @@
 ﻿using DWD.Pooling;
+using DWD.Utility.Loading;
 using Fusion;
 using LichLord.Items;
 using LichLord.World;
@@ -161,7 +162,7 @@ namespace LichLord.Buildables
             // Determine if theres any connectors near my connectors
 
             // Spawn VFX for defintion
-            _effectSpawner.SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
+            SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
 
             ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
 
@@ -188,6 +189,11 @@ namespace LichLord.Buildables
 
             data.DefinitionID = definitionID;
             data.Transform = buildableTransform;
+        }
+
+        public void SpawnVisualEffect(Vector3 position, Quaternion rotation, BundleObject vfxBundle)
+        {
+            _effectSpawner.SpawnVisualEffect(position, rotation, vfxBundle);
         }
 
         private void OnBuildingVisualEffectLoaded(GameObject loadedGameObject, Vector3 position, Quaternion rotation)

@@ -98,6 +98,7 @@ namespace LichLord
             _input.ShowTooltips = _controls.Gameplay.ShowTooltips.IsPressed();
             _input.Cancel = _controls.UI.Cancel.WasPressedThisFrame();
             _input.UI_Interact = _controls.UI.Interact.WasPressedThisFrame();
+            _input.UI_DebugConsole = _controls.UI.DebugConsole.WasPressedThisFrame();
 
             if (Cursor.lockState != CursorLockMode.Locked)
             {
