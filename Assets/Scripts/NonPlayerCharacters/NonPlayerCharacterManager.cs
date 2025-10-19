@@ -75,6 +75,9 @@ namespace LichLord.NonPlayerCharacters
             int formationIndex,
             DialogDefinition dialog = null)
         {
+            if (!HasStateAuthority)
+                return;
+
             FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.Invader, teamID, attitude);
 
             var invaderData = definition.GetDataDefinition(ENPCSpawnType.Invader) as InvaderDataDefinition;
@@ -186,10 +189,10 @@ namespace LichLord.NonPlayerCharacters
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                 return;
 
-            FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.Warrior, teamId, EAttitude.Hostile);
+            FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.SummonedWarrior, teamId, EAttitude.Hostile);
 
             // Type-specific adjustment: worker index
-            var warriorData = definition.GetDataDefinition(ENPCSpawnType.Warrior) as WarriorDataDefinition;
+            var warriorData = definition.GetDataDefinition(ENPCSpawnType.SummonedWarrior) as SummonedWarriorDataDefinition;
             if (warriorData == null)
             {
                 Debug.Log("Trying to spawn a non-warrior as a warrior");

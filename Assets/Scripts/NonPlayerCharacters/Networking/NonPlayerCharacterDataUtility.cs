@@ -96,6 +96,6 @@
         Worker, // Has a worker index for players
         Guard, // Spawns at locations to guard them
         Patrol, // Spawns at patrol points and paths to other ones
-        Warrior, // Summoned by the player character and attempts to follow when idle
+        SummonedWarrior, // Summoned by the player character and attempts to follow when idle
     }
 }

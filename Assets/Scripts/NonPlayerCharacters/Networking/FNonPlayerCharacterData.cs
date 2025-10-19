@@ -100,6 +100,10 @@
                 else
                     return -1;
             }
+            set
+            { 
+                _transform.RawCompressedYaw = (byte)(value + 240);
+            }
         }
 
         public float Pitch

@@ -40,8 +40,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterAnimationController _animationController;
         public NonPlayerCharacterAnimationController AnimationController => _animationController;
 
-        [SerializeField] private NonPlayerCharacterCarriedItemComponent _currencyComponent;
-        public NonPlayerCharacterCarriedItemComponent CurrencyComponent => _currencyComponent;
+        [SerializeField] private NonPlayerCharacterCarriedItemComponent _carriedItemComponent;
+        public NonPlayerCharacterCarriedItemComponent CarriedItem => _carriedItemComponent;
 
         [SerializeField] private NonPlayerCharacterAttitudeComponent _attitudeComponent;
         public NonPlayerCharacterAttitudeComponent AttitudeComponent => _attitudeComponent;
@@ -152,7 +152,7 @@ namespace LichLord.NonPlayerCharacters
             _replicator = replicator;
             _movementComponent.OnSpawned(runtimeState);
             _brainComponent.OnSpawned(runtimeState, hasAuthority);
-            _currencyComponent.OnSpawned();
+            _carriedItemComponent.OnSpawned(runtimeState);
             _attitudeComponent.OnSpawned(runtimeState);
             _dialogComponent.OnSpawned(runtimeState);
             _lifetimeComponent.OnSpawned(runtimeState, tick);
@@ -210,7 +210,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateChunk(_context.ChunkManager);
             UpdateTeam(runtimeState);
             _stateComponent.UpdateState(runtimeState, hasAuthority, tick);
-            _currencyComponent.OnRender(runtimeState);
+            _carriedItemComponent.OnRender(runtimeState);
             _attitudeComponent.OnRender( runtimeState);
             _dialogComponent.OnRender(runtimeState);
             _lifetimeComponent.UpdateLifetime(runtimeState, hasAuthority, tick);

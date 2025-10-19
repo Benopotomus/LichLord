@@ -1227,7 +1227,7 @@ MonoBehaviour:
   _hitReactComponent: {fileID: 7703171160761877983}
   _weaponsComponent: {fileID: 3797343846203693856}
   _animationController: {fileID: 3567655564029587463}
-  _currencyComponent: {fileID: 7850887928293133023}
+  _carriedItemComponent: {fileID: 7850887928293133023}
   _attitudeComponent: {fileID: 5729182260968451425}
   _dialogComponent: {fileID: 2401479208497145895}
   _spawningComponent: {fileID: 6259089908041508983}
@@ -1238,6 +1238,10 @@ MonoBehaviour:
   _transform: {fileID: 3282022331344466140}
   _hurtbox: {fileID: 2131942850854789237}
   _collider: {fileID: 1615885042697682339}
+  _localIndex: 0
+  _fullIndex: 0
+  _strongholdId: -1
+  _stronghold: {fileID: 0}
   _workerIndex: -1
   redHat: {fileID: 0}
   blueHat: {fileID: 0}
@@ -1535,6 +1539,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12c05af24cb5a254f97a252501c15f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pc: {fileID: 0}
   _handBoneLeft: {fileID: 0}
   _handBoneRight: {fileID: 0}
 --- !u!114 &7850887928293133023
@@ -1554,6 +1559,7 @@ MonoBehaviour:
   _woodGO: {fileID: 0}
   _ironGO: {fileID: 0}
   _deathCapsGO: {fileID: 0}
+  _definition: {fileID: 0}
 --- !u!114 &5729182260968451425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1610,6 +1616,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9deb56a2042157440817bfe260192ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _nextLifetimeProgressTick: 0
+  _lifetimeProgress: 0
 --- !u!1 &3176908961229995009
 GameObject:
   m_ObjectHideFlags: 0

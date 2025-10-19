@@ -57,6 +57,7 @@ namespace LichLord.NonPlayerCharacters
         private List<NonPlayerCharacterManeuverState> _maneuvers = new List<NonPlayerCharacterManeuverState>();
 
         private NonPlayerCharacterManeuverState _activeManeuver = null;
+        public NonPlayerCharacterManeuverState ActiveManuver => _activeManeuver;
 
         public PlayerCharacter TargetPlayer;
 
@@ -130,6 +131,9 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
+
+            Debug.Log(targetPlayerIndex);
+
             TargetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) :  null;
         }
 
@@ -522,7 +526,7 @@ namespace LichLord.NonPlayerCharacters
 
             bool isWorker = _npc.RuntimeState.IsWorker();
             
-            FItemData carriedItem = _npc.CurrencyComponent.CarriedItem;
+            FItemData carriedItem = _npc.CarriedItem.CarriedItem;
             
             bool hasCommandTargetNode = false;
 
@@ -1008,7 +1012,7 @@ namespace LichLord.NonPlayerCharacters
                 return null;
 
             IChunkTrackable currentTarget = null;
-            FItemData carriedItem = _npc.CurrencyComponent.CarriedItem;
+            FItemData carriedItem = _npc.CarriedItem.CarriedItem;
 
             switch (_activeManeuver.Definition.ManeuverType)
             {

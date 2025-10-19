@@ -5,7 +5,7 @@
 namespace LichLord.NonPlayerCharacters
 {
     [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/WarriorDataDefinition")]
-    public class WarriorDataDefinition : NonPlayerCharacterDataDefinition
+    public class SummonedWarriorDataDefinition : NonPlayerCharacterDataDefinition
     {
         [SerializeField]
         private int _maxLifetimeProgress = 10;

@@ -13,22 +13,28 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private GameObject _ironGO;
         [SerializeField] private GameObject _deathCapsGO;
 
-
         private FItemData _carriedItem;
         public FItemData CarriedItem => _carriedItem;
 
         [SerializeField]
         private ItemDefinition _definition;
 
-        public void OnSpawned()
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
-            if (!_npc.RuntimeState.IsWorker())
-                return;
+            if (_stoneGO != null)
+                _stoneGO.SetActive(false);
 
-            _stoneGO.SetActive(false);
-            _woodGO.SetActive(false);
-            _ironGO.SetActive(false);
-            _deathCapsGO.SetActive(false);
+            if (_woodGO != null)
+                _woodGO.SetActive(false);
+
+            if (_ironGO != null)
+                _ironGO.SetActive(false);
+
+            if (_deathCapsGO != null)
+                _deathCapsGO.SetActive(false);
+
+            if (runtimeState.IsWorker())
+                UpdateCarriedItemChanged(_npc.RuntimeState);
         }
 
         public void OnRender(NonPlayerCharacterRuntimeState runtimeState)
@@ -36,12 +42,12 @@ namespace LichLord.NonPlayerCharacters
             if (!runtimeState.IsWorker())
                 return;
 
-            UpdateCarriedCurrencyChange(runtimeState);
+            UpdateCarriedItemChanged(runtimeState);
 
             //Debug.Log(runtimeState.GetCarriedCurrencyType().ToString() + " " + runtimeState.GetHarvestProgress());
         }
 
-        private void UpdateCarriedCurrencyChange(NonPlayerCharacterRuntimeState runtimeState)
+        private void UpdateCarriedItemChanged(NonPlayerCharacterRuntimeState runtimeState)
         {
             FItemData oldItem = _carriedItem;
             FItemData newItem = runtimeState.GetCarriedItem();

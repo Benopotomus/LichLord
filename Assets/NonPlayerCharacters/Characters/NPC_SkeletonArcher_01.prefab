@@ -2993,7 +2993,7 @@ MonoBehaviour:
   _hitReactComponent: {fileID: 9187171251479877575}
   _weaponsComponent: {fileID: 7723641460175011890}
   _animationController: {fileID: 167064866010933950}
-  _currencyComponent: {fileID: 541806916981470579}
+  _carriedItemComponent: {fileID: 541806916981470579}
   _attitudeComponent: {fileID: 5667166935012497724}
   _dialogComponent: {fileID: 8280122207182958077}
   _spawningComponent: {fileID: 3078160300237640522}
@@ -3004,6 +3004,10 @@ MonoBehaviour:
   _transform: {fileID: 8251747689170000944}
   _hurtbox: {fileID: 5025131810704435619}
   _collider: {fileID: 5013894604574849869}
+  _localIndex: 0
+  _fullIndex: 0
+  _strongholdId: -1
+  _stronghold: {fileID: 0}
   _workerIndex: -1
   redHat: {fileID: 0}
   blueHat: {fileID: 0}
@@ -3326,6 +3330,7 @@ MonoBehaviour:
   _woodGO: {fileID: 0}
   _ironGO: {fileID: 0}
   _deathCapsGO: {fileID: 0}
+  _definition: {fileID: 0}
 --- !u!114 &5667166935012497724
 MonoBehaviour:
   m_ObjectHideFlags: 0

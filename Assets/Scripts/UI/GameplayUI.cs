@@ -56,6 +56,9 @@ namespace LichLord.UI
                         _debugConsoleView.Open();
                 }
 
+                if (_debugConsoleView.IsOpen)
+                    return;
+
                 if (pc.Input.CurrentInput.InventoryToggle)
                 {
                     if (_inventoryView.IsOpen)

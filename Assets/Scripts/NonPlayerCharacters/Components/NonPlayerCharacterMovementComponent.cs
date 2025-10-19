@@ -91,21 +91,17 @@ namespace LichLord.NonPlayerCharacters
 
             if (targetPlayerIndex > 0)
             {
-                if (runtimeState.IsInvader() && 
-                    _npc.Context.InvasionManager.InvasionState == EInvasionState.Approaching)
+                var targetPlayer = NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex);
+                if (targetPlayer != null)
                 {
-                    var targetPlayer = NPC.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex);
-                    if (targetPlayer != null)
+                    Vector3 dir = targetPlayer.Position - NPC.CachedTransform.position;
+                    if (dir.sqrMagnitude > 0.0001f)
                     {
-                        Vector3 dir = targetPlayer.Position - NPC.CachedTransform.position;
-                        if (dir.sqrMagnitude > 0.0001f)
-                        {
-                            // Calculate yaw toward the target player
-                            float playerYaw = Quaternion.LookRotation(dir, Vector3.up).eulerAngles.y;
+                        // Calculate yaw toward the target player
+                        float playerYaw = Quaternion.LookRotation(dir, Vector3.up).eulerAngles.y;
 
-                            // Blend between facing player and existing projectile follow yaw
-                            targetYaw = playerYaw;
-                        }
+                        // Blend between facing player and existing projectile follow yaw
+                        targetYaw = playerYaw;
                     }
                 }
             }
@@ -200,12 +196,13 @@ namespace LichLord.NonPlayerCharacters
                 data.PositionZ = NPC.CachedTransform.position.z;
             }
 
-            if (NPC.Brain.AttackTarget is PlayerCharacter pc)
+            if (NPC.Brain.AttackTarget is PlayerCharacter pc && 
+                NPC.Brain.ActiveManuver != null &&
+                NPC.Brain.ActiveManuver.Definition.ManeuverType == EManeuverType.Attack)
             {
                 if (pc.SpawnComplete)
                 {
-                    if (data.RawCompressedYaw != (byte)(pc.PlayerIndex + 240))
-                        data.RawCompressedYaw = (byte)(pc.PlayerIndex + 240);
+                    data.TargetPlayerIndex = pc.PlayerIndex;
                 }
             }
             else

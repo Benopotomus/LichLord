@@ -68,7 +68,7 @@ namespace LichLord.UI
             _historyIndex = _commandHistory.Count;
 
             // Execute command
-            Context.DebugConsole.RPC_ExecuteCommand(command);
+            Context.DebugConsole.ExecuteCommand(command);
 
             // Clear input
             _inputField.text = "";
@@ -190,6 +190,24 @@ namespace LichLord.UI
                 EConsoleColor.Success => Color.green,
                 _ => Color.white
             };
+        }
+
+        private void Update()
+        {
+            if (!_inputField.isFocused)
+                return;
+
+            // Navigate command history
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                OnUpArrow();
+                _inputField.caretPosition = _inputField.text.Length;
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                OnDownArrow();
+                _inputField.caretPosition = _inputField.text.Length;
+            }
         }
 
         private void ClearConsole()

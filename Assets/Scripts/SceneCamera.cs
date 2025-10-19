@@ -105,11 +105,12 @@ namespace LichLord
             Transform cameraTransform = mainCamera.transform;
             Vector3 cameraPosition = mainCamera.transform.position;
 
-            float minDistance = isFirstPerson ? 0 : _minRaycastDistance;
-            // Calculate ray origin at 60% up the viewport
-            Vector3 viewportPoint = new Vector3(0.5f, 0.6f, minDistance / mainCamera.nearClipPlane); // 0.6 = 60% up
-            Ray ray = mainCamera.ViewportPointToRay(viewportPoint);
-            Vector3 rayOrigin = ray.origin;
+            // Create a ray from the center of the camera viewport (slightly upward)
+            Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+
+            // Offset the ray origin forward in third person mode
+            float minDistance = isFirstPerson ? 0f : _minRaycastDistance;
+            Vector3 rayOrigin = ray.origin + ray.direction * minDistance;
             Vector3 rayDirection = ray.direction;
 
             _skydomeTransform.position = cameraPosition;
