@@ -245,7 +245,7 @@ namespace LichLord.NonPlayerCharacters
 
                     if (Context.LocalPlayerCharacter.PlayerIndex == playerIndex)
                     {
-                        _stronghold.BuildableZone.SpawnVisualEffect(prop.CachedTransform.position, Quaternion.identity, CommandTargetVFX);
+                        Context.VFXManager.SpawnVisualEffect(prop.CachedTransform.position, Quaternion.identity, CommandTargetVFX);
                     }
                 }
             }

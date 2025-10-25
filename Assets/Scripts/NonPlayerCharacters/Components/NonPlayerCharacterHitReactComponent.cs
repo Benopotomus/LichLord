@@ -10,7 +10,7 @@ namespace LichLord.NonPlayerCharacters
         private NonPlayerCharacter _npc;
 
         [SerializeField]
-        private List<NonPlayerCharacterHitReactState> _hitReacts = new List<NonPlayerCharacterHitReactState>();
+        private List<HitReactionDefinition> _hitReacts = new List<HitReactionDefinition>();
 
         int _hitReactEndTick;
 
@@ -40,10 +40,10 @@ namespace LichLord.NonPlayerCharacters
             Debug.Log("Guid: " + _npc.GUID + ", Starting Hit React " + animIndex +
                 ", tick: " + _npc.Context.Runner.Tick);
             */
-            NonPlayerCharacterHitReactState hitReact = _hitReacts[animIndex];
+            HitReactionDefinition hitReact = _hitReacts[animIndex];
             var animTrigger = hitReact.AnimationTrigger;
 
-            _hitReactEndTick = tick + (int)(hitReact.StateTime * 32);
+            _hitReactEndTick = tick + hitReact.TickDuration;
             _npc.AnimationController.SetAnimationForTrigger(animTrigger);
 
             SpawnImpactVisualEffect(animIndex);
@@ -51,7 +51,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void SpawnImpactVisualEffect(int animIndex)
         {
-            NonPlayerCharacterHitReactState hitReact = _hitReacts[animIndex];
+            HitReactionDefinition hitReact = _hitReacts[animIndex];
             var animTrigger = hitReact.AnimationTrigger;
 
             if (hitReact.HitEffect.Name != "")

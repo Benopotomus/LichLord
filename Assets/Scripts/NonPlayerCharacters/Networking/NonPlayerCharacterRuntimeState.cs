@@ -201,7 +201,7 @@ namespace LichLord.NonPlayerCharacters
             return false;
         }
 
-        public bool IsWarrior()
+        public bool IsSummonedWarrior()
         {
             if (NonPlayerCharacterDataUtility.GetSpawnType(ref _npcData) == ENPCSpawnType.SummonedWarrior)
                 return true;

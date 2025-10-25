@@ -14,6 +14,7 @@ namespace LichLord
         private int _animIDSide = Animator.StringToHash("Side");
         private int _animIDJumping = Animator.StringToHash("Jumping");
         private int _animIDAction = Animator.StringToHash("Action");
+        private int _animIDAnimationSpeed = Animator.StringToHash("AnimationSpeed");
 
         private int _animIDSpeedX = Animator.StringToHash("Velocity X");
         private int _animIDSpeedZ = Animator.StringToHash("Velocity Z");
@@ -41,6 +42,7 @@ namespace LichLord
             _animator.SetInteger(_animIDJumping, animationTrigger.Jumping);
             _animator.SetInteger(_animIDTriggerNumber, animationTrigger.TriggerNumber);
             _animator.SetTrigger(_animIDTrigger);
+            _animator.SetFloat(_animIDAnimationSpeed, animationTrigger.PlaybackSpeed);
         }
 
         public void PlayFlinchAnimation()
@@ -102,6 +104,7 @@ namespace LichLord
             switch (newMovementState)
             {
                 case EMovementState.Walking:
+                    _animator.SetFloat(_animIDAnimationSpeed, 1);
                     //Debug.Log("Walking");
                     _animator.SetInteger(_animIDWeapon, _pc.Weapons.GetWeaponID());
                     //_animator.SetBool(_animIDMoving, true);
@@ -123,6 +126,7 @@ namespace LichLord
 
                 case EMovementState.Jumping:
                     //Debug.Log("Jump Hit");
+                    _animator.SetFloat(_animIDAnimationSpeed, 1);
                     _animator.SetInteger(_animIDWeapon, _pc.Weapons.GetWeaponID());
                     _animator.SetBool(_animIDMoving, false);
                     _animator.SetInteger(_animIDJumping, 1);
@@ -132,6 +136,7 @@ namespace LichLord
                     break;
                 case EMovementState.Flying:
                     //Debug.Log("Flying Hit");
+                    _animator.SetFloat(_animIDAnimationSpeed, 1);
                     _animator.SetInteger(_animIDWeapon, _pc.Weapons.GetWeaponID());
                     _animator.SetBool(_animIDMoving, false);
                     _animator.SetInteger(_animIDJumping, 2);

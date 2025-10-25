@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LichLord.World;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -51,9 +52,30 @@ namespace LichLord.NonPlayerCharacters
         private List<FAnimationTrigger> _animationTriggers = new List<FAnimationTrigger>();
         public List<FAnimationTrigger> AnimationTriggers => _animationTriggers;
 
+        [Header("Events")]
+        [SerializeField]
+        private List<NonPlayerCharacterManeuverHitEvent> _hitEvents = new List<NonPlayerCharacterManeuverHitEvent>();
+        public List<NonPlayerCharacterManeuverHitEvent> HitEvents => _hitEvents;
+
+        [SerializeField]
+        private List<NonPlayerCharacterManeuverHitEvent> _specialEvents = new List<NonPlayerCharacterManeuverHitEvent>();
+        public List<NonPlayerCharacterManeuverHitEvent> SpecialEvents => _specialEvents;
+
         public virtual bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
             return false;
+        }
+
+        public void ExecuteHitEvents(NonPlayerCharacter npc, IChunkTrackable target)
+        { 
+            foreach(var hitEvent in HitEvents) 
+                hitEvent.Execute(npc, this, target);
+        }
+
+        public void ExecuteSpecialEvents(NonPlayerCharacter npc, IChunkTrackable target)
+        {
+            foreach (var specialEvent in SpecialEvents)
+                specialEvent.Execute(npc, this, target);
         }
     }
 

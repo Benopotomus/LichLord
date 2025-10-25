@@ -12,7 +12,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
-            if (!runtimeState.IsWarrior())
+            if (!runtimeState.IsSummonedWarrior())
                 return;
 
             _lifetimeProgress = runtimeState.GetLifetimeProgress();
@@ -23,7 +23,7 @@ namespace LichLord.NonPlayerCharacters
             bool hasAuthority, 
             int tick)
         {
-            if (!runtimeState.IsWarrior())
+            if (!runtimeState.IsSummonedWarrior())
                 return;
 
             if (tick > _nextLifetimeProgressTick)

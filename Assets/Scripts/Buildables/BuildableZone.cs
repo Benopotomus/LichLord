@@ -18,7 +18,6 @@ namespace LichLord.Buildables
         private CapsuleCollider _trigger;
 
         private BuildableSpawner _spawner = new BuildableSpawner();
-        private VisualEffectSpawner _effectSpawner = new VisualEffectSpawner();
 
         [Networked, Capacity(BuildableConstants.MAX_BUILDABLE_REPS)]
         protected virtual NetworkArray<FBuildableData> _buildableDatas { get; }
@@ -43,8 +42,6 @@ namespace LichLord.Buildables
                 _runtimeStates[i] = new BuildableRuntimeState(this, i, ref _localBuildableDatas[i]);
 
             _loadStates = new FBuildableLoadState[BuildableConstants.MAX_BUILDABLE_REPS];
-
-            _effectSpawner.OnLoaded += OnBuildingVisualEffectLoaded;
         }
 
         public void SetTriggerSize(float size)
@@ -162,7 +159,7 @@ namespace LichLord.Buildables
             // Determine if theres any connectors near my connectors
 
             // Spawn VFX for defintion
-            SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
+            Context.VFXManager.SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
 
             ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
 
@@ -189,26 +186,6 @@ namespace LichLord.Buildables
 
             data.DefinitionID = definitionID;
             data.Transform = buildableTransform;
-        }
-
-        public void SpawnVisualEffect(Vector3 position, Quaternion rotation, BundleObject vfxBundle)
-        {
-            _effectSpawner.SpawnVisualEffect(position, rotation, vfxBundle);
-        }
-
-        private void OnBuildingVisualEffectLoaded(GameObject loadedGameObject, Vector3 position, Quaternion rotation)
-        {
-            var poolObject = loadedGameObject.GetComponent<DWDObjectPoolObject>();
-
-            if (poolObject == null)
-            {
-                Debug.LogWarning("Could not spawn Visuals Prefab for Impact");
-                return;
-            }
-
-            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, position, rotation);
-            if (instance is StandaloneVisualEffect standaloneEffect)
-                standaloneEffect.Initialize();
         }
 
         public int GetFreeIndex()

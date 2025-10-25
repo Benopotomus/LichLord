@@ -14,6 +14,7 @@ namespace LichLord.NonPlayerCharacters
         public int ActivationExpirationTick;
         public int ActivationTick;
         public float RandomAimOffset = 7f;
+        public bool IsEnabled = true;
 
         public bool IsValid()
         {
@@ -25,6 +26,9 @@ namespace LichLord.NonPlayerCharacters
 
         public bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
+            if (!IsEnabled)
+                return false;
+
             if (Definition == null) 
                 return false;
             
@@ -106,7 +110,11 @@ namespace LichLord.NonPlayerCharacters
 
             ProjectileDefinition definition = projectileData.Definition;
 
+            Debug.Log("spawn projectile" + projectileData.Muzzle);
+
             Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(npc, projectileData.Muzzle);
+
+            Debug.Log("spawn projectile position" + muzzlePosition);
 
             Vector3 targetPos = npc.Brain.AttackTarget.Position;
             targetPos.y += (1f + Definition.VerticalAimOffset);

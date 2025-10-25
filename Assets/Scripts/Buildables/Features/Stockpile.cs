@@ -91,7 +91,9 @@ namespace LichLord.Buildables
 
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());
-            UpdateCurrencyStacks();
+
+            if(_healthComponent.CurrentHealth > 0)
+                UpdateCurrencyStacks();
         }
 
         private void UpdateCurrencyStacks()

@@ -287,6 +287,37 @@ Transform:
   - {fileID: 6420086587264807267}
   m_Father: {fileID: 7342135858886626939}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &970446431699640054
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1788455330690645157}
+  m_Layer: 0
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1788455330690645157
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 970446431699640054}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0.119, z: 0.768}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1934824835560534130}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1099912079860287609
 GameObject:
   m_ObjectHideFlags: 0
@@ -515,7 +546,6 @@ Transform:
   - {fileID: 1056073750726177066}
   - {fileID: 6751762309761990702}
   - {fileID: 5321847717481377503}
-  - {fileID: 6059247638362266708}
   m_Father: {fileID: 592989036420087557}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1693060787230286941
@@ -1127,7 +1157,6 @@ GameObject:
   - component: {fileID: 7703171160761877983}
   - component: {fileID: 3797343846203693856}
   - component: {fileID: 3567655564029587463}
-  - component: {fileID: 7889308162331754733}
   - component: {fileID: -5343675085829805393}
   - component: {fileID: 6977141634129608888}
   - component: {fileID: -64430088923349558}
@@ -1184,7 +1213,6 @@ MonoBehaviour:
   _spawningComponent: {fileID: 6691232617847703286}
   _lifetimeComponent: {fileID: 31364041555530400}
   _interactableComponent: {fileID: 8472195953335971330}
-  _muzzleComponent: {fileID: 7889308162331754733}
   _animator: {fileID: 5683565048644474723}
   _transform: {fileID: 3282022331344466140}
   _hurtbox: {fileID: 2131942850854789237}
@@ -1240,7 +1268,7 @@ MonoBehaviour:
   movement:
     follower:
       rotationSpeed: 600
-      speed: 5
+      speed: 6
       maxRotationSpeed: 720
       maxOnSpotRotationSpeed: 720
       slowdownTime: 0.5
@@ -1339,19 +1367,14 @@ MonoBehaviour:
   _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
-  - Definition: {fileID: 11400000, guid: 08c89e9b799dfc64da43b3e986b534f5, type: 2}
+  - Definition: {fileID: 11400000, guid: af730af8e3a90d14ea4974e1c06c17f5, type: 2}
     ActiveState: 4
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
-    RandomAimOffset: 7
-  - Definition: {fileID: 11400000, guid: 6eebe11c58b399840b32a8dd33e6af67, type: 2}
-    ActiveState: 5
-    CooldownExpirationTick: 0
-    ActivationExpirationTick: 0
-    ActivationTick: 0
     RandomAimOffset: 0
-  TargetPlayer: {fileID: 0}
+    IsEnabled: 1
+  _targetPlayer: {fileID: 0}
   _losLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -1373,71 +1396,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
   _hitReacts:
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 12
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 2
-      Weapon: 0
-      TriggerNumber: 12
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 14
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 1.5
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 26
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 2
-      Weapon: 0
-      TriggerNumber: 26
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
+  - {fileID: 11400000, guid: 2ed8cbc795dfd0a40aef68ce1341113b, type: 2}
+  - {fileID: 11400000, guid: c23387d04f6eae440a9035ecb3adc9c3, type: 2}
+  - {fileID: 11400000, guid: baf2e06d515cf484b80d4f772eb9b98b, type: 2}
+  - {fileID: 11400000, guid: 5eed346c2a633204a9bfa754702de8ff, type: 2}
   _impactAttachment: {fileID: 8905927029070619014}
 --- !u!114 &3797343846203693856
 MonoBehaviour:
@@ -1451,11 +1413,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07b5161cc43135c4088a03476b472842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _weaponIndex: 7
-  _leftHandItem: {fileID: 0}
-  _rightHandItem: {fileID: 0}
-  _leftHandBone: {fileID: 0}
-  _rightHandBone: {fileID: 0}
+  _weaponIndex: 3
+  _weaponLeft: {fileID: 0}
+  _weaponRight: {fileID: 6966500592582706671}
+  _handBoneLeft: {fileID: 1347477040883846014}
+  _handBoneRight: {fileID: 8450487017670190647}
 --- !u!114 &3567655564029587463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1472,21 +1434,6 @@ MonoBehaviour:
   _animator: {fileID: 5683565048644474723}
   _animationCallbacks:
     _serializedList: []
---- !u!114 &7889308162331754733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3080396072933564549}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12c05af24cb5a254f97a252501c15f73, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pc: {fileID: 0}
-  _handBoneLeft: {fileID: 0}
-  _handBoneRight: {fileID: 0}
 --- !u!114 &-5343675085829805393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1563,89 +1510,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nextLifetimeProgressTick: 0
   _lifetimeProgress: 0
---- !u!1 &3176908961229995009
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6059247638362266708}
-  - component: {fileID: 3140248678780647566}
-  - component: {fileID: 9206550126981138591}
-  m_Layer: 0
-  m_Name: Shield_1H
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &6059247638362266708
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3176908961229995009}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0.000000024169267, y: -0.997949, z: 0.00000011927038, w: 0.064014554}
-  m_LocalPosition: {x: -0.132, y: 0, z: -0.006}
-  m_LocalScale: {x: 2.5, y: 2, z: 2.5}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1347477040883846014}
-  m_LocalEulerAnglesHint: {x: 0, y: -172.659, z: 0}
---- !u!33 &3140248678780647566
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3176908961229995009}
-  m_Mesh: {fileID: -1237385702677163044, guid: 07ce9e7842bc4086b8afd43c3778e8b5, type: 3}
---- !u!23 &9206550126981138591
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3176908961229995009}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 770e91c858354d3f9b1683f22294d355, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &3499520639590078676
 GameObject:
   m_ObjectHideFlags: 0
@@ -2360,8 +2224,9 @@ GameObject:
   - component: {fileID: 1934824835560534130}
   - component: {fileID: 5313530166011308593}
   - component: {fileID: 8495610013350638949}
+  - component: {fileID: 6966500592582706671}
   m_Layer: 0
-  m_Name: Sword_1H_Newbie_02
+  m_Name: Hammer_2H
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2375,11 +2240,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5164388194304020967}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.69322926, y: 0.13940306, z: 0.13940303, w: 0.69322926}
-  m_LocalPosition: {x: -0.072, y: -0, z: 0.303}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalRotation: {x: -0.75620425, y: -0.05792786, z: -0.17308076, w: 0.6283649}
+  m_LocalPosition: {x: 0.096, y: 0.854, z: 0.149}
+  m_LocalScale: {x: 2.2, y: 2.2, z: 2.2}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1788455330690645157}
   m_Father: {fileID: 8450487017670190647}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 22.74}
 --- !u!33 &5313530166011308593
@@ -2389,7 +2255,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5164388194304020967}
-  m_Mesh: {fileID: -7772447050528881924, guid: 65af6d742be0424297163f27a727c956, type: 3}
+  m_Mesh: {fileID: -3307003082895579260, guid: 0210a088b827d2b479f059bb760230f8, type: 3}
 --- !u!23 &8495610013350638949
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2432,6 +2298,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6966500592582706671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5164388194304020967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98a219aff359b5c46ad6a5598a0b3fbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _muzzle: {fileID: 1788455330690645157}
+  _localOffset: {x: 0, y: -0.025, z: 0.05}
+  _localRotation: {x: 0.24184477, y: 0.54167527, z: -0.664463, w: -0.45451945}
 --- !u!1 &5398171206379014393
 GameObject:
   m_ObjectHideFlags: 0

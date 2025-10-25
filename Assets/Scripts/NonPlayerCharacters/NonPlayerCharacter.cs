@@ -59,9 +59,6 @@ namespace LichLord.NonPlayerCharacters
         private InteractableComponent _interactableComponent;
         public InteractableComponent Interactable => _interactableComponent;
 
-        [SerializeField] private MuzzleComponent _muzzleComponent;
-        public MuzzleComponent Muzzle => _muzzleComponent;
-
         [SerializeField] private Animator _animator;
         public Animator Animator => _animator;
 
@@ -187,7 +184,7 @@ namespace LichLord.NonPlayerCharacters
                 _stronghold.WorkerComponent.AddWorkerCharacter(this, _workerIndex);
             }
             
-            if (runtimeState.IsWarrior())
+            if (runtimeState.IsSummonedWarrior())
             {
                 var pc = runtimeState.GetFollowPlayer();
 
@@ -395,7 +392,7 @@ namespace LichLord.NonPlayerCharacters
                 _stronghold.WorkerComponent.RemoveWorkerCharacter(this, _workerIndex);
             }  
 
-            if (_runtimeState.IsWarrior())
+            if (_runtimeState.IsSummonedWarrior())
             {
                 var pc = _runtimeState.GetFollowPlayer();
 

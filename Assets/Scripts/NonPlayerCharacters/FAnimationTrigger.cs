@@ -13,6 +13,7 @@ namespace LichLord
         public int RightWeapon;
         public bool IsMoving;
         public bool IsBlocking;
+        public float PlaybackSpeed;
         
     }
 }

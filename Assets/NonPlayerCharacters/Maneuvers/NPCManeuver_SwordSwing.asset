@@ -30,6 +30,7 @@ MonoBehaviour:
     RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
+    PlaybackSpeed: 1
   - Action: 9
     Weapon: 0
     TriggerNumber: 4
@@ -38,6 +39,7 @@ MonoBehaviour:
     RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
+    PlaybackSpeed: 1
   - Action: 10
     Weapon: 0
     TriggerNumber: 4
@@ -46,6 +48,7 @@ MonoBehaviour:
     RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
+    PlaybackSpeed: 1
   - Action: 11
     Weapon: 0
     TriggerNumber: 4
@@ -54,6 +57,9 @@ MonoBehaviour:
     RightWeapon: 9
     IsMoving: 0
     IsBlocking: 0
+    PlaybackSpeed: 1
+  _hitEvents:
+  - {fileID: 11400000, guid: d6613b0a332361b4a95fc63529e10835, type: 2}
   _damage: 10
   _validTargetTypes: 01000000020000000300000005000000
   _maneuverProjectiles: []

@@ -572,7 +572,6 @@ MonoBehaviour:
   _spawningComponent: {fileID: 8856251495970217324}
   _lifetimeComponent: {fileID: 5997692529121259776}
   _interactableComponent: {fileID: 7058524168046784688}
-  _muzzleComponent: {fileID: 749010148028210758}
   _animator: {fileID: 8262333946229476320}
   _transform: {fileID: 676597866055640825}
   _hurtbox: {fileID: 2605984060248782365}
@@ -733,7 +732,8 @@ MonoBehaviour:
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 7
-  TargetPlayer: {fileID: 0}
+    IsEnabled: 1
+  _targetPlayer: {fileID: 0}
   _losLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -755,71 +755,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 179727579642908255}
   _hitReacts:
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 12
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 2
-      Weapon: 0
-      TriggerNumber: 12
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 14
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 1.5
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 26
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 2
-      Weapon: 0
-      TriggerNumber: 26
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
+  - {fileID: 11400000, guid: 2ed8cbc795dfd0a40aef68ce1341113b, type: 2}
+  - {fileID: 11400000, guid: c23387d04f6eae440a9035ecb3adc9c3, type: 2}
+  - {fileID: 11400000, guid: baf2e06d515cf484b80d4f772eb9b98b, type: 2}
+  - {fileID: 11400000, guid: 5eed346c2a633204a9bfa754702de8ff, type: 2}
   _impactAttachment: {fileID: 3203382455121866481}
 --- !u!114 &8248370757452899674
 MonoBehaviour:
@@ -834,10 +773,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _weaponIndex: 0
-  _leftHandItem: {fileID: 0}
-  _rightHandItem: {fileID: 0}
-  _leftHandBone: {fileID: 0}
-  _rightHandBone: {fileID: 0}
+  _weaponLeft: {fileID: 0}
+  _weaponRight: {fileID: 0}
+  _handBoneLeft: {fileID: 1347477040883846014, guid: 48bdcb0208c282c47a4aa07038740280,
+    type: 3}
+  _handBoneRight: {fileID: 8450487017670190647, guid: 48bdcb0208c282c47a4aa07038740280,
+    type: 3}
 --- !u!114 &6474061676955578483
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -866,7 +807,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12c05af24cb5a254f97a252501c15f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pc: {fileID: 0}
   _handBoneLeft: {fileID: 880012112042857268}
   _handBoneRight: {fileID: 7627982238889114157}
 --- !u!114 &3343333360448289225

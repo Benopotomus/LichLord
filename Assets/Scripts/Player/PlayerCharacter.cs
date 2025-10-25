@@ -37,9 +37,6 @@ namespace LichLord
         [SerializeField] private PlayerCharacterAnimationController _animationController;
         public PlayerCharacterAnimationController AnimationController => _animationController;
 
-        [SerializeField] private MuzzleComponent _muzzleComponent;
-        public MuzzleComponent Muzzle => _muzzleComponent;
-
         public Renderer[] HeadRenderers;
         public GameObject[] FirstPersonOverlayObjects;
 

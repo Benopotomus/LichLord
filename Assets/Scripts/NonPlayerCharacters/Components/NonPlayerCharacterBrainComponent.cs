@@ -59,7 +59,9 @@ namespace LichLord.NonPlayerCharacters
         private NonPlayerCharacterManeuverState _activeManeuver = null;
         public NonPlayerCharacterManeuverState ActiveManuver => _activeManeuver;
 
-        public PlayerCharacter TargetPlayer;
+        [SerializeField]
+        private PlayerCharacter _targetPlayer;
+        public PlayerCharacter TargetPlayer => _targetPlayer;
 
         [SerializeField] 
         private LayerMask _losLayerMask;
@@ -109,7 +111,7 @@ namespace LichLord.NonPlayerCharacters
             UpdateAuthorityTick(runtimeState, tick);
 
             int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
-            TargetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) : null;
+            _targetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) : null;
 
             // Detect if an active state is running 
             // We don't want to update the target during this
@@ -134,7 +136,7 @@ namespace LichLord.NonPlayerCharacters
 
             Debug.Log(targetPlayerIndex);
 
-            TargetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) :  null;
+            _targetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) :  null;
         }
 
         int _lastTick = -1;
@@ -214,7 +216,7 @@ namespace LichLord.NonPlayerCharacters
                 _wanderPositionSet = false;
                 return;
             }
-
+ 
             if (runtimeState.IsInvader())
             {
                 InvasionManager invasionManager = NPC.Context.InvasionManager;
@@ -226,7 +228,7 @@ namespace LichLord.NonPlayerCharacters
                 _moveTarget = NPC.Context.InvasionManager.GetInvasionTargetPosition(formationOffset);
                 _wanderPositionSet = true;
             }
-            else if (runtimeState.IsWarrior())
+            else if (runtimeState.IsSummonedWarrior())
             {
                 PlayerCharacter pc = runtimeState.GetFollowPlayer();
 
@@ -797,54 +799,27 @@ namespace LichLord.NonPlayerCharacters
         public void OnHitFromAnimation()
         {
             var currentManeuver = GetManeuverFromState(_npc.State.CurrentState);
-
             if (currentManeuver == null)
                 return;
 
-            if (currentManeuver.Definition is NonPlayerCharacterAttackManeuverDefinition attackManeuverDefinition)
-            {
-                if (TargetPlayer != null)
-                {
-                    if (_npc.Context.LocalPlayerCharacter == TargetPlayer)
-                    {
-                        float distance = Vector3.Distance(TargetPlayer.CachedTransform.position, _npc.CachedTransform.position);
+            var definition = currentManeuver.Definition;
+            if (definition == null)
+                return;
 
-                        if (distance < attackManeuverDefinition.AttackRange)
-                        {
-                            TargetPlayer.RPC_TakeHitNPC(0, attackManeuverDefinition.Damage);
-                        }
-                    }
+            definition.ExecuteHitEvents(_npc, GetTargetForActiveManeuver());
+        }
 
-                    return;
-                }
+        public void OnSpecialEventFromAnimation()
+        {
+            var currentManeuver = GetManeuverFromState(_npc.State.CurrentState);
+            if (currentManeuver == null)
+                return;
 
-                var hitTarget = _attackTarget as IHitTarget;
+            var definition = currentManeuver.Definition;
+            if (definition == null)
+                return;
 
-                if (hitTarget != null)
-                {
-                    ApplyHitToTarget(hitTarget, attackManeuverDefinition, _npc.Context.Runner.Tick);
-                }
-            }
-            else if(currentManeuver.Definition is NonPlayerCharacterHarvestManeuverDefinition harvestManeuverDefinition)
-            {
-                if (NPC.Replicator.HasStateAuthority)
-                {
-                    if(_harvestTarget is HarvestNode harvestNode)
-                        harvestNode.ProgressHarvest(NPC);
-
-                    FindCurrentTargets();
-                }
-            }
-            else if (currentManeuver.Definition is NonPlayerCharacterDepositManeuverDefinition depositManeuverDefinition)
-            {
-                if (NPC.Replicator.HasStateAuthority)
-                {
-                    if (_depositTarget is Stockpile stockpile)
-                        stockpile.DropOffCurrency(_npc);
-
-                    FindCurrentTargets();
-                }
-            }
+            definition.ExecuteSpecialEvents(_npc, GetTargetForActiveManeuver());
         }
 
         public void ApplyHitToTarget(IHitTarget hitTarget, NonPlayerCharacterAttackManeuverDefinition definition, int tick)

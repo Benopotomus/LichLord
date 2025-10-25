@@ -39,6 +39,7 @@ namespace LichLord
         public DialogManager DialogManager;
         public MissionManager MissionManager;
         public DebugConsole DebugConsole;
+        public VisualEffectManager VFXManager;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;

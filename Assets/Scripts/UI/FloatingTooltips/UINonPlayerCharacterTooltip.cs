@@ -21,7 +21,7 @@ namespace LichLord.UI
 
             _healthbar.SetHealth(npc.RuntimeState.GetHealth(), npc.RuntimeState.GetMaxHealth());
 
-            if (npc.RuntimeState.IsWarrior())
+            if (npc.RuntimeState.IsSummonedWarrior())
             {
                 _lifetimebar.SetActive(true);
                 _lifetimebar.SetLifetime(npc.RuntimeState.GetLifetimeProgress(), npc.RuntimeState.GetLifetimeProgressMax());

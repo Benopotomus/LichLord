@@ -190,7 +190,7 @@ namespace LichLord
                 return;
             
             _beamInstance.UpdateBeamPosition(
-                _pc.Muzzle.GetMuzzlePosition(_beamMuzzle), 
+                _pc.Weapons.GetMuzzlePosition(_beamMuzzle), 
                 _interactTargetPosition.Position);
         }
 
@@ -218,7 +218,7 @@ namespace LichLord
 
         public void SpawnBeamEffect(VisualEffectBeam beamPrefab, EMuzzle muzzle)
         {
-            Vector3 spawnPosition = _pc.Muzzle.GetMuzzlePosition(muzzle);
+            Vector3 spawnPosition = _pc.Weapons.GetMuzzlePosition(muzzle);
             _beamMuzzle = muzzle;
 
             var instance = DWDObjectPool.Instance.SpawnAt(beamPrefab, spawnPosition, Quaternion.identity);
@@ -226,7 +226,7 @@ namespace LichLord
             {
                 _beamInstance = beamEffect;
                 _beamInstance.UpdateBeamPosition(
-                    _pc.Muzzle.GetMuzzlePosition(muzzle),
+                    _pc.Weapons.GetMuzzlePosition(muzzle),
                     _interactTargetPosition.Position);
 
                 _beamInstance.ToggleBeam(true);

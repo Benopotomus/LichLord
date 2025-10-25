@@ -16,6 +16,7 @@ namespace LichLord.NonPlayerCharacters
         private int _animIDSide = Animator.StringToHash("Side");
         private int _animIDJumping = Animator.StringToHash("Jumping");
         private int _animIDAction = Animator.StringToHash("Action");
+        private int _animIDAnimationSpeed = Animator.StringToHash("AnimationSpeed");
 
         private int _animIDSpeedX = Animator.StringToHash("Velocity X");
         private int _animIDSpeedZ = Animator.StringToHash("Velocity Z");
@@ -40,6 +41,7 @@ namespace LichLord.NonPlayerCharacters
             _animator.SetInteger(_animIDJumping, animationTrigger.Jumping);
             _animator.SetInteger(_animIDTriggerNumber, animationTrigger.TriggerNumber);
             _animator.SetTrigger(_animIDTrigger);
+            _animator.SetFloat(_animIDAnimationSpeed, animationTrigger.PlaybackSpeed);
         }
 
         public void SetAnimationForState(ENPCState oldState, ENPCState newState)
@@ -52,7 +54,12 @@ namespace LichLord.NonPlayerCharacters
                 case ENPCState.Idle:
                     _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
                     _animator.SetInteger(_animIDTriggerNumber, 25);
-                    _animator.SetTrigger(_animIDTrigger);
+                    _animator.SetFloat(_animIDAnimationSpeed, 1);
+
+                    if (oldState == ENPCState.Inactive ||
+                        oldState == ENPCState.Dead)
+                        _animator.SetTrigger(_animIDTrigger);
+
                     break;
 
                 case ENPCState.Dead:
@@ -60,6 +67,7 @@ namespace LichLord.NonPlayerCharacters
                     _animator.SetInteger(_animIDWeapon, _npc.Weapons.GetWeaponID());
                     _animator.SetInteger(_animIDTriggerNumber, 20);
                     _animator.SetTrigger(_animIDTrigger);
+                    _animator.SetFloat(_animIDAnimationSpeed, 1);
                     break;
             }
         }

@@ -196,7 +196,8 @@ namespace LichLord.NonPlayerCharacters
                 data.PositionZ = NPC.CachedTransform.position.z;
             }
 
-            if (NPC.Brain.AttackTarget is PlayerCharacter pc && 
+            if (NPC.Brain.AttackTarget != null && 
+                NPC.Brain.AttackTarget is PlayerCharacter pc && 
                 NPC.Brain.ActiveManuver != null &&
                 NPC.Brain.ActiveManuver.Definition.ManeuverType == EManeuverType.Attack)
             {

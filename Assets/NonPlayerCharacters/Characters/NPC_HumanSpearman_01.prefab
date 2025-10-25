@@ -3743,7 +3743,6 @@ GameObject:
   - component: {fileID: 7366876257130086336}
   - component: {fileID: 6074217055694189224}
   - component: {fileID: 4632910898843582812}
-  - component: {fileID: 1907940134008171684}
   - component: {fileID: 4906727717878229208}
   - component: {fileID: 245007551256796185}
   - component: {fileID: 935672199965080799}
@@ -3800,7 +3799,6 @@ MonoBehaviour:
   _spawningComponent: {fileID: 6366930559101097702}
   _lifetimeComponent: {fileID: 4203371755937751931}
   _interactableComponent: {fileID: 2436890876530448295}
-  _muzzleComponent: {fileID: 1907940134008171684}
   _animator: {fileID: 5986324606360035825}
   _transform: {fileID: 2416786617183052698}
   _hurtbox: {fileID: 849551184351389129}
@@ -3961,19 +3959,22 @@ MonoBehaviour:
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 0
+    IsEnabled: 1
   - Definition: {fileID: 11400000, guid: 6eebe11c58b399840b32a8dd33e6af67, type: 2}
     ActiveState: 4
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 0
+    IsEnabled: 1
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
     ActiveState: 4
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 0
-  TargetPlayer: {fileID: 0}
+    IsEnabled: 1
+  _targetPlayer: {fileID: 0}
   _losLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3995,71 +3996,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 6743547951332622073}
   _hitReacts:
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 12
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 2
-      Weapon: 0
-      TriggerNumber: 12
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 14
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 1.5
-    _animationTrigger:
-      Action: 1
-      Weapon: 0
-      TriggerNumber: 26
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
-  - StateTime: 0.75
-    _animationTrigger:
-      Action: 2
-      Weapon: 0
-      TriggerNumber: 26
-      Side: 0
-      Jumping: 0
-      RightWeapon: 0
-      IsMoving: 0
-      IsBlocking: 0
-    _hitEffect:
-      _name: VIS_IMP_BloodBurst
-      _bundle: vis_imp_bloodburst
+  - {fileID: 11400000, guid: 2ed8cbc795dfd0a40aef68ce1341113b, type: 2}
+  - {fileID: 11400000, guid: c23387d04f6eae440a9035ecb3adc9c3, type: 2}
+  - {fileID: 11400000, guid: baf2e06d515cf484b80d4f772eb9b98b, type: 2}
+  - {fileID: 11400000, guid: 5eed346c2a633204a9bfa754702de8ff, type: 2}
   _impactAttachment: {fileID: 4504825798416197596}
 --- !u!114 &6074217055694189224
 MonoBehaviour:
@@ -4074,10 +4014,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _weaponIndex: 2
-  _leftHandItem: {fileID: 0}
-  _rightHandItem: {fileID: 0}
-  _leftHandBone: {fileID: 0}
-  _rightHandBone: {fileID: 0}
+  _weaponLeft: {fileID: 0}
+  _weaponRight: {fileID: 0}
+  _handBoneLeft: {fileID: 1347477040883846014, guid: 48bdcb0208c282c47a4aa07038740280,
+    type: 3}
+  _handBoneRight: {fileID: 8450487017670190647, guid: 48bdcb0208c282c47a4aa07038740280,
+    type: 3}
 --- !u!114 &4632910898843582812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4094,21 +4036,6 @@ MonoBehaviour:
   _animator: {fileID: 5986324606360035825}
   _animationCallbacks:
     _serializedList: []
---- !u!114 &1907940134008171684
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5887745109417851595}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12c05af24cb5a254f97a252501c15f73, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pc: {fileID: 0}
-  _handBoneLeft: {fileID: 0}
-  _handBoneRight: {fileID: 0}
 --- !u!114 &4906727717878229208
 MonoBehaviour:
   m_ObjectHideFlags: 0

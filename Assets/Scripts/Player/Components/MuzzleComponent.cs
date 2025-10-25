@@ -7,9 +7,6 @@ namespace LichLord
 {
     public class MuzzleComponent : MonoBehaviour
     {
-        [SerializeField]
-        private PlayerCharacter _pc;
-
         [SerializeField] 
         private Transform _handBoneLeft;
         

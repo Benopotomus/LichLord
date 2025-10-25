@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff6691fbf9cd5a749929a003f9b746d2, type: 3}
+  m_Name: HitReaction_Front_Short_00
+  m_EditorClassIdentifier: 
+  _isAdditive: 0
+  _tickDuration: 32
+  _animationTrigger:
+    Action: 1
+    Weapon: 7
+    TriggerNumber: 12
+    Side: 0
+    Jumping: 0
+    RightWeapon: 0
+    IsMoving: 0
+    IsBlocking: 0
+    PlaybackSpeed: 0.75
+  _hitEffect:
+    _name: VIS_IMP_BloodBurst
+    _bundle: vis_imp_bloodburst
