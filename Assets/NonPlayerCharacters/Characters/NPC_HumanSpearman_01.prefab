@@ -3748,6 +3748,8 @@ GameObject:
   - component: {fileID: 935672199965080799}
   - component: {fileID: 4203371755937751931}
   - component: {fileID: 6366930559101097702}
+  - component: {fileID: 5916735813840557417}
+  - component: {fileID: 2920546086061785859}
   m_Layer: 10
   m_Name: NPC_HumanSpearman_01
   m_TagString: Untagged
@@ -3791,6 +3793,7 @@ MonoBehaviour:
   _stateComponent: {fileID: 5422552558949892833}
   _brainComponent: {fileID: 1453920379017319176}
   _hitReactComponent: {fileID: 7366876257130086336}
+  _healthComponent: {fileID: 5916735813840557417}
   _weaponsComponent: {fileID: 6074217055694189224}
   _animationController: {fileID: 4632910898843582812}
   _carriedItemComponent: {fileID: 4906727717878229208}
@@ -3798,6 +3801,7 @@ MonoBehaviour:
   _dialogComponent: {fileID: 935672199965080799}
   _spawningComponent: {fileID: 6366930559101097702}
   _lifetimeComponent: {fileID: 4203371755937751931}
+  _flinchComponent: {fileID: 2920546086061785859}
   _interactableComponent: {fileID: 2436890876530448295}
   _animator: {fileID: 5986324606360035825}
   _transform: {fileID: 2416786617183052698}
@@ -4112,6 +4116,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 6743547951332622073}
   _spawnAttachment: {fileID: 2416786617183052698}
+--- !u!114 &5916735813840557417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc640a8cabc3dea4cb35c07da4fe07df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 6743547951332622073}
+  _currentHealth: 0
+  _maxHealth: 0
+--- !u!114 &2920546086061785859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shakeBones:
+  - {fileID: 6970716261807447000}
+  - {fileID: 4504825798416197596}
+  - {fileID: 6266555531598627957}
+  - {fileID: 2495819083712872570}
 --- !u!1 &6173624226421269209
 GameObject:
   m_ObjectHideFlags: 0

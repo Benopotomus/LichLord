@@ -274,6 +274,7 @@ GameObject:
   - component: {fileID: 1073450328132710053}
   - component: {fileID: 8727693245842519014}
   - component: {fileID: 7461307003997220604}
+  - component: {fileID: 7123329808735588214}
   m_Layer: 10
   m_Name: NPC_Base
   m_TagString: Untagged
@@ -316,6 +317,7 @@ MonoBehaviour:
   _stateComponent: {fileID: 5813864165240207391}
   _brainComponent: {fileID: 2073302252260987663}
   _hitReactComponent: {fileID: -5226509248368517820}
+  _healthComponent: {fileID: 7123329808735588214}
   _weaponsComponent: {fileID: 8245235728932067376}
   _animationController: {fileID: 6470708934419270937}
   _carriedItemComponent: {fileID: 3346465133891306659}
@@ -624,6 +626,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nextLifetimeProgressTick: 0
   _lifetimeProgress: 0
+--- !u!114 &7123329808735588214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7301654162607387296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc640a8cabc3dea4cb35c07da4fe07df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 174069171961541429}
+  _currentHealth: 0
+  _maxHealth: 0
 --- !u!1 &7315302883465504394
 GameObject:
   m_ObjectHideFlags: 0

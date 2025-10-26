@@ -134,8 +134,6 @@ namespace LichLord.NonPlayerCharacters
 
             int targetPlayerIndex = runtimeState.GetTargetPlayerIndex();
 
-            Debug.Log(targetPlayerIndex);
-
             _targetPlayer = (targetPlayerIndex > 0) ? _npc.Context.NetworkGame.GetPlayerByIndex(targetPlayerIndex) :  null;
         }
 

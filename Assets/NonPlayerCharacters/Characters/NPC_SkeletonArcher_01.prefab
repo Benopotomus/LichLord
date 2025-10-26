@@ -2947,6 +2947,8 @@ GameObject:
   - component: {fileID: 8280122207182958077}
   - component: {fileID: 4261139995832820338}
   - component: {fileID: 3078160300237640522}
+  - component: {fileID: 1231099122279484745}
+  - component: {fileID: 7012724181190879688}
   m_Layer: 10
   m_Name: NPC_SkeletonArcher_01
   m_TagString: Untagged
@@ -2990,6 +2992,7 @@ MonoBehaviour:
   _stateComponent: {fileID: 2885352510859362084}
   _brainComponent: {fileID: 6830939738194414368}
   _hitReactComponent: {fileID: 9187171251479877575}
+  _healthComponent: {fileID: 1231099122279484745}
   _weaponsComponent: {fileID: 7723641460175011890}
   _animationController: {fileID: 167064866010933950}
   _carriedItemComponent: {fileID: 541806916981470579}
@@ -2997,6 +3000,7 @@ MonoBehaviour:
   _dialogComponent: {fileID: 8280122207182958077}
   _spawningComponent: {fileID: 3078160300237640522}
   _lifetimeComponent: {fileID: 4261139995832820338}
+  _flinchComponent: {fileID: 7012724181190879688}
   _interactableComponent: {fileID: 1398376250750045317}
   _animator: {fileID: 8304036627096845830}
   _transform: {fileID: 8251747689170000944}
@@ -3314,6 +3318,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3183157435632504526}
   _spawnAttachment: {fileID: 8251747689170000944}
+--- !u!114 &1231099122279484745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7741492357796157577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc640a8cabc3dea4cb35c07da4fe07df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 3183157435632504526}
+  _currentHealth: 0
+  _maxHealth: 0
+--- !u!114 &7012724181190879688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7741492357796157577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shakeBones:
+  - {fileID: 5719532584146746637}
+  - {fileID: 8853355107687926547}
+  - {fileID: 7861539811252775917}
+  - {fileID: 1301431698829176015}
 --- !u!1 &7919634645097698640
 GameObject:
   m_ObjectHideFlags: 0

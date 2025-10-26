@@ -31,8 +31,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterHitReactComponent _hitReactComponent;
         public NonPlayerCharacterHitReactComponent HitReact => _hitReactComponent;
 
-        [SerializeField] private NonPlayerCharacteHealthComponent _healthComponent;
-        public NonPlayerCharacteHealthComponent Health => _healthComponent;
+        [SerializeField] private NonPlayerCharacterHealthComponent _healthComponent;
+        public NonPlayerCharacterHealthComponent Health => _healthComponent;
 
         [SerializeField] private NonPlayerCharacterWeaponsComponent _weaponsComponent;
         public NonPlayerCharacterWeaponsComponent Weapons => _weaponsComponent;
@@ -54,6 +54,9 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] private NonPlayerCharacterLifetimeComponent _lifetimeComponent;
         public NonPlayerCharacterLifetimeComponent LifetimeComponent => _lifetimeComponent;
+
+        [SerializeField] private NonPlayerCharacterFlinchComponent _flinchComponent;
+        public NonPlayerCharacterFlinchComponent FlinchComponent => _flinchComponent;
 
         [SerializeField]
         private InteractableComponent _interactableComponent;
@@ -147,6 +150,7 @@ namespace LichLord.NonPlayerCharacters
             _runtimeState = runtimeState;
             _context = replicator.Context;
             _replicator = replicator;
+            _healthComponent.OnSpawned(runtimeState);
             _movementComponent.OnSpawned(runtimeState);
             _brainComponent.OnSpawned(runtimeState, hasAuthority);
             _carriedItemComponent.OnSpawned(runtimeState);
@@ -206,6 +210,7 @@ namespace LichLord.NonPlayerCharacters
 
             UpdateChunk(_context.ChunkManager);
             UpdateTeam(runtimeState);
+            _healthComponent.OnRender(runtimeState, tick);
             _stateComponent.UpdateState(runtimeState, hasAuthority, tick);
             _carriedItemComponent.OnRender(runtimeState);
             _attitudeComponent.OnRender( runtimeState);

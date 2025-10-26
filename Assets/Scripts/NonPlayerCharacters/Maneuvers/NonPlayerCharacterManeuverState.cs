@@ -110,11 +110,7 @@ namespace LichLord.NonPlayerCharacters
 
             ProjectileDefinition definition = projectileData.Definition;
 
-            Debug.Log("spawn projectile" + projectileData.Muzzle);
-
             Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(npc, projectileData.Muzzle);
-
-            Debug.Log("spawn projectile position" + muzzlePosition);
 
             Vector3 targetPos = npc.Brain.AttackTarget.Position;
             targetPos.y += (1f + Definition.VerticalAimOffset);

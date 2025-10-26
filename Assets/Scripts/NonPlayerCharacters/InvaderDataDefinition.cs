@@ -73,30 +73,5 @@ namespace LichLord.NonPlayerCharacters
             events = (ushort)((events & ~(HEALTH_MASK << HEALTH_SHIFT)) | (newHealth << HEALTH_SHIFT));
             npcData.Events = events;
         }
-
-        // Handle damage application
-        public override void ApplyDamage(
-            ref FNonPlayerCharacterData npcData,
-            int damage, 
-            int hitReactIndex)
-        {
-            NonPlayerCharacterDefinition definition = npcData.Definition;
-
-            int currentHealth = GetHealth(ref npcData);
-            damage = Mathf.Max(damage - definition.DamageReduction, 0);
-            damage = (int)((float)damage * (1.0f - definition.DamageResistance));
-
-            SetHealth(currentHealth - damage, ref npcData);
-
-            if (GetHealth(ref npcData) == 0)
-            {
-                SetState(TryAssignState(ref npcData, ENPCState.Dead), ref npcData);
-            }
-            else
-            {
-                SetState(TryAssignState(ref npcData, ENPCState.HitReact), ref npcData);
-                SetAnimationIndex(hitReactIndex, ref npcData);
-            }
-        }
     }
 }

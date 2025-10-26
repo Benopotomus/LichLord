@@ -144,27 +144,6 @@ namespace LichLord.NonPlayerCharacters
             //Debug.Log($"After SetState: Condition=0x{condition:X2}, Attitude={GetAttitude(ref npcData)}");
         }
 
-        public virtual ENPCState TryAssignState(ref FNonPlayerCharacterData npcData, ENPCState newState)
-        {
-            ENPCState currentState = GetState(ref npcData);
-
-            switch (newState)
-            {
-                case ENPCState.Inactive:
-                    return newState;
-                case ENPCState.HitReact:
-                    switch (currentState)
-                    {
-                        case ENPCState.Dead:
-                        case ENPCState.Inactive:
-                            return currentState;
-                    }
-                    break;
-            }
-
-            return newState;
-        }
-
         // Animation
         public int GetAnimationIndex(ref FNonPlayerCharacterData npcData)
         {

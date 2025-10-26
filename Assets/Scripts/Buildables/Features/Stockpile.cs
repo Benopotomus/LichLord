@@ -1,5 +1,4 @@
 ﻿using DWD.Pooling;
-using Fusion;
 using LichLord.Items;
 using LichLord.NonPlayerCharacters;
 using System.Collections.Generic;

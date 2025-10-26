@@ -49,6 +49,7 @@ namespace LichLord.NonPlayerCharacters
                 int fullIndex = i + (NonPlayerCharacterConstants.MAX_NPC_REPS * Index);
                 _loadStates[i] = new FNPCLoadState();
                 _localRuntimeStates[i] = new NonPlayerCharacterRuntimeState(this, i, fullIndex);
+                _localRuntimeStates[i].CopyData(ref _npcDatas.GetRef(i));
             }
         }
 
@@ -202,7 +203,7 @@ namespace LichLord.NonPlayerCharacters
 
             foreach (var (key, state) in _predictedStates)
             {
-                if (tick > state.PredictionTimeoutTick)
+                if (tick >= state.PredictionTimeoutTick)
                     keysToRemove.Add(key);
             }
 

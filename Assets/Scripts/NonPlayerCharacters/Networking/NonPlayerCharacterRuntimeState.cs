@@ -74,7 +74,29 @@ namespace LichLord.NonPlayerCharacters
 
         public void ApplyDamage(int damage, int hitReactIndex)
         {
-            DataDefinition.ApplyDamage(ref _npcData, damage, hitReactIndex);
+            int currentHealth = _dataDefinition.GetHealth(ref _npcData);
+            damage = Mathf.Max(damage - Definition.DamageReduction, 0);
+            damage = (int)((float)damage * (1.0f - Definition.DamageResistance));
+
+            int postDamageHealth = Mathf.Max(currentHealth - damage, 0);
+
+            _dataDefinition.SetHealth(postDamageHealth, ref _npcData);
+
+            if (postDamageHealth == 0)
+            {
+                ENPCState nextState = GetNextStateFromState(ENPCState.Dead);
+                _dataDefinition.SetState(nextState, ref _npcData);
+            }
+            else
+            {
+                if (damage > Definition.HitReactThreshold)
+                {
+                    ENPCState nextState = GetNextStateFromState(ENPCState.HitReact);
+                    _dataDefinition.SetState(nextState, ref _npcData);
+                    _dataDefinition.SetAnimationIndex(hitReactIndex, ref _npcData);
+                }
+            }
+
             _replicator.ReplicateRuntimeState(this);
 
             if (IsInvader())
@@ -91,6 +113,27 @@ namespace LichLord.NonPlayerCharacters
                     }
                 }
             }
+        }
+
+        public ENPCState GetNextStateFromState(ENPCState newState)
+        {
+            ENPCState currentState = _dataDefinition.GetState(ref _npcData);
+
+            switch (newState)
+            {
+                case ENPCState.Inactive:
+                    return newState;
+                case ENPCState.HitReact:
+                    switch (currentState)
+                    {
+                        case ENPCState.Dead:
+                        case ENPCState.Inactive:
+                            return currentState;
+                    }
+                    break;
+            }
+
+            return newState;
         }
 
         public bool IsActive()

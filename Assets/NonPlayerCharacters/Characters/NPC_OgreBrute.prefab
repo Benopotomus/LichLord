@@ -1162,6 +1162,8 @@ GameObject:
   - component: {fileID: -64430088923349558}
   - component: {fileID: 6691232617847703286}
   - component: {fileID: 31364041555530400}
+  - component: {fileID: -4360264469574333289}
+  - component: {fileID: -9128782179872349071}
   m_Layer: 10
   m_Name: NPC_OgreBrute
   m_TagString: Untagged
@@ -1205,6 +1207,7 @@ MonoBehaviour:
   _stateComponent: {fileID: 4961190173273936787}
   _brainComponent: {fileID: 7501507582850676184}
   _hitReactComponent: {fileID: 7703171160761877983}
+  _healthComponent: {fileID: -4360264469574333289}
   _weaponsComponent: {fileID: 3797343846203693856}
   _animationController: {fileID: 3567655564029587463}
   _carriedItemComponent: {fileID: -5343675085829805393}
@@ -1212,6 +1215,7 @@ MonoBehaviour:
   _dialogComponent: {fileID: -64430088923349558}
   _spawningComponent: {fileID: 6691232617847703286}
   _lifetimeComponent: {fileID: 31364041555530400}
+  _flinchComponent: {fileID: -9128782179872349071}
   _interactableComponent: {fileID: 8472195953335971330}
   _animator: {fileID: 5683565048644474723}
   _transform: {fileID: 3282022331344466140}
@@ -1367,13 +1371,13 @@ MonoBehaviour:
   _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
-  - Definition: {fileID: 11400000, guid: af730af8e3a90d14ea4974e1c06c17f5, type: 2}
+  - Definition: {fileID: 11400000, guid: 8ae4eb5942e135a448711f9354ce5e33, type: 2}
     ActiveState: 4
     CooldownExpirationTick: 0
     ActivationExpirationTick: 0
     ActivationTick: 0
     RandomAimOffset: 0
-    IsEnabled: 1
+    IsEnabled: 0
   _targetPlayer: {fileID: 0}
   _losLayerMask:
     serializedVersion: 2
@@ -1510,6 +1514,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nextLifetimeProgressTick: 0
   _lifetimeProgress: 0
+--- !u!114 &-4360264469574333289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc640a8cabc3dea4cb35c07da4fe07df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 3484536114419770148}
+  _currentHealth: 0
+  _maxHealth: 0
+--- !u!114 &-9128782179872349071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shakeBones:
+  - {fileID: 8553318093330218609}
+  - {fileID: 8905927029070619014}
+  - {fileID: 3063067307559331451}
+  - {fileID: 228136172936989056}
 --- !u!1 &3499520639590078676
 GameObject:
   m_ObjectHideFlags: 0

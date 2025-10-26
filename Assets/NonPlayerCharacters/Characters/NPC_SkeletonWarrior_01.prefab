@@ -1181,6 +1181,8 @@ GameObject:
   - component: {fileID: 2401479208497145895}
   - component: {fileID: 6259089908041508983}
   - component: {fileID: 2408611921920231200}
+  - component: {fileID: 9210603820427642481}
+  - component: {fileID: 6668249780244376760}
   m_Layer: 10
   m_Name: NPC_SkeletonWarrior_01
   m_TagString: Untagged
@@ -1224,6 +1226,7 @@ MonoBehaviour:
   _stateComponent: {fileID: 4961190173273936787}
   _brainComponent: {fileID: 7501507582850676184}
   _hitReactComponent: {fileID: 7703171160761877983}
+  _healthComponent: {fileID: 9210603820427642481}
   _weaponsComponent: {fileID: 3797343846203693856}
   _animationController: {fileID: 3567655564029587463}
   _carriedItemComponent: {fileID: 7850887928293133023}
@@ -1231,6 +1234,7 @@ MonoBehaviour:
   _dialogComponent: {fileID: 2401479208497145895}
   _spawningComponent: {fileID: 6259089908041508983}
   _lifetimeComponent: {fileID: 2408611921920231200}
+  _flinchComponent: {fileID: 6668249780244376760}
   _interactableComponent: {fileID: 7459789804197456675}
   _animator: {fileID: 5683565048644474723}
   _transform: {fileID: 3282022331344466140}
@@ -1545,6 +1549,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nextLifetimeProgressTick: 0
   _lifetimeProgress: 0
+--- !u!114 &9210603820427642481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc640a8cabc3dea4cb35c07da4fe07df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 3484536114419770148}
+  _currentHealth: 0
+  _maxHealth: 0
+--- !u!114 &6668249780244376760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shakeBones:
+  - {fileID: 8553318093330218609}
+  - {fileID: 8905927029070619014}
+  - {fileID: 3063067307559331451}
+  - {fileID: 228136172936989056}
 --- !u!1 &3176908961229995009
 GameObject:
   m_ObjectHideFlags: 0

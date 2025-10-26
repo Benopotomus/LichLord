@@ -521,6 +521,8 @@ GameObject:
   - component: {fileID: 8752692798761404018}
   - component: {fileID: 8856251495970217324}
   - component: {fileID: 5997692529121259776}
+  - component: {fileID: 1282635378813779763}
+  - component: {fileID: 7833139265186650892}
   m_Layer: 10
   m_Name: NPC_SkeletonWizard
   m_TagString: Untagged
@@ -564,6 +566,7 @@ MonoBehaviour:
   _stateComponent: {fileID: 5816980641474545013}
   _brainComponent: {fileID: 2076501224800218725}
   _hitReactComponent: {fileID: 3991132869708390446}
+  _healthComponent: {fileID: 1282635378813779763}
   _weaponsComponent: {fileID: 8248370757452899674}
   _animationController: {fileID: 6474061676955578483}
   _carriedItemComponent: {fileID: 3343333360448289225}
@@ -571,6 +574,7 @@ MonoBehaviour:
   _dialogComponent: {fileID: 8752692798761404018}
   _spawningComponent: {fileID: 8856251495970217324}
   _lifetimeComponent: {fileID: 5997692529121259776}
+  _flinchComponent: {fileID: 7833139265186650892}
   _interactableComponent: {fileID: 7058524168046784688}
   _animator: {fileID: 8262333946229476320}
   _transform: {fileID: 676597866055640825}
@@ -885,6 +889,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nextLifetimeProgressTick: 0
   _lifetimeProgress: 0
+--- !u!114 &1282635378813779763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7295902260064604106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc640a8cabc3dea4cb35c07da4fe07df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _npc: {fileID: 179727579642908255}
+  _currentHealth: 0
+  _maxHealth: 0
+--- !u!114 &7833139265186650892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7295902260064604106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shakeBones:
+  - {fileID: 8464379620750102367}
+  - {fileID: 3203382455121866481}
+  - {fileID: 378802543156338385}
+  - {fileID: 4137159272667656675}
 --- !u!1001 &7114970133147117983
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1048,6 +1084,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ee4e9b1d7909286409319ca5270a9c27, type: 3}
+--- !u!4 &378802543156338385 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7493063185267062606, guid: ee4e9b1d7909286409319ca5270a9c27,
+    type: 3}
+  m_PrefabInstance: {fileID: 7114970133147117983}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &880012112042857268 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7965493324807436971, guid: ee4e9b1d7909286409319ca5270a9c27,
@@ -1057,6 +1099,12 @@ Transform:
 --- !u!4 &3203382455121866481 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5677280999361120110, guid: ee4e9b1d7909286409319ca5270a9c27,
+    type: 3}
+  m_PrefabInstance: {fileID: 7114970133147117983}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4137159272667656675 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6617854745340991612, guid: ee4e9b1d7909286409319ca5270a9c27,
     type: 3}
   m_PrefabInstance: {fileID: 7114970133147117983}
   m_PrefabAsset: {fileID: 0}
@@ -1075,6 +1123,12 @@ Transform:
 --- !u!95 &8262333946229476320 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 1158770156543386239, guid: ee4e9b1d7909286409319ca5270a9c27,
+    type: 3}
+  m_PrefabInstance: {fileID: 7114970133147117983}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8464379620750102367 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1714455049073256128, guid: ee4e9b1d7909286409319ca5270a9c27,
     type: 3}
   m_PrefabInstance: {fileID: 7114970133147117983}
   m_PrefabAsset: {fileID: 0}

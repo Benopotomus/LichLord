@@ -37,6 +37,10 @@ namespace LichLord.NonPlayerCharacters
         public float DamageResistance => _damageResistance;
 
         [SerializeField]
+        protected int _hitReactThreshold = 3;
+        public int HitReactThreshold => _hitReactThreshold;
+
+        [SerializeField]
         protected float _walkSpeed;
         public float WalkSpeed => _walkSpeed;
 

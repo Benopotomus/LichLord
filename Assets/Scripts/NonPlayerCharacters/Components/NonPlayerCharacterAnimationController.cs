@@ -1,6 +1,5 @@
 ﻿using AYellowpaper.SerializedCollections;
 using LichLord.Projectiles;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters

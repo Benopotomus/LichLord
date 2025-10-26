@@ -8,7 +8,7 @@ namespace LichLord.NonPlayerCharacters
         {
             var targetData = _npcDatas.Get(index);
 
-            int predictionTicks = (int)(32.0f);
+            int predictionTicks = 48;
 
             if (_predictedStates.TryGetValue(index, out NonPlayerCharacterRuntimeState predictedState))
             {
