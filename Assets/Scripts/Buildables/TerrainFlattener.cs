@@ -39,6 +39,9 @@ public class TerrainFlattener : MonoBehaviour
         TerrainData data = terrain.terrainData;
         Vector3 terrainPos = terrain.transform.position;
 
+        if (data == null)
+            return;
+
         int res = data.heightmapResolution;
         float normX = (worldPosition.x - terrainPos.x) / data.size.x;
         float normZ = (worldPosition.z - terrainPos.z) / data.size.z;

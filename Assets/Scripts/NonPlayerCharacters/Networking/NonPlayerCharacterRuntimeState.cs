@@ -143,7 +143,7 @@ namespace LichLord.NonPlayerCharacters
 
         public ETeamID GetTeam()
         { 
-            return DataDefinition.GetTeamID(ref _npcData);
+            return _npcData.DataDefinition.GetTeamID(ref _npcData);
         }
 
         public ENPCSpawnType GetSpawnType()
@@ -153,7 +153,7 @@ namespace LichLord.NonPlayerCharacters
 
         public EAttitude GetAttitude()
         {
-            return DataDefinition.GetAttitude(ref _npcData);
+            return _npcData.DataDefinition.GetAttitude(ref _npcData);
         }
 
         public void SetAttitude(EAttitude newAttitude)
@@ -170,7 +170,7 @@ namespace LichLord.NonPlayerCharacters
             if(_npcData.DefinitionID == 0)
                 return ENPCState.Inactive;
 
-            if (DataDefinition == null)
+            if (_npcData.Definition == null)
                 return ENPCState.Inactive;
 
             return DataDefinition.GetState(ref _npcData);
