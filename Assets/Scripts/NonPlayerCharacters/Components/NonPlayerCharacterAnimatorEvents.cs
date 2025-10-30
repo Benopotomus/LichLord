@@ -28,6 +28,11 @@ namespace LichLord.NonPlayerCharacters
             _npc.Brain.OnSpecialEventFromAnimation();
         }
 
+        public void HitSweep(bool isSweeping)
+        {
+            _npc.Brain.OnSweepChangeFromAnimation(isSweeping);
+        }
+
         public void Land()
         { }
 

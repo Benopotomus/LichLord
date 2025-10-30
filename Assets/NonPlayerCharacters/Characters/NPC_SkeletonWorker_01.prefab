@@ -822,6 +822,7 @@ GameObject:
   - component: {fileID: 875799037016124911}
   - component: {fileID: 7700684092759164539}
   - component: {fileID: -3976135024856770984}
+  - component: {fileID: 3537137329067030322}
   m_Layer: 10
   m_Name: NPC_SkeletonWorker_01
   m_TagString: Untagged
@@ -878,6 +879,7 @@ MonoBehaviour:
   _spawningComponent: {fileID: 5031277814089699016}
   _lifetimeComponent: {fileID: 875799037016124911}
   _flinchComponent: {fileID: -3976135024856770984}
+  _meleeHitTracker: {fileID: 3537137329067030322}
   _interactableComponent: {fileID: 1022278662677194036}
   _animator: {fileID: 5939124716950771260}
   _transform: {fileID: 3282022331344466140}
@@ -1224,6 +1226,18 @@ MonoBehaviour:
   - {fileID: 4406563033268077474}
   - {fileID: 6170666664653408271}
   - {fileID: 1242642962279907152}
+--- !u!114 &3537137329067030322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3417770816120147926
 GameObject:
   m_ObjectHideFlags: 0

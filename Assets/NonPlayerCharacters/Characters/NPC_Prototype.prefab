@@ -554,6 +554,11 @@ PrefabInstance:
       objectReference: {fileID: 7099780770044356808}
     - target: {fileID: 174069171961541429, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
+      propertyPath: _meleeHitTracker
+      value: 
+      objectReference: {fileID: 5226959283620696464}
+    - target: {fileID: 174069171961541429, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
       propertyPath: _attitudeComponent
       value: 
       objectReference: {fileID: 1046792201604085329}
@@ -687,6 +692,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7099780770044356808}
+    - targetCorrespondingSourceObject: {fileID: 7301654162607387296, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5226959283620696464}
   m_SourcePrefab: {fileID: 100100000, guid: 4a02f8c2682c09e4a943d311f292753d, type: 3}
 --- !u!1 &1632385000444466551 stripped
 GameObject:
@@ -784,6 +793,18 @@ MonoBehaviour:
   - {fileID: 2048518051028611283}
   - {fileID: 2143663937053075289}
   - {fileID: 7338249756848643478}
+--- !u!114 &5226959283620696464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632385000444466551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!23 &3929707082675796431 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 5006548687361809944, guid: 4a02f8c2682c09e4a943d311f292753d,

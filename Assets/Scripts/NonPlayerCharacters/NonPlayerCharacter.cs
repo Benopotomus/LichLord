@@ -58,6 +58,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterFlinchComponent _flinchComponent;
         public NonPlayerCharacterFlinchComponent FlinchComponent => _flinchComponent;
 
+        [SerializeField] private MeleeHitTrackerComponent _meleeHitTracker;
+        public MeleeHitTrackerComponent MeleeHitTracker => _meleeHitTracker;
+
         [SerializeField]
         private InteractableComponent _interactableComponent;
         public InteractableComponent Interactable => _interactableComponent;

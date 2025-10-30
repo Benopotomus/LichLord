@@ -1,12 +1,14 @@
-﻿using UnityEngine;
+﻿using AYellowpaper.SerializedCollections;
+using LichLord.Projectiles;
+using UnityEngine;
 
 namespace LichLord.Items
 {
     public class Weapon : Item
     {
         [SerializeField]
-        private Transform _muzzle;
-        public Transform Muzzle => _muzzle;
+        [SerializedDictionary("MuzzleType", "Transform")]
+        private SerializedDictionary<EMuzzle, Transform> _sockets;
 
         [SerializeField]
         private Vector3 _localOffset;
@@ -19,6 +21,14 @@ namespace LichLord.Items
         public void OnSpawned()
         { 
             
+        }
+
+        public Transform GetMuzzleTransform(EMuzzle muzzle)
+        { 
+            if(_sockets.TryGetValue(muzzle, out Transform t))
+                return t;
+
+            return null;
         }
     }
 }

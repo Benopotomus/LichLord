@@ -18,6 +18,9 @@ namespace LichLord
 
         public void SpawnVisualEffect(Vector3 position, Quaternion rotation, BundleObject vfxBundle)
         {
+            if (vfxBundle.Name == "")
+                return;
+
             _effectSpawner.SpawnVisualEffect(position, rotation, vfxBundle);
         }
 

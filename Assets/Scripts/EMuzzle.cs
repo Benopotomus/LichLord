@@ -7,8 +7,11 @@
         RightHand,
         LeftHand_RightHand_Blend,
         Chest,
-        WeaponSocket_1,
-        WeaponSocket_2, 
-        WeaponSocket_3,
+        Left_WeaponSocket_1,
+        Left_WeaponSocket_2,
+        Left_WeaponSocket_3,
+        Right_WeaponSocket_1,
+        Right_WeaponSocket_2,
+        Right_WeaponSocket_3,
     }
 }

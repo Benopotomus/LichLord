@@ -4267,6 +4267,7 @@ GameObject:
   - component: {fileID: 2625048825368158490}
   - component: {fileID: 4321276173898992692}
   - component: {fileID: 5025290217668158428}
+  - component: {fileID: 3543137431405028545}
   m_Layer: 10
   m_Name: NPC_HumanSwordsman_01
   m_TagString: Untagged
@@ -4319,6 +4320,7 @@ MonoBehaviour:
   _spawningComponent: {fileID: 2625048825368158490}
   _lifetimeComponent: {fileID: 1434329773975222504}
   _flinchComponent: {fileID: 5025290217668158428}
+  _meleeHitTracker: {fileID: 3543137431405028545}
   _interactableComponent: {fileID: 1370577029228525798}
   _animator: {fileID: 7646857354785003770}
   _transform: {fileID: 2416786617183052698}
@@ -4665,6 +4667,18 @@ MonoBehaviour:
   - {fileID: 7661320016181326476}
   - {fileID: 6557474056734756247}
   - {fileID: 1085713092064556984}
+--- !u!114 &3543137431405028545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5914536390991823929
 GameObject:
   m_ObjectHideFlags: 0

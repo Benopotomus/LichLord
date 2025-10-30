@@ -16,13 +16,14 @@ MonoBehaviour:
   _name: Skeleton Worker
   _prefabBundle:
     _name: NPC_SkeletonWorker_01
-    _bundle: npc_skeletonworker_01
+    _bundle: n_p_c__skeleton_worker_01
   _icon:
     _name: T_Pt_Skeleton_C_01
     _bundle: t_pt_skeleton_c_01
   _maxHealth: 100
   _damageReduction: 0
   _damageResistance: 0
+  _hitReactThreshold: 3
   _walkSpeed: 5
   _isFrontlineCombatant: 1
   _spawnState:
@@ -36,6 +37,7 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
+      PlaybackSpeed: 0
     _spawnEffect:
       _name: VFX_Spawning
       _bundle: vfx_spawning

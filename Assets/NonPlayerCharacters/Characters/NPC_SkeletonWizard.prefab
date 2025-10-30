@@ -523,6 +523,7 @@ GameObject:
   - component: {fileID: 5997692529121259776}
   - component: {fileID: 1282635378813779763}
   - component: {fileID: 7833139265186650892}
+  - component: {fileID: 2299043602647548698}
   m_Layer: 10
   m_Name: NPC_SkeletonWizard
   m_TagString: Untagged
@@ -575,6 +576,7 @@ MonoBehaviour:
   _spawningComponent: {fileID: 8856251495970217324}
   _lifetimeComponent: {fileID: 5997692529121259776}
   _flinchComponent: {fileID: 7833139265186650892}
+  _meleeHitTracker: {fileID: 2299043602647548698}
   _interactableComponent: {fileID: 7058524168046784688}
   _animator: {fileID: 8262333946229476320}
   _transform: {fileID: 676597866055640825}
@@ -921,6 +923,18 @@ MonoBehaviour:
   - {fileID: 3203382455121866481}
   - {fileID: 378802543156338385}
   - {fileID: 4137159272667656675}
+--- !u!114 &2299043602647548698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7295902260064604106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7114970133147117983
 PrefabInstance:
   m_ObjectHideFlags: 0

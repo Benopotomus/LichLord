@@ -369,6 +369,11 @@ PrefabInstance:
       propertyPath: _flinchComponent
       value: 
       objectReference: {fileID: 1791598904902598212}
+    - target: {fileID: 174069171961541429, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      propertyPath: _meleeHitTracker
+      value: 
+      objectReference: {fileID: 2300709559197884733}
     - target: {fileID: 682064007814798227, guid: 4a02f8c2682c09e4a943d311f292753d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -503,6 +508,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1791598904902598212}
+    - targetCorrespondingSourceObject: {fileID: 7301654162607387296, guid: 4a02f8c2682c09e4a943d311f292753d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2300709559197884733}
   m_SourcePrefab: {fileID: 100100000, guid: 4a02f8c2682c09e4a943d311f292753d, type: 3}
 --- !u!1 &1632385000444466551 stripped
 GameObject:
@@ -527,6 +536,18 @@ MonoBehaviour:
   - {fileID: 2048518051028611283}
   - {fileID: 2143663937053075289}
   - {fileID: 7338249756848643478}
+--- !u!114 &2300709559197884733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632385000444466551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8185750515959796962 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 174069171961541429, guid: 4a02f8c2682c09e4a943d311f292753d,

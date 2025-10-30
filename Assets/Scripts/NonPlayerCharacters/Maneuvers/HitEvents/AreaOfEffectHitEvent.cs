@@ -15,8 +15,8 @@ namespace LichLord.NonPlayerCharacters
         public BundleObject HitEffect => _hitEffect;
 
         [SerializeField]
-        private EMuzzle _muzzle;
-        public EMuzzle Muzzle => _muzzle;
+        private EMuzzle[] _muzzles;
+        public EMuzzle[] Muzzles => _muzzles;
 
         [SerializeField]
         private float _aoeRadius;
@@ -38,35 +38,47 @@ namespace LichLord.NonPlayerCharacters
             NonPlayerCharacterManeuverDefinition definition,
             IChunkTrackable target)
         {
-            Vector3 muzzlePosition = npc.Weapons.GetMuzzlePosition(Muzzle);
+            MeleeHitTrackerComponent hitTracker = npc.MeleeHitTracker;
 
-            npc.Context.VFXManager.SpawnVisualEffect(muzzlePosition, Quaternion.identity, HitEffect);
-
-            Collider[] hitColliders = Physics.OverlapSphere(muzzlePosition, _aoeRadius, _hitCollisionLayer);
-
-            foreach (Collider collider in hitColliders)
+            foreach (var muzzle in _muzzles)
             {
-                IHitTarget hitTarget = null;
+                Vector3 muzzlePosition = npc.Weapons.GetMuzzlePosition(muzzle);
+                hitTracker.DrawHitShape(muzzlePosition, _aoeRadius);
 
-                if (collider.tag == "Hurtbox")
+                npc.Context.VFXManager.SpawnVisualEffect(muzzlePosition, Quaternion.identity, HitEffect);
+
+                Collider[] hitColliders = Physics.OverlapSphere(muzzlePosition, _aoeRadius, _hitCollisionLayer);
+
+                foreach (Collider collider in hitColliders)
                 {
-                    HurtboxOwner hitboxOwnerComp = collider.GetComponent<HurtboxOwner>();
-                    if (hitboxOwnerComp == null)
-                        continue;
+                    IHitTarget hitTarget = null;
 
-                    hitTarget = hitboxOwnerComp.HitTarget;
+                    if (collider.tag == "Hurtbox")
+                    {
+                        HurtboxOwner hitboxOwnerComp = collider.GetComponent<HurtboxOwner>();
+                        if (hitboxOwnerComp == null)
+                            continue;
 
-                    if(!IsImpactObjectValid(npc, hitTarget))
-                        continue;
+                        hitTarget = hitboxOwnerComp.HitTarget;
 
-                    ApplyHitToTarget(hitTarget, npc, Damage);
+                        if (!IsImpactObjectValid(npc, hitTracker, hitTarget))
+                            continue;
+
+                        hitTracker.AddHitTarget(hitTarget);
+                        ApplyHitToTarget(hitTarget, npc, Damage);
+                    }
                 }
             }
         }
 
-        public static bool IsImpactObjectValid(NonPlayerCharacter npc, IHitTarget hitTarget)
+        public static bool IsImpactObjectValid(NonPlayerCharacter npc, 
+            MeleeHitTrackerComponent hitTracker, 
+            IHitTarget hitTarget)
         {
             if (npc == (object)hitTarget)
+                return false;
+
+            if (hitTracker.HitsPerSwing.Contains(hitTarget))
                 return false;
 
             return true;

@@ -10,6 +10,11 @@ namespace LichLord.NonPlayerCharacters
 
             int predictionTicks = 48;
 
+            if (_loadStates[index].LoadState == ELoadState.Loaded)
+            {
+                _loadStates[index].NPC.FlinchComponent.TriggerFlinch();
+            }
+
             if (_predictedStates.TryGetValue(index, out NonPlayerCharacterRuntimeState predictedState))
             {
                 predictedState.ApplyDamage(damage, hitReactIndex);
@@ -31,6 +36,11 @@ namespace LichLord.NonPlayerCharacters
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_DealDamageToNPC(int index, int damage, int hitReactIndex)
         {
+            if (_loadStates[index].LoadState == ELoadState.Loaded)
+            {
+                _loadStates[index].NPC.FlinchComponent.TriggerFlinch();
+            }
+
             _localRuntimeStates[index].ApplyDamage(damage, hitReactIndex);
         }
 

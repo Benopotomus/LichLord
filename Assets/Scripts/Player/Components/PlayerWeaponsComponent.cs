@@ -248,7 +248,7 @@ namespace LichLord
 
         public void OnHitFromAnimation()
         {
-            Vector3 position = _weaponRight.Weapon.Muzzle.position;
+            Vector3 position = _weaponRight.Weapon.GetMuzzleTransform(EMuzzle.RightHand).position;
             var definition = _weaponRight.WeaponDefinition;
 
             var tick = Runner.Tick;
@@ -313,28 +313,33 @@ namespace LichLord
             HitUtility.ProcessHit(ref hit, Context);
         }
 
-
         public Vector3 GetMuzzlePosition(EMuzzle muzzleName)
         {
             switch (muzzleName)
             {
                 case EMuzzle.LeftHand:
+                case EMuzzle.Left_WeaponSocket_1:
+                case EMuzzle.Left_WeaponSocket_2:
+                case EMuzzle.Left_WeaponSocket_3:
                     if (_weaponLeft.LoadState == ELoadState.Loaded)
-                        return _weaponLeft.Weapon.Muzzle.position;
+                        return _weaponLeft.Weapon.GetMuzzleTransform(muzzleName).position;
 
                     return _handBoneLeft.position;
 
                 case EMuzzle.RightHand:
+                case EMuzzle.Right_WeaponSocket_1:
+                case EMuzzle.Right_WeaponSocket_2:
+                case EMuzzle.Right_WeaponSocket_3:
                     if (_weaponRight.LoadState == ELoadState.Loaded)
-                        return _weaponRight.Weapon.Muzzle.position;
+                        return _weaponRight.Weapon.GetMuzzleTransform(muzzleName).position;
 
                     return _handBoneRight.position;
 
                 case EMuzzle.LeftHand_RightHand_Blend:
-                    Vector3 leftPos = _weaponLeft.LoadState == ELoadState.Loaded ? 
-                        _weaponLeft.Weapon.Muzzle.position : _handBoneLeft.position;
-                    Vector3 rightPos = _weaponRight.LoadState == ELoadState.Loaded ? 
-                        _weaponRight.Weapon.Muzzle.position : _handBoneRight.position;
+                    Vector3 leftPos = _weaponLeft.LoadState == ELoadState.Loaded ?
+                        _weaponLeft.Weapon.GetMuzzleTransform(EMuzzle.LeftHand).position : _handBoneLeft.position;
+                    Vector3 rightPos = _weaponRight.LoadState == ELoadState.Loaded ?
+                        _weaponRight.Weapon.GetMuzzleTransform(EMuzzle.RightHand).position : _handBoneRight.position;
 
                     return Vector3.Lerp(leftPos, rightPos, 0.5f);
             }

@@ -1183,6 +1183,7 @@ GameObject:
   - component: {fileID: 2408611921920231200}
   - component: {fileID: 9210603820427642481}
   - component: {fileID: 6668249780244376760}
+  - component: {fileID: 7729869794948552604}
   m_Layer: 10
   m_Name: NPC_SkeletonWarrior_01
   m_TagString: Untagged
@@ -1235,6 +1236,7 @@ MonoBehaviour:
   _spawningComponent: {fileID: 6259089908041508983}
   _lifetimeComponent: {fileID: 2408611921920231200}
   _flinchComponent: {fileID: 6668249780244376760}
+  _meleeHitTracker: {fileID: 7729869794948552604}
   _interactableComponent: {fileID: 7459789804197456675}
   _animator: {fileID: 5683565048644474723}
   _transform: {fileID: 3282022331344466140}
@@ -1581,6 +1583,18 @@ MonoBehaviour:
   - {fileID: 8905927029070619014}
   - {fileID: 3063067307559331451}
   - {fileID: 228136172936989056}
+--- !u!114 &7729869794948552604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080396072933564549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3176908961229995009
 GameObject:
   m_ObjectHideFlags: 0

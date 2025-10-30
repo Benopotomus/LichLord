@@ -820,6 +820,19 @@ namespace LichLord.NonPlayerCharacters
             definition.ExecuteSpecialEvents(_npc, GetTargetForActiveManeuver());
         }
 
+        public void OnSweepChangeFromAnimation(bool isSweeping)
+        {
+            var currentManeuver = GetManeuverFromState(_npc.State.CurrentState);
+            if (currentManeuver == null)
+                return;
+
+            var definition = currentManeuver.Definition;
+            if (definition == null)
+                return;
+
+            
+        }
+
         public void ApplyHitToTarget(IHitTarget hitTarget, NonPlayerCharacterAttackManeuverDefinition definition, int tick)
         {
             FDamageData damageData = new FDamageData();

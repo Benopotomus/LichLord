@@ -4198,6 +4198,7 @@ GameObject:
   - component: {fileID: 3727939437294402150}
   - component: {fileID: 3235610406539929433}
   - component: {fileID: 92385976797085160}
+  - component: {fileID: 1862589176070407191}
   m_Layer: 10
   m_Name: NPC_HumanArcher_01
   m_TagString: Untagged
@@ -4250,6 +4251,7 @@ MonoBehaviour:
   _spawningComponent: {fileID: 3808059592538173901}
   _lifetimeComponent: {fileID: 3727939437294402150}
   _flinchComponent: {fileID: 92385976797085160}
+  _meleeHitTracker: {fileID: 1862589176070407191}
   _interactableComponent: {fileID: 1543758665101288144}
   _animator: {fileID: 1849537508615831428}
   _transform: {fileID: 2416786617183052698}
@@ -4599,6 +4601,18 @@ MonoBehaviour:
   - {fileID: 7661320016181326476}
   - {fileID: 6557474056734756247}
   - {fileID: 1085713092064556984}
+--- !u!114 &1862589176070407191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5887745109417851595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5914536390991823929
 GameObject:
   m_ObjectHideFlags: 0

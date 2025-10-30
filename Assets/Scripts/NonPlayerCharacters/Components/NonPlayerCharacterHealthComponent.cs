@@ -26,11 +26,6 @@ namespace LichLord.NonPlayerCharacters
             if (newHealth == _currentHealth)
                 return;
 
-            if (newHealth < _currentHealth)
-            {
-                _npc.FlinchComponent.TriggerFlinch();
-            }
-
             _currentHealth = newHealth;
         }
     }

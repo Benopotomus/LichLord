@@ -62,6 +62,8 @@ namespace LichLord.NonPlayerCharacters
             if(IsOnCooldown(tick)) 
                 return false;
 
+            npc.MeleeHitTracker.HitsPerSwing.Clear();
+
             runtimeState.SetState(ActiveState);
 
             int currentAnimIndex = runtimeState.GetAnimationIndex();
