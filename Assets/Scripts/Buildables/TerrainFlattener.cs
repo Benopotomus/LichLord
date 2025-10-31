@@ -39,6 +39,8 @@ public class TerrainFlattener : MonoBehaviour
         TerrainData data = terrain.terrainData;
         Vector3 terrainPos = terrain.transform.position;
 
+        return;
+
         if (data == null)
             return;
 
