@@ -1,7 +1,12 @@
-﻿using UnityEngine;
+﻿// Assets/Scripts/LichLord/World/Chunk.cs
+using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
 using LichLord.Props;
+using Unity.Collections;
+using Unity.Mathematics;
+using LichLord.NonPlayerCharacters;
+using LichLord.Buildables;
 
 namespace LichLord.World
 {
@@ -32,17 +37,94 @@ namespace LichLord.World
 
         public FPropLoadState[] PropLoadStates = new FPropLoadState[0];
 
-        // Total number of players that should be replicating this
         public int ReplicationRefCount { get; private set; } = 0;
 
-        // Prediction and reconcilation
         [SerializeField] private Dictionary<int, PropRuntimeState> _localRuntimePropStates = new Dictionary<int, PropRuntimeState>();
         [SerializeField] private Dictionary<int, PropRuntimeState> _predictedStates = new Dictionary<int, PropRuntimeState>();
 
-        // Saved data
         private Dictionary<int, PropRuntimeState> _loadedPropStates = new Dictionary<int, PropRuntimeState>();
         public Dictionary<int, PropRuntimeState> LoadedPropStates => _loadedPropStates;
 
+        // -----------------------------------------------------------------
+        // NATIVE TRACKABLES (for Burst + Jobs)
+        // -----------------------------------------------------------------
+        private NativeArray<TrackableData> _nativeTrackables;
+        public NativeArray<TrackableData> NativeTrackables => _nativeTrackables;
+
+        // DIRTY FLAG SYSTEM
+        private bool _trackablesDirty = true;
+
+        public void MarkTrackablesDirty() => _trackablesDirty = true;
+
+        public NativeArray<TrackableData> GetNativeTrackables()
+        {
+            if (_trackablesDirty || !_nativeTrackables.IsCreated)
+            {
+                RebuildNativeTrackables();
+                _trackablesDirty = false;
+            }
+            return _nativeTrackables;
+        }
+
+        public void RebuildNativeTrackables()
+        {
+            // Dispose old
+            if (_nativeTrackables.IsCreated)
+                _nativeTrackables.Dispose();
+
+            // Count valid trackables
+            int validCount = 0;
+            for (int i = 0; i < _trackablesInChunk.Count; i++)
+                if (_trackablesInChunk[i] != null)
+                    validCount++;
+
+            // Allocate exact size
+            _nativeTrackables = new NativeArray<TrackableData>(validCount, Unity.Collections.Allocator.Persistent);
+
+            int writeIndex = 0;
+            for (int i = 0; i < _trackablesInChunk.Count; i++)
+            {
+                var t = _trackablesInChunk[i];
+                if (t == null) continue;
+
+                _nativeTrackables[writeIndex++] = new TrackableData
+                {
+                    Position = t.Position,
+                    TrackableIndex = i,
+                    TeamID = GetTeamID(t),
+                    Flags = PackFlags(t),
+                    HarvestPoints = GetHarvestPoints(t)
+                };
+            }
+        }
+
+        public void DisposeNativeTrackables()
+        {
+            if (_nativeTrackables.IsCreated)
+                _nativeTrackables.Dispose();
+        }
+
+        // -----------------------------------------------------------------
+        // HELPER METHODS
+        // -----------------------------------------------------------------
+        private int GetTeamID(IChunkTrackable t)
+            => t is NonPlayerCharacter n ? (int)n.TeamID : 0;
+
+        private byte PackFlags(IChunkTrackable t)
+        {
+            byte f = 0;
+            if (t.IsAttackable) f |= 1;
+            if (t is HarvestNode h && h.RuntimeState.GetHarvestPoints() > 0) f |= 2;
+            if (t is Stockpile) f |= 4;
+            return f;
+        }
+
+        private short GetHarvestPoints(IChunkTrackable t)
+            => t is HarvestNode h ? (short)h.RuntimeState.GetHarvestPoints() : (short)0;
+
+        // -----------------------------------------------------------------
+        // CONSTRUCTOR
+        // -----------------------------------------------------------------
         public Chunk(FChunkPosition chunkID, ChunkManager manager)
         {
             ChunkID = chunkID;
@@ -51,24 +133,24 @@ namespace LichLord.World
 
             float chunkSize = WorldConstants.CHUNK_SIZE;
 
-            // Calculate the chunk's world position, accounting for worldOrigin as the center
             Vector2 chunkCorner = new Vector2(
                 chunkID.X * chunkSize,
                 chunkID.Y * chunkSize
             );
 
-            // Set Bounds center at the middle of the chunk
             Vector2 center = new Vector2(
                 chunkCorner.x + chunkSize / 2,
                 chunkCorner.y + chunkSize / 2
             );
 
-            // Create Bounds with height 1000 (as in original) for 3D space
             Bounds = new Bounds(new Vector3(center.x, 0, center.y), new Vector3(chunkSize, 1000, chunkSize));
         }
 
+        // -----------------------------------------------------------------
+        // REPLICATION
+        // -----------------------------------------------------------------
         public void SetReplicator(ChunkReplicator replicator)
-        { 
+        {
             _replicator = replicator;
             _hasReplicator = true;
         }
@@ -79,26 +161,27 @@ namespace LichLord.World
             _hasReplicator = false;
         }
 
-        public void IncrementReplicationRef()
-        {
-            ReplicationRefCount++;
-        }
+        public void IncrementReplicationRef() => ReplicationRefCount++;
+        public void DecrementReplicationRef() => ReplicationRefCount = Mathf.Max(ReplicationRefCount - 1, 0);
 
-        public void DecrementReplicationRef()
-        {
-            ReplicationRefCount = Mathf.Max(ReplicationRefCount - 1, 0);
-        }
-
+        // -----------------------------------------------------------------
+        // TRACKABLE MANAGEMENT
+        // -----------------------------------------------------------------
         public void AddObject(IChunkTrackable objId)
         {
             _trackablesInChunk.Add(objId);
+            MarkTrackablesDirty(); // REBUILD ON NEXT GET
         }
 
         public void RemoveObject(IChunkTrackable objId)
         {
             _trackablesInChunk.Remove(objId);
+            MarkTrackablesDirty(); // REBUILD ON NEXT GET
         }
 
+        // -----------------------------------------------------------------
+        // PROP INITIALIZATION
+        // -----------------------------------------------------------------
         public void InitializeRuntimeStates(PropMarkupData[] propMarkupDatas)
         {
             _propRuntimeStates = new PropRuntimeState[propMarkupDatas.Length];
@@ -106,13 +189,10 @@ namespace LichLord.World
 
             for (int i = 0; i < propMarkupDatas.Length; i++)
             {
-                PropMarkupData propMarkupData = propMarkupDatas[i];
-                if (propMarkupData == null)
-                {
-                    continue;
-                }
+                var propMarkupData = propMarkupDatas[i];
+                if (propMarkupData == null) continue;
 
-                PropRuntimeState propRuntimeState = new PropRuntimeState(
+                var propRuntimeState = new PropRuntimeState(
                     propMarkupData.guid,
                     this,
                     propMarkupData.position,
@@ -124,7 +204,6 @@ namespace LichLord.World
                 PropLoadStates[i] = new FPropLoadState();
             }
         }
-
 
         public void AddInvasionSpawnPoint(InvasionSpawnPoint spawnPoint)
         {
@@ -143,15 +222,21 @@ namespace LichLord.World
             {
                 var loadState = PropLoadStates[i];
 
-                if(loadState.LoadState == ELoadState.Loaded)
+                if (loadState.LoadState == ELoadState.Loaded)
                     loadState.Prop.StartRecycle();
 
                 loadState.LoadState = ELoadState.None;
                 loadState.Prop = null;
-                PropLoadStates[i] = loadState; // Explicitly write back the modified value
+                PropLoadStates[i] = loadState;
             }
+
+            DisposeNativeTrackables(); // ADD THIS
+            _trackablesDirty = true;   // Force rebuild next time
         }
 
+        // -----------------------------------------------------------------
+        // PROP RENDER & NETWORK
+        // -----------------------------------------------------------------
         public void UpdatePropRuntimeState(PropRuntimeState runtimeState)
         {
             if (!_hasReplicator)
@@ -160,13 +245,10 @@ namespace LichLord.World
                 return;
             }
 
-            // if we have replication data, use that
             ref FPropData propData = ref _replicator.GetPropData(runtimeState.index);
             if (propData.IsValid())
             {
                 FPropData runtimeData = runtimeState.Data;
-
-                // if the data is not equal, we update the runtime state
                 if (!propData.IsPropDataEqual(ref runtimeData))
                 {
                     AddOrUpdateDeltaState(runtimeState);
@@ -175,65 +257,43 @@ namespace LichLord.World
             }
         }
 
-        public void ReplicatePropState(PropRuntimeState replictedState)
+        public void ReplicatePropState(PropRuntimeState replicatedState)
         {
-            AddOrUpdateDeltaState(replictedState);
+            AddOrUpdateDeltaState(replicatedState);
 
-            if (!_hasReplicator)
-                return;
+            if (!_hasReplicator) return;
 
-            ref FPropData data = ref _replicator.GetPropData(replictedState.index);
-            FPropData currentData = replictedState.Data;
+            ref FPropData data = ref _replicator.GetPropData(replicatedState.index);
+            FPropData currentData = replicatedState.Data;
             data.Copy(ref currentData);
         }
-         
+
         public bool GetRenderState(bool hasAuthority, int index, out PropRuntimeState usedState)
         {
-            PropRuntimeState authorityState = _propRuntimeStates[index];
-
-            // Update the authority state if there's a replicated value    
+            var authorityState = _propRuntimeStates[index];
             UpdatePropRuntimeState(authorityState);
-
             usedState = authorityState;
 
-            // If we are the authority, we dont need to handle prediction
-            if (hasAuthority)
-                return true;
+            if (hasAuthority) return true;
 
-            // Check for predicted data
-            bool hasPredictedState = _predictedStates.TryGetValue(index, out PropRuntimeState predictedState);
-            bool hasLocalState = _localRuntimePropStates.TryGetValue(index, out PropRuntimeState localState);
+            bool hasPredicted = _predictedStates.TryGetValue(index, out var predictedState);
+            bool hasLocal = _localRuntimePropStates.TryGetValue(index, out var localState);
 
-            // If there's no local state for this guid, create one and return
-            if (!hasLocalState)
+            if (!hasLocal)
             {
                 _localRuntimePropStates[index] = new PropRuntimeState(authorityState);
                 return true;
             }
 
-            // Check for if local data has changed
             if (localState.Data.StateData != authorityState.Data.StateData)
             {
-                // remove predicted states for any changes
-                if (hasPredictedState)
-                {
-                    hasPredictedState = false;
-                    _predictedStates.Remove(index);
-                }
-
-                // update the local state data
-                FPropData authorityData = authorityState.Data;
-                localState.CopyData(ref authorityData);
+                if (hasPredicted) _predictedStates.Remove(index);
+                FPropData data = authorityState.Data;
+                localState.CopyData(ref data);
                 _localRuntimePropStates[index] = localState;
             }
 
-            // if we still have a predicted state after checking authority changes
-            // use that state
-            if (hasPredictedState)
-            {
-                // Debug.Log("Using Predicted State");
-                usedState = predictedState;
-            }
+            if (hasPredicted) usedState = predictedState;
 
             return true;
         }
@@ -248,20 +308,19 @@ namespace LichLord.World
                     continue;
                 }
 
-                FPropLoadState propLoadState =  PropLoadStates[i];
+                var propLoadState = PropLoadStates[i];
 
                 switch (propLoadState.LoadState)
                 {
                     case ELoadState.None:
                         propLoadState.LoadState = ELoadState.Loading;
                         PropLoadStates[i] = propLoadState;
-
                         _context.PropManager.SpawnProp(usedState);
                         break;
                     case ELoadState.Loaded:
                         propLoadState.Prop.OnRender(usedState, renderDeltaTime);
                         break;
-                }             
+                }
             }
         }
 
@@ -270,17 +329,12 @@ namespace LichLord.World
         public void OnFixedUpdateNetwork(int tick)
         {
             _tempPropStateList.Clear();
-
             foreach (var kvp in _deltaPropStates)
-            {
                 _tempPropStateList.Add(kvp.Value);
-            }
 
             foreach (var propState in _tempPropStateList)
-            {
                 if (propState.AuthorityUpdate(tick))
                     ReplicatePropState(propState);
-            }
         }
     }
 }

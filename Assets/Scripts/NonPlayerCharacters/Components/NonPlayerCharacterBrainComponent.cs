@@ -2,7 +2,9 @@
 using LichLord.Items;
 using LichLord.Props;
 using LichLord.World;
+using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -262,9 +264,9 @@ namespace LichLord.NonPlayerCharacters
                     return;
 
                 _moveTarget = new Vector3(
-                    Random.Range(-20f, 20f),
+                    UnityEngine.Random.Range(-20f, 20f),
                     0f, // Keep Y fixed
-                    Random.Range(-20f, 20f)
+                    UnityEngine.Random.Range(-20f, 20f)
                 );
 
                 _moveTarget += _npc.CachedTransform.position;
@@ -273,66 +275,110 @@ namespace LichLord.NonPlayerCharacters
             _npc.Movement.SetMoveTargetPosition(_moveTarget);
         }
 
+        // ---------------------------------------------------------------
+        //  Add these fields to the class that contains SelectManeuver
+        // ---------------------------------------------------------------
+        private NonPlayerCharacterManeuverState[] _tempArray = new NonPlayerCharacterManeuverState[32]; // grow if needed
+        private int _tempCount;
+
+        // ---------------------------------------------------------------
         private void SelectManeuver(int tick)
         {
-            // Drop invalid active maneuver
+            // -------------------------------------------------------
+            // 1. Drop invalid active maneuver (unchanged)
+            // -------------------------------------------------------
             if (HasActiveManeuver())
             {
                 if (!_activeManeuver.CanBeSelected(this, tick))
                     SetActiveManuever(null);
             }
 
-            // Gather valid maneuvers
-            List<NonPlayerCharacterManeuverState> availableStates = new List<NonPlayerCharacterManeuverState>();
+            // -------------------------------------------------------
+            // 2. Gather *valid* maneuvers into the pre-allocated buffer
+            // -------------------------------------------------------
+            _tempCount = 0;
             for (int i = 0; i < _maneuvers.Count; i++)
             {
-                var currentManeuver = _maneuvers[i];
-                if (currentManeuver.CanBeSelected(this, tick))
+                var m = _maneuvers[i];
+                if (m.CanBeSelected(this, tick))
                 {
-                    availableStates.Add(currentManeuver);
+                    // auto-grow if the buffer is too small (very rare)
+                    if (_tempCount == _tempArray.Length)
+                        Array.Resize(ref _tempArray, _tempCount << 1);
+
+                    _tempArray[_tempCount++] = m;
                 }
             }
 
-            if (availableStates.Count == 0)
+            // No valid maneuvers → clear and exit
+            if (_tempCount == 0)
             {
                 SetActiveManuever(null);
                 return;
             }
 
-            // Step 1: find nearest maneuver type
-            EManeuverType nearestTargetType = EManeuverType.None;
-            float bestDistance = float.MaxValue;
+            // -------------------------------------------------------
+            // 3. Find the *nearest* maneuver type (single pass)
+            // -------------------------------------------------------
+            EManeuverType nearestType = EManeuverType.None;
+            float bestDist = float.MaxValue;
 
-            for (int i = 0; i < availableStates.Count; i++)
+            for (int i = 0; i < _tempCount; i++)
             {
-                var maneuver = availableStates[i];
-                float dist = DistanceToManeuverTarget(maneuver.Definition.ManeuverType);
+                var def = _tempArray[i].Definition;
+                float d = DistanceToManeuverTarget(def.ManeuverType);
 
-                if (dist < bestDistance)
+                if (d < bestDist)
                 {
-                    bestDistance = dist;
-                    nearestTargetType = maneuver.Definition.ManeuverType;
+                    bestDist = d;
+                    nearestType = def.ManeuverType;
                 }
             }
 
-            // Step 2: build a list of maneuvers of that type
-            List<NonPlayerCharacterManeuverState> filteredStates = new List<NonPlayerCharacterManeuverState>();
-            if (nearestTargetType != EManeuverType.None)
+            // -------------------------------------------------------
+            // 4. Count how many maneuvers share the nearest type
+            // -------------------------------------------------------
+            int typeCount = 0;
+            if (nearestType != EManeuverType.None)
             {
-                for (int i = 0; i < availableStates.Count; i++)
+                for (int i = 0; i < _tempCount; i++)
                 {
-                    if (availableStates[i].Definition.ManeuverType == nearestTargetType)
-                        filteredStates.Add(availableStates[i]);
+                    if (_tempArray[i].Definition.ManeuverType == nearestType)
+                        typeCount++;
                 }
             }
 
-            // Step 3: if none matched, fall back to all available
-            List<NonPlayerCharacterManeuverState> finalStates =
-                filteredStates.Count > 0 ? filteredStates : availableStates;
+            // -------------------------------------------------------
+            // 5. Pick a random index inside the matching group
+            // -------------------------------------------------------
+            NonPlayerCharacterManeuverState chosen = null;
 
-            // Step 4: roll randomly within that type
-            int selectedIndex = Random.Range(0, finalStates.Count);
-            SetActiveManuever(finalStates[selectedIndex]);
+            if (typeCount > 0)
+            {
+                // Randomly walk until we hit the N-th match
+                int target = UnityEngine.Random.Range(0, typeCount);
+                int cursor = 0;
+
+                for (int i = 0; i < _tempCount; i++)
+                {
+                    if (_tempArray[i].Definition.ManeuverType == nearestType)
+                    {
+                        if (cursor == target)
+                        {
+                            chosen = _tempArray[i];
+                            break;
+                        }
+                        cursor++;
+                    }
+                }
+            }
+            else
+            {
+                // Fallback: any valid maneuver
+                chosen = _tempArray[UnityEngine.Random.Range(0, _tempCount)];
+            }
+
+            SetActiveManuever(chosen);
         }
 
         private float DistanceToManeuverTarget(EManeuverType maneuverType)
@@ -750,10 +796,11 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateSenses(int tick)
         {
-            if (tick % _updateSensesTick == 0)
-            {
-                FindCurrentTargets();
-            }
+            // REPLACE old call
+            // if (tick % 32 == 0) FindCurrentTargets();
+
+            if (tick % 32 == 0)
+                _npc.RuntimeState.Context.SensingJobSystem?.QueueSense(this);
         }
 
         private bool HasActiveManeuver()
@@ -990,6 +1037,28 @@ namespace LichLord.NonPlayerCharacters
 
             // No hit at all = nothing blocking
             return true;
+        }
+
+        public void ApplySenseResult(SenseResult result, NativeList<TrackableData> allTrackables, List<Chunk> nearbyChunks)
+        {
+            DistanceToAttackTarget = result.AttackDistSqr;
+            DistanceToHarvestTarget = result.HarvestDistSqr;
+            DistanceToDepositTarget = result.DepositDistSqr;
+
+            SetAttackTarget(GetTrackableFromGlobalIndex(result.AttackGlobalIndex, allTrackables, nearbyChunks));
+            SetHarvestTarget(GetTrackableFromGlobalIndex(result.HarvestGlobalIndex, allTrackables, nearbyChunks));
+            SetDepositTarget(GetTrackableFromGlobalIndex(result.DepositGlobalIndex, allTrackables, nearbyChunks));
+        }
+
+        private IChunkTrackable GetTrackableFromGlobalIndex(int globalIndex, NativeList<TrackableData> all, List<Chunk> nearby)
+        {
+            if (globalIndex < 0 || globalIndex >= all.Length) return null;
+            var data = all[globalIndex];
+            int chunkIdx = data.ChunkIndex;
+            if (chunkIdx >= nearby.Count) return null;
+            var chunk = nearby[chunkIdx];
+            int localIdx = data.TrackableIndex;
+            return localIdx < chunk.Trackables.Count ? chunk.Trackables[localIdx] : null;
         }
 
         public IChunkTrackable GetTargetForActiveManeuver()

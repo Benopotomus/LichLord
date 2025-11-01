@@ -40,6 +40,7 @@ namespace LichLord
         public MissionManager MissionManager;
         public DebugConsole DebugConsole;
         public VisualEffectManager VFXManager;
+        public SensingJobSystem SensingJobSystem;
 
         [HideInInspector]
         public PlayerRef LocalPlayerRef;
