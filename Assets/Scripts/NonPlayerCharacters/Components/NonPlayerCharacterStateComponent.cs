@@ -65,8 +65,8 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Hurtbox.SetHitBoxesActive(true);
                     if (hasAuthority)
                     {
-                        NPC.Movement.AIFollower.rvoSettings.locked = false;
-                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        //NPC.Movement.AIFollower.enableLocalAvoidance = false;
+                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.SetFollowerUpdatePosition(true);
                         NPC.Movement.SetFollowerUpdateRotation(true);
                         NPC.Movement.SetFollowerLocalAvoidance(true);
@@ -80,7 +80,7 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     if (hasAuthority)
                     {
-                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.SetFollowerUpdatePosition(false);
                         NPC.Movement.SetFollowerUpdateRotation(false);
                         NPC.Movement.SetFollowerLocalAvoidance(false);
@@ -95,7 +95,7 @@ namespace LichLord.NonPlayerCharacters
 
                     if (hasAuthority)
                     {
-                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.SetFollowerUpdatePosition(false);
                         NPC.Movement.SetFollowerUpdateRotation(false);
                         NPC.Movement.SetFollowerLocalAvoidance(false);
@@ -109,8 +109,8 @@ namespace LichLord.NonPlayerCharacters
 
                     if (hasAuthority)
                     {
-                        NPC.Movement.AIFollower.rvoSettings.locked = true;
-                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        //NPC.Movement.AIFollower.rvoSettings.locked = true;
+                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
 
                         NPC.Movement.SetFollowerUpdateRotation(false);
                         NPC.Movement.SetFollowerUpdatePosition(false);
@@ -126,8 +126,8 @@ namespace LichLord.NonPlayerCharacters
 
                     if (hasAuthority)
                     {
-                        NPC.Movement.AIFollower.rvoSettings.locked = true;
-                        NPC.Movement.AIFollower.rvoSettings.priority = 1;
+                        //NPC.Movement.AIFollower.rvoSettings.locked = true;
+                       // NPC.Movement.AIFollower.rvoSettings.priority = 1;
                     }
                     break;
 
@@ -138,7 +138,7 @@ namespace LichLord.NonPlayerCharacters
 
                     if (hasAuthority)
                     {
-                        NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
+                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
                         NPC.Movement.SetFollowerUpdatePosition(false);
                         NPC.Movement.SetFollowerUpdateRotation(false);
                         NPC.Movement.SetFollowerLocalAvoidance(false);

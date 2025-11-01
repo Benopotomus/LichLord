@@ -98,10 +98,6 @@ namespace LichLord.NonPlayerCharacters
         private ETeamID _teamId;
         public ETeamID TeamID => _teamId;
 
-        // Cached list of Chunks for current and neighboring chunks
-        private List<Chunk> _cachedChunks = new List<Chunk>();
-        public IReadOnlyList<Chunk> CachedChunks => _cachedChunks.AsReadOnly();
-
         // IChunkTrackable
         private Chunk _currentChunk;
         public Chunk CurrentChunk { get => _currentChunk; set => _currentChunk = value; }
@@ -364,9 +360,6 @@ namespace LichLord.NonPlayerCharacters
             if (lastChunk != newChunk)
             {
                 _currentChunk = newChunk;
-
-                if(_currentChunk != null)
-                    _cachedChunks = _context.ChunkManager.GetNearbyChunks(_currentChunk.ChunkID);
 
                 if (lastChunk != null)
                     lastChunk.RemoveObject(this);

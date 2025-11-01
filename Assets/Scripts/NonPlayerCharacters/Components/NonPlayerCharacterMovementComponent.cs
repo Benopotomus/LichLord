@@ -277,12 +277,12 @@ namespace LichLord.NonPlayerCharacters
         public void SetMoveTargetPosition(Vector3 newMoveTarget)
         {
             Vector3 delta = _moveTarget - newMoveTarget;
-            if (delta.sqrMagnitude < 0.01f)
+            if (delta.sqrMagnitude < 0.1f)
                 return;
 
             _moveTarget = newMoveTarget;
 
-            _follower.destination = _moveTarget;
+            _follower.SetDestination(_moveTarget);
         }
 
         public void StartRecycle()

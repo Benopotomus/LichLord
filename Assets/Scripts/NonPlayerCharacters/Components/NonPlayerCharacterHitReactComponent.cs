@@ -60,17 +60,16 @@ namespace LichLord.NonPlayerCharacters
 
         private void OnVisualsPrefabLoadedAttached(GameObject loadedGameObject, Transform attachment, Quaternion rotation)
         {
-            var poolObject = loadedGameObject.GetComponent<DWDObjectPoolObject>();
-
-            if (poolObject == null)
+            if (loadedGameObject.TryGetComponent<DWDObjectPoolObject>(out var poolObject))
             {
-                Debug.LogWarning("Could not spawn Visuals Prefab for Impact");
-                return;
+                var instance = DWDObjectPool.Instance.SpawnAttached(poolObject, attachment.position, attachment.rotation, attachment);
+                if (instance is StandaloneVisualEffect standaloneEffect)
+                    standaloneEffect.Initialize();
             }
-
-            var instance = DWDObjectPool.Instance.SpawnAttached(poolObject, attachment.position, attachment.rotation, attachment);
-            if(instance is StandaloneVisualEffect standaloneEffect)
-                standaloneEffect.Initialize();
+            else
+            {
+                Debug.LogWarning("Could not spawn Visuals Prefab for Impact - missing DWDObjectPoolObject");
+            }
         }
 
         private void OnDestroy()

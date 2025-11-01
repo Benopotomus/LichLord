@@ -18,7 +18,7 @@ namespace LichLord.NonPlayerCharacters
             if (target is HarvestNode harvestNode)
                 harvestNode.ProgressHarvest(npc);
             
-            npc.Brain.FindCurrentTargets();
+           // npc.Brain.FindCurrentTargets();
         }
     }
 }

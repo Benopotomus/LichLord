@@ -20,7 +20,7 @@ MonoBehaviour:
   _faceTargetRange: 5
   _requiresLOS: 1
   _verticalAimOffset: 0
-  _validTargetDistance: {x: 0, y: 100}
+  _validTargetDistance: {x: 0, y: 9000}
   _animationTriggers:
   - Action: 8
     Weapon: 0
@@ -60,6 +60,7 @@ MonoBehaviour:
     PlaybackSpeed: 1
   _hitEvents:
   - {fileID: 11400000, guid: d6613b0a332361b4a95fc63529e10835, type: 2}
+  _specialEvents: []
   _damage: 10
   _validTargetTypes: 01000000020000000300000005000000
   _maneuverProjectiles: []

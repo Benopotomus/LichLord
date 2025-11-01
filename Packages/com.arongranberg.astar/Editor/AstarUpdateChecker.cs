@@ -187,7 +187,6 @@ namespace Pathfinding {
 			if (!Application.isPlaying) AstarPath.FindAstarPath();
 			var script = AstarPath.active != null ? AstarPath.active : UnityCompatibility.FindAnyObjectByType<AstarPath>();
 
-			return;
 			bool mecanim = UnityCompatibility.FindAnyObjectByType<Animator>() != null;
 			string query = updateURL+
 						   "?v="+AstarPath.Version+
@@ -198,13 +197,13 @@ namespace Pathfinding {
 						   "&targetplatform="+EditorUserBuildSettings.activeBuildTarget+
 						   "&devplatform="+Application.platform+
 						   "&mecanim="+(mecanim ? "1" : "0")+
-						   "&hasNavmesh=" + (script != null && script.data.graphs != null && script.data.graphs.Any(g => g.GetType().Name == "NavMeshGraph") ? 1 : 0) +
-						   "&hasPoint=" + (script != null && script.data.graphs != null && script.data.graphs.Any(g => g.GetType().Name == "PointGraph") ? 1 : 0) +
-						   "&hasGrid=" + (script != null && script.data.graphs != null && script.data.graphs.Any(g => g.GetType().Name == "GridGraph") ? 1 : 0) +
-						   "&hasLayered=" + (script != null && script.data.graphs != null && script.data.graphs.Any(g => g.GetType().Name == "LayerGridGraph") ? 1 : 0) +
-						   "&hasRecast=" + (script != null && script.data.graphs != null && script.data.graphs.Any(g => g.GetType().Name == "RecastGraph") ? 1 : 0) +
-						   "&hasGrid=" + (script != null && script.data.graphs != null && script.data.graphs.Any(g => g.GetType().Name == "GridGraph") ? 1 : 0) +
-						   "&hasCustom=" + (script != null && script.data.graphs != null && script.data.graphs.Any(g => g != null && !g.GetType().FullName.Contains("Pathfinding.")) ? 1 : 0) +
+						   "&hasNavmesh=" + (script != null && script.data.graphs.Any(g => g != null && g.GetType().Name == "NavMeshGraph") ? 1 : 0) +
+						   "&hasPoint=" + (script != null && script.data.graphs.Any(g => g != null && g.GetType().Name == "PointGraph") ? 1 : 0) +
+						   "&hasGrid=" + (script != null && script.data.graphs.Any(g => g != null && g.GetType().Name == "GridGraph") ? 1 : 0) +
+						   "&hasLayered=" + (script != null && script.data.graphs.Any(g => g != null && g.GetType().Name == "LayerGridGraph") ? 1 : 0) +
+						   "&hasRecast=" + (script != null && script.data.graphs.Any(g => g != null && g.GetType().Name == "RecastGraph") ? 1 : 0) +
+						   "&hasGrid=" + (script != null && script.data.graphs.Any(g => g != null && g.GetType().Name == "GridGraph") ? 1 : 0) +
+						   "&hasCustom=" + (script != null && script.data.graphs.Any(g => g != null && !g.GetType().FullName.Contains("Pathfinding.")) ? 1 : 0) +
 						   "&graphCount=" + (script != null ? script.data.graphs.Count(g => g != null) : 0) +
 						   "&unityversion="+Application.unityVersion +
 						   "&branch="+AstarPath.Branch;

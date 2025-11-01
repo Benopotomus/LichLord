@@ -1,11 +1,8 @@
-﻿// Assets/Scripts/LichLord/SensingJobSystem.cs
-using Unity.Burst;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-using Unity.Mathematics;
+using System.Collections;
 using System.Collections.Generic;
-using LichLord.World;
 using LichLord.NonPlayerCharacters;
 
 namespace LichLord
@@ -21,10 +18,11 @@ namespace LichLord
                 _brains.Add(brain);
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             if (_brains.Count == 0) return;
 
+            // === 1. Gather data (main thread, fast) ===
             var inputs = new NativeArray<SenseInput>(_brains.Count, Allocator.TempJob);
             var allTrackables = new NativeList<TrackableData>(Allocator.TempJob);
             var chunkOffsets = new NativeList<int>(Allocator.TempJob);
@@ -42,71 +40,83 @@ namespace LichLord
                     TeamID = (int)npc.TeamID,
                     IsWorker = npc.RuntimeState.IsWorker() ? 1 : 0,
                     CarriedItemID = npc.CarriedItem.CarriedItem.Data,
-                    SenseRadiusSqr = 50f * 50f,
-                    BrainIndex = i,
-                    ChunkDataStart = chunkOffsets.Length,  // start of this brain's chunk offsets
+                    SenseRadiusSqr = 500f * 500f,
+                    ChunkDataStart = chunkOffsets.Length,
                     ChunkCount = 0
                 };
 
                 var nearby = Context.ChunkManager.GetNearbyChunks(center.ChunkID, 1);
                 int validChunks = 0;
 
-                for (int c = 0; c < 9 && c < nearby.Count; c++)
+                for (int c = 0; c < nearby.Count && c < 9; c++)
                 {
                     var chunk = nearby[c];
-                    var arr = chunk.GetNativeTrackables();
+                    var arr = chunk.NativeTrackables;
                     if (!arr.IsCreated) continue;
 
-                    // Record start of this chunk
                     chunkOffsets.Add(allTrackables.Length);
-
-                    // Copy trackables with ChunkIndex
                     for (int t = 0; t < arr.Length; t++)
                     {
                         var track = arr[t];
-                        track.ChunkIndex = c;  // SET CHUNK INDEX
+                        track.ChunkIndex = c;
                         allTrackables.Add(track);
                     }
-
                     validChunks++;
                 }
 
-                // Update input with valid chunk count
                 var input = inputs[i];
                 input.ChunkCount = validChunks;
                 inputs[i] = input;
             }
 
-            // Final offset
             chunkOffsets.Add(allTrackables.Length);
 
+            // === 2. Schedule job (runs on worker threads) ===
             var job = new SensingJob
             {
                 Inputs = inputs,
-                AllTrackables = allTrackables.AsArray(),
-                ChunkOffsets = chunkOffsets.AsArray(),
+                AllTrackables = allTrackables.AsDeferredJobArray(),
+                ChunkOffsets = chunkOffsets.AsDeferredJobArray(),
                 Results = results
             };
 
             JobHandle handle = job.Schedule(_brains.Count, 32);
+
+            // === 3. Copy brains BEFORE clearing ===
+            var brainsCopy = _brains.ToArray();
+            _brains.Clear();
+
+            // === 4. Start coroutine to wait & apply (NO BLOCK) ===
+            StartCoroutine(ApplyWhenDone(handle, results, allTrackables, brainsCopy));
+        }
+
+        private IEnumerator ApplyWhenDone(
+            JobHandle handle,
+            NativeArray<SenseResult> results,
+            NativeList<TrackableData> trackables,
+            NonPlayerCharacterBrainComponent[] brains)
+        {
+            // Wait until job finishes (does NOT block main thread)
+            while (!handle.IsCompleted)
+                yield return null;
+
+            // Now safe: job is done → Complete is instant
             handle.Complete();
 
-            // Apply results
-            for (int i = 0; i < _brains.Count; i++)
+            // === 5. Apply results ===
+            for (int i = 0; i < brains.Length; i++)
             {
-                var result = results[i];
-                var brain = _brains[i];
-                var nearby = Context.ChunkManager.GetNearbyChunks(brain.NPC.CurrentChunk.ChunkID, 1);
+                var brain = brains[i];
+                if (brain == null) continue;
 
-                brain.ApplySenseResult(result, allTrackables, nearby);
+                var result = results[i];
+                var nearby = Context.ChunkManager.GetNearbyChunks(brain.NPC.CurrentChunk.ChunkID, 1);
+                brain.ApplySenseResult(result, trackables, nearby);
             }
 
-            // Cleanup
-            inputs.Dispose();
-            allTrackables.Dispose();
-            chunkOffsets.Dispose();
+            // === 6. Cleanup ===
             results.Dispose();
-            _brains.Clear();
+            trackables.Dispose();
         }
     }
 }

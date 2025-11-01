@@ -1,10 +1,8 @@
 ﻿// Assets/Scripts/LichLord/World/Chunk.cs
 using UnityEngine;
-using Fusion;
 using System.Collections.Generic;
 using LichLord.Props;
 using Unity.Collections;
-using Unity.Mathematics;
 using LichLord.NonPlayerCharacters;
 using LichLord.Buildables;
 
@@ -46,41 +44,37 @@ namespace LichLord.World
         public Dictionary<int, PropRuntimeState> LoadedPropStates => _loadedPropStates;
 
         // -----------------------------------------------------------------
-        // NATIVE TRACKABLES (for Burst + Jobs)
+        // NATIVE TRACKABLES — PERSISTENT, IN-PLACE UPDATE
         // -----------------------------------------------------------------
         private NativeArray<TrackableData> _nativeTrackables;
-        public NativeArray<TrackableData> NativeTrackables => _nativeTrackables;
-
-        // DIRTY FLAG SYSTEM
+        private int _lastValidCount = 0;
         private bool _trackablesDirty = true;
+
+        public NativeArray<TrackableData> NativeTrackables => _nativeTrackables;
 
         public void MarkTrackablesDirty() => _trackablesDirty = true;
 
-        public NativeArray<TrackableData> GetNativeTrackables()
-        {
-            if (_trackablesDirty || !_nativeTrackables.IsCreated)
-            {
-                RebuildNativeTrackables();
-                _trackablesDirty = false;
-            }
-            return _nativeTrackables;
-        }
+        private int _rebuildFrameCounter = 0;
+        private const int REBUILD_EVERY_FRAMES = 2;
 
         public void RebuildNativeTrackables()
         {
-            // Dispose old
-            if (_nativeTrackables.IsCreated)
-                _nativeTrackables.Dispose();
-
-            // Count valid trackables
             int validCount = 0;
             for (int i = 0; i < _trackablesInChunk.Count; i++)
                 if (_trackablesInChunk[i] != null)
                     validCount++;
 
-            // Allocate exact size
-            _nativeTrackables = new NativeArray<TrackableData>(validCount, Unity.Collections.Allocator.Persistent);
+            // Resize only if count changed
+            if (!_nativeTrackables.IsCreated || validCount != _lastValidCount)
+            {
+                if (_nativeTrackables.IsCreated)
+                    _nativeTrackables.Dispose();
 
+                _nativeTrackables = new NativeArray<TrackableData>(validCount, Allocator.Persistent);
+                _lastValidCount = validCount;
+            }
+
+            // In-place update
             int writeIndex = 0;
             for (int i = 0; i < _trackablesInChunk.Count; i++)
             {
@@ -96,12 +90,17 @@ namespace LichLord.World
                     HarvestPoints = GetHarvestPoints(t)
                 };
             }
+
+            _trackablesDirty = false;
         }
 
         public void DisposeNativeTrackables()
         {
             if (_nativeTrackables.IsCreated)
+            {
                 _nativeTrackables.Dispose();
+                _lastValidCount = 0;
+            }
         }
 
         // -----------------------------------------------------------------
@@ -300,6 +299,14 @@ namespace LichLord.World
 
         public void OnRender(bool hasAuthority, float renderDeltaTime)
         {
+
+            _rebuildFrameCounter++;
+            if (_rebuildFrameCounter >= REBUILD_EVERY_FRAMES)
+            {
+                RebuildNativeTrackables();
+                _rebuildFrameCounter = 0;
+            }
+
             for (int i = 0; i < _propRuntimeStates.Length; i++)
             {
                 if (!GetRenderState(hasAuthority, i, out var usedState))

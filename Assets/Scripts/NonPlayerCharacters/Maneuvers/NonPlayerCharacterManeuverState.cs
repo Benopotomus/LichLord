@@ -29,9 +29,6 @@ namespace LichLord.NonPlayerCharacters
             if (!IsEnabled)
                 return false;
 
-            if (Definition == null) 
-                return false;
-            
             if (IsOnCooldown(tick))
                 return false;
 

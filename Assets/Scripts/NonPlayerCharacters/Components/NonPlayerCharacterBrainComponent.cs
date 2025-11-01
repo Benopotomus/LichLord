@@ -19,15 +19,15 @@ namespace LichLord.NonPlayerCharacters
 
         private IChunkTrackable _attackTarget;
         public IChunkTrackable AttackTarget => _attackTarget;
-        public float DistanceToAttackTarget;
+        public float SqrDistanceToAttackTarget;
 
         private IChunkTrackable _harvestTarget;
         public IChunkTrackable HarvestTarget => _harvestTarget;
-        public float DistanceToHarvestTarget;
+        public float SqrDistanceToHarvestTarget;
 
         private IChunkTrackable _depositTarget;
         public IChunkTrackable DepositTarget => _depositTarget;
-        public float DistanceToDepositTarget;
+        public float SqrDistanceToDepositTarget;
 
         // Modulus of ticks x/32
         private int _updateSensesTick = 32; // 1 per second
@@ -87,9 +87,6 @@ namespace LichLord.NonPlayerCharacters
             _activeManeuverState = ENPCState.Inactive;
             _moveTarget = Vector3.zero;
             _activeManeuver = null;
-
-            if(hasAuthority)
-                FindCurrentTargets();
         }
 
         public void StartRecycle()
@@ -386,13 +383,13 @@ namespace LichLord.NonPlayerCharacters
             switch (maneuverType)
             {
                 case EManeuverType.Deposit:
-                    return _hasDepositTarget ? DistanceToDepositTarget : float.MaxValue;
+                    return _hasDepositTarget ? SqrDistanceToDepositTarget : float.MaxValue;
 
                 case EManeuverType.Harvest:
-                    return _hasHarvestTarget ? DistanceToHarvestTarget : float.MaxValue;
+                    return _hasHarvestTarget ? SqrDistanceToHarvestTarget : float.MaxValue;
 
                 case EManeuverType.Attack:
-                    return _hasAttackTarget ? DistanceToAttackTarget : float.MaxValue;
+                    return _hasAttackTarget ? SqrDistanceToAttackTarget : float.MaxValue;
 
                 default:
                     return float.MaxValue; // No valid target
@@ -554,100 +551,6 @@ namespace LichLord.NonPlayerCharacters
             }
 
             _npc.Movement.SetMoveTargetPosition(_moveTarget);
-        }
-
-        public void FindCurrentTargets()
-        {
-            if(_npc.CurrentChunk == null) return;
-
-            // Get current + nearby chunks
-            
-            float closestAttackTargetDistance = Mathf.Infinity;
-            float closestHarvestTargetDistance = Mathf.Infinity;
-            float closestDepositTargetDistance = Mathf.Infinity;
-
-            IChunkTrackable currentAttackTarget = null;
-            IChunkTrackable currentHarvestTarget = null;
-            IChunkTrackable currentDepositTarget = null;
-
-            bool isWorker = _npc.RuntimeState.IsWorker();
-            
-            FItemData carriedItem = _npc.CarriedItem.CarriedItem;
-            
-            bool hasCommandTargetNode = false;
-
-            if (isWorker)
-            {
-                var commandTargetNode = GetCommandTargetNode();
-                IChunkTrackable commandTarget = commandTargetNode.Item2;
-
-                if (IsHarvestTargetValid(commandTarget, carriedItem))
-                {
-                    hasCommandTargetNode = true;
-                    currentHarvestTarget = commandTarget;
-                }
-            }
-
-            foreach (var chunk in _npc.CachedChunks)
-            {
-                var trackables = chunk.Trackables;
-
-                for (int i = 0; i < trackables.Count; i++)
-                {
-                    IChunkTrackable trackable = trackables[i];
-
-                    if (IsAttackTargetValid(trackable))
-                    {
-                        float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
-
-                        if (sqrDistance < closestAttackTargetDistance)
-                        {
-                            closestAttackTargetDistance = sqrDistance;
-                            currentAttackTarget = trackable;
-                        }
-                    }
-
-                    if (isWorker)
-                    {
-                        if (!hasCommandTargetNode)
-                        {
-                            if (IsHarvestTargetValid(trackable, carriedItem))
-                            {
-                                float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
-
-                                if (sqrDistance < closestHarvestTargetDistance)
-                                {
-                                    closestHarvestTargetDistance = sqrDistance;
-                                    currentHarvestTarget = trackable;
-                                }
-                            }
-                        }
-
-                        if (IsDepositTargetValid(trackable, carriedItem))
-                        {
-                            float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
-
-                            if (sqrDistance < closestDepositTargetDistance)
-                            {
-                                closestDepositTargetDistance = sqrDistance;
-                                currentDepositTarget = trackable;
-                            }
-                        }
-                    }
-                }
-            }
-
-            DistanceToAttackTarget = closestAttackTargetDistance;
-            SetAttackTarget(currentAttackTarget);
-
-            if (isWorker)
-            {
-                DistanceToHarvestTarget = closestHarvestTargetDistance;
-                SetHarvestTarget(currentHarvestTarget);
-
-                DistanceToDepositTarget = closestDepositTargetDistance;
-                SetDepositTarget(currentDepositTarget);
-            }
         }
 
         private (bool, IChunkTrackable) GetCommandTargetNode()
@@ -1041,9 +944,9 @@ namespace LichLord.NonPlayerCharacters
 
         public void ApplySenseResult(SenseResult result, NativeList<TrackableData> allTrackables, List<Chunk> nearbyChunks)
         {
-            DistanceToAttackTarget = result.AttackDistSqr;
-            DistanceToHarvestTarget = result.HarvestDistSqr;
-            DistanceToDepositTarget = result.DepositDistSqr;
+            SqrDistanceToAttackTarget = result.AttackDistSqr;
+            SqrDistanceToHarvestTarget = result.HarvestDistSqr;
+            SqrDistanceToDepositTarget = result.DepositDistSqr;
 
             SetAttackTarget(GetTrackableFromGlobalIndex(result.AttackGlobalIndex, allTrackables, nearbyChunks));
             SetHarvestTarget(GetTrackableFromGlobalIndex(result.HarvestGlobalIndex, allTrackables, nearbyChunks));

@@ -18,7 +18,7 @@ namespace LichLord.NonPlayerCharacters
             if (target is Stockpile stockpile)
                 stockpile.DropOffCurrency(npc);
             
-            npc.Brain.FindCurrentTargets();
+           // npc.Brain.FindCurrentTargets();
         }
     }
 }

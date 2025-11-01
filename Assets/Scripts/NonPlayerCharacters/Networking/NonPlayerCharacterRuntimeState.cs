@@ -153,7 +153,10 @@ namespace LichLord.NonPlayerCharacters
 
         public EAttitude GetAttitude()
         {
-            return _npcData.DataDefinition.GetAttitude(ref _npcData);
+            if (_npcData.DefinitionID == 0)
+                return EAttitude.None;
+
+            return _dataDefinition.GetAttitude(ref _npcData);
         }
 
         public void SetAttitude(EAttitude newAttitude)
@@ -161,7 +164,7 @@ namespace LichLord.NonPlayerCharacters
             if (_npcData.DefinitionID == 0)
                 return;
 
-            DataDefinition.SetAttitude(newAttitude, ref _npcData);
+            _dataDefinition.SetAttitude(newAttitude, ref _npcData);
             _replicator.ReplicateRuntimeState(this);
         }
 
