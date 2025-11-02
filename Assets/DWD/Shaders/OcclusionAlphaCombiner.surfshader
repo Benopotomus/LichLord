@@ -1,0 +1,28 @@
+
+BEGIN_OPTIONS
+	ShaderName "DWD/Editor/OcclusionAlphaMultiplier"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[NoScaleOffset] _SourceOne("Source One", 2D) = "white" {}
+	[NoScaleOffset] _SourceTwo("Source Two", 2D) = "white" {}
+END_PROPERTIES
+
+BEGIN_CODE
+
+	TEXTURE2D(_SourceOne);
+	SAMPLER(sampler_SourceOne);
+	TEXTURE2D(_SourceTwo);
+	SAMPLER(sampler_SourceTwo);
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 texOne = SAMPLE_TEXTURE2D(_SourceOne, sampler_SourceOne, d.texcoord0.xy);
+		half4 texTwo = SAMPLE_TEXTURE2D(_SourceTwo, sampler_SourceTwo, d.texcoord0.xy).aaaa;
+		texOne *= texTwo;
+		o.Albedo = texOne.rgb;
+		o.Alpha = texOne.a;
+	}
+
+END_CODE
+
