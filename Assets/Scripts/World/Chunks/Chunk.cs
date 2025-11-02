@@ -16,6 +16,9 @@ namespace LichLord.World
         private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
         public List<IChunkTrackable> Trackables => _trackablesInChunk;
 
+        private List<IHitTarget> _hitTargets = new List<IHitTarget>();
+        public List<IHitTarget> HitTargets => _hitTargets;
+
         private List<InvasionSpawnPoint> _invasionSpawnPoints = new List<InvasionSpawnPoint>();
         public List<InvasionSpawnPoint> InvasionSpawnPoints => _invasionSpawnPoints;
 
@@ -97,6 +100,16 @@ namespace LichLord.World
         public void RemoveObject(IChunkTrackable objId)
         {
             _trackablesInChunk.Remove(objId);
+        }
+
+        public void AddHitTarget(IHitTarget objId)
+        {
+            _hitTargets.Add(objId);
+        }
+
+        public void RemoveHitTarget(IHitTarget objId)
+        {
+            _hitTargets.Remove(objId);
         }
 
         public void InitializeRuntimeStates(PropMarkupData[] propMarkupDatas)

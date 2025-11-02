@@ -107,6 +107,9 @@ namespace LichLord.NonPlayerCharacters
         public Chunk CurrentChunk { get => _currentChunk; set => _currentChunk = value; }
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 
+        // IHitTarget
+        public IChunkTrackable ChunkTrackable => this;
+
         public Vector3 Position => CachedTransform.position;
         public bool IsAttackable 
         { 
@@ -369,10 +372,16 @@ namespace LichLord.NonPlayerCharacters
                     _cachedChunks = _context.ChunkManager.GetNearbyChunks(_currentChunk.ChunkID);
 
                 if (lastChunk != null)
+                {
                     lastChunk.RemoveObject(this);
+                    lastChunk.RemoveHitTarget(this);
+                }
 
                 if (newChunk != null)
+                {
                     newChunk.AddObject(this);
+                    newChunk.AddHitTarget(this);
+                }
             }
         }
 

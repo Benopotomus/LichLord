@@ -2,6 +2,7 @@
 
 namespace LichLord
 {
+    using LichLord.World;
     using UnityEngine;
 
     public enum EHitAction : byte
@@ -36,6 +37,7 @@ namespace LichLord
     {
         void ProcessHit(ref FHitUtilityData hit);
         void OnHitTaken(ref FHitUtilityData hit);
+        public IChunkTrackable ChunkTrackable { get;}
     }
 
     public interface IHitInstigator

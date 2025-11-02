@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using LichLord.World;
+using UnityEngine;
 
 namespace LichLord.Props
 {
@@ -11,6 +12,9 @@ namespace LichLord.Props
         [SerializeField]
         protected PropHealthComponent _healthComponent;
         public PropHealthComponent HealthComponent => _healthComponent;
+
+        // IHitTarget
+        public IChunkTrackable ChunkTrackable => this;
 
         public HurtboxComponent Hurtbox;
 

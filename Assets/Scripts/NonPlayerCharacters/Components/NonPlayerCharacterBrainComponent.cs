@@ -546,23 +546,12 @@ namespace LichLord.NonPlayerCharacters
             {
                 var trackables = chunk.Trackables;
 
-                for (int i = 0; i < trackables.Count; i++)
+                if (isWorker)
                 {
-                    IChunkTrackable trackable = trackables[i];
-
-                    if (IsAttackTargetValid(trackable))
+                    for (int i = 0; i < trackables.Count; i++)
                     {
-                        float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
+                        IChunkTrackable trackable = trackables[i];
 
-                        if (sqrDistance < closestAttackTargetDistance)
-                        {
-                            closestAttackTargetDistance = sqrDistance;
-                            currentAttackTarget = trackable;
-                        }
-                    }
-
-                    if (isWorker)
-                    {
                         if (!hasCommandTargetNode)
                         {
                             if (IsHarvestTargetValid(trackable, carriedItem))
@@ -586,6 +575,25 @@ namespace LichLord.NonPlayerCharacters
                                 closestDepositTargetDistance = sqrDistance;
                                 currentDepositTarget = trackable;
                             }
+                        }
+                    
+                    }
+                }
+
+                var hitTargets = chunk.HitTargets;
+
+                for (int i = 0; i < hitTargets.Count; i++)
+                {
+                    IChunkTrackable trackable = hitTargets[i].ChunkTrackable;
+
+                    if (IsAttackTargetValid(trackable))
+                    {
+                        float sqrDistance = Vector3.SqrMagnitude(_npc.CachedTransform.position - trackable.Position);
+
+                        if (sqrDistance < closestAttackTargetDistance)
+                        {
+                            closestAttackTargetDistance = sqrDistance;
+                            currentAttackTarget = trackable;
                         }
                     }
                 }

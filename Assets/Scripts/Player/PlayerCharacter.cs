@@ -67,6 +67,9 @@ namespace LichLord
         public bool IsAttackable { get { return true; } }
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 
+        // IHitTarget
+        public IChunkTrackable ChunkTrackable => this;
+
         // Cached list of PropRuntimeState for current and neighboring chunks
         private List<PropRuntimeState> _cachedPropStates = new List<PropRuntimeState>();
         public IReadOnlyList<PropRuntimeState> CachedPropStates => _cachedPropStates.AsReadOnly();
@@ -232,10 +235,16 @@ namespace LichLord
             CurrentChunk = newChunk;
 
             if (lastChunk != null)
+            {
                 lastChunk.RemoveObject(this);
+                lastChunk.RemoveHitTarget(this);
+            }
 
             if (newChunk != null)
+            {
                 newChunk.AddObject(this);
+                newChunk.AddHitTarget(this);
+            }
 
             var oldChunks = new List<Chunk>(_cachedChunks);
             var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);

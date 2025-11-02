@@ -31,6 +31,9 @@ namespace LichLord.Buildables
         public virtual float BonusRadius { get { return 0; } }
         public virtual Collider HurtBoxCollider { get { return null; } }
 
+        // IHitTarget
+        public IChunkTrackable ChunkTrackable => this;
+
         public HurtboxComponent Hurtbox;
         [SerializeField] protected BuildableSpawnTransformer _spawnTransformer;
         public BuildableSpawnTransformer SpawnTransformer => _spawnTransformer;
@@ -46,6 +49,7 @@ namespace LichLord.Buildables
             _sceneContext = zone.Context;
             _chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
             _chunk.AddObject(this);
+            _chunk.AddHitTarget(this);
 
             _spawnTransformer.PlaySpawnAnimation();
         }
@@ -58,6 +62,8 @@ namespace LichLord.Buildables
         public virtual void StartRecycle()
         {
             _chunk.RemoveObject(this);
+            _chunk.RemoveHitTarget(this);
+
             DWDObjectPool.Instance.Recycle(this);
         }
 

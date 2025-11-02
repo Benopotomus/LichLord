@@ -63,6 +63,9 @@ namespace LichLord
         private Chunk _chunk;
         public Vector3 Position => _cachedTransform.position;
 
+        // IHitTarget
+        public IChunkTrackable ChunkTrackable => this;
+
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
         public bool IsAttackable {
             get
@@ -114,6 +117,7 @@ namespace LichLord
             _cachedTransform.position = _data.GetPosition(Context, HasStateAuthority);
             _chunk = Context.ChunkManager.GetChunk(_data.ChunkPosition);
             _chunk.AddObject(this);
+            _chunk.AddHitTarget(this);
             var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
             Context.ChunkManager.TryAddReplicatedChunks(newChunks);
         }
@@ -175,6 +179,7 @@ namespace LichLord
             _interactableComponent.onInteractEnd -= OnInteractEnd;
             _interactableComponent.onInteractionComplete -= OnInteractionComplete;
             _chunk.RemoveObject(this);
+            _chunk.RemoveHitTarget(this);
             Context.StrongholdManager.OnStrongholdDespawned(this);
 
             base.Despawned(runner, hasState);

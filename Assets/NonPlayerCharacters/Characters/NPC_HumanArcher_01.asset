@@ -17,10 +17,30 @@ MonoBehaviour:
   _prefabBundle:
     _name: NPC_HumanArcher_01
     _bundle: npc_humanarcher_01
+  _icon:
+    _name: 
+    _bundle: 
   _maxHealth: 100
   _damageReduction: 3
   _damageResistance: 0
+  _hitReactThreshold: 3
   _walkSpeed: 5
+  _isFrontlineCombatant: 0
+  _spawnState:
+    StateTime: 2
+    _animationTrigger:
+      Action: 0
+      Weapon: 0
+      TriggerNumber: 0
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
+      IsMoving: 0
+      IsBlocking: 0
+      PlaybackSpeed: 0
+    _spawnEffect:
+      _name: 
+      _bundle: 
   _spawnTypeDataDefinitions:
     _serializedList:
     - Key: 0
@@ -32,3 +52,5 @@ MonoBehaviour:
   _dialogOwnerInfo:
     sprite: {fileID: 0}
     name: 
+  _tasks: []
+  _summonableItem: {fileID: 0}
