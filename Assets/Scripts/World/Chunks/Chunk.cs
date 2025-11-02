@@ -19,6 +19,9 @@ namespace LichLord.World
         private List<IChunkTrackable> _trackablesInChunk = new List<IChunkTrackable>();
         public List<IChunkTrackable> Trackables => _trackablesInChunk;
 
+        private List<NonPlayerCharacter> _npcsInChunk = new List<NonPlayerCharacter>();
+        public List<NonPlayerCharacter> NPCsInChunk => _npcsInChunk;
+
         private List<InvasionSpawnPoint> _invasionSpawnPoints = new List<InvasionSpawnPoint>();
         public List<InvasionSpawnPoint> InvasionSpawnPoints => _invasionSpawnPoints;
 
@@ -175,6 +178,23 @@ namespace LichLord.World
         public void RemoveObject(IChunkTrackable objId)
         {
             _trackablesInChunk.Remove(objId);
+            MarkTrackablesDirty(); // REBUILD ON NEXT GET
+        }
+
+        // -----------------------------------------------------------------
+        // NPC MANAGEMENT
+        // -----------------------------------------------------------------
+        public void AddNPC(NonPlayerCharacter npc)
+        {
+            _trackablesInChunk.Add(npc);
+            _npcsInChunk.Add(npc);
+            MarkTrackablesDirty(); // REBUILD ON NEXT GET
+        }
+
+        public void RemoveNPC(NonPlayerCharacter npc)
+        {
+            _trackablesInChunk.Remove(npc);
+            _npcsInChunk.Remove(npc);
             MarkTrackablesDirty(); // REBUILD ON NEXT GET
         }
 

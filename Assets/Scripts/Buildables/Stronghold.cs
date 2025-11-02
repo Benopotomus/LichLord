@@ -59,8 +59,8 @@ namespace LichLord
         public FContainerSlotData ContainerSlotData => _containerSlotData;
 
         // IChunkTrackable
-        public Chunk CurrentChunk { get { return _chunk; } set { } }
-        private Chunk _chunk;
+        public FChunkReference CurrentChunk { get { return _chunk; } set { } }
+        private FChunkReference _chunk;
         public Vector3 Position => _cachedTransform.position;
 
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
@@ -112,10 +112,14 @@ namespace LichLord
         {
             Context.ChunkManager.onChunksReady -= OnChunksReady;
             _cachedTransform.position = _data.GetPosition(Context, HasStateAuthority);
-            _chunk = Context.ChunkManager.GetChunk(_data.ChunkPosition);
-            _chunk.AddObject(this);
-            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
-            Context.ChunkManager.TryAddReplicatedChunks(newChunks);
+            _chunk.Chunk = Context.ChunkManager.GetChunk(_data.ChunkPosition);
+
+            if (_chunk.IsValid)
+            {
+                _chunk.Chunk.AddObject(this);
+                var newChunks = Context.ChunkManager.GetNearbyChunks(_chunk.Chunk.ChunkID, radius: 1);
+                Context.ChunkManager.TryAddReplicatedChunks(newChunks);
+            }
         }
 
         public void SetSpawnData(int strongholdId, FStaticPropPosition positionData, int currentHealth, int rank,int containerIndex)
@@ -168,13 +172,17 @@ namespace LichLord
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
-            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
-            Context.ChunkManager.TryAddReplicatedChunks(newChunks);
+            if (_chunk.IsValid)
+            {
+                var newChunks = Context.ChunkManager.GetNearbyChunks(_chunk.Chunk.ChunkID, radius: 1);
+                Context.ChunkManager.TryAddReplicatedChunks(newChunks);
+                _chunk.Chunk.RemoveObject(this);
+            }
 
             _interactableComponent.onInteractStart -= OnInteractStart;
             _interactableComponent.onInteractEnd -= OnInteractEnd;
             _interactableComponent.onInteractionComplete -= OnInteractionComplete;
-            _chunk.RemoveObject(this);
+
             Context.StrongholdManager.OnStrongholdDespawned(this);
 
             base.Despawned(runner, hasState);

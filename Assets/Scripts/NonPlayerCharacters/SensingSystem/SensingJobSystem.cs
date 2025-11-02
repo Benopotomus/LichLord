@@ -14,7 +14,7 @@ namespace LichLord
 
         public void QueueSense(NonPlayerCharacterBrainComponent brain)
         {
-            if (brain?.NPC?.CurrentChunk != null)
+            if (brain.NPC.CurrentChunk.IsValid)
                 _brains.Add(brain);
         }
 
@@ -45,7 +45,7 @@ namespace LichLord
                     ChunkCount = 0
                 };
 
-                var nearby = Context.ChunkManager.GetNearbyChunks(center.ChunkID, 1);
+                var nearby = Context.ChunkManager.GetNearbyChunks(center.Chunk.ChunkID, 1);
                 int validChunks = 0;
 
                 for (int c = 0; c < nearby.Count && c < 9; c++)
@@ -110,8 +110,12 @@ namespace LichLord
                 if (brain == null) continue;
 
                 var result = results[i];
-                var nearby = Context.ChunkManager.GetNearbyChunks(brain.NPC.CurrentChunk.ChunkID, 1);
-                brain.ApplySenseResult(result, trackables, nearby);
+
+                if (brain.NPC.CurrentChunk.IsValid)
+                {
+                    var nearby = Context.ChunkManager.GetNearbyChunks(brain.NPC.CurrentChunk.Chunk.ChunkID, 1);
+                    brain.ApplySenseResult(result, trackables, nearby);
+                }
             }
 
             // === 6. Cleanup ===

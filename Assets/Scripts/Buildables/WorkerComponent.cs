@@ -221,8 +221,8 @@ namespace LichLord.NonPlayerCharacters
                     continue;
 
                 var targetObject = interactable.Owner;
-                Chunk chunk = targetObject.CurrentChunk;
-                if (chunk == null)
+                var chunkRef = targetObject.CurrentChunk;
+                if (!chunkRef.IsValid)
                     continue;
 
                 float distSqr = (collider.transform.position - spawnPosition).sqrMagnitude;

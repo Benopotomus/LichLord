@@ -13,8 +13,8 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private int _currentAnimIndex;
         public int CurrentAnimIndex => _currentAnimIndex;
 
-        int _deathTicks = 64;
-        int _deathEndTick;
+        private int _deathTicks = 64;
+        private int _deathEndTick;
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority, int tick)
         {
@@ -22,7 +22,7 @@ namespace LichLord.NonPlayerCharacters
         }
 
         public void StartRecycle()
-        { 
+        {
             _currentState = ENPCState.Inactive;
         }
 
@@ -30,7 +30,7 @@ namespace LichLord.NonPlayerCharacters
         {
             UpdateStateChange(runtimeState, hasAuthority, tick, forceUpdate);
 
-            if(hasAuthority) 
+            if (hasAuthority)
                 UpdateCurrentState(runtimeState, tick);
         }
 
@@ -40,24 +40,18 @@ namespace LichLord.NonPlayerCharacters
             ENPCState newState = runtimeState.GetState();
             int animIndex = runtimeState.GetAnimationIndex();
 
-            if (!forceUpdate)
-            {
-                if (_currentState == newState &&
-                    _currentAnimIndex == animIndex)
-                    return;
-            }
+            if (!forceUpdate && _currentState == newState && _currentAnimIndex == animIndex)
+                return;
 
             NPC.AnimationController.SetAnimationForState(oldState, newState);
 
-            switch (oldState)
+            // Teleport NPC if transitioning from Dead or Inactive
+            if (oldState == ENPCState.Dead || oldState == ENPCState.Inactive)
             {
-                case ENPCState.Dead:
-                case ENPCState.Inactive:
-                    NPC.Movement.AIFollower.Teleport(runtimeState.GetPosition());
-                    //Debug.Log("teleporting " + data.Position);
-                    break;
+                NPC.Movement.AIFollower.Teleport(runtimeState.GetPosition());
             }
 
+            // Handle new state
             switch (newState)
             {
                 case ENPCState.Idle:
@@ -65,55 +59,8 @@ namespace LichLord.NonPlayerCharacters
                     NPC.Hurtbox.SetHitBoxesActive(true);
                     if (hasAuthority)
                     {
-                        //NPC.Movement.AIFollower.enableLocalAvoidance = false;
-                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.SetFollowerUpdatePosition(true);
-                        NPC.Movement.SetFollowerUpdateRotation(true);
-                        NPC.Movement.SetFollowerLocalAvoidance(true);
-                        NPC.Movement.SetFollowerCanMove(true);
-                        //NPC.Movement.AIFollower.destination = NPC.CachedTransform.position;
-                    }
-                    break;
-
-                case ENPCState.Inactive:
-
-                    NPC.Hurtbox.SetHitBoxesActive(false);
-                    if (hasAuthority)
-                    {
-                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.SetFollowerUpdatePosition(false);
-                        NPC.Movement.SetFollowerUpdateRotation(false);
-                        NPC.Movement.SetFollowerLocalAvoidance(false);
-                        NPC.Movement.SetFollowerCanMove(false);
-                    }
-                    break;
-                case ENPCState.Dead:
-                    _deathEndTick = tick + _deathTicks;
-                    NPC.Hurtbox.SetHitBoxesActive(false);
-                    NPC.Collider.enabled = false;
-                    NPC.HitReact.SpawnImpactVisualEffect(0);
-
-                    if (hasAuthority)
-                    {
-                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.SetFollowerUpdatePosition(false);
-                        NPC.Movement.SetFollowerUpdateRotation(false);
-                        NPC.Movement.SetFollowerLocalAvoidance(false);
-                        NPC.Movement.SetFollowerCanMove(false);
-                    }
-
-                    break;
-                case ENPCState.HitReact:
-                    NPC.Collider.enabled = true;
-                    NPC.HitReact.StartHitReact(newState, animIndex, tick);
-
-                    if (hasAuthority)
-                    {
-                        //NPC.Movement.AIFollower.rvoSettings.locked = true;
-                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-
-                        NPC.Movement.SetFollowerUpdateRotation(false);
-                        NPC.Movement.SetFollowerUpdatePosition(false);
+                        SetRVOSettings(false, 0.5f); // unlocked, can move
+                        SetFollowerMovement(true, true,  true);
                     }
                     break;
 
@@ -123,26 +70,52 @@ namespace LichLord.NonPlayerCharacters
                 case ENPCState.Maneuver_4:
                     NPC.Collider.enabled = true;
                     NPC.Brain.SetAnimationForManeuver(newState, animIndex);
-
                     if (hasAuthority)
                     {
-                        //NPC.Movement.AIFollower.rvoSettings.locked = true;
-                       // NPC.Movement.AIFollower.rvoSettings.priority = 1;
+                        SetRVOSettings(true, 1f); // unlocked, higher priority
+                        SetFollowerMovement(true, true,  true);
+                    }
+                    break;
+
+                case ENPCState.HitReact:
+                    NPC.Collider.enabled = true;
+                    NPC.HitReact.StartHitReact(newState, animIndex, tick);
+                    if (hasAuthority)
+                    {
+                        SetRVOSettings(true, 0.5f); // lock agent during hit
+                        SetFollowerMovement(false, false,  false);
+                    }
+                    break;
+
+                case ENPCState.Dead:
+                    _deathEndTick = tick + _deathTicks;
+                    NPC.Collider.enabled = false;
+                    NPC.Hurtbox.SetHitBoxesActive(false);
+                    NPC.HitReact.SpawnImpactVisualEffect(0);
+                    if (hasAuthority)
+                    {
+                        SetRVOSettings(true, 0.5f); // locked
+                        SetFollowerMovement(false, false,  false);
+                    }
+                    break;
+
+                case ENPCState.Inactive:
+                    NPC.Hurtbox.SetHitBoxesActive(false);
+                    if (hasAuthority)
+                    {
+                        SetRVOSettings(true, 0.5f); // locked
+                        SetFollowerMovement(false, false, false);
                     }
                     break;
 
                 case ENPCState.Spawning:
-                    NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.Collider.enabled = false;
+                    NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.SpawningComponent.StartSpawnState(tick);
-
                     if (hasAuthority)
                     {
-                        //NPC.Movement.AIFollower.rvoSettings.priority = 0.5f;
-                        NPC.Movement.SetFollowerUpdatePosition(false);
-                        NPC.Movement.SetFollowerUpdateRotation(false);
-                        NPC.Movement.SetFollowerLocalAvoidance(false);
-                        NPC.Movement.SetFollowerCanMove(false);
+                        SetRVOSettings(true, 0.5f); // locked
+                        SetFollowerMovement(false, false, false);
                     }
                     break;
             }
@@ -156,7 +129,6 @@ namespace LichLord.NonPlayerCharacters
             _currentState = newState;
         }
 
-        // State Authority Only
         private void UpdateCurrentState(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
             switch (runtimeState.GetState())
@@ -168,14 +140,32 @@ namespace LichLord.NonPlayerCharacters
                     NPC.HitReact.UpdateHitReactState(runtimeState, tick);
                     break;
                 case ENPCState.Dead:
-
                     if (tick > _deathEndTick)
-                    {
                         runtimeState.SetState(ENPCState.Inactive);
-                    }
-
                     break;
             }
+        }
+
+        // --- Helpers ---
+        private void SetRVOSettings(bool locked, float priority)
+        {
+            var follower = NPC.Movement.AIFollower;
+
+            if (!follower.enableLocalAvoidance)
+                return;
+
+            var settings = follower.rvoSettings;
+
+            settings.locked = locked;
+            settings.priority = priority;
+            follower.rvoSettings = settings;
+        }
+
+        private void SetFollowerMovement(bool updatePosition, bool updateRotation, bool canMove)
+        {
+            NPC.Movement.SetFollowerUpdatePosition(updatePosition);
+            NPC.Movement.SetFollowerUpdateRotation(updateRotation);
+            NPC.Movement.SetFollowerCanMove(canMove);
         }
     }
 }

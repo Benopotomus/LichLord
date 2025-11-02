@@ -99,8 +99,8 @@ namespace LichLord.NonPlayerCharacters
         public ETeamID TeamID => _teamId;
 
         // IChunkTrackable
-        private Chunk _currentChunk;
-        public Chunk CurrentChunk { get => _currentChunk; set => _currentChunk = value; }
+        private FChunkReference _chunk;
+        public FChunkReference CurrentChunk { get => _chunk; set => _chunk = value; }
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 
         public Vector3 Position => CachedTransform.position;
@@ -354,18 +354,18 @@ namespace LichLord.NonPlayerCharacters
 
         public void UpdateChunk(ChunkManager chunkManager)
         {
-            var lastChunk = CurrentChunk;
+            var lastChunk = _chunk.Chunk;
             var newChunk = chunkManager.GetChunkAtPosition(CachedTransform.position);
 
             if (lastChunk != newChunk)
             {
-                _currentChunk = newChunk;
+                _chunk.Chunk = newChunk;
 
                 if (lastChunk != null)
-                    lastChunk.RemoveObject(this);
+                    lastChunk.RemoveNPC(this);
 
                 if (newChunk != null)
-                    newChunk.AddObject(this);
+                    newChunk.AddNPC(this);
             }
         }
 

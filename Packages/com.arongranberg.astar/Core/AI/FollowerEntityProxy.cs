@@ -1037,12 +1037,29 @@ namespace Pathfinding.ECS {
 			position = newPosition;
 		}
 
-		/// <summary>
-		/// Destroys the entity and clears the proxy.
-		///
-		/// If the entity does not exist, this does nothing.
-		/// </summary>
-		public void Destroy () {
+        public bool TryGetRVOSettings(out RVOAgent settings)
+        {
+            settings = default;
+            if (!entityExists) return false;
+
+            if (entityStorageCache.Update(world, entity, out var entityManager, out var storage))
+            {
+                rvoSettingsAccessRO.Update(entityManager);
+                if (rvoSettingsAccessRO.HasComponent(storage))
+                {
+                    settings = rvoSettingsAccessRO[storage];
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Destroys the entity and clears the proxy.
+        ///
+        /// If the entity does not exist, this does nothing.
+        /// </summary>
+        public void Destroy () {
 			if (entityExists) world.EntityManager.DestroyEntity(entity);
 			this = default; // Clear the proxy to avoid dangling references
 		}

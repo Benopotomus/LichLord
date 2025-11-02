@@ -215,7 +215,7 @@ namespace LichLord
             var players = Context.NetworkGame.ActivePlayers;
             var stronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
 
-            Chunk strongholdChunk = stronghold.CurrentChunk;
+            Chunk strongholdChunk = stronghold.CurrentChunk.Chunk;
             Vector3 strongholdPosition = stronghold.Position;
 
             var nearbyChunks = Context.ChunkManager.GetNearbyChunks(strongholdChunk.ChunkID,2);

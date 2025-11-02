@@ -61,8 +61,8 @@ namespace LichLord
         INetActor IHitInstigator.NetActor => this;
 
         // IChunkTrackable
-        private Chunk _chunk;
-        public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
+        private FChunkReference _chunk;
+        public FChunkReference CurrentChunk { get { return _chunk; } set { _chunk = value; } }
         public Vector3 Position => CachedTransform.position;
         public bool IsAttackable { get { return true; } }
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
@@ -158,8 +158,8 @@ namespace LichLord
             Context.NetworkGame.OnPlayerDespawned(this);
             //Context.WorldSaveLoadManager.OnPlayerDespawned(this);
 
-            if(CurrentChunk != null)
-                CurrentChunk.RemoveObject(this);
+            if(_chunk.IsValid)
+                _chunk.Chunk.RemoveObject(this);
 
 
         }
@@ -223,26 +223,29 @@ namespace LichLord
 
         public void UpdateChunk()
         {
-            var lastChunk = CurrentChunk;
+            var lastChunk = _chunk.Chunk;
             var newChunk = Context.ChunkManager.GetChunkAtPosition(CachedTransform.position);
 
-            if (lastChunk == newChunk)
-                return;
+            if (lastChunk != newChunk)
+            {
+                _chunk.Chunk = newChunk;
 
-            CurrentChunk = newChunk;
+                if (lastChunk != null)
+                    lastChunk.RemoveObject(this);
 
-            if (lastChunk != null)
-                lastChunk.RemoveObject(this);
+                if (newChunk != null)
+                    newChunk.AddObject(this);
 
-            if (newChunk != null)
-                newChunk.AddObject(this);
+                var oldChunks = new List<Chunk>(_cachedChunks);
+                var newChunks = Context.ChunkManager.GetNearbyChunks(_chunk.Chunk.ChunkID, radius: 1);
 
-            var oldChunks = new List<Chunk>(_cachedChunks);
-            var newChunks = Context.ChunkManager.GetNearbyChunks(CurrentChunk.ChunkID, radius: 1);
+                DiffChunks(oldChunks, newChunks, out var added, out var removed);
 
-            DiffChunks(oldChunks, newChunks, out var added, out var removed);
+                _cachedChunks = newChunks;
 
-            _cachedChunks = newChunks;
+                Context.ChunkManager.TryRemoveReplicatedChunks(removed);
+                Context.ChunkManager.TryAddReplicatedChunks(added);
+            }
 
             /*
             // Log removed chunks
@@ -262,8 +265,7 @@ namespace LichLord
             Debug.Log(addedLog + removedLog);
             */
 
-            Context.ChunkManager.TryRemoveReplicatedChunks(removed);
-            Context.ChunkManager.TryAddReplicatedChunks(added);
+
         }
 
         public void DiffChunks(List<Chunk> oldChunks, List<Chunk> newChunks,

@@ -248,13 +248,15 @@ namespace LichLord.NonPlayerCharacters
             if (newCanMove == _followerCanMove)
                 return;
 
-            _follower.canMove = newCanMove;
+            _follower.simulateMovement = newCanMove;
 
             _followerCanMove = newCanMove;
         }
 
         public void SetFollowerLocalAvoidance(bool newEnabled)
         {
+            return;
+
             if (_followerLocalAvoidance == newEnabled)
                 return;
 
@@ -292,6 +294,7 @@ namespace LichLord.NonPlayerCharacters
             SetFollowerLocalAvoidance(false);
             SetFollowerCanMove(false);
             SetMoveTargetPosition(Vector3.zero);
+            _follower.position = Vector3.zero;
         }
 
         public void OnStateAuthorityChanged(bool hasAuthority)

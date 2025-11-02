@@ -21,7 +21,9 @@ namespace LichLord.Props
         public Transform CachedTransform => _cachedTransform;
 
         // IChunkTrackable
-        public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
+        protected FChunkReference _chunk;
+        public FChunkReference CurrentChunk { get { return _chunk; } set { } }
+
         public Vector3 Position => CachedTransform.position;
 
         public virtual bool IsAttackable => false;
@@ -41,7 +43,9 @@ namespace LichLord.Props
             ChunkID = propRuntimeState.chunk.ChunkID;
             Index = propRuntimeState.index;
 
-            CurrentChunk.AddObject(this);
+            _chunk.Chunk = propRuntimeState.chunk;
+            if(_chunk.IsValid)
+                _chunk.Chunk.AddObject(this);
         }
 
         public virtual void OnRender(PropRuntimeState propRuntimeState, float renderDeltaTime)
@@ -52,7 +56,9 @@ namespace LichLord.Props
         public virtual void StartRecycle()
         {
             DWDObjectPool.Instance.Recycle(this);
-            CurrentChunk.RemoveObject(this);
+
+            if (_chunk.IsValid)
+                _chunk.Chunk.RemoveObject(this);
         }
     }
 }

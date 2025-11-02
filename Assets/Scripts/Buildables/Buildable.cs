@@ -24,8 +24,8 @@ namespace LichLord.Buildables
         public Transform CachedTransform => _cachedTransform;
 
         // IChunkTrackable
-        private Chunk _chunk;
-        public Chunk CurrentChunk { get => _chunk; set { } }
+        private FChunkReference _chunk;
+        public FChunkReference CurrentChunk { get => _chunk; set { } }
         public Vector3 Position => _cachedTransform.position;
         public virtual bool IsAttackable => false;
         public virtual float BonusRadius { get { return 0; } }
@@ -44,8 +44,10 @@ namespace LichLord.Buildables
             _zone = zone;
             _stronghold = zone.Stronghold;
             _sceneContext = zone.Context;
-            _chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
-            _chunk.AddObject(this);
+            _chunk.Chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
+
+            if(_chunk.IsValid)
+                _chunk.Chunk.AddObject(this);
 
             _spawnTransformer.PlaySpawnAnimation();
         }
@@ -57,7 +59,9 @@ namespace LichLord.Buildables
 
         public virtual void StartRecycle()
         {
-            _chunk.RemoveObject(this);
+            if (_chunk.IsValid)
+                _chunk.Chunk.RemoveObject(this);
+
             DWDObjectPool.Instance.Recycle(this);
         }
 
