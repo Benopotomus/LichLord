@@ -129,6 +129,9 @@ namespace LichLord.NonPlayerCharacters
 
         public NonPlayerCharacterRuntimeState GetNpcRuntimeState(int index)
         {
+            if(index >= _localRuntimeStates.Length)
+                return null;
+
             return _localRuntimeStates[index];
         }
 

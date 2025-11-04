@@ -39,54 +39,7 @@ namespace LichLord.Buildables
             buildableData.StateData = stateData;
         }
 
-        // Handle damage application
-        public void ApplyDamage(ref FBuildableData buildableData, int damage)
-        {
-            var definition = Global.Tables.BuildableTable.TryGetDefinition(buildableData.DefinitionID);
 
-            int currentHealth = GetHealth(ref buildableData);
-            damage = Mathf.Max(damage - definition.DamageReduction, 0);
-            damage = (int)((float)damage * (1.0f - definition.DamageResistance));
-
-            SetHealth(currentHealth - damage, ref buildableData);
-
-            if (GetHealth(ref buildableData) <= 0)
-            {
-                SetState(TryAssignState(ref buildableData, EBuildableState.Destroyed), ref buildableData);
-            }
-            else
-            {
-                SetState(TryAssignState(ref buildableData, EBuildableState.HitReact), ref buildableData);
-            }
-
-            //Debug.Log($"Apply Damage " + GetState(ref buildableData) + ", Health: " + GetHealth(ref buildableData));
-        }
-
-        // Prioritize destroyed state
-        public override EBuildableState TryAssignState(ref FBuildableData buildableData, EBuildableState newState)
-        {
-            EBuildableState currentState = GetState(ref buildableData);
-
-            switch (newState)
-            {
-                case EBuildableState.Inactive:
-                    SetState(newState, ref buildableData);
-                    return newState;
-                case EBuildableState.HitReact:
-                    switch (currentState)
-                    {
-                        case EBuildableState.Destroyed:
-                        case EBuildableState.Inactive:
-
-                            SetState(currentState, ref buildableData);
-                            return currentState;
-                    }
-                    break;
-            }
-
-            SetState(currentState, ref buildableData);
-            return newState;
-        }
     }
 
 

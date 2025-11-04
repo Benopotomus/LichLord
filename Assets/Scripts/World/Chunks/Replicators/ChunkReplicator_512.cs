@@ -1,6 +1,5 @@
 ﻿using Fusion;
 using LichLord.Props;
-using UnityEngine;
 
 namespace LichLord.World
 {

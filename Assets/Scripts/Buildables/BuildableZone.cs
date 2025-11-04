@@ -158,13 +158,13 @@ namespace LichLord.Buildables
 
             // Determine if theres any connectors near my connectors
 
-            // Spawn VFX for defintion
+            // Spawn VFX for definition
             Context.VFXManager.SpawnVisualEffect(buildableTransform.Position, buildableTransform.Rotation, definition.PlacementVFX);
 
             ref FBuildableData data = ref _buildableDatas.GetRef(freeIndex);
 
             if (definition.BuildableDataDefinition is ContainerDataDefinition containerDataDefinition)
-            { 
+            {
                 var containerData = Context.ContainerManager.GetContainerFreeReplicatorAndIndex(definition.ContainerSlots);
 
                 if (containerData.freeIndex < 0)

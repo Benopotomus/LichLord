@@ -1,6 +1,7 @@
 ﻿using LichLord.Items;
 using LichLord.NonPlayerCharacters;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace LichLord.Buildables
 {
@@ -69,6 +70,20 @@ namespace LichLord.Buildables
             BuildableDataDefinition dataDefinition = Definition.BuildableDataDefinition;
             dataDefinition.SetState(newState, ref _data);
 
+            switch (newState)
+            {
+                case EBuildableState.Destroyed:
+                case EBuildableState.Inactive:
+
+                    if (dataDefinition is ContainerDataDefinition containerDataDefinition)
+                    {
+                        int containerIndex = containerDataDefinition.GetContainerIndex(ref _data);
+                        Context.ContainerManager.ClearContainer(containerIndex);
+                    }
+
+                    break;
+
+            }
             if (buildableZone != null)
                 buildableZone.ReplicateRuntimeState(this);
         }
@@ -93,12 +108,53 @@ namespace LichLord.Buildables
         {
             if (Definition.BuildableDataDefinition is DestructibleBuildableDataDefinition destructibleDataDefinition)
             {
-                destructibleDataDefinition.ApplyDamage(ref _data, damage);
+                int currentHealth = GetHealth();
+                damage = Mathf.Max(damage - _definition.DamageReduction, 0);
+                damage = (int)((float)damage * (1.0f - _definition.DamageResistance));
 
-                if(buildableZone != null) 
+                destructibleDataDefinition.SetHealth(currentHealth - damage, ref _data);
+
+                if (GetHealth() <= 0)
+                {
+                    SetState(EBuildableState.Destroyed);
+                }
+                else
+                {
+                    SetState(EBuildableState.HitReact);
+                }
+
+                if (buildableZone != null) 
                     buildableZone.ReplicateRuntimeState(this);
             }
         }
+
+        // Prioritize destroyed state
+        /*
+        public EBuildableState TryAssignState(ref FBuildableData buildableData, EBuildableState newState)
+        {
+            EBuildableState currentState = GetState(ref buildableData);
+
+            switch (newState)
+            {
+                case EBuildableState.Inactive:
+                    SetState(newState, ref buildableData);
+                    return newState;
+                case EBuildableState.HitReact:
+                    switch (currentState)
+                    {
+                        case EBuildableState.Destroyed:
+                        case EBuildableState.Inactive:
+
+                            SetState(currentState, ref buildableData);
+                            return currentState;
+                    }
+                    break;
+            }
+
+            SetState(currentState, ref buildableData);
+            return newState;
+        }
+        */
 
         public void SetInteracting(bool interact, int tick)
         {

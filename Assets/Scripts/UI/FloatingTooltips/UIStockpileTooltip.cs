@@ -9,6 +9,8 @@ namespace LichLord.UI
     {
         [SerializeField] private RectTransform _layoutGroup;
 
+        [SerializeField] private UIFloatingHealthbar _healthbar;
+
         [SerializeField] private UIStockpileCurrencySlot _stockpileCurrencyPrefab;
 
         private Dictionary<CurrencyDefinition, UIStockpileCurrencySlot> _stockpileSlots = 
@@ -16,8 +18,11 @@ namespace LichLord.UI
 
         public void SetStockpileData(Stockpile stockpile)
         {
+            int health = stockpile.RuntimeState.GetHealth();
+            _healthbar.SetHealth(health, stockpile.RuntimeState.GetMaxHealth());
+
             int containerIndex = stockpile.RuntimeState.GetContainerIndex();
-            bool isValidStockpile = containerIndex >= 0;
+            bool isValidStockpile = containerIndex >= 0 && health > 0;
 
             // Create a set of currency types that are currently in the stockpile with non-zero values
             Dictionary<CurrencyDefinition, int> currencyAmounts = new Dictionary<CurrencyDefinition, int>();

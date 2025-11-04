@@ -33,6 +33,11 @@ namespace LichLord.Buildables
                 case EBuildableState.Inactive:
                 case EBuildableState.Destroyed:
                     _buildable.SpawnTransformer.PlayDestroyAnimation();
+
+                    int containerIndex = _buildable.RuntimeState.GetContainerIndex();
+                    if (containerIndex >= 0)
+                        _buildable.RuntimeState.Context.ContainerManager.ClearContainer(containerIndex);
+
                     //gameObject.SetActive(false);
                     break;
                 case EBuildableState.Idle:

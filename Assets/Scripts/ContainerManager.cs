@@ -115,6 +115,8 @@ namespace LichLord
                 int localItemIndex = fullItemIndex % ContainerConstants.ITEMS_PER_REPLICATOR;
                 itemSlotReplicator.ClearItemData(localItemIndex);
             }
+
+            Debug.Log("Container Cleared " + containerIndex);
         }
 
         public (ContainerReplicator replicator, int freeIndex)

@@ -14,6 +14,7 @@ namespace LichLord.UI
         [SerializeField] private UICryptTooltip _cryptTooltip;
         [SerializeField] private UINonPlayerCharacterTooltip _npcTooltip;
         [SerializeField] private UIRefineryTooltip _refineryTooltip;
+        [SerializeField] private UIStorageChestTooltip _storageChestTooltip;
 
         private IChunkTrackable _trackableTarget;
         private Action _updateTooltip;  // Cached update delegate
@@ -28,6 +29,7 @@ namespace LichLord.UI
             _cryptTooltip.gameObject.SetActive(false);
             _stockpileTooltip.gameObject.SetActive(false);
             _refineryTooltip.gameObject.SetActive(false);
+            _storageChestTooltip.gameObject.SetActive(false);
 
             if (target == null)
             {
@@ -61,9 +63,16 @@ namespace LichLord.UI
                     _updateTooltip = () => _refineryTooltip.SetRefinery(refinery);
                     break;
 
+                case StorageChest storageChest:
+                    _storageChestTooltip.gameObject.SetActive(true);
+                    base.SetTarget(storageChest.CachedTransform);
+                    _updateTooltip = () => _storageChestTooltip.SetStorageChest(storageChest);
+
+                    break;
                 case Prop prop:
                     base.SetTarget(prop.CachedTransform);
                     break;
+                   
             }
         }
 

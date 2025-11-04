@@ -91,8 +91,7 @@ namespace LichLord.Buildables
             _healthComponent.UpdateHealth(RuntimeState.GetHealth());
             _stateComponent.UpdateState(RuntimeState.GetState());
 
-            if(_healthComponent.CurrentHealth > 0)
-                UpdateCurrencyStacks();
+            UpdateCurrencyStacks();
         }
 
         private void UpdateCurrencyStacks()
@@ -101,6 +100,22 @@ namespace LichLord.Buildables
             var indexes = RuntimeState.GetItemSlotIndexes();
             _itemSlotIndexStart = indexes.start;
             _itemSlotIndexEnd = indexes.end;
+
+            if (_healthComponent.CurrentHealth <= 0)
+            {
+                for (int i = 0; i < _piles.Length; i++)
+                {
+                    StockpileCurrencyStack currentPile = _piles[i];
+
+                    if (currentPile != null)
+                    {
+                        currentPile.StartRecycle();
+                        _piles[i] = null;
+                    }
+                }
+
+                return;
+            }
 
             List<FItemSlotData> itemSlots = Context.ContainerManager.GetItemSlotDatasFromContainerIndex(_containerIndex);
 
