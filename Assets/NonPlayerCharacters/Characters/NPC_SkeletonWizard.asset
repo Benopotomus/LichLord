@@ -12,15 +12,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3784c5b7ca19fcc46ad12cc8cdd20a14, type: 3}
   m_Name: NPC_SkeletonWizard
   m_EditorClassIdentifier: 
-  _tableID: 10
+  _tableID: 11
   _name: Skeleton Wizard NPC
   _prefabBundle:
     _name: NPC_SkeletonWizard
     _bundle: npc_skeletonwizard
+  _icon:
+    _name: 
+    _bundle: 
   _maxHealth: 100
   _damageReduction: 3
   _damageResistance: 0
+  _hitReactThreshold: 3
   _walkSpeed: 5
+  _isFrontlineCombatant: 0
+  _spawnState:
+    StateTime: 2
+    _animationTrigger:
+      Action: 0
+      Weapon: 0
+      TriggerNumber: 0
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
+      IsMoving: 0
+      IsBlocking: 0
+      PlaybackSpeed: 0
+    _spawnEffect:
+      _name: 
+      _bundle: 
   _spawnTypeDataDefinitions:
     _serializedList:
     - Key: 0
@@ -29,3 +49,8 @@ MonoBehaviour:
       Value: {fileID: 11400000, guid: 28b0e26f4ba3a3b4f952498bb6ed5789, type: 2}
   _currencyCarryValues:
     _serializedList: []
+  _dialogOwnerInfo:
+    sprite: {fileID: 0}
+    name: 
+  _tasks: []
+  _summonableItem: {fileID: 0}

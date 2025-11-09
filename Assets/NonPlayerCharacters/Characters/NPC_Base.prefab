@@ -275,6 +275,8 @@ GameObject:
   - component: {fileID: 8727693245842519014}
   - component: {fileID: 7461307003997220604}
   - component: {fileID: 7123329808735588214}
+  - component: {fileID: 1070915020429317535}
+  - component: {fileID: 6012151630220851529}
   m_Layer: 10
   m_Name: NPC_Base
   m_TagString: Untagged
@@ -325,6 +327,8 @@ MonoBehaviour:
   _dialogComponent: {fileID: 1073450328132710053}
   _spawningComponent: {fileID: 8727693245842519014}
   _lifetimeComponent: {fileID: 7461307003997220604}
+  _flinchComponent: {fileID: 1070915020429317535}
+  _meleeHitTracker: {fileID: 6012151630220851529}
   _interactableComponent: {fileID: 1460831480497857824}
   _animator: {fileID: 0}
   _transform: {fileID: 682064007814798227}
@@ -641,6 +645,31 @@ MonoBehaviour:
   _npc: {fileID: 174069171961541429}
   _currentHealth: 0
   _maxHealth: 0
+--- !u!114 &1070915020429317535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7301654162607387296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shakeBones: []
+--- !u!114 &6012151630220851529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7301654162607387296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8af5409b24608a459ec6489248cd382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7315302883465504394
 GameObject:
   m_ObjectHideFlags: 0

@@ -39,6 +39,15 @@ namespace LichLord
         public FCachedRaycast CachedRaycastHit => _cachedRaycastHit;
 
         private bool lastRaycastHit; // True if last raycast hit something
+        
+        [Header("Camera Shake")]
+        [SerializeField] private float _defaultShakeDuration = 0.3f;
+        [SerializeField] private float _defaultShakeAmplitude = 1.5f;
+        [SerializeField] private float _defaultShakeFrequency = 12f;
+
+        private Coroutine _shakeRoutine;
+        private CinemachineBasicMultiChannelPerlin _thirdPersonNoise;
+        private CinemachineBasicMultiChannelPerlin _firstPersonNoise;
 
         protected override void OnInitialize()
         {
@@ -61,6 +70,58 @@ namespace LichLord
             {
                 reticle.gameObject.SetActive(true);
             }
+
+
+        }
+
+        private void EnsureNoiseSettings(CinemachineBasicMultiChannelPerlin noise)
+        {
+            if (noise == null) return;
+
+            // Option 1: Use a NoiseSettings asset you created in the editor (recommended)
+            // Drag it onto the field below in the inspector
+            if (noise.m_NoiseProfile == null)
+            {
+                // Try to load the built-in basic profile that ships with Cinemachine
+                var basic = Resources.Load<Cinemachine.NoiseSettings>("CinemachineBasicNoise");
+                if (basic != null)
+                    noise.m_NoiseProfile = basic;
+                else
+                {
+                    // Fallback: create a minimal one at runtime
+                    noise.m_NoiseProfile = CreateMinimalNoiseSettings();
+                }
+            }
+        }
+
+        private Cinemachine.NoiseSettings CreateMinimalNoiseSettings()
+        {
+            var settings = ScriptableObject.CreateInstance<Cinemachine.NoiseSettings>();
+            settings.name = "RuntimeMinimalShake";
+
+            // ----- POSITION (XYZ) -----
+            settings.PositionNoise = new Cinemachine.NoiseSettings.TransformNoiseParams[]
+            {
+        new Cinemachine.NoiseSettings.TransformNoiseParams
+        {
+            X = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
+            Y = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
+            Z = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f }
+        }
+            };
+
+            // ----- ROTATION (XYZ) -----
+            settings.OrientationNoise = new Cinemachine.NoiseSettings.TransformNoiseParams[]
+            {
+        new Cinemachine.NoiseSettings.TransformNoiseParams
+        {
+            X = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
+            Y = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
+            Z = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f }
+        }
+            };
+
+            return settings;
         }
 
         public void ModifyCameraTargetRotation(Quaternion newRotation)
