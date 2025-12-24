@@ -14,14 +14,16 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHA_CUT
-  - _VERTEXWIND
+  - _VERTEXWIND_ON
   m_InvalidKeywords:
   - _COLOR_TINT
+  - _FOLIAGERENDERER
   - _GLOSSYREFLECTIONS_OFF
   - _INTERACTION_OFF
   - _LIGHTING_QUALITY_HIGH
   - _SPECULARHIGHLIGHTS_OFF
   - _TERRAINBLENDALBEDO_NONE
+  - _VERTEXWIND
   - _WIND_AUTO
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -305,6 +307,7 @@ Material:
     - _WindNormalInfluence: 0
     - _WindStrength: 1
     - _WindVariation: 0.3
+    - _YHeightScalar: 1
     - _ZWrite: 1
     - __dirty: 0
     m_Colors:
