@@ -9,8 +9,6 @@ namespace LichLord.NonPlayerCharacters
 {
     public class NonPlayerCharacterAnimatorEvents : MonoBehaviour
     {
-        [SerializeField]
-        private NonPlayerCharacter _npc;
 
         public void FootR()
         { }
@@ -20,17 +18,17 @@ namespace LichLord.NonPlayerCharacters
 
         public void Hit()
         {
-            _npc.Brain.OnHitFromAnimation();
+          //  _npc.Brain.OnHitFromAnimation();
         }
 
         public void Special()
         {
-            _npc.Brain.OnSpecialEventFromAnimation();
+           // _npc.Brain.OnSpecialEventFromAnimation();
         }
 
         public void HitSweep(bool isSweeping)
         {
-            _npc.Brain.OnSweepChangeFromAnimation(isSweeping);
+           // _npc.Brain.OnSweepChangeFromAnimation(isSweeping);
         }
 
         public void Land()
