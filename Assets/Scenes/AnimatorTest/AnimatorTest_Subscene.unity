@@ -122,7 +122,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &2180848052307842245
+--- !u!1001 &1136968582
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -130,6 +130,12 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 6713695002450263927, guid: f026b54e235aec34b9a3275da68fa63c,
+        type: 3}
+      propertyPath: visualPrefab
+      value: 
+      objectReference: {fileID: 3366890679115955601, guid: beac7ba120bfda949b9d7f6631ff18e4,
+        type: 3}
     - target: {fileID: 7013920731673298933, guid: f026b54e235aec34b9a3275da68fa63c,
         type: 3}
       propertyPath: m_Name
@@ -158,17 +164,17 @@ PrefabInstance:
     - target: {fileID: 9155171098226233283, guid: f026b54e235aec34b9a3275da68fa63c,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9155171098226233283, guid: f026b54e235aec34b9a3275da68fa63c,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9155171098226233283, guid: f026b54e235aec34b9a3275da68fa63c,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9155171098226233283, guid: f026b54e235aec34b9a3275da68fa63c,
         type: 3}
@@ -194,4 +200,4 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 2180848052307842245}
+  - {fileID: 1136968582}
