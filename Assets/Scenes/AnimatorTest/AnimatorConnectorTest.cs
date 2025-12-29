@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using System.Collections;
+using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -33,26 +34,35 @@ public class AnimatorConnectorTest : MonoBehaviour
 
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        // Fetch baked prefab from singleton (same as before)
-        var query = entityManager.CreateEntityQuery(typeof(VisualEntityPrefab));
-        if (!query.HasSingleton<VisualEntityPrefab>())
-        {
-            Debug.LogError("AnimatorConnectorTest: No VisualEntityPrefab singleton found!");
-            return;
-        }
+        // Start waiting for the singleton instead of checking immediately
+        StartCoroutine(WaitForVisualPrefabAndSpawn());
+    }
+
+    private IEnumerator WaitForVisualPrefabAndSpawn()
+    {
+        var world = World.DefaultGameObjectInjectionWorld;
+
+        while (world == null || !world.IsCreated)
+            yield return null;
+
+        var query = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<VisualEntityPrefab>());
+
+        while (!query.HasSingleton<VisualEntityPrefab>())
+            yield return null;
 
         visualEntityPrefab = query.GetSingleton<VisualEntityPrefab>().Prefab;
+
         if (visualEntityPrefab == Entity.Null)
         {
-            Debug.LogError("AnimatorConnectorTest: Baked visual prefab is Null!");
-            return;
+            Debug.LogError("AnimatorConnectorTest: Visual prefab is Null!");
+            yield break;
         }
 
-        visualEntity = entityManager.Instantiate(visualEntityPrefab);
+        //Debug.Log("Visual prefab loaded successfully!");
 
-        // Start by choosing first random target
-        ChooseNewRandomTarget();
+        visualEntity = world.EntityManager.Instantiate(visualEntityPrefab);
         SyncTransformToEntity();
+        ChooseNewRandomTarget();
     }
 
     private void Update()
@@ -104,6 +114,7 @@ public class AnimatorConnectorTest : MonoBehaviour
 
     private void SyncTransformToEntity()
     {
+
         Vector3 pos = transform.position;
         Quaternion rot = transform.rotation;
 
