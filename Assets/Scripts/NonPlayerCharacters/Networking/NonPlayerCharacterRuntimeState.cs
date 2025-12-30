@@ -10,6 +10,7 @@ namespace LichLord.NonPlayerCharacters
 {
     public class NonPlayerCharacterRuntimeState
     {
+        public int PredictionStartTick;
         public int PredictionTimeoutTick; // Max lifetime of predictive state
 
         private int _localIndex;

@@ -76,6 +76,7 @@ namespace LichLord
         private ref FWorldTransform _worldTransform => ref MakeRef<FWorldTransform>();
         public FWorldTransform WorldTransform => _worldTransform;
 
+        [SerializeField]
         private Vector3 _worldVelocity;
         public Vector3 WorldVelocity => _worldVelocity;
 

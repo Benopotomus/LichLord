@@ -18,6 +18,7 @@ namespace LichLord.NonPlayerCharacters
             if (_predictedStates.TryGetValue(index, out NonPlayerCharacterRuntimeState predictedState))
             {
                 predictedState.ApplyDamage(damage, hitReactIndex);
+                predictedState.PredictionStartTick = Runner.Tick + 4;
                 predictedState.PredictionTimeoutTick = Runner.Tick + predictionTicks;
             }
             else
@@ -26,6 +27,7 @@ namespace LichLord.NonPlayerCharacters
                 NonPlayerCharacterRuntimeState newPredictedState = new NonPlayerCharacterRuntimeState(this, index, fullIndex);
                 newPredictedState.CopyData(ref targetData);
                 newPredictedState.ApplyDamage(damage, hitReactIndex);
+                newPredictedState.PredictionStartTick = Runner.Tick + 4;
                 newPredictedState.PredictionTimeoutTick = Runner.Tick + predictionTicks;
                 _predictedStates[index] = newPredictedState;
 

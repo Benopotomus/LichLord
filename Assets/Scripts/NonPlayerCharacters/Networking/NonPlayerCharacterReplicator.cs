@@ -167,7 +167,7 @@ namespace LichLord.NonPlayerCharacters
 
             for (int i = 0; i < NonPlayerCharacterConstants.MAX_NPC_REPS; i++)
             {
-                var renderState = GetRenderState(hasAuthority, i);
+                var renderState = GetRenderState(hasAuthority, i, tick);
                 var renderStateData = renderState.Data;
 
                 bool shouldBeActive = renderState.IsActive();
@@ -298,7 +298,7 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public NonPlayerCharacterRuntimeState GetRenderState(bool hasAuthority, int index)
+        public NonPlayerCharacterRuntimeState GetRenderState(bool hasAuthority, int index, int tick)
         {
             var localState = _localRuntimeStates[index];
 
@@ -308,6 +308,9 @@ namespace LichLord.NonPlayerCharacters
                 // Check for predicted data
                 if (_predictedStates.TryGetValue(index, out var predictedState))
                 {
+                    if (tick < predictedState.PredictionStartTick)
+                        return localState;
+
                     //Debug.Log("Using predicted state " + predictedState.GetState() + " Anim: " + predictedState.GetAnimationIndex() + " index: " + index);
                     var predictedStateData = predictedState.Data;
                     predictedStateData.Position = localState.GetPosition();
