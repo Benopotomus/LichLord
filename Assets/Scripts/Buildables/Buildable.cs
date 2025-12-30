@@ -27,6 +27,7 @@ namespace LichLord.Buildables
         private Chunk _chunk;
         public Chunk CurrentChunk { get => _chunk; set { } }
         public Vector3 Position => _cachedTransform.position;
+        public Vector3 PredictedPosition => _cachedTransform.position;
         public virtual bool IsAttackable => false;
         public virtual float BonusRadius { get { return 0; } }
         public virtual Collider HurtBoxCollider { get { return null; } }

@@ -22,7 +22,8 @@ namespace LichLord.Props
 
         // IChunkTrackable
         public Chunk CurrentChunk { get => RuntimeState.chunk; set => value = RuntimeState.chunk; }
-        public Vector3 Position => CachedTransform.position;
+        public Vector3 Position => _cachedTransform.position;
+        public Vector3 PredictedPosition => _cachedTransform.position;
 
         public virtual bool IsAttackable => false;
 

@@ -62,6 +62,7 @@ namespace LichLord
         public Chunk CurrentChunk { get { return _chunk; } set { } }
         private Chunk _chunk;
         public Vector3 Position => _cachedTransform.position;
+        public Vector3 PredictedPosition => _cachedTransform.position;
 
         // IHitTarget
         public IChunkTrackable ChunkTrackable => this;

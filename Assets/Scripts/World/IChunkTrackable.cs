@@ -9,6 +9,8 @@ namespace LichLord.World
         
         Vector3 Position { get; }
 
+        Vector3 PredictedPosition { get; }
+
         Collider HurtBoxCollider { get; }
 
         bool IsAttackable { get; }

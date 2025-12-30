@@ -64,6 +64,8 @@ namespace LichLord
         private Chunk _chunk;
         public Chunk CurrentChunk { get { return _chunk; } set { _chunk = value; } }
         public Vector3 Position => CachedTransform.position;
+        public Vector3 PredictedPosition => _cachedTransform.position + Movement.WorldVelocity;
+
         public bool IsAttackable { get { return true; } }
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
 

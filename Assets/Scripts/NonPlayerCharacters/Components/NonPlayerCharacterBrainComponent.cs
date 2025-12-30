@@ -481,7 +481,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 case EManeuverType.Attack:
                     if (_hasAttackTarget)
-                        _moveTarget = _attackTarget.Position;
+                        _moveTarget = _attackTarget.PredictedPosition;
                     break;
                 case EManeuverType.Harvest:
                     if (_hasHarvestTarget)

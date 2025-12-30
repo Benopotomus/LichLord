@@ -65,8 +65,8 @@ namespace LichLord.NonPlayerCharacters
         private InteractableComponent _interactableComponent;
         public InteractableComponent Interactable => _interactableComponent;
 
-        [SerializeField] private Transform _transform;
-        public Transform CachedTransform => _transform;
+        [SerializeField] private Transform _cachedTransform;
+        public Transform CachedTransform => _cachedTransform;
 
         [SerializeField] private HurtboxComponent _hurtbox;
         public HurtboxComponent Hurtbox => _hurtbox;
@@ -108,6 +108,8 @@ namespace LichLord.NonPlayerCharacters
         public IChunkTrackable ChunkTrackable => this;
 
         public Vector3 Position => CachedTransform.position;
+        public Vector3 PredictedPosition => _cachedTransform.position + Movement.WorldVelocity;
+
         public bool IsAttackable 
         { 
             get 

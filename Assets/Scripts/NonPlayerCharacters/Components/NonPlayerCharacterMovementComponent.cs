@@ -14,7 +14,7 @@ namespace LichLord.NonPlayerCharacters
         public FollowerEntity AIFollower => _follower;
 
         [SerializeField] private Vector3 _worldVelocity;
-        public Vector3 Velocity => _worldVelocity;
+        public Vector3 WorldVelocity => _worldVelocity;
 
         [SerializeField] private bool _isGrounded;
         public bool IsGrounded => _isGrounded;

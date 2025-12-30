@@ -108,7 +108,7 @@ Transform:
   m_GameObject: {fileID: 1894147597003793881}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.953, z: 0}
+  m_LocalPosition: {x: 0, y: 0.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -278,7 +278,7 @@ MonoBehaviour:
   _flinchComponent: {fileID: 6668249780244376760}
   _meleeHitTracker: {fileID: 7729869794948552604}
   _interactableComponent: {fileID: 7459789804197456675}
-  _transform: {fileID: 3282022331344466140}
+  _cachedTransform: {fileID: 3282022331344466140}
   _hurtbox: {fileID: 2131942850854789237}
   _collider: {fileID: 1615885042697682339}
   _localIndex: 0
@@ -474,10 +474,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
   _hitReacts:
-  - {fileID: 11400000, guid: 2ed8cbc795dfd0a40aef68ce1341113b, type: 2}
-  - {fileID: 11400000, guid: c23387d04f6eae440a9035ecb3adc9c3, type: 2}
   - {fileID: 11400000, guid: baf2e06d515cf484b80d4f772eb9b98b, type: 2}
   - {fileID: 11400000, guid: 5eed346c2a633204a9bfa754702de8ff, type: 2}
+  - {fileID: 11400000, guid: 2ed8cbc795dfd0a40aef68ce1341113b, type: 2}
+  - {fileID: 11400000, guid: c23387d04f6eae440a9035ecb3adc9c3, type: 2}
   _impactAttachment: {fileID: 3756902675477475904}
 --- !u!114 &3797343846203693856
 MonoBehaviour:
