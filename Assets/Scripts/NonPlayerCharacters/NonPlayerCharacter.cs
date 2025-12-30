@@ -65,9 +65,6 @@ namespace LichLord.NonPlayerCharacters
         private InteractableComponent _interactableComponent;
         public InteractableComponent Interactable => _interactableComponent;
 
-        [SerializeField] private Animator _animator;
-        public Animator Animator => _animator;
-
         [SerializeField] private Transform _transform;
         public Transform CachedTransform => _transform;
 
@@ -165,6 +162,7 @@ namespace LichLord.NonPlayerCharacters
             _lifetimeComponent.OnSpawned(runtimeState, tick);
             _spawningComponent.OnSpawned(runtimeState);
             _stateComponent.OnSpawned(runtimeState, hasAuthority, tick);
+            _animationController.OnSpawned();
 
             _interactableComponent.Activate(
                 this,
@@ -222,6 +220,7 @@ namespace LichLord.NonPlayerCharacters
             _attitudeComponent.OnRender( runtimeState);
             _dialogComponent.OnRender(runtimeState);
             _lifetimeComponent.UpdateLifetime(runtimeState, hasAuthority, tick);
+            _animationController.SyncTransformToEntity();
 
             _formationId = runtimeState.GetFormationID();
             _formationIndex = runtimeState.GetFormationIndex();
@@ -313,7 +312,7 @@ namespace LichLord.NonPlayerCharacters
             if (projectile == null) 
                 return;
 
-            AnimationController.SetProjectileFrame(definition);
+            //AnimationController.SetProjectileFrame(definition);
         }
 
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
