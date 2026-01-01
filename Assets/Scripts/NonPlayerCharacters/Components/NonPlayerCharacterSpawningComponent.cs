@@ -34,7 +34,7 @@ namespace LichLord.NonPlayerCharacters
             var animTrigger = spawnState.AnimationTrigger;
 
             _spawnEndTick = tick + (int)(spawnState.StateTime * 32);
-            _npc.AnimationController.SetAnimationForTrigger(animTrigger, true);
+            //_npc.AnimationController.SetAnimationForTrigger(animTrigger, true);
 
             SpawnImpactVisualEffect(spawnState);
         }

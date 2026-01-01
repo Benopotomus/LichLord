@@ -164,7 +164,7 @@ namespace LichLord.NonPlayerCharacters
             _lifetimeComponent.OnSpawned(runtimeState, tick);
             _spawningComponent.OnSpawned(runtimeState);
             _stateComponent.OnSpawned(runtimeState, hasAuthority, tick);
-            _animationController.OnSpawned();
+            _animationController.OnSpawned(runtimeState);
 
             _interactableComponent.Activate(
                 this,
@@ -223,6 +223,7 @@ namespace LichLord.NonPlayerCharacters
             _dialogComponent.OnRender(runtimeState);
             _lifetimeComponent.UpdateLifetime(runtimeState, hasAuthority, tick);
             _animationController.SyncTransformToEntity();
+            _animationController.UpdateAnimationEvents();
 
             _formationId = runtimeState.GetFormationID();
             _formationIndex = runtimeState.GetFormationIndex();
@@ -396,6 +397,8 @@ namespace LichLord.NonPlayerCharacters
             _movementComponent.StartRecycle();
             _brainComponent.StartRecycle();
             _stateComponent.StartRecycle();
+            _animationController.CleanupPreviousVisualEntity();
+
             DWDObjectPool.Instance.Recycle(this);
             UpdateChunk(Context.ChunkManager);
 

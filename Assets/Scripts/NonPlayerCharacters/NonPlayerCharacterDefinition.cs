@@ -52,6 +52,23 @@ namespace LichLord.NonPlayerCharacters
         protected NonPlayerCharacterSpawnState _spawnState;
         public NonPlayerCharacterSpawnState SpawnState => _spawnState;
 
+        [Header("Weapons")]
+        [SerializeField]
+        protected int _weaponState;
+        public int WeaponState => _weaponState;
+
+        [SerializeField]
+        protected int _weaponLeft;
+        public int WeaponLeft => _weaponLeft;
+
+        [SerializeField]
+        protected int _weaponRight;
+        public int WeaponRight => _weaponRight;
+
+        [SerializeField]
+        protected Vector2 _modelScale;
+        public Vector2 ModelScale => _modelScale;
+
         [SerializeField]
         [SerializedDictionary("SpawnType", "DataDefinition")]
         private SerializedDictionary<ENPCSpawnType, NonPlayerCharacterDataDefinition> _spawnTypeDataDefinitions;

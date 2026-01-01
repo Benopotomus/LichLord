@@ -103,17 +103,6 @@ namespace LichLord
 
         }
 
-        // Override Equals
-        public override bool Equals(object obj)
-        {
-            if (obj is FNetObjectID other)
-            {
-                return IsEqual(other);
-            }
-            return false;
-        }
-
-
         public void Clear()
         {
             _data = 0;

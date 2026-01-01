@@ -35,20 +35,54 @@ namespace LichLord.NonPlayerCharacters
         private static readonly FastAnimatorParameter AnimationSpeed = new("AnimationSpeed");
         private static readonly FastAnimatorParameter VelocityX = new("Velocity X");
         private static readonly FastAnimatorParameter VelocityZ = new("Velocity Z");
+        private static readonly FastAnimatorParameter Injured = new("Injured");
+        private static readonly FastAnimatorParameter Crouch = new("Crouch");
+
         private static readonly FastAnimatorParameter CycleOffset = new("CycleOffset");
+
+        private const int Hash_FootR = -1235114484; 
+        private const int Hash_FootL = 1234503542;
+        private const int Hash_Hit = 994339148;  
+        private const int Hash_HitSweep = 0;
+        private const int Hash_Special = -2083125633;
+        private const int Hash_Shoot = 1068997707;
+
+        [ContextMenu("Log Hashes")]
+        private void LogHashes()
+        {
+            Debug.Log("FootR hash: " + Animator.StringToHash("FootR"));
+            Debug.Log("FootL hash: " + Animator.StringToHash("FootL"));
+            Debug.Log("Hit hash: " + Animator.StringToHash("Hit"));
+            Debug.Log("HitSweep hash: " + Animator.StringToHash("HitSweep"));
+            Debug.Log("Special hash: " + Animator.StringToHash("Special"));
+        }
 
         [Header("Animation Smoothing")]
         private float velocitySmoothTime = 0.1f;
         private Vector3 smoothedLocalVelocity;
         private float smoothedYawVelocity;
 
-        public void OnSpawned()
+        private float modelScale;
+
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
+            // Exactly 10 scale values, evenly distributed across ALL NPCs
+            const int TotalScaleSteps = 10;
+
+            // Use FullIndex % 10 → gives 0 to 9, perfectly balanced no matter how many NPCs
+            int scaleIndex = runtimeState.FullIndex % TotalScaleSteps; // 0,1,2,...,9 repeating
+
+            // Map 0–9 to min–max scale
+            modelScale = Mathf.Lerp(runtimeState.Definition.ModelScale.x, 
+                runtimeState.Definition.ModelScale.y
+                , scaleIndex / (TotalScaleSteps - 1f));
+
             CleanupPreviousVisualEntity();
-            StartCoroutine(WaitForVisualPrefabAndSpawn());
+            StartCoroutine(WaitForVisualPrefabAndSpawn(runtimeState));
+            //LogHashes();
         }
 
-        private void CleanupPreviousVisualEntity()
+        public void CleanupPreviousVisualEntity()
         {
             if (visualEntity != Entity.Null && entityManager != null && entityManager.Exists(visualEntity))
             {
@@ -57,68 +91,89 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        private IEnumerator WaitForVisualPrefabAndSpawn()
+        private IEnumerator WaitForVisualPrefabAndSpawn(NonPlayerCharacterRuntimeState runtimeState)
         {
             var world = Unity.Entities.World.DefaultGameObjectInjectionWorld;
-
             while (world == null || !world.IsCreated)
                 yield return null;
 
             entityManager = world.EntityManager;
 
-            while (entityManager == null)
+            // Wait until the buffer exists and has data
+            var query = entityManager.CreateEntityQuery(ComponentType.ReadOnly<VisualEntityPrefabElement>());
+            while (query.IsEmpty || entityManager.GetBuffer<VisualEntityPrefabElement>(query.GetSingletonEntity()).Length == 0)
                 yield return null;
 
-            var query = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<VisualEntityPrefab>());
-
-            while (!query.HasSingleton<VisualEntityPrefab>())
-                yield return null;
-
-            visualEntityPrefab = query.GetSingleton<VisualEntityPrefab>().Prefab;
+            visualEntityPrefab = GetVisualPrefab(runtimeState);
 
             if (visualEntityPrefab == Entity.Null)
             {
-                Debug.LogError("AnimatorConnectorTest: Visual prefab is Null!");
+                Debug.LogError("Selected visual prefab is Null!");
                 yield break;
             }
 
-            visualEntity = world.EntityManager.Instantiate(visualEntityPrefab);
+            visualEntity = entityManager.Instantiate(visualEntityPrefab);
 
-            // Reacquire buffer for parameter setting
+            // Rest of your setup (cycle offset, etc.)
             if (entityManager.HasComponent<AnimatorControllerParameterIndexTableComponent>(visualEntity))
             {
                 var indexTable = entityManager.GetComponentData<AnimatorControllerParameterIndexTableComponent>(visualEntity);
                 var parameterBuffer = entityManager.GetBuffer<AnimatorControllerParameterComponent>(visualEntity);
                 var paramAspect = new AnimatorParametersAspect(parameterBuffer, indexTable);
 
-                // Random offset: 0–1 (full cycle)
                 float randomOffset = UnityEngine.Random.Range(0f, 1f);
                 paramAspect.SetFloatParameter(CycleOffset, randomOffset);
+
+                SetAnimationForState(ENPCState.Inactive, _npc.RuntimeState.GetState());
             }
 
             SyncTransformToEntity();
         }
 
+        private Entity GetVisualPrefab(NonPlayerCharacterRuntimeState runtimeState)
+        {
+            int targetId = runtimeState.Definition.TableID;
+
+            var query = entityManager.CreateEntityQuery(ComponentType.ReadOnly<VisualEntityPrefabElement>());
+            if (query.IsEmpty)
+            {
+                Debug.LogError("No visual prefabs authoring object found in scene!");
+                return Entity.Null;
+            }
+
+            var authoringEntity = query.GetSingletonEntity();
+            var prefabBuffer = entityManager.GetBuffer<VisualEntityPrefabElement>(authoringEntity);
+
+            // Linear search — perfectly fine for <50 entries (your NPC types)
+            for (int i = 0; i < prefabBuffer.Length; i++)
+            {
+                if (prefabBuffer[i].DefinitionTableId == targetId)
+                {
+                    return prefabBuffer[i].Prefab;
+                }
+            }
+
+            Debug.LogWarning($"No visual prefab found for TableID {targetId} (Definition: {runtimeState.Definition.name}). Using fallback or null.");
+            return Entity.Null;
+        }
+
         public void SetAnimationForTrigger(FAnimationTrigger animationTrigger, bool forceWeaponId = false)
         {
-
             if (visualEntity == Entity.Null) return;
-
-            int weaponId = forceWeaponId ? animationTrigger.Weapon : _npc.Weapons.GetWeaponID();
 
             if (TryGetParametersAspect(out var paramAspect))
             {
                 paramAspect.SetBoolParameter(Moving, animationTrigger.IsMoving);
-                paramAspect.SetIntParameter(Weapon, weaponId);
+                paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
                 paramAspect.SetIntParameter(Action, animationTrigger.Action);
                 paramAspect.SetIntParameter(Jumping, 0);
                 paramAspect.SetIntParameter(TriggerNumber, animationTrigger.TriggerNumber);
-                paramAspect.SetIntParameter(RightWeapon, animationTrigger.RightWeapon);
+                paramAspect.SetIntParameter(RightWeapon, _npc.RuntimeState.Definition.WeaponRight);
                 paramAspect.SetIntParameter(Side, animationTrigger.Side);
                 paramAspect.SetBoolParameter(Blocking, animationTrigger.IsBlocking);
-                paramAspect.SetIntParameter(LeftWeapon, 7);
+                paramAspect.SetIntParameter(LeftWeapon, _npc.RuntimeState.Definition.WeaponLeft);
                 paramAspect.SetFloatParameter(AnimationSpeed, animationTrigger.PlaybackSpeed);
-                
+
                 paramAspect.SetTrigger(Trigger);
             }
         }
@@ -132,19 +187,32 @@ namespace LichLord.NonPlayerCharacters
                 switch (newState)
                 {
                     case ENPCState.Idle:
-                        paramAspect.SetIntParameter(Weapon, _npc.Weapons.GetWeaponID());
+                        paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
                         paramAspect.SetIntParameter(TriggerNumber, 25);
                         paramAspect.SetFloatParameter(AnimationSpeed, 1f);
+                        paramAspect.SetIntParameter(RightWeapon, _npc.RuntimeState.Definition.WeaponRight);
+                        paramAspect.SetIntParameter(LeftWeapon, _npc.RuntimeState.Definition.WeaponLeft);
+                        paramAspect.SetTrigger(Trigger);
 
-                        if (oldState == ENPCState.Inactive || oldState == ENPCState.Dead)
-                            paramAspect.SetTrigger(Trigger);
+                        //if (oldState == ENPCState.Inactive || oldState == ENPCState.Dead)
+                        //    paramAspect.SetTrigger(Trigger);
                         break;
 
                     case ENPCState.Dead:
-                        paramAspect.SetIntParameter(Weapon, _npc.Weapons.GetWeaponID());
+                        paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
                         paramAspect.SetIntParameter(TriggerNumber, 20);
                         paramAspect.SetTrigger(Trigger);
                         paramAspect.SetFloatParameter(AnimationSpeed, 1f);
+                        break;
+
+                    case ENPCState.Spawning:
+                        paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
+                        paramAspect.SetIntParameter(TriggerNumber, 25);
+                        paramAspect.SetFloatParameter(AnimationSpeed, 1f);
+                        paramAspect.SetIntParameter(RightWeapon, _npc.RuntimeState.Definition.WeaponRight);
+                        paramAspect.SetIntParameter(LeftWeapon, _npc.RuntimeState.Definition.WeaponLeft);
+                        paramAspect.SetTrigger(Trigger);
+
                         break;
                 }
             }
@@ -171,8 +239,12 @@ namespace LichLord.NonPlayerCharacters
 
             if (TryGetParametersAspect(out var paramAspect))
             {
-                int weaponId = _npc.Weapons.GetWeaponID();
-                paramAspect.SetIntParameter(Weapon, weaponId);
+                paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
+                paramAspect.SetIntParameter(RightWeapon, _npc.RuntimeState.Definition.WeaponRight);
+                paramAspect.SetIntParameter(LeftWeapon, _npc.RuntimeState.Definition.WeaponLeft);
+                paramAspect.SetBoolParameter(Injured, false);
+                paramAspect.SetBoolParameter(Crouch, false);
+
                 paramAspect.SetBoolParameter(Moving, isMoving);
                 paramAspect.SetFloatParameter(VelocityX, smoothedLocalVelocity.x);
                 paramAspect.SetFloatParameter(VelocityZ, smoothedLocalVelocity.z);
@@ -195,13 +267,70 @@ namespace LichLord.NonPlayerCharacters
                 Quaternion.Angle(rot, lastSyncedRotation) > 0.1f)
             {
                 // Create the LocalTransform with position, rotation, and uniform scale
-                LocalTransform transform = LocalTransform.FromPositionRotationScale(pos, rot, 0.41f);
+                LocalTransform transform = LocalTransform.FromPositionRotationScale(pos, rot, modelScale);
 
                 entityManager.SetComponentData(visualEntity, transform);
 
                 lastSyncedPosition = pos;
                 lastSyncedRotation = rot;
             }
+        }
+
+        public void UpdateAnimationEvents()
+        {
+            if (visualEntity == Entity.Null || !entityManager.Exists(visualEntity))
+                return;
+
+            // Safety: Only if buffer exists (enabled in authoring)
+            if (!entityManager.HasBuffer<AnimationEventComponent>(visualEntity))
+                return;
+
+            var eventBuffer = entityManager.GetBuffer<AnimationEventComponent>(visualEntity);
+
+            // Process all events that fired this frame
+            foreach (var evt in eventBuffer)
+            {
+                // Cast uint to int (safe for Animator hashes)
+                int nameHash = (int)evt.nameHash;
+
+                switch (nameHash)
+                {
+                    case Hash_FootR:
+                        //Debug.Log("Foot R triggered!");
+                        // Your footstep sound/particles for right foot
+                        break;
+
+                    case Hash_FootL:
+                        //Debug.Log("Foot L triggered!");
+                        // Left foot logic
+                        break;
+
+                    case Hash_Hit:
+                        //Debug.Log("Hit event!");
+                        _npc.Brain.OnHitFromAnimation();
+                        break;
+
+                    case Hash_HitSweep:
+                        //Debug.Log("HitSweep event!");
+                        // Your special logic
+                        break;
+
+                    case Hash_Special:
+                        //Debug.Log("Special event!");
+                        // Your special logic
+                        break;
+
+                    case Hash_Shoot:
+                        //Debug.Log("Special event!");
+                        // Your special logic
+                        break;
+                    default:
+                        Debug.LogWarning($"Unhandled animation event hash: {nameHash}");
+                        break;
+                }
+            }
+
+            eventBuffer.Clear();
         }
 
         // Helper: safely get fresh parameters aspect every call

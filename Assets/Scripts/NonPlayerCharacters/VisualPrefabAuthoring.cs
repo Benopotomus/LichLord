@@ -1,29 +1,53 @@
 using Unity.Entities;
 using UnityEngine;
+using AYellowpaper.SerializedCollections;
+using LichLord.NonPlayerCharacters; // Assuming your NPCDefinition lives here
 
 namespace LichLord
 {
-    public class VisualPrefabAuthoring : MonoBehaviour
+    public class VisualPrefabsAuthoring : MonoBehaviour
     {
-        public GameObject visualPrefab; // Drag your visual GameObject prefab here (the one with SkinnedMeshRenderer, etc.)
+        [Header("Map NPC Definitions to their Visual Prefabs")]
+        [SerializedDictionary("NPC Definition", "Visual Prefab")]
+        public SerializedDictionary<NonPlayerCharacterDefinition, GameObject> visualPrefabs;
     }
 
-    public class VisualPrefabBaker : Baker<VisualPrefabAuthoring>
+    // Buffer element now includes the key for lookup
+    public struct VisualEntityPrefabElement : IBufferElementData
     {
-        public override void Bake(VisualPrefabAuthoring authoring)
+        public int DefinitionTableId; // The key
+        public Entity Prefab;                           // The baked visual entity
+    }
+
+    public class VisualPrefabsBaker : Baker<VisualPrefabsAuthoring>
+    {
+        public override void Bake(VisualPrefabsAuthoring authoring)
         {
-            if (authoring.visualPrefab == null) return;
+            if (authoring.visualPrefabs == null || authoring.visualPrefabs.Count == 0)
+                return;
 
             var entity = GetEntity(TransformUsageFlags.None);
 
-            var prefabEntity = GetEntity(authoring.visualPrefab, TransformUsageFlags.Dynamic);
+            var buffer = AddBuffer<VisualEntityPrefabElement>(entity);
 
-            AddComponent(entity, new VisualEntityPrefab
+            foreach (var kvp in authoring.visualPrefabs)
             {
-                Prefab = prefabEntity
-            });
+                var definition = kvp.Key;
+                var prefabGO = kvp.Value;
 
-            DependsOn(authoring.visualPrefab);  // This fixes unreliable serialization/duplication issues
+                if (definition == null || prefabGO == null)
+                    continue;
+
+                var prefabEntity = GetEntity(prefabGO, TransformUsageFlags.Dynamic);
+
+                buffer.Add(new VisualEntityPrefabElement
+                {
+                    DefinitionTableId = definition.TableID,
+                    Prefab = prefabEntity
+                });
+
+                DependsOn(prefabGO);
+            }
         }
     }
 }

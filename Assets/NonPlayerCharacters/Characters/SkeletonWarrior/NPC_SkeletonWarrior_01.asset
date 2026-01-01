@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3784c5b7ca19fcc46ad12cc8cdd20a14, type: 3}
   m_Name: NPC_SkeletonWarrior_01
   m_EditorClassIdentifier: 
-  _tableID: 10
+  _tableID: 12
   _name: Skeleton Warrior
   _prefabBundle:
     _name: NPC_SkeletonWarrior_01
@@ -41,6 +41,10 @@ MonoBehaviour:
     _spawnEffect:
       _name: VFX_Spawning
       _bundle: vfx_spawning
+  _weaponState: 7
+  _weaponLeft: 7
+  _weaponRight: 9
+  _modelScale: {x: 0.41, y: 0.44}
   _spawnTypeDataDefinitions:
     _serializedList:
     - Key: 0
