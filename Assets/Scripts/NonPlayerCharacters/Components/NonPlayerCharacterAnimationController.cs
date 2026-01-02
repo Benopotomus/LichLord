@@ -123,6 +123,7 @@ namespace LichLord.NonPlayerCharacters
 
                 float randomOffset = UnityEngine.Random.Range(0f, 1f);
                 paramAspect.SetFloatParameter(CycleOffset, randomOffset);
+                paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
 
                 SetAnimationForState(ENPCState.Inactive, _npc.RuntimeState.GetState());
             }
@@ -207,7 +208,7 @@ namespace LichLord.NonPlayerCharacters
 
                     case ENPCState.Spawning:
                         paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
-                        paramAspect.SetIntParameter(TriggerNumber, 25);
+                        paramAspect.SetIntParameter(TriggerNumber, 30);
                         paramAspect.SetFloatParameter(AnimationSpeed, 1f);
                         paramAspect.SetIntParameter(RightWeapon, _npc.RuntimeState.Definition.WeaponRight);
                         paramAspect.SetIntParameter(LeftWeapon, _npc.RuntimeState.Definition.WeaponLeft);
