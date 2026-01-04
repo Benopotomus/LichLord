@@ -57,10 +57,11 @@ void CSComputeOutflow (
 
     GroupMemoryBarrierWithGroupSync();
 
-    float waterHts0 = waterData[groupThreadID.x-1][groupThreadID.y];
-    float waterHts1 = waterData[groupThreadID.x+1][groupThreadID.y];
-    float waterHts2 = waterData[groupThreadID.x][groupThreadID.y-1];
-    float waterHts3 = waterData[groupThreadID.x][groupThreadID.y+1];
+    // check bounds for grouping. each thread group has 16x16=256 threads. inside each group x and y range from 0 to 15
+    float waterHts0 = (groupThreadID.x > 0) ? waterData[groupThreadID.x - 1][groupThreadID.y] : waterHt;
+    float waterHts1 = (groupThreadID.x < 15) ? waterData[groupThreadID.x + 1][groupThreadID.y] : waterHt;
+    float waterHts2 = (groupThreadID.y > 0) ? waterData[groupThreadID.x][groupThreadID.y - 1] : waterHt;
+    float waterHts3 = (groupThreadID.y < 15) ? waterData[groupThreadID.x][groupThreadID.y + 1] : waterHt;
 
 
     float landHt = UnpackHeightmap(_HeightMap.SampleLevel(shared_linear_clamp, float2((float)x/wm1, (float)y/hm1), 0));

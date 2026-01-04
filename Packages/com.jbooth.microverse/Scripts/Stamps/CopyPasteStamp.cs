@@ -25,7 +25,8 @@ namespace JBooth.MicroVerseCore
         [Tooltip("When true, the stamp scale is aligned to pixel sizes, providing a precise copy instead of interpolating the data between pixels. You may want to turn this off if you are scaling/rotating a copy paste stamp")]
         public bool pixelQuantization = true;
 
-        public HeightStamp heightStamp { get; private set; }
+        // Unity can't record this for undo if its a field
+        public HeightStamp heightStamp;
         Material splatPaste;
         RenderBuffer[] _mrt;
         float[] channels = new float[32];
@@ -214,7 +215,7 @@ namespace JBooth.MicroVerseCore
                 splatPaste.SetTexture("_IndexMap", stamp.indexMap);
                 splatPaste.SetTexture("_PlacementMask", od.terrainMask);
                 keywordBuilder.Clear();
-                heightStamp.falloff.PrepareMaterial(splatPaste, transform, keywordBuilder.keywords);
+                heightStamp.falloff.PrepareMaterial(splatPaste, transform, keywordBuilder.keywords, terrain);
                 keywordBuilder.Assign(splatPaste);
 
                 splatPaste.SetMatrix("_Transform", TerrainUtil.ComputeStampMatrix(terrain, transform));

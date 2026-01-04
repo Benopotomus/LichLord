@@ -536,13 +536,11 @@
                     result *= flowResult;
                 #endif
 
-                float falloffnoise = 0;
-                
-
                 float2 falloffuv = noiseUV;
                 if (_FalloffNoise2.x > 0)
                     falloffuv = stampUV;
 
+                float falloffnoise = 0;
                 float falloff = ComputeFalloff(uv, stampUV, noiseUV, falloffnoise);
 
                 #if _FALLOFFNOISE 
@@ -559,7 +557,6 @@
                     falloffnoise = (SAMPLE(_FalloffNoiseTexture, shared_linear_repeat, falloffuv * _FalloffNoiseTexture_ST.xy + _FalloffNoiseTexture_ST.zw)[_FalloffNoiseChannel]) * _FalloffNoise.y + _FalloffNoise.w;
                 #endif
  
-
                 #if _FALLOFFNOISE || _FALLOFFFBM || _FALLOFFWORLEY || _FALLOFFWORM || _FALLOFFWORMFBM || _FALLOFFNOISETEXTURE
                     falloffnoise *= 1-falloff;
                     falloff = ComputeFalloff(uv, stampUV, falloffuv, falloffnoise);

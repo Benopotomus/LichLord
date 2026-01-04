@@ -24,19 +24,14 @@ Shader "Hidden/MicroVerse/PasteSplat"
 
             #include_with_pragmas "UnityCG.cginc"
             #include_with_pragmas "/../SplatMerge.cginc"
+            #include_with_pragmas "/../Filtering.cginc"
 
 
             sampler2D _IndexMap;
             sampler2D _WeightMap;
             sampler2D _OrigIndexMap;
             sampler2D _OrigWeightMap;
-            float4x4 _Transform;
             float _Channels[TEXCOUNT];
-            sampler2D _FalloffTexture;
-            float2 _FalloffTextureParams;
-            int _FalloffTextureChannel;
-            float2 _Falloff;
-            float _FalloffAreaRange;
 
             struct appdata
             {
@@ -61,26 +56,6 @@ Shader "Hidden/MicroVerse/PasteSplat"
                 return o;
             }
 
-            float RectFalloff(float2 uv, float falloff) 
-            {
-                if (falloff == 1)
-                {
-                    if (uv.x <= 0 || uv.y <= 0 || uv.x >= 1 || uv.y >= 1)
-                        return 0;
-                    return 1;
-                    
-                }
-                uv = saturate(uv);
-                uv -= 0.5;
-                uv = abs(uv);
-                uv = 0.5 - uv;
-                falloff = 1 - falloff;
-                uv = smoothstep(uv, 0, 0.03 * falloff);
-                return min(uv.x, uv.y);
-            }
-
-
-
             FragmentOutput frag(v2f i)
             {
                 half4 weightMap = tex2D(_WeightMap, i.stampUV);
@@ -99,20 +74,8 @@ Shader "Hidden/MicroVerse/PasteSplat"
                 }
 
                 float mask = 1;
-                #if _USEFALLOFF
-                    mask *= RectFalloff(i.stampUV, _Falloff.y);
-                #elif _USEFALLOFFRANGE
-                    float2 falloff = _Falloff * 0.5;
-                    float radius = length( i.stampUV-0.5 );
- 	                mask = 1.0 - saturate(( radius-falloff.x ) / max(0.01, ( falloff.y-falloff.x )));
-                #elif _USEFALLOFFTEXTURE
-                    mask = 1.0 - saturate(tex2D(_FalloffTexture, i.stampUV)[_FalloffTextureChannel] * _FalloffTextureParams.x + _FalloffTextureParams.y);
-                #elif _USEFALLOFFSPLINEAREA
-                    float d = tex2D(_FalloffTexture, i.uv).r;
-                    d *= -1;
-                    d /= max(0.0001, _FalloffAreaRange);
-                    mask *= saturate(d);
-                #endif
+                float falloff = ComputeFalloff(i.uv, i.stampUV, float2(0, 0), 0);
+                mask *= falloff;
 
                 indexMap[0] = _Channels[indexMap[0]];
                 indexMap[1] = _Channels[indexMap[1]];

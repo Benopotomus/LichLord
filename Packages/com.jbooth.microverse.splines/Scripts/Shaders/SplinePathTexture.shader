@@ -121,12 +121,11 @@
                 //float2 sdfUV = i.uv;// - 1.0 / _AlphaMapSize;
                 float2 data = tex2D(_SplineSDF, sdfUV).xy;
 
-                float2 noiseUV = i.uv;
+                float2 noiseUV = (i.uv * _NoiseUV.z) + _NoiseUV.xy * _NoiseUV.z;
                 noiseUV *= _AlphaMapSize;
                 noiseUV += lerp(-0.5, 0.5, i.uv);
                 noiseUV /= _AlphaMapSize;
-                noiseUV *= _NoiseUV.z;
-                noiseUV += _NoiseUV.xy;
+                
 
                 float result = Blend(_Width, _Smoothness, data.g) * _SplatWeight;
                 float embank = Blend(_HeightWidth, _HeightSmoothness, data.g);

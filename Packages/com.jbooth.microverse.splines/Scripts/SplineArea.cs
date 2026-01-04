@@ -11,6 +11,22 @@ namespace JBooth.MicroVerseCore
 {
     public class SplineArea : Stamp, IModifier
     {
+        /// <summary>
+        /// Determine how a closed spline is to be treated
+        /// </summary>
+        public enum ClosedMode
+        {
+            /// <summary>
+            /// Treat as area, fill full spline area
+            /// </summary>
+            Area = SplineRenderer.RenderDesc.Mode.Area,
+
+            /// <summary>
+            /// Treat as path, paint only along the path, don't paint inside the enclosing area
+            /// </summary>
+            Path = SplineRenderer.RenderDesc.Mode.Path
+        }
+
         public SplineContainer spline;
         [Tooltip("This is the resolution of the signed distance field used to represent this spline")]
         public SplinePath.SDFRes sdfRes = SplinePath.SDFRes.k512;
@@ -19,11 +35,12 @@ namespace JBooth.MicroVerseCore
 
         public Noise positionNoise = new Noise();
 
-
         public bool NeedCurvatureMap() { return false; }
 
         Dictionary<Terrain, SplineRenderer> splineRenderers = new Dictionary<Terrain, SplineRenderer>();
 
+        [Tooltip("Define how a closed spline is to be processed. By default it's an area. For Paths content type this can be switched to Path in order render only along the path instead of the full surface")]
+        public ClosedMode closedMode = ClosedMode.Area;
 
         public override void OnEnable()
         {
@@ -45,6 +62,13 @@ namespace JBooth.MicroVerseCore
         SplineRenderer GetSplineRenderer(Terrain terrain)
         {
             var mode = spline.Spline.Closed ? SplineRenderer.RenderDesc.Mode.Area : SplineRenderer.RenderDesc.Mode.Path;
+
+            // override in case the user explicitly chose path render mode
+            if (spline.Spline.Closed && closedMode == ClosedMode.Path)
+            {
+                mode = SplineRenderer.RenderDesc.Mode.Path;
+            }
+
             if (splineRenderers.ContainsKey(terrain))
             {
                 var sr = splineRenderers[terrain];

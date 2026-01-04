@@ -32,6 +32,7 @@ struct FillAnimationsBufferJob: IJobChunk
 	public NativeHashMap<Hash128, BlobAssetReference<AvatarMaskBlob>> avatarMaskDatabase;
 	
 	public BufferTypeHandle<AnimationToProcessComponent> animationToProcessBufferHandle;
+	public NativeParallelHashMap<int, BlobAssetReference<ControllerAnimationsBlob>>.ParallelWriter animatorOverrideAnimationsMap;
 	
 	BlobAssetReference<ControllerAnimationsBlob> controllerAnimationsBlob;
 
@@ -96,7 +97,7 @@ struct FillAnimationsBufferJob: IJobChunk
 			var animationCurIndex = animations.Length;
 
 			var l = aclc[i];
-			controllerAnimationsBlob = GetControllerAnimationsBlob(entity, animatorOverrideAnimationLookup, l.animations);
+			controllerAnimationsBlob = GetControllerAnimationsBlob(entity, animatorOverrideAnimationLookup, l.animations, animatorOverrideAnimationsMap);
 			
 			var cb = l.controller;
 			ref var lb = ref cb.Value.layers[i];

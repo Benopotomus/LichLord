@@ -63,7 +63,7 @@ namespace JBooth.MicroVerseCore
 
             serializedObject.ApplyModifiedProperties();
 
-            GUIUtil.DrawFalloffFilter(this, area.falloff, area.transform, false);
+            GUIUtil.DrawFalloffFilter(area, area.falloff, area.transform, false);
 
             if (changeScope.changed)
             {

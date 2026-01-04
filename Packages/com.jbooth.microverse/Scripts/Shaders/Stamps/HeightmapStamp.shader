@@ -176,7 +176,7 @@
                     falloffuv = stampUV;
 
                 float noise = 0;
-                float falloff = ComputeFalloff(i.uv, i.stampUV, noiseUV, 0);
+                float falloff = ComputeFalloff(i.uv, i.stampUV, noiseUV, noise);
 
                 #if _FALLOFFNOISE
                     noise = (Noise(falloffuv, _FalloffNoise)) / _RealSize.y;
@@ -192,14 +192,13 @@
                     noise = (tex2D(_FalloffNoiseTexture, falloffuv * _FalloffNoiseTexture_ST.xy + _FalloffNoiseTexture_ST.zw)[_FalloffNoiseChannel] * 2.0 - 1.0) / _RealSize.y * _FalloffNoise.y + _FalloffNoise.w;
                 #endif
 
-                
-
                 #if _FALLOFFNOISE || _FALLOFFFBM || _FALLOFFWORLEY || _FALLOFFWORM || _FALLOFFWORMFBM || _FALLOFFNOISETEXTURE
                     noise *= 1-falloff;
                     falloff = ComputeFalloff(i.uv, stampUV, noiseUV, noise);
                 #endif
 
                 falloff *= 1.0 - tex2D(_PlacementMask, i.uv).x;
+
 
                 #if _USEORIGINALHEIGHTMAP
                     float originalHeight = UnpackHeightmap(tex2D(_OriginalHeights, i.uv));   

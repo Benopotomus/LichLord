@@ -32,9 +32,9 @@ partial struct ApplyAnimationToSkinnedMeshJob: IJobEntity
 	[ReadOnly]
 	public ComponentLookup<AnimatorEntityRefComponent> rigBoneLookup;
 	[ReadOnly]
-	public NativeList<BoneTransform> boneTransforms;
+	public ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTagLookup;
 	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
+	public NativeList<BoneTransform> boneTransforms;
 	[ReadOnly]
 	public NativeParallelHashMap<Hash128, BlobAssetReference<BoneRemapTableBlob>> rigToSkinnedMeshRemapTables;
 	
@@ -50,9 +50,10 @@ partial struct ApplyAnimationToSkinnedMeshJob: IJobEntity
 		if (!rigDefinitionLookup.TryGetComponent(rigEntity, out var rigDef))
 			return;
 		
-		if (!entityToDataOffsetMap.TryGetValue(rigEntity, out var boneDataOffset))
+		if (smc.IsGPUAnimator(gpuAnimationEngineTagLookup))
 			return;
-
+		
+		var boneDataOffset = rigDef.dynamicFrameData;
 		ref var boneRemapTable = ref GetBoneRemapTable(smc.smrInfoBlob, rigDef.rigBlob);
 
 		var absoluteBoneTransforms = RuntimeAnimationData.GetAnimationDataForRigRO(boneTransforms, boneDataOffset.bonePoseOffset, boneDataOffset.rigBoneCount);
@@ -135,17 +136,23 @@ partial struct PropagateBoneTransformToEntityTRSJob: IJobEntity
 {
 	[ReadOnly]
 	public NativeList<BoneTransform> boneTransforms;
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
 
 	[NativeDisableParallelForRestriction]
 	public ComponentLookup<PostTransformMatrix> postTransformMatrixLookup;
+	[ReadOnly]
+	public ComponentLookup<RigDefinitionComponent> rigDefLookup;
+	[ReadOnly]
+	public ComponentLookup<GPUAnimationEngineTag> gpuEngineTagLookup;
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void Execute(Entity e, in AnimatorEntityRefComponent animatorRef, ref LocalTransform lt)
 	{
-		var boneData = RuntimeAnimationData.GetAnimationDataForRigRO(boneTransforms, entityToDataOffsetMap, animatorRef.animatorEntity);
+		if (gpuEngineTagLookup.IsComponentEnabled(animatorRef.animatorEntity))
+			return;
+		
+		var rigDefinition = rigDefLookup[animatorRef.animatorEntity];
+		var boneData = RuntimeAnimationData.GetAnimationDataForRigRO(boneTransforms, rigDefinition);
 		if (boneData.IsEmpty)
 			return;
 		
@@ -251,15 +258,16 @@ unsafe partial struct FillRigToSkinBonesRemapTableCacheJob: IJobEntity
 partial struct UpdateSkinnedMeshBoundsJob: IJobEntity
 {
 	[ReadOnly]
-	public NativeList<BoneTransform> worldBonePoses;
+	public ComponentLookup<RigDefinitionComponent> rigDefLookup;
 	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
+	public NativeList<BoneTransform> worldBonePoses;
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Execute(in SkinnedMeshRendererComponent asm, ref RenderBounds rbb)
 	{
-		var animationData = RuntimeAnimationData.GetAnimationDataForRigRO(worldBonePoses, entityToDataOffsetMap, asm.animatedRigEntity);
+		var rigDefinition = rigDefLookup[asm.animatedRigEntity];
+		var animationData = RuntimeAnimationData.GetAnimationDataForRigRO(worldBonePoses, rigDefinition);
 		
 		if (animationData.Length <= asm.rootBoneIndexInRig || asm.rootBoneIndexInRig < 0)
 			return;

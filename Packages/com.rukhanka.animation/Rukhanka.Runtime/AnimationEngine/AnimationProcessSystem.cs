@@ -31,8 +31,8 @@ public partial struct AnimationProcessSystem: ISystem
 		bonePosesOffsetsArr = new (Allocator.Persistent);
 
 		var eqb0 = new EntityQueryBuilder(Allocator.Temp)
-		.WithAll<RigDefinitionComponent, AnimationToProcessComponent>()
-		.WithNone<GPUAnimationEngineTag>();
+			.WithAll<RigDefinitionComponent, AnimationToProcessComponent>()
+			.WithDisabled<GPUAnimationEngineTag>();
 		animatedObjectQuery = ss.GetEntityQuery(eqb0);
 		
 		ss.RequireForUpdate(animatedObjectQuery);
@@ -66,7 +66,7 @@ public partial struct AnimationProcessSystem: ISystem
 	{
 		var rigDefinitionTypeHandle = SystemAPI.GetComponentTypeHandle<RigDefinitionComponent>(true);
 		var cullAnimationsTagComponentLookup = SystemAPI.GetComponentLookup<CullAnimationsTag>(true);
-		var atpsBufHandle = SystemAPI.GetBufferTypeHandle<AnimationToProcessComponent>(true);
+		var rigDefTypeHandle = SystemAPI.GetComponentTypeHandle<RigDefinitionComponent>();
 		
 		//	Calculate bone offsets per entity
 		var calcBoneOffsetsJob = new CalculateBoneOffsetsJob()
@@ -103,8 +103,7 @@ public partial struct AnimationProcessSystem: ISystem
 			bonePosesOffsets = bonePosesOffsetsArr,
 			boneToEntityIndices = runtimeData.boneToEntityArr,
 			chunkBaseEntityIndices = chunkBaseEntityIndices,
-			entities = entitiesArr,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap.AsParallelWriter()
+			rigDefinitionTypeHandle = rigDefTypeHandle
 		};
 
 		var boneToEntityJH = boneToEntityArrFillJob.ScheduleParallel(animatedObjectQuery, resizeDataBuffersJH);
@@ -118,8 +117,7 @@ public partial struct AnimationProcessSystem: ISystem
 		var animationToProcessBufferLookup = SystemAPI.GetBufferLookup<AnimationToProcessComponent>(true);
 		var rootMotionAnimationStateBufferLookupRW = SystemAPI.GetBufferLookup<RootMotionAnimationStateComponent>();
 
-		var rigDefsArr = animatedObjectQuery.ToComponentDataListAsync<RigDefinitionComponent>(ss.WorldUpdateAllocator, out var rigDefsLookupJH);
-		var dataGatherJH = JobHandle.CombineDependencies(rigDefsLookupJH, dependsOn);
+		var rigDefsArr = animatedObjectQuery.ToComponentDataListAsync<RigDefinitionComponent>(ss.WorldUpdateAllocator, dependsOn, out var rigDefsLookupJH);
 
 		var computeAnimationsJob = new ComputeBoneAnimationJob()
 		{
@@ -132,7 +130,7 @@ public partial struct AnimationProcessSystem: ISystem
 			rootMotionAnimStateBufferLookup = rootMotionAnimationStateBufferLookupRW,
 		};
 
-		var jh = computeAnimationsJob.Schedule(runtimeData.animatedBonesBuffer, 16, dataGatherJH);
+		var jh = computeAnimationsJob.Schedule(runtimeData.animatedBonesBuffer, 16, rigDefsLookupJH);
 		return jh;
 	}
 
@@ -150,6 +148,7 @@ public partial struct AnimationProcessSystem: ISystem
 	JobHandle CopyEntityBonesToAnimationTransforms(ref SystemState ss, ref RuntimeAnimationData runtimeData, JobHandle dependsOn)
 	{
 		var rigDefinitionLookup = SystemAPI.GetComponentLookup<RigDefinitionComponent>(true);
+		var gpuAnimationEngineTagLookup = SystemAPI.GetComponentLookup<GPUAnimationEngineTag>(true);
 		var parentComponentLookup = SystemAPI.GetComponentLookup<Parent>();
 			
 		//	Now take available entity transforms as ref poses overrides
@@ -157,9 +156,9 @@ public partial struct AnimationProcessSystem: ISystem
 		{
 			rigDefComponentLookup = rigDefinitionLookup,
 			boneTransformFlags = runtimeData.boneTransformFlagsHolderArr,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
 			animatedBoneTransforms = runtimeData.animatedBonesBuffer,
 			parentComponentLookup = parentComponentLookup,
+			gpuAnimationEngineTagLookup = gpuAnimationEngineTagLookup
 		};
 
 		var jh = copyEntityBoneTransforms.ScheduleParallel(dependsOn);
@@ -171,19 +170,19 @@ public partial struct AnimationProcessSystem: ISystem
 	JobHandle MakeAbsoluteBoneTransforms(ref SystemState ss, in RuntimeAnimationData runtimeData, JobHandle dependsOn)
 	{
 		var rigDefTypeHandle = SystemAPI.GetComponentTypeHandle<RigDefinitionComponent>(true);
-		var entityTypeHandle = SystemAPI.GetEntityTypeHandle();
 		
 		var makeAbsTransformsJob = new MakeAbsoluteTransformsJob()
 		{
 			localBoneTransforms = runtimeData.animatedBonesBuffer,
 			worldBoneTransforms = runtimeData.worldSpaceBonesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
 			boneTransformFlags = runtimeData.boneTransformFlagsHolderArr,
-			entityTypeHandle = entityTypeHandle,
 			rigDefTypeHandle = rigDefTypeHandle
 		};
 
-		var query = SystemAPI.QueryBuilder().WithAll<RigDefinitionComponent>().Build();
+		var query = SystemAPI.QueryBuilder()
+			.WithAll<RigDefinitionComponent>()
+			.WithNone<GPUAnimationEngineTag>()
+			.Build();
 		var jh = makeAbsTransformsJob.ScheduleParallel(query, dependsOn);
 		return jh;
 	}
@@ -195,7 +194,6 @@ public partial struct AnimationProcessSystem: ISystem
 		var computeRootMotionJob = new ComputeRootMotionJob()
 		{
 			animatedBonePoses = runtimeData.animatedBonesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
 			deltaTime = SystemAPI.Time.DeltaTime,
 			parentLookup = SystemAPI.GetComponentLookup<Parent>(true),
 			ptmLookup = SystemAPI.GetComponentLookup<PostTransformMatrix>(true),
@@ -227,11 +225,6 @@ public partial struct AnimationProcessSystem: ISystem
 		ref var runtimeData = ref SystemAPI.GetSingletonRW<RuntimeAnimationData>().ValueRW;
 		
 		var entityCount = animatedObjectQuery.CalculateEntityCount();
-		if (entityCount == 0)
-		{
-			runtimeData.entityToDataOffsetMap.Clear();
-			return;
-		}
 		
 		bonePosesOffsetsArr.Resize(entityCount + 1, NativeArrayOptions.UninitializedMemory);
 		var chunkBaseEntityIndices = animatedObjectQuery.CalculateBaseEntityIndexArrayAsync(ss.WorldUpdateAllocator, ss.Dependency, out var baseIndexCalcJH);

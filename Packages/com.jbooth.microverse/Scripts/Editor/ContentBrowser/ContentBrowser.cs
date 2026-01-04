@@ -69,23 +69,27 @@ namespace JBooth.MicroVerseCore.Browser
             Biomes = ContentType.Biomes,
             Roads = ContentType.Roads,
             Caves = ContentType.Caves,
-            Global = ContentType.Global
+            Global = ContentType.Global,
+            Paths = ContentType.Paths,
         }
 
-        public ContentTab[] contentTabs = new ContentTab[9]
+        public static ContentTab[] contentTabs = new ContentTab[10]
         {
-            new HeightTab(),
-            new TextureTab(),
-            new VegetationTab(),
-            new ObjectTab(),
-            new AmbienceTab(),
-            new BiomeTab(),
-            new RoadTab(),
-            new CaveTab(),
-            new GlobalTab()
+            new HeightTab() { tab = Tab.Height, name = "Height", order = 0 },
+            new TextureTab() { tab = Tab.Texture, name = "Texture", order = 1 },
+            new VegetationTab() { tab = Tab.Vegetation, name = "Vegetation", order = 2 },
+            new ObjectTab() { tab = Tab.Objects, name = "Objects", order = 3 },
+            new AmbienceTab() { tab = Tab.Audio, name = "Audio", order = 4 },
+            new BiomeTab() { tab = Tab.Biomes, name = "Biomes", order = 5 },
+            new RoadTab() { tab = Tab.Roads, name = "Roads", order = 6 },
+            new CaveTab() { tab = Tab.Caves, name = "Caves", order = 8 },
+            new GlobalTab() { tab = Tab.Global, name = "Global", order = 9 },
+            new PathsTab() { tab = Tab.Paths, name = "Paths", order = 7 },
         };
 
-        GUIContent[] tabNames = new GUIContent[9] { new GUIContent("Height"), new GUIContent("Texture"), new GUIContent("Vegetation"), new GUIContent("Objects"), new GUIContent("Audio"), new GUIContent("Biomes"), new GUIContent("Roads"), new GUIContent("Caves"), new GUIContent("Global") };
+        private static Dictionary<int, Tab> toolbarIndex2Tab = contentTabs.ToDictionary(kvp => kvp.order, kvp => kvp.tab);
+        private static Dictionary<Tab, int> tab2toolbarIndex = contentTabs.ToDictionary(kvp => kvp.tab, kvp => kvp.order);
+        private static GUIContent[] tabNames = contentTabs.OrderBy( x => x.order).Select( x => new GUIContent( x.name)).ToArray();
         
         public static Tab tab = Tab.Height;
 
@@ -140,6 +144,12 @@ namespace JBooth.MicroVerseCore.Browser
         private Grouping grouping = Grouping.Package;
 
         /// <summary>
+        /// Internal flag to visualize where the path content type is being used.
+        /// Can be removed later.
+        /// </summary>
+        private static bool pathsContentTypeEnabled = true;
+
+        /// <summary>
         /// Get all presets that are currently visible in the browser
         /// </summary>
         /// <returns></returns>
@@ -157,9 +167,18 @@ namespace JBooth.MicroVerseCore.Browser
         {
             return selectedPackage;
         }
+
         public Tab GetSelectedTab()
         {
             return tab;
+        }
+
+        public void SetSelectedTab( Tab selectedTab)
+        {
+            tab = selectedTab;
+
+            OnGUI();
+            Repaint();
         }
 
         public ContentSelectionGrid GetContentSelectionGrid()
@@ -309,6 +328,20 @@ namespace JBooth.MicroVerseCore.Browser
             // calculated automatically in the next step wherein the tangent mode is set to "Auto Smooth."
             spline.Knots = m_Reduced.Select(x => new BezierKnot(x));
 
+            // center
+            float3 center = 0;
+            foreach (var p in spline)
+            {
+                center += p.Position;
+            }
+            center /= spline.Count;
+            splineContainer.transform.position = center;
+            for (int i = 0; i < spline.Count; ++i)
+            {
+                var k = spline[i];
+                k.Position -= center;
+                spline[i] = k;
+            }
 
             var all = new SplineRange(0, spline.Count);
 
@@ -320,6 +353,7 @@ namespace JBooth.MicroVerseCore.Browser
             spline.SetAutoSmoothTension(all, splineTension);
            
             spline.Closed = placementMode == PlacementMode.PaintArea;
+
             EditorUtility.SetDirty(splineContainer);
 
             //m_Stats.text = $"Input Sample Count: {m_Stroke.Count}\nSpline Knot Count: {m_Reduced.Count}";
@@ -460,7 +494,6 @@ namespace JBooth.MicroVerseCore.Browser
                                             avg += p;
                                             min = Vector3.Min(min, p);
                                             max = Vector3.Max(max, p);
-                                            
                                         }
 
                                         avg /= splineContainer.Spline.Count;
@@ -475,6 +508,15 @@ namespace JBooth.MicroVerseCore.Browser
                                             if (s.stampVersion == 0)
                                                 s.stampVersion = 1;
                                         }
+
+                                        if (tab == Tab.Paths && pathsContentTypeEnabled)
+                                        {
+                                            // use path mode so that the closed area isnn't filled in case the user select "closed" on the spline container
+                                            area.closedMode = SplineArea.ClosedMode.Path;
+
+                                            AssignSplineAreaToChildren(spawned, area);
+                                        }
+
                                         var over = spawned.GetComponent<FalloffOverride>();
                                         if (over != null)
                                         {
@@ -513,13 +555,20 @@ namespace JBooth.MicroVerseCore.Browser
                                                 }
                                                 if (falloff != null)
                                                 {
-                                                    falloff.filterType = FalloffFilter.FilterType.SplineArea;
-                                                    falloff.splineArea = area;
-                                                    falloff.falloffRange = Vector2.one;
-                                                    if (placementMode == PlacementMode.PaintSpline)
+                                                    if (tab == Tab.Paths && pathsContentTypeEnabled && falloff.filterType == FalloffFilter.FilterType.SplineArea)
                                                     {
-                                                        falloff.splineAreaFalloffBoost = 10;
-                                                        falloff.splineAreaFalloff = 5;
+                                                        // nothing to do, spline is already assigned to children
+                                                    }
+                                                    else
+                                                    {
+                                                        falloff.filterType = FalloffFilter.FilterType.SplineArea;
+                                                        falloff.splineArea = area;
+                                                        falloff.falloffRange = Vector2.one;
+                                                        if (placementMode == PlacementMode.PaintSpline)
+                                                        {
+                                                            falloff.splineAreaFalloffBoost = 10;
+                                                            falloff.splineAreaFalloff = 5;
+                                                        }
                                                     }
                                                     areaUses++;
                                                 }
@@ -530,12 +579,20 @@ namespace JBooth.MicroVerseCore.Browser
                                 }
                             }
                         }
+
+                        // select new object
+                        Selection.activeObject = splineContainer.gameObject;
+
                         // clear spline container too
                         splineContainer = null;
+
                         if (placementMode != PlacementMode.Place && Event.current.shift == false)
                         {
                             placementMode = PlacementMode.Place;
                         }
+
+
+
                         Repaint();
                     }
                 }
@@ -925,8 +982,10 @@ namespace JBooth.MicroVerseCore.Browser
 
             EditorGUILayout.BeginHorizontal();
             {
-                // tab bar
-                tab = (Tab)GUILayout.Toolbar((int)tab, tabNames);
+                // toolbar of Unity uses strict indexes regarding the gui content
+                // we need our custom order, so we map the indexes back and forth
+                int index = GUILayout.Toolbar(tab2toolbarIndex[tab], tabNames);
+                tab = toolbarIndex2Tab[index];
 
                 // optional button
                 if (GUILayout.Button(COptionalVisibility, EditorStyles.miniButton, GUILayout.Width(20)))
@@ -1157,5 +1216,42 @@ namespace JBooth.MicroVerseCore.Browser
         {
             return listWidth;
         }
+
+#if __MICROVERSE_SPLINES__
+
+        /// <summary>
+        /// Assign the spline area to all the children. This is used for the Paths content type
+        /// </summary>
+        /// <param name="spawned"></param>
+        /// <param name="splineArea"></param>
+        public void AssignSplineAreaToChildren( GameObject spawned, SplineArea splineArea)
+        {
+            Stamp[] stamps = spawned.GetComponentsInChildren<Stamp>();
+
+            // spline paths: assign the spline
+            var subpaths = spawned.GetComponentsInChildren<SplinePath>();
+            foreach (var sp in subpaths)
+            {
+                sp.spline = splineArea?.spline;
+            }
+
+            foreach (var s in stamps)
+            {
+                var falloffFilter = s.GetFilterSet();
+
+                FalloffFilter falloff = null;
+
+                if (falloffFilter != null)
+                {
+                    falloff = falloffFilter.falloffFilter;
+                }
+
+                if (falloff?.filterType == FalloffFilter.FilterType.SplineArea)
+                {
+                    falloff.splineArea = splineArea;
+                }
+            }
+        }
+#endif
     }
 }

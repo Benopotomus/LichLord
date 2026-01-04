@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -104,11 +105,15 @@ class UIController_CrowdSample: MonoBehaviour
 	{
 		var spawners = spawnerQuery.ToEntityArray(Allocator.Temp);
 
+		var multiplier = 1.0f;
+	#if ENABLE_INPUT_SYSTEM
+		multiplier = Keyboard.current.ctrlKey.isPressed ? 10 : 1;
+	#endif
 		foreach (var s in spawners)
 		{
 			var scc = new SpawnCommandComponent()
 			{
-				spawnCount = (int)(spawnCountSlider.value / spawners.Length),
+				spawnCount = (int)(spawnCountSlider.value / spawners.Length * multiplier),
 				boneVisualizationOn = visualizeSkeletonsToggle.isOn,
 				gpuAnimator = modeSelector.value == 1
 			};
@@ -122,7 +127,11 @@ class UIController_CrowdSample: MonoBehaviour
 	void DespawnEntities()
 	{
 		var rigsArr = rigsQuery.ToEntityArray(Allocator.Temp);
-		var numToDespawn = math.min(rigsArr.Length, (int)spawnCountSlider.value);
+		var multiplier = 1.0f;
+	#if ENABLE_INPUT_SYSTEM
+		multiplier = Keyboard.current.ctrlKey.isPressed ? 10 : 1;
+	#endif
+		var numToDespawn = math.min(rigsArr.Length, (int)(spawnCountSlider.value * multiplier));
 
 		var allRigsIndices = new NativeList<int>(rigsArr.Length, Allocator.Temp);
 		var rigsToDespawn = new NativeArray<int>(numToDespawn, Allocator.Temp);

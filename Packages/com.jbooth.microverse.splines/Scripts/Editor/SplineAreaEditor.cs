@@ -25,6 +25,8 @@ namespace JBooth.MicroVerseCore
             EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("spline"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("closedMode"));
+
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sdfRes"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxSDF"));
 
@@ -54,6 +56,29 @@ namespace JBooth.MicroVerseCore
             var path = target as SplineArea;
             if (path != null && path.spline != null && path.spline.Splines != null)
             {
+                // first clear renderers of child gameobjects
+                // required if you have a hierarchy like this:
+                // + Track [Spline Container,SplineArea]
+                // -- Trench [Spline Path]
+                // otherwise if you modify track then the Trench wouldn't be updated
+                // get all splinepath components of children in the hierarchy
+                // eg required for the Path content type in which the height is modified via spline path as a child gameobject
+                SplinePath[] paths = path.transform.GetComponentsInChildren<SplinePath>();
+                foreach (var s in path.spline.Splines)
+                {
+                    foreach (SplinePath childPath in paths)
+                    {
+                        if (childPath == path)
+                            continue;
+
+                        if (ReferenceEquals(spline, s))
+                        {
+                            childPath.ClearSplineRenders(path.GetBounds());
+                        }
+                    }
+                }
+
+                // modification of the gameobject with this spline area
                 foreach (var s in path.spline.Splines)
                 {
                     if (ReferenceEquals(spline, s))

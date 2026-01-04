@@ -87,8 +87,14 @@ namespace JBooth.MicroVerseCore
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("mipBias"));
                 GUI.enabled = old;
             }
-            
-            heightmapStamp.scaleOffset = EditorGUILayout.Vector4Field("Scale Offset", heightmapStamp.scaleOffset);
+
+            var scaleOffsetProperty = serializedObject.FindProperty("scaleOffset");
+            EditorGUI.BeginChangeCheck();
+            var newScaleOffset = EditorGUILayout.Vector4Field("Scale Offset", scaleOffsetProperty.vector4Value);
+            if (EditorGUI.EndChangeCheck())
+            {
+                scaleOffsetProperty.vector4Value = newScaleOffset;
+            }
             //heightmapStamp.remapRange = GUIUtil.DrawMinMax("Remap Range", heightmapStamp.remapRange, new Vector2(0, 1));
             using (new GUILayout.VerticalScope(GUIUtil.boxStyle))
             {
@@ -143,7 +149,7 @@ namespace JBooth.MicroVerseCore
 
 
             
-            GUIUtil.DrawFalloffFilter(this, heightmapStamp.falloff, heightmapStamp.transform, false);
+            GUIUtil.DrawFalloffFilter(heightmapStamp, heightmapStamp.falloff, heightmapStamp.transform, false);
 
             if (changeScope.changed)
             {

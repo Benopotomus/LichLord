@@ -116,7 +116,8 @@ namespace JBooth.MicroVerseCore
             else
                 material.SetTexture(_PlacementMask, null);
 
-            material.SetVector("_AlphaMapSize", new Vector2(indexSrc.width, indexSrc.width));
+            material.SetVector("_AlphaMapSize", new Vector2(indexSrc.width, indexSrc.height));
+            material.SetVector("_StampScale", new Vector2(this.transform.lossyScale.x, this.transform.lossyScale.z));
             filterSet.PrepareTransform(this.transform, splatmapData.terrain, material, keywordBuilder.keywords);
             
             if (MicroVerse.GetMegasplatTexture(od.terrain) != null)

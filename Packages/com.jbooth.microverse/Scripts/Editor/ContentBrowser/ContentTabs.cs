@@ -8,9 +8,13 @@ using static JBooth.MicroVerseCore.Browser.ContentBrowser;
 
 namespace JBooth.MicroVerseCore.Browser
 {
-    // default implimentation
+    // default implementation
     public class ContentTab
     {
+        public Tab tab;
+        public string name;
+        public int order;
+
         public virtual bool SupportsPlacementMode(PlacementMode pm)
         {
             return pm != PlacementMode.PaintSpline && pm != PlacementMode.PaintArea;
@@ -368,6 +372,13 @@ namespace JBooth.MicroVerseCore.Browser
         }
     }
 
+    public class PathsTab : ContentTab
+    {
+        public override bool SupportsPlacementMode(PlacementMode pm)
+        {
+            return pm == PlacementMode.PaintSpline;
+        }
+    }
 
     public class HeightTab : ContentTab
     {

@@ -311,7 +311,7 @@ namespace JBooth.MicroVerseCore
         static int _TerrainSize = Shader.PropertyToID("_TerrainSize");
 
         FalloffFilter useFilter = null;
-        FalloffFilter GetUseFilter(Transform transform)
+        public FalloffFilter GetUseFilter(Transform transform)
         {
             if (useFilter != null)
                 return useFilter;
@@ -357,7 +357,7 @@ namespace JBooth.MicroVerseCore
             }
         }
 
-        public void PrepareMaterial(Material mat, Transform transform, List<string> keywords)
+        public void PrepareMaterial(Material mat, Transform transform, List<string> keywords, Terrain terrain = null)
         {
             this.useFilter = null;
             var useFilter = GetUseFilter(transform);
@@ -403,6 +403,21 @@ namespace JBooth.MicroVerseCore
                 mat.SetVector(_Falloff, Vector2.one);
 
             }
+#if __MICROVERSE_SPLINES__
+            else if (useFilter.filterType == FilterType.SplineArea && useFilter.splineArea != null && terrain != null)
+            {
+                keywords.Add("_USEFALLOFFSPLINEAREA");
+                mat.SetTexture(_FalloffTexture, useFilter.splineArea.GetSDF(terrain));
+                mat.SetFloat(_FalloffAreaRange, useFilter.splineAreaFalloff);
+                mat.SetFloat(_FalloffAreaBoost, useFilter.splineAreaFalloffBoost);
+            }
+#else
+            if (filterType == FilterType.SplineArea)
+            {
+                keywords.Add("_USEFALLOFFRANGE");
+                mat.SetVector(_Falloff, useFilter.falloffRange);
+            }
+#endif
         }
     }
 }

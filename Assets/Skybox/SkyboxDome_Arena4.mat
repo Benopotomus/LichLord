@@ -8,11 +8,11 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SkyboxDome_Arena4
-  m_Shader: {fileID: -6465566751694194690, guid: 66834a1859cfff746827efad8f4c0200,
-    type: 3}
+  m_Shader: {fileID: 106, guid: 0000000000000000f000000000000000, type: 0}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _SUNDISK_HIGH_QUALITY
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -24,6 +24,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BackTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -36,7 +40,19 @@ Material:
         m_Texture: {fileID: 2800000, guid: b4314cf81836a4441a19ebbc4e51f677, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DownTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FrontTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LeftTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -49,6 +65,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RightTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -66,6 +86,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _Tex:
         m_Texture: {fileID: 8900000, guid: 8e816e9edfec2554aa757bfd337f5aad, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _UpTex:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Worm:
@@ -87,6 +111,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AlphaClip: 0
+    - _AtmosphereThickness: 1
     - _Blend: 0
     - _BumpScale: 1
     - _CloudCutoff: 0.301
@@ -135,8 +160,10 @@ Material:
     - _Stars: 0
     - _StarsOn: 0
     - _SunContrast: 23.2
+    - _SunDisk: 2
     - _SunPow: 41.21
     - _SunSize: 99.63
+    - _SunSizeConvergence: 5
     - _Surface: 0
     - _TwinkleBoost: 1
     - _TwinkleFreq: 2
@@ -159,6 +186,7 @@ Material:
     - _CoreColor: {r: 1.1706502, g: 0.56713164, b: 3.0949183, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FarColor: {r: 0.41176468, g: 0.22745094, b: 0.21176466, a: 0}
+    - _GroundColor: {r: 0.36899996, g: 0.34899998, b: 0.34099993, a: 1}
     - _HaloColor: {r: 0.7646882, g: 1, b: 0.5803922, a: 1}
     - _HorizonColor: {r: 0.09989874, g: 0.19806935, b: 0.17788847, a: 1}
     - _LightDir: {r: 0.2, g: 1, b: 0, a: 0}
@@ -173,6 +201,7 @@ Material:
     - _SampleTwoScroll: {r: -0.04, g: 0.17, b: 0, a: 0}
     - _Shadow: {r: 0.008568125, g: 0.03433981, b: 0.09084173, a: 1}
     - _SkyColor: {r: 0.09989874, g: 0.19806935, b: 0.17464745, a: 1}
+    - _SkyTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _SunColor: {r: 4, g: 3.3643203, b: 1.5723267, a: 1}
     - _Tint: {r: 1, g: 1, b: 1, a: 1}

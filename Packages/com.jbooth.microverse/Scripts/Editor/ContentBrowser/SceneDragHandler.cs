@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using static JBooth.MicroVerseCore.Browser.ContentBrowser;
 
-#if __MICROVERSE_ROADS__
+#if __MICROVERSE_ROADS__ || __MICROVERSE_SPLINES__
 using UnityEngine.Splines;
 #endif
 
@@ -88,8 +88,13 @@ namespace JBooth.MicroVerseCore.Browser
             if (Event.current.type != EventType.DragUpdated && Event.current.type != EventType.DragPerform)
                 return;
 
+#if UNITY_6000_3_OR_NEWER
+            if(browser.position.Contains(Event.current.mousePosition))
+                return;
+#else
             if (EditorWindow.mouseOverWindow == browser)
                 return;
+#endif
 
             object isMicroVerseDraggable = DragAndDrop.GetGenericData( IsMicroverseDraggableId);
 
@@ -109,7 +114,10 @@ namespace JBooth.MicroVerseCore.Browser
             {
                 DragAndDrop.SetGenericData("preset", null);
 
-                GameObject draggable = browser.contentTabs[(int)browser.GetSelectedTab()].Spawn(browser, preset, wasShiftPressed);
+                GameObject draggable = contentTabs[(int)browser.GetSelectedTab()].Spawn(browser, preset, wasShiftPressed);
+
+                // drag start operation, potentially wrap the draggable into a parent object
+                draggable = DragStarted(draggable);
 
                 DragAndDrop.objectReferences = new GameObject[] { draggable };
                 DragAndDrop.paths = null;
@@ -121,7 +129,6 @@ namespace JBooth.MicroVerseCore.Browser
                     collider.enabled = false;
                 }
                 DragAndDrop.SetGenericData( EnabledCollidersId, enabledColliders);
-
             }
 
 
@@ -253,10 +260,59 @@ namespace JBooth.MicroVerseCore.Browser
             */
         }
 
+        /// <summary>
+        /// Process the draggable gameobject after instantiation.
+        /// Used eg for Paths in order to create a spline path in placement mode and to assign the path to all stamps
+        /// </summary>
+        /// <param name="draggable"></param>
+        /// <returns></returns>
+        private GameObject DragStarted( GameObject draggable)
+        {
+            if (draggable == null)
+                return null;
+
+#if __MICROVERSE_SPLINES__
+            #region Paths
+            // when a path is dragged out via placement we create a spline container of arbitrary size and reparent the preset with it
+            if (browser.GetSelectedTab() == Tab.Paths)
+            {
+                // create parent and spline
+                var newgo = new GameObject("Spline - " + draggable.name);
+                SplineContainer splineContainer = newgo.AddComponent<SplineContainer>();
+
+                // add spline area
+                var area = splineContainer.gameObject.AddComponent<SplineArea>();
+                area.spline = splineContainer;
+
+                // use path mode so that the closed area isnn't filled in case the user select "closed" on the spline container
+                area.closedMode = SplineArea.ClosedMode.Path;
+
+                // create microverse child
+                draggable.transform.SetParent(newgo.transform, true);
+                newgo.transform.SetParent(MicroVerse.instance.transform, true);
+
+                // add 2 arbitrary knots
+                Vector3 startPointWorld = draggable.transform.TransformPoint(new Vector3(-2, 0, 0));
+                Vector3 endPointWorld = draggable.transform.TransformPoint(new Vector3(2, 0, 0));
+                splineContainer.Spline.Add(new BezierKnot(startPointWorld));
+                splineContainer.Spline.Add(new BezierKnot(endPointWorld));
+
+                // standard behaviour, same as painting
+                browser.AssignSplineAreaToChildren(newgo, area);
+
+                // select the new created object
+                return newgo;
+            }
+            #endregion Paths
+#endif
+
+            return draggable;
+        }
 
         private void DragFinished()
         {
             GameObject go = DragAndDrop.objectReferences[0] as GameObject;
+
 
 #if __MICROVERSE_ROADS__
             if (go != null)

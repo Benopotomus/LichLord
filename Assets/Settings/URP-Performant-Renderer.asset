@@ -36,6 +36,19 @@ MonoBehaviour:
   m_Name: HiZURP
   m_EditorClassIdentifier: 
   m_Active: 1
+--- !u!114 &-1323325556438399398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: HiZURP
+  m_EditorClassIdentifier: JBooth.FoliageRenderer:JBooth.FoliageRendering:HiZURP
+  m_Active: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54,8 +67,7 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -4771968266071351858}
-  - {fileID: -2228673321665804309}
-  m_RendererFeatureMap: ce5d611d2590c6bdeb47b8056c2912e1
+  m_RendererFeatureMap: ce5d611d2590c6bd
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: d322abdc99ebb0f4b9fee6250c00e37a, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -104,3 +116,29 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &4135616705682095197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: HiZURP
+  m_EditorClassIdentifier: JBooth.FoliageRenderer:JBooth.FoliageRendering:HiZURP
+  m_Active: 1
+--- !u!114 &5343326910071210623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b72f3a84ed6147c18134fe9455e0f85, type: 3}
+  m_Name: HiZURP
+  m_EditorClassIdentifier: 
+  m_Active: 1

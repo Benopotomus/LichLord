@@ -97,7 +97,7 @@
             {
                 float height = UnpackHeightmap(tex2D(_MainTex, i.uv));
                 //float4 os = _SplineSDF_TexelSize;
-                float2 noiseUV = (i.uv * _NoiseUV.z) + _NoiseUV.xy;
+                float2 noiseUV = (i.uv * _NoiseUV.z) + _NoiseUV.xy * _NoiseUV.z;
                 float2 sdfUV = i.uv;// - (1.0 / _HeightMapSize * 0.5);
                 float3 data = tex2D(_SplineSDF, sdfUV).xyz;
                 

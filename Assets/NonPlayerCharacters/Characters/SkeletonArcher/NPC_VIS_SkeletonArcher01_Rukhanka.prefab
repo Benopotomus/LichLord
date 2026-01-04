@@ -475,12 +475,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6734432770595679014}
   - {fileID: 1736501808357093491}
   - {fileID: 5710749220520124081}
   - {fileID: 6640886012218655230}
   - {fileID: 4468622284377268057}
   - {fileID: 1335225797986246485}
+  - {fileID: 5968379036260956193}
   m_Father: {fileID: 3342723544305357932}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1617771509978592137
@@ -1162,8 +1162,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5996040515201241304}
-  - component: {fileID: 5151928700135255316}
-  - component: {fileID: 1452442918906011372}
+  - component: {fileID: 4769332464121106734}
+  - component: {fileID: 4390673513821686569}
   m_Layer: 0
   m_Name: NPC_VIS_SkeletonArcher01_Rukhanka
   m_TagString: Untagged
@@ -1188,7 +1188,7 @@ Transform:
   - {fileID: 1692042985082422555}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &5151928700135255316
+--- !u!95 &4769332464121106734
 Animator:
   serializedVersion: 5
   m_ObjectHideFlags: 0
@@ -1209,7 +1209,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1452442918906011372
+--- !u!114 &4390673513821686569
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1222,7 +1222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigConfigSource: 0
-  avatar: {fileID: 9000000, guid: 4c313c1a5b453304d94edc5c5a0e9d69, type: 3}
+  avatar: {fileID: 9000000, guid: f68544d0e30403b4b835d29e79a8d965, type: 3}
   avatarOptimizationMask: {fileID: 0}
   applyRootMotion: 0
   animationCulling: 0
@@ -1423,7 +1423,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.03, z: 0.11419}
-  m_LocalScale: {x: 0.375, y: 0.375, z: 0.375}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2665063577168183738}
@@ -2161,7 +2161,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.029999971, z: 0.11419}
-  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5996040515201241304}
@@ -2211,7 +2211,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: 4300000, guid: 54c730c0e32ca4949941077887f7e525, type: 2}
+  m_Mesh: {fileID: 4300000, guid: b6db448f9a202a44492fd42804698de2, type: 2}
   m_Bones:
   - {fileID: 7741416851340000140}
   - {fileID: 2682980808201280484}
@@ -2805,7 +2805,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2967107496350093667}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &8455762791915823439
+--- !u!1001 &8862684417395110472
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -2816,7 +2816,7 @@ PrefabInstance:
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.094
       objectReference: {fileID: 0}
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
@@ -2826,27 +2826,27 @@ PrefabInstance:
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.297
+      value: -0.341
       objectReference: {fileID: 0}
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.68228334
+      value: 0.6865333
       objectReference: {fileID: 0}
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.68228334
+      value: 0.6865333
       objectReference: {fileID: 0}
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.18571337
+      value: 0.1693286
       objectReference: {fileID: 0}
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.18571337
+      value: -0.1693286
       objectReference: {fileID: 0}
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
@@ -2861,31 +2861,21 @@ PrefabInstance:
     - target: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -30.453
+      value: -27.71
       objectReference: {fileID: 0}
     - target: {fileID: 3387607590888773306, guid: 5476fbf88f4248644a6f92c8dcd02959,
         type: 3}
       propertyPath: m_Name
       value: Bow_1H
       objectReference: {fileID: 0}
-    - target: {fileID: 7657407923664887115, guid: 5476fbf88f4248644a6f92c8dcd02959,
-        type: 3}
-      propertyPath: m_Materials.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7657407923664887115, guid: 5476fbf88f4248644a6f92c8dcd02959,
-        type: 3}
-      propertyPath: m_Materials.Array.data[1]
-      value: 
-      objectReference: {fileID: 2100000, guid: 3469bd4c10c515f4b9d6af484a6cb0ca, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5476fbf88f4248644a6f92c8dcd02959, type: 3}
---- !u!4 &6734432770595679014 stripped
+--- !u!4 &5968379036260956193 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2895081847333669481, guid: 5476fbf88f4248644a6f92c8dcd02959,
     type: 3}
-  m_PrefabInstance: {fileID: 8455762791915823439}
+  m_PrefabInstance: {fileID: 8862684417395110472}
   m_PrefabAsset: {fileID: 0}

@@ -9,14 +9,15 @@ namespace JBooth.MicroVerseCore
     public enum ContentType
     {
         Height = 0,
-        Texture,
-        Vegetation,
-        Objects,
-        Audio,
-        Biomes,
-        Roads,
-        Caves,
-        Global
+        Texture = 1,
+        Vegetation = 2,
+        Objects = 3,
+        Audio = 4,
+        Biomes = 5,
+        Roads = 6,
+        Caves = 7,
+        Global = 8,
+        Paths = 9,
     }
 
     public class BrowserContent : ScriptableObject

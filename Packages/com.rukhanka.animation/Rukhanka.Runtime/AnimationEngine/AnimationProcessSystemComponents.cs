@@ -45,9 +45,9 @@ public struct SkinnedMeshRendererComponent: IComponentData
 	public int rootBoneIndexInRig;
 	public BlobAssetReference<SkinnedMeshInfoBlob> smrInfoBlob;
 	
-	public bool IsGPUAnimator(ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTagLookup)
+	public bool IsGPUAnimator(in ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTagLookup)
 	{
-		return gpuAnimationEngineTagLookup.HasComponent(animatedRigEntity) && gpuAnimationEngineTagLookup.IsComponentEnabled(animatedRigEntity);
+		return animatedRigEntity != Entity.Null && gpuAnimationEngineTagLookup.IsComponentEnabled(animatedRigEntity);
 	}
 }
 

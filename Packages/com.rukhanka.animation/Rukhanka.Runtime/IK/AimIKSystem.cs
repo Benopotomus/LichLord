@@ -29,15 +29,27 @@ public partial struct AimIKSystem: ISystem
         [NativeDisableContainerSafetyRestriction]
         public RuntimeAnimationData runtimeData;
     
+/////////////////////////////////////////////////////////////////////////////////
+
         void Execute(AimIKComponent aik, in AnimatorEntityRefComponent aer, in DynamicBuffer<AimIKAffectedBoneComponent> aimedBones)
         {
             if (aik.weight < math.EPSILON)
                 return;
             
             var rigDef = rigDefLookup[aer.animatorEntity];
-            using var animStream = AnimationStream.Create(runtimeData, aer.animatorEntity, rigDef);
+            using var animStream = AnimationStream.Create(runtimeData, rigDef);
             
-            var targetEntityRigRelativePose = IKCommon.GetRigRelativeEntityPose(aik.target, aer.animatorEntity, animStream.GetWorldPose(0), runtimeData, localTransformLookup, parentLookup, boneEntityRefLookup);
+            var targetEntityRigRelativePose = IKCommon.GetRigRelativeEntityPose
+            (
+                aik.target,
+                aer.animatorEntity,
+                animStream.GetWorldPose(0),
+                runtimeData,
+                localTransformLookup,
+                parentLookup,
+                boneEntityRefLookup,
+                rigDefLookup
+            );
 
             for (var i = 0; i < aimedBones.Length; ++i)
             {

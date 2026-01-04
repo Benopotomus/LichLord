@@ -70,7 +70,7 @@ namespace JBooth.MicroVerseCore
             serializedObject.ApplyModifiedProperties();
 
             EditorGUI.BeginChangeCheck();
-            GUIUtil.DrawFalloffFilter(this, meshStamp.falloff, meshStamp.transform, false);
+            GUIUtil.DrawFalloffFilter(meshStamp, meshStamp.falloff, meshStamp.transform, false);
 
             if (EditorGUI.EndChangeCheck())
             {

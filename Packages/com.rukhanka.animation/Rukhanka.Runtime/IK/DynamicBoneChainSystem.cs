@@ -33,10 +33,12 @@ partial struct DynamicBoneChainVerletSolverJob : IJobEntity
     public float deltaTime;
     static readonly float fixedUpdateRate = 1 / 60.0f;
 
+/////////////////////////////////////////////////////////////////////////////////
+
     void Execute(Entity e, ref DynamicBoneChainComponent dbcc, in AnimatorEntityRefComponent aer, ref DynamicBuffer<DynamicBoneChainNode> dynamicChain)
     {
         var rigDef = rigDefLookup[aer.animatorEntity];
-        using var animStream = AnimationStream.Create(runtimeData, aer.animatorEntity, rigDef);
+        using var animStream = AnimationStream.Create(runtimeData, rigDef);
         
         Span<int> boneIndicesInRig = stackalloc int[dynamicChain.Length];
         Span<float3> initialPositions = stackalloc float3[dynamicChain.Length];
@@ -116,7 +118,16 @@ partial struct DynamicBoneChainVerletSolverJob : IJobEntity
     float3 ComputeEntityInertia(Entity e, ref DynamicBoneChainComponent dbcc, RuntimeAnimationData runtimeAnimationData)
     {
         BoneTransform bt = BoneTransform.Identity();
-        IKCommon.GetEntityWorldTransform(e, ref bt, runtimeAnimationData, localTransformLookup, parentLookup, boneEntityRefLookup);
+        IKCommon.GetEntityWorldTransform
+        (
+            e,
+            ref bt,
+            runtimeAnimationData,
+            localTransformLookup,
+            parentLookup,
+            boneEntityRefLookup,
+            rigDefLookup
+        );
         var rv = bt.pos - dbcc.prevPosition;
         dbcc.prevPosition = bt.pos;
         return rv;

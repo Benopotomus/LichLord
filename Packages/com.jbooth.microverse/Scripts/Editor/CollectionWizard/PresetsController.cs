@@ -52,6 +52,7 @@ namespace JBooth.MicroVerseCore.Browser.CollectionWizard
             contentTypeSelection[ContentType.Audio] = false;
             contentTypeSelection[ContentType.Biomes] = true;
             contentTypeSelection[ContentType.Roads] = false;
+            contentTypeSelection[ContentType.Paths] = false;
             contentTypeSelection[ContentType.Caves] = false;
             contentTypeSelection[ContentType.Global] = false;
         }

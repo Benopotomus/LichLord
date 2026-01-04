@@ -29,7 +29,12 @@ public static class BakingUtils
         if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out var guidString, out long fileID))
         {
             //  In case of no backed file, use InstanceID
-            return new uint2((uint)obj.GetInstanceID(), 0);
+        #if UNITY_6000_4_OR_NEWER
+            ulong entityID = obj.GetEntityId().GetRawData();
+        #else
+            ulong entityID = (ulong)obj.GetInstanceID();
+        #endif
+            return new uint2((uint)entityID, (uint)(entityID >> 32));
         }
         
         var guid = new GUID(guidString);

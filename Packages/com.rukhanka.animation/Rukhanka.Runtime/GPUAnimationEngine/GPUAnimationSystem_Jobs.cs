@@ -1,9 +1,11 @@
 using Rukhanka.Toolbox;
 using Unity.Burst;
+using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
@@ -225,7 +227,7 @@ struct CopyNewSkinnedMeshesDataJob: IJobFor
 //-----------------------------------------------------------------------------------------------------------------//
 
 [BurstCompile]
-partial struct FillFrameAnimatedRigWorkloadBuffersJob: IJobEntity
+struct FillFrameAnimatedRigWorkloadBuffersJob: IJobChunk
 {
 	[NativeDisableParallelForRestriction]
 	public NativeArray<GPUStructures.AnimatedBoneWorkload> animatedBonesWorkloadBuf;
@@ -240,18 +242,44 @@ partial struct FillFrameAnimatedRigWorkloadBuffersJob: IJobEntity
 	public NativeParallelHashMap<Hash128, int> avatarMasksOffsets;
 	[ReadOnly]
 	public NativeParallelHashMap<Hash128, int> rigDefinitionOffsets;
+	
 	[ReadOnly]
-	public NativeParallelHashMap<Entity, GPURuntimeAnimationData.FrameOffsets> frameEntityAnimatedDataOffsetsMap;
+	public ComponentTypeHandle<RigDefinitionComponent> rigDefComponentTypeHandle;
+	[ReadOnly]
+	public BufferTypeHandle<AnimationToProcessComponent> atpBufTypeHandle;
+	[ReadOnly]
+	public EntityTypeHandle entityTypeHandle;
+	[ReadOnly]
+	public ComponentTypeHandle<GPURigFrameOffsetsComponent> frameOffsetsTypeHandle;
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Execute(Entity e, in RigDefinitionComponent rdc, in DynamicBuffer<AnimationToProcessComponent> atps)
+	public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+	{
+		var rigDefs = chunk.GetNativeArray(ref rigDefComponentTypeHandle);
+		var atpBufs = chunk.GetBufferAccessorRO(ref atpBufTypeHandle);
+		var frameOffsets = chunk.GetNativeArray(ref frameOffsetsTypeHandle);
+		var entities = chunk.GetNativeArray(entityTypeHandle);
+		var frameOffsetsInChunk = chunk.GetChunkComponentData(ref frameOffsetsTypeHandle);
+		
+		var cee = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count);
+		while (cee.NextEntityIndex(out var i))
+		{
+			var rdc = rigDefs[i];
+			var atps = atpBufs[i];
+			var e = entities[i];
+			var frameOffset = frameOffsets[i];
+			frameOffset.AddOffsets(frameOffsetsInChunk);
+			Execute(e, rdc, atps, frameOffset);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Execute(Entity e, in RigDefinitionComponent rdc, in DynamicBuffer<AnimationToProcessComponent> atps, in GPURigFrameOffsetsComponent frameOffsets)
 	{
 		var abCount = rdc.rigBlob.Value.bones.Length;
 		var atpCount = atps.Length;
-		
-		var gotAnimaDataOffset = frameEntityAnimatedDataOffsetsMap.TryGetValue(e, out var animDataOffset);
-		BurstAssert.IsTrue(gotAnimaDataOffset, "Cannot get output animation data offset for rig");
 		
 		for (var i = 0; i < atpCount; ++i)
 		{
@@ -270,7 +298,7 @@ partial struct FillFrameAnimatedRigWorkloadBuffersJob: IJobEntity
 				avatarMaskDataOffset = atp.avatarMask.IsCreated ? avatarMasksOffsets[atp.avatarMask.Value.hash] : -1
 			};
 			
-			var idx = i + animDataOffset.animationToProcessIndex;
+			var idx = i + frameOffsets.animationToProcessIndex;
 			animationToProcessBuf[idx] = gpuAtp;
 		}
 		
@@ -282,20 +310,20 @@ partial struct FillFrameAnimatedRigWorkloadBuffersJob: IJobEntity
 		var faj = new GPUStructures.AnimationJob()
 		{
 			rigDefinitionIndex = rigDefIndex,
-			animatedBoneIndexOffset = animDataOffset.boneIndex,
-			animationsToProcessRange = new int2(animDataOffset.animationToProcessIndex, atpCount)
+			animatedBoneIndexOffset = frameOffsets.boneIndex,
+			animationsToProcessRange = new int2(frameOffsets.animationToProcessIndex, atpCount)
 		};
-		frameRigAnimationJobs[animDataOffset.rigIndex] = faj;
+		frameRigAnimationJobs[frameOffsets.rigIndex] = faj;
 		
 		var abw = new GPUStructures.AnimatedBoneWorkload()
 		{
-			animationJobIndex = animDataOffset.rigIndex,
+			animationJobIndex = frameOffsets.rigIndex,
 		};
 		
 		for (var i = 0; i < abCount; ++i)
 		{
 			abw.boneIndexInRig = i;
-			animatedBonesWorkloadBuf[animDataOffset.boneIndex + i] = abw;
+			animatedBonesWorkloadBuf[frameOffsets.boneIndex + i] = abw;
 		}
 	}
 }
@@ -303,18 +331,18 @@ partial struct FillFrameAnimatedRigWorkloadBuffersJob: IJobEntity
 //-----------------------------------------------------------------------------------------------------------------//
 
 [BurstCompile]
-partial struct FillFrameSkinMatrixWorkloadBuffersJob: IJobEntity
+struct FillFrameSkinMatrixWorkloadBuffersJob: IJobChunk
 {
 	[ReadOnly]
 	public ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTagLookup;
 	[ReadOnly]
 	public ComponentLookup<RigDefinitionComponent> rigDefLookup;
 	[ReadOnly]
+	public ComponentLookup<GPURigFrameOffsetsComponent> frameOffsetsLookup;
+	[ReadOnly]
 	public ComponentLookup<LocalToWorld> localToWorldLookup;
 	[ReadOnly]
 	public NativeParallelHashMap<Hash128, int> skinnedMeshDataMap;
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, GPURuntimeAnimationData.FrameOffsets> frameEntityAnimatedDataOffsetsMap;
 	[ReadOnly]
 	public NativeParallelHashMap<Entity, SkinnedMeshRendererFrameDeformationData> entityToSMRFrameDataMap;
 	
@@ -323,20 +351,49 @@ partial struct FillFrameSkinMatrixWorkloadBuffersJob: IJobEntity
 	[NativeDisableUnsafePtrRestriction]
 	public UnsafeAtomicCounter32 frameSkinnedMeshesAtomicCounter;
 		
+	[ReadOnly]
+	public ComponentTypeHandle<SkinnedMeshRendererComponent> smrTypeHandle;
+	[ReadOnly]
+	public ComponentTypeHandle<LocalToWorld> l2wTypeHandle;
+	[ReadOnly]
+	public EntityTypeHandle entityTypeHandle;
+	[ReadOnly]
+	public ComponentTypeHandle<GPURigFrameOffsetsComponent> gpuRigChunkDataTypeHandle;
+		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Execute(Entity e, in SkinnedMeshRendererComponent asmc, in LocalToWorld l2w)
+	public unsafe void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
 	{
-		if (!asmc.IsGPUAnimator(gpuAnimationEngineTagLookup))
+		var smrs = chunk.GetNativeArray(ref smrTypeHandle);
+		var l2ws = chunk.GetNativeArray(ref l2wTypeHandle);
+		var entities = chunk.GetNativeArray(entityTypeHandle);
+		
+		var cee = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count);
+		while (cee.NextEntityIndex(out var i))
+		{
+			var smr = smrs[i];
+			var l2w = l2ws[i];
+			var e = entities[i];
+			var rigChunkIndex = chunk.m_EntityComponentStore->GetChunk(smr.animatedRigEntity);
+			var rigChunk = new ArchetypeChunk(rigChunkIndex, chunk.m_EntityComponentStore);
+			Execute(e, smr, l2w, rigChunk);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Execute(Entity e, in SkinnedMeshRendererComponent smr, in LocalToWorld l2w, in ArchetypeChunk rigChunk)
+	{
+		if (!smr.IsGPUAnimator(gpuAnimationEngineTagLookup))
 			return;
 		
 		if (!entityToSMRFrameDataMap.TryGetValue(e, out var skinMatrixData))
 			return;
 		
-		if (!rigDefLookup.TryGetComponent(asmc.animatedRigEntity, out var rigDef))
+		if (!rigDefLookup.TryGetComponent(smr.animatedRigEntity, out var rigDef))
 			return;
 		
-		var hash = AnimationUtils.CalculateBoneRemapTableHash(asmc.smrInfoBlob, rigDef.rigBlob);
+		var hash = AnimationUtils.CalculateBoneRemapTableHash(smr.smrInfoBlob, rigDef.rigBlob);
 		
 		if (!skinnedMeshDataMap.TryGetValue(hash, out var remapTableOffset))
 		{
@@ -344,21 +401,22 @@ partial struct FillFrameSkinMatrixWorkloadBuffersJob: IJobEntity
 			return;
 		}
 		
-		var gotAnimDataOffset = frameEntityAnimatedDataOffsetsMap.TryGetValue(asmc.animatedRigEntity, out var animDataOffset);
-		BurstAssert.IsTrue(gotAnimDataOffset, "Cannot get output animation data offset for rig");
+		var gpuRigFrameOffsets = rigChunk.GetChunkComponentData(ref gpuRigChunkDataTypeHandle);
+		frameOffsetsLookup.TryGetComponent(smr.animatedRigEntity, out var frameOffsets);
+		frameOffsets.AddOffsets(gpuRigFrameOffsets);
 		
-		var animatedEntityL2W = localToWorldLookup[asmc.animatedRigEntity];
+		var animatedEntityL2W = localToWorldLookup[smr.animatedRigEntity];
 		var invAnimatedEntityPose = math.inverse(animatedEntityL2W.Value);
 		var smrPose = l2w.Value;
 		var rootBoneToEntityTransform = math.mul(invAnimatedEntityPose, smrPose);
 		
 		var smw = new GPUStructures.SkinnedMeshWorkload()
 		{
-			skinMatricesCount = asmc.smrInfoBlob.Value.bones.Length,
+			skinMatricesCount = smr.smrInfoBlob.Value.bones.Length,
 			boneRemapTableIndex = remapTableOffset,
 			skinMatrixBaseOutIndex = skinMatrixData.skinMatrixIndex,
-			rootBoneIndex = asmc.rootBoneIndexInRig,
-			animatedBoneIndexOffset = animDataOffset.boneIndex,
+			rootBoneIndex = smr.rootBoneIndexInRig,
+			animatedBoneIndexOffset = frameOffsets.boneIndex,
 			skinnedMeshInverseTransform = math.inverse(rootBoneToEntityTransform)
 		};
 		var index = frameSkinnedMeshesAtomicCounter.Add(1);
@@ -369,7 +427,44 @@ partial struct FillFrameSkinMatrixWorkloadBuffersJob: IJobEntity
 //-----------------------------------------------------------------------------------------------------------------//
 
 [BurstCompile]
-unsafe partial struct ComputeFrameRigWorkloadSizesJob: IJobEntity
+struct ComputeFrameRigWorkloadSizesPerChunkJob: IJobChunk
+{
+	[ReadOnly]
+	public ComponentTypeHandle<RigDefinitionComponent> rigDefComponentTypeHandle;
+	[ReadOnly]
+	public BufferTypeHandle<AnimationToProcessComponent> atpBufTypeHandle;
+	
+	public ComponentTypeHandle<GPURigFrameOffsetsComponent> frameOffsetsTypeHandle;
+		
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+	{
+		var rigDefs = chunk.GetNativeArray(ref rigDefComponentTypeHandle);
+		var atpBufs = chunk.GetBufferAccessorRO(ref atpBufTypeHandle);
+		var frameOffsets = chunk.GetNativeArray(ref frameOffsetsTypeHandle);
+	
+		var gpuRigFrameOffsets = new GPURigFrameOffsetsComponent();
+		
+		var cee = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count);
+		while (cee.NextEntityIndex(out var i))
+		{
+			var rdc = rigDefs[i];
+			var atps = atpBufs[i];
+			frameOffsets[i] = gpuRigFrameOffsets;
+			
+			gpuRigFrameOffsets.boneIndex += rdc.rigBlob.Value.bones.Length;
+			gpuRigFrameOffsets.rigIndex += 1;
+			gpuRigFrameOffsets.animationToProcessIndex += atps.Length;
+		}
+		chunk.SetChunkComponentData(ref frameOffsetsTypeHandle, gpuRigFrameOffsets);
+	}
+}
+
+//-----------------------------------------------------------------------------------------------------------------//
+
+[BurstCompile]
+unsafe struct ComputeFrameRigWorkloadSizesAbsChunkOffsetsJob: IJobChunk
 {
 	[NativeDisableUnsafePtrRestriction]
 	public uint* frameAnimatedBonesCounter;
@@ -377,35 +472,38 @@ unsafe partial struct ComputeFrameRigWorkloadSizesJob: IJobEntity
 	public uint* frameAnimationToProcessCounter;
 	[NativeDisableUnsafePtrRestriction]
 	public uint* frameAnimatedRigsCounter;
-	public NativeParallelHashMap<Entity, GPURuntimeAnimationData.FrameOffsets> frameEntityAnimatedDataOffsetsMap;
-		
+	
+	public ComponentTypeHandle<GPURigFrameOffsetsComponent> gpuRigChunkDataTypeHandle;
+	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Execute(Entity e, in RigDefinitionComponent rdc, in DynamicBuffer<AnimationToProcessComponent> atps)
+	public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
 	{
-		var v = new GPURuntimeAnimationData.FrameOffsets()
-		{
-			boneIndex = (int)*frameAnimatedBonesCounter,
-			rigIndex = (int)*frameAnimatedRigsCounter,
-			animationToProcessIndex = (int)*frameAnimationToProcessCounter
-		};
-		frameEntityAnimatedDataOffsetsMap.Add(e, v);
-		*frameAnimatedBonesCounter += (uint)rdc.rigBlob.Value.bones.Length;
-		*frameAnimationToProcessCounter += (uint)atps.Length;
-		*frameAnimatedRigsCounter += 1;
+		var gpuRigChunkData = chunk.GetChunkComponentData(ref gpuRigChunkDataTypeHandle);
+		var gcd = gpuRigChunkData;
+		
+		gpuRigChunkData.boneIndex = (int)*frameAnimatedBonesCounter;
+		gpuRigChunkData.animationToProcessIndex = (int)*frameAnimationToProcessCounter;
+		gpuRigChunkData.rigIndex = (int)*frameAnimatedRigsCounter;
+		
+		*frameAnimatedBonesCounter += (uint)gcd.boneIndex;
+		*frameAnimationToProcessCounter += (uint)gcd.animationToProcessIndex;;
+		*frameAnimatedRigsCounter += (uint)gcd.rigIndex;
+		
+		chunk.SetChunkComponentData(ref gpuRigChunkDataTypeHandle, gpuRigChunkData);
 	}
 }
 
 //-----------------------------------------------------------------------------------------------------------------//
 
 [BurstCompile]
-unsafe partial struct ComputeFrameSkinnedMeshWorkloadSizesJob: IJobEntity
+partial struct ComputeFrameSkinnedMeshWorkloadSizesJob: IJobEntity
 {
 	[ReadOnly]
 	public ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTagLookup;
 	
-	[NativeDisableUnsafePtrRestriction]
-	public uint* frameSkinnedMeshesCounter;
+	[NativeDisableParallelForRestriction]
+	public NativeList<uint> frameSkinnedMeshesPerThreadCounters;
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -414,7 +512,29 @@ unsafe partial struct ComputeFrameSkinnedMeshWorkloadSizesJob: IJobEntity
 		if (!asmc.IsGPUAnimator(gpuAnimationEngineTagLookup))
 			return;
 		
-		*frameSkinnedMeshesCounter += 1;
+		frameSkinnedMeshesPerThreadCounters[JobsUtility.ThreadIndex] += 1;
+	}
+}
+
+//-----------------------------------------------------------------------------------------------------------------//
+
+[BurstCompile]
+unsafe struct ComputeFrameSkinnedMeshWorkloadSizesTotalJob: IJob
+{
+	[ReadOnly]
+	public NativeList<uint> frameSkinnedMeshesPerThreadCounters;
+	
+	[NativeDisableUnsafePtrRestriction]
+	public uint* frameSkinnedMeshesCounter;
+		
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public void Execute()
+	{
+		foreach (var c in frameSkinnedMeshesPerThreadCounters)
+		{
+			*frameSkinnedMeshesCounter += c;
+		}
 	}
 }
 
@@ -431,7 +551,7 @@ struct ResetFrameDataJob: IJob
 	public UnsafeAtomicCounter32 frameAnimationToProcessCounter;
 	[NativeDisableUnsafePtrRestriction]
 	public UnsafeAtomicCounter32 frameSkinnedMeshesCounter;
-	public NativeParallelHashMap<Entity, GPURuntimeAnimationData.FrameOffsets> frameEntityAnimatedDataOffsets;
+	public NativeList<uint> frameSkinnedMeshesPerThreadCounters;
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -441,7 +561,8 @@ struct ResetFrameDataJob: IJob
 		frameAnimatedRigsCounter.Reset(0);
 		frameSkinnedMeshesCounter.Reset(0);
 		frameAnimationToProcessCounter.Reset(0);
-		frameEntityAnimatedDataOffsets.Clear();
+		frameSkinnedMeshesPerThreadCounters.Clear();
+		frameSkinnedMeshesPerThreadCounters.Resize(JobsUtility.ThreadIndexCount, NativeArrayOptions.ClearMemory);
 	}
 }
 }

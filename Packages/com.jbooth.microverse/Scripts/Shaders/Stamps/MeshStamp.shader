@@ -145,7 +145,7 @@ Shader "Hidden/MicroVerse/MeshStamp"
                     return heightSample;
                 float height = UnpackHeightmap(heightSample);
 
-                float2 noiseUV = (i.uv * _NoiseUV.z) + _NoiseUV.xy;
+                float2 noiseUV = (i.uv * _NoiseUV.z) + _NoiseUV.xy * _NoiseUV.z;
                 float2 stampUV = i.stampUV;
 
                 float2 falloffuv = noiseUV;

@@ -1493,6 +1493,36 @@ namespace JBooth.MicroVerseCore
 
         public static Color DropAreaBackgroundColor = new Color(0.8f, 0.8f, 0.8f, 1f);
 
+        private static Texture _warnIcon;
+        public static Texture WarnIcon
+        {
+            get
+            {
+                if(_warnIcon == null)
+                {
+                    _warnIcon = EditorGUIUtility.IconContent("console.warnicon.sml").image;
+                }
+
+                return _warnIcon;
+            }
+
+        }
+
+        private static Texture _infoIcon;
+        public static Texture InfoIcon
+        {
+            get
+            {
+                if (_infoIcon == null)
+                {
+                    _infoIcon = EditorGUIUtility.IconContent("console.infoicon.sml").image;
+                }
+
+                return _infoIcon;
+            }
+
+        }
+
 
         /// <summary>
         /// Custom property drawer that allows the selection of the terrain layer via preview

@@ -237,10 +237,10 @@ namespace JBooth.MicroVerseCore
         [Tooltip("Minimum height to place tree - this lets you spawn objects on water, for instance")]
         public float minHeight = -99999;
         [Tooltip("Allows to to raise or lower the terrain around tree objects")]
-        [Range(-3, 3)]
+        [Range(-3, 10)]
         public float heightModAmount = 0;
         [Tooltip("Controls the width of the height adjustment")]
-        [Range(0.1f, 20)]
+        [Range(0.1f, 50)]
         public float heightModWidth = 5;
         [Tooltip("Texture to apply")]
         public TerrainLayer layer;

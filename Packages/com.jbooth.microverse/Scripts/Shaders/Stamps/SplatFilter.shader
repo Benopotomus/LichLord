@@ -41,10 +41,7 @@ Shader "Hidden/MicroVerse/SplatFilter"
             sampler2D _WeightMap;
             sampler2D _PlacementMask;
             float2 _AlphaMapSize;
-
-            
-            
-
+            float2 _StampScale;
 
             struct appdata
             {
@@ -59,8 +56,6 @@ Shader "Hidden/MicroVerse/SplatFilter"
                 float2 stampUV : TEXCOORD1;
             };
 
-
-
             v2f vert(appdata v)
             {
                 v2f o;
@@ -72,6 +67,11 @@ Shader "Hidden/MicroVerse/SplatFilter"
 
             FragmentOutput frag(v2f i)
             {
+                // half pixel
+                float2 uvOffset = 1.0 / _AlphaMapSize * 0.5;
+                // pull back stamp uv to origin by one fifth alphamap resolution
+                float2 stampOffset = uvOffset * _AlphaMapSize / _StampScale * i.uv;
+
                 half4 weightMap = tex2D(_WeightMap, i.uv);
                 half4 indexMap = round(tex2D(_IndexMap, i.uv) * TEXCOUNT);
 
@@ -83,8 +83,8 @@ Shader "Hidden/MicroVerse/SplatFilter"
                 noiseUV *= _NoiseUV.z;
                 noiseUV += _NoiseUV.xy;
                 // adjust filter UVs to center
-                float2 uvOffset = 1.0 / _AlphaMapSize * 0.5;
-                float result = saturate(DoFilters(i.uv - uvOffset, i.stampUV, noiseUV));
+
+                float result = saturate(DoFilters(i.uv - uvOffset, i.stampUV + stampOffset, noiseUV));
                 FragmentOutput o = FilterSplatWeights(result, weightMap, indexMap, _Channel);
                 o.indexMap /= TEXCOUNT;
                 return o;
