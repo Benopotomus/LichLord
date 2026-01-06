@@ -801,7 +801,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8f4d5503fdeab441e8c6c041504cf535, type: 2}
+  - {fileID: -876546973899608171, guid: 9a04d2f9faf6a1e46b1f185bc64f118f, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1402,15 +1402,18 @@ MonoBehaviour:
   logWorkTime: 0
   _cullingCameras:
   - {fileID: 8944336656349189699}
+  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
+    - {x: 774.59204, y: 404.77527, z: 708.9693, w: 0}
     fov:
     - 0.57735026
+    - 0.57735026
     viewProjection:
-    - e00: 0.9737098
-      e01: 1.0995945e-22
-      e02: 1.3837249e-14
+    - e00: 0.97447175
+      e01: 1.1004549e-22
+      e02: 1.38480764e-14
       e03: 0
       e10: -1.9559773e-22
       e11: 1.7320508
@@ -1424,20 +1427,43 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
+    - e00: 0.6950829
+      e01: 0.00035784385
+      e02: -0.5378552
+      e03: -157.22772
+      e10: 0.78381383
+      e11: 1.165339
+      e12: 1.0137163
+      e13: -1797.53
+      e20: 0.41198698
+      e21: -0.73982364
+      e22: 0.53192824
+      e23: -402.25165
+      e30: 0.41198286
+      e31: -0.73981625
+      e32: 0.53192294
+      e33: -396.77637
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
+    - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
-    - {x: 0.6976261, y: -2.5453842e-15, z: 0.716462, w: 0}
+    - {x: 0.69790614, y: -2.544415e-15, z: 0.7161892, w: 0}
+    - {x: 0.8315513, y: -0.55543, z: -0.0044559124, w: -416.12958}
     frustumPlane1:
-    - {x: -0.6976261, y: -2.5453844e-15, z: 0.716462, w: 0}
+    - {x: -0.69790614, y: -2.5444152e-15, z: 0.7161892, w: 0}
+    - {x: -0.21264519, y: -0.5559676, z: 0.80354345, w: -179.93239}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
+    - {x: 0.59789836, y: 0.21276137, z: 0.77281964, w: -1097.1532}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
+    - {x: -0.1859155, y: -0.9525777, z: -0.24089673, w: 700.3769}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
+    - {x: 0.4119829, y: -0.7398163, z: 0.53192294, w: -399.51205}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
+    - {x: -0.41192746, y: 0.74027544, z: -0.5313267, w: 548400.6}
   attachReflectionProbeCamera: 0
 --- !u!4 &1750085325
 Transform:
@@ -1507,6 +1533,7 @@ MonoBehaviour:
   showNavGraphs: 1
   showUnwalkableNodes: 1
   debugMode: 0
+  graphUpdateDebugMode: 0
   debugFloor: 0
   debugRoof: 1
   manualDebugFloorRoof: 0
@@ -1573,6 +1600,7 @@ MonoBehaviour:
     pivotPointRoot: {fileID: 0}
     spreadOutCount: 10
   showGraphs: 1
+  showGraphsInStandalonePlayer: 0
 --- !u!1 &1864014080
 GameObject:
   m_ObjectHideFlags: 0
@@ -2512,11 +2540,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7136224720027177897, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 465fd4e57519ec44fb1a0a4afb74af8c, type: 3}
 --- !u!1 &2114283753834967212
 GameObject:
