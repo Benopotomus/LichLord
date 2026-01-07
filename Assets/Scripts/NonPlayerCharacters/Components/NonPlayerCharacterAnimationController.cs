@@ -121,8 +121,11 @@ namespace LichLord.NonPlayerCharacters
                 var parameterBuffer = entityManager.GetBuffer<AnimatorControllerParameterComponent>(visualEntity);
                 var paramAspect = new AnimatorParametersAspect(parameterBuffer, indexTable);
 
-                float randomOffset = UnityEngine.Random.Range(0f, 1f);
-                paramAspect.SetFloatParameter(CycleOffset, randomOffset);
+                const int TotalScaleSteps = 10;
+                // Use FullIndex % 10 → gives 0 to 9, perfectly balanced no matter how many NPCs
+                int scaleIndex = runtimeState.FullIndex % TotalScaleSteps; // 0,1,2,...,9 repeating
+
+                paramAspect.SetFloatParameter(CycleOffset, scaleIndex / (TotalScaleSteps - 1f));
                 paramAspect.SetIntParameter(Weapon, _npc.RuntimeState.Definition.WeaponState);
 
                 SetAnimationForState(ENPCState.Inactive, _npc.RuntimeState.GetState());

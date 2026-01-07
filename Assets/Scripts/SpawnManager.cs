@@ -80,13 +80,12 @@ namespace LichLord
 
         private (Vector3, Quaternion) GetSpawnPosition()
         {
-            /*
             if (_spawnPoints != null && _spawnPoints.Length > 0)
             {
                 var spawnPoint = _spawnPoints[0];
                 return (spawnPoint.transform.position, spawnPoint.transform.rotation);
             }
-            */
+            
             //Debug.Log("No spawn points available, using default position (0,0,0)");
             return (_fallbackSpawnPosition, Quaternion.identity);
         }
