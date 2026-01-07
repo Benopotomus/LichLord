@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5453928007914527894}
-  - component: {fileID: -580889677894006120}
+  - component: {fileID: 7043449902789612956}
   m_Layer: 2
-  m_Name: InvasionSpawnPointMarker
+  m_Name: PlayerSpawnPoint
   m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,7 +33,7 @@ Transform:
   - {fileID: 2909638697717308748}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-580889677894006120
+--- !u!114 &7043449902789612956
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,11 +42,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2865362689749735049}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e3d8c49e4bc8f14393a981f9508696d, type: 3}
+  m_Script: {fileID: 11500000, guid: ba996b4383a6a4b40b0a6018d3dba58f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MarkerScale: {x: 1, y: 1, z: 1}
-  definition: {fileID: 0}
+  Radius: 1
 --- !u!1 &4555222627658918697
 GameObject:
   m_ObjectHideFlags: 0
@@ -57,9 +56,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2909638697717308748}
   - component: {fileID: 5633479181637004984}
-  - component: {fileID: 9200431205260549163}
-  m_Layer: 2
-  m_Name: InvasionSpawnPointMarkerVis
+  - component: {fileID: 4583923220824291805}
+  m_Layer: 0
+  m_Name: SpawnPointVis
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,13 +72,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4555222627658918697}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: 0, y: 1.34, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5453928007914527894}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 90}
 --- !u!33 &5633479181637004984
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -88,7 +87,7 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4555222627658918697}
   m_Mesh: {fileID: -6639996529428066002, guid: 61aa5284b5deb7947a4e351f487a70ea, type: 3}
---- !u!23 &9200431205260549163
+--- !u!23 &4583923220824291805
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -96,19 +95,19 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4555222627658918697}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
+  m_DynamicOccludee: 0
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
+  m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -876546973899608171, guid: f090c02c15e42bf41ba8388b37b3c21e, type: 3}
+  - {fileID: 2100000, guid: 70c943015cb975a4caf70d8fef6ce5e8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

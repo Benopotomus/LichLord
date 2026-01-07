@@ -45,7 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b47f5fe7e7275fa4b960e1fe84b13586, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TicksToComplete: 32
   InteractTick: 0
 --- !u!135 &808128829017529850
 SphereCollider:
@@ -192,6 +191,10 @@ MonoBehaviour:
   _stateComponent: {fileID: 6540483102308276946}
   _interactableComponent: {fileID: 4893720143199319590}
   _interactEffect: {fileID: 0}
+  _workerIndex: 0
+  _workerState: 0
+  _spawnEndTick: 0
+  _cooldownEndTick: 0
 --- !u!114 &922959605239068312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -446,6 +449,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6964584924661535035, guid: abd528d124da3014185390c0997f306a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 9a04d2f9faf6a1e46b1f185bc64f118f,
+        type: 3}
     - target: {fileID: 8446562929546697126, guid: abd528d124da3014185390c0997f306a,
         type: 3}
       propertyPath: m_Name
@@ -571,6 +580,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8167190006996246255, guid: a6f83b78a2ff64f45b817b2f6cbe8d7b,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 9a04d2f9faf6a1e46b1f185bc64f118f,
+        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

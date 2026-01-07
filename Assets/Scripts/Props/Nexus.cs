@@ -1,6 +1,5 @@
 ﻿using Fusion;
 using LichLord.World;
-using Pathfinding;
 using UnityEngine;
 
 namespace LichLord.Props
@@ -139,6 +138,7 @@ namespace LichLord.Props
 
             context.PropManager.RPC_SetActivated(ChunkID, Index, true);
 
+            
             if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                 context.PropManager.Predict_SetActivated(ChunkID, Index, true);
 
@@ -148,6 +148,7 @@ namespace LichLord.Props
 
             context.MissionManager.NexusInteractionComplete();
             context.StrongholdManager.RPC_ActivateNexus(staticPropPosition);
+            
         }
     }
 }

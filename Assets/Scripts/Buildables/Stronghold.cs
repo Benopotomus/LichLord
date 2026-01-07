@@ -145,7 +145,7 @@ namespace LichLord
             {
                 _decalProjector.size = new Vector3(_influenceDistance * 2.95f, _influenceDistance * 2.95f, _influenceDistance * 2.95f);
                 _buildableZone.SetTriggerSize(_influenceDistance);
-                _terrainFlattener.TryFlatten(_influenceDistance, 10f);
+                //_terrainFlattener.TryFlatten(_influenceDistance, 10f);
                 _localInfluenceDistance = _influenceDistance;
             }
         }

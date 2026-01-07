@@ -15,6 +15,9 @@ namespace LichLord.UI
 
         protected override void OnTick()
         {
+            if (Context.LocalPlayerCharacter == null)
+                return;
+
             base.OnTick();
 
             _healthSlider.value = Context.LocalPlayerCharacter.Health.HealthPercent;

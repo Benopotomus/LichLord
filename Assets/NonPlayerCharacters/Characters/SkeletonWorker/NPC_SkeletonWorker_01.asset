@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3784c5b7ca19fcc46ad12cc8cdd20a14, type: 3}
   m_Name: NPC_SkeletonWorker_01
   m_EditorClassIdentifier: 
-  _tableID: 10
+  _tableID: 12
   _name: Skeleton Worker
   _prefabBundle:
-    _name: NPC_SkeletonWorker_01
-    _bundle: n_p_c__skeleton_worker_01
+    _name: NPC_SkeletonWorker_01_Bundle
+    _bundle: npc_skeletonworker_01_bundle
   _icon:
     _name: T_Pt_Skeleton_C_01
     _bundle: t_pt_skeleton_c_01
@@ -41,6 +41,10 @@ MonoBehaviour:
     _spawnEffect:
       _name: VFX_Spawning
       _bundle: vfx_spawning
+  _weaponState: 7
+  _weaponLeft: 7
+  _weaponRight: 9
+  _modelScale: {x: 0.36, y: 0.38}
   _spawnTypeDataDefinitions:
     _serializedList:
     - Key: 0

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5244930249846838747}
   - component: {fileID: 7120471587053415041}
   - component: {fileID: 5192144284826553988}
-  - component: {fileID: 6629033338036438909}
   m_Layer: 0
   m_Name: PROP_VIS_Tomb
   m_TagString: Untagged
@@ -70,7 +69,7 @@ MonoBehaviour:
   ChunkID:
     X: 0
     Y: 0
-  GUID: 0
+  Index: 0
   _cachedTransform: {fileID: 3250597500166225624}
   _stateComponent: {fileID: 7120471587053415041}
   _healthComponent: {fileID: 5192144284826553988}
@@ -105,33 +104,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _prop: {fileID: 5244930249846838747}
   _currentHealth: 0
---- !u!114 &6629033338036438909
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6272355397201178900}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 560112f876f5746c780eca0d404e7139, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 1073741824
-  radiusBackingField: 0.5
-  heightBackingField: 2
-  centerBackingField: 1
-  locked: 0
-  lockWhenNotMoving: 0
-  agentTimeHorizon: 2
-  obstacleTimeHorizon: 0.5
-  maxNeighbours: 10
-  layer: 1
-  collidesWith: -1
-  wallAvoidForce: 1
-  wallAvoidFalloff: 1
-  priority: 0.5
-  debug: 0
 --- !u!1001 &425230823969134018
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -34,6 +34,9 @@ namespace LichLord.UI
         {
             base.OnTick();
 
+            if (_pc == null)
+                return;
+
             foreach (var slot in _loadoutSlots)
             {
                 ELoadoutSlot loadoutSlotName = slot.LoadoutSlot;
