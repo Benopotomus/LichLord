@@ -157,7 +157,7 @@ namespace LichLord.World
                     invasionSaveData.invasionId = invasionManager.InvasionID;
                     invasionSaveData.invasionSpawnWave = invasionManager.InvasionSpawnWave;
                     invasionSaveData.invasionSpawnPosition = invasionManager.InvasionStagingPosition.Position;
-                    invasionSaveData.targetStrongholdId = invasionManager.TargetStrongholdID;
+                    invasionSaveData.invastionTargetPosition = invasionManager.InvasionTargetPosition.Position;
                     invasionSaveData.invasionState = invasionManager.InvasionState;
                 }
 

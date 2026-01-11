@@ -401,6 +401,74 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1410621466}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &260064264
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4421744607870023599, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_Name
+      value: NPC_VIS_SkeletonArcher_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.9723718
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.39170074
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5996040515201241304, guid: ad6eda880cd21a04691441fa721b106d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ad6eda880cd21a04691441fa721b106d, type: 3}
 --- !u!4 &274493582 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5453928007914527894, guid: d8ee4a5bbe6f4014495bb7a4c894ace7,
@@ -1753,10 +1821,13 @@ MonoBehaviour:
   logWorkTime: 0
   _cullingCameras:
   - {fileID: 1382417185}
+  - {fileID: 0}
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
+    - {x: -2.5089412, y: 3.9439454, z: 6.4559298, w: 0}
     fov:
+    - 0.57735026
     - 0.57735026
     viewProjection:
     - e00: 0.9740331
@@ -1775,20 +1846,43 @@ MonoBehaviour:
       e31: -3.5527137e-15
       e32: 1
       e33: 0
+    - e00: -0.8248222
+      e01: 0.00024311859
+      e02: -0.31798014
+      e03: -0.017531672
+      e10: 0.24806763
+      e11: 1.5893291
+      e12: -0.6422579
+      e13: -1.4994683
+      e20: 0.32997018
+      e21: -0.39750978
+      e22: -0.8562275
+      e23: 7.847315
+      e30: 0.32996687
+      e31: -0.3975058
+      e32: -0.85621893
+      e33: 7.923298
     calibration:
+    - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.69774497, y: -2.544973e-15, z: 0.71634626, w: 0}
+    - {x: -0.37075952, y: -0.29764035, z: -0.879743, w: 5.923222}
     frustumPlane1:
     - {x: -0.69774497, y: -2.5449732e-15, z: 0.71634626, w: 0}
+    - {x: 0.86520034, y: -0.29800463, z: -0.40326354, w: 5.949492}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
+    - {x: 0.2890173, y: 0.59591174, z: -0.7492385, w: 3.2119153}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
+    - {x: 0.040949624, y: -0.99341756, z: -0.10698052, w: 4.7113833}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
+    - {x: 0.3299669, y: -0.39750585, z: -0.85621905, w: 7.8852677}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
+    - {x: -0.32988268, y: 0.39823675, z: 0.8559118, w: 7577.102}
   attachReflectionProbeCamera: 0
 --- !u!4 &1250046470
 Transform:
@@ -2670,11 +2764,23 @@ PrefabInstance:
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.size
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: fdc0e87a0c95b1e4f9cbea8135efa084,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
       propertyPath: _debugSpawnDefinitions.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: 3ebbcb5c0bc6a064eafb18c263674544,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[3]
       value: 
       objectReference: {fileID: 11400000, guid: 3ebbcb5c0bc6a064eafb18c263674544,
         type: 2}
@@ -10637,3 +10743,4 @@ SceneRoots:
   - {fileID: 684420791}
   - {fileID: 1386640149}
   - {fileID: 1250046470}
+  - {fileID: 260064264}

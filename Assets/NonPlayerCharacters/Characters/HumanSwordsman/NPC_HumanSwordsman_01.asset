@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: NPC_HumanSwordsman_01
   m_EditorClassIdentifier: 
   _tableID: 3
-  _name: Default NPC
+  _name: Human Swordsman
   _prefabBundle:
-    _name: NPC_HumanSwordsman_01
-    _bundle: npc_humanswordsman_01
+    _name: NPC_GO_HumanSwordsman_01
+    _bundle: npc_go_humanswordsman_01
   _icon:
     _name: 
     _bundle: 
@@ -41,6 +41,10 @@ MonoBehaviour:
     _spawnEffect:
       _name: 
       _bundle: 
+  _weaponState: 7
+  _weaponLeft: 7
+  _weaponRight: 9
+  _modelScale: {x: 0.96, y: 1}
   _spawnTypeDataDefinitions:
     _serializedList:
     - Key: 0

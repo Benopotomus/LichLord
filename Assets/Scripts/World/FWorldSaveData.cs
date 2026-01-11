@@ -264,19 +264,19 @@ namespace LichLord.World
         public int invasionId;
         public int invasionSpawnWave;
         public Vector3 invasionSpawnPosition;
-        public int targetStrongholdId;
+        public Vector3 invastionTargetPosition;
         public EInvasionState invasionState;
 
         public FInvasionSaveData(int invasionId, 
             int invasionSpawnWave, 
             Vector3 invasionSpawnPosition,
-            int targetStrongholdId,
+            Vector3 invastionTargetPosition,
             EInvasionState invasionState)
         {
             this.invasionId = invasionId;
             this.invasionSpawnWave = invasionSpawnWave;
             this.invasionSpawnPosition = invasionSpawnPosition;
-            this.targetStrongholdId = targetStrongholdId;
+            this.invastionTargetPosition = invastionTargetPosition;
             this.invasionState = invasionState;
         }
     }

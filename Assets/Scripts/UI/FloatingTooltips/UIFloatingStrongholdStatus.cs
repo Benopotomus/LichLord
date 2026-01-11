@@ -43,6 +43,7 @@ namespace LichLord.UI
                 _healthText.SetActive(false);
             }
 
+            /*
             if (Context.InvasionManager.InvasionID > 0 &&
                 Context.InvasionManager.TargetStronghold == _stronghold)
             {
@@ -61,6 +62,7 @@ namespace LichLord.UI
                     _invasionActive = false;
                 }
             }
+            */
         }
 
         public void SetStronghold(Stronghold stronghold)

@@ -74,13 +74,13 @@ namespace LichLord.UI
 
             Log(EConsoleColor.Info, $"Invasion started at level {definitionId}!");
 
-            RPC_BeginInvasion((byte)definitionId, 0);
+            RPC_BeginInvasion((byte)definitionId, Context.LocalPlayerCharacter.Position);
         }
 
         [Rpc(RpcSources.All, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_BeginInvasion(byte definitionId, byte strongholdId)
+        public void RPC_BeginInvasion(byte definitionId, Vector3 position)
         {
-            Context.InvasionManager.BeginInvasion(definitionId, strongholdId);
+            Context.InvasionManager.BeginInvasion(definitionId, position);
         }
 
         private void SpawnNPC(string[] args)

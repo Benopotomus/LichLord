@@ -95,7 +95,7 @@ namespace LichLord.Props
 
         private EInteractType GetInteractType(InteractorComponent interactor)
         {
-            return EInteractType.HarvestNode;
+            return EInteractType.Dialog;
         }
 
         private float GetInteractDistance(InteractorComponent interactor)
@@ -117,7 +117,7 @@ namespace LichLord.Props
         private void OnInteractionComplete(InteractableComponent interactable, InteractorComponent interactor)
         {
             Debug.Log("Intactable Sign Interaction complete.");
-
+            Context.InvasionManager.BeginInvasion(1, CachedTransform.position);
         }
     }
 }

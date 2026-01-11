@@ -23,11 +23,7 @@ namespace LichLord
         public ref FWorldPosition InvasionStagingPosition => ref MakeRef<FWorldPosition>();
 
         [Networked]
-        public sbyte TargetStrongholdID { get; set; }
-
-        [SerializeField]
-        private Stronghold _targetStronghold;
-        public Stronghold TargetStronghold => _targetStronghold;
+        public ref FWorldPosition InvasionTargetPosition => ref MakeRef<FWorldPosition>();
 
         [Networked]
         public EInvasionState InvasionState { get; set; }
@@ -39,7 +35,7 @@ namespace LichLord
 
         public InvasionDefinition ActiveInvasion;
 
-        public Action<Stronghold> onInvasionStarted;
+        public Action<Vector3> onInvasionStarted;
         public Action onInvasionEnded;
 
         public void LoadInvasionData()
@@ -67,10 +63,6 @@ namespace LichLord
 
             InvasionStagingPosition.CopyPosition(saveData.invasionSpawnPosition);
 
-            TargetStrongholdID =(sbyte)saveData.targetStrongholdId;
-
-            _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
-
             InvasionState = saveData.invasionState;
             _localInvasionState = InvasionState;
 
@@ -78,7 +70,7 @@ namespace LichLord
                 _despawnTick = tick + ActiveInvasion.TicksUntilDespawn;
         }
 
-        public void BeginInvasion(byte invasionID, int targetStrongholdId)
+        public void BeginInvasion(byte invasionID, Vector3 targetPosition)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                 return;
@@ -86,7 +78,6 @@ namespace LichLord
             InvasionID = invasionID;
             InvasionSpawnWave = 0;
             InvasionState = EInvasionState.Approaching;
-            TargetStrongholdID = (sbyte)targetStrongholdId;
             InvasionStagingPosition.CopyPosition(GetInvasionStagingPosition());
             //Debug.Log(InvasionStagingPosition.Position);
             _localSpawnWave = -1;
@@ -125,9 +116,6 @@ namespace LichLord
                 _localSpawnWave = -1;
                 return;
             }
-
-            if(TargetStrongholdID > 0 && _targetStronghold == null)
-                _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
 
             ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
 
@@ -194,15 +182,12 @@ namespace LichLord
             if (_localInvasionID == 0)
             {
                 ActiveInvasion = null;
-                _targetStronghold = null;
                 onInvasionEnded?.Invoke();
             }
             else
             {
                 ActiveInvasion = Global.Tables.InvasionTable.TryGetDefinition(InvasionID);
-                _targetStronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
-
-                onInvasionStarted?.Invoke(_targetStronghold);
+                onInvasionStarted?.Invoke(InvasionTargetPosition.Position);
             }
         }
 
@@ -213,12 +198,10 @@ namespace LichLord
         private Vector3 GetInvasionStagingPosition()
         {
             var players = Context.NetworkGame.ActivePlayers;
-            var stronghold = Context.StrongholdManager.GetStronghold(TargetStrongholdID);
 
-            Chunk strongholdChunk = stronghold.CurrentChunk;
-            Vector3 strongholdPosition = stronghold.Position;
+            Vector3 strongholdPosition = InvasionTargetPosition.Position;
 
-            var nearbyChunks = Context.ChunkManager.GetNearbyChunks(strongholdChunk.ChunkID,2);
+            var nearbyChunks = Context.ChunkManager.GetNearbyChunks(strongholdPosition, 2);
             var nearbyInvasionSpawns = new List<InvasionSpawnPoint>();
 
             foreach (var chunk in nearbyChunks)
@@ -371,14 +354,14 @@ namespace LichLord
             {
                 case EInvasionState.Approaching:
 
-                    var targetPosition = TargetStronghold.CachedTransform.position;
+                    var targetPosition = InvasionTargetPosition.Position;
 
                     Vector3 direction = (InvasionStagingPosition.Position - targetPosition).normalized;
 
                     Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
                     Vector3 rotatedOffset = rotation * formationOffset;
 
-                    Vector3 backedUpTarget = (targetPosition + direction * TargetStronghold.InfluenceDistance) + rotatedOffset;
+                    Vector3 backedUpTarget = (targetPosition + direction * 50) + rotatedOffset;
 
                     return backedUpTarget;
                 case EInvasionState.Retreating:

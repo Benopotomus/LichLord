@@ -207,6 +207,36 @@ namespace LichLord.World
             return nearbyChunks;
         }
 
+        public List<Chunk> GetNearbyChunks(Vector3 worldPosition, int radius = 1)
+        {
+            var centerChunk = GetChunkAtPosition(worldPosition);
+            if(centerChunk == null)
+                return new List<Chunk>();
+
+            List<Chunk> nearbyChunks = new List<Chunk>((2 * radius + 1) * (2 * radius + 1));
+
+            for (int dx = -radius; dx <= radius; dx++)
+            {
+                for (int dy = -radius; dy <= radius; dy++)
+                {
+                    int arrayX = centerChunk.ChunkID.X + dx;
+                    int arrayY = centerChunk.ChunkID.Y + dy;
+
+                    if (arrayX >= 0 && arrayX < _worldChunks.GetLength(0) &&
+                        arrayY >= 0 && arrayY < _worldChunks.GetLength(1))
+                    {
+                        Chunk chunk = _worldChunks[arrayX, arrayY];
+                        if (chunk != null)
+                        {
+                            nearbyChunks.Add(chunk);
+                        }
+                    }
+                }
+            }
+
+            return nearbyChunks;
+        }
+
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             base.Despawned(runner, hasState);
