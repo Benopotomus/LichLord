@@ -1,6 +1,5 @@
 ﻿
 using DWD.Utility.Loading;
-using LichLord.Projectiles;
 using LichLord.World;
 using UnityEngine;
 

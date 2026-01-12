@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-4403417729319577734
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -25,8 +12,42 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _ENVIRONMENTREFLECTIONS_OFF
   - _SPECULARHIGHLIGHTS_OFF
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _ARMORARCHERBOOTS_ON
+  - _ARMORARCHERCHEST_ON
+  - _ARMORARCHERGLOVES_ON
+  - _ARMORARCHERPANTS_ON
+  - _ARMORDEATHKNIGHTARMBANDAGES_ON
+  - _ARMORDEATHKNIGHTBOOTS_ON
+  - _ARMORDEATHKNIGHTCHEST_ON
+  - _ARMORDEATHKNIGHTGLOVES_ON
+  - _ARMORDEATHKNIGHTPANTS_ON
+  - _ARMORMAGEARMBANDAGES_ON
+  - _ARMORMAGEBOOTS_ON
+  - _ARMORMAGECHEST_ON
+  - _ARMORMAGEGLOVES_ON
+  - _ARMORMAGEPANTS_ON
+  - _ARMORMAGEROBE_ON
+  - _ARMORNEWBIEMAGEBELT_ON
+  - _ARMORNEWBIEMAGEBOOTS_ON
+  - _ARMORNEWBIEMAGECHEST_ON
+  - _ARMORNEWBIEMAGEROBE_ON
+  - _ARMORNEWBIERANGERBELT_ON
+  - _ARMORNEWBIERANGERBOOTS_ON
+  - _ARMORNEWBIERANGERCHEST_ON
+  - _ARMORNEWBIERANGERGLOVES_ON
+  - _ARMORNEWBIERANGERPANTS_ON
+  - _ARMORNEWBIEWARRIORBELT_ON
+  - _ARMORNEWBIEWARRIORBOOTS_ON
+  - _ARMORNEWBIEWARRIORCHEST_ON
+  - _ARMORNEWBIEWARRIORGLOVES_ON
+  - _ARMORNEWBIEWARRIORPANTS_ON
+  - _ARMORPEASANTBOOTS_ON
+  - _ARMORPEASANTPANTS_ON
+  - _ARMORPEASANTSHIRT_ON
+  - _GLOSSYREFLECTIONS_OFF
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -249,7 +270,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _EnvironmentReflections: 1
+    - _EnvironmentReflections: 0
     - _Gloss: 0
     - _GlossMapScale: 1
     - _Glossiness: 0
@@ -263,7 +284,7 @@ Material:
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.5
+    - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 0
     - _SrcBlend: 1
@@ -279,3 +300,16 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
+--- !u!114 &6801964854009696229
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7

@@ -12,14 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3784c5b7ca19fcc46ad12cc8cdd20a14, type: 3}
   m_Name: NPC_PrototypeArcher
   m_EditorClassIdentifier: 
-  _tableID: 6
+  _tableID: 7
   _name: Default NPC
   _prefabBundle:
     _name: NPC_PrototypeArcher
     _bundle: npc_prototypearcher
+  _icon:
+    _name: 
+    _bundle: 
   _maxHealth: 100
   _damageReduction: 3
   _damageResistance: 0
+  _hitReactThreshold: 3
   _walkSpeed: 5
   _isFrontlineCombatant: 0
   _spawnState:
@@ -33,9 +37,14 @@ MonoBehaviour:
       RightWeapon: 0
       IsMoving: 0
       IsBlocking: 0
+      PlaybackSpeed: 0
     _spawnEffect:
       _name: VFX_WarriorSpawning
       _bundle: vfx_warriorspawning
+  _weaponState: 0
+  _weaponLeft: 0
+  _weaponRight: 0
+  _modelScale: {x: 0, y: 0}
   _spawnTypeDataDefinitions:
     _serializedList:
     - Key: 0
@@ -47,3 +56,5 @@ MonoBehaviour:
   _dialogOwnerInfo:
     sprite: {fileID: 0}
     name: 
+  _tasks: []
+  _summonableItem: {fileID: 0}

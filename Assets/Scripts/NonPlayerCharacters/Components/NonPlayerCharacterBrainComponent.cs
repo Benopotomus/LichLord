@@ -14,6 +14,8 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField] 
         private Vector3 _moveTarget;
+        [SerializeField]
+        private Vector3 _losTarget;
 
         private IChunkTrackable _attackTarget;
         public IChunkTrackable AttackTarget => _attackTarget;
@@ -481,24 +483,29 @@ namespace LichLord.NonPlayerCharacters
             {
                 case EManeuverType.Attack:
                     if (_hasAttackTarget)
+                    {
                         _moveTarget = _attackTarget.PredictedPosition;
+                        _losTarget = _attackTarget.Position;
+                    }
                     break;
                 case EManeuverType.Harvest:
                     if (_hasHarvestTarget)
-                        _moveTarget = _harvestTarget.Position;
+                    if (_hasHarvestTarget)
+
+                        _losTarget = _moveTarget = _harvestTarget.Position;
                     break;
                 case EManeuverType.Deposit:
                     if (_hasDepositTarget)
-                        _moveTarget = _depositTarget.Position;
+                        _losTarget = _moveTarget = _depositTarget.Position;
                     break;
             }
 
             if (_isInFaceTargetRange)
             {
-                _hasLineOfSight = HasLineOfSight(_npc.CachedTransform.position, _moveTarget);
+                _hasLineOfSight = HasLineOfSight(_npc.CachedTransform.position, _losTarget);
 
                 if (!_hasLineOfSight)
-                    FindBetterLOSPosition(_moveTarget);
+                    FindBetterLOSPosition(_losTarget);
             }
 
             if (_isInMovementStopRange)
