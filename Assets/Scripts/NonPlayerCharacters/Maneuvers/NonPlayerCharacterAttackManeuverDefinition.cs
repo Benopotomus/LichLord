@@ -1,5 +1,6 @@
 ﻿using LichLord.Buildables;
 using LichLord.Props;
+using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ namespace LichLord.NonPlayerCharacters
 
         public override bool CanBeSelected(NonPlayerCharacterBrainComponent brainComponent, int tick)
         {
-            if (brainComponent.AttackTarget == null)
+            if (!brainComponent.AttackTarget.HasTarget)
                 return false;
 
             if(brainComponent.NPC.RuntimeState.GetAttitude() != EAttitude.Hostile)
@@ -35,35 +36,37 @@ namespace LichLord.NonPlayerCharacters
             if (carriedItem.IsValid())
                 return false;
 
+            IChunkTrackable target = brainComponent.AttackTarget.Target;
+
             float distanceToTarget = Vector3.Distance(
-            brainComponent.AttackTarget.Position,
-            brainComponent.NPC.CachedTransform.position);
+            target.Position,
+            brainComponent.NPC.Position);
 
             if (distanceToTarget < ValidTargetDistance.x ||
                 distanceToTarget > ValidTargetDistance.y)
                 return false;
 
-            if (brainComponent.AttackTarget is NonPlayerCharacter)
+            if (target is NonPlayerCharacter)
             {
                 if (ValidTargetTypes.Contains(EManeuverTarget.NPC))
                     return true;
             }
-            else if (brainComponent.AttackTarget is PlayerCharacter)
+            else if (target is PlayerCharacter)
             {
                 if (ValidTargetTypes.Contains(EManeuverTarget.PC))
                     return true;
             }
-            else if (brainComponent.AttackTarget is Stronghold)
+            else if (target is Stronghold)
             {
                 if (ValidTargetTypes.Contains(EManeuverTarget.Stronghold))
                     return true;
             }
-            else if (brainComponent.AttackTarget is Prop)
+            else if (target is Prop)
             {
                 if (ValidTargetTypes.Contains(EManeuverTarget.Prop))
                     return true;
             }
-            else if (brainComponent.AttackTarget is Buildable)
+            else if (target is Buildable)
             {
                 if (ValidTargetTypes.Contains(EManeuverTarget.Buildable))
                     return true;

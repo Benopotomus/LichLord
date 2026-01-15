@@ -16,9 +16,10 @@ namespace LichLord.NonPlayerCharacters
             if (carriedItem.IsValid())
                 return false;
 
-            IChunkTrackable harvestTarget = brainComponent.HarvestTarget;
-            if (harvestTarget == null)
+            if(!brainComponent.HarvestTarget.HasTarget)
                 return false;
+
+            IChunkTrackable harvestTarget = brainComponent.HarvestTarget.Target;
 
             float distanceToTarget = Vector3.Distance(
             harvestTarget.Position,

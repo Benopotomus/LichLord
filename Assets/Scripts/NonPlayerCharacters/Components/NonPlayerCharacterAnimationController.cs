@@ -224,18 +224,20 @@ namespace LichLord.NonPlayerCharacters
 
         public void UpdateAnimatonForMovement(NonPlayerCharacterRuntimeState runtimeState, Vector3 localVelocity, float yawVelocity, float renderDeltaTime)
         {
-            if (runtimeState.GetState() != ENPCState.Idle || visualEntity == Entity.Null) return;
+            if (runtimeState.GetState() != ENPCState.Idle) 
+                return;
+
+            float walkSpeed = runtimeState.Definition.WalkSpeed;
 
             float smoothRate = Time.deltaTime / velocitySmoothTime;
-            smoothedLocalVelocity = Vector3.Lerp(smoothedLocalVelocity, localVelocity, smoothRate);
+            smoothedLocalVelocity = Vector3.Lerp(smoothedLocalVelocity, localVelocity / walkSpeed, smoothRate);
             smoothedYawVelocity = Mathf.Lerp(smoothedYawVelocity, yawVelocity, smoothRate);
 
-            float speed = localVelocity.magnitude;
-            float walkSpeed = runtimeState.Definition.WalkSpeed;
+            float speed = smoothedLocalVelocity.magnitude;
 
             bool isMoving = speed > 0.1f || Mathf.Abs(yawVelocity) > 1f;
 
-            if (speed < 0.1f)
+            if (speed <= 0.1f)
             {
                 smoothedLocalVelocity.z = 0f;
                 smoothedLocalVelocity.x = smoothedYawVelocity * 2f; // Turn in place

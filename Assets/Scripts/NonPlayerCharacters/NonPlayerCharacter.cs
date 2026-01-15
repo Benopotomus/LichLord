@@ -156,7 +156,7 @@ namespace LichLord.NonPlayerCharacters
             _context = replicator.Context;
             _replicator = replicator;
             _healthComponent.OnSpawned(runtimeState);
-            _movementComponent.OnSpawned(runtimeState);
+            _movementComponent.OnSpawned(runtimeState, hasAuthority);
             _brainComponent.OnSpawned(runtimeState, hasAuthority);
             _carriedItemComponent.OnSpawned(runtimeState);
             _attitudeComponent.OnSpawned(runtimeState);

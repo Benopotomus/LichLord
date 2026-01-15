@@ -1,6 +1,4 @@
-﻿using Fusion;
-using LichLord.Projectiles;
-using Pathfinding;
+﻿using Pathfinding;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -32,17 +30,19 @@ namespace LichLord.NonPlayerCharacters
         bool _followerCanMove = true;
         float _followerMaxSpeed = 5f;
 
-        private Transform _transform;
+        private Transform _cachedTransform;
 
         private float _teleportDistanceSquared = 36;
 
         private float _10hrzSendDistance = 30.0f;
         private float _8hrzSendDistance = 60.0f;
 
-        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
+        public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority)
         {
             _lastPosition = runtimeState.GetPosition();
-            _transform = transform;
+            _cachedTransform = transform;
+
+            SetFollowerLocalAvoidance(true);
         }
 
         public void AuthorityUpdate(NonPlayerCharacterRuntimeState runtimeState, float renderDeltaTime, int tick)
@@ -61,7 +61,6 @@ namespace LichLord.NonPlayerCharacters
             SetFollowerUpdatePosition(false);
             SetFollowerUpdateRotation(false);
             SetFollowerCanMove(false);
-            SetFollowerLocalAvoidance(false);
 
             Vector3 statePosition = runtimeState.GetPosition();
 
@@ -129,7 +128,7 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateYawVelocity()
         {
-            Vector3 forward = _transform.forward;
+            Vector3 forward = _cachedTransform.forward;
             float currentYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
             _yawVelocity = currentYaw - _lastYaw;
             _lastYaw = currentYaw;
@@ -196,8 +195,8 @@ namespace LichLord.NonPlayerCharacters
                 data.PositionZ = NPC.CachedTransform.position.z;
             }
 
-            if (NPC.Brain.AttackTarget != null && 
-                NPC.Brain.AttackTarget is PlayerCharacter pc && 
+            if (NPC.Brain.AttackTarget.HasTarget && 
+                NPC.Brain.AttackTarget.Target is PlayerCharacter pc && 
                 NPC.Brain.ActiveManuver != null &&
                 NPC.Brain.ActiveManuver.Definition.ManeuverType == EManeuverType.Attack)
             {
@@ -248,7 +247,7 @@ namespace LichLord.NonPlayerCharacters
             if (newCanMove == _followerCanMove)
                 return;
 
-            _follower.canMove = newCanMove;
+            _follower.simulateMovement = newCanMove;
 
             _followerCanMove = newCanMove;
         }
@@ -289,9 +288,10 @@ namespace LichLord.NonPlayerCharacters
         {
             SetFollowerUpdatePosition(false);
             SetFollowerUpdateRotation(false);
-            SetFollowerLocalAvoidance(false);
+
             SetFollowerCanMove(false);
             SetMoveTargetPosition(Vector3.zero);
+            SetFollowerLocalAvoidance(false);
         }
 
         public void OnStateAuthorityChanged(bool hasAuthority)
@@ -299,7 +299,18 @@ namespace LichLord.NonPlayerCharacters
             SetFollowerUpdatePosition(true);
             SetFollowerUpdateRotation(true);
             SetFollowerCanMove(true);
-            SetFollowerLocalAvoidance(true);
+        }
+
+        public void SetRVOSettings(bool locked, float priority = 0.5f)
+        {
+            if (!_follower.enableLocalAvoidance)
+                return;
+
+            var settings = _follower.rvoSettings;
+            settings.locked = locked;
+            settings.priority = Mathf.Clamp01(priority);
+
+            _follower.rvoSettings = settings; 
         }
     }
 }

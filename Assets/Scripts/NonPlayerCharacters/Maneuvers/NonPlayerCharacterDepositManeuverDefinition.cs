@@ -18,19 +18,20 @@ namespace LichLord.NonPlayerCharacters
             if(!carriedItem.IsValid()) 
                 return false;
 
-            IChunkTrackable depositTarget = brainComponent.DepositTarget;
-            if (depositTarget == null)
+            if(!brainComponent.DepositTarget.HasTarget)
                 return false;
 
+            IChunkTrackable target = brainComponent.DepositTarget.Target;
+
             float distanceToTarget = Vector3.Distance(
-            depositTarget.Position,
+            target.Position,
             brainComponent.NPC.CachedTransform.position);
 
             if (distanceToTarget < ValidTargetDistance.x ||
                 distanceToTarget > ValidTargetDistance.y)
                 return false;
 
-            if (depositTarget is Stockpile stockpile)
+            if (target is Stockpile stockpile)
             {
                 int containerIndex = stockpile.RuntimeState.GetContainerIndex();
 

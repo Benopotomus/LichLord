@@ -1,4 +1,5 @@
 ﻿using LichLord.Projectiles;
+using LichLord.World;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -113,12 +114,13 @@ namespace LichLord.NonPlayerCharacters
             ProjectileDefinition definition = projectileData.Definition;
 
             Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(npc, projectileData.Muzzle);
+            IChunkTrackable target = npc.Brain.AttackTarget.Target;
 
-            Vector3 targetPos = npc.Brain.AttackTarget.Position;
+            Vector3 targetPos = target.Position;
             targetPos.y += (1f + Definition.VerticalAimOffset);
 
             // Modify target position by target velocity
-            if (npc.Brain.AttackTarget is PlayerCharacter pc)
+            if (target is PlayerCharacter pc)
             {
                 bool targetIsMasterClient = pc.HasStateAuthority;
 
