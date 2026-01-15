@@ -58,7 +58,9 @@ namespace LichLord
 
         public float BonusRadius { get { return 0; } }
 
+        //IHitInstigator
         INetActor IHitInstigator.NetActor => this;
+        public ETeamID TeamID => ETeamID.PlayerTeam;
 
         // IChunkTrackable
         private Chunk _chunk;

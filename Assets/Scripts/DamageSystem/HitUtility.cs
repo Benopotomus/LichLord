@@ -43,6 +43,7 @@ namespace LichLord
     public interface IHitInstigator
     {
         INetActor NetActor { get; }
+        ETeamID TeamID { get; }
         void HitPerformed(ref FHitUtilityData hit);
     }
 

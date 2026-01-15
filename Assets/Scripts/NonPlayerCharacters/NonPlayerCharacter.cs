@@ -165,6 +165,7 @@ namespace LichLord.NonPlayerCharacters
             _spawningComponent.OnSpawned(runtimeState);
             _stateComponent.OnSpawned(runtimeState, hasAuthority, tick);
             _animationController.OnSpawned(runtimeState);
+            UpdateTeam(runtimeState);
 
             _interactableComponent.Activate(
                 this,
@@ -215,7 +216,6 @@ namespace LichLord.NonPlayerCharacters
             _runtimeState = runtimeState;
 
             UpdateChunk(_context.ChunkManager);
-            UpdateTeam(runtimeState);
             _healthComponent.OnRender(runtimeState, tick);
             _stateComponent.UpdateState(runtimeState, hasAuthority, tick);
             _carriedItemComponent.OnRender(runtimeState);
