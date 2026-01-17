@@ -21,6 +21,9 @@ namespace LichLord.NonPlayerCharacters
         private float _movementStopRange = 2.5f;
 
         [SerializeField]
+        private Vector2 _activationRange = new Vector2(0, 2.5f);
+
+        [SerializeField]
         private float _attackRange = 3f;
         public float AttackRange => _attackRange;
 

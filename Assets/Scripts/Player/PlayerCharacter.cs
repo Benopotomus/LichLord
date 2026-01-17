@@ -11,7 +11,7 @@ using LichLord.Buildables;
 
 namespace LichLord
 {
-    public class PlayerCharacter : RelayPlayer, INetActor, IHitInstigator, IHitTarget, IChunkTrackable
+    public class PlayerCharacter : RelayPlayer, IHitInstigator, IHitTarget, IChunkTrackable
     {
         [Header("References")]
         public PlayerCharacterMovementComponent Movement;
@@ -59,7 +59,6 @@ namespace LichLord
         public float BonusRadius { get { return 0; } }
 
         //IHitInstigator
-        INetActor IHitInstigator.NetActor => this;
         public ETeamID TeamID => ETeamID.PlayerTeam;
 
         // IChunkTrackable
@@ -214,10 +213,6 @@ namespace LichLord
                 if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_DealDamage(prop.ChunkID, prop.Index, hit.damageData.damageValue);
             }
-        }
-
-        void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
-        {
         }
 
         void IHitTarget.ProcessHit(ref FHitUtilityData hit)

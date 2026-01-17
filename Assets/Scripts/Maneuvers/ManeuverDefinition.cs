@@ -148,7 +148,7 @@ namespace LichLord
                 ref fireEvent,
                 projectileData.Definition,
                 pc,
-                new FNetObjectID(),
+                null,
                 MuzzleUtility.GetMuzzlePosition(pc, projectileData.Muzzle),
                 targetPos,
                 tick,

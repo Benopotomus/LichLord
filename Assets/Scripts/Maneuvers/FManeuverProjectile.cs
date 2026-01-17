@@ -1,5 +1,6 @@
 ﻿using LichLord.Projectiles;
 using System;
+using UnityEngine;
 
 namespace LichLord
 {
@@ -8,8 +9,8 @@ namespace LichLord
     {
         public int SpawnTick;
         public ProjectileDefinition Definition;
-        public bool SpawnsOnAnimationNotify;
         public EMuzzle Muzzle;
         public FDamagePotential Damage;
+        public Vector2 AimOffset;
     }
 }

@@ -6,7 +6,7 @@
     {
         public ProjectileDefinition projectileDefinition;
         public IHitInstigator instigator;
-        public FNetObjectID targetId;
+        public IHitTarget target;
         public int fireTick;
 
         public Vector3 spawnPosition;

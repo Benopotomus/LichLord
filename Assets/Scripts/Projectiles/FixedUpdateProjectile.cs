@@ -12,6 +12,7 @@ namespace LichLord.Projectiles
         public bool IsDataSet { get; set;}
 
         public int FuseDetonationTick { get; set; }
+        public int TicksSinceFired { get; set; }
 
         // FIXED UPDATE
 
@@ -41,6 +42,11 @@ namespace LichLord.Projectiles
             Position = data.Position.Position;
             TargetPosition = data.TargetPosition.Position;
             IsDataSet = true;
+
+            if (data.HomingData.TargetActorID.IsValid())
+            { 
+                Target = data.HomingData.TargetActorID.GetHitTarget(Context);
+            }
         }
 
         public void DeactivateFixedUpdate(ref FProjectileData data)
@@ -67,6 +73,8 @@ namespace LichLord.Projectiles
 
             if (!IsDataSet)
                 SetData(ref data);
+
+            TicksSinceFired = tick - data.FireTick;
 
             if (tick >= (data.FireTick + Definition.LifetimeTicks))
             {
@@ -110,7 +118,7 @@ namespace LichLord.Projectiles
                 ref fireEvent,
                 definition,
                 Instigator,
-                new FNetObjectID(),
+                null,
                 position,
                 position + Vector3CompressedExtensions.SubtractAndNormalize(data.TargetPosition.Position, data.Position.Position),
                 OwningPool.Runner.Tick,

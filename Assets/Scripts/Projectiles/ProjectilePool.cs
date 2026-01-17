@@ -235,8 +235,12 @@ namespace LichLord.Projectiles
             data.HasImpacted = false;
             data.IsHoming = false;
             data.IsProximityFuseActive = false;
-            // TODO Fix instigator from NPCs and PCs
-            data.InstigatorID = fireEvent.instigator.NetActor.NetObjectID;
+
+            // Get target objectID
+            FNetObjectID instigatorObjectID = new FNetObjectID();
+            instigatorObjectID.SetHitInstigator(fireEvent.instigator);
+
+            data.InstigatorID = instigatorObjectID;
             data.DefinitionID = (byte)definition.TableID;
             data.FireTick = fireEvent.fireTick;
             data.Position.CopyPosition(fireEvent.spawnPosition);
@@ -245,6 +249,15 @@ namespace LichLord.Projectiles
             if (definition.HasTimedFuse)
             { 
                 definition.SetTimedFuseTick(ref data, ref fireEvent);
+            }
+
+            if (definition.ProjectileMovement is HomingMovement)
+            {
+                // Get target objectID
+                FNetObjectID targetObjectID = new FNetObjectID();
+                targetObjectID.SetHitTarget(fireEvent.target);
+
+                data.HomingData.TargetActorID = targetObjectID;
             }
 
             return data;

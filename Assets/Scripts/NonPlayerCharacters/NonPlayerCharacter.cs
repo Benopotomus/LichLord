@@ -11,7 +11,7 @@ using UnityEngine;
 namespace LichLord.NonPlayerCharacters
 {
 
-    public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor, IChunkTrackable
+    public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, IChunkTrackable
     {
         private NonPlayerCharacterRuntimeState _runtimeState;
         public NonPlayerCharacterRuntimeState RuntimeState => _runtimeState;
@@ -76,8 +76,6 @@ namespace LichLord.NonPlayerCharacters
 
         private SceneContext _context;
         public SceneContext Context => _context;
-
-        public INetActor NetActor => this;
 
         private FNetObjectID _netObjectID = new FNetObjectID();
         public FNetObjectID NetObjectID => _netObjectID;
@@ -300,23 +298,6 @@ namespace LichLord.NonPlayerCharacters
         public void ProcessHit(ref FHitUtilityData hit) { }
 
         public void OnHitTaken(ref FHitUtilityData hit) { }
-
-        void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
-        {
-            if (Replicator.HasStateAuthority)
-                return;
-
-            if (definition == null)
-                return;
-
-            if (!definition.ForcesRemoteAiming)
-                return;
-
-            if (projectile == null) 
-                return;
-
-            //AnimationController.SetProjectileFrame(definition);
-        }
 
         void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
         {

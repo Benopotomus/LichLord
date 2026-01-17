@@ -26,7 +26,7 @@ namespace LichLord.Projectiles
         [FieldOffset(13)]
         public FWorldPosition TargetPosition;
         [FieldOffset(20)]
-        public FNetObjectID InstigatorID; // this can be reduced down to 2 bytes
+        public FNetObjectID InstigatorID;
         [FieldOffset(22)]
 
         // Custom Data
@@ -79,6 +79,8 @@ namespace LichLord.Projectiles
         {
             [FieldOffset(0)]
             public FNetObjectID TargetActorID;
+            [FieldOffset(2)]
+            public FWorldRotation WorldRotation;
         }
 
         [StructLayout(LayoutKind.Explicit)]

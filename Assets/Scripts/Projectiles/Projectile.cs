@@ -14,8 +14,8 @@ namespace LichLord.Projectiles
         public int Index { get; set; }
 
         public ProjectileDefinition Definition { get; protected set; }
-        public IHitInstigator Instigator { get; set; }
-        public INetActor Target { get; private set; }
+        public IHitInstigator Instigator { get; protected set; }
+        public IHitTarget Target { get; protected set; }
         public float Timestamp { get; set; }
         public int FireTick { get; set; }
 

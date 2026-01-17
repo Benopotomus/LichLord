@@ -6,20 +6,25 @@ namespace LichLord
 {
     static class MuzzleUtility
     {
-        public static Vector3 GetMuzzlePosition(INetActor actor, EMuzzle muzzle)
+        public static Vector3 GetMuzzlePosition(PlayerCharacter pc, EMuzzle muzzle)
         {
-            if (actor is PlayerCharacter pc)
-            {
-                return pc.Weapons.GetMuzzlePosition(muzzle);
-            }
+            return pc.Weapons.GetMuzzlePosition(muzzle);
+        }
 
-            if (actor is NonPlayerCharacter npc)
-            {
+        public static Vector3 GetMuzzlePosition(NonPlayerCharacter npc, EMuzzle muzzle)
+        {
+            return npc.Weapons.GetMuzzlePosition(muzzle);
+        }
+
+        public static Vector3 GetMuzzlePosition(IHitInstigator instigator, EMuzzle muzzle)
+        {
+            if(instigator is NonPlayerCharacter npc)
                 return npc.Weapons.GetMuzzlePosition(muzzle);
-            }
+
+            if (instigator is PlayerCharacter pc)
+                return pc.Weapons.GetMuzzlePosition(muzzle);
 
             return Vector3.zero;
-        
         }
     }
 }

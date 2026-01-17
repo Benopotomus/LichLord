@@ -10,38 +10,38 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
-  m_Name: PROJ_FireballExplosion
+  m_Name: PROJ_MagicMissile
   m_EditorClassIdentifier: 
-  _tableID: 5
-  _lifetimeTicks: 32
+  _tableID: 6
+  _lifetimeTicks: 160
   _lifetimeExpiredSpawnedProjectiles: []
-  _projectileMovement: {fileID: 11400000, guid: 73f3a09a38ebc1549a0ae6dde5708fca,
+  _projectileMovement: {fileID: 11400000, guid: e3ff80c6af0e1b245bd1fda08c26e349,
     type: 2}
-  _speed: 0
+  _speed: 8
   _impactCollisionLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 257
   _overlapCollisionLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 257
   _shape: 1
   _lineOfSightRequirement: 0
-  _rotationType: 0
-  _extents: {x: 4, y: 0, z: 0}
-  _onlyAffectsOnce: 1
+  _rotationType: 1
+  _extents: {x: 0.05, y: 0, z: 0}
+  _onlyAffectsOnce: 0
   _affectsEachCast: 0
-  _physicsSweep: 1
-  _collisionCheckTrim: {x: 0, y: 0.25}
+  _physicsSweep: 2
+  _collisionCheckTrim: {x: 0, y: 0}
   _collisionCheckRate: 0
-  _collisionCheckNumber: 8
+  _collisionCheckNumber: 4
   _onlyAffectImpactTarget: 0
   _lineOfSightLayer:
     serializedVersion: 2
     m_Bits: 0
-  _scaleOverLifetime: {fileID: 11400000, guid: 917ff6c25fd8b034c9accb9b7c3f5fd8, type: 2}
+  _scaleOverLifetime: {fileID: 0}
   _visualsPrefab:
-    _name: PROJ_VIS_FireballExplosion
-    _bundle: proj_vis_fireballexplosion
+    _name: PROJ_VIS_MagicMissile
+    _bundle: proj_vis_magicmissile
   _impactSticksToHitActor: 0
   _homesAtApex: 0
   _damage: 10

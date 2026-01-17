@@ -42,7 +42,7 @@ namespace LichLord
 
     public interface IHitInstigator
     {
-        INetActor NetActor { get; }
+        public IChunkTrackable ChunkTrackable { get; }
         ETeamID TeamID { get; }
         void HitPerformed(ref FHitUtilityData hit);
     }
