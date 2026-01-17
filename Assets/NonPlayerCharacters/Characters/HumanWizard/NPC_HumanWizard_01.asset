@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3784c5b7ca19fcc46ad12cc8cdd20a14, type: 3}
+  m_Name: NPC_HumanWizard_01
+  m_EditorClassIdentifier: 
+  _tableID: 6
+  _name: Human Wizard
+  _prefabBundle:
+    _name: NPC_GO_HumanWizard_01
+    _bundle: npc_go_humanwizard_01
+  _icon:
+    _name: 
+    _bundle: 
+  _maxHealth: 100
+  _damageReduction: 3
+  _damageResistance: 0
+  _hitReactThreshold: 3
+  _walkSpeed: 4
+  _isFrontlineCombatant: 0
+  _spawnState:
+    StateTime: 2
+    _animationTrigger:
+      Action: 0
+      Weapon: 0
+      TriggerNumber: 0
+      Side: 0
+      Jumping: 0
+      RightWeapon: 0
+      IsMoving: 0
+      IsBlocking: 0
+      PlaybackSpeed: 0
+    _spawnEffect:
+      _name: 
+      _bundle: 
+  _weaponState: 4
+  _weaponLeft: 0
+  _weaponRight: 0
+  _modelScale: {x: 0.85, y: 0.95}
+  _spawnTypeDataDefinitions:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 11400000, guid: f9c1f1ff3966ec34e9cfe3bc478bdb4b, type: 2}
+    - Key: 1
+      Value: {fileID: 11400000, guid: 28b0e26f4ba3a3b4f952498bb6ed5789, type: 2}
+  _currencyCarryValues:
+    _serializedList: []
+  _dialogOwnerInfo:
+    sprite: {fileID: 0}
+    name: 
+  _tasks: []
+  _summonableItem: {fileID: 0}
