@@ -1106,15 +1106,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
   _moveTarget: {x: 0, y: 0, z: 0}
-  DistanceToAttackTarget: 0
-  DistanceToHarvestTarget: 0
-  DistanceToDepositTarget: 0
+  _losTarget: {x: 0, y: 0, z: 0}
   _isInMovementStopRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
-  _hasAttackTarget: 0
-  _hasHarvestTarget: 0
-  _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
@@ -1407,7 +1402,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4632229491851016830
 Transform:
   m_ObjectHideFlags: 0
