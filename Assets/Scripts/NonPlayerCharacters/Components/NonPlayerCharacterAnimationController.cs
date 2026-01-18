@@ -17,7 +17,6 @@ namespace LichLord.NonPlayerCharacters
         [SerializedDictionary]
         private SerializedDictionary<ProjectileDefinition, FAnimationCallbackData> _animationCallbacks;
 
-        private Entity visualEntityPrefab;
         private Entity visualEntity;
         private EntityManager entityManager;
 
@@ -80,6 +79,7 @@ namespace LichLord.NonPlayerCharacters
             CleanupPreviousVisualEntity();
             StartCoroutine(WaitForVisualPrefabAndSpawn(runtimeState));
             //LogHashes();
+
         }
 
         public void CleanupPreviousVisualEntity()
@@ -104,15 +104,15 @@ namespace LichLord.NonPlayerCharacters
             while (query.IsEmpty || entityManager.GetBuffer<VisualEntityPrefabElement>(query.GetSingletonEntity()).Length == 0)
                 yield return null;
 
-            visualEntityPrefab = GetVisualPrefab(runtimeState);
+            var prefab = GetVisualPrefab(runtimeState);
 
-            if (visualEntityPrefab == Entity.Null)
+            if (prefab == Entity.Null)
             {
                 Debug.LogError("Selected visual prefab is Null!");
                 yield break;
             }
 
-            visualEntity = entityManager.Instantiate(visualEntityPrefab);
+            visualEntity = entityManager.Instantiate(prefab);
 
             // Rest of your setup (cycle offset, etc.)
             if (entityManager.HasComponent<AnimatorControllerParameterIndexTableComponent>(visualEntity))
@@ -132,6 +132,8 @@ namespace LichLord.NonPlayerCharacters
             }
 
             SyncTransformToEntity();
+
+            SetWeaponVisibility("", false);
         }
 
         private Entity GetVisualPrefab(NonPlayerCharacterRuntimeState runtimeState)
@@ -337,6 +339,54 @@ namespace LichLord.NonPlayerCharacters
             }
 
             eventBuffer.Clear();
+        }
+
+        // Simple toggle by finding attachments under the visual rig
+        public void SetWeaponVisibility(string boneNameHint, bool visible) // boneNameHint = e.g. "RightHand_Sword"
+        {
+            Debug.Log("Found 1");
+            if (visualEntity == Entity.Null || !entityManager.Exists(visualEntity))
+                return;
+
+            Debug.Log("Found 2");
+            // Get children of the visual entity (bone entities + attachments)
+            if (!entityManager.HasBuffer<Child>(visualEntity))
+                return;
+
+            Debug.Log("Found 3");
+            var children = entityManager.GetBuffer<Child>(visualEntity);
+
+            foreach (var child in children)
+            {
+                Debug.Log("Found 4");
+                var childEntity = child.Value;
+
+                // Only process real GPU attachments
+                if (!entityManager.HasComponent<GPUAttachmentComponent>(childEntity))
+                    continue;
+
+                // Optional: filter by bone index/name if you have it stored
+                // var ga = EntityManager.GetComponentData<GPUAttachmentComponent>(childEntity);
+                // if (!boneNameHint.Contains(ga.attachedBoneIndex.ToString())) continue;
+                Debug.Log("Found 5 ");
+
+                if (visible)
+                {
+                    // Show → remove Disabled if present
+                    if (entityManager.HasComponent<Disabled>(childEntity))
+                    {
+                        entityManager.RemoveComponent<Disabled>(childEntity);
+                    }
+                }
+                else
+                {
+                    // Hide → add Disabled (idempotent, safe to call multiple times)
+                    if (!entityManager.HasComponent<Disabled>(childEntity))
+                    {
+                        entityManager.AddComponent<Disabled>(childEntity);
+                    }
+                }
+            }
         }
 
         // Helper: safely get fresh parameters aspect every call
