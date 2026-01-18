@@ -12,16 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db5487f7bda4e944b960bfb3c0cc6f4c, type: 3}
   m_Name: NPCManeuver_MagicMissile
   m_EditorClassIdentifier: 
-  ActionName: Firebolt
+  ActionName: Magic Missle
   _cooldownTicks: 32
-  _movementStopRange: 20
-  _activationRange: {x: 0, y: 2.5}
+  _activationRange: {x: 12, y: 20}
   _attackRange: 30
   _stateTicks: 32
   _faceTargetRange: 25
   _requiresLOS: 1
   _verticalAimOffset: 0
-  _validTargetDistance: {x: 8, y: 100}
+  _validTargetDistance: {x: 0, y: 100}
   _animationTriggers:
   - Action: 1
     Weapon: 0

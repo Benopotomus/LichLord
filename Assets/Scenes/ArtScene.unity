@@ -1758,7 +1758,7 @@ MonoBehaviour:
   _cameraData:
     position:
     - {x: 0, y: 0, z: 0, w: 0}
-    - {x: 2.1043644, y: 2.2740977, z: 4.1865797, w: 0}
+    - {x: 0.94241273, y: 2.4934983, z: 4.6647825, w: 0}
     fov:
     - 0.57735026
     - 0.57735026
@@ -1782,40 +1782,40 @@ MonoBehaviour:
     - e00: -0.8410032
       e01: -0.008386196
       e02: 0.37878805
-      e03: 0.20302188
+      e03: -0.9534808
       e10: -0.25924212
       e11: 1.6253084
       e12: -0.53959805
-      e13: -0.89150006
+      e13: -1.2912831
       e20: -0.38251513
       e21: -0.34551013
       e22: -0.85692775
-      e23: 5.138625
+      e23: 5.182622
       e30: -0.3825113
       e31: -0.34550667
       e32: -0.85691917
-      e33: 5.1782193
+      e33: 5.2193456
     calibration:
     - {x: 0, y: 1, z: 0, w: 0}
     - {x: 0, y: 1, z: 0, w: 0}
     frustumPlane0:
     - {x: 0.6978938, y: -2.544458e-15, z: 0.7162013, w: 0}
-    - {x: -0.8993422, y: -0.26012835, z: -0.35144946, w: 3.9554722}
+    - {x: -0.8993422, y: -0.26012835, z: -0.35144946, w: 3.1356168}
     frustumPlane1:
     - {x: -0.6978938, y: -2.5444582e-15, z: 0.7162013, w: 0}
-    - {x: 0.33701366, y: -0.24779981, z: -0.90830445, w: 3.65701}
+    - {x: 0.33701366, y: -0.24779981, z: -0.90830445, w: 4.537325}
     frustumPlane2:
     - {x: -7.1054274e-15, y: 0.8660254, z: 0.5, w: 0}
-    - {x: -0.32087672, y: 0.63990086, z: -0.69825864, w: 2.1433597}
+    - {x: -0.32087672, y: 0.63990086, z: -0.69825864, w: 1.9640312}
     frustumPlane3:
     - {x: -7.1054274e-15, y: -0.8660254, z: 0.5, w: 0}
-    - {x: -0.061634585, y: -0.98540753, z: -0.15866056, w: 3.0348597}
+    - {x: -0.061634585, y: -0.98540753, z: -0.15866056, w: 3.2553144}
     frustumPlane4:
     - {x: -1.4210855e-14, y: -3.5527137e-15, z: 1, w: -0.30000004}
-    - {x: -0.38251126, y: -0.34550664, z: -0.85691905, w: 5.1583962}
+    - {x: -0.38251126, y: -0.34550664, z: -0.85691905, w: 5.2009573}
     frustumPlane5:
     - {x: 1.4210855e-14, y: 3.5527137e-15, z: -1, w: 1499.6044}
-    - {x: 0.38368225, y: 0.3450166, z: 0.85659295, w: 3951.511}
+    - {x: 0.38368225, y: 0.3450166, z: 0.85659295, w: 3665.028}
   attachReflectionProbeCamera: 0
 --- !u!4 &1250046470
 Transform:
@@ -2687,7 +2687,7 @@ PrefabInstance:
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _streamSpawnCount
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
@@ -2697,31 +2697,43 @@ PrefabInstance:
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.size
-      value: 1
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.data[0]
       value: 
-      objectReference: {fileID: 11400000, guid: e59b70e1c14ef6d48ae66d076f6581f3,
+      objectReference: {fileID: 11400000, guid: f663ab4a8bff28244b6ff247210fae92,
         type: 2}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.data[1]
       value: 
-      objectReference: {fileID: 11400000, guid: e59b70e1c14ef6d48ae66d076f6581f3,
+      objectReference: {fileID: 11400000, guid: cf7d0d189ae6ec145a0795f7f95011a3,
         type: 2}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.data[2]
       value: 
-      objectReference: {fileID: 11400000, guid: e59b70e1c14ef6d48ae66d076f6581f3,
+      objectReference: {fileID: 11400000, guid: bfae2a9f36a97a44a81490b1aa75fa72,
         type: 2}
     - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: _debugSpawnDefinitions.Array.data[3]
       value: 
-      objectReference: {fileID: 11400000, guid: 3ebbcb5c0bc6a064eafb18c263674544,
+      objectReference: {fileID: 11400000, guid: e59b70e1c14ef6d48ae66d076f6581f3,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[4]
+      value: 
+      objectReference: {fileID: 11400000, guid: fdc0e87a0c95b1e4f9cbea8135efa084,
+        type: 2}
+    - target: {fileID: 916566940587386260, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: _debugSpawnDefinitions.Array.data[5]
+      value: 
+      objectReference: {fileID: 11400000, guid: 9bbdd1250e0b18441869d091ff071742,
         type: 2}
     - target: {fileID: 1458356081151909809, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
