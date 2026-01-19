@@ -13,13 +13,14 @@ namespace Rukhanka
 partial class GPUAttachmentsUpdateSystem: SystemBase
 {
     GraphicsBuffer dummyGB;
+    EntityQuery gpuAttachmentsQuery;
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected override void OnCreate()
     {
-        var gpuAttachmentsQuery = SystemAPI.QueryBuilder()
-            .WithAll<GPUAttachmentBoneIndexMPComponent>()
+        gpuAttachmentsQuery = SystemAPI.QueryBuilder()
+            .WithAll<GPUAttachmentBoneIndexMPComponent, GPUAttachmentComponent>()
             .Build();
         RequireForUpdate(gpuAttachmentsQuery);
         
@@ -33,26 +34,28 @@ partial class GPUAttachmentsUpdateSystem: SystemBase
 
     protected override void OnDestroy()
     {
-        dummyGB?.Dispose();
+        dummyGB.Dispose();
     }
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected override void OnUpdate()
     {
-        var animatedDataOffsetsMap =
-            SystemAPI.TryGetSingleton<GPURuntimeAnimationData>(out var rad)
-            ? rad.frameEntityAnimatedDataOffsetsMap
-            : new (0x4, WorldUpdateAllocator);
-        
         var attachmentBoneIndexUpdateJob = new UpdateGPUAttachmentBoneIndexJob()
         {
-            frameEntityAnimatedDataOffsetsMap = animatedDataOffsetsMap,
+            frameOffsetsLookup = SystemAPI.GetComponentLookup<GPURigFrameOffsetsComponent>(true),
             localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
             parentLookup = SystemAPI.GetComponentLookup<Parent>(true),
+            postTransformMatrixLookup = SystemAPI.GetComponentLookup<PostTransformMatrix>(true),
             rigBoneRefLookup = SystemAPI.GetComponentLookup<AnimatorEntityRefComponent>(true),
+            gpuAttachmentTypeHandle = SystemAPI.GetComponentTypeHandle<GPUAttachmentComponent>(true),
+            gpuAttachmentBoneIndexTypeHandle = SystemAPI.GetComponentTypeHandle<GPUAttachmentBoneIndexMPComponent>(),
+            gpuAttachmentToBoneTransformTypeHandle = SystemAPI.GetComponentTypeHandle<GPUAttachmentToBoneTransformMPComponent>(),
+            gpuRigEntityLocalToWorldTypeHandle = SystemAPI.GetComponentTypeHandle<GPURigEntityLocalToWorldMPComponent>(),
+            gpuRigFrameOffsetsTypeHandle = SystemAPI.GetComponentTypeHandle<GPURigFrameOffsetsComponent>(true),
+            entityTypeHandle = SystemAPI.GetEntityTypeHandle()
         };
-        var attachmentBoneIndexUpdateJH = attachmentBoneIndexUpdateJob.ScheduleParallel(Dependency);
+        var attachmentBoneIndexUpdateJH = attachmentBoneIndexUpdateJob.ScheduleParallel(gpuAttachmentsQuery, Dependency);
         Dependency = attachmentBoneIndexUpdateJH;
         Dependency.Complete();
     }

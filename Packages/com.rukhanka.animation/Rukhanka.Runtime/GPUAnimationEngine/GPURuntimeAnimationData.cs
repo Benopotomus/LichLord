@@ -2,6 +2,7 @@
 using System;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,17 +107,9 @@ public struct GPURuntimeAnimationData: IComponentData, IDisposable
     public uint frameAnimatedBonesCounter;
 	public uint frameAnimatedRigsCounter;
 	public uint frameAnimationToProcessCounter;
+    public NativeList<uint> frameSkinnedMeshesPerThreadCounters;
 	public uint frameSkinnedMeshesCounter;
     
-    public struct FrameOffsets
-    {
-        public int boneIndex;
-        public int rigIndex;
-        public int animationToProcessIndex;
-    }
-    
-    public NativeParallelHashMap<Entity, FrameOffsets> frameEntityAnimatedDataOffsetsMap;
-        
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static GPURuntimeAnimationData Construct()
@@ -144,8 +137,8 @@ public struct GPURuntimeAnimationData: IComponentData, IDisposable
         rv.frameAnimatedBonesCounter = 0;
         rv.frameAnimatedRigsCounter = 0;
         rv.frameAnimationToProcessCounter = 0;
+        rv.frameSkinnedMeshesPerThreadCounters = new (JobsUtility.MaxJobThreadCount, Allocator.Persistent);
         rv.frameSkinnedMeshesCounter = 0;
-        rv.frameEntityAnimatedDataOffsetsMap = new (initialCapacity, Allocator.Persistent);
         
         return rv;
     }
@@ -161,7 +154,7 @@ public struct GPURuntimeAnimationData: IComponentData, IDisposable
         animationClipsMap.Dispose();
         rigDefinitionsMap.Dispose();
         skinnedMeshesDataMap.Dispose();
-        frameEntityAnimatedDataOffsetsMap.Dispose();
+        frameSkinnedMeshesPerThreadCounters.Dispose();
         avatarMasksDataMap.Dispose();
     }
 }

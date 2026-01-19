@@ -20,27 +20,10 @@ public struct BlobDatabaseSingleton: IComponentData
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static unsafe bool IsBlobValid<T>(BlobAssetReference<T> blob) where T: unmanaged
-    {
-        if (!blob.IsCreated)
-            return true;
-        
-        var rv = blob.m_data.Header->ValidationPtr == blob.m_data.m_Ptr;
-        return rv;
-    }
-    
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     public static BlobAssetReference<T> GetBlobAsset<T>(Hash128 blobHash, NativeHashMap<Hash128, BlobAssetReference<T>> blobDatabase) where T: unmanaged
     {
         if (!blobDatabase.TryGetValue(blobHash, out var bar))
             return default;
-        
-    #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        var isBlobValid = IsBlobValid(bar);
-        if (!isBlobValid)
-            throw new InvalidOperationException($"Blob asset {typeof(T).FullName} with hash '{blobHash}' is corrupted. It was likely a part of the subscene data and unloaded.");
-    #endif
         
         return bar;
     }

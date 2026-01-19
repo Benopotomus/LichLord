@@ -10,22 +10,21 @@ namespace Rukhanka
 {
 public struct AnimationStream: IDisposable
 {
-    public RuntimeAnimationData.AnimatedEntityBoneDataProps rigBoneProps;
+    public DynamicFrameData rigFrameData;
     public RuntimeAnimationData runtimeData;
     public BlobAssetReference<RigDefinitionBlob> rigBlob;
     public NativeBitArray worldPoseDirtyFlags;
     
 /////////////////////////////////////////////////////////////////////////////////
 
-    public static AnimationStream Create(RuntimeAnimationData rd, Entity rigEntity, in RigDefinitionComponent rdc)
+    public static AnimationStream Create(RuntimeAnimationData rd, in RigDefinitionComponent rdc)
     {
-        var offsets = RuntimeAnimationData.CalculateBufferOffset(rd.entityToDataOffsetMap, rigEntity);
         var rv = new AnimationStream()
         {
-            rigBoneProps = offsets,
+            rigFrameData = rdc.dynamicFrameData,
             runtimeData = rd,
             rigBlob = rdc.rigBlob,
-            worldPoseDirtyFlags = new NativeBitArray(offsets.rigBoneCount, Allocator.Temp)
+            worldPoseDirtyFlags = new NativeBitArray(rdc.dynamicFrameData.rigBoneCount, Allocator.Temp)
         };
         
         return rv;
@@ -42,10 +41,10 @@ public struct AnimationStream: IDisposable
 
     public BoneTransform GetLocalPose(int boneIndex)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return BoneTransform.Identity();
         
-        return runtimeData.animatedBonesBuffer[rigBoneProps.bonePoseOffset + boneIndex];
+        return runtimeData.animatedBonesBuffer[rigFrameData.bonePoseOffset + boneIndex];
     }
     
 /////////////////////////////////////////////////////////////////////////////////
@@ -57,14 +56,14 @@ public struct AnimationStream: IDisposable
 
     public BoneTransform GetWorldPose(int boneIndex)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return BoneTransform.Identity();
         
         var isWorldPoseDirty = worldPoseDirtyFlags.IsSet(boneIndex);
         if (isWorldPoseDirty)
             RebuildOutdatedBonePoses(boneIndex);
         
-        return runtimeData.worldSpaceBonesBuffer[rigBoneProps.bonePoseOffset + boneIndex];   
+        return runtimeData.worldSpaceBonesBuffer[rigFrameData.bonePoseOffset + boneIndex];   
     }
     
 /////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +75,7 @@ public struct AnimationStream: IDisposable
 
     BoneTransform GetParentBoneWorldPose(int boneIndex)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return BoneTransform.Identity();
         
         var parentBoneIndex = rigBlob.Value.bones[boneIndex].parentBoneIndex;
@@ -85,7 +84,7 @@ public struct AnimationStream: IDisposable
         {
             if (worldPoseDirtyFlags.IsSet(parentBoneIndex))
                 RebuildOutdatedBonePoses(parentBoneIndex);
-            parentWorldPose = runtimeData.worldSpaceBonesBuffer[parentBoneIndex + rigBoneProps.bonePoseOffset];
+            parentWorldPose = runtimeData.worldSpaceBonesBuffer[parentBoneIndex + rigFrameData.bonePoseOffset];
         }
 
         return parentWorldPose;
@@ -95,10 +94,10 @@ public struct AnimationStream: IDisposable
 
     public void SetWorldPose(int boneIndex, in BoneTransform bt)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return;
         
-        var absBoneIndex = rigBoneProps.bonePoseOffset + boneIndex;
+        var absBoneIndex = rigFrameData.bonePoseOffset + boneIndex;
         runtimeData.worldSpaceBonesBuffer[absBoneIndex] = bt;
         
         var parentWorldPose = GetParentBoneWorldPose(boneIndex);
@@ -113,7 +112,7 @@ public struct AnimationStream: IDisposable
 
     public void SetWorldPosition(int boneIndex, float3 pos)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return;
         
         var curPose = GetWorldPose(boneIndex);
@@ -125,10 +124,10 @@ public struct AnimationStream: IDisposable
 
     public void SetWorldRotation(int boneIndex, quaternion rot)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return;
         
-        var absBoneIndex = rigBoneProps.bonePoseOffset + boneIndex;
+        var absBoneIndex = rigFrameData.bonePoseOffset + boneIndex;
         ref var boneWorldPose = ref runtimeData.worldSpaceBonesBuffer.ElementAt(absBoneIndex);
         boneWorldPose.rot = rot;
         
@@ -144,10 +143,10 @@ public struct AnimationStream: IDisposable
 
     public void SetLocalPose(int boneIndex, in BoneTransform bt)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return;
         
-        var absBoneIndex = rigBoneProps.bonePoseOffset + boneIndex;
+        var absBoneIndex = rigFrameData.bonePoseOffset + boneIndex;
         runtimeData.animatedBonesBuffer[absBoneIndex] = bt;
         MarkChildrenWorldPosesAsDirty(boneIndex);
         worldPoseDirtyFlags.Set(boneIndex, true);
@@ -157,10 +156,10 @@ public struct AnimationStream: IDisposable
 
     public void SetLocalPosition(int boneIndex, float3 pos)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return;
         
-        var absBoneIndex = rigBoneProps.bonePoseOffset + boneIndex;
+        var absBoneIndex = rigFrameData.bonePoseOffset + boneIndex;
         ref var curPose = ref runtimeData.animatedBonesBuffer.ElementAt(absBoneIndex);
         curPose.pos = pos;
         MarkChildrenWorldPosesAsDirty(boneIndex);
@@ -171,10 +170,10 @@ public struct AnimationStream: IDisposable
 
     public void SetLocalRotation(int boneIndex, quaternion rot)
     {
-        if (boneIndex >= rigBoneProps.rigBoneCount)
+        if (boneIndex >= rigFrameData.rigBoneCount)
             return;
         
-        var absBoneIndex = rigBoneProps.bonePoseOffset + boneIndex;
+        var absBoneIndex = rigFrameData.bonePoseOffset + boneIndex;
         ref var curPose = ref runtimeData.animatedBonesBuffer.ElementAt(absBoneIndex);
         curPose.rot = rot;
         MarkChildrenWorldPosesAsDirty(boneIndex);
@@ -185,7 +184,7 @@ public struct AnimationStream: IDisposable
 
     void MarkChildrenWorldPosesAsDirty(int rootBoneIndex)
     {
-        for (var i = rootBoneIndex + 1; i < rigBoneProps.rigBoneCount; ++i)
+        for (var i = rootBoneIndex + 1; i < rigFrameData.rigBoneCount; ++i)
         {
             ref var bone = ref rigBlob.Value.bones[i];
             if (bone.parentBoneIndex == rootBoneIndex)
@@ -200,25 +199,25 @@ public struct AnimationStream: IDisposable
 
     void RebuildOutdatedBonePoses(int interestedBoneIndex)
     {
-        if (rigBoneProps.rigBoneCount < 0)
+        if (rigFrameData.rigBoneCount < 0)
             return;
         
-        var endBoneIndex = math.select(rigBoneProps.rigBoneCount - 1, interestedBoneIndex, interestedBoneIndex >= 0);
-        endBoneIndex = math.min(endBoneIndex, rigBoneProps.rigBoneCount);
+        var endBoneIndex = math.select(rigFrameData.rigBoneCount - 1, interestedBoneIndex, interestedBoneIndex >= 0);
+        endBoneIndex = math.min(endBoneIndex, rigFrameData.rigBoneCount);
         for (var i = 0; i <= endBoneIndex; ++i)
         {
             var isWorldPoseDirty = worldPoseDirtyFlags.IsSet(i);
             if (!isWorldPoseDirty)
                 continue;
             
-            var absBoneIndex = rigBoneProps.bonePoseOffset + i;
+            var absBoneIndex = rigFrameData.bonePoseOffset + i;
             ref var rigBone = ref rigBlob.Value.bones[i];
             var boneLocalPose = runtimeData.animatedBonesBuffer[absBoneIndex];
 
             var parentBoneWorldPose = BoneTransform.Identity();
             if (rigBone.parentBoneIndex >= 0)
             {
-                parentBoneWorldPose = runtimeData.worldSpaceBonesBuffer[rigBoneProps.bonePoseOffset + rigBone.parentBoneIndex];
+                parentBoneWorldPose = runtimeData.worldSpaceBonesBuffer[rigFrameData.bonePoseOffset + rigBone.parentBoneIndex];
             }
 
             var worldPose = BoneTransform.Multiply(parentBoneWorldPose, boneLocalPose);
@@ -231,14 +230,14 @@ public struct AnimationStream: IDisposable
 
     public AnimationTransformFlags GetAnimationTransformFlagsRO()
     {
-        return AnimationTransformFlags.CreateFromBufferRO(runtimeData.boneTransformFlagsHolderArr, rigBoneProps.boneFlagsOffset, rigBoneProps.rigBoneCount);
+        return AnimationTransformFlags.CreateFromBufferRO(runtimeData.boneTransformFlagsHolderArr, rigFrameData.boneFlagsOffset, rigFrameData.rigBoneCount);
     }
     
 /////////////////////////////////////////////////////////////////////////////////
 
     public AnimationTransformFlags GetAnimationTransformFlagsRW()
     {
-        return AnimationTransformFlags.CreateFromBufferRW(runtimeData.boneTransformFlagsHolderArr, rigBoneProps.boneFlagsOffset, rigBoneProps.rigBoneCount);
+        return AnimationTransformFlags.CreateFromBufferRW(runtimeData.boneTransformFlagsHolderArr, rigFrameData.boneFlagsOffset, rigFrameData.rigBoneCount);
     }
 }
 }

@@ -75,6 +75,7 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 		DependsOn(a.avatar);
 		
 		AddBuffer<AnimationToProcessComponent>(e);
+		AddComponent<GPURigFrameOffsetsComponent>(e);
 		CreateRigDefinitionFromRigAuthoring(e, a);	
 	}
 
@@ -452,15 +453,11 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 		//	For other bones search for parent with body part is set and set it to the same value
 		for (int i = 1; i < bonesArr.Length; ++i)
 		{
-			if (skeletonBones[i] == null)
-				continue;
-
-			if(skeletonBones[i].boneTransform == null)
-					continue;
-
 			//	Override human body part if explicitly specified
-			var hbpo = skeletonBones[i].boneTransform.GetComponent<HumanBodyPartOverrideAuthoring>();
-			
+			var t = skeletonBones[i].boneTransform;
+			HumanBodyPartOverrideAuthoring hbpo = null;
+			if (t != null)
+				hbpo = t.GetComponent<HumanBodyPartOverrideAuthoring>();
 			var humanBodyPart = hbpo != null ? hbpo.humanBodyPart : GetAvatarMaskBodyPartFromParent(i, bonesArr);
 			bonesArr[i].humanBodyPart = humanBodyPart;
 		}

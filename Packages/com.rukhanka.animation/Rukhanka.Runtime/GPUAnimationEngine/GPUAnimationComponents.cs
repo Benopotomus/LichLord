@@ -41,4 +41,21 @@ public struct GPURigEntityLocalToWorldMPComponent: IComponentData
 {
     public float4x4 value; 
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+public struct GPURigFrameOffsetsComponent: IComponentData
+{
+    public int boneIndex;
+    public int rigIndex;
+    public int animationToProcessIndex;
+    
+    public void AddOffsets(GPURigFrameOffsetsComponent o)
+    {
+        boneIndex += o.boneIndex;
+        rigIndex += o.rigIndex;
+        animationToProcessIndex += o.animationToProcessIndex;
+    }
+}
+
 }

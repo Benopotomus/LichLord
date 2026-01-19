@@ -48,6 +48,9 @@ public partial struct AnimatorControllerSystem<T>: ISystem where T: AnimatorCont
 		var controllerEventsBufferLookup = SystemAPI.GetBufferLookup<AnimatorControllerEventComponent>();
 		var animDBSingleton = SystemAPI.GetSingleton<BlobDatabaseSingleton>();
 		
+		var internalDataSingletonQuery = SystemAPI.QueryBuilder().WithAllRW<InternalAnimatorDataSingleton>().Build();
+		var internalAnimatorData = FillAnimationsFromControllerSystem.GetInternalDataSingleton(internalDataSingletonQuery, ref ss);
+		
 		var stateMachineProcessJob = new StateMachineProcessJob()
 		{
 			controllerLayersBufferHandle = controllerLayersBufferHandle,
@@ -57,6 +60,8 @@ public partial struct AnimatorControllerSystem<T>: ISystem where T: AnimatorCont
 			controllerEventsBufferLookup = controllerEventsBufferLookup,
 			animationDatabase = animDBSingleton.animations,
 			animatorOverrideAnimationLookup = animatorOverrideAnimationsLookup,
+			animatorOverrideAnimationsMap = internalAnimatorData.animatorOverrideAnimationsMap.AsParallelWriter()
+			
 		};
 
 		ss.Dependency = stateMachineProcessJob.ScheduleParallel(animatorControllerQuery, ss.Dependency);

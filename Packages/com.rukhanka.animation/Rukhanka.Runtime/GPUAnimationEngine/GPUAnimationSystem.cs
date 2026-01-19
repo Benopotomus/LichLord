@@ -47,7 +47,7 @@ public partial class GPUAnimationSystem: SystemBase
 	ComputeKernel copyMeshDataKernel;
 	
 	NativeParallelHashMap<Hash128, BlobAssetReference<BoneRemapTableBlob>> skinnedMeshToRigBoneRemapTables;
-	EntityQuery gpuAnimatedRigQuery;
+	EntityQuery gpuAnimatedRigQuery, gpuAnimatedRigNoChunkComponentsQuery, smrQuery;
 	
 #if RUKHANKA_DEBUG_INFO
 	BoneVisualizationSystem boneVisualizationSystem;
@@ -83,7 +83,18 @@ public partial class GPUAnimationSystem: SystemBase
 		
 		gpuAnimatedRigQuery = new EntityQueryBuilder(Allocator.Temp)
 			.WithAll<RigDefinitionComponent, AnimationToProcessComponent, GPUAnimationEngineTag>()
+			.WithAllChunkComponent<GPURigFrameOffsetsComponent>()
 			.WithNone<CullAnimationsTag>()
+			.Build(EntityManager);
+		
+		gpuAnimatedRigNoChunkComponentsQuery = new EntityQueryBuilder(Allocator.Temp)
+			.WithAll<RigDefinitionComponent, AnimationToProcessComponent, GPUAnimationEngineTag>()
+			.WithNoneChunkComponent<GPURigFrameOffsetsComponent>()
+			.WithNone<CullAnimationsTag>()
+			.Build(EntityManager);
+		
+		smrQuery = new EntityQueryBuilder(Allocator.Temp)
+			.WithAll<SkinnedMeshRendererComponent, LocalToWorld>()
 			.Build(EntityManager);
 		
 		Assert.IsTrue(UnsafeUtility.SizeOf<GPUStructures.KeyFrame>() == UnsafeUtility.SizeOf<KeyFrame>());
@@ -94,6 +105,8 @@ public partial class GPUAnimationSystem: SystemBase
 	protected override void OnUpdate()
 	{
 		ref var runtimeAnimationData = ref SystemAPI.GetSingletonRW<GPURuntimeAnimationData>().ValueRW;
+		
+		EntityManager.AddChunkComponentData<GPURigFrameOffsetsComponent>(gpuAnimatedRigNoChunkComponentsQuery, default);
 		
 		PrepareFrameAnimationData(ref runtimeAnimationData, Dependency);
 		DispatchAnimationCalculation(ref runtimeAnimationData);
@@ -162,28 +175,50 @@ public partial class GPUAnimationSystem: SystemBase
 
 	unsafe JobHandle CalculateFrameWorksetData(ref GPURuntimeAnimationData rad, JobHandle dependsOn)
 	{
-		//	All following jobs should be sequential. Interlocked math for a few counters are significantly slower then
+		//	All following jobs should be sequential. Interlocked math for a few counters are significantly slower than
 		//	sequential execution
 		
-		//	Workload sizes for animation calculation
-		var computeRigsWorkloadSizesJob = new ComputeFrameRigWorkloadSizesJob()
+		var gpuRigFrameOffsetsTypeHandle = SystemAPI.GetComponentTypeHandle<GPURigFrameOffsetsComponent>();
+		var rigDefTypeHandle = SystemAPI.GetComponentTypeHandle<RigDefinitionComponent>(true);
+		var atpBufHandle = SystemAPI.GetBufferTypeHandle<AnimationToProcessComponent>(true);
+		
+		//	Workload sizes for animation calculation per chunk
+		var computeRigsWorkloadSizesJob = new ComputeFrameRigWorkloadSizesPerChunkJob()
 		{
-			frameEntityAnimatedDataOffsetsMap = rad.frameEntityAnimatedDataOffsetsMap,
+			frameOffsetsTypeHandle = gpuRigFrameOffsetsTypeHandle,
+			atpBufTypeHandle = atpBufHandle,
+			rigDefComponentTypeHandle = rigDefTypeHandle,
+		};
+		var computeRigsWorkloadSizesJH = computeRigsWorkloadSizesJob.ScheduleParallel(gpuAnimatedRigQuery, dependsOn);
+		
+		//	Make absolute chunk offsets
+		var computeAbsChunkOffsetsJob = new ComputeFrameRigWorkloadSizesAbsChunkOffsetsJob()
+		{
 			frameAnimatedBonesCounter = (uint*)UnsafeUtility.AddressOf(ref rad.frameAnimatedBonesCounter),
 			frameAnimatedRigsCounter = (uint*)UnsafeUtility.AddressOf(ref rad.frameAnimatedRigsCounter),
-			frameAnimationToProcessCounter = (uint*)UnsafeUtility.AddressOf(ref rad.frameAnimationToProcessCounter)
+			frameAnimationToProcessCounter = (uint*)UnsafeUtility.AddressOf(ref rad.frameAnimationToProcessCounter),
+			gpuRigChunkDataTypeHandle = gpuRigFrameOffsetsTypeHandle
 		};
-		var computeRigsWorkloadSizesJH = computeRigsWorkloadSizesJob.Schedule(gpuAnimatedRigQuery, dependsOn);
+		var computeAbsChunkOffsetsJH = computeAbsChunkOffsetsJob.Schedule(gpuAnimatedRigQuery, computeRigsWorkloadSizesJH);
 		
 		//	Workload sizes for skin matrices calculation
+		//	To avoid InterlockedAdd (it is slow when invocation count is really big), and single thread job I use 2-step
+		//	process here: first job increments per-thread counters, and another single thread job do final accumulate.
 		var computeSkinnedMeshCountJob = new ComputeFrameSkinnedMeshWorkloadSizesJob()
 		{
-			frameSkinnedMeshesCounter = (uint*)UnsafeUtility.AddressOf(ref rad.frameSkinnedMeshesCounter),
+			frameSkinnedMeshesPerThreadCounters = rad.frameSkinnedMeshesPerThreadCounters,
 			gpuAnimationEngineTagLookup = SystemAPI.GetComponentLookup<GPUAnimationEngineTag>(true)
 		};
-		var computeSkinnedMeshCountJH = computeSkinnedMeshCountJob.Schedule(dependsOn);
+		var computeSkinnedMeshCountTotalJob = new ComputeFrameSkinnedMeshWorkloadSizesTotalJob()
+		{
+			frameSkinnedMeshesPerThreadCounters = rad.frameSkinnedMeshesPerThreadCounters,
+			frameSkinnedMeshesCounter =  (uint*)UnsafeUtility.AddressOf(ref rad.frameSkinnedMeshesCounter)
+		};
 		
-		var rv = JobHandle.CombineDependencies(computeRigsWorkloadSizesJH, computeSkinnedMeshCountJH);
+		var computeSkinnedMeshCountJH = computeSkinnedMeshCountJob.ScheduleParallel(dependsOn);
+		var computeSkinnedMeshCountTotalJH = computeSkinnedMeshCountTotalJob.Schedule(computeSkinnedMeshCountJH);
+		
+		var rv = JobHandle.CombineDependencies(computeAbsChunkOffsetsJH, computeSkinnedMeshCountTotalJH);
 		return rv;
 	}
 
@@ -217,7 +252,7 @@ public partial class GPUAnimationSystem: SystemBase
 		rad.frameSkinnedMeshesCounter = 0;
 		var frameSkinnedMeshesAtomicCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref rad.frameSkinnedMeshesCounter));
 		
-		var fillFrameSkinmatrixWorkloadBuffersJob = new FillFrameSkinMatrixWorkloadBuffersJob()
+		var fillFrameSkinMatrixWorkloadBuffersJob = new FillFrameSkinMatrixWorkloadBuffersJob()
 		{
 			frameSkinnedMeshesAtomicCounter = frameSkinnedMeshesAtomicCounter,
 			frameSkinMatrixWorkloadBuf = frameSkinMatrixWorkloadBuf,
@@ -226,9 +261,13 @@ public partial class GPUAnimationSystem: SystemBase
 			gpuAnimationEngineTagLookup = SystemAPI.GetComponentLookup<GPUAnimationEngineTag>(true),
 			localToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
 			entityToSMRFrameDataMap = entityToSMRFrameDataMap,
-			frameEntityAnimatedDataOffsetsMap = rad.frameEntityAnimatedDataOffsetsMap
+			gpuRigChunkDataTypeHandle = SystemAPI.GetComponentTypeHandle<GPURigFrameOffsetsComponent>(true),
+			smrTypeHandle = SystemAPI.GetComponentTypeHandle<SkinnedMeshRendererComponent>(true),
+			l2wTypeHandle = SystemAPI.GetComponentTypeHandle<LocalToWorld>(true),
+			entityTypeHandle = SystemAPI.GetEntityTypeHandle(),
+			frameOffsetsLookup = SystemAPI.GetComponentLookup<GPURigFrameOffsetsComponent>(true)
 		};
-		fillFrameSkinmatrixWorkloadBuffersJob.ScheduleParallel(new JobHandle()).Complete();
+		fillFrameSkinMatrixWorkloadBuffersJob.ScheduleParallel(smrQuery, default).Complete();
 		
 		frameSkinMatrixWorkloadGB.UnlockBufferAfterWrite((int)rad.frameSkinnedMeshesCounter);
 	}
@@ -250,7 +289,10 @@ public partial class GPUAnimationSystem: SystemBase
 			animationClipsOffsets = rad.animationClipsMap,
 			rigDefinitionOffsets = rad.rigDefinitionsMap,
 			avatarMasksOffsets = rad.avatarMasksDataMap,
-			frameEntityAnimatedDataOffsetsMap = rad.frameEntityAnimatedDataOffsetsMap
+			frameOffsetsTypeHandle = SystemAPI.GetComponentTypeHandle<GPURigFrameOffsetsComponent>(true),
+			atpBufTypeHandle = SystemAPI.GetBufferTypeHandle<AnimationToProcessComponent>(true),
+			rigDefComponentTypeHandle = SystemAPI.GetComponentTypeHandle<RigDefinitionComponent>(true),
+			entityTypeHandle = SystemAPI.GetEntityTypeHandle()
 		};
 		fillFrameAnimatedRigWorkloadDataJob.ScheduleParallel(gpuAnimatedRigQuery, new JobHandle()).Complete();
 		
@@ -265,11 +307,11 @@ public partial class GPUAnimationSystem: SystemBase
 	{
 		var resetFrameDataJob = new ResetFrameDataJob()
 		{
-			frameEntityAnimatedDataOffsets = rad.frameEntityAnimatedDataOffsetsMap,
 			frameAnimatedBonesCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref rad.frameAnimatedBonesCounter)),
 			frameAnimatedRigsCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref rad.frameAnimatedRigsCounter)),
 			frameSkinnedMeshesCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref rad.frameSkinnedMeshesCounter)),
 			frameAnimationToProcessCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref rad.frameAnimationToProcessCounter)),
+			frameSkinnedMeshesPerThreadCounters = rad.frameSkinnedMeshesPerThreadCounters
 		};
 		var rv = resetFrameDataJob.Schedule(dependsOn);
 		return rv;

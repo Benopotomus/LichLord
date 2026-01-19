@@ -27,6 +27,7 @@ int animatedBonesCount;
 #include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/AnimationToProcess.hlsl"
 #include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/AvatarMask.hlsl"
 #include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/PerfectHashTable.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/SkinMatrix.hlsl"
 
 /////////////////////////////////////////////////////////////////////////////////
 

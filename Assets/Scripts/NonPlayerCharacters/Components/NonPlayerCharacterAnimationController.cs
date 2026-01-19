@@ -6,6 +6,7 @@ using Rukhanka;
 using AYellowpaper.SerializedCollections;
 using LichLord.Projectiles;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -62,6 +63,10 @@ namespace LichLord.NonPlayerCharacters
         private float smoothedYawVelocity;
 
         private float modelScale;
+
+        // Caches split by side
+        private List<GpuAttachmentElement> rightSideAttachments = new List<GpuAttachmentElement>();
+        private List<GpuAttachmentElement> leftSideAttachments = new List<GpuAttachmentElement>();
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
@@ -132,8 +137,51 @@ namespace LichLord.NonPlayerCharacters
             }
 
             SyncTransformToEntity();
+            CacheAttachments(runtimeState);
 
-            SetWeaponVisibility("", false);
+            int randomRight = UnityEngine.Random.Range(0, rightSideAttachments.Count);
+            int randomLeft = UnityEngine.Random.Range(0, leftSideAttachments.Count);
+
+            ShowOnlySpecificAttachment(0, randomRight);
+            ShowOnlySpecificAttachment(1, randomLeft);
+        }
+
+        private void CacheAttachments(NonPlayerCharacterRuntimeState runtimeState)
+        {
+            rightSideAttachments.Clear();
+            leftSideAttachments.Clear();
+
+            var prefabSingletonQuery = entityManager.CreateEntityQuery(ComponentType.ReadOnly<VisualEntityPrefabElement>());
+            if (prefabSingletonQuery.IsEmpty)
+            {
+                Debug.LogError("No VisualEntityPrefabElement buffer found! Cannot load attachments.");
+            }
+            else
+            {
+                var singletonEntity = prefabSingletonQuery.GetSingletonEntity();
+                var attachmentBuffer = entityManager.GetBuffer<GpuAttachmentElement>(singletonEntity);
+
+                int myTableId = runtimeState.Definition.TableID;
+
+                for (int i = 0; i < attachmentBuffer.Length; i++)
+                {
+                    var entry = attachmentBuffer[i];
+                    if (entry.DefinitionTableId != myTableId)
+                        continue;
+
+                    if (!entityManager.Exists(entry.AttachmentEntity))
+                        continue;
+
+                    if (entry.Side == 0) // Right side
+                    {
+                        rightSideAttachments.Add(entry);
+                    }
+                    else if (entry.Side == 1) // Left side
+                    {
+                        leftSideAttachments.Add(entry);
+                    }
+                }
+            }
         }
 
         private Entity GetVisualPrefab(NonPlayerCharacterRuntimeState runtimeState)
@@ -341,54 +389,6 @@ namespace LichLord.NonPlayerCharacters
             eventBuffer.Clear();
         }
 
-        // Simple toggle by finding attachments under the visual rig
-        public void SetWeaponVisibility(string boneNameHint, bool visible) // boneNameHint = e.g. "RightHand_Sword"
-        {
-            Debug.Log("Found 1");
-            if (visualEntity == Entity.Null || !entityManager.Exists(visualEntity))
-                return;
-
-            Debug.Log("Found 2");
-            // Get children of the visual entity (bone entities + attachments)
-            if (!entityManager.HasBuffer<Child>(visualEntity))
-                return;
-
-            Debug.Log("Found 3");
-            var children = entityManager.GetBuffer<Child>(visualEntity);
-
-            foreach (var child in children)
-            {
-                Debug.Log("Found 4");
-                var childEntity = child.Value;
-
-                // Only process real GPU attachments
-                if (!entityManager.HasComponent<GPUAttachmentComponent>(childEntity))
-                    continue;
-
-                // Optional: filter by bone index/name if you have it stored
-                // var ga = EntityManager.GetComponentData<GPUAttachmentComponent>(childEntity);
-                // if (!boneNameHint.Contains(ga.attachedBoneIndex.ToString())) continue;
-                Debug.Log("Found 5 ");
-
-                if (visible)
-                {
-                    // Show → remove Disabled if present
-                    if (entityManager.HasComponent<Disabled>(childEntity))
-                    {
-                        entityManager.RemoveComponent<Disabled>(childEntity);
-                    }
-                }
-                else
-                {
-                    // Hide → add Disabled (idempotent, safe to call multiple times)
-                    if (!entityManager.HasComponent<Disabled>(childEntity))
-                    {
-                        entityManager.AddComponent<Disabled>(childEntity);
-                    }
-                }
-            }
-        }
-
         // Helper: safely get fresh parameters aspect every call
         private bool TryGetParametersAspect(out AnimatorParametersAspect aspect)
         {
@@ -405,6 +405,61 @@ namespace LichLord.NonPlayerCharacters
 
             aspect = new AnimatorParametersAspect(buffer, indexTable);
             return true;
+        }
+
+        // Side 0 = right, Side 1 = left
+        public bool ShowOnlySpecificAttachment(int side, int elementIndex)
+        {
+            // Select the correct list
+            var targetList = side == 0 ? rightSideAttachments :
+                             (side == 1 ? leftSideAttachments : null);
+
+            if (targetList == null)
+                return false;
+
+            if (elementIndex < 0 || elementIndex >= targetList.Count)
+                return false;
+
+            int shownCount = 0;
+            int hiddenCount = 0;
+
+            // Loop through all attachments on this side
+            for (int i = 0; i < targetList.Count; i++)
+            {
+                var entry = targetList[i];
+                var entity = entry.AttachmentEntity;
+
+                // Skip if entity no longer exists (rare safety check)
+                if (!entityManager.Exists(entity))
+                    continue;
+
+                if (i == elementIndex)
+                {
+                    // This is the one we want to show
+                    if (entityManager.HasComponent<Disabled>(entity))
+                    {
+                        entityManager.RemoveComponent<Disabled>(entity);
+                        shownCount++;
+                    }
+                }
+                else
+                {
+                    // Hide all others
+                    if (!entityManager.HasComponent<Disabled>(entity))
+                    {
+                        entityManager.AddComponent<Disabled>(entity);
+                        hiddenCount++;
+                    }
+                }
+            }
+
+            if (shownCount > 0 || hiddenCount > 0)
+            {
+                var boneIndex = targetList[elementIndex].BoneIndex;
+                return true;
+            }
+
+            return false;
         }
     }
 }

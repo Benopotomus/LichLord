@@ -10,6 +10,7 @@ using UnityEngine;
 using Unity.Assertions;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Transforms;
 using FixedStringName = Unity.Collections.FixedString512Bytes;
 using Hash128 = Unity.Entities.Hash128;
 
@@ -26,6 +27,9 @@ public struct SkinnedMeshRendererRootBoneEntity: IComponentData
 	public Entity value;
 }
 
+[TemporaryBakingType]
+public struct SkinnedMeshSplitSubmeshEntities: IComponentData { }
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
@@ -36,7 +40,6 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 			return;
 		
 		var smrHash = CalculateSkinnedMeshHash(a.sharedMesh);
-		var e = GetEntity(a, TransformUsageFlags.Renderable);
 		
 		var isSMSBlobExists = TryGetBlobAssetReference<SkinnedMeshInfoBlob>(smrHash, out var smrBlobAsset);
 		if (!isSMSBlobExists)
@@ -49,16 +52,55 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 		{
 			value = _State.BakedEntityData->GetEntity(a.rootBone)
 		};
-		AddComponent(e, rbe);
 		
-		var asmc = new SkinnedMeshRendererComponent()
+		var smrc = new SkinnedMeshRendererComponent()
 		{
 			smrInfoBlob = smrBlobAsset,
 			animatedRigEntity = GetEntity(a.gameObject.GetComponentInParent<RigDefinitionAuthoring>(true), TransformUsageFlags.Dynamic),
 			rootBoneIndexInRig = -1,
 			nameHash = a.name.CalculateHash32()
 		};
-		AddComponent(e, asmc);
+		var e = GetEntity(a, TransformUsageFlags.Renderable);
+		
+		var splitOnSubmeshes = a.GetComponent<SkinnedMeshSplitOnSubmeshEntitiesAuthoring>();
+		
+		//	One or many render entities
+		if (!splitOnSubmeshes || a.sharedMaterials.Length == 0)
+		{
+			AddEntityComponents(e, a, smrc, rbe, -1);
+		}
+		else
+		{
+			//	In case of submesh splitting requested create one entity per material in source skinned mesh renderer and configure it as ordinary
+			//	skinned mesh entity
+			var additionalEntities = new NativeArray<Entity>(a.sharedMaterials.Length - 1, Allocator.Temp);
+			CreateAdditionalEntities(additionalEntities, TransformUsageFlags.ManualOverride);
+			var parent = new Parent() { Value = GetEntity(a.transform.parent, TransformUsageFlags.Dynamic) };
+			var lt = new LocalTransform() { Position = a.transform.localPosition, Rotation = a.transform.localRotation, Scale = a.transform.localScale.x };
+			
+			//	Original SMR with first material
+			AddEntityComponents(e, a, smrc, rbe, 0);
+			
+			for (var i = 0; i < additionalEntities.Length; ++i)
+			{
+				var materialIndex = i + 1;
+				var renderEntity = additionalEntities[i];
+				if (parent.Value != Entity.Null)
+					AddComponent(renderEntity, parent);
+				AddComponent(renderEntity, lt);
+				AddComponent<LocalToWorld>(renderEntity);
+				
+				AddEntityComponents(renderEntity, a, smrc, rbe, materialIndex);
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void AddEntityComponents(Entity e, SkinnedMeshRenderer a, in SkinnedMeshRendererComponent smrc, SkinnedMeshRendererRootBoneEntity smrrbe, int materialIndex)
+	{
+		AddComponent(e, smrrbe);
+		AddComponent(e, smrc);
 		
 		if (a.updateWhenOffscreen)
 		{
@@ -66,9 +108,9 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 		}
 		
 		CheckMaterialCompatibility(a);
-        CreateRenderComponents(a);
-        CreateSkinMatricesBuffer(a);
-        CreateBlendShapeWeightsBuffer(a);
+        CreateRenderComponents(e, a, materialIndex);
+        CreateSkinMatricesBuffer(e, a);
+        CreateBlendShapeWeightsBuffer(e, a);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +227,102 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsafe void CreateRenderComponents(SkinnedMeshRenderer a)
+	void CreateRenderComponents(Entity renderEntity, SkinnedMeshRenderer a, int materialIndex)
+	{
+		var mmIndices = new MaterialMeshIndex[a.sharedMaterials.Length];
+		for (var i = 0; i < mmIndices.Length; ++i)
+		{
+			mmIndices[i] = new () { MeshIndex = 0, MaterialIndex = i, SubMeshIndex = i };
+		}
+		var rma = new RenderMeshArray(a.sharedMaterials, new [] { a.sharedMesh }, mmIndices);
+		var rmd = new RenderMeshDescription(a);
+		
+		var materialBaseIndex = math.select(0, materialIndex, materialIndex >= 0);
+		var materialsCount = math.select(a.sharedMaterials.Length, 1, materialIndex >= 0);
+		var mmi = MaterialMeshInfo.FromMaterialMeshIndexRange(materialBaseIndex, materialsCount);
+		var materialList = new ReadOnlySpan<Material>(rma.GetMaterials(mmi).ToArray());
+		
+		var componentFlags = RenderMeshUtility.EntitiesGraphicsComponentFlags.UseRenderMeshArray;
+		componentFlags.AppendMotionAndProbeFlags(rmd, false);
+		componentFlags.AppendPerVertexMotionPassFlag(materialList);
+		componentFlags.AppendDepthSortedFlag(rma.GetMaterials(mmi));
+		AddComponent(renderEntity, RenderMeshUtility.ComputeComponentTypes(componentFlags));
+
+		GetLayer(a);
+		SetSharedComponent(renderEntity, rmd.FilterSettings);
+		SetSharedComponentManaged(renderEntity, rma);
+		SetComponent(renderEntity, mmi);
+		AddComponent<DeformedMeshIndex>(renderEntity);
+		AddMeshRendererBakingData(renderEntity, a);
+		AddLODComponents(renderEntity, a);
+		
+		var rbb = a.localBounds.ToAABB();
+		if (a.rootBone != null)
+		{
+			var rootBoneLocalMat = float4x4.TRS(a.rootBone.localPosition, a.rootBone.localRotation, a.rootBone.localScale);
+			rbb = AABB.Transform(rootBoneLocalMat, rbb);
+		}
+		SetComponent(renderEntity, new RenderBounds { Value = rbb });
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void AddLODComponents(Entity renderEntity, SkinnedMeshRenderer a)
+	{
+		var lodGroup = a.GetComponentInParent<LODGroup>(true);
+		var lge = GetEntity(lodGroup, TransformUsageFlags.Renderable);
+		var lodMask = GetLODMask(lodGroup, a);
+		
+		if (lge == Entity.Null || lodMask == -1)
+			return;
+		
+		var mlc = new MeshLODComponent () { Group = lge, LODMask = lodMask };
+		AddComponent(renderEntity, mlc);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int GetLODMask(LODGroup lodGroup, SkinnedMeshRenderer a)
+	{
+		if (lodGroup == null)
+			return -1;
+                
+		var lods = lodGroup.GetLODs();
+		int lodGroupMask = 0;
+
+		// Find the renderer inside the LODGroup
+		for (int i = 0; i < lods.Length; ++i)
+		{
+			foreach (var renderer in lods[i].renderers)
+			{
+				if (renderer == a)
+				{
+					lodGroupMask |= (1 << i);
+				}
+			}
+		}
+		return lodGroupMask > 0 ? lodGroupMask : -1;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	unsafe void AddMeshRendererBakingData(Entity renderEntity, SkinnedMeshRenderer a)
+	{
+        var entitiesGraphicsSystemType = typeof(EntitiesGraphicsSystem);
+		var meshRendererBakingDataTypeName = "Unity.Rendering.MeshRendererBakingData";
+        var meshRendererBakingDataType = entitiesGraphicsSystemType.Assembly.GetType(meshRendererBakingDataTypeName);
+		var mrbdTypeIndex = TypeManager.GetTypeIndex(meshRendererBakingDataType);
+		var typeInfo = TypeManager.GetTypeInfo(mrbdTypeIndex);
+        var untypedComponentData = UnsafeUtility.Malloc(typeInfo.TypeSize, typeInfo.AlignmentInBytes, Allocator.Temp);
+        UnityObjectRef<Renderer> meshRenderer = a;
+        UnsafeUtility.MemCpy(untypedComponentData, &meshRenderer, typeInfo.TypeSize);
+        
+		UnsafeAddComponent(renderEntity, mrbdTypeIndex, typeInfo.TypeSize, untypedComponentData);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	unsafe void CreateRenderComponents2(SkinnedMeshRenderer a)
 	{
 		//	To bake skinned mesh using builtin Entities.Graphics methods, I need to do many reflection magic because all baking stuff
 		//	og EG is private.
@@ -249,11 +386,10 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CreateSkinMatricesBuffer(SkinnedMeshRenderer a)
+	void CreateSkinMatricesBuffer(Entity e, SkinnedMeshRenderer a)
 	{
 		DependsOn(a.transform);
 		
-		var e = GetEntity(a, TransformUsageFlags.None);
 		var mesh = a.sharedMesh;
 		
 		var boneWeights = mesh.GetAllBoneWeights();
@@ -291,13 +427,12 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CreateBlendShapeWeightsBuffer(SkinnedMeshRenderer a)
+	void CreateBlendShapeWeightsBuffer(Entity e, SkinnedMeshRenderer a)
 	{
 		var mesh = a.sharedMesh;
 		if (mesh.blendShapeCount == 0)
 			return;
 		
-		var e = GetEntity(a, TransformUsageFlags.None);
 		var bswb = AddBuffer<Rukhanka.BlendShapeWeight>(e);
 		for (var i = 0; i < mesh.blendShapeCount; ++i)
 		{

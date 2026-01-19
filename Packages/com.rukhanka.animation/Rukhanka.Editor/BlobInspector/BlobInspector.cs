@@ -78,7 +78,7 @@ public class BlobInspector : EditorWindow
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [MenuItem("Window/Rukhanka.Animation/Blob Inspector")]
+    [MenuItem("Window/Rukhanka Animation/Blob Inspector")]
     public static void ShowWindow()
     {
         var wnd = GetWindow<BlobInspector>();
@@ -210,7 +210,7 @@ public class BlobInspector : EditorWindow
             allAnimationClipBlobAssets.Clear();
             foreach (var kv in db.animations)
             {
-                if (!BlobDatabaseSingleton.IsBlobValid(kv.Value))
+                if (!kv.Value.IsCreated)
                     continue;
                 
                 RegisterBlobAsset(kv.Value, allAnimationClipBlobAssets);
@@ -219,7 +219,7 @@ public class BlobInspector : EditorWindow
             allAvatarMaskBlobAssets.Clear();
             foreach (var kv in db.avatarMasks)
             {
-                if (!BlobDatabaseSingleton.IsBlobValid(kv.Value))
+                if (!kv.Value.IsCreated)
                     continue;
                 
                 RegisterBlobAsset(kv.Value, allAvatarMaskBlobAssets);

@@ -31,6 +31,8 @@ public struct StateMachineProcessJob: IJobChunk
 	public NativeHashMap<Hash128, BlobAssetReference<AnimationClipBlob>> animationDatabase;
 	[ReadOnly]
 	public ComponentLookup<AnimatorOverrideAnimations> animatorOverrideAnimationLookup;
+	
+	public NativeParallelHashMap<int, BlobAssetReference<ControllerAnimationsBlob>>.ParallelWriter animatorOverrideAnimationsMap;
 
 	BlobAssetReference<ControllerAnimationsBlob> controllerAnimationsBlob;
 
@@ -81,7 +83,8 @@ public struct StateMachineProcessJob: IJobChunk
 			ref var acc = ref aclc.ElementAt(i);
 			
 			//	Save controller animations blob asset reference in class variable, because passing it inside almost all functions will bloat signatures significantly
-			controllerAnimationsBlob = FillAnimationsFromControllerSystem.GetControllerAnimationsBlob(entity, animatorOverrideAnimationLookup, acc.animations);
+			controllerAnimationsBlob = FillAnimationsFromControllerSystem.GetControllerAnimationsBlob
+				(entity, animatorOverrideAnimationLookup, acc.animations, animatorOverrideAnimationsMap);
 
 			ProcessLayer(ref acc.controller.Value, acc.layerIndex, acpc, aclc, ref events, triggersToReset);
 			if (events.IsCreated)

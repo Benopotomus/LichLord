@@ -3,7 +3,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////
 
-RWStructuredBuffer<float3x4> outSkinMatrices;
+RWByteAddressBuffer outSkinMatrices;
 StructuredBuffer<BoneTransform> rigSpaceBoneTransformsBuf;
 StructuredBuffer<SkinnedMeshWorkload> skinMatrixWorkloadBuf;
 ByteAddressBuffer skinnedMeshBoneData;
@@ -34,8 +34,7 @@ void ComputeSkinMatrices(uint tid: SV_DispatchThreadID)
         float4x4 outSkinMatrix = mul(skinMatrix, smb.bindPose);
 
         int skinMatrixOutIndex = smw.skinMatrixBaseOutIndex + i;
-        CHECK_STRUCTURED_BUFFER_OUT_OF_BOUNDS(RUKHANKADEBUGMARKERS_GPUANIMATOR_COMPUTE_SKIN_MATRICES_OUT_SKIN_MATRICES_WRITE, skinMatrixOutIndex, outSkinMatrices);
-        outSkinMatrices[skinMatrixOutIndex] = (float3x4)outSkinMatrix;
+        SkinMatrix::WriteToRawBuffer(outSkinMatrices, (float3x4)outSkinMatrix, skinMatrixOutIndex);
     }
 }
 
