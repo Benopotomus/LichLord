@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Fusion;
 using UnityEngine.Rendering;
 using LichLord.Projectiles;
@@ -130,7 +130,7 @@ namespace LichLord
 
             if (HasStateAuthority)
             {
-                // For input authority, deactivate head renderers so they don�t obstruct the view
+                // For input authority, deactivate head renderers so they don’t obstruct the view
                 for (int i = 0; i < HeadRenderers.Length; i++)
                 {
                     HeadRenderers[i].shadowCastingMode = ShadowCastingMode.ShadowsOnly;
@@ -187,23 +187,39 @@ namespace LichLord
                 return; // Do not show nickname for local player
         }
 
-        void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
+        void IHitInstigator.OnHitPerformed(ref FHitUtilityData hit)
         {
             if (hit.target is NonPlayerCharacter npc)
             {
                 int currentAnimIndex = npc.State.CurrentAnimIndex;
-                int hitReactIndex = UnityEngine.Random.Range(0, 4);
+                int currentAdditiveReactIndex = npc.HitReact.CurrentAdditiveReactIndex;
 
-                // If the new index is the same as the current, increment and wrap around
+                // Normal hit react (0–3)
+                int hitReactIndex = Random.Range(0, 4);
                 if (hitReactIndex == currentAnimIndex)
                 {
                     hitReactIndex = (currentAnimIndex + 1) % 4;
                 }
 
-                npc.Replicator.RPC_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
+                // Additive react — never 0 (only 1,2,3)
+                int additiveReactIndex;
+
+                // First try random in 1–3
+                additiveReactIndex = Random.Range(1, 4);  // 1,2,3
+
+                // If same as previous → pick next one (in 1–3 range)
+                if (additiveReactIndex == currentAdditiveReactIndex)
+                {
+                    // Move to next, wrap around within 1–3
+                    additiveReactIndex = currentAdditiveReactIndex + 1;
+                    if (additiveReactIndex > 3)
+                        additiveReactIndex = 1;
+                }
+
+                npc.Replicator.RPC_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex, additiveReactIndex);
 
                 if (!Runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex, additiveReactIndex);
             }
 
             if (hit.target is Prop prop)
@@ -213,10 +229,6 @@ namespace LichLord
                 if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_DealDamage(prop.ChunkID, prop.Index, hit.damageData.damageValue);
             }
-        }
-
-        void IHitTarget.ProcessHit(ref FHitUtilityData hit)
-        {
         }
 
         void IHitTarget.OnHitTaken(ref FHitUtilityData hit)

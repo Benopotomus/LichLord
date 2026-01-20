@@ -87,7 +87,7 @@ namespace LichLord.NonPlayerCharacters
                     _deathEndTick = tick + _deathTicks;
                     NPC.Hurtbox.SetHitBoxesActive(false);
                     NPC.Collider.enabled = false;
-                    NPC.HitReact.SpawnImpactVisualEffect(0);
+                    //NPC.HitReact.SpawnImpactVisualEffect(0);
 
                     if (hasAuthority)
                     {

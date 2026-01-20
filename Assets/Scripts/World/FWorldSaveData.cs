@@ -186,6 +186,7 @@ namespace LichLord.World
         public int condition;
         public int events;
         public FItemSaveData carriedItem;
+        public int attitude;
 
         // Store harvesting target data here as well
         public FNonPlayerCharacterSaveState(NonPlayerCharacter npc, FNonPlayerCharacterData data)
@@ -197,6 +198,7 @@ namespace LichLord.World
             this.condition = data.Condition;
             this.events = data.Events;
             this.carriedItem = new FItemSaveData(data.CarriedItem);
+            this.attitude = data.Attitude;
         }
     }
 

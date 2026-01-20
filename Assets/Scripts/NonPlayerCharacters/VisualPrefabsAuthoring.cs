@@ -95,7 +95,7 @@ namespace LichLord
                     var weaponIndex = gpuAuth.GetComponent<WeaponAuthoringIndex>();
 
                     var attachmentEntity = GetEntity(gpuAuth.gameObject, TransformUsageFlags.Dynamic);
-                    int boneIndex = gpuAuth.attachedBoneIndex;
+                    int boneIndex = weaponIndex.WeaponIndex;
 
                     attachmentBuffer.Add(new GpuAttachmentElement
                     {

@@ -1,9 +1,7 @@
-﻿using LichLord.Buildables;
-using LichLord.Dialog;
+﻿using LichLord.Dialog;
 using LichLord.Items;
 using LichLord.Props;
 using LichLord.World;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -73,7 +71,7 @@ namespace LichLord.NonPlayerCharacters
             _dataDefinition = _npcData.DataDefinition;
         }
 
-        public void ApplyDamage(int damage, int hitReactIndex)
+        public void ApplyDamage(int damage, int hitReactIndex, int additiveHitReactIndex)
         {
             int currentHealth = _dataDefinition.GetHealth(ref _npcData);
             damage = Mathf.Max(damage - Definition.DamageReduction, 0);
@@ -95,6 +93,10 @@ namespace LichLord.NonPlayerCharacters
                     ENPCState nextState = GetNextStateFromState(ENPCState.HitReact);
                     _dataDefinition.SetState(nextState, ref _npcData);
                     _dataDefinition.SetAnimationIndex(hitReactIndex, ref _npcData);
+                }
+                else
+                {
+                    _dataDefinition.SetAdditiveHitReactIndex(additiveHitReactIndex, ref _npcData);
                 }
             }
 
@@ -163,6 +165,20 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             DataDefinition.SetAttitude(newAttitude, ref _npcData);
+            _replicator.ReplicateRuntimeState(this);
+        }
+
+        public int GetAdditiveHitReact()
+        {
+            return _npcData.DataDefinition.GetAdditiveHitReactIndex(ref _npcData);
+        }
+
+        public void SetAdditiveHitReact(int newAdditiveIndex)
+        {
+            if (_npcData.DefinitionID == 0)
+                return;
+
+            DataDefinition.SetAdditiveHitReactIndex(newAdditiveIndex, ref _npcData);
             _replicator.ReplicateRuntimeState(this);
         }
 

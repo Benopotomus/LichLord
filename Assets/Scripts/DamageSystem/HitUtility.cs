@@ -35,7 +35,6 @@ namespace LichLord
 
     public interface IHitTarget
     {
-        void ProcessHit(ref FHitUtilityData hit);
         void OnHitTaken(ref FHitUtilityData hit);
         public IChunkTrackable ChunkTrackable { get;}
     }
@@ -44,7 +43,7 @@ namespace LichLord
     {
         public IChunkTrackable ChunkTrackable { get; }
         ETeamID TeamID { get; }
-        void HitPerformed(ref FHitUtilityData hit);
+        void OnHitPerformed(ref FHitUtilityData hit);
     }
 
     /// <summary>
@@ -57,8 +56,8 @@ namespace LichLord
         public static FHitUtilityData ProcessHit(ref FHitUtilityData hit,
             SceneContext context)
         {
-            hit.target.ProcessHit(ref hit);
-            hit.instigator.HitPerformed(ref hit);
+            hit.target.OnHitTaken(ref hit);
+            hit.instigator.OnHitPerformed(ref hit);
             return hit;
         }
     }

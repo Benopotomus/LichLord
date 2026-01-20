@@ -36,7 +36,7 @@ namespace LichLord.NonPlayerCharacters
         private int _updateRangesTick = 8;
 
         [SerializeField] 
-        private bool _isInMovementStopRange = false;
+        private bool _isInActivationRange = false;
 
         [SerializeField] 
         private bool _isInFaceTargetRange = false;
@@ -93,7 +93,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority)
         {
-            _isInMovementStopRange = false;
+            _isInActivationRange = false;
             _isInFaceTargetRange = false;
             AttackTarget.HasTarget = false;
             HarvestTarget.HasTarget = false;
@@ -403,7 +403,7 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateRanges()
         {
-            _isInMovementStopRange = false;
+            _isInActivationRange = false;
             _isInFaceTargetRange = false;
 
             float faceTargetRange = 20 * 20;
@@ -414,7 +414,7 @@ namespace LichLord.NonPlayerCharacters
                 BrainTarget currentTarget = GetTargetForActiveManeuver();
                 if (!currentTarget.HasTarget)
                 {
-                    _isInMovementStopRange = false;
+                    _isInActivationRange = false;
                     _isInFaceTargetRange = false;
                     return;
                 }
@@ -439,12 +439,12 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             {
-                _isInMovementStopRange = false;
+                _isInActivationRange = false;
                 _isInFaceTargetRange = false;
                 return;
             }
 
-            _isInMovementStopRange = _activeManeuver.Definition.IsInActivationRange(sqrDist);
+            _isInActivationRange = _activeManeuver.Definition.IsInActivationRange(sqrDist);
             _isInFaceTargetRange = sqrDist < faceTargetRange;
         }
 
@@ -468,7 +468,7 @@ namespace LichLord.NonPlayerCharacters
 
                 float angle = GetAngleToTarget(attackTargetPosition);
 
-                if (_isInMovementStopRange)
+                if (_isInActivationRange)
                 {
                     if (angle < 5f)
                     {
@@ -519,7 +519,7 @@ namespace LichLord.NonPlayerCharacters
                     FindBetterLOSPosition(_losTarget);
             }
 
-            if (_isInMovementStopRange)
+            if (_isInActivationRange)
             {
                 if(_hasLineOfSight)
                     _moveTarget = _npc.CachedTransform.position;

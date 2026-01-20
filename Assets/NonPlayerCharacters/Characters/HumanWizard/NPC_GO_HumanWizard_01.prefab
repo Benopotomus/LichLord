@@ -438,7 +438,6 @@ GameObject:
   - component: {fileID: 3808059592538173901}
   - component: {fileID: 3727939437294402150}
   - component: {fileID: 3235610406539929433}
-  - component: {fileID: 92385976797085160}
   - component: {fileID: 1862589176070407191}
   m_Layer: 10
   m_Name: NPC_GO_HumanWizard_01
@@ -492,7 +491,6 @@ MonoBehaviour:
   _dialogComponent: {fileID: 5972384184150605446}
   _spawningComponent: {fileID: 3808059592538173901}
   _lifetimeComponent: {fileID: 3727939437294402150}
-  _flinchComponent: {fileID: 92385976797085160}
   _meleeHitTracker: {fileID: 1862589176070407191}
   _interactableComponent: {fileID: 1543758665101288144}
   _cachedTransform: {fileID: 2416786617183052698}
@@ -721,7 +719,7 @@ MonoBehaviour:
   _npc: {fileID: 6743547951332622073}
   _moveTarget: {x: 0, y: 0, z: 0}
   _losTarget: {x: 0, y: 0, z: 0}
-  _isInMovementStopRange: 0
+  _isInActivationRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
   _hasLineOfSight: 0
@@ -774,6 +772,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: baf2e06d515cf484b80d4f772eb9b98b, type: 2}
   - {fileID: 11400000, guid: 5eed346c2a633204a9bfa754702de8ff, type: 2}
   _impactAttachment: {fileID: 4448070458724528855}
+  _additiveHitReacts:
+  - {fileID: 11400000, guid: a4df671175a58e54fbed731e829a1ff6, type: 2}
+  - {fileID: 11400000, guid: 002b9ba3b6f85134b97a1881b0033be5, type: 2}
+  - {fileID: 11400000, guid: c7376df0c9c74c74bafd7cdac4b5aadd, type: 2}
+  - {fileID: 11400000, guid: f7acbb33ec9f24e498bba04cd59eca69, type: 2}
 --- !u!114 &6074217055694189224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -902,23 +905,6 @@ MonoBehaviour:
   _npc: {fileID: 6743547951332622073}
   _currentHealth: 0
   _maxHealth: 0
---- !u!114 &92385976797085160
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5887745109417851595}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _shakeBones:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!114 &1862589176070407191
 MonoBehaviour:
   m_ObjectHideFlags: 0

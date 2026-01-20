@@ -5,7 +5,6 @@ using UnityEngine;
 using Rukhanka;
 using AYellowpaper.SerializedCollections;
 using LichLord.Projectiles;
-using Unity.Mathematics;
 using System.Collections.Generic;
 
 namespace LichLord.NonPlayerCharacters
@@ -39,6 +38,9 @@ namespace LichLord.NonPlayerCharacters
         private static readonly FastAnimatorParameter Crouch = new("Crouch");
 
         private static readonly FastAnimatorParameter CycleOffset = new("CycleOffset");
+
+        private static readonly FastAnimatorParameter AdditiveTrigger = new("AdditiveTrigger");
+        private static readonly FastAnimatorParameter AdditiveTriggerNumber = new("AdditiveTriggerNumber");
 
         private const int Hash_FootR = -1235114484; 
         private const int Hash_FootL = 1234503542;
@@ -141,7 +143,7 @@ namespace LichLord.NonPlayerCharacters
 
             int randomRight = UnityEngine.Random.Range(0, rightSideAttachments.Count);
             int randomLeft = UnityEngine.Random.Range(0, leftSideAttachments.Count);
-
+            
             ShowOnlySpecificAttachment(0, randomRight);
             ShowOnlySpecificAttachment(1, randomLeft);
         }
@@ -229,6 +231,17 @@ namespace LichLord.NonPlayerCharacters
                 paramAspect.SetFloatParameter(AnimationSpeed, animationTrigger.PlaybackSpeed);
 
                 paramAspect.SetTrigger(Trigger);
+            }
+        }
+
+        public void SetAdditiveAnimationForTrigger(FAdditiveAnimationTrigger additiveAnimationTrigger)
+        {
+            if (visualEntity == Entity.Null) return;
+
+            if (TryGetParametersAspect(out var paramAspect))
+            {
+                paramAspect.SetIntParameter(AdditiveTriggerNumber, additiveAnimationTrigger.TriggerNumber);
+                paramAspect.SetTrigger(AdditiveTrigger);
             }
         }
 
@@ -362,7 +375,6 @@ namespace LichLord.NonPlayerCharacters
                         break;
 
                     case Hash_Hit:
-                        //Debug.Log("Hit event!");
                         _npc.Brain.OnHitFromAnimation();
                         break;
 
