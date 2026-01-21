@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8676ca313987df479e7922244f26633, type: 3}
+  m_Name: DreamscapeToFRDS
+  m_EditorClassIdentifier: 
+  _sourceShader: {fileID: 4800000, guid: c80d3fd59f54e8f45ba81c2b20a6ced0, type: 3}
+  _destinationShader: {fileID: -6465566751694194690, guid: ef694e85feb3b054fbeff399d4cebb8c,
+    type: 3}
+  _propertyMap:
+  - propertyName: _FoliageColorMap
+    destinationName: _SampleOne
+    propertyType: 4
+    packerConfig: {fileID: 0}
+  - propertyName: _FoliageColorTop
+    destinationName: _AlbedoOne
+    propertyType: 0
+    packerConfig: {fileID: 0}
+  - propertyName: _FoliageColorBottom
+    destinationName: _AlbedoTwo
+    propertyType: 0
+    packerConfig: {fileID: 0}
+  - propertyName: _WindJitterSpeed
+    destinationName: _ShiverDrag
+    propertyType: 2
+    packerConfig: {fileID: 0}
+  - propertyName: _WindRustleSize
+    destinationName: _Drag
+    propertyType: 2
+    packerConfig: {fileID: 0}
+  - propertyName: _WindScrollSpeed
+    destinationName: _Stiffness
+    propertyType: 2
+    packerConfig: {fileID: 0}
+  - propertyName: _WindScrollSpeed
+    destinationName: _Stiffness
+    propertyType: 2
+    packerConfig: {fileID: 0}

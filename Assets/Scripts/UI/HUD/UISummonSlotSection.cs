@@ -39,6 +39,8 @@ namespace LichLord.UI
 
             foreach (var slot in _loadoutSlots)
             {
+                if(slot == null)
+                    continue;
                 ELoadoutSlot loadoutSlotName = slot.LoadoutSlot;
                 slot.SetItemData(_pc.Inventory.GetItemAtLoadoutSlot(loadoutSlotName));
             }
@@ -54,6 +56,9 @@ namespace LichLord.UI
         {
             foreach (var slot in _loadoutSlots)
             {
+                if (slot == null)
+                    continue;
+
                 ELoadoutSlot loadoutSlotName = slot.LoadoutSlot;
 
                 if (slot.LoadoutSlot == newSlot)
