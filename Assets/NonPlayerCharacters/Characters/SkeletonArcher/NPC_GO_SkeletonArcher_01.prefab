@@ -574,7 +574,6 @@ GameObject:
   - component: {fileID: 4261139995832820338}
   - component: {fileID: 3078160300237640522}
   - component: {fileID: 1231099122279484745}
-  - component: {fileID: 7012724181190879688}
   - component: {fileID: 155559908455424379}
   m_Layer: 10
   m_Name: NPC_GO_SkeletonArcher_01
@@ -628,7 +627,6 @@ MonoBehaviour:
   _dialogComponent: {fileID: 8280122207182958077}
   _spawningComponent: {fileID: 3078160300237640522}
   _lifetimeComponent: {fileID: 4261139995832820338}
-  _flinchComponent: {fileID: 7012724181190879688}
   _meleeHitTracker: {fileID: 155559908455424379}
   _interactableComponent: {fileID: 1398376250750045317}
   _cachedTransform: {fileID: 8251747689170000944}
@@ -909,12 +907,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c23387d04f6eae440a9035ecb3adc9c3, type: 2}
   - {fileID: 11400000, guid: baf2e06d515cf484b80d4f772eb9b98b, type: 2}
   - {fileID: 11400000, guid: 5eed346c2a633204a9bfa754702de8ff, type: 2}
+  _impactAttachment: {fileID: 7556032598673818765}
   _additiveHitReacts:
   - {fileID: 11400000, guid: a4df671175a58e54fbed731e829a1ff6, type: 2}
   - {fileID: 11400000, guid: 002b9ba3b6f85134b97a1881b0033be5, type: 2}
   - {fileID: 11400000, guid: c7376df0c9c74c74bafd7cdac4b5aadd, type: 2}
   - {fileID: 11400000, guid: f7acbb33ec9f24e498bba04cd59eca69, type: 2}
-  _impactAttachment: {fileID: 7556032598673818765}
 --- !u!114 &7723641460175011890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1043,23 +1041,6 @@ MonoBehaviour:
   _npc: {fileID: 3183157435632504526}
   _currentHealth: 0
   _maxHealth: 0
---- !u!114 &7012724181190879688
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7741492357796157577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _shakeBones:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!114 &155559908455424379
 MonoBehaviour:
   m_ObjectHideFlags: 0

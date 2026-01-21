@@ -14,14 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ActionName: Firebolt
   _cooldownTicks: 32
-  _movementStopRange: 20
-  _activationRange: {x: 0, y: 2.5}
+  _activationRange: {x: 12, y: 20}
   _attackRange: 30
   _stateTicks: 32
   _faceTargetRange: 25
   _requiresLOS: 1
   _verticalAimOffset: 0
-  _validTargetDistance: {x: 8, y: 100}
+  _validTargetDistance: {x: 0, y: 100}
   _animationTriggers:
   - Action: 1
     Weapon: 0
@@ -47,12 +46,12 @@ MonoBehaviour:
   _validTargetTypes: 01000000020000000300000005000000
   _maneuverProjectiles:
   - SpawnTick: 12
-    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
-    SpawnsOnAnimationNotify: 0
+    Definition: {fileID: 11400000, guid: 3e81f8020b543284c838ee39c836d1b3, type: 2}
     Muzzle: 1
     Damage:
       DamageValue: 12
-      DamageType: 1
+      DamageType: 2
       StaggerRating: 0
       KnockbackStrength: 0
       ArmorPenetration: 0
+    AimOffset: {x: 0, y: 0}
