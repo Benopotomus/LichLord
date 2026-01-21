@@ -1,0 +1,28 @@
+//© Dicewrench Designs LLC 2022-2026
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+//pushes all the verts UP to some global position
+BEGIN_PROPERTIES
+	[Header(Height Cutoff)]
+	_Height("Height", float) = 120
+	_Softness("Softness", float) = 3
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half _Height, _Softness;
+END_CBUFFER
+
+BEGIN_CODE
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+		half3 worldPos = TransformObjectToWorld(v.vertex.xyz);
+		half heightGradient = 1.0 - saturate((1.0 - (worldPos.y - (_Height))) / _Softness);
+		worldPos.y = lerp(_Height, worldPos.y, heightGradient);
+		v.vertex.xyz = TransformWorldToObject(worldPos);
+		v.normal.y = lerp( -1, v.normal.y, heightGradient);
+	}
+
+END_CODE
+

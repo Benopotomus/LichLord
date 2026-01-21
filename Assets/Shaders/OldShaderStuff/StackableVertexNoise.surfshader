@@ -1,0 +1,78 @@
+//© Dicewrench Designs LLC 2022-2026
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+
+BEGIN_PROPERTIES
+	_NoiseScale ("Noise Scale", Vector) = (1, 1, 1, 0)
+	_NoiseScrollRates("Noise Scroll Rates", Vector) = (1, -0.2, 0.3, 0)
+
+	_OffsetMin("Offset Min", float) = -0.1
+	_OffsetMax("Offset Max", float) = 0.3
+
+    _NormalIntensity("Normal Fix Intensity", Range(-1,1)) = 0.5
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half3 _NoiseScale;
+	half3 _NoiseScrollRates;
+	half _OffsetMin, _OffsetMax;
+    half _NormalIntensity;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#ifndef HASNOISE
+		#include "DWD_NoiseFunctions.cginc" 
+		#define HASNOISE 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+
+    //could do a 3d texture here at some point
+	half GetCloudNoise(float3 worldPos) 
+    {
+        float3 p = worldPos * _NoiseScale.xyz + (_NoiseScrollRates.xyz * _Time.xxx);
+
+        half n = Noise3D(p) * 0.5; 
+        n += Noise3D(p * 2.02) * 0.25; 
+        n += Noise3D(p * 4.03) * 0.125; 
+
+        return lerp(_OffsetMin, _OffsetMax, n);
+    }
+
+    half3 GetNoiseOffset(float3 worldPos, float3 worldNormal) 
+    {
+        half displacement = GetCloudNoise(worldPos);
+        return worldNormal * displacement;
+    }
+
+	void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+    {
+		half3 worldPos = TransformObjectToWorld(v.vertex.xyz);
+        half3 worldNormal = TransformObjectToWorldNormal(v.normal.xyz);
+        half3 worldTangent = TransformObjectToWorldDir(v.tangent.xyz);
+        half3 worldBitangent = cross(worldNormal, worldTangent) * v.tangent.w;
+
+        half3 offset = GetNoiseOffset(worldPos, worldNormal) * saturate(v.texcoord0.x);
+        half3 displacedWorldPos = worldPos + offset;
+
+        half eps = 0.01; // The "epsilon" or step size for the derivative
+        
+        half3 pTangent   = worldPos + worldTangent * eps;
+        half3 pBitangent = worldPos + worldBitangent * eps;
+
+        half3 displacedTangent   = pTangent   + GetNoiseOffset(pTangent, worldNormal);
+        half3 displacedBitangent = pBitangent + GetNoiseOffset(pBitangent, worldNormal);
+
+        half3 newTangent   = displacedTangent - displacedWorldPos;
+        half3 newBitangent = displacedBitangent - displacedWorldPos;
+        half3 correctedWorldNormal = normalize(cross(newBitangent, newTangent));
+
+        v.vertex.xyz = TransformWorldToObject(displacedWorldPos);
+        v.normal.xyz = lerp(v.normal.xyz, TransformWorldToObjectNormal(correctedWorldNormal), _NormalIntensity);
+	}
+
+END_CODE
+
