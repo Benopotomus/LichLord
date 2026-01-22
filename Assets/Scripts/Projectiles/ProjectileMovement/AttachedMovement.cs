@@ -18,7 +18,7 @@ namespace LichLord.Projectiles
             int tick)
         {
 
-            projectile.Position = MuzzleUtility.GetMuzzlePosition(projectile.Instigator.NetActor, _attachment);
+            projectile.Position = MuzzleUtility.GetMuzzlePosition(projectile.Instigator, _attachment);
             projectile.Velocity = Vector2.zero;
             projectile.Rotation = GetRotation(projectile.Definition,
                 ref toData, 
@@ -32,7 +32,7 @@ namespace LichLord.Projectiles
         {
             float simTimeSinceFired = simulationTime - (data.FireTick * projectile.Runner.DeltaTime);
 
-            Vector3 newPosition = MuzzleUtility.GetMuzzlePosition(projectile.Instigator.NetActor, _attachment);
+            Vector3 newPosition = MuzzleUtility.GetMuzzlePosition(projectile.Instigator, _attachment);
 
             Vector3 newVelocity = Vector3.zero;
 
@@ -67,12 +67,12 @@ namespace LichLord.Projectiles
 
         public void GetInstigatorTargetPosition(Projectile projectile, ref FProjectileData data)
         {
-            INetActor actor = projectile.Instigator.NetActor;
+            IHitInstigator instigator = projectile.Instigator;
 
-            if (actor == null)
+            if (instigator == null)
                 return;
 
-            if (actor is PlayerCharacter pc)
+            if (instigator is PlayerCharacter pc)
             {
                 data.TargetPosition.CopyPosition(pc.Context.Camera.CachedRaycastHit.position);
             }

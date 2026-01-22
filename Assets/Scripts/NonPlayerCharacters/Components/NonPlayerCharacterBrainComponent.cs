@@ -36,7 +36,7 @@ namespace LichLord.NonPlayerCharacters
         private int _updateRangesTick = 8;
 
         [SerializeField] 
-        private bool _isInMovementStopRange = false;
+        private bool _isInActivationRange = false;
 
         [SerializeField] 
         private bool _isInFaceTargetRange = false;
@@ -93,7 +93,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, bool hasAuthority)
         {
-            _isInMovementStopRange = false;
+            _isInActivationRange = false;
             _isInFaceTargetRange = false;
             AttackTarget.HasTarget = false;
             HarvestTarget.HasTarget = false;
@@ -403,10 +403,9 @@ namespace LichLord.NonPlayerCharacters
 
         private void UpdateRanges()
         {
-            _isInMovementStopRange = false;
+            _isInActivationRange = false;
             _isInFaceTargetRange = false;
 
-            float movementStopRange = 1 * 1;
             float faceTargetRange = 20 * 20;
             float sqrDist = 40 * 40;
 
@@ -415,12 +414,11 @@ namespace LichLord.NonPlayerCharacters
                 BrainTarget currentTarget = GetTargetForActiveManeuver();
                 if (!currentTarget.HasTarget)
                 {
-                    _isInMovementStopRange = false;
+                    _isInActivationRange = false;
                     _isInFaceTargetRange = false;
                     return;
                 }
 
-                movementStopRange = _activeManeuver.Definition.MovementStopRangeSqrt;
                 faceTargetRange = _activeManeuver.Definition.FaceTargetRangeSqrt;
                 var target = currentTarget.Target;
                 Collider targetCollider = target.HurtBoxCollider;
@@ -441,12 +439,12 @@ namespace LichLord.NonPlayerCharacters
             }
             else
             {
-                _isInMovementStopRange = false;
+                _isInActivationRange = false;
                 _isInFaceTargetRange = false;
                 return;
             }
 
-            _isInMovementStopRange = sqrDist < movementStopRange;
+            _isInActivationRange = _activeManeuver.Definition.IsInActivationRange(sqrDist);
             _isInFaceTargetRange = sqrDist < faceTargetRange;
         }
 
@@ -470,7 +468,7 @@ namespace LichLord.NonPlayerCharacters
 
                 float angle = GetAngleToTarget(attackTargetPosition);
 
-                if (_isInMovementStopRange)
+                if (_isInActivationRange)
                 {
                     if (angle < 5f)
                     {
@@ -499,7 +497,7 @@ namespace LichLord.NonPlayerCharacters
                 case EManeuverType.Attack:
                     if (AttackTarget.HasTarget)
                     {
-                        _moveTarget = AttackTarget.Target.PredictedPosition;
+                        _moveTarget = _activeManeuver.Definition.GetMovementToActivationRange(NPC, AttackTarget.Target);
                         _losTarget = AttackTarget.Target.Position;
                     }
                     break;
@@ -521,7 +519,7 @@ namespace LichLord.NonPlayerCharacters
                     FindBetterLOSPosition(_losTarget);
             }
 
-            if (_isInMovementStopRange)
+            if (_isInActivationRange)
             {
                 if(_hasLineOfSight)
                     _moveTarget = _npc.CachedTransform.position;
@@ -1041,6 +1039,23 @@ namespace LichLord.NonPlayerCharacters
             }
 
             return NullTarget;
+        }
+
+        // 1. Classic Gizmos way (shows in Scene view when the object is selected)
+        void OnDrawGizmos()
+        {
+            // Only draw when we actually have a meaningful move target
+            if (_moveTarget.sqrMagnitude > 0.1f) // rough check that it's not zero
+            {
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(_moveTarget, 0.7f);           // outer ring
+                Gizmos.color = new Color(1f, 1f, 0f, 0.35f);
+                Gizmos.DrawSphere(_moveTarget, 0.7f);               // semi-transparent filled sphere
+
+                // Optional: line from NPC to target
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawLine(transform.position, _moveTarget);
+            }
         }
     }
 }

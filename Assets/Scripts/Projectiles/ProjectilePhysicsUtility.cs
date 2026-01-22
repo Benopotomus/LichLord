@@ -1,6 +1,7 @@
 ﻿namespace LichLord.Projectiles
 {
     using DWD.AnimationCurveAsset;
+    using LichLord.NonPlayerCharacters;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Pool;
@@ -494,6 +495,12 @@
         {
             if (projectile == null || projectile.Instigator == null || hitTarget == projectile.Instigator)
                 return false;
+
+            if (hitTarget is NonPlayerCharacter npc)
+            {
+                if (npc.TeamID == projectile.Instigator.TeamID)
+                    return false;
+            }
 
             // if this is called from fixed update projectile
 

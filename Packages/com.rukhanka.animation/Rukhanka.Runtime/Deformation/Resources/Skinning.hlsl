@@ -6,6 +6,7 @@
 #pragma warning (disable: 4000)
 #include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/BoneTransform.hlsl"
 #include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/DualQuaternion.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/SkinMatrix.hlsl"
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -16,8 +17,9 @@ ByteAddressBuffer inputMeshVertexData;
 ByteAddressBuffer inputBoneInfluences;
 //  DeformedVertex
 ByteAddressBuffer inputBlendShapes;
+//  SkinMatrix
+ByteAddressBuffer frameSkinMatrices;
 
-StructuredBuffer<float3x4> frameSkinMatrices;
 StructuredBuffer<float> frameBlendShapeWeights;
 
 #ifdef RUKHANKA_HALF_DEFORMED_DATA
@@ -86,8 +88,7 @@ DeformedVertex ApplySkinMatrices
         BoneInfluence bi = BoneInfluence::ReadFromRawBuffer(inputBoneInfluences, boneInfluenceIndex);
 
         int skinMatrixIndex = bi.boneIndex + mfd.baseSkinMatrixIndex;
-        CHECK_STRUCTURED_BUFFER_OUT_OF_BOUNDS(RUKHANKADEBUGMARKERS_DEFORMATION_FRAME_SKIN_MATRICES_READ, skinMatrixIndex, frameSkinMatrices);
-        float3x4 skinMatrix = frameSkinMatrices[skinMatrixIndex];
+        float3x4 skinMatrix = SkinMatrix::ReadFromRawBuffer(frameSkinMatrices, skinMatrixIndex);
 
     #ifdef RUKHANKA_DUAL_QUATERNION_SKINNING
         BoneTransform skinPose = BoneTransform::FromMatrix(skinMatrix);

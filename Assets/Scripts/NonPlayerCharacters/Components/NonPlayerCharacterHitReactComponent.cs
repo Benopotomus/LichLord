@@ -1,5 +1,6 @@
 ﻿using DWD.Pooling;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
@@ -17,6 +18,15 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField]
         private Transform _impactAttachment;
 
+        // Additive Hit Reaction
+        private int _currentAdditiveReactIndex = 0;
+        public int CurrentAdditiveReactIndex => _currentAdditiveReactIndex;
+
+        int _additiveHitReactEndTick;
+
+        [SerializeField]
+        private List<AdditiveHitReactionDefinition> _additiveHitReacts = new List<AdditiveHitReactionDefinition>();
+
         private VisualEffectSpawner _visualSpawner = new VisualEffectSpawner();
 
         private void Start()
@@ -29,6 +39,24 @@ namespace LichLord.NonPlayerCharacters
             if (tick > _hitReactEndTick)
             {
                 runtimeState.SetState(ENPCState.Idle);
+            }
+        }
+
+        public void UpdateAdditiveHitReactState(NonPlayerCharacterRuntimeState runtimeState, int tick)
+        {
+            int hitReactIndex = runtimeState.GetAdditiveHitReact();
+
+            if (hitReactIndex > 0 && 
+                tick >_additiveHitReactEndTick)
+            {
+                runtimeState.SetAdditiveHitReact(0);
+            }
+
+            if(hitReactIndex > 0  && 
+                _currentAdditiveReactIndex != hitReactIndex)
+            {
+                StartAdditiveHitReact(hitReactIndex, tick);
+                _currentAdditiveReactIndex = hitReactIndex;
             }
         }
 
@@ -47,6 +75,21 @@ namespace LichLord.NonPlayerCharacters
             _npc.AnimationController.SetAnimationForTrigger(animTrigger);
 
             SpawnImpactVisualEffect(animIndex);
+        }
+
+        public void StartAdditiveHitReact(int reactIndex, int tick)
+        {
+            if (_additiveHitReacts.Count == 0)
+                return;
+
+            AdditiveHitReactionDefinition additiveHitReact = _additiveHitReacts[reactIndex];
+            var animTrigger = additiveHitReact.AdditiveAnimationTrigger;
+
+            _npc.AnimationController.SetAdditiveAnimationForTrigger(animTrigger);
+
+            SpawnImpactVisualEffect(reactIndex);
+
+            _additiveHitReactEndTick = tick + 16;
         }
 
         public void SpawnImpactVisualEffect(int animIndex)

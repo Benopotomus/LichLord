@@ -497,11 +497,17 @@ public partial class AnimationClipBaker
 	AnimationClip[] Deduplicate(AnimationClip[] animationClips)
 	{
 		var dedupList = new List<AnimationClip>();
-		var dupSet = new NativeHashSet<int>(animationClips.Length, Allocator.Temp);
+		var dupSet = new NativeHashSet<ulong>(animationClips.Length, Allocator.Temp);
 
 		foreach (var a in animationClips)
 		{
-			if (a != null && !dupSet.Add(a.GetInstanceID()))
+			if (a != null &&
+        #if UNITY_6000_4_OR_NEWER
+			    !dupSet.Add(a.GetEntityId().GetRawData())
+		#else
+			    !dupSet.Add((ulong)a.GetInstanceID())
+		#endif
+			)
 				continue;
 
 			dedupList.Add(a);

@@ -28,21 +28,26 @@ namespace LichLord.NonPlayerCharacters
         // Condition (byte)
         protected const int NPC_STATE_BITS = 4;           // 0–15
         protected const int ANIMATION_INDEX_BITS = 2;     // 0–3
-        protected const int ATTITUDE_BITS = 2;              // 0–3
+        protected const int ADDITIVE_HIT_REACT_BITS = 2;     // 0–3
 
         protected const int NPC_STATE_SHIFT = 0;
         protected const int ANIMATION_INDEX_SHIFT = NPC_STATE_SHIFT + NPC_STATE_BITS;
-        protected const int ATTITUDE_SHIFT = ANIMATION_INDEX_SHIFT + ANIMATION_INDEX_BITS;
+        protected const int ADDITIVE_HIT_REACT_SHIFT = ANIMATION_INDEX_SHIFT + ANIMATION_INDEX_BITS;
 
         protected const byte NPC_STATE_MASK = (1 << NPC_STATE_BITS) - 1;
         protected const byte ANIMATION_INDEX_MASK = (1 << ANIMATION_INDEX_BITS) - 1;
+        protected const byte ADDITIVE_HIT_REACT_MASK = (1 << ADDITIVE_HIT_REACT_BITS) - 1;
+
+        // Attitude (byte)
+        protected const int ATTITUDE_BITS = 8;              // 0–255
+        protected const int ATTITUDE_SHIFT = 0;
         protected const byte ATTITUDE_MASK = (1 << ATTITUDE_BITS) - 1;
 
         public virtual void InitializeData(ref FNonPlayerCharacterData npcData, 
             NonPlayerCharacterDefinition definition,
             ENPCSpawnType spawnType,
             ETeamID teamID,
-            EAttitude attitude)
+            EAttitude attitude) 
         {
             // Initialize Configuration
             npcData.Configuration = 0;
@@ -55,6 +60,10 @@ namespace LichLord.NonPlayerCharacters
             npcData.Condition = 0;
             SetState(ENPCState.Idle, ref npcData);
             SetAnimationIndex(0, ref npcData);
+            SetAdditiveHitReactIndex(0, ref npcData);
+
+            // Initialize Attitude
+            npcData.Attitude = 0;
             SetAttitude(attitude, ref npcData);
         }
 
@@ -160,22 +169,36 @@ namespace LichLord.NonPlayerCharacters
             //Debug.Log($"After SetAnimationIndex: Condition=0x{condition:X2}, Attitude={GetAttitude(ref npcData)}");
         }
 
-        // attitude
+        // Additive Hit React
+        public int GetAdditiveHitReactIndex(ref FNonPlayerCharacterData npcData)
+        {
+            return (npcData.Condition >> ADDITIVE_HIT_REACT_SHIFT) & ADDITIVE_HIT_REACT_MASK;
+        }
+
+        public void SetAdditiveHitReactIndex(int additiveHitReactIndex, ref FNonPlayerCharacterData npcData)
+        {
+            byte condition = npcData.Condition;
+            int statusValue = Mathf.Clamp((int)additiveHitReactIndex, 0, ADDITIVE_HIT_REACT_MASK);
+            condition = (byte)((condition & ~(ADDITIVE_HIT_REACT_MASK << ADDITIVE_HIT_REACT_SHIFT)) | (statusValue << ADDITIVE_HIT_REACT_SHIFT));
+            npcData.Condition = condition;
+        }
+
+        // Attitude
         public EAttitude GetAttitude(ref FNonPlayerCharacterData npcData)
         {
-            int rawValue = (npcData.Condition >> ATTITUDE_SHIFT) & ATTITUDE_MASK;
+            int rawValue = (npcData.Attitude >> ATTITUDE_SHIFT) & ATTITUDE_MASK;
             EAttitude attitude = (EAttitude)rawValue;
-            //Debug.Log($"GetAttitude for NPC {npcData.DefinitionID}: Condition=0x{npcData.Condition:X2}, Raw Attitude Bits={rawValue}, Returned Attitude={attitude}");
+            //Debug.Log($"GetAttitude for NPC {npcData.DefinitionID}: Attitude=0x{npcData.Attitude:X2}, Raw Attitude Bits={rawValue}, Returned Attitude={attitude}");
             //Debug.Assert(rawValue >= 0 && rawValue <= ATTITUDE_MASK, $"Invalid Attitude bits: {rawValue} in Condition=0x{npcData.Condition:X2}");
             return attitude;
         }
 
-        public void SetAttitude(EAttitude attitude, ref FNonPlayerCharacterData npcData)
+        public void SetAttitude(EAttitude newAttitude, ref FNonPlayerCharacterData npcData)
         {
-            byte condition = npcData.Condition;
-            int statusValue = Mathf.Clamp((int)attitude, 0, ATTITUDE_MASK);
-            condition = (byte)((condition & ~(ATTITUDE_MASK << ATTITUDE_SHIFT)) | (statusValue << ATTITUDE_SHIFT));
-            npcData.Condition = condition;
+            byte attitude = npcData.Attitude;
+            int statusValue = Mathf.Clamp((int)newAttitude, 0, ATTITUDE_MASK);
+            attitude = (byte)((attitude & ~(ATTITUDE_MASK << ATTITUDE_SHIFT)) | (statusValue << ATTITUDE_SHIFT));
+            npcData.Attitude = attitude;
         }
 
         // Handle damage application

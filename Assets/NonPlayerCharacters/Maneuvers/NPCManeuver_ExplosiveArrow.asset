@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ActionName: Explosive Arrow
   _cooldownTicks: 256
-  _movementStopRange: 20
+  _activationRange: {x: 12, y: 20}
   _attackRange: 30
   _stateTicks: 64
   _faceTargetRange: 25
   _requiresLOS: 1
   _verticalAimOffset: 1
-  _validTargetDistance: {x: 8, y: 100}
+  _validTargetDistance: {x: 0, y: 100}
   _animationTriggers:
   - Action: 1
     Weapon: 0
@@ -40,12 +40,13 @@ MonoBehaviour:
     IsMoving: 0
     IsBlocking: 0
     PlaybackSpeed: 1
+  _hitEvents: []
+  _specialEvents: []
   _damage: 10
   _validTargetTypes: 0200000005000000
   _maneuverProjectiles:
   - SpawnTick: 12
     Definition: {fileID: 11400000, guid: c0a769190d845a647a913eb932d2fe56, type: 2}
-    SpawnsOnAnimationNotify: 0
     Muzzle: 1
     Damage:
       DamageValue: 12
@@ -53,3 +54,4 @@ MonoBehaviour:
       StaggerRating: 0
       KnockbackStrength: 0
       ArmorPenetration: 0
+    AimOffset: {x: 0, y: 0}

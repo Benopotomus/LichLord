@@ -80,7 +80,7 @@ public partial class MeshDeformationSystem: SystemBase
 		renderMeshArrayTypeHandle = GetSharedComponentTypeHandle<RenderMeshArray>();
 		entitiesGraphicsSystem = World.GetExistingSystemManaged<EntitiesGraphicsSystem>();
 		gpuAnimationSystem = World.GetExistingSystemManaged<GPUAnimationSystem>();
-		frameSkinMatricesBuffer = new (0xffff, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.None);
+		frameSkinMatricesBuffer = new (0xffff, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None);
 		frameBlendShapeWeightsBuffer = new (0xffff, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.LockBufferForWrite);
 		frameMeshDeformationDescriptionBuffer = new (0xffff, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.LockBufferForWrite);
 		sparseUploader = new (null);

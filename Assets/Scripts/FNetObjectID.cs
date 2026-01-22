@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace LichLord
 {
-    [StructLayout(LayoutKind.Explicit, Size = 5)]
+    [StructLayout(LayoutKind.Explicit, Size = 2)]
     public struct FNetObjectID : INetworkStruct
     {
         [FieldOffset(0)]
@@ -83,6 +83,26 @@ namespace LichLord
             return null;
         }
 
+
+        public IHitTarget GetHitTarget(SceneContext context)
+        {
+            Component component = GetSceneContextObject(context);
+            if (component == null)
+                return null;
+
+            switch (GetObjectType())
+            {
+                case EObjectType.Player:
+                    var networkGame = context.NetworkGame;
+                    return networkGame.GetPlayerByIndex(GetIndex());
+                case EObjectType.NonPlayerCharacter:
+                    var npcManager = context.NonPlayerCharacterManager;
+                    return npcManager.GetNpcAtIndex(GetIndex());
+            }
+
+            return null;
+        }
+
         public IHitInstigator GetHitInstigator(SceneContext context)
         {
             Component component = GetSceneContextObject(context);
@@ -101,6 +121,36 @@ namespace LichLord
 
             return null;
 
+        }
+
+        public void SetHitInstigator(IHitInstigator hitInstigator)
+        {
+            if (hitInstigator is PlayerCharacter pc)
+            { 
+                SetObjectType(EObjectType.Player);
+                SetIndex(pc.PlayerIndex);
+            }
+
+            if (hitInstigator is NonPlayerCharacter npc)
+            {
+                SetObjectType(EObjectType.NonPlayerCharacter);
+                SetIndex(npc.FullIndex);
+            }
+        }
+
+        public void SetHitTarget(IHitTarget hitTarget)
+        {
+            if (hitTarget is PlayerCharacter pc)
+            {
+                SetObjectType(EObjectType.Player);
+                SetIndex(pc.PlayerIndex);
+            }
+
+            if (hitTarget is NonPlayerCharacter npc)
+            {
+                SetObjectType(EObjectType.NonPlayerCharacter);
+                SetIndex(npc.FullIndex);
+            }
         }
 
         public void Clear()

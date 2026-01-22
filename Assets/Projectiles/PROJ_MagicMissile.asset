@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
+  m_Name: PROJ_MagicMissile
+  m_EditorClassIdentifier: 
+  _tableID: 7
+  _lifetimeTicks: 160
+  _lifetimeExpiredSpawnedProjectiles: []
+  _projectileMovement: {fileID: 11400000, guid: e3ff80c6af0e1b245bd1fda08c26e349,
+    type: 2}
+  _speed: 8
+  _impactCollisionLayer:
+    serializedVersion: 2
+    m_Bits: 257
+  _overlapCollisionLayer:
+    serializedVersion: 2
+    m_Bits: 257
+  _shape: 1
+  _lineOfSightRequirement: 0
+  _rotationType: 1
+  _extents: {x: 0.05, y: 0, z: 0}
+  _onlyAffectsOnce: 0
+  _affectsEachCast: 0
+  _physicsSweep: 2
+  _collisionCheckTrim: {x: 0, y: 0}
+  _collisionCheckRate: 0
+  _collisionCheckNumber: 4
+  _onlyAffectImpactTarget: 0
+  _lineOfSightLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  _scaleOverLifetime: {fileID: 0}
+  _visualsPrefab:
+    _name: PROJ_VIS_MagicMissile
+    _bundle: proj_vis_magicmissile
+  _impactSticksToHitActor: 0
+  _homesAtApex: 0
+  _damage: 10
+  _damageType: 0
+  _postImpactTicks: 16
+  _impactSpawnedProjectiles: []
+  _impactActions: []
+  _proximityDetonationRange: 0
+  _proximityDetonationTicks: 0
+  _proximityDetonationProjectile: []
+  _hasTimedFuse: 0
+  _timedFuseTickRange: {x: 0, y: 0}
+  _timedFuseDistanceRange: {x: 0, y: 0}
+  _timedFuseDetonationProjectiles: []
+  _forcesRemoteAiming: 0

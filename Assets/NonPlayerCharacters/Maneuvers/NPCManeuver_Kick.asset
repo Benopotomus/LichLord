@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ActionName: Kick
   _cooldownTicks: 32
-  _movementStopRange: 1.5
+  _activationRange: {x: 0, y: 1.5}
   _attackRange: 2
   _stateTicks: 32
   _faceTargetRange: 5
   _requiresLOS: 1
   _verticalAimOffset: 0
-  _validTargetDistance: {x: 0, y: 50}
+  _validTargetDistance: {x: 0, y: 3}
   _animationTriggers:
   - Action: 1
     Weapon: 0
@@ -60,6 +60,7 @@ MonoBehaviour:
     PlaybackSpeed: 1
   _hitEvents:
   - {fileID: 11400000, guid: d6613b0a332361b4a95fc63529e10835, type: 2}
+  _specialEvents: []
   _damage: 10
   _validTargetTypes: 01000000020000000300000005000000
   _maneuverProjectiles: []

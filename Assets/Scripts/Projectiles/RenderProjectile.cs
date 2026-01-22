@@ -43,9 +43,6 @@ namespace LichLord.Projectiles
             {
                 Definition.ProjectileMovement.ActivateRender(this, ref data);
                 LoadVisualsPrefab(Definition.VisualsPrefab, ref data);
-
-                if (Instigator != null)
-                    Instigator.NetActor.ProjectileSpawnedCallback(this, Definition, ref data);
             }
 
             AffectedActors.Clear();

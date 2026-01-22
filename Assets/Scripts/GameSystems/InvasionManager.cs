@@ -78,6 +78,7 @@ namespace LichLord
             InvasionID = invasionID;
             InvasionSpawnWave = 0;
             InvasionState = EInvasionState.Approaching;
+            InvasionTargetPosition.CopyPosition(targetPosition);
             InvasionStagingPosition.CopyPosition(GetInvasionStagingPosition());
             //Debug.Log(InvasionStagingPosition.Position);
             _localSpawnWave = -1;
@@ -199,9 +200,9 @@ namespace LichLord
         {
             var players = Context.NetworkGame.ActivePlayers;
 
-            Vector3 strongholdPosition = InvasionTargetPosition.Position;
+            Vector3 targetPosition = InvasionTargetPosition.Position;
 
-            var nearbyChunks = Context.ChunkManager.GetNearbyChunks(strongholdPosition, 2);
+            var nearbyChunks = Context.ChunkManager.GetNearbyChunks(targetPosition, 2);
             var nearbyInvasionSpawns = new List<InvasionSpawnPoint>();
 
             foreach (var chunk in nearbyChunks)
@@ -218,7 +219,7 @@ namespace LichLord
                 playerPositions[i] = players[i].CachedTransform.position;
             }
 
-            const float minNexusDistance = 100f;
+            const float minNexusDistance = 50f;
             const float maxNexusDistance = 150f;
             const float minPlayerDistance = 100f;
 
@@ -226,7 +227,7 @@ namespace LichLord
             var validSpawnPoints = new List<InvasionSpawnPoint>();
             for (int i = 0; i < nearbyInvasionSpawns.Count; i++)
             {
-                float distToNexus = Vector3.Distance(nearbyInvasionSpawns[i].position, strongholdPosition);
+                float distToNexus = Vector3.Distance(nearbyInvasionSpawns[i].position, targetPosition);
                 if (distToNexus >= minNexusDistance && distToNexus <= maxNexusDistance)
                 {
                     validSpawnPoints.Add(nearbyInvasionSpawns[i]);
@@ -260,7 +261,7 @@ namespace LichLord
                 return validSpawnPoints[randomIndex].position;
             }
 
-            return strongholdPosition;
+            return targetPosition;
         }
 
         private void SpawnInvasionWave(int wave)

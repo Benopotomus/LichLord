@@ -116,8 +116,25 @@ namespace LichLord.NonPlayerCharacters
             Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(npc, projectileData.Muzzle);
             IChunkTrackable target = npc.Brain.AttackTarget.Target;
 
+            IHitTarget hitTarget = npc.Brain.AttackTarget.Target as IHitTarget;
+
             Vector3 targetPos = target.Position;
             targetPos.y += (1f + Definition.VerticalAimOffset);
+
+            // Apply aim offset here
+            if (projectileData.AimOffset != Vector2.zero)
+            {
+                Vector3 dir = (targetPos - muzzlePosition).normalized;
+                Vector3 right = Vector3.Cross(dir, Vector3.up).normalized;
+                if (right.sqrMagnitude < 0.001f) right = Vector3.right;
+
+                Vector3 up = Vector3.Cross(right, dir);
+
+                float dist = Vector3.Distance(muzzlePosition, targetPos);
+
+                targetPos += right * projectileData.AimOffset.x * dist;
+                targetPos += up * projectileData.AimOffset.y * dist;
+            }
 
             // Modify target position by target velocity
             if (target is PlayerCharacter pc)
@@ -149,7 +166,7 @@ namespace LichLord.NonPlayerCharacters
                 ref fireEvent,
                 definition,
                 npc,
-                new FNetObjectID(),
+                hitTarget,
                 muzzlePosition,
                 targetPos,
                 tick,

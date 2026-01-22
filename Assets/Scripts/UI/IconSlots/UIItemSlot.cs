@@ -36,8 +36,11 @@ namespace LichLord.UI
             {
                 LoadIcon(_itemDefinition.Icon);
                 int stackCount = _itemDefinition.DataDefinition.GetStackCount(ref _itemData);
-                _countText.text = stackCount.ToString();
-                _countText.enabled = stackCount > 1; // Hide count for single items
+                if (_countText != null)
+                { 
+                    _countText.text = stackCount.ToString();
+                    _countText.enabled = stackCount > 1; // Hide count for single items
+                }
             }
             else
             {

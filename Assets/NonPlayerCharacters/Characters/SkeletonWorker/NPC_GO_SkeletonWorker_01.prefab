@@ -821,7 +821,6 @@ GameObject:
   - component: {fileID: 5031277814089699016}
   - component: {fileID: 875799037016124911}
   - component: {fileID: 7700684092759164539}
-  - component: {fileID: -3976135024856770984}
   - component: {fileID: 3537137329067030322}
   m_Layer: 10
   m_Name: NPC_GO_SkeletonWorker_01
@@ -878,7 +877,6 @@ MonoBehaviour:
   _dialogComponent: {fileID: 297294928906903979}
   _spawningComponent: {fileID: 5031277814089699016}
   _lifetimeComponent: {fileID: 875799037016124911}
-  _flinchComponent: {fileID: -3976135024856770984}
   _meleeHitTracker: {fileID: 3537137329067030322}
   _interactableComponent: {fileID: 1022278662677194036}
   _cachedTransform: {fileID: 3282022331344466140}
@@ -1106,15 +1104,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _npc: {fileID: 3484536114419770148}
   _moveTarget: {x: 0, y: 0, z: 0}
-  DistanceToAttackTarget: 0
-  DistanceToHarvestTarget: 0
-  DistanceToDepositTarget: 0
-  _isInMovementStopRange: 0
+  _losTarget: {x: 0, y: 0, z: 0}
+  _isInActivationRange: 0
   _isInFaceTargetRange: 0
   _activeManeuverState: 0
-  _hasAttackTarget: 0
-  _hasHarvestTarget: 0
-  _hasDepositTarget: 0
   _hasLineOfSight: 0
   _maneuvers:
   - Definition: {fileID: 11400000, guid: 4322b1d14e16bfb42be1a9a59da3e6d2, type: 2}
@@ -1165,6 +1158,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: baf2e06d515cf484b80d4f772eb9b98b, type: 2}
   - {fileID: 11400000, guid: 5eed346c2a633204a9bfa754702de8ff, type: 2}
   _impactAttachment: {fileID: 6665306984301946488}
+  _additiveHitReacts:
+  - {fileID: 11400000, guid: a4df671175a58e54fbed731e829a1ff6, type: 2}
+  - {fileID: 11400000, guid: 002b9ba3b6f85134b97a1881b0033be5, type: 2}
+  - {fileID: 11400000, guid: c7376df0c9c74c74bafd7cdac4b5aadd, type: 2}
+  - {fileID: 11400000, guid: f7acbb33ec9f24e498bba04cd59eca69, type: 2}
 --- !u!114 &3797343846203693856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1290,23 +1288,6 @@ MonoBehaviour:
   _npc: {fileID: 3484536114419770148}
   _currentHealth: 0
   _maxHealth: 0
---- !u!114 &-3976135024856770984
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3080396072933564549}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8d71a9e4547b7146bc8620283f5fb2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _shakeBones:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!114 &3537137329067030322
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1407,7 +1388,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4632229491851016830
 Transform:
   m_ObjectHideFlags: 0

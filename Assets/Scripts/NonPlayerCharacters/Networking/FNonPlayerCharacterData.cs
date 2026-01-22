@@ -5,7 +5,7 @@
     using System.Runtime.InteropServices;
     using LichLord.Items;
 
-    [StructLayout(LayoutKind.Explicit, Size = 20)]
+    [StructLayout(LayoutKind.Explicit, Size = 21)]
     public struct FNonPlayerCharacterData : INetworkStruct
     {
         [FieldOffset(0)]
@@ -13,12 +13,14 @@
         [FieldOffset(4)]
         private FWorldTransform _transform; // 9 bytes: Position (7) + Rotation (2)
         [FieldOffset(13)]
-        private byte _condition; // 1 byte: NPCState (4 bits)// animation bits
+        private byte _condition; // 1 byte: NPCState (4 bits)// animation bits// Additive hit
         [FieldOffset(14)]
         private ushort _events; // 2 bytes: Health (12 bits) and storage
         [FieldOffset(16)]
         public FItemData CarriedItem; // 4 bytes: Item
-        // Total: 20 bytes
+        [FieldOffset(20)]
+        public byte _attitude;
+        // Total: 21 bytes
 
         public int DefinitionID
         {
@@ -136,12 +138,19 @@
             set => _events = value;
         }
 
+        public byte Attitude
+        {
+            get => _attitude;
+            set => _attitude = value;
+        }
+
         public void Copy(FNonPlayerCharacterData other)
         {
             _transform = other._transform;
             _condition = other._condition;
             _configuration = other._configuration;
             _events = other._events;
+            _attitude = other._attitude;
             CarriedItem = other.CarriedItem;
         }
 
@@ -151,6 +160,7 @@
             _condition = other._condition;
             _configuration = other._configuration;
             _events = other._events;
+            _attitude = other._attitude;
             CarriedItem = other.CarriedItem;
         }
 
@@ -159,6 +169,7 @@
             return _condition == other._condition &&
                    _configuration == other._configuration &&
                    _events == other._events &&
+                   _attitude == other._attitude &&
                     _transform.IsEqual(ref other._transform);
         }
 
@@ -167,6 +178,7 @@
             return _condition == other._condition &&
                    _configuration == other._configuration &&
                    _events == other._events &&
+                   _attitude == other._attitude &&
                    _transform.IsEqual(ref other._transform);
         }
 

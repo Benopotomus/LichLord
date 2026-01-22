@@ -76,7 +76,7 @@ public partial class WaybackMachineWindow: EditorWindow
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    [MenuItem("Window/Rukhanka.Animation/Animation Wayback Machine")]
+    [MenuItem("Window/Rukhanka Animation/Animation Wayback Machine")]
     public static void ShowExample()
     {
         var wnd = GetWindow<WaybackMachineWindow>();

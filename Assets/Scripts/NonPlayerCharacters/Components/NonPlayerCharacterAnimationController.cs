@@ -5,7 +5,7 @@ using UnityEngine;
 using Rukhanka;
 using AYellowpaper.SerializedCollections;
 using LichLord.Projectiles;
-using Unity.Mathematics;
+using System.Collections.Generic;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -17,7 +17,6 @@ namespace LichLord.NonPlayerCharacters
         [SerializedDictionary]
         private SerializedDictionary<ProjectileDefinition, FAnimationCallbackData> _animationCallbacks;
 
-        private Entity visualEntityPrefab;
         private Entity visualEntity;
         private EntityManager entityManager;
 
@@ -39,6 +38,9 @@ namespace LichLord.NonPlayerCharacters
         private static readonly FastAnimatorParameter Crouch = new("Crouch");
 
         private static readonly FastAnimatorParameter CycleOffset = new("CycleOffset");
+
+        private static readonly FastAnimatorParameter AdditiveTrigger = new("AdditiveTrigger");
+        private static readonly FastAnimatorParameter AdditiveTriggerNumber = new("AdditiveTriggerNumber");
 
         private const int Hash_FootR = -1235114484; 
         private const int Hash_FootL = 1234503542;
@@ -64,6 +66,10 @@ namespace LichLord.NonPlayerCharacters
 
         private float modelScale;
 
+        // Caches split by side
+        private List<GpuAttachmentElement> rightSideAttachments = new List<GpuAttachmentElement>();
+        private List<GpuAttachmentElement> leftSideAttachments = new List<GpuAttachmentElement>();
+
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState)
         {
             // Exactly 10 scale values, evenly distributed across ALL NPCs
@@ -80,6 +86,7 @@ namespace LichLord.NonPlayerCharacters
             CleanupPreviousVisualEntity();
             StartCoroutine(WaitForVisualPrefabAndSpawn(runtimeState));
             //LogHashes();
+
         }
 
         public void CleanupPreviousVisualEntity()
@@ -104,15 +111,15 @@ namespace LichLord.NonPlayerCharacters
             while (query.IsEmpty || entityManager.GetBuffer<VisualEntityPrefabElement>(query.GetSingletonEntity()).Length == 0)
                 yield return null;
 
-            visualEntityPrefab = GetVisualPrefab(runtimeState);
+            var prefab = GetVisualPrefab(runtimeState);
 
-            if (visualEntityPrefab == Entity.Null)
+            if (prefab == Entity.Null)
             {
                 Debug.LogError("Selected visual prefab is Null!");
                 yield break;
             }
 
-            visualEntity = entityManager.Instantiate(visualEntityPrefab);
+            visualEntity = entityManager.Instantiate(prefab);
 
             // Rest of your setup (cycle offset, etc.)
             if (entityManager.HasComponent<AnimatorControllerParameterIndexTableComponent>(visualEntity))
@@ -132,6 +139,51 @@ namespace LichLord.NonPlayerCharacters
             }
 
             SyncTransformToEntity();
+            CacheAttachments(runtimeState);
+
+            int randomRight = UnityEngine.Random.Range(0, rightSideAttachments.Count);
+            int randomLeft = UnityEngine.Random.Range(0, leftSideAttachments.Count);
+            
+            ShowOnlySpecificAttachment(0, randomRight);
+            ShowOnlySpecificAttachment(1, randomLeft);
+        }
+
+        private void CacheAttachments(NonPlayerCharacterRuntimeState runtimeState)
+        {
+            rightSideAttachments.Clear();
+            leftSideAttachments.Clear();
+
+            var prefabSingletonQuery = entityManager.CreateEntityQuery(ComponentType.ReadOnly<VisualEntityPrefabElement>());
+            if (prefabSingletonQuery.IsEmpty)
+            {
+                Debug.LogError("No VisualEntityPrefabElement buffer found! Cannot load attachments.");
+            }
+            else
+            {
+                var singletonEntity = prefabSingletonQuery.GetSingletonEntity();
+                var attachmentBuffer = entityManager.GetBuffer<GpuAttachmentElement>(singletonEntity);
+
+                int myTableId = runtimeState.Definition.TableID;
+
+                for (int i = 0; i < attachmentBuffer.Length; i++)
+                {
+                    var entry = attachmentBuffer[i];
+                    if (entry.DefinitionTableId != myTableId)
+                        continue;
+
+                    if (!entityManager.Exists(entry.AttachmentEntity))
+                        continue;
+
+                    if (entry.Side == 0) // Right side
+                    {
+                        rightSideAttachments.Add(entry);
+                    }
+                    else if (entry.Side == 1) // Left side
+                    {
+                        leftSideAttachments.Add(entry);
+                    }
+                }
+            }
         }
 
         private Entity GetVisualPrefab(NonPlayerCharacterRuntimeState runtimeState)
@@ -179,6 +231,17 @@ namespace LichLord.NonPlayerCharacters
                 paramAspect.SetFloatParameter(AnimationSpeed, animationTrigger.PlaybackSpeed);
 
                 paramAspect.SetTrigger(Trigger);
+            }
+        }
+
+        public void SetAdditiveAnimationForTrigger(FAdditiveAnimationTrigger additiveAnimationTrigger)
+        {
+            if (visualEntity == Entity.Null) return;
+
+            if (TryGetParametersAspect(out var paramAspect))
+            {
+                paramAspect.SetIntParameter(AdditiveTriggerNumber, additiveAnimationTrigger.TriggerNumber);
+                paramAspect.SetTrigger(AdditiveTrigger);
             }
         }
 
@@ -312,7 +375,6 @@ namespace LichLord.NonPlayerCharacters
                         break;
 
                     case Hash_Hit:
-                        //Debug.Log("Hit event!");
                         _npc.Brain.OnHitFromAnimation();
                         break;
 
@@ -355,6 +417,61 @@ namespace LichLord.NonPlayerCharacters
 
             aspect = new AnimatorParametersAspect(buffer, indexTable);
             return true;
+        }
+
+        // Side 0 = right, Side 1 = left
+        public bool ShowOnlySpecificAttachment(int side, int elementIndex)
+        {
+            // Select the correct list
+            var targetList = side == 0 ? rightSideAttachments :
+                             (side == 1 ? leftSideAttachments : null);
+
+            if (targetList == null)
+                return false;
+
+            if (elementIndex < 0 || elementIndex >= targetList.Count)
+                return false;
+
+            int shownCount = 0;
+            int hiddenCount = 0;
+
+            // Loop through all attachments on this side
+            for (int i = 0; i < targetList.Count; i++)
+            {
+                var entry = targetList[i];
+                var entity = entry.AttachmentEntity;
+
+                // Skip if entity no longer exists (rare safety check)
+                if (!entityManager.Exists(entity))
+                    continue;
+
+                if (i == elementIndex)
+                {
+                    // This is the one we want to show
+                    if (entityManager.HasComponent<Disabled>(entity))
+                    {
+                        entityManager.RemoveComponent<Disabled>(entity);
+                        shownCount++;
+                    }
+                }
+                else
+                {
+                    // Hide all others
+                    if (!entityManager.HasComponent<Disabled>(entity))
+                    {
+                        entityManager.AddComponent<Disabled>(entity);
+                        hiddenCount++;
+                    }
+                }
+            }
+
+            if (shownCount > 0 || hiddenCount > 0)
+            {
+                var boneIndex = targetList[elementIndex].BoneIndex;
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -233,6 +233,7 @@ namespace LichLord.NonPlayerCharacters
             data.Condition = (byte)saveState.condition;
             data.Events = (ushort)saveState.events;
             data.CarriedItem = saveState.carriedItem.ToNetworkItem();
+            data.Attitude = (byte)saveState.attitude;
 
             replicator.SpawnNPC(ref data, localIndex);
         }

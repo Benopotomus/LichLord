@@ -86,9 +86,6 @@ partial struct AnimationApplicationSystem: ISystem
 	{
 		var rigDefinitionComponentLookup = SystemAPI.GetComponentLookup<RigDefinitionComponent>(true);
 
-	#if RUKHANKA_DEBUG_INFO
-		SystemAPI.TryGetSingleton<DebugConfigurationComponent>(out var dc);
-	#endif
 		newRemapTablesCounter = 0;
 		
 		//	Count new remap tables count
@@ -127,7 +124,7 @@ partial struct AnimationApplicationSystem: ISystem
 		var updateSkinnedMeshBoundsJob = new UpdateSkinnedMeshBoundsJob()
 		{
 			worldBonePoses = runtimeData.worldSpaceBonesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
+			rigDefLookup = SystemAPI.GetComponentLookup<RigDefinitionComponent>(true)
 		};
 		
 		var updateSkinnedMeshBoundsJH = updateSkinnedMeshBoundsJob.ScheduleParallel(dependsOn);
@@ -140,9 +137,10 @@ partial struct AnimationApplicationSystem: ISystem
 	{
 		var propagateAnimationJob = new PropagateBoneTransformToEntityTRSJob()
 		{
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
 			boneTransforms = withParents ? runtimeData.animatedBonesBuffer : runtimeData.worldSpaceBonesBuffer,
 			postTransformMatrixLookup = SystemAPI.GetComponentLookup<PostTransformMatrix>(),
+			rigDefLookup = SystemAPI.GetComponentLookup<RigDefinitionComponent>(true),
+			gpuEngineTagLookup = SystemAPI.GetComponentLookup<GPUAnimationEngineTag>(true)
 		};
 
 		var jh = propagateAnimationJob.ScheduleParallel(eq, dependsOn);
@@ -158,17 +156,18 @@ partial struct AnimationApplicationSystem: ISystem
 		var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
 		var parentLookup = SystemAPI.GetComponentLookup<Parent>(true);
 		var rigBoneLookup = SystemAPI.GetComponentLookup<AnimatorEntityRefComponent>(true);
+		var gpuAnimationEngineLookup = SystemAPI.GetComponentLookup<GPUAnimationEngineTag>(true);
 
 		var animationApplyJob = new ApplyAnimationToSkinnedMeshJob()
 		{
 			boneTransforms = runtimeData.worldSpaceBonesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
 			rigDefinitionLookup = rigDefinitionComponentLookup,
 			rigToSkinnedMeshRemapTables = rigToSkinnedMeshRemapTables,
 			cullAnimationsTagLookup = cullAnimationsTagComponentLookup,
 			localTransformLookup = localTransformLookup,
 			parentLookup = parentLookup,
-			rigBoneLookup = rigBoneLookup
+			rigBoneLookup = rigBoneLookup,
+			gpuAnimationEngineTagLookup = gpuAnimationEngineLookup
 		};
 		
 		var jh = animationApplyJob.ScheduleParallel(dependsOn);

@@ -87,7 +87,6 @@ public partial class BoneVisualizationSystem: SystemBase
 		
 		var renderBonesJob = new RenderBonesCPUAnimatorsJob()
 		{
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
 			bonePoses = runtimeData.worldSpaceBonesBuffer,
 			drawer = dd.ValueRW,
 			colorLines = boneColorLinesUINT,
@@ -116,12 +115,13 @@ public partial class BoneVisualizationSystem: SystemBase
 		var prepareBoneDataJob = new PrepareGPURigsJob()
 		{
 			frameRigData = frameRigData,
-			frameEntityAnimatedDataOffsetsMap = rad.frameEntityAnimatedDataOffsetsMap,
 			localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
 			boneVisualizationLookup = SystemAPI.GetComponentLookup<BoneVisualizationComponent>(true),
+			gpuFrameOffsetsTypeHandle = SystemAPI.GetComponentTypeHandle<GPURigFrameOffsetsComponent>(true),
+			entityTypeHandle = SystemAPI.GetEntityTypeHandle()
 		};
 		
-		var rv = prepareBoneDataJob.ScheduleParallel(dependsOn);
+		var rv = prepareBoneDataJob.ScheduleParallel(gpuBoneVisualizeQuery, dependsOn);
 		rv.Complete();
 		
 		frameRigInfoCB.UnlockBufferAfterWrite(rigCount);

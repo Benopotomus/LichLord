@@ -2,6 +2,7 @@
 
 using Rukhanka.DebugDrawer;
 using Unity.Burst;
+using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -19,8 +20,6 @@ partial struct RenderBonesCPUAnimatorsJob: IJobEntity
 {
 	[ReadOnly]
 	public NativeList<BoneTransform> bonePoses;
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
 
     public uint colorTriangles;
     public uint colorLines;
@@ -31,7 +30,7 @@ partial struct RenderBonesCPUAnimatorsJob: IJobEntity
 
     public void Execute(Entity e, in RigDefinitionComponent rd, in BoneVisualizationComponent bvc)
     {
-        var bt = RuntimeAnimationData.GetAnimationDataForRigRO(bonePoses, entityToDataOffsetMap, e);
+        var bt = RuntimeAnimationData.GetAnimationDataForRigRO(bonePoses, rd);
 
         var len = bt.Length;
         
@@ -65,31 +64,42 @@ partial struct RenderBonesCPUAnimatorsJob: IJobEntity
 //------------------------------------------------------------------------------//
 
 [BurstCompile]
-[WithAll(typeof(GPUAnimationEngineTag), typeof(RigDefinitionComponent))]
-partial struct PrepareGPURigsJob: IJobEntity
+struct PrepareGPURigsJob: IJobChunk
 {
     [ReadOnly]
     public ComponentLookup<LocalTransform> localTransformLookup;
     [ReadOnly]
     public ComponentLookup<BoneVisualizationComponent> boneVisualizationLookup;
     [ReadOnly]
-	public NativeParallelHashMap<Entity, GPURuntimeAnimationData.FrameOffsets> frameEntityAnimatedDataOffsetsMap;
+    public ComponentTypeHandle<GPURigFrameOffsetsComponent> gpuFrameOffsetsTypeHandle;
+    [ReadOnly]
+    public EntityTypeHandle entityTypeHandle;
+    
     [NativeDisableParallelForRestriction]
     public NativeArray<GPUBoneRendererRigInfo> frameRigData;
     
 /////////////////////////////////////////////////////////////////////////////////
 
-    void Execute(Entity e)
-    {
-        if (!frameEntityAnimatedDataOffsetsMap.TryGetValue(e, out var rigOffsets))
-            return;
+	public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+	{
+		var entityFrameOffsets = chunk.GetNativeArray(ref gpuFrameOffsetsTypeHandle);
+		var chunkFrameOffsets = chunk.GetChunkComponentData(ref gpuFrameOffsetsTypeHandle);
+		var entities = chunk.GetNativeArray(entityTypeHandle);
         
-        var rigInfo = new GPUBoneRendererRigInfo();
-        if (boneVisualizationLookup.HasComponent(e))
+		var cee = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count);
+		while (cee.NextEntityIndex(out var i))
         {
-            localTransformLookup.TryGetComponent(e, out rigInfo.rigWorldPose);
+            var e = entities[i];
+            var gpuFrameOffsets = entityFrameOffsets[i];
+            gpuFrameOffsets.AddOffsets(chunkFrameOffsets);
+            
+            var rigInfo = new GPUBoneRendererRigInfo();
+            if (boneVisualizationLookup.HasComponent(e))
+            {
+                localTransformLookup.TryGetComponent(e, out rigInfo.rigWorldPose);
+            }
+            frameRigData[gpuFrameOffsets.rigIndex] = rigInfo;
         }
-        frameRigData[rigOffsets.rigIndex] = rigInfo;
     }
 }
 }

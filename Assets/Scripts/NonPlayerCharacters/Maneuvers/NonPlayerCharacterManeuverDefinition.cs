@@ -1,4 +1,5 @@
 ﻿using LichLord.World;
+using Rukhanka;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,7 +19,8 @@ namespace LichLord.NonPlayerCharacters
         public int CooldownTicks => _cooldownTicks;
 
         [SerializeField]
-        private float _movementStopRange = 2.5f;
+        private Vector2 _activationRange = new Vector2(0, 2.5f);
+        public Vector2 ActivationRange => _activationRange;
 
         [SerializeField]
         private float _attackRange = 3f;
@@ -35,8 +37,13 @@ namespace LichLord.NonPlayerCharacters
         private bool _requiresLOS = true;
         public bool RequiresLOS => _requiresLOS;
 
-        public float MovementStopRangeSqrt => _movementStopRange * _movementStopRange;
         public float FaceTargetRangeSqrt => _faceTargetRange * _faceTargetRange;
+
+        public bool IsInActivationRange(float sqrDist)
+        {
+            return (sqrDist > (_activationRange.x * _activationRange.x) &&
+               sqrDist < (_activationRange.y * _activationRange.y));
+        }
 
         [SerializeField]
         private float _verticalAimOffset;
@@ -76,6 +83,17 @@ namespace LichLord.NonPlayerCharacters
         {
             foreach (var specialEvent in SpecialEvents)
                 specialEvent.Execute(npc, this, target);
+        }
+
+        public Vector3 GetMovementToActivationRange(NonPlayerCharacter npc, IChunkTrackable target)
+        {
+            // this should offset away from the target toward teh npc and be inbetween the min and max activation range
+            Vector3 predictedPos = target.Position;
+            
+            Vector3 directionToTarget = (npc.Position - predictedPos).normalized;
+
+            return target.Position + (directionToTarget * ((_activationRange.x + _activationRange.y) * 0.5f));
+
         }
     }
 

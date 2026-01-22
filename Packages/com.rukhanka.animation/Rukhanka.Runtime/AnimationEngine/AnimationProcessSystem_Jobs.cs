@@ -720,18 +720,17 @@ struct CalculatePerBoneInfoJob: IJobChunk
 	public NativeArray<int> chunkBaseEntityIndices;
 	[ReadOnly]
 	public NativeList<int2> bonePosesOffsets;
-	[ReadOnly]
-	public NativeList<Entity> entities;
 	
 	[WriteOnly, NativeDisableContainerSafetyRestriction]
 	public NativeList<int3> boneToEntityIndices;
-	[WriteOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps>.ParallelWriter entityToDataOffsetMap;
+	
+	public ComponentTypeHandle<RigDefinitionComponent> rigDefinitionTypeHandle;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
 	{
+		var rigDefArray = chunk.GetNativeArray(ref rigDefinitionTypeHandle);
 		int baseEntityIndex = chunkBaseEntityIndices[unfilteredChunkIndex];
 		int validEntitiesInChunk = 0;
 
@@ -744,7 +743,6 @@ struct CalculatePerBoneInfoJob: IJobChunk
 			var offset = bonePosesOffsets[entityInQueryIndex];
 			var nextOffset = bonePosesOffsets[entityInQueryIndex + 1]; // This is always valid because we have entities count + 1 array
 
-			var e = entities[entityInQueryIndex];
 			var boneCount = nextOffset.x - offset.x;
 			
 			var boneCountHighWORD = boneCount << 16;
@@ -754,13 +752,15 @@ struct CalculatePerBoneInfoJob: IJobChunk
 				boneToEntityIndices[k + offset.x] = new int3(entityInQueryIndex, boneIndexAndBoneCount, offset.y);
 			}
 
-			var entityRigData = new RuntimeAnimationData.AnimatedEntityBoneDataProps()
+			var rigFrameData = new DynamicFrameData()
 			{
 				bonePoseOffset = offset.x,
 				boneFlagsOffset = offset.y,
 				rigBoneCount = boneCount,
 			};
-			entityToDataOffsetMap.TryAdd(e, entityRigData);
+			var rigDef = rigDefArray[i];
+			rigDef.dynamicFrameData = rigFrameData; 
+			rigDefArray[i] = rigDef;
 		}
 	}
 }
@@ -807,10 +807,6 @@ struct ResizeDataBuffersJob: IJob
 		//	Clear flags by two resizes
 		runtimeData.boneTransformFlagsHolderArr.Resize(0, NativeArrayOptions.UninitializedMemory);
 		runtimeData.boneTransformFlagsHolderArr.Resize(boneBufferLen.y, NativeArrayOptions.ClearMemory);
-		
-		var entityCount = boneOffsets.Length;
-		runtimeData.entityToDataOffsetMap.Clear();
-		runtimeData.entityToDataOffsetMap.Capacity = math.max(entityCount, runtimeData.entityToDataOffsetMap.Capacity);
 	}
 }
 
@@ -824,11 +820,11 @@ partial struct CopyEntityBoneTransformsToAnimationBuffer: IJobEntity
 	[ReadOnly]
 	public ComponentLookup<RigDefinitionComponent> rigDefComponentLookup;
 	[ReadOnly]
+	public ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTagLookup;
+	[ReadOnly]
 	public ComponentLookup<Parent> parentComponentLookup;
 	[NativeDisableContainerSafetyRestriction]
 	public NativeList<ulong> boneTransformFlags;
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -836,8 +832,11 @@ partial struct CopyEntityBoneTransformsToAnimationBuffer: IJobEntity
 	{
 		if (!rigDefComponentLookup.TryGetComponent(aer.animatorEntity, out var rdc))
 			return;
+		
+		if (gpuAnimationEngineTagLookup.IsComponentEnabled(aer.animatorEntity))
+			return;
 
-		var entityBoneData = RuntimeAnimationData.CalculateBufferOffset(entityToDataOffsetMap, aer.animatorEntity);
+		var entityBoneData = rdc.dynamicFrameData;
 		if (entityBoneData.bonePoseOffset < 0)
 			return;
 		
@@ -884,43 +883,35 @@ struct MakeAbsoluteTransformsJob: IJobChunk
 {
 	[ReadOnly]
 	public ComponentTypeHandle<RigDefinitionComponent> rigDefTypeHandle;
-	[ReadOnly]
-	public EntityTypeHandle entityTypeHandle;
 	[NativeDisableContainerSafetyRestriction]
 	public NativeList<BoneTransform> localBoneTransforms;
 	[NativeDisableContainerSafetyRestriction]
 	public NativeList<BoneTransform> worldBoneTransforms;
 	[ReadOnly]
 	public NativeList<ulong> boneTransformFlags;
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
 	{
-		var rigDefAccessor = chunk.GetNativeArray(ref rigDefTypeHandle);
-		var entityAccessor = chunk.GetNativeArray(entityTypeHandle);
+		var rigDefArray = chunk.GetNativeArray(ref rigDefTypeHandle);
 
 		var cee = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count);
 		var flagsHolder = new NativeBitArray(0xff, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
 		while (cee.NextEntityIndex(out var i))
 		{
-			var rigDef = rigDefAccessor[i];
-			var rigEntity = entityAccessor[i];
+			var rigDef = rigDefArray[i];
 			
-			if (!entityToDataOffsetMap.TryGetValue(rigEntity, out var boneDataOffset))
-				continue;
-
 			ref var rigBones = ref rigDef.rigBlob.Value.bones;
-			var rigBonesCount = boneDataOffset.rigBoneCount;
+			var rigFrameData = rigDef.dynamicFrameData;
+			var rigBonesCount = rigFrameData.rigBoneCount;
 			flagsHolder.Resize(rigBonesCount);
 			flagsHolder.Clear();
 
-			var localBoneTransformsForRig = localBoneTransforms.GetSpan(boneDataOffset.bonePoseOffset, rigBonesCount);
-			var worldBoneTransformsForRig = worldBoneTransforms.GetSpan(boneDataOffset.bonePoseOffset, rigBonesCount);
-			var boneFlags = AnimationTransformFlags.CreateFromBufferRO(boneTransformFlags, boneDataOffset.boneFlagsOffset, rigBonesCount);
+			var localBoneTransformsForRig = localBoneTransforms.GetSpan(rigFrameData.bonePoseOffset, rigBonesCount);
+			var worldBoneTransformsForRig = worldBoneTransforms.GetSpan(rigFrameData.bonePoseOffset, rigBonesCount);
+			var boneFlags = AnimationTransformFlags.CreateFromBufferRO(boneTransformFlags, rigFrameData.boneFlagsOffset, rigBonesCount);
 
 			// Iterate over all animated bones and calculate absolute transform in-place
 			for (int animationBoneIndex = 0; animationBoneIndex < rigBonesCount; ++animationBoneIndex)
@@ -984,6 +975,7 @@ struct MakeAbsoluteTransformsJob: IJobChunk
 //=================================================================================================================//
 
 [BurstCompile]
+[WithDisabled(typeof(GPUAnimationEngineTag))]
 partial struct ComputeRootMotionJob: IJobEntity
 {
 	[NativeDisableContainerSafetyRestriction]
@@ -994,8 +986,7 @@ partial struct ComputeRootMotionJob: IJobEntity
 	public ComponentLookup<PostTransformMatrix> ptmLookup;
 	[ReadOnly]
 	public ComponentLookup<LocalTransform> localTransformLookup;
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
+	
 	public float deltaTime;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1005,7 +996,7 @@ partial struct ComputeRootMotionJob: IJobEntity
 		if (!rdc.applyRootMotion)
 			return;
 		
-		var boneData = RuntimeAnimationData.GetAnimationDataForRigRW(animatedBonePoses, entityToDataOffsetMap, e);
+		var boneData = RuntimeAnimationData.GetAnimationDataForRigRW(animatedBonePoses, rdc);
 		if (boneData.IsEmpty)
 			return;
 		

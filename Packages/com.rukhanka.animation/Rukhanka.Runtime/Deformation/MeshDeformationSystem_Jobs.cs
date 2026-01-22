@@ -129,7 +129,6 @@ partial struct SetDeformedMeshIndicesJob: IJobEntity
 		
 	#if RUKHANKA_ENABLE_DEFORMATION_MOTION_VECTORS
 		dri.Value[currentFrameDeformedBufferIndex] = (uint)smrdd.deformedVertexIndex;
-		drid.Value[currentFrameDeformedBufferIndex] = dri.Value[currentFrameDeformedBufferIndex];
 	#else
 		dri.Value = (uint)smrdd.deformedVertexIndex;
 	#endif

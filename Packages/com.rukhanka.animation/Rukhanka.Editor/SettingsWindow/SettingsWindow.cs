@@ -33,7 +33,7 @@ public class SettingsWindow: SettingsProvider
     [SettingsProvider]
     static SettingsProvider CreateSettingsProvider()
     {
-        var rv = new SettingsWindow("Project/Rukhanka.Animation", SettingsScope.Project);
+        var rv = new SettingsWindow("Project/Rukhanka Animation", SettingsScope.Project);
         return rv;
     }
     

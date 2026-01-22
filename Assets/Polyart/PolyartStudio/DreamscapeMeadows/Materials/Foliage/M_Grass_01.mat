@@ -8,23 +8,45 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_Grass_01
-  m_Shader: {fileID: -6465566751694194690, guid: 206766aa085243e4191b6e044eb0dc72,
+  m_Shader: {fileID: -6465566751694194690, guid: ef694e85feb3b054fbeff399d4cebb8c,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHA_CUT
+  - _CACHE_HEIGHT
+  - _DEBUG_OFF
+  - _DOUBLESIDED_NONE
+  - _EMISSIVEMODE_OFF
+  - _FROSTMASK_OFF
+  - _INTERACTMODE_BEND
+  - _INTERACT_ONE
+  - _LAYERBLENDMODE_REPLACE
+  - _LAYERMASK_OFF
+  - _LAYERON
+  - _MODE_ULTRALITE
+  - _NORMALMODE_UP
+  - _SSMASKMODE_OFF
+  - _SSMODE_OFF
+  - _TERRAINBLENDALBEDO_HEIGHT
+  - _TERRAINBLEND_REPLACE
+  - _VERTEXALPHA_OFF
   - _VERTEXWIND_ON
+  - _WETNESS_OFF
   m_InvalidKeywords:
   - _COLOR_TINT
+  - _EMISSIVEMODE_EXT_1_OFF
   - _FOLIAGERENDERER
   - _GLOSSYREFLECTIONS_OFF
   - _INTERACTION_OFF
+  - _LAYERBLENDMODE_EXT_1_REPLACE
   - _LIGHTING_QUALITY_HIGH
+  - _MODE_EXT_1_ULTRALITE
+  - _MODE__EXT_1ULTRALITE
   - _SPECULARHIGHLIGHTS_OFF
-  - _TERRAINBLENDALBEDO_NONE
   - _VERTEXWIND
   - _WIND_AUTO
+  - _ZWRITE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -68,6 +90,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _FrostSample:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: aa3f5c93e1b271345a875c5ef4ebf6f9, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -93,6 +119,38 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleEmissive:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleEmissive_Ext_1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleOne:
+        m_Texture: {fileID: 2800000, guid: 819ab4cb19773fc42b327328ca218ec7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleOne_Ext_1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleThree:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleThree_Ext_1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTwo:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTwo_Ext_1:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -168,6 +226,42 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _TerrainMaskB:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskBL:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskBR:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskC:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskL:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskR:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskU:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskUL:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TerrainMaskUR:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _ThicknessMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -199,83 +293,187 @@ Material:
     m_Ints: []
     m_Floats:
     - _AO: 2.4
+    - _AlbedoMask: 1
+    - _AlbedoRampBoost: 1
+    - _AlbedoRampBoost_Ext_1: 1
+    - _AlbedoRampPow: 1
+    - _AlbedoRampPow_Ext_1: 1
     - _Alpha: 1
-    - _AlphaCutoff: 0.5
+    - _AlphaCutoff: 1
     - _AlphaTest: 0
     - _AlphaTestThreshold: 0.5
     - _AlphaThreshold: 0.65
+    - _AlphaToMask: 0
     - _BaseLight: 0.35
+    - _Billboard: 0
     - _BranchPhase: 0
     - _BrushLighting: 0
     - _BumpScale: 1
+    - _CanBendUp: 0
     - _ColorBottomLevel: 1.34
     - _ColorBottomMaskFade: 0.261
     - _ColorCorrection: 0
+    - _ColorPivot: 0
     - _ColorVariationSpread: 0.2
+    - _Cull: 0
     - _CullMode: 2
     - _Cutoff: 0.54
+    - _Debug: 0
     - _DetailAlbedoStrength: 1
     - _DetailNormalMapScale: 1
     - _DetailNormalStrength: 1
     - _DetailSmoothnessStrength: 1
+    - _DistScale: 0
     - _DitherBottomLevel: 0
     - _DitherFade: 0
+    - _DoubleSided: 0
     - _DoubleSidedMode: 2
     - _DoubleSidedNormalMode: 1
-    - _Drag: 1
+    - _Drag: 3.82
     - _DstBlend: 0
+    - _EdgeFade: 0
+    - _EdgeFadeBoost: 2
+    - _EdgeFadePow: 1
     - _EdgeFlutter: 1
     - _EmissionIntensity: 0
+    - _EmissionMask: 0
     - _EmissionStrength: 1
+    - _EmissiveMode: 0
+    - _EmissiveMode_Ext_1: 0
     - _EnvironmentReflections: 1
+    - _FadeNoise: 0
+    - _FadeNoiseIntensity: 0.3
+    - _FadeNoisePow: 2
+    - _FadeNoiseScale: 1
+    - _FarFade: 0
     - _FoliageRoughness: 1
     - _FoliageSpecular: 0.1
+    - _FrostBoost: 2
+    - _FrostCutoff: 0.3
+    - _FrostEmissionCutoff: 0.3
+    - _FrostMask: 0
+    - _FrostMaskBoost: 2
+    - _FrostMaskCutoff: 1
+    - _FrostMaskPow: 1
+    - _FrostNormalStrength: 1
+    - _FrostPow: 1
+    - _FrostRimBoost: 2
+    - _FrostRimPow: 2
+    - _FrostSmoothness: 0.85
+    - _FrostTerrainMaskCutoff: 0
+    - _FrostUV: 0
+    - _Frost_On: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 0
     - _InitialBend: 1
+    - _Interact: 1
+    - _InteractColorPivot: 0
+    - _InteractMode: 1
+    - _InteractStiffness: 0.595
     - _Interaction: 0
     - _InteractionDuration: 1.5
     - _InteractionPushDown: 1
     - _InteractionStrength: 1
+    - _InvertMask: 0
+    - _LayerAlpha: 1
+    - _LayerAlpha_Ext_1: 1
+    - _LayerBlendMode: 3
+    - _LayerBlendMode_Ext_1: 3
+    - _LayerMask: 0
+    - _LayerMaskBoost: 2
+    - _LayerMaskPow: 1
+    - _LayerMaskScale: 5
+    - _LayerOn: 1
+    - _LayerOn_Ext_1: 0
     - _LightingQuality: 0
     - _LockPositionGradient: 0.32
+    - _MaskBoost: 1
     - _MaskClip: 0.5
+    - _MaskFalloff: 1
+    - _MaskIntensity: 1
+    - _MaskPow: 1
     - _Metallic: 0
-    - _Mode: 1
+    - _Metalness: 0
+    - _Metalness_Ext_1: 0
+    - _Mode: 0
+    - _Mode_Ext_1: 0
+    - _ModifyNormal: 0
+    - _Mul_Vertex: 0
     - _NatureRendererDistanceControl: 1
+    - _NearFade: 0
     - _NormalMapScale: 1
-    - _NormalStrength: 1
+    - _NormalMode: 3
+    - _NormalStrength: 0
+    - _NormalStrength_Ext_1: 1
     - _ObjectHeight: 0.5
     - _ObjectRadius: 0.5
-    - _Occlusion: 7.5
+    - _Occlusion: 1
     - _OcclusionStrength: 1
+    - _Occlusion_Ext_1: 1
     - _Overlay: 0
+    - _PBR: 1
+    - _PBRMask: 0
+    - _PBRMask_Ext_1: 0
+    - _PBR_Ext_1: 0
     - _Parallax: 0.02
+    - _Perspective: 0
     - _PerspectiveCorrection: 0.5
+    - _PerspectiveDot: 0
+    - _PerspectiveDotPow: 1
+    - _PerspectiveIntensity: 0.3
+    - _PerspectiveNoiseScale: 5
     - _PrimaryFactor: 2.95
     - _QueueControl: 0
     - _QueueOffset: 0
     - _RecalculateWindNormals: 0.5
     - _ReceiveShadows: 1
+    - _SSBoost: 1
+    - _SSFalloff: 0
+    - _SSMaskMode: 0
+    - _SSMode: 0
+    - _SSPow: 1
+    - _SSThickness: 0.3
+    - _SSWrap: 0
     - _SampleAlphaOverlay: 1
     - _SampleColorOverlay: 1
+    - _SampleEmissiveUV: 0
+    - _SampleEmissiveUV_Ext_1: 0
+    - _SampleOneUV: 0
+    - _SampleOneUV_Ext_1: 0
+    - _SampleThreeUV: 0
+    - _SampleThreeUV_Ext_1: 0
+    - _SampleTwoUV: 0
+    - _SampleTwoUV_Ext_1: 0
+    - _Saturation: 1
+    - _ScaleModifier: 1
     - _SecondaryFactor: 10.64
+    - _SecondaryRampBoost: 1
+    - _SecondaryRampBoost_Ext_1: 1
+    - _SecondaryRampPow: 1
+    - _SecondaryRampPow_Ext_1: 1
     - _ShiverDrag: 0.05
+    - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
+    - _Smoothness_Ext_1: 1
     - _SpecularHighlights: 0
     - _SpecularIntensity: 0
     - _SquashAmount: 1
     - _SrcBlend: 1
-    - _Stiffness: 1
+    - _Stiffness: 0.3
     - _SurfaceMapMethod: 2
     - _TerrainAlbedoProvided: 0
     - _TerrainAlignedDetail: 0
-    - _TerrainBlendAlbedo: 0
+    - _TerrainBlend: 3
+    - _TerrainBlendAlbedo: 2
+    - _TerrainBlendBoost: 1
     - _TerrainBlendHeight: 0.2
+    - _TerrainBlendPow: 1
     - _TerrainHeightProvided: 0
     - _TerrainYOffset: 0
     - _TessValue: 15
+    - _ThickBoost: 1
+    - _ThickPow: 1
     - _Translucency: 0
     - _TranslucencyAmbient: 0.5
     - _TranslucencyBlendMode: 0
@@ -289,17 +487,33 @@ Material:
     - _UseEmission: 0
     - _UseGlobalSetting: 0
     - _UseGlobalWindSettings: 0
+    - _UseMask: 0
     - _UseMaskMap: 0
+    - _UseMask_Ext_1: 0
     - _UseVertexColor: 0
     - _VariationMapScale: 41.78
+    - _VertexAlpha: 0
     - _VertexColorGradient: 1
     - _VertexColorOffset: 0
     - _VertexNormalStrength: 1
     - _VertexWind: 1
+    - _VertexWind_Mask: 0
+    - _Wetness: 0
+    - _WetnessBoost: 2
+    - _WetnessDot: 0.2
+    - _WetnessIntensity: 0
+    - _WetnessMetalness: 0.1
+    - _WetnessNoiseIntensity: 0.3
+    - _WetnessNoiseRate: 20
+    - _WetnessNoiseScale: 14
+    - _WetnessNormal: 0.2
+    - _WetnessPow: 1
+    - _WetnessSmoothness: 1
+    - _Wetness_Mask: 0
     - _Wind: 2
-    - _WindHeightBoost: 1
-    - _WindHeightCutoff: 0
-    - _WindHeightPow: 1
+    - _WindHeightBoost: 1.01
+    - _WindHeightCutoff: 0.18
+    - _WindHeightPow: 0.32
     - _WindNoise01Multiplier: 0.21
     - _WindNoise01Size: 42.1
     - _WindNoise02Multiplier: 0.07
@@ -308,9 +522,15 @@ Material:
     - _WindStrength: 1
     - _WindVariation: 0.3
     - _YHeightScalar: 1
+    - _ZTest: 4
     - _ZWrite: 1
     - __dirty: 0
     m_Colors:
+    - _AlbedoOne: {r: 0.047096644, g: 0.088050246, b: 0, a: 1}
+    - _AlbedoOne_Ext_1: {r: 1, g: 1, b: 1, a: 1}
+    - _AlbedoTwo: {r: 0.1488635, g: 0.2578616, b: 0.023515657, a: 1}
+    - _AlbedoTwo_Ext_1: {r: 0.3, g: 0.2, b: 0.1, a: 1}
+    - _AxisMask: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.5923446, g: 0.8113208, b: 0.27171594, a: 1}
     - _ColorBottom: {r: 0.44743934, g: 0.7830189, b: 0, a: 0}
     - _ColorTop: {r: 0.18652916, g: 0.3679245, b: 0, a: 0}
@@ -318,11 +538,35 @@ Material:
     - _DitherFade: {r: 50, g: 50, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionTint: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissiveFour: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissiveFour_Ext_1: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissiveOne: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissiveOne_Ext_1: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissiveThree: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissiveThree_Ext_1: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissiveTwo: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissiveTwo_Ext_1: {r: 0, g: 0, b: 0, a: 0}
+    - _FarFadeDist: {r: 50, g: 50, b: 1, a: 0}
+    - _FrostColor: {r: 0.15, g: 0.3, b: 1, a: 1}
+    - _FrostHighlightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FrostRimColor: {r: 0.3, g: 0.4, b: 1, a: 1}
     - _GlossRemap: {r: 0, g: 1, b: 0, a: 0}
     - _HSL: {r: 0.02, g: 0.05, b: 0.1, a: 0}
     - _HSLVariation: {r: -0.02, g: -0.05, b: -0.1, a: 0}
+    - _LayerMaskOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _LayerMaskVertexMix: {r: 0, g: 0, b: 1, a: 0}
+    - _NearFadeDist: {r: 50, g: 50, b: 1, a: 0}
     - _OcclusionRemap: {r: 0, g: 1, b: 0, a: 0}
+    - _PerspectiveDist: {r: 3, g: 8, b: 1, a: 0}
+    - _SSColor: {r: 0.9, g: 0.2, b: 0.2, a: 1}
+    - _SampleVertexMix: {r: 0, g: 0, b: 1, a: 0}
+    - _SampleVertexMix_Ext_1: {r: 0, g: 0, b: 1, a: 0}
     - _ScaleFade: {r: 50, g: 20, b: 0, a: 0}
+    - _ScaleFadeDist: {r: 3, g: 4, b: 1, a: 0}
+    - _SecondaryOne: {r: 1, g: 1, b: 1, a: 1}
+    - _SecondaryOne_Ext_1: {r: 1, g: 1, b: 1, a: 1}
+    - _SecondaryTwo: {r: 0.3, g: 0.2, b: 0.1, a: 1}
+    - _SecondaryTwo_Ext_1: {r: 0.3, g: 0.2, b: 0.1, a: 1}
     - _TerrainPosition: {r: 0, g: 0, b: 0, a: 0}
     - _TerrainSize: {r: 0, g: 0, b: 0, a: 0}
     - _ThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
@@ -333,5 +577,6 @@ Material:
     - _TreeInstanceScale: {r: 0, g: 0, b: 0, a: 0}
     - _TreeOffset: {r: 0, g: 5, b: 0, a: 0}
     - _TrunkBendFactor: {r: 1, g: 0, b: 0, a: 0}
+    - _WetnessTint: {r: 0.7, g: 0.7, b: 0.7, a: 0.7}
     - _WindFade: {r: 50, g: 20, b: 0, a: 0}
   m_BuildTextureStacks: []

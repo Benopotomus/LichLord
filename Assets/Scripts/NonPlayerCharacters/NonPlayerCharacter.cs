@@ -11,7 +11,7 @@ using UnityEngine;
 namespace LichLord.NonPlayerCharacters
 {
 
-    public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, INetActor, IChunkTrackable
+    public class NonPlayerCharacter : DWDObjectPoolObject, IHitTarget, IHitInstigator, IChunkTrackable
     {
         private NonPlayerCharacterRuntimeState _runtimeState;
         public NonPlayerCharacterRuntimeState RuntimeState => _runtimeState;
@@ -55,9 +55,6 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private NonPlayerCharacterLifetimeComponent _lifetimeComponent;
         public NonPlayerCharacterLifetimeComponent LifetimeComponent => _lifetimeComponent;
 
-        [SerializeField] private NonPlayerCharacterFlinchComponent _flinchComponent;
-        public NonPlayerCharacterFlinchComponent FlinchComponent => _flinchComponent;
-
         [SerializeField] private MeleeHitTrackerComponent _meleeHitTracker;
         public MeleeHitTrackerComponent MeleeHitTracker => _meleeHitTracker;
 
@@ -76,8 +73,6 @@ namespace LichLord.NonPlayerCharacters
 
         private SceneContext _context;
         public SceneContext Context => _context;
-
-        public INetActor NetActor => this;
 
         private FNetObjectID _netObjectID = new FNetObjectID();
         public FNetObjectID NetObjectID => _netObjectID;
@@ -165,6 +160,7 @@ namespace LichLord.NonPlayerCharacters
             _spawningComponent.OnSpawned(runtimeState);
             _stateComponent.OnSpawned(runtimeState, hasAuthority, tick);
             _animationController.OnSpawned(runtimeState);
+            UpdateTeam(runtimeState);
 
             _interactableComponent.Activate(
                 this,
@@ -215,7 +211,6 @@ namespace LichLord.NonPlayerCharacters
             _runtimeState = runtimeState;
 
             UpdateChunk(_context.ChunkManager);
-            UpdateTeam(runtimeState);
             _healthComponent.OnRender(runtimeState, tick);
             _stateComponent.UpdateState(runtimeState, hasAuthority, tick);
             _carriedItemComponent.OnRender(runtimeState);
@@ -224,6 +219,7 @@ namespace LichLord.NonPlayerCharacters
             _lifetimeComponent.UpdateLifetime(runtimeState, hasAuthority, tick);
             _animationController.SyncTransformToEntity();
             _animationController.UpdateAnimationEvents();
+            _hitReactComponent.UpdateAdditiveHitReactState(runtimeState, tick);
 
             _formationId = runtimeState.GetFormationID();
             _formationIndex = runtimeState.GetFormationIndex();
@@ -297,45 +293,45 @@ namespace LichLord.NonPlayerCharacters
             _teamId = newTeam;
         }
 
-        public void ProcessHit(ref FHitUtilityData hit) { }
-
-        public void OnHitTaken(ref FHitUtilityData hit) { }
-
-        void INetActor.ProjectileSpawnedCallback(Projectile projectile, ProjectileDefinition definition, ref FProjectileData data)
+        void IHitTarget.OnHitTaken(ref FHitUtilityData hit) 
         {
-            if (Replicator.HasStateAuthority)
-                return;
 
-            if (definition == null)
-                return;
-
-            if (!definition.ForcesRemoteAiming)
-                return;
-
-            if (projectile == null) 
-                return;
-
-            //AnimationController.SetProjectileFrame(definition);
         }
 
-        void IHitInstigator.HitPerformed(ref FHitUtilityData hit)
+        void IHitInstigator.OnHitPerformed(ref FHitUtilityData hit)
         {
             NetworkRunner runner = Context.Runner;
             if (hit.target is NonPlayerCharacter npc)
             {
                 int currentAnimIndex = npc.State.CurrentAnimIndex;
-                int hitReactIndex = Random.Range(0, 4);
+                int currentAdditiveReactIndex = npc.HitReact.CurrentAdditiveReactIndex;
 
-                // If the new index is the same as the current, increment and wrap around
+                // Normal hit react (0–3)
+                int hitReactIndex = Random.Range(0, 4);
                 if (hitReactIndex == currentAnimIndex)
                 {
                     hitReactIndex = (currentAnimIndex + 1) % 4;
                 }
 
-                npc.Replicator.RPC_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
+                // Additive react — never 0 (only 1,2,3)
+                int additiveReactIndex;
+
+                // First try random in 1–3
+                additiveReactIndex = Random.Range(1, 4);  // 1,2,3
+
+                // If same as previous → pick next one (in 1–3 range)
+                if (additiveReactIndex == currentAdditiveReactIndex)
+                {
+                    // Move to next, wrap around within 1–3
+                    additiveReactIndex = currentAdditiveReactIndex + 1;
+                    if (additiveReactIndex > 3)
+                        additiveReactIndex = 1;
+                }
+
+                npc.Replicator.RPC_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex, additiveReactIndex);
 
                 if (!runner.IsSharedModeMasterClient)
-                    npc.Replicator.Predict_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex);
+                    npc.Replicator.Predict_DealDamageToNPC(npc.LocalIndex, hit.damageData.damageValue, hitReactIndex, additiveReactIndex);
             }
             else if (hit.target is Prop prop)
             {

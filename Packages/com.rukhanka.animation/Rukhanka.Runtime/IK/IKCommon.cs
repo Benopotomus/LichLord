@@ -14,7 +14,8 @@ public static class IKCommon
 		in RuntimeAnimationData runtimeAnimationData,
         ComponentLookup<LocalTransform> ltl,
         ComponentLookup<Parent> pl,
-        ComponentLookup<AnimatorEntityRefComponent> aerc
+        ComponentLookup<AnimatorEntityRefComponent> aerc,
+        ComponentLookup<RigDefinitionComponent> rd
     )
     {
         if (!ltl.TryGetComponent(e, out var lt)) return;
@@ -22,7 +23,7 @@ public static class IKCommon
         //  If current entity is a part of the rig (bone entity) use its animated pose
         if (aerc.TryGetComponent(e, out var aer))
         {
-            var boneWorldPoses = RuntimeAnimationData.GetAnimationDataForRigRO(runtimeAnimationData.worldSpaceBonesBuffer, runtimeAnimationData.entityToDataOffsetMap, aer.animatorEntity);
+            var boneWorldPoses = RuntimeAnimationData.GetAnimationDataForRigRO(runtimeAnimationData.worldSpaceBonesBuffer, rd[aer.animatorEntity]);
             if (boneWorldPoses.Length > aer.boneIndexInAnimationRig)
             {
                 var bt = boneWorldPoses[aer.boneIndexInAnimationRig];
@@ -38,7 +39,7 @@ public static class IKCommon
 
         if (pl.TryGetComponent(e, out var p))
         {
-            GetEntityWorldTransform(p.Value, ref t, runtimeAnimationData, ltl, pl, aerc);
+            GetEntityWorldTransform(p.Value, ref t, runtimeAnimationData, ltl, pl, aerc, rd);
         }
     }
     
@@ -52,13 +53,14 @@ public static class IKCommon
 		in RuntimeAnimationData runtimeAnimationData,
         ComponentLookup<LocalTransform> ltl,
         ComponentLookup<Parent> pl,
-        ComponentLookup<AnimatorEntityRefComponent> aerc
+        ComponentLookup<AnimatorEntityRefComponent> aerc,
+        ComponentLookup<RigDefinitionComponent> rd
     )
     {
         var targetEntityWorldPose = BoneTransform.Identity();
-        GetEntityWorldTransform(target, ref targetEntityWorldPose, runtimeAnimationData, ltl, pl, aerc);
+        GetEntityWorldTransform(target, ref targetEntityWorldPose, runtimeAnimationData, ltl, pl, aerc, rd);
         var animatedEntityWorldPose = BoneTransform.Inverse(rigRootWorldPose);
-        GetEntityWorldTransform(animatorEntity, ref animatedEntityWorldPose, runtimeAnimationData, ltl, pl, aerc);
+        GetEntityWorldTransform(animatorEntity, ref animatedEntityWorldPose, runtimeAnimationData, ltl, pl, aerc, rd);
         var rv = BoneTransform.Multiply(BoneTransform.Inverse(animatedEntityWorldPose), targetEntityWorldPose);
         return rv;
     }

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8676ca313987df479e7922244f26633, type: 3}
+  m_Name: DreamscapeSurfaceToFRDS
+  m_EditorClassIdentifier: 
+  _sourceShader: {fileID: 4800000, guid: d2b917323e9b23640bd3b3ecabfd7f67, type: 3}
+  _destinationShader: {fileID: -6465566751694194690, guid: ef694e85feb3b054fbeff399d4cebb8c,
+    type: 3}
+  _propertyMap:
+  - propertyName: _AlbedoTexture
+    destinationName: _SampleOne
+    propertyType: 4
+    packerConfig: {fileID: 11400000, guid: 6b946bd95bb0d604c8d8f327a7695d09, type: 2}
+  - propertyName: _AlbedoTint
+    destinationName: _AlbedoOne
+    propertyType: 0
+    packerConfig: {fileID: 0}
+  - propertyName: _SmoothnessMultiplier
+    destinationName: _Smoothness
+    propertyType: 2
+    packerConfig: {fileID: 0}
+  - propertyName: _MetallicMultiplier
+    destinationName: _Metalness
+    propertyType: 2
+    packerConfig: {fileID: 0}
