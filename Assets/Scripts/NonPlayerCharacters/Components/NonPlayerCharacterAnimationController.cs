@@ -298,9 +298,9 @@ namespace LichLord.NonPlayerCharacters
 
             float speed = smoothedLocalVelocity.magnitude;
 
-            bool isMoving = speed > 0.1f || Mathf.Abs(yawVelocity) > 1f;
+            bool isMoving = speed > 0.01f || Mathf.Abs(yawVelocity) > 1f;
 
-            if (speed <= 0.1f)
+            if (speed <= 0.01f)
             {
                 smoothedLocalVelocity.z = 0f;
                 smoothedLocalVelocity.x = smoothedYawVelocity * 2f; // Turn in place

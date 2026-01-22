@@ -261,19 +261,19 @@ namespace LichLord.NonPlayerCharacters
             return false;
         }
 
-        public bool IsSummonedWarrior()
+        public bool IsCommandedUnit()
         {
-            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _npcData) == ENPCSpawnType.SummonedWarrior)
+            if (NonPlayerCharacterDataUtility.GetSpawnType(ref _npcData) == ENPCSpawnType.CommandedUnit)
                 return true;
 
             return false;
         }
 
-        public int GetFormationID()
+        public int GetSquadId()
         {
-            if (DataDefinition is SummonedWarriorDataDefinition warriorDataDefinition)
+            if (DataDefinition is CommandedUnitDataDefinition commandedUnit)
             {
-                return warriorDataDefinition.GetFormationID(ref _npcData);
+                return commandedUnit.GetSquadId(ref _npcData);
             }
 
             return -1;
@@ -281,9 +281,9 @@ namespace LichLord.NonPlayerCharacters
 
         public int GetFormationIndex()
         {
-            if (DataDefinition is SummonedWarriorDataDefinition warriorDataDefinition)
+            if (DataDefinition is CommandedUnitDataDefinition commandedUnit)
             {
-                return warriorDataDefinition.GetFormationIndex(ref _npcData);
+                return commandedUnit.GetFormationIndex(ref _npcData);
             }
 
             return -1;
@@ -481,7 +481,7 @@ namespace LichLord.NonPlayerCharacters
 
         public PlayerCharacter GetFollowPlayer()
         {
-            if (DataDefinition is SummonedWarriorDataDefinition warriorData)
+            if (DataDefinition is CommandedUnitDataDefinition warriorData)
             {
                 return Context.NetworkGame.GetPlayerByIndex(warriorData.GetPlayerFollowIndex(ref _npcData));
             }
@@ -493,7 +493,7 @@ namespace LichLord.NonPlayerCharacters
 
         public int GetLifetimeProgress()
         {
-            if (DataDefinition is SummonedWarriorDataDefinition warriorData)
+            if (DataDefinition is CommandedUnitDataDefinition warriorData)
             {
                 return warriorData.GetLifetimeProgress(ref _npcData);
             }
@@ -503,7 +503,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void SetLifetimeProgress(int newProgress)
         {
-            if (DataDefinition is SummonedWarriorDataDefinition warriorData)
+            if (DataDefinition is CommandedUnitDataDefinition warriorData)
             {
                 warriorData.SetLifetimeProgress(newProgress, ref _npcData);
                 _replicator.ReplicateRuntimeState(this);
@@ -512,7 +512,7 @@ namespace LichLord.NonPlayerCharacters
 
         public int GetTicksPerLifetime()
         {
-            if (DataDefinition is SummonedWarriorDataDefinition warriorData)
+            if (DataDefinition is CommandedUnitDataDefinition warriorData)
             {
                 return warriorData.TicksPerLifetimeProgress;
             }
@@ -522,7 +522,7 @@ namespace LichLord.NonPlayerCharacters
 
         public int GetLifetimeProgressMax()
         {
-            if (DataDefinition is SummonedWarriorDataDefinition warriorData)
+            if (DataDefinition is CommandedUnitDataDefinition warriorData)
             {
                 return warriorData.MaxLifetimeProgress;
             }

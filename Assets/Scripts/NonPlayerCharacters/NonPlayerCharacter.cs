@@ -2,7 +2,6 @@
 using Fusion;
 using LichLord.Buildables;
 using LichLord.Items;
-using LichLord.Projectiles;
 using LichLord.Props;
 using LichLord.World;
 using System.Collections.Generic;
@@ -190,14 +189,14 @@ namespace LichLord.NonPlayerCharacters
                 _stronghold.WorkerComponent.AddWorkerCharacter(this, _workerIndex);
             }
             
-            if (runtimeState.IsSummonedWarrior())
+            if (runtimeState.IsCommandedUnit())
             {
                 var pc = runtimeState.GetFollowPlayer();
 
                 if (pc != null)
                 {
-                    pc.Formation.AddCharacter(this, 
-                        runtimeState.GetFormationID(), 
+                    pc.Commander.AddCharacter(this, 
+                        runtimeState.GetSquadId(), 
                         runtimeState.GetFormationIndex());
                 }
             }
@@ -221,7 +220,7 @@ namespace LichLord.NonPlayerCharacters
             _animationController.UpdateAnimationEvents();
             _hitReactComponent.UpdateAdditiveHitReactState(runtimeState, tick);
 
-            _formationId = runtimeState.GetFormationID();
+            _formationId = runtimeState.GetSquadId();
             _formationIndex = runtimeState.GetFormationIndex();
 
             if (hasAuthority)
@@ -409,14 +408,14 @@ namespace LichLord.NonPlayerCharacters
                 _stronghold.WorkerComponent.RemoveWorkerCharacter(this, _workerIndex);
             }  
 
-            if (_runtimeState.IsSummonedWarrior())
+            if (_runtimeState.IsCommandedUnit())
             {
                 var pc = _runtimeState.GetFollowPlayer();
 
                 if (pc != null)
                 {
-                    pc.Formation.RemoveCharacter(this,
-                        _runtimeState.GetFormationID(),
+                    pc.Commander.RemoveCharacter(this,
+                        _runtimeState.GetSquadId(),
                         _runtimeState.GetFormationIndex());
                 }
             }

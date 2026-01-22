@@ -40,7 +40,7 @@ namespace LichLord.Projectiles
                 }
             }
 
-            projectile.Context.NonPlayerCharacterManager.RPC_SpawnNPCWarriorGroup(
+            projectile.Context.NonPlayerCharacterManager.RPC_SpawnCommandGroup(
                 hitPosition,
                 validDefinitionIds.ToArray(),
                 ETeamID.PlayerTeam,

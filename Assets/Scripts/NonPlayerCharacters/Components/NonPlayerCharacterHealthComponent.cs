@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -9,9 +10,13 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField]
         private int _currentHealth;
+        public int CurrentHealth => _currentHealth;
 
         [SerializeField]
         private int _maxHealth;
+        public int MaxHealth => _maxHealth;
+
+        public Action<int, int> OnHealthChanged;
 
         public void OnSpawned(NonPlayerCharacterRuntimeState state)
         {
@@ -27,6 +32,8 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             _currentHealth = newHealth;
+
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         }
     }
 }

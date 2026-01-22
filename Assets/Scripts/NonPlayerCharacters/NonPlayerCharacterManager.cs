@@ -122,7 +122,7 @@ namespace LichLord.NonPlayerCharacters
 
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_SpawnNPCWarriorGroup(FWorldPosition centerPosition,
+        public void RPC_SpawnCommandGroup(FWorldPosition centerPosition,
             byte[] npcDefinitionIds,
             ETeamID teamId,
             byte playerFollowIndex
@@ -132,7 +132,7 @@ namespace LichLord.NonPlayerCharacters
             if (pc == null)
                 return;
 
-            var formationComponent = pc.Formation;
+            var formationComponent = pc.Commander;
             if (formationComponent == null)
                 return;
 
@@ -160,39 +160,39 @@ namespace LichLord.NonPlayerCharacters
                         formationComponent.GetFreeFrontlineIndex() :
                         formationComponent.GetFreeBacklineIndex();
 
-                    int freeFormationId = result.formationId;
+                    int squadId = result.squadId;
                     int freeFormationIndex = result.formationIndex;
 
                     // If no slot found, try the opposite
-                    if (freeFormationId == -1 || freeFormationIndex == -1)
+                    if (squadId == -1 || freeFormationIndex == -1)
                     {
                         result = definition.IsFrontlineCombatant
                             ? formationComponent.GetFreeBacklineIndex()
                             : formationComponent.GetFreeFrontlineIndex();
 
-                        freeFormationId = result.formationId;
+                        squadId = result.squadId;
                         freeFormationIndex = result.formationIndex;
                     }
 
                     // If still no slot found, bail
-                    if (freeFormationId == -1 || freeFormationIndex == -1)
+                    if (squadId == -1 || freeFormationIndex == -1)
                         continue;
 
-                    pc.Formation.SetFormationIndexFilled(freeFormationId, freeFormationIndex);
-                    SpawnNPCWarrior(hit.point, definition, teamId, playerFollowIndex, freeFormationId, freeFormationIndex);
+                    pc.Commander.SetFormationIndexFilled(squadId, freeFormationIndex);
+                    SpawnCommandUnit(hit.point, definition, teamId, playerFollowIndex, squadId, freeFormationIndex);
                 }
             }
         }
 
-        public void SpawnNPCWarrior(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamId, int playerFollowIndex, int formationID, int formationIndex)
+        public void SpawnCommandUnit(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamId, int playerFollowIndex, int formationID, int formationIndex)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                 return;
 
-            FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.SummonedWarrior, teamId, EAttitude.Hostile);
+            FNonPlayerCharacterData data = CreateNPCData(spawnPos, definition, ENPCSpawnType.CommandedUnit, teamId, EAttitude.Hostile);
 
             // Type-specific adjustment: worker index
-            var warriorData = definition.GetDataDefinition(ENPCSpawnType.SummonedWarrior) as SummonedWarriorDataDefinition;
+            var warriorData = definition.GetDataDefinition(ENPCSpawnType.CommandedUnit) as CommandedUnitDataDefinition;
             if (warriorData == null)
             {
                 Debug.Log("Trying to spawn a non-warrior as a warrior");
@@ -202,7 +202,7 @@ namespace LichLord.NonPlayerCharacters
             var pc = Context.NetworkGame.GetPlayerByIndex(playerFollowIndex);
 
             warriorData.SetPlayerFollowIndex(playerFollowIndex, ref data);
-            warriorData.SetFormationID(formationID, ref data);
+            warriorData.SetSquadId(formationID, ref data);
             warriorData.SetFormationIndex(formationIndex, ref data);
             warriorData.SetState(ENPCState.Spawning, ref data);
             SpawnNPC(ref data);

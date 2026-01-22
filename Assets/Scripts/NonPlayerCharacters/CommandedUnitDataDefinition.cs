@@ -4,11 +4,11 @@
 
 namespace LichLord.NonPlayerCharacters
 {
-    [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/WarriorDataDefinition")]
-    public class SummonedWarriorDataDefinition : NonPlayerCharacterDataDefinition
+    [CreateAssetMenu(menuName = "LichLord/NonPlayerCharacters/CommandedUnitDataDefinition")]
+    public class CommandedUnitDataDefinition : NonPlayerCharacterDataDefinition
     {
         [SerializeField]
-        private int _maxLifetimeProgress = 10;
+        private int _maxLifetimeProgress = 15;
         public int MaxLifetimeProgress => _maxLifetimeProgress;
 
         [SerializeField]
@@ -20,12 +20,12 @@ namespace LichLord.NonPlayerCharacters
         private const int PLAYER_FOLLOW_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
         private const ushort PLAYER_FOLLOW_MASK = (1 << PLAYER_FOLLOW_BITS) - 1;
 
-        private const int FORMATION_ID_BITS = 4;             // 0–15
-        private const int FORMATION_ID_SHIFT = PLAYER_FOLLOW_SHIFT + PLAYER_FOLLOW_BITS;
-        private const ushort FORMATION_ID_MASK = (1 << FORMATION_ID_BITS) - 1;
+        private const int SQUAD_ID_BITS = 4;             // 0–15
+        private const int SQUAD_ID_SHIFT = PLAYER_FOLLOW_SHIFT + PLAYER_FOLLOW_BITS;
+        private const ushort SQUAD_ID_MASK = (1 << SQUAD_ID_BITS) - 1;
 
         private const int FORMATION_INDEX_BITS = 4;             // 0–15
-        private const int FORMATION_INDEX_SHIFT = FORMATION_ID_SHIFT + FORMATION_ID_BITS;
+        private const int FORMATION_INDEX_SHIFT = SQUAD_ID_SHIFT + SQUAD_ID_BITS;
         private const ushort FORMATION_INDEX_MASK = (1 << FORMATION_INDEX_BITS) - 1;
 
         // Events
@@ -52,16 +52,16 @@ namespace LichLord.NonPlayerCharacters
         }
 
         // Formation
-        public int GetFormationID(ref FNonPlayerCharacterData npcData)
+        public int GetSquadId(ref FNonPlayerCharacterData npcData)
         {
-            return (npcData.Configuration >> FORMATION_ID_SHIFT) & FORMATION_ID_MASK;
+            return (npcData.Configuration >> SQUAD_ID_SHIFT) & SQUAD_ID_MASK;
         }
 
-        public void SetFormationID(int formationId, ref FNonPlayerCharacterData npcData)
+        public void SetSquadId(int squadId, ref FNonPlayerCharacterData npcData)
         {
             int config = npcData.Configuration;
-            formationId = Mathf.Clamp(formationId, 0, FORMATION_ID_MASK);
-            config = (config & ~(FORMATION_ID_MASK << FORMATION_ID_SHIFT)) | (formationId << FORMATION_ID_SHIFT);
+            squadId = Mathf.Clamp(squadId, 0, SQUAD_ID_MASK);
+            config = (config & ~(SQUAD_ID_MASK << SQUAD_ID_SHIFT)) | (squadId << SQUAD_ID_SHIFT);
             npcData.Configuration = config;
         }
 

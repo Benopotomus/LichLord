@@ -12034,7 +12034,7 @@ MonoBehaviour:
   Aim: {fileID: 6895327201870177106}
   Nexus: {fileID: 5360785679034961874}
   Health: {fileID: 7449162478297926621}
-  Formation: {fileID: 3873841533538091301}
+  Commander: {fileID: 3873841533538091301}
   Weapons: {fileID: 8453103197528511047}
   Inventory: {fileID: 1203748198828285372}
   Summoner: {fileID: 3700213216379212753}
@@ -12346,6 +12346,7 @@ MonoBehaviour:
   - {fileID: 7449162478297926621}
   - {fileID: 5360785679034961874}
   - {fileID: 4804172155013043321}
+  - {fileID: 3873841533538091301}
   - {fileID: 8453103197528511047}
   - {fileID: 1203748198828285372}
   - {fileID: 3700213216379212753}
@@ -12395,109 +12396,115 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed95c93ae572054a96595bd494661a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  formations:
-  - Characters:
-    - Character: {fileID: 0}
+  squads:
+  - MaxColumns: 6
+    MaxRows: 2
+    DefaultSquadPositionOffset: {x: 0, y: 0, z: 12}
+    CommandUnits:
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    FormationOffset: {x: 0, y: 0, z: 15}
-  - Characters:
-    - Character: {fileID: 0}
+  - MaxColumns: 6
+    MaxRows: 2
+    DefaultSquadPositionOffset: {x: -8, y: 0, z: 7}
+    CommandUnits:
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    FormationOffset: {x: 10, y: 0, z: 10}
-  - Characters:
-    - Character: {fileID: 0}
+  - MaxColumns: 6
+    MaxRows: 2
+    DefaultSquadPositionOffset: {x: 8, y: 0, z: 7}
+    CommandUnits:
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    - Character: {fileID: 0}
+    - NPC: {fileID: 0}
       IsFilled: 0
-    FormationOffset: {x: -10, y: 0, z: 10}
   backLineZOffset: -2
   xSpacing: 2
 --- !u!114 &8453103197528511047

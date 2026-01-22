@@ -242,7 +242,7 @@ namespace LichLord.NonPlayerCharacters
                 _moveTarget = NPC.Context.InvasionManager.GetInvasionTargetPosition(formationOffset);
                 _wanderPositionSet = true;
             }
-            else if (runtimeState.IsSummonedWarrior())
+            else if (runtimeState.IsCommandedUnit())
             {
                 PlayerCharacter pc = runtimeState.GetFollowPlayer();
 
@@ -254,7 +254,7 @@ namespace LichLord.NonPlayerCharacters
                     Vector3 formationOffset = runtimeState.GetInvaderFormationOffset();
                     formationOffset.z += 20f;
 
-                    _moveTarget = pc.Formation.GetFormationPosition(runtimeState.GetFormationID(),
+                    _moveTarget = pc.Commander.GetFormationPosition(runtimeState.GetSquadId(),
                         runtimeState.GetFormationIndex());
                     //_wanderPositionSet = true;
                 }

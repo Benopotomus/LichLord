@@ -28,7 +28,7 @@ namespace LichLord
         public PlayerCharacterAimComponent Aim;
         public PlayerNexusComponent Nexus;
         public PlayerHealthComponent Health;
-        public PlayerFormationComponent Formation;
+        public CommanderComponent Commander;
         public PlayerWeaponsComponent Weapons;
         public PlayerInventoryComponent Inventory;
         public SummonerComponent Summoner;
