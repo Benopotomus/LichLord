@@ -16,26 +16,26 @@ Material:
   - _ALPHA_CUT
   - _DEBUG_OFF
   - _DOUBLESIDED_NONE
-  - _EMISSIVEMODE_EXT_1_OFF
   - _EMISSIVEMODE_OFF
   - _FROSTMASK_OFF
   - _INTERACTMODE_WARP
   - _INTERACT_OFF
-  - _LAYERBLENDMODE_EXT_1_REPLACE
   - _LAYERBLENDMODE_REPLACE
   - _LAYERMASK_OFF
   - _LAYERON
-  - _MODE_EXT_1_ULTRALITE
   - _MODE_ULTRALITE
   - _NORMALMODE_STANDARD
   - _SSMASKMODE_OFF
   - _SSMODE_OFF
   - _TERRAINBLEND_MUL
   - _VERTEXALPHA_OFF
-  - _VERTEXWIND_OFF
+  - _VERTEXWIND_ON
   - _WETNESS_OFF
   m_InvalidKeywords:
+  - _EMISSIVEMODE_EXT_1_OFF
   - _FOLIAGERENDERER
+  - _LAYERBLENDMODE_EXT_1_REPLACE
+  - _MODE_EXT_1_ULTRALITE
   - _MODE__EXT_1ULTRALITE
   - _TERRAINBLENDALBEDO_NONE
   - _ZWRITE_ON
@@ -369,7 +369,7 @@ Material:
     - _SecondaryRampBoost_Ext_1: 1
     - _SecondaryRampPow: 1
     - _SecondaryRampPow_Ext_1: 1
-    - _ShiverDrag: 0.05
+    - _ShiverDrag: 0.07
     - _Smoothness: 0.164
     - _SmoothnessTextureChannel: 0
     - _Smoothness_Ext_1: 1
@@ -390,7 +390,7 @@ Material:
     - _UseMask: 0
     - _UseMask_Ext_1: 0
     - _VertexAlpha: 0
-    - _VertexWind: 0
+    - _VertexWind: 1
     - _VertexWind_Mask: 0
     - _Wetness: 0
     - _WetnessBoost: 2
@@ -407,7 +407,7 @@ Material:
     - _WindHeightBoost: 1
     - _WindHeightCutoff: 0
     - _WindHeightPow: 1
-    - _WindNormalInfluence: 0
+    - _WindNormalInfluence: 1
     - _YHeightScalar: 1
     - _ZTest: 4
     - _ZWrite: 1
