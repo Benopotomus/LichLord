@@ -14,6 +14,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHA_CUT
+  - _CACHE_HEIGHT
   - _DEBUG_OFF
   - _DOUBLESIDED_NONE
   - _EMISSIVEMODE_OFF
@@ -23,11 +24,12 @@ Material:
   - _LAYERBLENDMODE_REPLACE
   - _LAYERMASK_OFF
   - _LAYERON
-  - _MODE_DIFFUSE
-  - _NORMALMODE_STANDARD
+  - _MODE_ULTRALITE
+  - _NORMALMODE_UP
   - _SSMASKMODE_OFF
   - _SSMODE_OFF
-  - _TERRAINBLEND_MUL
+  - _TERRAINBLENDALBEDO_HEIGHT
+  - _TERRAINBLEND_REPLACE
   - _VERTEXALPHA_OFF
   - _VERTEXWIND_ON
   - _WETNESS_OFF
@@ -42,7 +44,6 @@ Material:
   - _MODE_EXT_1_ULTRALITE
   - _MODE__EXT_1ULTRALITE
   - _SPECULARHIGHLIGHTS_OFF
-  - _TERRAINBLENDALBEDO_NONE
   - _VERTEXWIND
   - _WIND_AUTO
   - _ZWRITE_ON
@@ -130,7 +131,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SampleOne:
-        m_Texture: {fileID: 2800000, guid: aa3f5c93e1b271345a875c5ef4ebf6f9, type: 3}
+        m_Texture: {fileID: 2800000, guid: 819ab4cb19773fc42b327328ca218ec7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SampleOne_Ext_1:
@@ -298,7 +299,7 @@ Material:
     - _AlbedoRampPow: 1
     - _AlbedoRampPow_Ext_1: 1
     - _Alpha: 1
-    - _AlphaCutoff: 0.261
+    - _AlphaCutoff: 1
     - _AlphaTest: 0
     - _AlphaTestThreshold: 0.5
     - _AlphaThreshold: 0.65
@@ -395,19 +396,19 @@ Material:
     - _Metallic: 0
     - _Metalness: 0
     - _Metalness_Ext_1: 0
-    - _Mode: 2
+    - _Mode: 0
     - _Mode_Ext_1: 0
     - _ModifyNormal: 0
     - _Mul_Vertex: 0
     - _NatureRendererDistanceControl: 1
     - _NearFade: 0
     - _NormalMapScale: 1
-    - _NormalMode: 0
+    - _NormalMode: 3
     - _NormalStrength: 0
     - _NormalStrength_Ext_1: 1
     - _ObjectHeight: 0.5
     - _ObjectRadius: 0.5
-    - _Occlusion: 7.5
+    - _Occlusion: 1
     - _OcclusionStrength: 1
     - _Occlusion_Ext_1: 1
     - _Overlay: 0
@@ -452,7 +453,7 @@ Material:
     - _SecondaryRampPow: 1
     - _SecondaryRampPow_Ext_1: 1
     - _ShiverDrag: 0.05
-    - _Smoothness: 1
+    - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _Smoothness_Ext_1: 1
     - _SpecularHighlights: 0
@@ -463,11 +464,11 @@ Material:
     - _SurfaceMapMethod: 2
     - _TerrainAlbedoProvided: 0
     - _TerrainAlignedDetail: 0
-    - _TerrainBlend: 0
-    - _TerrainBlendAlbedo: 0
+    - _TerrainBlend: 3
+    - _TerrainBlendAlbedo: 2
     - _TerrainBlendBoost: 1
     - _TerrainBlendHeight: 0.2
-    - _TerrainBlendPow: 0.5
+    - _TerrainBlendPow: 1
     - _TerrainHeightProvided: 0
     - _TerrainYOffset: 0
     - _TessValue: 15
@@ -525,9 +526,9 @@ Material:
     - _ZWrite: 1
     - __dirty: 0
     m_Colors:
-    - _AlbedoOne: {r: 0.22159624, g: 0.4716981, b: 0.09938284, a: 1}
+    - _AlbedoOne: {r: 0.047096644, g: 0.088050246, b: 0, a: 1}
     - _AlbedoOne_Ext_1: {r: 1, g: 1, b: 1, a: 1}
-    - _AlbedoTwo: {r: 0.3, g: 0.2, b: 0.1, a: 1}
+    - _AlbedoTwo: {r: 0.1488635, g: 0.2578616, b: 0.023515657, a: 1}
     - _AlbedoTwo_Ext_1: {r: 0.3, g: 0.2, b: 0.1, a: 1}
     - _AxisMask: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.5923446, g: 0.8113208, b: 0.27171594, a: 1}

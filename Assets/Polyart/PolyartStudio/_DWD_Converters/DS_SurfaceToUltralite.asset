@@ -12,5 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c75e7283a4df2e4d86d2e8644106772, type: 3}
   m_Name: DS_SurfaceToUltralite
   m_EditorClassIdentifier: 
-  _inputPropertyNames: []
-  _outputTextures: []
+  _inputPropertyNames:
+  - _AlbedoTexture
+  - _NormalTexture
+  - _SmoothnessTexture
+  _outputTextures:
+  - outputSuffix: _SampleOne
+    rChannel:
+      enabled: 1
+      textureSource: 0
+      channel: 1
+    gChannel:
+      enabled: 1
+      textureSource: 1
+      channel: 0
+    bChannel:
+      enabled: 1
+      textureSource: 2
+      channel: 0
+    aChannel:
+      enabled: 1
+      textureSource: 1
+      channel: 1
