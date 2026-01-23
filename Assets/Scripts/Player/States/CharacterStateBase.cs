@@ -30,10 +30,14 @@ namespace LichLord
 
             if (input.SummonMode)
             {
-                if (fsmRef.StateMachine.ActiveState is SummonModeState)
-                    MoveToIdle();
-                else
+                if (fsmRef.StateMachine.ActiveState is IdleState)
                     MoveToSummonMode();
+                else if (fsmRef.StateMachine.ActiveState is SummonModeState)
+                    MoveToCommandMode();
+                else if (fsmRef.StateMachine.ActiveState is CommandModeState)
+                     MoveToIdle();
+                else
+                    MoveToIdle();
 
                 return;
             }
@@ -63,6 +67,11 @@ namespace LichLord
         public void MoveToSummonMode()
         {
             fsmRef.StateMachine.TryActivateState<SummonModeState>();
+        }
+
+        public void MoveToCommandMode()
+        {
+            fsmRef.StateMachine.TryActivateState<CommandModeState>();
         }
     }
 }

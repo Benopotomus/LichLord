@@ -166,6 +166,17 @@ namespace LichLord
                    formationIndex >= 0 && formationIndex < squads[squadId].CommandUnits.Length &&
                    squads[squadId] != null;
         }
+
+        public void ProcessInput(ref FGameplayInput input)
+        { 
+        
+        }
+
+        public void OnFixedUpdate()
+        {
+
+        }
+
     }
 
     [Serializable]

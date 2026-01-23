@@ -5736,6 +5736,7 @@ GameObject:
   - component: {fileID: 5189535172980925867}
   - component: {fileID: 8530991970368520409}
   - component: {fileID: 6754216214200336027}
+  - component: {fileID: 6887489706291409906}
   m_Layer: 0
   m_Name: FSM
   m_TagString: Untagged
@@ -5839,6 +5840,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdbacfde4353c8340b986d947bf74538, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _priority: 0
+  _checkPriorityOnExit: 1
+  fsmRef: {fileID: 6231497543318802807}
+--- !u!114 &6887489706291409906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1447467598753523381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e082c4ad3c810a840b263dfbf139777d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _priority: 0
@@ -12357,6 +12373,7 @@ MonoBehaviour:
   - {fileID: 5189535172980925867}
   - {fileID: 8530991970368520409}
   - {fileID: 6754216214200336027}
+  - {fileID: 6887489706291409906}
   ForceRemoteRenderTimeframe: 0
 --- !u!143 &6155389979576705781
 CharacterController:

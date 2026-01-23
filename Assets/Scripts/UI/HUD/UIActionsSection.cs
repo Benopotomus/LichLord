@@ -34,11 +34,15 @@ namespace LichLord.UI
             }
             else if (state is BuildModeState)
             {
-                SetLayout(EActiveLayout.Buildables);
+                SetLayout(EActiveLayout.BuildMode);
             }
             else if (state is SummonModeState)
             {
-                SetLayout(EActiveLayout.Summoning);
+                SetLayout(EActiveLayout.SummonMode);
+            }
+            else if (state is CommandModeState)
+            {
+                SetLayout(EActiveLayout.CommandMode);
             }
             else
             {
@@ -69,7 +73,7 @@ namespace LichLord.UI
                     _buildCategorySection.SetActive(false);
                     _buildIcon.SetActive(true);
                     break;
-                case EActiveLayout.Buildables:
+                case EActiveLayout.BuildMode:
                     _buildIconsSection.SetActive(true);
                     _buildIcon.SetActive(false);
                     _maneuverIconsSection.SetActive(false);
@@ -77,13 +81,21 @@ namespace LichLord.UI
                     _buildCategorySection.SetActive(true);
                     _manueverIcon.SetActive(true);
                     break;
-                case EActiveLayout.Summoning:
+                case EActiveLayout.SummonMode:
                     _summonIconsSection.SetActive(true);
                     _buildIconsSection.SetActive(false);
                     _buildIcon.SetActive(false);
                     _maneuverIconsSection.SetActive(false);
                     _buildCategorySection.SetActive(false);
                     _manueverIcon.SetActive(false);
+                    break;
+                case EActiveLayout.CommandMode:
+                    _maneuverIconsSection.SetActive(false);
+                    _manueverIcon.SetActive(false);
+                    _buildIconsSection.SetActive(false);
+                    _summonIconsSection.SetActive(false);
+                    _buildCategorySection.SetActive(false);
+                    _buildIcon.SetActive(false);
                     break;
             }
 
@@ -94,8 +106,9 @@ namespace LichLord.UI
         { 
             None,
             Maneuvers,
-            Buildables,
-            Summoning,
+            BuildMode,
+            SummonMode,
+            CommandMode,
         }
     }
 }
