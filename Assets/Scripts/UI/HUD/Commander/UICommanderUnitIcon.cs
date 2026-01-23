@@ -22,11 +22,19 @@ namespace LichLord.UI
         {
             if(!commandUnit.IsFilled)
             {
+                //Hidden();
                 _iconImage.enabled = false;
                 _healthSlider.enabled = false;
+                _healthSlider.gameObject.SetActive(false);
                 _healthText.enabled = false;
+
+                if(_npc != null) 
+                    _npc.Health.OnHealthChanged -= SetHealth;
+
                 return;
             }
+
+            //Visible();
 
             _npc = commandUnit.NPC;
 
@@ -42,6 +50,7 @@ namespace LichLord.UI
 
         public void SetHealth(int currentHealth, int maxHealth)
         {
+            _healthSlider.gameObject.SetActive(true);
             _healthSlider.enabled = true;
             _healthText.enabled = true;
             _healthText.text = currentHealth + " / " + maxHealth;
@@ -59,10 +68,6 @@ namespace LichLord.UI
             _iconLoader.OnLoaded -= OnIconLoaded;
             _iconImage.sprite = sprite;
             _iconImage.enabled = true;
-
-
         }
-
-        
     }
 }

@@ -250,12 +250,12 @@ namespace LichLord.NonPlayerCharacters
                 {
                     Vector3 direction = pc.CachedTransform.forward;
 
-
                     Vector3 formationOffset = runtimeState.GetInvaderFormationOffset();
                     formationOffset.z += 20f;
 
                     _moveTarget = pc.Commander.GetFormationPosition(runtimeState.GetSquadId(),
                         runtimeState.GetFormationIndex());
+                    //Debug.Log("Move Target Changed: " + _moveTarget);
                     //_wanderPositionSet = true;
                 }
             }

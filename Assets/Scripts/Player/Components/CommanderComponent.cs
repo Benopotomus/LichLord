@@ -181,6 +181,15 @@ namespace LichLord
         public Vector3 DefaultSquadPositionOffset; // Per-formation offset applied to all characters
 
         public FCommandUnit[] CommandUnits = new FCommandUnit[16];
+
+        public bool HasAnyUnitsActive()
+        { 
+            for(int i = 0; i < CommandUnits.Length; i++)
+                if (CommandUnits[i].IsFilled)
+                    return true;
+
+            return false;
+        }
     }
 
     [Serializable]

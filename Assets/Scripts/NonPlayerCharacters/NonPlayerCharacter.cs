@@ -139,7 +139,7 @@ namespace LichLord.NonPlayerCharacters
         private GameObject blueHat;
 
         [SerializeField]
-        private int _formationId;
+        private int _squadId;
 
         [SerializeField]
         private int _formationIndex;
@@ -220,7 +220,7 @@ namespace LichLord.NonPlayerCharacters
             _animationController.UpdateAnimationEvents();
             _hitReactComponent.UpdateAdditiveHitReactState(runtimeState, tick);
 
-            _formationId = runtimeState.GetSquadId();
+            _squadId = runtimeState.GetSquadId();
             _formationIndex = runtimeState.GetFormationIndex();
 
             if (hasAuthority)
