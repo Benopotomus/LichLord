@@ -12146,15 +12146,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pc: {fileID: 2971398371087610287}
-  _availableManeuvers:
+  _maneuverList: 0
+  _spellManeuvers:
   - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
   - {fileID: 11400000, guid: 71c7cefcfae79134d83a32db88893771, type: 2}
   - {fileID: 11400000, guid: fa5a12f2917bdad4dbc7236637674db6, type: 2}
+  _commandManeuvers:
+  - {fileID: 11400000, guid: f2f4bd5c2d0e1bd4b8a642523f256d45, type: 2}
+  - {fileID: 11400000, guid: 7a6ddbff852b5d9419a6fc5d2b6bf65c, type: 2}
+  - {fileID: 11400000, guid: 5cfb7f936d5df8943bb006fecb2b3da6, type: 2}
   _swapWeaponManeuver: {fileID: 11400000, guid: 75d7a14097cf20c4cb25edad63c0c78c,
     type: 2}
   _weaponAttackManeuver: {fileID: 11400000, guid: 08a351e19b56bcf42851bc5ecce5751f,
     type: 2}
-  ActionSpawnPoint: {fileID: 0}
 --- !u!114 &4625314071529301451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12413,10 +12417,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed95c93ae572054a96595bd494661a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  squads:
+  _squads:
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: 0, y: 0, z: 12}
+    DefaultSquadPositionOffset: {x: 0, y: 0, z: 0}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12452,7 +12456,7 @@ MonoBehaviour:
       IsFilled: 0
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: -8, y: 0, z: 7}
+    DefaultSquadPositionOffset: {x: 0, y: 0, z: 0}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12488,7 +12492,7 @@ MonoBehaviour:
       IsFilled: 0
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: 8, y: 0, z: 7}
+    DefaultSquadPositionOffset: {x: 0, y: 0, z: 0}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0

@@ -2,7 +2,6 @@
 using DWD.Utility.Loading;
 using Fusion;
 using LichLord.Projectiles;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -56,23 +55,31 @@ namespace LichLord
 
         [SerializeField]
         private List<FManeuverProjectile> _timedProjectiles = new List<FManeuverProjectile>();
+        public List<FManeuverProjectile> TimedProjectiles => _timedProjectiles;
 
         [SerializeField]
         private List<FManeuverProjectile> _cycleProjectiles = new List<FManeuverProjectile>();
+        public List<FManeuverProjectile> CycleProjectiles => _cycleProjectiles;
 
         [SerializeField]
         private int _projectileCycleDelayTicks;
+        public int ProjectileCycleDelayTicks => _projectileCycleDelayTicks;
 
         [SerializeField]
         private int _projectileTicksPerCycle;
+        public int ProjectileTicksPerCycle => _projectileTicksPerCycle;
+
+        [SerializeField]
+        private List<FManeuverAction> _timedActions;
+        public List<FManeuverAction> TimedActions => _timedActions;
 
         [SerializeField]
         private List<ManeuverActionDefinition> _maneuverActions;
         public List<ManeuverActionDefinition> ManeuverActions => _maneuverActions;
 
-        public virtual void SelectAction(PlayerCharacter playerCreature, NetworkRunner runner) { }
+        public virtual void SelectManeuver(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
-        public virtual void DeselectAction(PlayerCharacter playerCreature, NetworkRunner runner) { }
+        public virtual void DeselectManeuver(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
         public virtual void StartExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 
         {
@@ -88,31 +95,6 @@ namespace LichLord
 
         public virtual void SustainExecute(PlayerCharacter playerCharacter, NetworkRunner runner, int ticksSinceStart)
         {
-            for (int i = 0; i < _timedProjectiles.Count; i++)
-            { 
-                var projectile  = _timedProjectiles[i];
-                if (projectile.SpawnTick == ticksSinceStart)
-                {
-                    SpawnProjectile(playerCharacter, ref projectile, runner.Tick);
-                }
-            }
-
-            // Handle cyclic projectiles after delay
-            if (ticksSinceStart < _projectileCycleDelayTicks || _projectileTicksPerCycle <= 0)
-                return;
-
-            // Calculate tick within the current cycle
-            int cycleTicksElapsed = ticksSinceStart - _projectileCycleDelayTicks;
-            int currentCycleTick = cycleTicksElapsed % _projectileTicksPerCycle;
-
-            for (int i = 0; i < _cycleProjectiles.Count; i++)
-            {
-                var projectile = _cycleProjectiles[i];
-                if (projectile.SpawnTick == currentCycleTick)
-                {
-                    SpawnProjectile(playerCharacter, ref projectile, runner.Tick);
-                }
-            }
         }
 
         public virtual void EndExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 
@@ -127,7 +109,7 @@ namespace LichLord
                 summonerComponent.RPC_NotifyEndExecute((ushort)TableID);
         }
 
-        private void SpawnProjectile(PlayerCharacter pc, ref FManeuverProjectile projectileData, int tick)
+        public void SpawnProjectile(PlayerCharacter pc, ref FManeuverProjectile projectileData, int tick)
         {
             ProjectileManager projectileManager = pc.Context.ProjectileManager;
             if (projectileManager == null)

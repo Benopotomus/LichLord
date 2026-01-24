@@ -47,7 +47,7 @@ namespace LichLord
             if (Machine.StateTime >= respawnTime)
             {
                 //fsmRef.PlayerNetworkObject.Health = fsmRef.PlayerNetworkObject.MaxHealth;
-                Machine.TryActivateState<IdleState>();
+                Machine.TryActivateState<SpellcastState>();
             }
         }
     }

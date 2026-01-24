@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: SwapWeaponManeuver
   m_EditorClassIdentifier: 
-  _tableID: 4
+  _tableID: 7
   ManeuverName: Swap Weapon
   _duration: 0.4
   Cooldown: 0.25
@@ -55,5 +55,7 @@ MonoBehaviour:
   _cycleProjectiles: []
   _projectileCycleDelayTicks: 0
   _projectileTicksPerCycle: 0
-  _maneuverActions:
-  - {fileID: 11400000, guid: 596fb517c9280094abd9bb7f4191cec9, type: 2}
+  _timedActions:
+  - SpawnTick: 0
+    Definition: {fileID: 11400000, guid: 596fb517c9280094abd9bb7f4191cec9, type: 2}
+  _maneuverActions: []

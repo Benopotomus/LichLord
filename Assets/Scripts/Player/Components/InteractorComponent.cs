@@ -49,7 +49,7 @@ namespace LichLord
             if (!input.Interact)
                 return;
 
-            if (_pc.FSM.StateMachine.ActiveState is IdleState idleState)
+            if (_pc.FSM.StateMachine.ActiveState is SpellcastState idleState)
             {
                 StartInteract(_bestInteractable);
             }
@@ -102,7 +102,7 @@ namespace LichLord
 
             _interactType = EInteractType.None;
 
-            state.MoveToIdle();
+            state.MoveToSpellcastState();
             _currentInteractable.InteractEnd(this);
             _currentInteractable = null;
             _pc.Movement.LookTarget = null;

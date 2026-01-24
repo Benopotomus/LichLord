@@ -38,7 +38,7 @@ namespace LichLord
         {
             bool isUpperBody = false;
 
-            if (_pc.FSM.StateMachine.ActiveState is IdleState)
+            if (_pc.FSM.StateMachine.ActiveState is SpellcastState)
             {
                 var activeManeuver = _pc.Maneuvers.GetActiveManeuver();
 

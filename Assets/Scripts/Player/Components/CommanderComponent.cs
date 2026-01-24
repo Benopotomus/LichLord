@@ -2,19 +2,15 @@
 using UnityEngine;
 using LichLord.NonPlayerCharacters;
 using Fusion;
-using LichLord.Items;
+using System.Collections.Generic;
 
 namespace LichLord
 {
     public class CommanderComponent : ContextBehaviour
     {
-        FItemData[] _squadItems_0;
-        FItemData[] _squadItems_1;
-        FItemData[] _squadItems_2;
-
         [SerializeField]
-        private CommandSquad[] squads = new CommandSquad[3];
-        public CommandSquad[] Squads => squads;
+        private CommandSquad[] _squads = new CommandSquad[3];
+        public CommandSquad[] Squads => _squads;
 
         [SerializeField]
         private float backLineZOffset = -2f; // Offset to place the back line behind the front line
@@ -41,7 +37,7 @@ namespace LichLord
                 return;
             }
 
-            CommandSquad squad = squads[squadId];
+            CommandSquad squad = _squads[squadId];
             squad.CommandUnits[formationIndex].NPC = npc;
             squad.CommandUnits[formationIndex].IsFilled = true;
 
@@ -56,9 +52,9 @@ namespace LichLord
                 return;
             }
 
-            CommandSquad squad = squads[squadId];
-            squads[squadId].CommandUnits[formationIndex].NPC = null;
-            squads[squadId].CommandUnits[formationIndex].IsFilled = false;
+            CommandSquad squad = _squads[squadId];
+            _squads[squadId].CommandUnits[formationIndex].NPC = null;
+            _squads[squadId].CommandUnits[formationIndex].IsFilled = false;
 
             OnCommandSquadUnitChanged?.Invoke(squadId, squad, formationIndex);
         }
@@ -71,7 +67,7 @@ namespace LichLord
                 return Vector3.zero;
             }
 
-            CommandSquad squad = squads[squadId];
+            CommandSquad squad = _squads[squadId];
             int maxColumns = squad.MaxColumns;           // 6
             int slotsPerLine = maxColumns;               // 6
 
@@ -112,21 +108,21 @@ namespace LichLord
             Vector3 localOffset = new Vector3(xOffset, 0f, zOffset);
 
             // Apply squad-specific offset + centering around commander's position
-            Vector3 worldPosition = transform.position
-                                  + transform.TransformDirection(localOffset + squad.DefaultSquadPositionOffset);
+            Vector3 worldPosition = GetCommandPositionForSquad(squadId)
+                                  + transform.TransformDirection(localOffset );
 
             return worldPosition;
         }
 
         public (int squadId, int formationIndex) GetFreeFrontlineIndex()
         {
-            for (int squadId = 0; squadId < squads.Length; squadId++)
+            for (int squadId = 0; squadId < _squads.Length; squadId++)
             {
-                CommandSquad squad = squads[squadId];
+                CommandSquad squad = _squads[squadId];
 
                 for (int i = 0; i < squad.MaxColumns; i++) // Only check frontline indices 0-7
                 {
-                    if (!squads[squadId].CommandUnits[i].IsFilled)
+                    if (!_squads[squadId].CommandUnits[i].IsFilled)
                     {
                         return (squadId, i);
                     }
@@ -138,13 +134,13 @@ namespace LichLord
 
         public (int squadId, int formationIndex) GetFreeBacklineIndex()
         {
-            for (int squadId = 0; squadId < squads.Length; squadId++)
+            for (int squadId = 0; squadId < _squads.Length; squadId++)
             {
-                CommandSquad squad = squads[squadId];
+                CommandSquad squad = _squads[squadId];
 
                 for (int i = squad.MaxColumns; i < (squad.MaxColumns * 2); i++) // Only check backline indices 8-15
                 {
-                    if (!squads[squadId].CommandUnits[i].IsFilled)
+                    if (!_squads[squadId].CommandUnits[i].IsFilled)
                     {
                         return (squadId, i);
                     }
@@ -157,14 +153,51 @@ namespace LichLord
         // Used to block slots before the NPC spawns
         public void SetFormationIndexFilled(int formationId, int formationIndex)
         {
-            squads[formationId].CommandUnits[formationIndex].IsFilled = true;
+            _squads[formationId].CommandUnits[formationIndex].IsFilled = true;
         }
 
         private bool IsValidFormation(int squadId, int formationIndex)
         {
-            return squadId >= 0 && squadId < squads.Length &&
-                   formationIndex >= 0 && formationIndex < squads[squadId].CommandUnits.Length &&
-                   squads[squadId] != null;
+            return squadId >= 0 && squadId < _squads.Length &&
+                   formationIndex >= 0 && formationIndex < _squads[squadId].CommandUnits.Length &&
+                   _squads[squadId] != null;
+        }
+
+        private Vector3 GetCommandPositionForSquad(int squadId)
+        {
+            switch (squadId)
+            { 
+                case 0:
+                    if (SquadTargetTransform_0.Position != Vector3.zero)
+                        return SquadTargetTransform_0.Position;
+                    break;
+                 case 1:
+                    if (SquadTargetTransform_1.Position != Vector3.zero)
+                        return SquadTargetTransform_1.Position;
+                    break;
+                case 2:
+                    if (SquadTargetTransform_2.Position != Vector3.zero)
+                        return SquadTargetTransform_2.Position;
+                    break;
+            }
+
+            return _squads[squadId].DefaultSquadPositionOffset;
+        }
+
+        public void SetCommandPosition(int squadId, Vector3 position)
+        {
+            switch (squadId)
+            {
+                case 0:
+                    SquadTargetTransform_0.Position = position;
+                    break;
+                case 1:
+                    SquadTargetTransform_1.Position = position;
+                    break;
+                case 2:
+                    SquadTargetTransform_2.Position = position;
+                    break;
+            }
         }
 
         public void ProcessInput(ref FGameplayInput input)

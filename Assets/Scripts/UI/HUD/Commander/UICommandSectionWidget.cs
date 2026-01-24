@@ -16,7 +16,7 @@ namespace LichLord.UI
         private CommanderComponent _commanderComponent;
 
         [SerializeField]
-        UICommanderSquadWidget[] _squadWidgets;
+        private UICommanderSquadWidget[] _squadWidgets;
 
         protected override void OnVisible()
         {
@@ -68,7 +68,6 @@ namespace LichLord.UI
             {
                 widget.gameObject.SetActiveSafe(false);
             }
-
         }
     }
 }

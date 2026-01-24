@@ -8,43 +8,51 @@ namespace LichLord
     {
         [SerializeField] private PlayerCharacter _pc;
 
-        [Header("Maneuvers Setup")]
-        [SerializeField] private List<ManeuverDefinition> _availableManeuvers = new List<ManeuverDefinition>();
-        public IReadOnlyList<ManeuverDefinition> AvailableManeuvers => _availableManeuvers;
+        [SerializeField]
+        private EManeuverList _maneuverList;
+
+        [Header("Maneuvers")]
+        //Spells
+        [SerializeField] private List<ManeuverDefinition> _spellManeuvers = new List<ManeuverDefinition>();
+        public IReadOnlyList<ManeuverDefinition> SpellManeuvers => _spellManeuvers;
+
+        [Networked, Capacity(5)]
+        private NetworkDictionary<sbyte, TickTimer> _spellCooldownTimers { get; }
+
+        //Commands
+        [SerializeField] private List<ManeuverDefinition> _commandManeuvers = new List<ManeuverDefinition>();
+        public IReadOnlyList<ManeuverDefinition> CommandManeuvers => _commandManeuvers;
+
+        [Networked, Capacity(3)]
+        private NetworkDictionary<sbyte, TickTimer> _commandCooldownTimers { get; }
 
         [SerializeField]
         private ManeuverDefinition _swapWeaponManeuver;
-        
+
+        [Networked]
+        private TickTimer _swapWeaponCooldownTimer { get; set; }
+
         [SerializeField]
         private ManeuverDefinition _weaponAttackManeuver;
 
-        [SerializeField] public Transform ActionSpawnPoint; // Where actions originate
+        [Networked]
+        private TickTimer _weaponAttackCooldownTimer { get; set; }
 
         [Networked] private sbyte _selectedIndex { get; set; }
-        [Networked] private sbyte _activeManeuverIndex { get; set; }
+
+        [Networked] private sbyte _activeManeuverId { get; set; }
 
         [Networked]
         private TickTimer _activeManeuverTimer { get; set; }
         private int _activeManeuverTick;
 
-        [Networked, Capacity(8)]
-        private NetworkDictionary<sbyte, TickTimer> _maneuverCooldownTimers { get; }
-
-        private const sbyte SWAP_WEAPON_COOLDOWN_INDEX = 99;
-        private const sbyte WEAPON_ATTACK_COOLDOWN_INDEX = 100;
-
-        [Networked]
-        private TickTimer _swapWeaponCooldownTimer { get; set; }
-
-        [Networked]
-        private TickTimer _weaponAttackCooldownTimer { get; set; }
-
-        // Current upper body blend amount
         private float _moveSpeedMultiplier = 1f;
+
+        private int _lastProcessedTick = -1;
 
         public float GetMoveSpeedMultiplier()
         { 
-            if(_activeManeuverIndex < 0)
+            if(_activeManeuverId < 0)
                 return 1f;
 
             return _moveSpeedMultiplier;
@@ -57,24 +65,13 @@ namespace LichLord
 
             if (HasStateAuthority)
             {
-                if (_availableManeuvers.Count > 0)
-                {
-                    _selectedIndex = 0;
-                    _availableManeuvers[0].SelectAction(_pc, Runner);
-                    Debug.Log($"[ActionManager] Automatically selected action: {_availableManeuvers[0].ManeuverName} (Index: 0)");
-                }
-                else
-                {
-                    _selectedIndex = -1;
-                    Debug.LogWarning("[ActionManager] No actions available, no initial selection set.");
-                }
+                _activeManeuverTimer = TickTimer.None;
 
-                for (int i = 0; i < _availableManeuvers.Count; i++)
-                {
-                    _activeManeuverTimer = TickTimer.None;
-                    _maneuverCooldownTimers.Set((sbyte)i, TickTimer.None);
-                }
+                for (int i = 0; i < _spellManeuvers.Count; i++)
+                    _spellCooldownTimers.Set((sbyte)i, TickTimer.None);
 
+                for (int i = 0; i < _commandManeuvers.Count; i++)
+                    _commandCooldownTimers.Set((sbyte)i, TickTimer.None);
             }
         }
 
@@ -98,6 +95,12 @@ namespace LichLord
             if (activeManeuver == null)
                 return;
 
+            ManeuverDefinition selectedManeuver = GetSelectedManeuver();
+
+            if (activeManeuver != null &&
+                selectedManeuver != activeManeuver)
+                return;
+
             if (activeManeuver.InputType == EInputType.Held)
             {
                 if (input.FireHeld)
@@ -109,8 +112,54 @@ namespace LichLord
             if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
             {
                 int ticksSinceStart = Runner.Tick - _activeManeuverTick;
-                activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
+                SustainManeuver(activeManeuver, ticksSinceStart);
             }
+        }
+
+        public void SustainManeuver(ManeuverDefinition definition, int ticksSinceStart)
+        {
+            for (int t = _lastProcessedTick + 1; t <= ticksSinceStart; t++)
+            {
+                // Timed Projectiles
+                for (int i = 0; i < definition.TimedProjectiles.Count; i++)
+                {
+                    var projectile = definition.TimedProjectiles[i];   // ref to the actual list element
+                    if (projectile.SpawnTick == t)
+                    {
+                        definition.SpawnProjectile(_pc, ref projectile, Runner.Tick);
+                    }
+                }
+
+                // Cycle Projectiles
+                if (t >= definition.ProjectileCycleDelayTicks && definition.ProjectileTicksPerCycle > 0)
+                {
+                    int cycleTicksElapsed = t - definition.ProjectileCycleDelayTicks;
+                    int currentCycleTick = cycleTicksElapsed % definition.ProjectileTicksPerCycle;
+
+                    for (int i = 0; i < definition.CycleProjectiles.Count; i++)
+                    {
+                        var projectile = definition.CycleProjectiles[i];
+                        if (projectile.SpawnTick == currentCycleTick)
+                        {
+                            definition.SpawnProjectile(_pc, ref projectile, Runner.Tick);
+                        }
+                    }
+                }
+
+                // Timed Actions
+                for (int i = 0; i < definition.TimedActions.Count; i++)
+                {
+                    var action = definition.TimedActions[i];   // ref to the actual list element
+                    if (action.SpawnTick == t)
+                    {
+                        action.Definition.Execute(_pc, Runner);
+                    }
+                }
+            }
+
+            _lastProcessedTick = ticksSinceStart;
+
+            definition.SustainExecute(_pc, Runner, ticksSinceStart);
         }
 
         private void ProcessManeuverExpiration()
@@ -137,15 +186,19 @@ namespace LichLord
 
         private void ProcessManeuverActivation(ref FGameplayInput input)
         {
+            var maneuverList = GetManeuverList();
+            if (maneuverList == null)
+                return;
+
             // if the selected index is out of range, early out
-            if (_selectedIndex < 0 || _selectedIndex >= _availableManeuvers.Count)
+            if (_selectedIndex < 0 || _selectedIndex >= maneuverList.Count)
                 return;
  
             // Cache current selected maneuver
-            ManeuverDefinition selectedManeuver = _availableManeuvers[_selectedIndex];
+            ManeuverDefinition selectedManeuver = GetSelectedManeuver();
 
             // if the cooldown timer doesn't exist for this selected index, early out
-            if (!_maneuverCooldownTimers.TryGet(_selectedIndex, out var cooldownTimer))
+            if(!TryGetCooldownTimer(_selectedIndex, out TickTimer cooldownTimer))
             {
                 Debug.Log("Maneuver cooldown timer doesn't exist for index " + _selectedIndex);
                 return;
@@ -158,22 +211,22 @@ namespace LichLord
                 return;
             }
 
-            // Cache current selected maneuver
             ManeuverDefinition activeManeuver = GetActiveManeuver();
 
             if (activeManeuver != null)
                 return;
 
-            if (input.Fire)
+            if (input.FireHeld)
             {
-                //Debug.Log($"[ActionManager] Executing action: {GetSelectedManeuver().ManeuverName} (Index: {_selectedIndex})");
+                Debug.Log($"[ActionManager] Executing action: {GetSelectedManeuver().ManeuverName} (Index: {_selectedIndex})");
 
                 _activeManeuverTick = Runner.Tick;
-                _activeManeuverIndex = _selectedIndex;
+                _activeManeuverId = (sbyte)maneuverList[_selectedIndex].TableID;
                 _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Duration);
 
                 activeManeuver = GetActiveManeuver();
                 activeManeuver.StartExecute(_pc, this, Runner);
+                _lastProcessedTick = Runner.Tick;
             }
         }
 
@@ -195,11 +248,12 @@ namespace LichLord
             if (input.AltFire)
             {
                 _activeManeuverTick = Runner.Tick;
-                _activeManeuverIndex = WEAPON_ATTACK_COOLDOWN_INDEX;
+                _activeManeuverId = (sbyte)_weaponAttackManeuver.TableID;
                 _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _weaponAttackManeuver.Duration);
 
                 activeManeuver = GetActiveManeuver();
                 activeManeuver.StartExecute(_pc, this, Runner);
+                _lastProcessedTick = Runner.Tick;
             }
         }
 
@@ -221,45 +275,26 @@ namespace LichLord
             if (input.SwapWeapon)
             {
                 _activeManeuverTick = Runner.Tick;
-                _activeManeuverIndex = SWAP_WEAPON_COOLDOWN_INDEX;
+                _activeManeuverId = (sbyte)_swapWeaponManeuver.TableID;
                 _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _swapWeaponManeuver.Duration);
 
                 activeManeuver = GetActiveManeuver();
                 activeManeuver.StartExecute(_pc, this, Runner);
+                _lastProcessedTick = Runner.Tick;
             }
-        }
-
-        public ManeuverDefinition GetActiveManeuver()
-        {
-            if (_activeManeuverIndex == SWAP_WEAPON_COOLDOWN_INDEX)
-                return _swapWeaponManeuver;
-
-            if (_activeManeuverIndex == WEAPON_ATTACK_COOLDOWN_INDEX)
-                return _weaponAttackManeuver;
-
-            if (_activeManeuverIndex < 0)
-                return null;
-
-            return _availableManeuvers[_activeManeuverIndex];
-        }
-
-        public ManeuverDefinition GetSelectedManeuver()
-        {
-            if (_selectedIndex < 0)
-                return null;
-
-            return _availableManeuvers[_selectedIndex];
         }
 
         public float GetCooldownPercent(int slot)
         {
-            // if the cooldown timer doesn't exist for this selected index, early out
-            if (!_maneuverCooldownTimers.TryGet((sbyte)slot, out TickTimer cooldownTimer))
-            {
+            var maneuverList = GetManeuverList();
+            if (maneuverList == null)
                 return 0f;
-            }
 
-            ManeuverDefinition definition = _availableManeuvers[slot];
+            // if the cooldown timer doesn't exist for this selected index, early out
+            if (!TryGetCooldownTimer((sbyte)slot, out TickTimer cooldownTimer))
+                return 0f;
+
+            ManeuverDefinition definition = maneuverList[slot];
             if (definition.Cooldown == 0)
                 return 0;
 
@@ -290,25 +325,24 @@ namespace LichLord
 
         private void ProcessManeuverSelection(ref FGameplayInput input)
         {
+            var maneuverList = GetManeuverList();
+
+            if (maneuverList == null)
+                return;
+
             int newIndex = -1;
-            if (input.ScrollDelta != 0 && _availableManeuvers.Count > 1)
+            if (input.ScrollDelta != 0 && maneuverList.Count > 1)
             {
                 int delta = input.ScrollDelta > 0 ? 1 : -1;
-                newIndex = (_selectedIndex + delta + _availableManeuvers.Count) % _availableManeuvers.Count;
+                newIndex = (_selectedIndex + delta + maneuverList.Count) % maneuverList.Count;
                 //Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
             }
 
             if (input.ActionSelection > 0)
-            {
-                //Debug.Log($"[ActionManager] ActionSelection={input.ActionSelection}");
                 newIndex = input.ActionSelection - 1;
-            }
 
-            if (newIndex >= _availableManeuvers.Count)
-            {
-                //Debug.Log($"[ActionManager] Ignored invalid ActionSelection={input.ActionSelection} (exceeds availableActions.Count={availableActions.Count})");
+            if (newIndex >= maneuverList.Count)
                 return;
-            }
 
             if (newIndex < 0)
                 return;
@@ -321,28 +355,31 @@ namespace LichLord
 
         private void UpdateActionSelection(int newIndex)
         {
-            if (HasStateAuthority)
+            if (!HasStateAuthority)
+                return;
+
+            var maneuverList = GetManeuverList();
+
+            if (_selectedIndex >= 0 && _selectedIndex < maneuverList.Count)
             {
-                if (_selectedIndex >= 0 && _selectedIndex < _availableManeuvers.Count)
-                {
-                    _availableManeuvers[_selectedIndex].DeselectAction(_pc, Runner);
-                }
-
-                _selectedIndex = (sbyte)newIndex;
-                if (newIndex >= 0 && newIndex < _availableManeuvers.Count)
-                {
-                    _availableManeuvers[newIndex].SelectAction(_pc, Runner);
-                }
-
-                if (newIndex >= 0 && newIndex < _availableManeuvers.Count)
-                {
-                    Debug.Log($"[ActionManager] Selected action: {_availableManeuvers[newIndex].ManeuverName} (Index: {newIndex})");
-                }
-                else
-                {
-                    Debug.Log("[ActionManager] Action selection cleared");
-                }
+                maneuverList[_selectedIndex].DeselectManeuver(_pc, Runner);
             }
+
+            _selectedIndex = (sbyte)newIndex;
+
+            if (newIndex >= 0 && newIndex < maneuverList.Count)
+            {
+                maneuverList[newIndex].SelectManeuver(_pc, Runner);
+            }
+
+            if (newIndex >= 0 && newIndex < maneuverList.Count)
+            {
+                Debug.Log($"[ActionManager] Selected action: {maneuverList[newIndex].ManeuverName} (Index: {newIndex})");
+            }
+            else
+            {
+                Debug.Log("[ActionManager] Action selection cleared");
+            }            
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -361,11 +398,6 @@ namespace LichLord
             _pc.Aim.TargetPitchOffset = animationState.PitchOffset;
             _pc.Aim.TargetYawOffset = animationState.YawOffset;
             _pc.Aim.TargetRollOffset = animationState.RollOffset;
-
-            foreach (var action in maneuver.ManeuverActions)
-            {
-                action.Execute(_pc, Runner);
-            }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -379,33 +411,134 @@ namespace LichLord
                 _pc.AnimationController.SetAnimationForUpperBodyTrigger(upperBodyAnimationTrigger);
             }
 
-            if (_activeManeuverIndex == SWAP_WEAPON_COOLDOWN_INDEX)
+            if (maneuver == _swapWeaponManeuver)
             {
                 _swapWeaponCooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
             }
-            else if (_activeManeuverIndex == WEAPON_ATTACK_COOLDOWN_INDEX)
+            else if (maneuver == _weaponAttackManeuver)
             {
                 _weaponAttackCooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
             }
             else
             {
-                if (_maneuverCooldownTimers.TryGet(_activeManeuverIndex, out TickTimer cooldownTimer))
+                if (_spellCooldownTimers.TryGet(_activeManeuverId, out TickTimer cooldownTimer))
                 {
                     cooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
-                    _maneuverCooldownTimers.Set(_selectedIndex, cooldownTimer);
+                    _spellCooldownTimers.Set(_selectedIndex, cooldownTimer);
                 }
             }
             
             _pc.Aim.TargetPitchOffset = 0;
             _pc.Aim.TargetYawOffset = 0;
 
-            _activeManeuverIndex = -1;
+            _activeManeuverId = -1;
         }
 
         public int GetAvailableActionsCount()
         {
-            return _availableManeuvers.Count;
+            return _spellManeuvers.Count;
         }
-       
+
+        int _lastSpellIndex = -1;
+        int _lastCommandIndex = -1;
+
+        public void OnEnterState(EManeuverList maneuverList)
+        {
+            if (!HasStateAuthority)
+                return;
+
+            _maneuverList = maneuverList;
+
+            int selectedIndex = 0;
+
+            switch (maneuverList)
+            {
+                case EManeuverList.Spells:
+                    if (_spellManeuvers.Count == 0)
+                        return;
+
+                    if(_lastSpellIndex >= 0)
+                        selectedIndex = _lastSpellIndex;
+                    break;
+                case EManeuverList.Commands:
+                    if (_commandManeuvers.Count == 0)
+                        return;
+
+                    if (_lastCommandIndex >= 0)
+                        selectedIndex = _lastCommandIndex;
+                    break;
+            }
+
+            UpdateActionSelection(selectedIndex);
+        }
+
+        private List<ManeuverDefinition> GetManeuverList()
+        {
+            switch (_maneuverList)
+            {
+                case EManeuverList.Spells:
+                    return _spellManeuvers;
+                case EManeuverList.Commands:
+                    return _commandManeuvers;
+            }
+
+            return null;
+        }
+
+        public ManeuverDefinition GetActiveManeuver()
+        {
+            if (_activeManeuverId < 0)
+                return null;
+
+            return Global.Tables.ManeuverTable.TryGetDefinition(_activeManeuverId);
+        }
+
+        public ManeuverDefinition GetSelectedManeuver()
+        {
+            var maneuvers = GetManeuverList();
+
+            if( maneuvers == null ) 
+                return null;
+
+            return maneuvers[_selectedIndex];
+        }
+
+        private bool TryGetCooldownTimer(sbyte selectedIndex, out TickTimer cooldownTimer)
+        {
+            switch (_maneuverList)
+            {
+                case EManeuverList.Spells:
+                    if (_spellCooldownTimers.TryGet(selectedIndex, out TickTimer spellTimer))
+                    {
+                        cooldownTimer = spellTimer;
+                        return true;
+                    }
+                        break;
+
+                case EManeuverList.Commands:
+                    if (_commandCooldownTimers.TryGet(selectedIndex, out TickTimer commandTimer))
+                    {
+                        cooldownTimer = commandTimer;
+                        return true;
+                    }
+                        break;
+            }
+
+            cooldownTimer = new TickTimer();
+            return false;
+        }
+    }
+
+    public struct FManeuverProjectileTracker
+    {
+        public List<int> ProjectileTicks;
+        public List<int> CycleProjectileTicks;
+    }
+
+    public enum EManeuverList
+    {
+        None,
+        Spells,
+        Commands,
     }
 }

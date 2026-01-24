@@ -201,12 +201,61 @@ namespace LichLord
                 }
             }
 
-            if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+            if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
+                return;
+
+            int ticksSinceStart = Runner.Tick - _activeManeuverTick;
+            SustainManeuver(activeManeuver, ticksSinceStart);
+            activeManeuver.CheckExpiredItem(_pc, _activeManeuverSlot, Runner, ticksSinceStart);
+        }
+
+        private int _lastProcessedTick = -1;
+
+        public void SustainManeuver(ManeuverDefinition definition, int ticksSinceStart)
+        {
+            for (int t = _lastProcessedTick + 1; t <= ticksSinceStart; t++)
             {
-                int ticksSinceStart = Runner.Tick - _activeManeuverTick;
-                activeManeuver.SustainExecute(_pc, Runner, ticksSinceStart);
-                activeManeuver.CheckExpiredItem(_pc, _activeManeuverSlot, Runner, ticksSinceStart);
+                // Timed projectiles
+                for (int i = 0; i < definition.TimedProjectiles.Count; i++)
+                {
+                    var projectile = definition.TimedProjectiles[i];   // ref to the actual list element
+                    if (projectile.SpawnTick == t)
+                    {
+                        definition.SpawnProjectile(_pc, ref projectile, Runner.Tick);
+                    }
+                }
+
+                // Cyclic projectiles
+                if (t >= definition.ProjectileCycleDelayTicks && definition.ProjectileTicksPerCycle > 0)
+                {
+                    int cycleTicksElapsed = t - definition.ProjectileCycleDelayTicks;
+                    int currentCycleTick = cycleTicksElapsed % definition.ProjectileTicksPerCycle;
+
+                    for (int i = 0; i < definition.CycleProjectiles.Count; i++)
+                    {
+                        var projectile = definition.CycleProjectiles[i];
+                        if (projectile.SpawnTick == currentCycleTick)
+                        {
+                            definition.SpawnProjectile(_pc, ref projectile, Runner.Tick);
+                        }
+                    }
+                }
+
+                // Timed actions
+                for (int i = 0; i < definition.TimedActions.Count; i++)
+                {
+                    var action = definition.TimedActions[i];   // ref to the actual list element
+                    if (action.SpawnTick == t)
+                    {
+                        action.Definition.Execute(_pc, Runner);
+                    }
+                }
             }
+
+            _lastProcessedTick = ticksSinceStart;
+
+            // Optional: keep for overrides / custom per-tick logic
+            definition.SustainExecute(_pc, Runner, ticksSinceStart);
         }
 
         private SummonableManeuverDefinition GetActiveManeuver()
@@ -246,11 +295,6 @@ namespace LichLord
             _pc.Aim.TargetPitchOffset = animationState.PitchOffset;
             _pc.Aim.TargetYawOffset = animationState.YawOffset;
             _pc.Aim.TargetRollOffset = animationState.RollOffset;
-
-            foreach (var action in maneuver.ManeuverActions)
-            {
-                action.Execute(_pc, Runner);
-            }
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

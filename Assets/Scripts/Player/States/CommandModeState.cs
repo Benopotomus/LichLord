@@ -10,6 +10,18 @@ namespace LichLord
             //anim.CrossFadeInFixedTime(animState, 4f / 60f);
         }
 
+        protected override void OnEnterState()
+        {
+            base.OnEnterState();
+            fsmRef.PC.Maneuvers.OnEnterState(EManeuverList.Commands);
+        }
+
+        protected override void OnExitState()
+        {
+            base.OnExitState();
+            fsmRef.PC.Maneuvers.OnExitState();
+        }
+
         protected override void OnFixedUpdate()
         {
             float deltaTime = Runner.DeltaTime;
@@ -21,11 +33,11 @@ namespace LichLord
             fsmRef.PC.CameraController.ProcessInput(ref input);
             fsmRef.PC.Movement.ProcessInput(ref input, deltaTime);
             fsmRef.PC.Movement.UpdateLookRotation(deltaTime, 20f);
-            fsmRef.PC.Commander.ProcessInput(ref input);
-            //fsmRef.PC.Summoner.UpdateMoveSpeed(deltaTime);
+            fsmRef.PC.Maneuvers.ProcessInput(ref input);
+            fsmRef.PC.Maneuvers.UpdateMoveSpeed(deltaTime);
 
             fsmRef.PC.Movement.WritePosition();
-            fsmRef.PC.Commander.OnFixedUpdate();
+            fsmRef.PC.Maneuvers.OnFixedUpdate();
 
             fsmRef.PC.Interactor.RefreshInteractables();
             fsmRef.PC.Interactor.ProcessInput(ref input);

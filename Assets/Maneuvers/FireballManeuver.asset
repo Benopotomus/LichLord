@@ -15,7 +15,7 @@ MonoBehaviour:
   _tableID: 1
   ManeuverName: Fireball
   _duration: 0.5
-  Cooldown: 0.25
+  Cooldown: 0.3
   ActionSound: {fileID: 0}
   _inputType: 0
   _muzzle: 0
@@ -54,7 +54,6 @@ MonoBehaviour:
   _timedProjectiles:
   - SpawnTick: 12
     Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
-    SpawnsOnAnimationNotify: 1
     Muzzle: 1
     Damage:
       DamageValue: 35
@@ -62,6 +61,7 @@ MonoBehaviour:
       StaggerRating: 0
       KnockbackStrength: 0
       ArmorPenetration: 0
+    AimOffset: {x: 0, y: 0}
   _cycleProjectiles: []
   _projectileCycleDelayTicks: 0
   _projectileTicksPerCycle: 0

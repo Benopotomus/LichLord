@@ -21,7 +21,7 @@ namespace LichLord
             if (input.BuildMode)
             {
                 if (fsmRef.StateMachine.ActiveState is BuildModeState)
-                    MoveToIdle();
+                    MoveToSpellcastState();
                 else
                     MoveToBuildMode();
                     
@@ -30,14 +30,12 @@ namespace LichLord
 
             if (input.SummonMode)
             {
-                if (fsmRef.StateMachine.ActiveState is IdleState)
-                    MoveToSummonMode();
-                else if (fsmRef.StateMachine.ActiveState is SummonModeState)
+                if (fsmRef.StateMachine.ActiveState is SpellcastState)
                     MoveToCommandMode();
                 else if (fsmRef.StateMachine.ActiveState is CommandModeState)
-                     MoveToIdle();
+                     MoveToSpellcastState();
                 else
-                    MoveToIdle();
+                    MoveToSpellcastState();
 
                 return;
             }
@@ -54,9 +52,9 @@ namespace LichLord
             fsmRef.StateMachine.TryActivateState<InteractingState>();
         }
 
-        public void MoveToIdle()
+        public void MoveToSpellcastState()
         {
-            fsmRef.StateMachine.TryActivateState<IdleState>();
+            fsmRef.StateMachine.TryActivateState<SpellcastState>();
         }
 
         public void MoveToBuildMode()

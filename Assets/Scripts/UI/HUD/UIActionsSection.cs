@@ -6,8 +6,10 @@ namespace LichLord.UI
 {
     public class UIActionsSection : UIWidget
     {
-        [SerializeField] private HorizontalLayoutGroup _maneuverIconsSection;
-        [SerializeField] private HorizontalLayoutGroup _summonIconsSection;
+        [SerializeField] private GridLayoutGroup _spellIconsSection;
+        [SerializeField] private GridLayoutGroup _summonIconsSection;
+        [SerializeField] private GridLayoutGroup _commandIconsSection;
+
         [SerializeField] private HorizontalLayoutGroup _buildIconsSection;
         [SerializeField] private HorizontalLayoutGroup _buildCategorySection;
 
@@ -28,9 +30,9 @@ namespace LichLord.UI
 
             var state = pc.FSM.StateMachine.ActiveState;
 
-            if (state is IdleState)
+            if (state is SpellcastState)
             {
-                SetLayout(EActiveLayout.Maneuvers);
+                SetLayout(EActiveLayout.SpellMode);
             }
             else if (state is BuildModeState)
             {
@@ -58,44 +60,54 @@ namespace LichLord.UI
             switch (newLayout)
             { 
                 case EActiveLayout.None:
-                    _maneuverIconsSection.SetActive(false);
-                    _manueverIcon.SetActive(false);
-                    _buildIconsSection.SetActive(false);
+                    _spellIconsSection.SetActive(false);
                     _summonIconsSection.SetActive(false);
+                    _commandIconsSection.SetActive(false);
+                    _buildIconsSection.SetActive(false);
+
+                    _manueverIcon.SetActive(false);
                     _buildCategorySection.SetActive(false);
                     _buildIcon.SetActive(false);
                     break;
-                case EActiveLayout.Maneuvers:
-                    _maneuverIconsSection.SetActive(true);
-                    _manueverIcon.SetActive(false);
+                case EActiveLayout.SpellMode:
+                    _spellIconsSection.SetActive(true);
+                    _summonIconsSection.SetActive(false);
+                    _commandIconsSection.SetActive(false);
                     _buildIconsSection.SetActive(false);
-                    _summonIconsSection.SetActive(false);
-                    _buildCategorySection.SetActive(false);
-                    _buildIcon.SetActive(true);
-                    break;
-                case EActiveLayout.BuildMode:
-                    _buildIconsSection.SetActive(true);
-                    _buildIcon.SetActive(false);
-                    _maneuverIconsSection.SetActive(false);
-                    _summonIconsSection.SetActive(false);
-                    _buildCategorySection.SetActive(true);
+
                     _manueverIcon.SetActive(true);
+                    _buildCategorySection.SetActive(false);
+                    _buildIcon.SetActive(false);
                     break;
                 case EActiveLayout.SummonMode:
+                    _spellIconsSection.SetActive(false);
                     _summonIconsSection.SetActive(true);
+                    _commandIconsSection.SetActive(false);
                     _buildIconsSection.SetActive(false);
-                    _buildIcon.SetActive(false);
-                    _maneuverIconsSection.SetActive(false);
+
+                    _manueverIcon.SetActive(true);
                     _buildCategorySection.SetActive(false);
-                    _manueverIcon.SetActive(false);
+                    _buildIcon.SetActive(false);
                     break;
                 case EActiveLayout.CommandMode:
-                    _maneuverIconsSection.SetActive(false);
-                    _manueverIcon.SetActive(false);
-                    _buildIconsSection.SetActive(false);
+                    _spellIconsSection.SetActive(false);
                     _summonIconsSection.SetActive(false);
+                    _commandIconsSection.SetActive(true);
+                    _buildIconsSection.SetActive(false);
+
+                    _manueverIcon.SetActive(true);
                     _buildCategorySection.SetActive(false);
                     _buildIcon.SetActive(false);
+                    break;
+                case EActiveLayout.BuildMode:
+                    _spellIconsSection.SetActive(false);
+                    _summonIconsSection.SetActive(false);
+                    _commandIconsSection.SetActive(false);
+                    _buildIconsSection.SetActive(true);
+
+                    _manueverIcon.SetActive(false);
+                    _buildIcon.SetActive(false);
+                    _buildCategorySection.SetActive(true);
                     break;
             }
 
@@ -105,7 +117,7 @@ namespace LichLord.UI
         public enum EActiveLayout
         { 
             None,
-            Maneuvers,
+            SpellMode,
             BuildMode,
             SummonMode,
             CommandMode,

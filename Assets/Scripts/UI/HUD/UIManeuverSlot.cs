@@ -1,5 +1,4 @@
 ﻿using DWD.Utility.Loading;
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,7 +43,10 @@ namespace LichLord.UI
 
             _text.text = _slot.ToString();
 
-            ManeuverDefinition slotDefinition = pc.Maneuvers.AvailableManeuvers[_slot - 1];
+            if (_slot > pc.Maneuvers.SpellManeuvers.Count)
+                return;
+
+            ManeuverDefinition slotDefinition = pc.Maneuvers.SpellManeuvers[_slot - 1];
 
             // Check if the definitin has changed. Load icon if it has
             if (_definition == null || slotDefinition.TableID != _definition.TableID)
@@ -52,7 +54,6 @@ namespace LichLord.UI
                 LoadDefinition(slotDefinition);
             }
 
-            
             _cooldownImage.fillAmount = pc.Maneuvers.GetCooldownPercent(_slot-1);
 
             _iconImage.color = _unselectedColor;
@@ -81,8 +82,6 @@ namespace LichLord.UI
             _definition = definition;
             LoadIcon(_definition.Icon);
         }
-
-        // VISUALS
 
         // VISUALS
 
