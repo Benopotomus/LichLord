@@ -12,13 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: WitchfireManeuver
   m_EditorClassIdentifier: 
-  _tableID: 9
+  _tableID: 10
   ManeuverName: Witchfire
   _duration: 0.25
-  Cooldown: 0.5
-  ActionSound: {fileID: 0}
+  _cooldown: 1
+  _fireButton: 1
   _inputType: 1
-  _muzzle: 0
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
@@ -49,8 +48,8 @@ MonoBehaviour:
         PitchOffset: 60
         YawOffset: 80
         RollOffset: 0
-  AnimationSpeed: 1
-  MovementSpeedMultiplier: 0.65
+  _animationSpeed: 1
+  _movementSpeedMultiplier: 1
   _timedProjectiles: []
   _cycleProjectiles:
   - SpawnTick: 0
@@ -66,4 +65,4 @@ MonoBehaviour:
   _projectileCycleDelayTicks: 10
   _projectileTicksPerCycle: 10
   _timedActions: []
-  _maneuverActions: []
+  _altFireManeuver: {fileID: 0}

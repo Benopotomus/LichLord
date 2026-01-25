@@ -16,15 +16,15 @@ namespace LichLord
         [SerializeField] private float _duration = 1f;
         public float Duration => _duration;
 
-        public float Cooldown = 1f;
+        [SerializeField] private float _cooldown = 1f;
+        public float Cooldown => _cooldown;
 
-        public AudioClip ActionSound; // Sound played when performing action (e.g., FireSound for gun)
+
+        [SerializeField] private EFireButton _fireButton;
+        public EFireButton FireButton => _fireButton; 
 
         [SerializeField] private EInputType _inputType;
         public EInputType InputType => _inputType;
-
-        [SerializeField] private EMuzzle _muzzle;
-        public EMuzzle Muzzle => _muzzle;
 
         //Visuals
         [BundleObject(typeof(GameObject))]
@@ -42,16 +42,20 @@ namespace LichLord
         private FAnimationTrigger _animationTrigger;
         public FAnimationTrigger AnimationTrigger => _animationTrigger;
 
-        public bool Fullbody; // Animator trigger (e.g., "Shoot" for gun)
+        public bool Fullbody;
 
         [SerializeField]
         [SerializedDictionary("WeaponID", "AnimationState")]
         private SerializedDictionary<int, FUpperBodyAnimationTrigger> _upperBodyAnimationStates;
         public SerializedDictionary<int, FUpperBodyAnimationTrigger> UpperBodyAnimationStates => _upperBodyAnimationStates;
 
-        public float AnimationSpeed = 1f;
+        [SerializeField]
+        private float _animationSpeed = 1f;
+        public float AnimationSpeed => _animationSpeed;
 
-        public float MovementSpeedMultiplier = 1f; // Scales movement speed during action
+        [SerializeField]
+        private float _movementSpeedMultiplier = 1f;
+        public float MovementSpeedMultiplier => _movementSpeedMultiplier;
 
         [SerializeField]
         private List<FManeuverProjectile> _timedProjectiles = new List<FManeuverProjectile>();
@@ -74,8 +78,8 @@ namespace LichLord
         public List<FManeuverAction> TimedActions => _timedActions;
 
         [SerializeField]
-        private List<ManeuverActionDefinition> _maneuverActions;
-        public List<ManeuverActionDefinition> ManeuverActions => _maneuverActions;
+        private ManeuverDefinition _altFireManeuver;
+        public ManeuverDefinition AltFireManeuver => _altFireManeuver;
 
         public virtual void SelectManeuver(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
@@ -99,6 +103,9 @@ namespace LichLord
 
         public virtual void EndExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 
         {
+            for (int i = 0; i < TimedActions.Count; i++)
+                TimedActions[i].Definition.EndExecute(playerCharacter, runner);
+
             if (component == null)
                 return;
 
@@ -141,6 +148,13 @@ namespace LichLord
             var projectile = projectileManager.SpawnProjectile(fireEvent);
             //Debug.Log($"[GunActionData] Fired projectile with {ActionName} using ProjectileManager");
         }
+    }
+
+    public enum EFireButton
+    { 
+        None,
+        Fire,
+        AltFire,
     }
 
     public enum EInputType

@@ -12420,7 +12420,7 @@ MonoBehaviour:
   _squads:
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: 0, y: 0, z: 0}
+    DefaultSquadPositionOffset: {x: -10, y: 0, z: 10}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12456,7 +12456,7 @@ MonoBehaviour:
       IsFilled: 0
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: 0, y: 0, z: 0}
+    DefaultSquadPositionOffset: {x: 0, y: 0, z: 15}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12492,7 +12492,7 @@ MonoBehaviour:
       IsFilled: 0
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: 0, y: 0, z: 0}
+    DefaultSquadPositionOffset: {x: 10, y: 0, z: 10}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12528,6 +12528,8 @@ MonoBehaviour:
       IsFilled: 0
   backLineZOffset: -2
   xSpacing: 2
+  _commandVisualPrefab: {fileID: 2865362689749735049, guid: ba4ea3bb035cecc49baac00f8e838485,
+    type: 3}
 --- !u!114 &8453103197528511047
 MonoBehaviour:
   m_ObjectHideFlags: 0

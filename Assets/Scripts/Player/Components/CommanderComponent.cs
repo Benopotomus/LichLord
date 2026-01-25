@@ -2,7 +2,6 @@
 using UnityEngine;
 using LichLord.NonPlayerCharacters;
 using Fusion;
-using System.Collections.Generic;
 
 namespace LichLord
 {
@@ -19,15 +18,24 @@ namespace LichLord
         private float xSpacing = 2f; // Fixed 2-unit spacing between characters along x-axis
 
         [Networked]
-        public ref FWorldTransform SquadTargetTransform_0 => ref MakeRef<FWorldTransform>();
+        public ref FCommandTransform SquadTargetTransform_0 => ref MakeRef<FCommandTransform>();
 
         [Networked]
-        public ref FWorldTransform SquadTargetTransform_1 => ref MakeRef<FWorldTransform>();
+        public ref FCommandTransform SquadTargetTransform_1 => ref MakeRef<FCommandTransform>();
 
         [Networked]
-        public ref FWorldTransform SquadTargetTransform_2 => ref MakeRef<FWorldTransform>();
+        public ref FCommandTransform SquadTargetTransform_2 => ref MakeRef<FCommandTransform>();
+
+        [SerializeField]
+        private GameObject _commandVisualPrefab;
+        private GameObject _commandVisualInstance;
 
         public Action<int, CommandSquad, int> OnCommandSquadUnitChanged;
+
+        public override void Spawned()
+        {
+            _commandVisualInstance = GameObject.Instantiate(_commandVisualPrefab) as GameObject;
+        }
 
         public void AddCharacter(NonPlayerCharacter npc, int squadId, int formationIndex)
         {
@@ -107,9 +115,11 @@ namespace LichLord
 
             Vector3 localOffset = new Vector3(xOffset, 0f, zOffset);
 
+            var squadTransform = GetCommandTransformForSquad(squadId);
+
             // Apply squad-specific offset + centering around commander's position
-            Vector3 worldPosition = GetCommandPositionForSquad(squadId)
-                                  + transform.TransformDirection(localOffset );
+            Vector3 worldPosition = squadTransform.Item1
+                                  + (squadTransform.Item2 * localOffset);
 
             return worldPosition;
         }
@@ -163,25 +173,25 @@ namespace LichLord
                    _squads[squadId] != null;
         }
 
-        private Vector3 GetCommandPositionForSquad(int squadId)
+        private (Vector3, Quaternion) GetCommandTransformForSquad(int squadId)
         {
             switch (squadId)
             { 
                 case 0:
-                    if (SquadTargetTransform_0.Position != Vector3.zero)
-                        return SquadTargetTransform_0.Position;
+                    if (SquadTargetTransform_0.IsValid)
+                        return (SquadTargetTransform_0.Position, SquadTargetTransform_0.Rotation);
                     break;
                  case 1:
-                    if (SquadTargetTransform_1.Position != Vector3.zero)
-                        return SquadTargetTransform_1.Position;
+                    if (SquadTargetTransform_1.IsValid)
+                        return (SquadTargetTransform_1.Position, SquadTargetTransform_1.Rotation);
                     break;
                 case 2:
-                    if (SquadTargetTransform_2.Position != Vector3.zero)
-                        return SquadTargetTransform_2.Position;
+                    if (SquadTargetTransform_2.IsValid)
+                        return (SquadTargetTransform_2.Position, SquadTargetTransform_2.Rotation);
                     break;
             }
 
-            return _squads[squadId].DefaultSquadPositionOffset;
+            return (transform.position + transform.TransformDirection(_squads[squadId].DefaultSquadPositionOffset), transform.rotation);
         }
 
         public void SetCommandPosition(int squadId, Vector3 position)
@@ -190,14 +200,66 @@ namespace LichLord
             {
                 case 0:
                     SquadTargetTransform_0.Position = position;
+                    SquadTargetTransform_0.IsValid = true;
                     break;
                 case 1:
                     SquadTargetTransform_1.Position = position;
+                    SquadTargetTransform_1.IsValid = true;
                     break;
                 case 2:
                     SquadTargetTransform_2.Position = position;
+                    SquadTargetTransform_2.IsValid = true;
                     break;
             }
+        }
+
+        public void SetCommandRotation(int squadId, Vector3 direction)
+        {
+            switch (squadId)
+            {
+                case 0:
+                    SquadTargetTransform_0.Rotation = Quaternion.LookRotation(direction);
+                    SquadTargetTransform_0.IsValid = true;
+                    break;
+                case 1:
+                    SquadTargetTransform_1.Rotation = Quaternion.LookRotation(direction);
+                    SquadTargetTransform_1.IsValid = true;
+                    break;
+                case 2:
+                    SquadTargetTransform_2.Rotation = Quaternion.LookRotation(direction);
+                    SquadTargetTransform_2.IsValid = true;
+                    break;
+            }
+        }
+
+        public void ModifyCommandRotation(int squadId, float inputY)
+        {
+            switch (squadId)
+            {
+                case 0:
+                    Vector3 euler0 = SquadTargetTransform_0.Rotation.eulerAngles;
+                    euler0.y += inputY;
+                    SquadTargetTransform_0.Rotation = Quaternion.Euler(euler0);
+                    break;
+                case 1:
+                    Vector3 euler1 = SquadTargetTransform_1.Rotation.eulerAngles;
+                    euler1.y += inputY;
+                    SquadTargetTransform_1.Rotation = Quaternion.Euler(euler1);
+                    break;
+                case 2:
+                    Vector3 euler2 = SquadTargetTransform_2.Rotation.eulerAngles;
+                    euler2.y += inputY;
+                    SquadTargetTransform_2.Rotation = Quaternion.Euler(euler2);
+                    break;
+            }
+        }
+
+        public void ToggleVisuals(int squadId, bool isDisplayed)
+        {
+            var commandTransform = GetCommandTransformForSquad(squadId);
+
+            _commandVisualInstance.transform.position = commandTransform.Item1;
+            _commandVisualInstance.transform.rotation = commandTransform.Item2;
         }
 
         public void ProcessInput(ref FGameplayInput input)
@@ -207,7 +269,10 @@ namespace LichLord
 
         public void OnFixedUpdate()
         {
-
+            if(SquadTargetTransform_0.IsValid) 
+                ToggleVisuals(0, true);
+            else
+                ToggleVisuals(0, false);
         }
 
     }

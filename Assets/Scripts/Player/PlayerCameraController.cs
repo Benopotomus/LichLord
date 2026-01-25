@@ -15,6 +15,8 @@ namespace LichLord
 
         private bool isFirstPerson = false;
 
+        public bool LockAiming = false;
+
         public override void Spawned()
         {
             base.Spawned();
@@ -30,6 +32,9 @@ namespace LichLord
         public void ProcessInput(ref FGameplayInput input)
         {
             if (!HasStateAuthority)
+                return;
+
+            if (LockAiming)
                 return;
 
             Vector2 lookDelta = input.LookDelta;

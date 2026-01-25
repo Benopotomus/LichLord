@@ -14,6 +14,7 @@ namespace LichLord
         public bool Fire;
         public bool FireHeld;
         public bool AltFire;
+        public bool AltFireHeld;
 
         public bool PlaceBuildable;
         public bool RotateBuildableYaw;

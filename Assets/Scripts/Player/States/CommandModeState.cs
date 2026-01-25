@@ -38,6 +38,7 @@ namespace LichLord
 
             fsmRef.PC.Movement.WritePosition();
             fsmRef.PC.Maneuvers.OnFixedUpdate();
+            fsmRef.PC.Commander.OnFixedUpdate();
 
             fsmRef.PC.Interactor.RefreshInteractables();
             fsmRef.PC.Interactor.ProcessInput(ref input);

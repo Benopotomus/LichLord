@@ -72,6 +72,7 @@ namespace LichLord
             _input.Fire = false;
             _input.FireHeld = false;
             _input.AltFire = false;
+            _input.AltFireHeld = false;
 
             _input.PlaceBuildable = false;
             _input.RotateBuildableYaw = false;
@@ -120,8 +121,10 @@ namespace LichLord
             _input.Crouch |= _controls.Gameplay.Crouch.WasPressedThisFrame();
             _input.CrouchHeld = _controls.Gameplay.Crouch.IsPressed();
             _input.Fire |= _controls.Gameplay.Fire.WasPressedThisFrame();
-            _input.AltFire |= _controls.Gameplay.AltFire.WasPressedThisFrame();
             _input.FireHeld |= _controls.Gameplay.Fire.IsPressed();
+            _input.AltFire |= _controls.Gameplay.AltFire.WasPressedThisFrame();
+            _input.AltFireHeld |= _controls.Gameplay.AltFire.IsPressed();
+
             _input.Sprint = _controls.Gameplay.Sprint.IsPressed();
             _input.ToggleCameraView |= _controls.Gameplay.CameraViewSwitch.WasPressedThisFrame();
             _input.BuildMode |= _controls.Gameplay.BuildMode.WasPressedThisFrame();

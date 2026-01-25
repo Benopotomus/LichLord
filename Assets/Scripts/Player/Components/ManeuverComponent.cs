@@ -98,15 +98,28 @@ namespace LichLord
             ManeuverDefinition selectedManeuver = GetSelectedManeuver();
 
             if (activeManeuver != null &&
-                selectedManeuver != activeManeuver)
+                activeManeuver != selectedManeuver &&
+                activeManeuver != selectedManeuver.AltFireManeuver)
                 return;
 
             if (activeManeuver.InputType == EInputType.Held)
             {
-                if (input.FireHeld)
+                switch (activeManeuver.FireButton)
                 {
-                    _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                    case EFireButton.Fire:
+                        if (input.FireHeld)
+                        {
+                            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                        }
+                        break;
+                    case EFireButton.AltFire:
+                        if (input.AltFireHeld)
+                        {
+                            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                        }
+                        break;
                 }
+
             }
 
             if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
@@ -154,6 +167,10 @@ namespace LichLord
                     {
                         action.Definition.Execute(_pc, Runner);
                     }
+
+                    if(ticksSinceStart > action.SpawnTick)
+                        action.Definition.Sustain(_pc, Runner);
+
                 }
             }
 
@@ -218,16 +235,25 @@ namespace LichLord
 
             if (input.FireHeld)
             {
-                Debug.Log($"[ActionManager] Executing action: {GetSelectedManeuver().ManeuverName} (Index: {_selectedIndex})");
-
-                _activeManeuverTick = Runner.Tick;
-                _activeManeuverId = (sbyte)maneuverList[_selectedIndex].TableID;
-                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Duration);
-
-                activeManeuver = GetActiveManeuver();
-                activeManeuver.StartExecute(_pc, this, Runner);
-                _lastProcessedTick = Runner.Tick;
+                StartManeuver(selectedManeuver);
             }
+            else if (input.AltFireHeld)
+            {
+                if (selectedManeuver.AltFireManeuver != null)
+                    StartManeuver(selectedManeuver.AltFireManeuver);
+            }
+        }
+
+        private void StartManeuver(ManeuverDefinition selectedManeuver)
+        {
+            Debug.Log($"[ActionManager] Executing action: {selectedManeuver.ManeuverName} (Index: {_selectedIndex})");
+
+            _activeManeuverTick = Runner.Tick;
+            _activeManeuverId = (sbyte)selectedManeuver.TableID;
+            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Duration);
+
+            selectedManeuver.StartExecute(_pc, this, Runner);
+            _lastProcessedTick = Runner.Tick;
         }
 
         private void ProcessWeaponAttackActivation(ref FGameplayInput input)

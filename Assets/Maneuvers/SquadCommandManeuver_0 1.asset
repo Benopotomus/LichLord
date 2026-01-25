@@ -12,13 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78907bdd2eb2c7f44b5f6d0b44cde5af, type: 3}
   m_Name: SquadCommandManeuver_0 1
   m_EditorClassIdentifier: 
-  _tableID: 2
+  _tableID: 3
   ManeuverName: Squad Command 1
   _duration: 0.25
-  Cooldown: 1
-  ActionSound: {fileID: 0}
-  _inputType: 0
-  _muzzle: 0
+  _cooldown: 1
+  _fireButton: 1
+  _inputType: 1
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
@@ -49,8 +48,8 @@ MonoBehaviour:
         PitchOffset: 20
         YawOffset: 70
         RollOffset: 0
-  AnimationSpeed: 1
-  MovementSpeedMultiplier: 1
+  _animationSpeed: 1
+  _movementSpeedMultiplier: 1
   _timedProjectiles: []
   _cycleProjectiles: []
   _projectileCycleDelayTicks: 0
@@ -58,4 +57,4 @@ MonoBehaviour:
   _timedActions:
   - SpawnTick: 4
     Definition: {fileID: 11400000, guid: b5aa1bde582ea2a479d48ec9949ca507, type: 2}
-  _maneuverActions: []
+  _altFireManeuver: {fileID: 0}

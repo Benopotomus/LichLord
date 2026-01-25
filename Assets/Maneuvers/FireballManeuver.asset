@@ -15,10 +15,9 @@ MonoBehaviour:
   _tableID: 1
   ManeuverName: Fireball
   _duration: 0.5
-  Cooldown: 0.3
-  ActionSound: {fileID: 0}
+  _cooldown: 1
+  _fireButton: 1
   _inputType: 0
-  _muzzle: 0
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
@@ -49,8 +48,8 @@ MonoBehaviour:
         PitchOffset: 20
         YawOffset: 70
         RollOffset: 0
-  AnimationSpeed: 1
-  MovementSpeedMultiplier: 0.65
+  _animationSpeed: 1
+  _movementSpeedMultiplier: 1
   _timedProjectiles:
   - SpawnTick: 12
     Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
@@ -65,4 +64,5 @@ MonoBehaviour:
   _cycleProjectiles: []
   _projectileCycleDelayTicks: 0
   _projectileTicksPerCycle: 0
-  _maneuverActions: []
+  _timedActions: []
+  _altFireManeuver: {fileID: 11400000, guid: e4e0fb01e274bc44fa9931606a372afa, type: 2}

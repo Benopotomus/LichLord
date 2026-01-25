@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: SwapWeaponManeuver
   m_EditorClassIdentifier: 
-  _tableID: 7
+  _tableID: 8
   ManeuverName: Swap Weapon
   _duration: 0.4
   Cooldown: 0.25
   ActionSound: {fileID: 0}
+  _fireButton: 1
   _inputType: 0
   _muzzle: 0
   _muzzleEffectPrefab:
@@ -58,4 +59,4 @@ MonoBehaviour:
   _timedActions:
   - SpawnTick: 0
     Definition: {fileID: 11400000, guid: 596fb517c9280094abd9bb7f4191cec9, type: 2}
-  _maneuverActions: []
+  _altFireManeuver: {fileID: 0}

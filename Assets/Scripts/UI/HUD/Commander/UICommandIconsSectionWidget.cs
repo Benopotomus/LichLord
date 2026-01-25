@@ -15,8 +15,23 @@ namespace LichLord.UI
 
         protected override void OnVisible()
         {
-            base.OnVisible();
+            base.OnVisible();   
             StartCoroutine(BindPlayerCharacter());
+
+            ReverseGridOrder();
+
+            for (int i = 0; i < _slotWidgets.Length; i++)
+                _slotWidgets[i].SetSlot(i);
+        }
+
+        private void ReverseGridOrder()
+        {
+            for (int i = 0; i < _slotWidgets.Length; i++)
+            {
+                _slotWidgets[i].transform.SetSiblingIndex(
+                    _slotWidgets.Length - 1 - i
+                );
+            }
         }
 
         protected override void OnHidden()
@@ -39,6 +54,7 @@ namespace LichLord.UI
                 UISquadCommandSlot widget = _slotWidgets[i];
                 CommandSquad squad = _pc.Commander.Squads[i];
 
+                OnCommandUnitSquadChanged(i, squad, 0);
             }
 
             _pc.Commander.OnCommandSquadUnitChanged += OnCommandUnitSquadChanged;

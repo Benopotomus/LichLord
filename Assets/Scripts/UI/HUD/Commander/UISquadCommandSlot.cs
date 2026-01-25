@@ -28,15 +28,24 @@ namespace LichLord.UI
         [SerializeField]
         private Color _activeColor;
 
+        public void SetSlot(int slot)
+        {
+            _slot = slot;
+            _text.text = (_slot + 1).ToString();
+        }
+
         public void OnCommandSquadChanged(int squadId, CommandSquad squad, int formationIndex)
         {
+            if (squadId != _slot)
+                return;
+
             if (squad.HasAnyUnitsActive())
             {
-                _cooldownImage.enabled = true;
+                _cooldownImage.enabled = false;
             }
             else
             {
-                _cooldownImage.enabled = false;
+                _cooldownImage.enabled = true;
             }
 
 
