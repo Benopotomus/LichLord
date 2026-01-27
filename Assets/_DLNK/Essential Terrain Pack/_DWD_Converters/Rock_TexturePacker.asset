@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 670917b52644ba948ab31bc80c8ae6f8, type: 3}
+  m_Name: Rock_TexturePacker
+  m_EditorClassIdentifier: 
+  _inputTextures:
+  - {fileID: 2800000, guid: 5e505b8a2c683f8468adcd3860442fd7, type: 3}
+  - {fileID: 2800000, guid: c10da00f0ac80a44895fb50cf7a4f587, type: 3}
+  - {fileID: 2800000, guid: a65f06e7929bc5b45b5a59162004b052, type: 3}
+  _outputTextures:
+  - outputSuffix: _Ultralite
+    rChannel:
+      enabled: 1
+      textureSource: 0
+      channel: 1
+    gChannel:
+      enabled: 1
+      textureSource: 1
+      channel: 3
+    bChannel:
+      enabled: 1
+      textureSource: 2
+      channel: 1
+    aChannel:
+      enabled: 1
+      textureSource: 1
+      channel: 1
+  _outputPath: F:/disruptorhome/LichLord/Assets/_DLNK/Essential Terrain Pack/_DWD_Converters
