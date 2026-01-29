@@ -14,12 +14,14 @@ namespace LichLord
         {
             base.OnEnterState();
             fsmRef.PC.Maneuvers.OnEnterState(EManeuverList.Commands);
+            fsmRef.PC.Commander.OnEnterState();
         }
 
         protected override void OnExitState()
         {
             base.OnExitState();
             fsmRef.PC.Maneuvers.OnExitState();
+            fsmRef.PC.Commander.OnExitState();
         }
 
         protected override void OnFixedUpdate()

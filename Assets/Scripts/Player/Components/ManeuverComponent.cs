@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Fusion;
 using System.Collections.Generic;
+using System;
 
 namespace LichLord
 {
@@ -50,6 +51,8 @@ namespace LichLord
 
         private int _lastProcessedTick = -1;
 
+        public Action<ManeuverDefinition> OnSelectedManeuverChanged;
+
         public float GetMoveSpeedMultiplier()
         { 
             if(_activeManeuverId < 0)
@@ -79,7 +82,7 @@ namespace LichLord
         {
             ProcessManeuverSelection(ref input);
             ProcessManeuverActivation(ref input);
-            ProcessWeaponAttackActivation(ref input);
+            //ProcessWeaponAttackActivation(ref input);
             ProcessWeaponSwapActivation(ref input);
             ProcessActiveManeuver(ref input);
         }
@@ -256,33 +259,6 @@ namespace LichLord
             _lastProcessedTick = Runner.Tick;
         }
 
-        private void ProcessWeaponAttackActivation(ref FGameplayInput input)
-        {
-            // If the event is on cooldown, early out
-            if (!_weaponAttackCooldownTimer.ExpiredOrNotRunning(Runner))
-            {
-                //Debug.Log("Maneuver cooldown timer is running for " + _selectedIndex);
-                return;
-            }
-
-            // Cache current selected maneuver
-            ManeuverDefinition activeManeuver = GetActiveManeuver();
-
-            if (activeManeuver != null)
-                return;
-
-            if (input.AltFire)
-            {
-                _activeManeuverTick = Runner.Tick;
-                _activeManeuverId = (sbyte)_weaponAttackManeuver.TableID;
-                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _weaponAttackManeuver.Duration);
-
-                activeManeuver = GetActiveManeuver();
-                activeManeuver.StartExecute(_pc, this, Runner);
-                _lastProcessedTick = Runner.Tick;
-            }
-        }
-
         private void ProcessWeaponSwapActivation(ref FGameplayInput input)
         {
             // If the event is on cooldown, early out
@@ -376,15 +352,18 @@ namespace LichLord
             if (newIndex == _selectedIndex)
                 return;
 
-            UpdateActionSelection(newIndex);
+            UpdateManeuverSelection(newIndex);
         }
 
-        private void UpdateActionSelection(int newIndex)
+        private void UpdateManeuverSelection(int newIndex)
         {
             if (!HasStateAuthority)
                 return;
 
             var maneuverList = GetManeuverList();
+
+            if (maneuverList.Count == 0)
+                return;
 
             if (_selectedIndex >= 0 && _selectedIndex < maneuverList.Count)
             {
@@ -405,7 +384,9 @@ namespace LichLord
             else
             {
                 Debug.Log("[ActionManager] Action selection cleared");
-            }            
+            }
+
+            OnSelectedManeuverChanged?.Invoke(GetSelectedManeuver());
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -495,7 +476,7 @@ namespace LichLord
                     break;
             }
 
-            UpdateActionSelection(selectedIndex);
+            UpdateManeuverSelection(selectedIndex);
         }
 
         private List<ManeuverDefinition> GetManeuverList()

@@ -28,10 +28,17 @@ namespace LichLord.UI
         [SerializeField]
         private Color _activeColor;
 
+        private ManeuverDefinition _maneuver;
+
         public void SetSlot(int slot)
         {
             _slot = slot;
             _text.text = (_slot + 1).ToString();
+        }
+
+        public void SetManeuver(ManeuverDefinition maneuver)
+        {
+            _maneuver = maneuver;
         }
 
         public void OnCommandSquadChanged(int squadId, CommandSquad squad, int formationIndex)
@@ -47,9 +54,14 @@ namespace LichLord.UI
             {
                 _cooldownImage.enabled = true;
             }
-
-
         }
 
+        public void OnSelectedManeuverChanged(ManeuverDefinition definition)
+        {
+            if (_maneuver == definition)
+                _iconImage.color = _selectedColor;
+            else
+                _iconImage.color = _unselectedColor;
+        }
     }
 }

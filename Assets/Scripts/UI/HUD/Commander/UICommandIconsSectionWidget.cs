@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -6,16 +7,15 @@ namespace LichLord.UI
 {
     public class UICommandIconsSectionWidget : UIWidget
     {
-
-        [SerializeField]
-        private PlayerCharacter _pc;
-
         [SerializeField]
         private UISquadCommandSlot[] _slotWidgets;
 
+        private PlayerCharacter _pc;
+
         protected override void OnVisible()
         {
-            base.OnVisible();   
+            base.OnVisible();
+
             StartCoroutine(BindPlayerCharacter());
 
             ReverseGridOrder();
@@ -37,7 +37,10 @@ namespace LichLord.UI
         protected override void OnHidden()
         {
             if (_pc != null)
+            {
                 _pc.Commander.OnCommandSquadUnitChanged -= OnCommandUnitSquadChanged;
+                _pc.Maneuvers.OnSelectedManeuverChanged -= OnSelectedManeuverChanged;
+            }
 
             base.OnHidden();
         }
@@ -52,12 +55,24 @@ namespace LichLord.UI
             for (int i = 0; i < _slotWidgets.Length; i++)
             {
                 UISquadCommandSlot widget = _slotWidgets[i];
-                CommandSquad squad = _pc.Commander.Squads[i];
+                if (i >= _pc.Maneuvers.CommandManeuvers.Count)
+                    continue;
 
+                CommandSquad squad = _pc.Commander.Squads[i];
+                ManeuverDefinition maneuver = _pc.Maneuvers.CommandManeuvers[i];
+                widget.SetManeuver(maneuver);
                 OnCommandUnitSquadChanged(i, squad, 0);
+                OnSelectedManeuverChanged(_pc.Maneuvers.GetSelectedManeuver());
             }
 
             _pc.Commander.OnCommandSquadUnitChanged += OnCommandUnitSquadChanged;
+            _pc.Maneuvers.OnSelectedManeuverChanged += OnSelectedManeuverChanged;
+        }
+
+        private void OnSelectedManeuverChanged(ManeuverDefinition definition)
+        {
+            for (int i = 0; i < _slotWidgets.Length; i++)
+                _slotWidgets[i].OnSelectedManeuverChanged(definition);
         }
 
         private void OnCommandUnitSquadChanged(int squadId, CommandSquad squad, int formationIndex)
@@ -67,5 +82,7 @@ namespace LichLord.UI
             widget.OnCommandSquadChanged(squadId, squad, formationIndex);
 
         }
+
+
     }
 }

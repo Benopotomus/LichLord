@@ -12,14 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: WeaponAttackManeuver
   m_EditorClassIdentifier: 
-  _tableID: 9
+  _tableID: 12
   ManeuverName: Weapon Attack
   _duration: 0.75
-  Cooldown: 0
-  ActionSound: {fileID: 0}
+  _cooldown: 1
   _fireButton: 1
   _inputType: 0
-  _muzzle: 0
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
@@ -50,8 +48,8 @@ MonoBehaviour:
         PitchOffset: 45
         YawOffset: -15
         RollOffset: 0
-  AnimationSpeed: 1
-  MovementSpeedMultiplier: 0.65
+  _animationSpeed: 1
+  _movementSpeedMultiplier: 1
   _timedProjectiles: []
   _cycleProjectiles: []
   _projectileCycleDelayTicks: 0

@@ -8,33 +8,52 @@ namespace LichLord
     public class CommanderComponent : ContextBehaviour
     {
         [SerializeField]
+        private PlayerCharacter _pc;
+
+        [SerializeField]
         private CommandSquad[] _squads = new CommandSquad[3];
         public CommandSquad[] Squads => _squads;
 
-        [SerializeField]
-        private float backLineZOffset = -2f; // Offset to place the back line behind the front line
+        private float backLineZOffset = -1f; // Offset to place the back line behind the front line
+        private float frontLineZOffset = 1f;
 
         [SerializeField]
         private float xSpacing = 2f; // Fixed 2-unit spacing between characters along x-axis
 
         [Networked]
         public ref FCommandTransform SquadTargetTransform_0 => ref MakeRef<FCommandTransform>();
+        private float _desiredY_0 = 0;
+        private ESquadStance _desiredStance_0;
+        public ESquadStance DesiredStance_0 => _desiredStance_0;
 
         [Networked]
         public ref FCommandTransform SquadTargetTransform_1 => ref MakeRef<FCommandTransform>();
+        private float _desiredY_1 = 0;
+        private ESquadStance _desiredStance_1;
+        public ESquadStance DesiredStance_1 => _desiredStance_1;
 
         [Networked]
         public ref FCommandTransform SquadTargetTransform_2 => ref MakeRef<FCommandTransform>();
+        private float _desiredY_2 = 0;
+        private ESquadStance _desiredStance_2;
+        public ESquadStance DesiredStance_2 => _desiredStance_2;
 
         [SerializeField]
-        private GameObject _commandVisualPrefab;
-        private GameObject _commandVisualInstance;
+        private SquadCommandVisual _squadCommmandVisualPrefab;
+        private SquadCommandVisual[] _squadCommandVisuals = new SquadCommandVisual[3];
 
         public Action<int, CommandSquad, int> OnCommandSquadUnitChanged;
 
+        public Action<int, ESquadStance> OnDesiredSquadStanceChanged;
+
+        public Action<int, bool> OnIsModifyingStanceChanged;
+
         public override void Spawned()
         {
-            _commandVisualInstance = GameObject.Instantiate(_commandVisualPrefab) as GameObject;
+            for (int i = 0; i < 3; i++)
+            {
+                _squadCommandVisuals[i] = Instantiate(_squadCommmandVisualPrefab) as SquadCommandVisual;
+            }
         }
 
         public void AddCharacter(NonPlayerCharacter npc, int squadId, int formationIndex)
@@ -111,7 +130,7 @@ namespace LichLord
             float totalWidth = (occupiedInRow - 1) * xSpacing;
             float xOffset = -(totalWidth / 2f) + (positionInRow * xSpacing);
 
-            float zOffset = (row == 0) ? 0f : backLineZOffset;
+            float zOffset = (row == 0) ? frontLineZOffset : backLineZOffset;
 
             Vector3 localOffset = new Vector3(xOffset, 0f, zOffset);
 
@@ -173,20 +192,36 @@ namespace LichLord
                    _squads[squadId] != null;
         }
 
-        private (Vector3, Quaternion) GetCommandTransformForSquad(int squadId)
+        public bool IsCommandTargetValid(int squadId)
+        {
+            switch (squadId)
+            {
+                case 0:
+                    return SquadTargetTransform_0.Stance != ESquadStance.Follow;
+                case 1:
+                    return SquadTargetTransform_1.Stance != ESquadStance.Follow;
+                case 2:
+                    return SquadTargetTransform_2.Stance != ESquadStance.Follow;
+                    
+            }
+
+            return false;
+        }
+
+        public (Vector3, Quaternion) GetCommandTransformForSquad(int squadId)
         {
             switch (squadId)
             { 
                 case 0:
-                    if (SquadTargetTransform_0.IsValid)
+                    if (SquadTargetTransform_0.Stance != ESquadStance.Follow)
                         return (SquadTargetTransform_0.Position, SquadTargetTransform_0.Rotation);
                     break;
                  case 1:
-                    if (SquadTargetTransform_1.IsValid)
+                    if (SquadTargetTransform_1.Stance != ESquadStance.Follow)
                         return (SquadTargetTransform_1.Position, SquadTargetTransform_1.Rotation);
                     break;
                 case 2:
-                    if (SquadTargetTransform_2.IsValid)
+                    if (SquadTargetTransform_2.Stance != ESquadStance.Follow)
                         return (SquadTargetTransform_2.Position, SquadTargetTransform_2.Rotation);
                     break;
             }
@@ -200,15 +235,18 @@ namespace LichLord
             {
                 case 0:
                     SquadTargetTransform_0.Position = position;
-                    SquadTargetTransform_0.IsValid = true;
+                    if (SquadTargetTransform_0.Stance == ESquadStance.Follow)
+                        SquadTargetTransform_0.Stance = ESquadStance.Attack;
                     break;
                 case 1:
                     SquadTargetTransform_1.Position = position;
-                    SquadTargetTransform_1.IsValid = true;
+                    if (SquadTargetTransform_1.Stance == ESquadStance.Follow)
+                        SquadTargetTransform_1.Stance = ESquadStance.Attack;
                     break;
                 case 2:
                     SquadTargetTransform_2.Position = position;
-                    SquadTargetTransform_2.IsValid = true;
+                    if (SquadTargetTransform_2.Stance == ESquadStance.Follow)
+                        SquadTargetTransform_2.Stance = ESquadStance.Attack;
                     break;
             }
         }
@@ -219,15 +257,12 @@ namespace LichLord
             {
                 case 0:
                     SquadTargetTransform_0.Rotation = Quaternion.LookRotation(direction);
-                    SquadTargetTransform_0.IsValid = true;
                     break;
                 case 1:
                     SquadTargetTransform_1.Rotation = Quaternion.LookRotation(direction);
-                    SquadTargetTransform_1.IsValid = true;
                     break;
                 case 2:
                     SquadTargetTransform_2.Rotation = Quaternion.LookRotation(direction);
-                    SquadTargetTransform_2.IsValid = true;
                     break;
             }
         }
@@ -254,26 +289,155 @@ namespace LichLord
             }
         }
 
-        public void ToggleVisuals(int squadId, bool isDisplayed)
+        public void SetModifyingStance(int squadId, bool isModifying)
         {
-            var commandTransform = GetCommandTransformForSquad(squadId);
-
-            _commandVisualInstance.transform.position = commandTransform.Item1;
-            _commandVisualInstance.transform.rotation = commandTransform.Item2;
+            OnIsModifyingStanceChanged.Invoke(squadId, isModifying);
         }
 
-        public void ProcessInput(ref FGameplayInput input)
-        { 
-        
+        public void ModifyDesiredCommandStance(int squadId, float inputY)
+        {
+            {
+                switch (squadId)
+                {
+                    case 0:
+                        _desiredY_0 += inputY; 
+                        _desiredStance_0 = GetNextStance(_desiredStance_0, ref _desiredY_0);
+                        OnDesiredSquadStanceChanged?.Invoke(0, _desiredStance_0);
+                        break;
+                    case 1:
+                        _desiredY_1 += inputY;
+                        _desiredStance_1 = GetNextStance(_desiredStance_1, ref _desiredY_1);
+                        OnDesiredSquadStanceChanged?.Invoke(1, _desiredStance_1);
+                        break;
+                    case 2:
+                        _desiredY_2 += inputY;
+                        _desiredStance_2 = GetNextStance(_desiredStance_2, ref _desiredY_2);
+                        OnDesiredSquadStanceChanged?.Invoke(2, _desiredStance_2);
+                        break;
+                }
+            }
+        }
+
+        public void ConfirmDesiredStance(int squadId)
+        {
+            switch (squadId)
+            {
+                case 0:
+                    SquadTargetTransform_0.Stance = _desiredStance_0;
+                    _desiredY_0 = 0;
+                    break;
+                case 1:
+                    SquadTargetTransform_1.Stance = _desiredStance_1;
+                    _desiredY_1 = 0;
+                    break;
+                case 2:
+                    SquadTargetTransform_2.Stance = _desiredStance_2;
+                    _desiredY_2 = 0;
+                    break;
+            }
+        }
+
+        private ESquadStance GetNextStance(ESquadStance oldStance, ref float inputY)
+        {
+            if (inputY > 1)
+            {
+                switch (oldStance)
+                {
+                    case ESquadStance.Attack:
+                        inputY = 0;
+                        return ESquadStance.Defend;
+                    case ESquadStance.Defend:
+                        inputY = 0;
+                        return ESquadStance.Follow;
+                }
+            }
+            else if (inputY < -1)
+            {
+                switch (oldStance)
+                {
+                    case ESquadStance.Follow:
+                        inputY = 0;
+                        return ESquadStance.Defend;
+                    case ESquadStance.Defend:
+                        inputY = 0;
+                        return ESquadStance.Attack;
+                }
+            }
+
+            return oldStance;
+        }
+
+        public ESquadStance GetDesiredStance(int squadId)
+        {
+            switch (squadId)
+            {
+                case 0: return _desiredStance_0;
+                case 1: return _desiredStance_1;
+                case 2: return _desiredStance_2;
+            }
+
+            return ESquadStance.Attack;
+        }
+
+        public ESquadStance GetStance(int squadId)
+        {
+            switch (squadId)
+            {
+                case 0: return SquadTargetTransform_0.Stance;
+                case 1: return SquadTargetTransform_1.Stance;
+                case 2: return SquadTargetTransform_2.Stance;
+            }
+
+            return ESquadStance.Attack;
+        }
+
+        public void ToggleVisuals(bool isDisplayed)
+        {
+            for (int i = 0; i < _squadCommandVisuals.Length; i++)
+            {
+                _squadCommandVisuals[i].SetActive(isDisplayed);
+            }
         }
 
         public void OnFixedUpdate()
         {
-            if(SquadTargetTransform_0.IsValid) 
-                ToggleVisuals(0, true);
-            else
-                ToggleVisuals(0, false);
+            var selectedManeuver = _pc.Maneuvers.GetSelectedManeuver();
+            if (selectedManeuver == null)
+            {
+                ToggleVisuals(false);
+                return;
+            }
+
+            if (selectedManeuver.SquadId < 0)
+            {
+                ToggleVisuals(false);
+                return;
+            }
+
+            for (int i = 0; i < _squadCommandVisuals.Length; i++)
+            {
+                if (i == selectedManeuver.SquadId)
+                {
+                    _squadCommandVisuals[i].SetActive(true);
+                    _squadCommandVisuals[i].UpdateVisuals(this, i);
+                }
+                else
+                {
+                    _squadCommandVisuals[i].SetActive(false);
+                }
+            }
         }
+
+        public void OnEnterState()
+        {
+            ToggleVisuals(true);
+        }
+
+        public void OnExitState()
+        {
+            ToggleVisuals(false);
+        }
+
 
     }
 

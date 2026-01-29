@@ -1,7 +1,5 @@
 ﻿using DWD.Utility.Loading;
-using LichLord.Items;
 using LichLord.NonPlayerCharacters;
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

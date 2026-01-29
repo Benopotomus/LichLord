@@ -7,15 +7,15 @@ namespace LichLord
     [StructLayout(LayoutKind.Explicit, Size = 9)]
     public struct FCommandTransform : INetworkStruct
     {
-        [FieldOffset(0)] private NetworkBool _isValid; // 1 bytes
+        [FieldOffset(0)] private byte _stance; // 1 bytes
         [FieldOffset(1)] private FWorldPosition _position; // 7 bytes
         [FieldOffset(8)] private byte _compressedYaw; // 1 byte
         // Total: 9 bytes
 
-        public bool IsValid
-        {
-            get => _isValid;
-            set => _isValid = value;
+        public ESquadStance Stance
+        { 
+            get => (ESquadStance)_stance;
+            set => _stance = (byte)value;
         }
 
         public float PositionX
@@ -69,7 +69,6 @@ namespace LichLord
                 );
             }
         }
-
 
         public Quaternion Rotation
         {
@@ -142,5 +141,12 @@ namespace LichLord
             _position.CopyPosition(in other._position);
             _compressedYaw = other._compressedYaw;
         }
+    }
+
+    public enum ESquadStance
+    { 
+        Follow,
+        Defend,
+        Attack,
     }
 }

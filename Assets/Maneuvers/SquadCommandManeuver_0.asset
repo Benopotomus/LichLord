@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78907bdd2eb2c7f44b5f6d0b44cde5af, type: 3}
+  m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: SquadCommandManeuver_0
   m_EditorClassIdentifier: 
-  _tableID: 5
+  _tableID: 3
   ManeuverName: Squad Command 0
-  _duration: 0.25
+  _duration: 0.1
   _cooldown: 1
   _fireButton: 1
   _inputType: 1
@@ -55,6 +55,7 @@ MonoBehaviour:
   _projectileCycleDelayTicks: 0
   _projectileTicksPerCycle: 0
   _timedActions:
-  - SpawnTick: 4
+  - SpawnTick: 1
     Definition: {fileID: 11400000, guid: ee2d123361eb3114a926373f14390d19, type: 2}
-  _altFireManeuver: {fileID: 0}
+  _altFireManeuver: {fileID: 11400000, guid: f1392985f19a7c745be385ecf77519fe, type: 2}
+  _squadId: 0

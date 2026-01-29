@@ -81,6 +81,10 @@ namespace LichLord
         private ManeuverDefinition _altFireManeuver;
         public ManeuverDefinition AltFireManeuver => _altFireManeuver;
 
+        [SerializeField]
+        private int _squadId = -1;
+        public int SquadId => _squadId;
+
         public virtual void SelectManeuver(PlayerCharacter playerCreature, NetworkRunner runner) { }
 
         public virtual void DeselectManeuver(PlayerCharacter playerCreature, NetworkRunner runner) { }

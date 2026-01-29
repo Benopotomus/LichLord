@@ -12,14 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fc1e2bf877386b458948e20958dcaf5, type: 3}
   m_Name: SummonSkeletonWorkerManeuver
   m_EditorClassIdentifier: 
-  _tableID: 7
+  _tableID: 10
   ManeuverName: Summon Skeleton Worker
   _duration: 0.6
-  Cooldown: 1
-  ActionSound: {fileID: 0}
+  _cooldown: 1
   _fireButton: 1
   _inputType: 0
-  _muzzle: 0
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
@@ -50,8 +48,8 @@ MonoBehaviour:
         PitchOffset: 40
         YawOffset: 60
         RollOffset: 0
-  AnimationSpeed: 1
-  MovementSpeedMultiplier: 0.75
+  _animationSpeed: 1
+  _movementSpeedMultiplier: 1
   _timedProjectiles: []
   _cycleProjectiles: []
   _projectileCycleDelayTicks: 0

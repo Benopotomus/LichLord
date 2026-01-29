@@ -29,11 +29,6 @@ namespace LichLord.UI
             UpdateScreenSpaceScale();
         }
 
-        protected override void OnTick()
-        {
-            base.OnTick();
-        }
-
         private void UpdateScreenSpaceScale()
         {
             if (_scaleDistanceCurve == null)

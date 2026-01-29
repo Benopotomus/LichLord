@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
+  m_Name: SquadCommandManeuver_1_AltFire
+  m_EditorClassIdentifier: 
+  _tableID: 6
+  ManeuverName: Squad Command 1 AltFire
+  _duration: 0.1
+  _cooldown: 1
+  _fireButton: 2
+  _inputType: 1
+  _muzzleEffectPrefab:
+    _name: 
+    _bundle: 
+  _icon:
+    _name: 
+    _bundle: 
+  Fullbody: 0
+  _upperBodyAnimationStates:
+    _serializedList:
+    - Key: 0
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 12
+        PitchOffset: 0
+        YawOffset: 0
+        RollOffset: 0
+    - Key: 6
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 8
+        PitchOffset: 45
+        YawOffset: 50
+        RollOffset: 0
+    - Key: 7
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 8
+        PitchOffset: 20
+        YawOffset: 70
+        RollOffset: 0
+  _animationSpeed: 1
+  _movementSpeedMultiplier: 1
+  _timedProjectiles: []
+  _cycleProjectiles: []
+  _projectileCycleDelayTicks: 0
+  _projectileTicksPerCycle: 0
+  _timedActions:
+  - SpawnTick: 1
+    Definition: {fileID: 11400000, guid: b49b686d4a085804a98eaffab9480948, type: 2}
+  _altFireManeuver: {fileID: 0}
