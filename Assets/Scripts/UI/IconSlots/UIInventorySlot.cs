@@ -43,7 +43,7 @@ namespace LichLord.UI
 
                 if (targetSlot is UIStrongholdWorkerItemSlot workerItemSlot)
                 {
-                    if (_itemDefinition is not SummonableDefinition summonableDefinition)
+                    if (_itemDefinition is not SummonableItemDefinition summonableDefinition)
                         return;
                 }
 

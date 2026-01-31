@@ -1,5 +1,6 @@
 ﻿using Fusion;
 using LichLord.Dialog;
+using LichLord.Items;
 using LichLord.World;
 using System.Collections.Generic;
 using UnityEngine;
@@ -157,8 +158,8 @@ namespace LichLord.NonPlayerCharacters
                     hitMask))
                 {
                     var result = definition.IsFrontlineCombatant ?
-                        formationComponent.GetFreeFrontlineIndex() :
-                        formationComponent.GetFreeBacklineIndex();
+                        formationComponent.GetFreeSquadAndFrontlineIndex() :
+                        formationComponent.GetFreeSquadAndBacklineIndex();
 
                     int squadId = result.squadId;
                     int freeFormationIndex = result.formationIndex;
@@ -167,8 +168,8 @@ namespace LichLord.NonPlayerCharacters
                     if (squadId == -1 || freeFormationIndex == -1)
                     {
                         result = definition.IsFrontlineCombatant
-                            ? formationComponent.GetFreeBacklineIndex()
-                            : formationComponent.GetFreeFrontlineIndex();
+                            ? formationComponent.GetFreeSquadAndBacklineIndex()
+                            : formationComponent.GetFreeSquadAndFrontlineIndex();
 
                         squadId = result.squadId;
                         freeFormationIndex = result.formationIndex;
@@ -184,7 +185,12 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public void SpawnCommandUnit(Vector3 spawnPos, NonPlayerCharacterDefinition definition, ETeamID teamId, int playerFollowIndex, int formationID, int formationIndex)
+        public void SpawnCommandUnit(Vector3 spawnPos, 
+            NonPlayerCharacterDefinition definition, 
+            ETeamID teamId, 
+            int playerFollowIndex, 
+            int formationID, 
+            int formationIndex)
         {
             if (!Runner.IsSharedModeMasterClient && Runner.GameMode != GameMode.Single)
                 return;
@@ -207,6 +213,61 @@ namespace LichLord.NonPlayerCharacters
             warriorData.SetState(ENPCState.Spawning, ref data);
             SpawnNPC(ref data);
         }
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_SpawnCommandGroupsFromItems(FWorldPosition centerPosition,
+           FItemData[] commandUnitItems_0,
+           FItemData[] commandUnitItems_1,
+           FItemData[] commandUnitItems_2,
+           ETeamID teamId,
+           byte playerFollowIndex)
+        {
+
+            var pc = Context.NetworkGame.GetPlayerByIndex(playerFollowIndex);
+            if (pc == null)
+                return;
+
+            var formationComponent = pc.Commander;
+            if (formationComponent == null)
+                return;
+
+            int squadId = 0;
+
+            for (int i = 0; i < commandUnitItems_0.Length; i++)
+            {
+                if (pc.Commander.IsFormationIndexFilled(squadId, i))
+                    continue;
+
+                FItemData commanedItem = commandUnitItems_0[i];
+
+                SummonableItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(commanedItem.DefinitionID) as SummonableItemDefinition;
+                if(itemDefinition == null ) 
+                    continue;
+
+                NonPlayerCharacterDefinition definition = itemDefinition.NonPlayerCharacterDefinition;
+                if (definition == null)
+                    continue;
+
+                Vector3 randomPosition = new Vector3(
+                Random.Range(-5f, 5f),
+                0, // Keep Y fixed
+                Random.Range(-5f, 5f)
+                );
+
+                // Combine offset into raycast origin
+                if (Physics.Raycast((randomPosition + centerPosition.Position) +
+                    (Vector3.up * (raycastLength * 0.5f)),
+                    Vector3.down,
+                    out RaycastHit hit,
+                    raycastLength,
+                    hitMask))
+                {
+                    pc.Commander.SetFormationIndexFilled(squadId, i);
+                    SpawnCommandUnit(hit.point, definition, teamId, playerFollowIndex, squadId, i);
+                }
+            }
+        }
+
 
         public void SpawnNPCFromSave(FNonPlayerCharacterSaveState saveState)
         {

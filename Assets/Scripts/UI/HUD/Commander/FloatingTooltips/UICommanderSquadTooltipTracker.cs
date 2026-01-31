@@ -12,8 +12,6 @@ namespace LichLord.UI
         {
             base.OnVisible();
 
-            Debug.Log("Visible");
-
             for (int i = 0; i < _tooltips.Length; i++)
                 _tooltips[i].OnTrackerVisible(i);
         }

@@ -1,5 +1,5 @@
-﻿using JetBrains.Annotations;
-using LichLord.Items;
+﻿using LichLord.Items;
+using LichLord.NonPlayerCharacters;
 using UnityEngine;
 
 namespace LichLord
@@ -20,6 +20,10 @@ namespace LichLord
         private FItemData _summon_04;
 
         private FItemData[] _inventoryItems;
+
+        private FItemData[] _squad_0;
+        private FItemData[] _squad_1;
+        private FItemData[] _squad_2;
 
         private int _carryWeight;
         public int CarryWeight => _carryWeight;
@@ -48,7 +52,27 @@ namespace LichLord
             _summon_04 = testLoadout.CopyLoadoutItem(ELoadoutSlot.Summon_04);
 
             _inventoryItems = testLoadout.CopyInventory();
+
+            _squad_0 = testLoadout.CopySquad(0);
+            _squad_1 = testLoadout.CopySquad(1);
+            _squad_2 = testLoadout.CopySquad(2);
         }
+
+        public FItemData[] GetSquadItemsAtIndex(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return _squad_0;
+                case 1:
+                    return _squad_1;
+                case 2:
+                    return _squad_2;
+            }
+
+            return new FItemData[0];
+        }
+
 
         public FItemData GetItemAtLoadoutSlot(ELoadoutSlot slot)
         {
@@ -306,6 +330,7 @@ namespace LichLord
         Summon_02,
         Summon_03,
         Summon_04,
+        CommandSquad,
     }
 }
 

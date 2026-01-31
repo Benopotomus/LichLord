@@ -11,20 +11,29 @@ namespace LichLord
     [CreateAssetMenu(fileName = "Maneuver", menuName = "LichLord/Maneuvers/ManeuverDefinition", order = 1)]
     public class ManeuverDefinition : TableObject
     {
-        public string ManeuverName;
+        [SerializeField]
+        private string _maneuverName;
+        public string ManeuverName => _maneuverName;
 
-        [SerializeField] private float _duration = 1f;
+        [SerializeField] 
+        private float _duration = 1f;
         public float Duration => _duration;
 
-        [SerializeField] private float _cooldown = 1f;
+        [SerializeField] 
+        private float _cooldown = 1f;
         public float Cooldown => _cooldown;
 
-
-        [SerializeField] private EFireButton _fireButton;
+        [SerializeField] 
+        private EFireButton _fireButton;
         public EFireButton FireButton => _fireButton; 
 
-        [SerializeField] private EInputType _inputType;
+        [SerializeField] 
+        private EInputType _inputType;
         public EInputType InputType => _inputType;
+
+        [SerializeField]
+        private ManeuverTargetingDefinition _targeting;
+        public ManeuverTargetingDefinition Targeting => _targeting;
 
         //Visuals
         [BundleObject(typeof(GameObject))]
@@ -85,9 +94,17 @@ namespace LichLord
         private int _squadId = -1;
         public int SquadId => _squadId;
 
-        public virtual void SelectManeuver(PlayerCharacter playerCreature, NetworkRunner runner) { }
+        public virtual void SelectManeuver(PlayerCharacter pc, NetworkRunner runner) { }
 
-        public virtual void DeselectManeuver(PlayerCharacter playerCreature, NetworkRunner runner) { }
+        public virtual void DeselectManeuver(PlayerCharacter pc, NetworkRunner runner) { }
+
+        public virtual Vector3 GetTargetPosition(PlayerCharacter pc, NetworkRunner runner)
+        {
+            if (Targeting == null)
+                return pc.Context.Camera.CachedRaycastHit.position;
+
+            return Targeting.GetTargetPosition(this, pc, runner);
+        }
 
         public virtual void StartExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 
         {

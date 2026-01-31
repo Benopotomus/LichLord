@@ -12151,6 +12151,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
   - {fileID: 11400000, guid: 71c7cefcfae79134d83a32db88893771, type: 2}
   - {fileID: 11400000, guid: fa5a12f2917bdad4dbc7236637674db6, type: 2}
+  - {fileID: 11400000, guid: a02020ea099ebd649a78f181028efde9, type: 2}
   _commandManeuvers:
   - {fileID: 11400000, guid: 751855629f607e044a17fff50f8f287e, type: 2}
   - {fileID: 11400000, guid: f43f9af82fa9b3342a2dddd3ab929bd4, type: 2}
@@ -12422,7 +12423,7 @@ MonoBehaviour:
   _squads:
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: -10, y: 0, z: 10}
+    DefaultSquadPositionOffset: {x: 0, y: 0, z: 8}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12458,7 +12459,7 @@ MonoBehaviour:
       IsFilled: 0
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: 0, y: 0, z: 15}
+    DefaultSquadPositionOffset: {x: -8, y: 0, z: 4}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12494,7 +12495,7 @@ MonoBehaviour:
       IsFilled: 0
   - MaxColumns: 6
     MaxRows: 2
-    DefaultSquadPositionOffset: {x: 10, y: 0, z: 10}
+    DefaultSquadPositionOffset: {x: 8, y: 0, z: 4}
     CommandUnits:
     - NPC: {fileID: 0}
       IsFilled: 0
@@ -12528,7 +12529,6 @@ MonoBehaviour:
       IsFilled: 0
     - NPC: {fileID: 0}
       IsFilled: 0
-  xSpacing: 2
   _squadCommmandVisualPrefab: {fileID: 7326009730553760371, guid: ce5ff3c1ee6125343aae922757772edf,
     type: 3}
 --- !u!114 &8453103197528511047

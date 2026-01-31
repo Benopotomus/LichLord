@@ -43,7 +43,7 @@ namespace LichLord
 
             ItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID);
 
-            if (itemDefinition is not SummonableDefinition summonable)
+            if (itemDefinition is not SummonableItemDefinition summonable)
                 return (false, "Item Invalid");
 
             Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;

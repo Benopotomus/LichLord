@@ -23,7 +23,7 @@ namespace LichLord
         [Header("Raycast Settings")]
         [SerializeField] private float _minRaycastDistance = 2.7f;
         [SerializeField] private float _maxRaycastDistance = 100f;
-        [SerializeField] private LayerMask raycastLayerMask;
+        [SerializeField] private LayerMask _raycastLayerMask;
         [SerializeField] private LayerMask _buildableZoneLayerMask;
         [SerializeField] private LayerMask _trackableLayerMask;
         [SerializeField] private LayerMask _interactableLayerMask;
@@ -247,7 +247,7 @@ namespace LichLord
                 return;
             }
 
-            LayerMask combinedMask = raycastLayerMask
+            LayerMask combinedMask = _raycastLayerMask
                 | _buildableZoneLayerMask
                 | _trackableLayerMask
                 | _interactableLayerMask;
@@ -257,26 +257,33 @@ namespace LichLord
             _cachedRaycastHit.trackable = null;
             _cachedRaycastHit.interactable = null;
 
-            float closestWorldHit = float.MaxValue;
             float closestInteractableDist = float.MaxValue;
             float closestBuildableDist = float.MaxValue;
             float closestTrackableDist = float.MaxValue;
 
+            // NEW: We'll cache the actual hit for the closest interactable so we can use its precise point
+            RaycastHit closestInteractableHit = default;
+            bool haveValidInteractableHit = false;
+
             RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, _maxRaycastDistance, combinedMask, QueryTriggerInteraction.Collide);
 
-            RaycastHit closestHit = new RaycastHit();
+            // Track the closest world (solid geometry) hit
+            RaycastHit closestWorldHit = default;
+            float closestWorldDistance = float.MaxValue;
             bool foundValidWorldHit = false;
 
             foreach (var hit in hits)
             {
-                // Skip ignored object and children
-                if (ignoredObject != null && (hit.collider.gameObject == ignoredObject || hit.collider.transform.IsChildOf(ignoredObject.transform)))
+                // Skip ignored object and its children (usually the player)
+                if (ignoredObject != null &&
+                    (hit.collider.gameObject == ignoredObject || hit.collider.transform.IsChildOf(ignoredObject.transform)))
                     continue;
 
                 float dist = hit.distance;
+                int layerBit = 1 << hit.collider.gameObject.layer;
 
                 // Trackables
-                if (((1 << hit.collider.gameObject.layer) & _trackableLayerMask) != 0)
+                if ((_trackableLayerMask.value & layerBit) != 0)
                 {
                     IChunkTrackable trackable = hit.collider.GetComponentInParent<IChunkTrackable>();
                     if (trackable != null && dist < closestTrackableDist)
@@ -287,7 +294,7 @@ namespace LichLord
                 }
 
                 // Buildables
-                if (((1 << hit.collider.gameObject.layer) & _buildableZoneLayerMask) != 0)
+                if ((_buildableZoneLayerMask.value & layerBit) != 0)
                 {
                     BuildableZone bz = hit.collider.GetComponent<BuildableZone>();
                     if (bz != null && dist < closestBuildableDist)
@@ -297,43 +304,65 @@ namespace LichLord
                     }
                 }
 
-                // Interactables
-                if (((1 << hit.collider.gameObject.layer) & _interactableLayerMask) != 0)
+                // Interactables – keep the closest one + remember its hit
+                if ((_interactableLayerMask.value & layerBit) != 0)
                 {
                     InteractableComponent interactable = hit.collider.GetComponent<InteractableComponent>();
-                    if (interactable != null && interactable.IsPotentialInteractor(Context.LocalPlayerCharacter.Interactor))
+                    if (interactable != null &&
+                        interactable.IsPotentialInteractor(Context.LocalPlayerCharacter.Interactor))
                     {
                         if (dist < closestInteractableDist)
                         {
                             closestInteractableDist = dist;
                             _cachedRaycastHit.interactable = interactable;
+                            closestInteractableHit = hit;
+                            haveValidInteractableHit = true;
                         }
                     }
                 }
 
-                // Generic "world" hit (e.g., terrain, wall, etc.)
-                if (((1 << hit.collider.gameObject.layer) & raycastLayerMask) != 0)
+                // World / solid geometry – only the CLOSEST one
+                if ((_raycastLayerMask.value & layerBit) != 0)
                 {
-                    if (dist < closestWorldHit)
+                    if (dist < closestWorldDistance)
                     {
-                        closestWorldHit = dist;
-                        closestHit = hit;
+                        closestWorldDistance = dist;
+                        closestWorldHit = hit;
                         foundValidWorldHit = true;
                     }
                 }
             }
 
+            // Final positions
+            Vector3 maxRangePoint = rayOrigin + rayDirection * _maxRaycastDistance;
+
+            // staticPosition = always the closest solid world geometry (or max range)
             if (foundValidWorldHit)
             {
-                _cachedRaycastHit.raycastHit = closestHit;
-                _cachedRaycastHit.position = closestHit.point;
+                _cachedRaycastHit.staticPosition = closestWorldHit.point;
+            }
+            else
+            {
+                _cachedRaycastHit.staticPosition = maxRangePoint;
+            }
+
+            // position = interaction point: prefer interactable's real hit point if we have one, else world, else max
+            if (haveValidInteractableHit && closestInteractableDist < float.MaxValue)
+            {
+                _cachedRaycastHit.position = closestInteractableHit.point;
+                _cachedRaycastHit.raycastHit = closestInteractableHit;
+                lastRaycastHit = true;
+            }
+            else if (foundValidWorldHit)
+            {
+                _cachedRaycastHit.position = closestWorldHit.point;
+                _cachedRaycastHit.raycastHit = closestWorldHit;
                 lastRaycastHit = true;
             }
             else
             {
-                Vector3 maxRangePoint = rayOrigin + rayDirection * _maxRaycastDistance;
-                _cachedRaycastHit.raycastHit = new RaycastHit();
                 _cachedRaycastHit.position = maxRangePoint;
+                _cachedRaycastHit.raycastHit = default;
                 lastRaycastHit = false;
             }
         }
@@ -364,11 +393,18 @@ namespace LichLord
 
         private void OnDrawGizmos()
         {
-            // Draw sphere at the last raycast point
             if (_cachedRaycastHit.position != Vector3.zero)
             {
-                Gizmos.color = lastRaycastHit ? Color.red : Color.green;
-                Gizmos.DrawWireSphere(_cachedRaycastHit.position, sphereRadius);
+                // Red = interaction point (what the reticle / player is "looking at")
+                Gizmos.color = lastRaycastHit ? Color.red : Color.yellow; // yellow = no valid hit, at max range
+                Gizmos.DrawWireSphere(_cachedRaycastHit.position, sphereRadius * 1.2f); // slightly larger for visibility
+            }
+
+            if (_cachedRaycastHit.staticPosition != Vector3.zero)
+            {
+                // Blue = closest solid world geometry stop (for building/placement)
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireSphere(_cachedRaycastHit.staticPosition, sphereRadius);
             }
         }
     }
@@ -381,6 +417,7 @@ namespace LichLord
         public BuildableZone buildableZone;
         public IChunkTrackable trackable;
         public InteractableComponent interactable;
+        public Vector3 staticPosition;
 
         public void Clear()
         {

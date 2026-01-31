@@ -27,16 +27,19 @@ namespace LichLord
 
         public void OnRender(float deltaTime)
         {
-            _pitchOffset = Mathf.Lerp(_pitchOffset, TargetPitchOffset, _rotationLerpSpeed * deltaTime);
-            _yawOffset = Mathf.Lerp(_yawOffset, TargetYawOffset, _rotationLerpSpeed * deltaTime);
-            _rollOffset = Mathf.Lerp(_rollOffset, TargetRollOffset, _rotationLerpSpeed * deltaTime);
-
             UpdateUpperBodyBlend(deltaTime);
+
+            float rotationSpeed = _rotationLerpSpeed;
+
+            _pitchOffset = Mathf.Lerp(_pitchOffset, TargetPitchOffset, rotationSpeed * deltaTime);
+            _yawOffset = Mathf.Lerp(_yawOffset, TargetYawOffset, rotationSpeed * deltaTime);
+            _rollOffset = Mathf.Lerp(_rollOffset, TargetRollOffset, rotationSpeed * deltaTime);
         }
 
         public void UpdateUpperBodyBlend(float deltaTime)
         {
             bool isUpperBody = false;
+            float rotationSpeed = _rotationLerpSpeed;
 
             if (_pc.FSM.StateMachine.ActiveState is SpellcastState)
             {
@@ -53,9 +56,9 @@ namespace LichLord
             }
 
             if (isUpperBody)
-                _upperBodyBlend = Mathf.Lerp(_upperBodyBlend, 1f, _rotationLerpSpeed * deltaTime);
+                _upperBodyBlend = Mathf.Lerp(_upperBodyBlend, 1f, rotationSpeed * deltaTime);
             else
-                _upperBodyBlend = Mathf.Lerp(_upperBodyBlend, 0f, _rotationLerpSpeed * deltaTime);
+                _upperBodyBlend = Mathf.Lerp(_upperBodyBlend, 0f, rotationSpeed * deltaTime);
 
             _pc.AnimationController.SetUpperBodyBlend(_upperBodyBlend);
         }

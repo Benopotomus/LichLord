@@ -21,22 +21,51 @@ namespace LichLord
         [Header("Tertiary Right Weapon")]
         public TestWeapon _weapon_02_Right;
 
-        [Header("Summmon 00")]
+        [Header("Summmons")]
         public TestSummonable _summon_00;
-
-        [Header("Summmon 00")]
         public TestSummonable _summon_01;
-
-        [Header("Summmon 00")]
         public TestSummonable _summon_02;
-
-        [Header("Summmon 00")]
         public TestSummonable _summon_03;
-
-        [Header("Summmon 00")]
         public TestSummonable _summon_04;
 
+        [Header("Squad 0")]
+        public TestSummonable[] _squad00;
+        [Header("Squad 1")]
+        public TestSummonable[] _squad01;
+        [Header("Squad 2")]
+        public TestSummonable[] _squad02;
+
         public TestItem[] _items = new TestItem[36];
+
+        public FItemData[] CopySquad(int squadId)
+        {
+            FItemData[] itemDatas = new FItemData[0];
+            TestSummonable[] squadSummonables = new TestSummonable[0];
+
+            switch (squadId)
+            { 
+                case 0:
+                    squadSummonables = _squad00;
+                    itemDatas = new FItemData[_squad00.Length];
+                    break;
+                case 1:
+                    squadSummonables = _squad01;
+                    itemDatas = new FItemData[_squad01.Length];
+                    break;
+                case 2:
+                    squadSummonables = _squad02;
+                    itemDatas = new FItemData[_squad02.Length];
+                    break;
+
+            }
+
+            for (int i = 0; i < squadSummonables.Length; i++)
+            {
+                itemDatas[i] = squadSummonables[i].ToItemData();
+            }
+
+            return itemDatas;
+        }
 
         public FItemData[] CopyInventory()
         {

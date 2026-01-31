@@ -8,6 +8,10 @@ namespace LichLord.NonPlayerCharacters
     public class CommandedUnitDataDefinition : NonPlayerCharacterDataDefinition
     {
         [SerializeField]
+        private bool _infiniteLifetime;
+        public bool InfiniteLifetime => _infiniteLifetime;
+
+        [SerializeField]
         private int _maxLifetimeProgress = 15;
         public int MaxLifetimeProgress => _maxLifetimeProgress;
 
@@ -16,15 +20,15 @@ namespace LichLord.NonPlayerCharacters
         public int TicksPerLifetimeProgress => _ticksPerLifetimeProgress;
 
         // Config 
-        private const int PLAYER_FOLLOW_BITS = 4;             // 0–15
+        private const int PLAYER_FOLLOW_BITS = 3;             // 0–8 22
         private const int PLAYER_FOLLOW_SHIFT = DIALOG_INDEX_SHIFT + DIALOG_INDEX_BITS;
         private const ushort PLAYER_FOLLOW_MASK = (1 << PLAYER_FOLLOW_BITS) - 1;
 
-        private const int SQUAD_ID_BITS = 4;             // 0–15
+        private const int SQUAD_ID_BITS = 2;             // 0–4 24
         private const int SQUAD_ID_SHIFT = PLAYER_FOLLOW_SHIFT + PLAYER_FOLLOW_BITS;
         private const ushort SQUAD_ID_MASK = (1 << SQUAD_ID_BITS) - 1;
 
-        private const int FORMATION_INDEX_BITS = 4;             // 0–15
+        private const int FORMATION_INDEX_BITS = 4;             // 0–15 28
         private const int FORMATION_INDEX_SHIFT = SQUAD_ID_SHIFT + SQUAD_ID_BITS;
         private const ushort FORMATION_INDEX_MASK = (1 << FORMATION_INDEX_BITS) - 1;
 

@@ -17,9 +17,10 @@
         [FieldOffset(14)]
         private ushort _events; // 2 bytes: Health (12 bits) and storage
         [FieldOffset(16)]
-        public FItemData CarriedItem; // 4 bytes: Item
-        [FieldOffset(20)]
         public byte _attitude;
+        [FieldOffset(17)]
+        public FItemData CarriedItem; // 4 bytes: Item
+
         // Total: 21 bytes
 
         public int DefinitionID

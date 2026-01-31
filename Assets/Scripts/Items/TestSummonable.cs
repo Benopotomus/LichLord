@@ -9,7 +9,7 @@ namespace LichLord
         // Optional: Runtime validation
         public void SetDefinition(ItemDefinition definition)
         {
-            if (definition != null && !(definition is SummonableDefinition))
+            if (definition != null && !(definition is SummonableItemDefinition))
             {
                 throw new ArgumentException("TestSummonable Definition must be a SummonableDefinition.");
             }

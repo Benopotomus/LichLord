@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LichLord
 {
-    [CreateAssetMenu(fileName = "SquadCommandAction", menuName = "LichLord/Maneuvers/SquadCommandAction", order = 1)]
+    [CreateAssetMenu(fileName = "SquadCommandAction", menuName = "LichLord/Maneuvers/Actions/SquadCommandAction", order = 1)]
     public class SquadCommandAction : ManeuverActionDefinition
     {
         [SerializeField]

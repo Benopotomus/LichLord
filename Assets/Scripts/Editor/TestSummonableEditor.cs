@@ -19,12 +19,12 @@ public class TestSummonablePropertyDrawer : PropertyDrawer
 
         // Draw Definition field, restricted to SummonableDefinition
         EditorGUI.LabelField(definitionRect, "Definition (SummonableDefinition only)");
-        SummonableDefinition newDefinition = EditorGUI.ObjectField(
+        SummonableItemDefinition newDefinition = EditorGUI.ObjectField(
             definitionRect,
-            definitionProp.objectReferenceValue as SummonableDefinition,
-            typeof(SummonableDefinition),
+            definitionProp.objectReferenceValue as SummonableItemDefinition,
+            typeof(SummonableItemDefinition),
             false
-        ) as SummonableDefinition;
+        ) as SummonableItemDefinition;
 
         // Update if changed
         if (newDefinition != definitionProp.objectReferenceValue)

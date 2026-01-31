@@ -102,7 +102,7 @@ namespace LichLord.NonPlayerCharacters
         public CommandTaskDefinition[] CommandTasks => _tasks;
 
         [SerializeField]
-        private SummonableDefinition _summonableItem;
-        public SummonableDefinition SummonableItem => _summonableItem;
+        private SummonableItemDefinition _summonableItem;
+        public SummonableItemDefinition SummonableItem => _summonableItem;
     }
 }

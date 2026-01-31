@@ -17,7 +17,6 @@ namespace LichLord
         private float backLineZOffset = -1f; // Offset to place the back line behind the front line
         private float frontLineZOffset = 1f;
 
-        [SerializeField]
         private float xSpacing = 2f; // Fixed 2-unit spacing between characters along x-axis
 
         [Networked]
@@ -143,7 +142,7 @@ namespace LichLord
             return worldPosition;
         }
 
-        public (int squadId, int formationIndex) GetFreeFrontlineIndex()
+        public (int squadId, int formationIndex) GetFreeSquadAndFrontlineIndex()
         {
             for (int squadId = 0; squadId < _squads.Length; squadId++)
             {
@@ -161,7 +160,7 @@ namespace LichLord
             return (-1, -1); // Return (-1, -1) if no free frontline slot is found
         }
 
-        public (int squadId, int formationIndex) GetFreeBacklineIndex()
+        public (int squadId, int formationIndex) GetFreeSquadAndBacklineIndex()
         {
             for (int squadId = 0; squadId < _squads.Length; squadId++)
             {
@@ -179,10 +178,45 @@ namespace LichLord
             return (-1, -1); // Return (-1, -1) if no free backline slot is found
         }
 
-        // Used to block slots before the NPC spawns
-        public void SetFormationIndexFilled(int formationId, int formationIndex)
+        public int GetFreeFrontlineIndex(int squadId)
         {
-            _squads[formationId].CommandUnits[formationIndex].IsFilled = true;
+            CommandSquad squad = _squads[squadId];
+
+            for (int i = 0; i < squad.MaxColumns; i++) // Only check frontline indices 0-7
+            {
+                if (!_squads[squadId].CommandUnits[i].IsFilled)
+                {
+                    return i;
+                }
+            }
+
+            return -1; // Return (-1, -1) if no free frontline slot is found
+        }
+
+        public int GetFreeBacklineIndex(int squadId)
+        {
+            CommandSquad squad = _squads[squadId];
+
+            for (int i = squad.MaxColumns; i < (squad.MaxColumns * 2); i++) // Only check backline indices 8-15
+            {
+                if (!_squads[squadId].CommandUnits[i].IsFilled)
+                {
+                    return i;
+                }
+            }
+
+            return -1; // Return (-1, -1) if no free backline slot is found
+        }
+
+        // Used to block slots before the NPC spawns
+        public void SetFormationIndexFilled(int squadId, int formationIndex)
+        {
+            _squads[squadId].CommandUnits[formationIndex].IsFilled = true;
+        }
+
+        public bool IsFormationIndexFilled(int squadId, int formationIndex)
+        {
+            return _squads[squadId].CommandUnits[formationIndex].IsFilled;
         }
 
         private bool IsValidFormation(int squadId, int formationIndex)
@@ -291,7 +325,7 @@ namespace LichLord
 
         public void SetModifyingStance(int squadId, bool isModifying)
         {
-            OnIsModifyingStanceChanged.Invoke(squadId, isModifying);
+            OnIsModifyingStanceChanged?.Invoke(squadId, isModifying);
         }
 
         public void ModifyDesiredCommandStance(int squadId, float inputY)
@@ -430,15 +464,12 @@ namespace LichLord
 
         public void OnEnterState()
         {
-            ToggleVisuals(true);
         }
 
         public void OnExitState()
         {
             ToggleVisuals(false);
         }
-
-
     }
 
     [Serializable]

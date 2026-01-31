@@ -170,7 +170,7 @@ namespace LichLord
             if (itemDefinition == null)
                 return;
 
-            if (itemDefinition is not SummonableDefinition summonable)
+            if (itemDefinition is not SummonableItemDefinition summonable)
                 return;
 
             ManeuverDefinition maneuverDefinition = summonable.ManeuverDefinition;

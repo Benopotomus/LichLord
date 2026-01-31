@@ -2,6 +2,7 @@
 using Fusion;
 using System.Collections.Generic;
 using System;
+using DWD.Pooling;
 
 namespace LichLord
 {
@@ -47,6 +48,12 @@ namespace LichLord
         private TickTimer _activeManeuverTimer { get; set; }
         private int _activeManeuverTick;
 
+        private VisualEffectSpawner _visualEffectSpawner = new VisualEffectSpawner();
+        private StandaloneVisualEffect _maneuverTargetVisualInstance;
+
+        private Vector3 _maneuverTargetPosition;
+        public Vector3 ManeuverTargetPosition => _maneuverTargetPosition;
+
         private float _moveSpeedMultiplier = 1f;
 
         private int _lastProcessedTick = -1;
@@ -54,8 +61,8 @@ namespace LichLord
         public Action<ManeuverDefinition> OnSelectedManeuverChanged;
 
         public float GetMoveSpeedMultiplier()
-        { 
-            if(_activeManeuverId < 0)
+        {
+            if (_activeManeuverId < 0)
                 return 1f;
 
             return _moveSpeedMultiplier;
@@ -65,6 +72,8 @@ namespace LichLord
         {
             base.Spawned();
             ReplicateToAll(false);
+
+            _visualEffectSpawner.OnLoaded += OnVisualEffectSpawned;
 
             if (HasStateAuthority)
             {
@@ -78,9 +87,28 @@ namespace LichLord
             }
         }
 
+        private void OnVisualEffectSpawned(GameObject loadedGameObject, Vector3 position, Quaternion rotation)
+        {
+            var poolObject = loadedGameObject.GetComponent<DWDObjectPoolObject>();
+
+            if (poolObject == null)
+            {
+                Debug.LogWarning("Could not spawn Visuals Prefab for Impact");
+                return;
+            }
+
+            var instance = DWDObjectPool.Instance.SpawnAt(poolObject, position, rotation);
+            if (instance is StandaloneVisualEffect standaloneEffect)
+            {
+                standaloneEffect.Initialize();
+                _maneuverTargetVisualInstance = standaloneEffect;
+            }
+        }
+
         public void ProcessInput(ref FGameplayInput input)
         {
             ProcessManeuverSelection(ref input);
+            ProcessManeuverTargeting();
             ProcessManeuverActivation(ref input);
             //ProcessWeaponAttackActivation(ref input);
             ProcessWeaponSwapActivation(ref input);
@@ -90,6 +118,20 @@ namespace LichLord
         public void OnFixedUpdate()
         {
             ProcessManeuverExpiration();
+        }
+
+        private void ProcessManeuverTargeting()
+        {
+             var selectedManeuver = GetSelectedManeuver();
+            if (selectedManeuver == null)
+                return;
+
+            _maneuverTargetPosition = selectedManeuver.GetTargetPosition(_pc, Runner);
+
+            if (_maneuverTargetVisualInstance != null)
+            { 
+                _maneuverTargetVisualInstance.CachedTransform.position = _maneuverTargetPosition;
+            }
         }
 
         private void ProcessActiveManeuver(ref FGameplayInput input)
@@ -171,7 +213,7 @@ namespace LichLord
                         action.Definition.Execute(_pc, Runner);
                     }
 
-                    if(ticksSinceStart > action.SpawnTick)
+                    if (ticksSinceStart > action.SpawnTick)
                         action.Definition.Sustain(_pc, Runner);
 
                 }
@@ -213,12 +255,12 @@ namespace LichLord
             // if the selected index is out of range, early out
             if (_selectedIndex < 0 || _selectedIndex >= maneuverList.Count)
                 return;
- 
+
             // Cache current selected maneuver
             ManeuverDefinition selectedManeuver = GetSelectedManeuver();
 
             // if the cooldown timer doesn't exist for this selected index, early out
-            if(!TryGetCooldownTimer(_selectedIndex, out TickTimer cooldownTimer))
+            if (!TryGetCooldownTimer(_selectedIndex, out TickTimer cooldownTimer))
             {
                 Debug.Log("Maneuver cooldown timer doesn't exist for index " + _selectedIndex);
                 return;
@@ -236,11 +278,11 @@ namespace LichLord
             if (activeManeuver != null)
                 return;
 
-            if (input.FireHeld)
+            if (input.Fire)
             {
                 StartManeuver(selectedManeuver);
             }
-            else if (input.AltFireHeld)
+            else if (input.AltFire)
             {
                 if (selectedManeuver.AltFireManeuver != null)
                     StartManeuver(selectedManeuver.AltFireManeuver);
@@ -386,7 +428,20 @@ namespace LichLord
                 Debug.Log("[ActionManager] Action selection cleared");
             }
 
-            OnSelectedManeuverChanged?.Invoke(GetSelectedManeuver());
+            var newSelectedManeuver = GetSelectedManeuver();
+
+            if (_maneuverTargetVisualInstance != null)
+                _maneuverTargetVisualInstance.StartRecycle();
+
+            if (newSelectedManeuver != null &&
+                newSelectedManeuver.Targeting != null &&
+                newSelectedManeuver.Targeting.VisualsPrefab.Name != "")
+            {
+                
+                _visualEffectSpawner.SpawnVisualEffect(ManeuverTargetPosition, Quaternion.identity, newSelectedManeuver.Targeting.VisualsPrefab);
+            }
+
+            OnSelectedManeuverChanged?.Invoke(newSelectedManeuver);
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -434,9 +489,10 @@ namespace LichLord
                     _spellCooldownTimers.Set(_selectedIndex, cooldownTimer);
                 }
             }
-            
+
             _pc.Aim.TargetPitchOffset = 0;
             _pc.Aim.TargetYawOffset = 0;
+            _pc.Aim.TargetRollOffset = 0;
 
             _activeManeuverId = -1;
         }
@@ -464,7 +520,7 @@ namespace LichLord
                     if (_spellManeuvers.Count == 0)
                         return;
 
-                    if(_lastSpellIndex >= 0)
+                    if (_lastSpellIndex >= 0)
                         selectedIndex = _lastSpellIndex;
                     break;
                 case EManeuverList.Commands:
@@ -504,7 +560,7 @@ namespace LichLord
         {
             var maneuvers = GetManeuverList();
 
-            if( maneuvers == null ) 
+            if (maneuvers == null)
                 return null;
 
             return maneuvers[_selectedIndex];
@@ -520,7 +576,7 @@ namespace LichLord
                         cooldownTimer = spellTimer;
                         return true;
                     }
-                        break;
+                    break;
 
                 case EManeuverList.Commands:
                     if (_commandCooldownTimers.TryGet(selectedIndex, out TickTimer commandTimer))
@@ -528,18 +584,12 @@ namespace LichLord
                         cooldownTimer = commandTimer;
                         return true;
                     }
-                        break;
+                    break;
             }
 
             cooldownTimer = new TickTimer();
             return false;
         }
-    }
-
-    public struct FManeuverProjectileTracker
-    {
-        public List<int> ProjectileTicks;
-        public List<int> CycleProjectileTicks;
     }
 
     public enum EManeuverList

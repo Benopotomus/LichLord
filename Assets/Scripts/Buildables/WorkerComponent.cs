@@ -64,7 +64,7 @@ namespace LichLord.NonPlayerCharacters
 
             if (data.ItemData.IsValid())
             {
-                SummonableDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(data.ItemData.DefinitionID) as SummonableDefinition;
+                SummonableItemDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(data.ItemData.DefinitionID) as SummonableItemDefinition;
                 if (summableDefinition == null)
                     return;
 
@@ -202,7 +202,7 @@ namespace LichLord.NonPlayerCharacters
             if (!itemData.IsValid())
                 return;
 
-            SummonableDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID) as SummonableDefinition;
+            SummonableItemDefinition summableDefinition = Global.Tables.ItemTable.TryGetDefinition(itemData.DefinitionID) as SummonableItemDefinition;
             if (summableDefinition == null)
                 return;
 
