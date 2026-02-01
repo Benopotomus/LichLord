@@ -19,9 +19,9 @@ BEGIN_CODE
 
 	void SurfaceFunction(inout Surface o, ShaderData d)
 	{
-		o.Occlusion = 1.0 - _Occlusion;
-        o.Smoothness = _Smoothness;
-        o.Metallic = _Metalness;
+		o.Occlusion *= _Occlusion;
+        o.Smoothness *= _Smoothness;
+        o.Metallic *= _Metalness;
 	}
 
 END_CODE

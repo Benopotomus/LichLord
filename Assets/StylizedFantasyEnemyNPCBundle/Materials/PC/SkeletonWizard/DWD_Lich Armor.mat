@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: DWD_Lich Armor
+  m_Shader: {fileID: -6465566751694194690, guid: a47a8c40611e7bb4e8a62df2e3593adb,
+    type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _EMISSION_ON
+  - _HQ_SIDELIGHT
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 1b7ecde683efa9e4bb4129ac2a8a85f7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NMAO:
+        m_Texture: {fileID: 2800000, guid: 66b8b631eff0055488093356fa19741f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlbedoMask: 1
+    - _Emission: 1
+    - _EmissionMask: 0
+    - _EmissionPower: 0
+    - _EmissiveMax: 10
+    - _EmissiveMulAlbedo: 0.54
+    - _HQSide: 1
+    - _LeftBoost: 3.64
+    - _LeftFall: 0.82
+    - _LeftPow: 1.23
+    - _Metalness: 0.979
+    - _NormalIntensity: 1.279
+    - _Occlusion: 1
+    - _QueueControl: -1
+    - _QueueOffset: 0
+    - _RightBoost: 5.46
+    - _RightFall: 0.86
+    - _RightPow: 1.37
+    - _SSWrap: 0.474
+    - _Saturation: 1.45
+    - _ShadowMin: 0.781
+    - _Smoothness: 0.664
+    - _Wrap: 0.292
+    - _WrapBoost: 1.76
+    - _WrapIntensity: 0.923
+    - _WrapPow: 4.09
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 2.418255, g: 1.2623954, b: 0, a: 1}
+    - _EmissiveOverlayColor: {r: 0, g: 1, b: 0, a: 1}
+    - _Left: {r: 0.019208413, g: 0.4708795, b: 2.0361254, a: 1}
+    - _Right: {r: 1.0227203, g: 0.19377773, b: 0.09969898, a: 1}
+    - _SSColor: {r: 1, g: 0.3, b: 0.1, a: 1}
+    - _ShadowColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []

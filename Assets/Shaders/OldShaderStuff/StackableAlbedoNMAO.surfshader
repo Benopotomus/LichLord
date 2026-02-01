@@ -1,0 +1,71 @@
+//© Dicewrench Designs LLC 2022-2026
+//All Rights Reserved
+//Last Owned by: Allen White (allen@dicewrenchdesigns.com)
+
+BEGIN_OPTIONS
+	Workflow "Metallic"
+END_OPTIONS
+
+BEGIN_PROPERTIES
+	[Header(Albedo)]
+	[HDR] _Color ("Main Color", Color) = (0, 1, 0, 1)
+	[NoScaleOffset] _MainTex("Main Tex, A EmissiveMask", 2D) = "white" {}
+	[Header(Emission)]
+	[Toggle] _Emission ("Enable Emission?", float) = 0
+	[HDR] _EmissionColor("Emission Color", Color) = (1,0,0,1)
+	[Header(Detail Pack)]
+	[NoScaleOffset] _NMAO("Normal, Metallic, AO", 2D) = "bump" {}
+	_NormalIntensity("Normal Strength", Range(0,2)) = 1
+	[Header(Saturation)]
+	_Saturation("Saturation", Range(0,3)) = 1.0
+	_AlbedoMask("Albedo Sat Intensity", Range(0,1)) = 1.0
+	_EmissionMask("Emission Sat Intensity", Range(0,1)) = 0.0
+END_PROPERTIES
+
+BEGIN_CBUFFER
+	half4 _Color, _EmissionColor;
+	half _NormalIntensity;
+	half _Saturation;
+	half _AlbedoMask, _EmissionMask;
+END_CBUFFER
+
+BEGIN_DEFINES
+	#pragma multi_compile _ _EMISSION_ON
+
+	#ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
+END_DEFINES
+
+
+BEGIN_CODE
+	
+	TEXTURE2D(_MainTex);
+	SAMPLER(sampler_MainTex);
+	TEXTURE2D(_NMAO);
+	SAMPLER(sampler_NMAO);
+
+	void SurfaceFunction(inout Surface o, ShaderData d)
+	{
+		half4 mainTex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, d.texcoord0.xy).rgba;
+		o.Albedo = mainTex.rgb * _Color.rgb;
+		o.Alpha = 1.0;
+
+		half4 dataTex = SAMPLE_TEXTURE2D(_NMAO, sampler_NMAO, d.texcoord0.xy).rgba;
+		half3 norm = UnpackNormal(half4(dataTex.r, dataTex.g, 1.0.x, 1.0.x)).rgb;
+		o.Normal = lerp(o.Normal, norm, _NormalIntensity);
+		o.Metallic = dataTex.b;
+		o.Occlusion = dataTex.a;
+		o.Smoothness = 1.0;
+
+		#if _EMISSION_ON
+			o.Emission = mainTex.aaa * _EmissionColor.rgb * _EmissionColor.aaa;
+		#endif
+
+		o.Albedo = lerp(o.Albedo, Saturation(o.Albedo, _Saturation), _AlbedoMask);
+		o.Emission = lerp(o.Emission, Saturation(o.Emission, _Saturation), _EmissionMask);
+	}
+
+END_CODE
+
