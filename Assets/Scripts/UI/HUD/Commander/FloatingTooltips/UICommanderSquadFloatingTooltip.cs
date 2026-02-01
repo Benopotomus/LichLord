@@ -49,10 +49,11 @@ namespace LichLord.UI
 
         private void UpdateScreenSpacePosition()
         {
-            if (_pc.Commander.IsCommandTargetValid(_squadId))
+            Vector3 squadAveragePosition = _pc.Commander.GetSquadAveragePosition(_squadId);
+
+            if (squadAveragePosition != Vector3.zero)
             {
-                var squadTransform = _pc.Commander.GetCommandTransformForSquad(_squadId);
-                Vector3 worldPos = squadTransform.Item1 + _worldOffset;
+                Vector3 worldPos = squadAveragePosition + _worldOffset;
                 Vector3 cameraSpacePos = _camera.WorldToViewportPoint(worldPos); // Use viewport for easier z-check
 
                 // Check if the target is in front of the camera (z > 0)

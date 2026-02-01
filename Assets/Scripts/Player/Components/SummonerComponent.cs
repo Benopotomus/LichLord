@@ -179,7 +179,7 @@ namespace LichLord
                 return;
 
             _activeManeuverTick = Runner.Tick;
-            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, maneuverDefinition.Duration);
+            _activeManeuverTimer = TickTimer.CreateFromTicks(Runner, maneuverDefinition.DurationTicks);
             _activeManeuverSlot = SelectedSlot;
 
             _activeSummoningManeuverId = (ushort)maneuverDefinition.TableID;
@@ -197,7 +197,7 @@ namespace LichLord
             {
                 if (input.FireHeld)
                 {
-                    _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                    _activeManeuverTimer = TickTimer.CreateFromTicks(Runner, activeManeuver.DurationTicks);
                 }
             }
 

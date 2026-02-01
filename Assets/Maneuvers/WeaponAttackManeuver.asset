@@ -12,12 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: WeaponAttackManeuver
   m_EditorClassIdentifier: 
-  _tableID: 13
-  ManeuverName: Weapon Attack
-  _duration: 0.75
-  _cooldown: 1
+  _tableID: 15
+  _maneuverName: 
+  _activationTooltipText: 
+  _progressTooltipText: 
+  _durationTicks: 32
+  _cooldownTicks: 32
+  _maxHeldTime: -1
   _fireButton: 1
   _inputType: 0
+  _targeting: {fileID: 0}
   _muzzleEffectPrefab:
     _name: 
     _bundle: 

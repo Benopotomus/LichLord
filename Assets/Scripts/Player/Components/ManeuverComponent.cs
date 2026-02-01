@@ -59,6 +59,8 @@ namespace LichLord
         private int _lastProcessedTick = -1;
 
         public Action<ManeuverDefinition> OnSelectedManeuverChanged;
+        public Action<ManeuverDefinition> OnActiveManeuverChanged;
+        public Action<ManeuverDefinition, int> OnActiveManeuverUpdated;
 
         public float GetMoveSpeedMultiplier()
         {
@@ -147,20 +149,26 @@ namespace LichLord
                 activeManeuver != selectedManeuver.AltFireManeuver)
                 return;
 
+            int ticksSinceStart = Runner.Tick - _activeManeuverTick;
+
             if (activeManeuver.InputType == EInputType.Held)
             {
+                if (activeManeuver.MaxHeldTicks > 0 &&
+                    ticksSinceStart > activeManeuver.MaxHeldTicks)
+                    return;
+
                 switch (activeManeuver.FireButton)
                 {
                     case EFireButton.Fire:
                         if (input.FireHeld)
                         {
-                            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                            _activeManeuverTimer = TickTimer.CreateFromTicks(Runner, activeManeuver.DurationTicks);
                         }
                         break;
                     case EFireButton.AltFire:
                         if (input.AltFireHeld)
                         {
-                            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, activeManeuver.Duration);
+                            _activeManeuverTimer = TickTimer.CreateFromTicks(Runner, activeManeuver.DurationTicks);
                         }
                         break;
                 }
@@ -169,7 +177,6 @@ namespace LichLord
 
             if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
             {
-                int ticksSinceStart = Runner.Tick - _activeManeuverTick;
                 SustainManeuver(activeManeuver, ticksSinceStart);
             }
         }
@@ -222,6 +229,8 @@ namespace LichLord
             _lastProcessedTick = ticksSinceStart;
 
             definition.SustainExecute(_pc, Runner, ticksSinceStart);
+
+            OnActiveManeuverUpdated?.Invoke(definition, ticksSinceStart);
         }
 
         private void ProcessManeuverExpiration()
@@ -230,11 +239,11 @@ namespace LichLord
             if (activeManeuver == null)
                 return;
 
-            if (_activeManeuverTimer.ExpiredOrNotRunning(Runner))
-            {
-                activeManeuver.EndExecute(_pc, this, Runner);
+            if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
                 return;
-            }
+
+            activeManeuver.EndExecute(_pc, this, Runner);
+            OnActiveManeuverChanged?.Invoke(null);
         }
 
         public void OnExitState()
@@ -295,10 +304,11 @@ namespace LichLord
 
             _activeManeuverTick = Runner.Tick;
             _activeManeuverId = (sbyte)selectedManeuver.TableID;
-            _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, selectedManeuver.Duration);
+            _activeManeuverTimer = TickTimer.CreateFromTicks(Runner, selectedManeuver.DurationTicks);
 
             selectedManeuver.StartExecute(_pc, this, Runner);
             _lastProcessedTick = Runner.Tick;
+            OnActiveManeuverChanged?.Invoke(selectedManeuver);
         }
 
         private void ProcessWeaponSwapActivation(ref FGameplayInput input)
@@ -320,7 +330,7 @@ namespace LichLord
             {
                 _activeManeuverTick = Runner.Tick;
                 _activeManeuverId = (sbyte)_swapWeaponManeuver.TableID;
-                _activeManeuverTimer = TickTimer.CreateFromSeconds(Runner, _swapWeaponManeuver.Duration);
+                _activeManeuverTimer = TickTimer.CreateFromTicks(Runner, _swapWeaponManeuver.DurationTicks);
 
                 activeManeuver = GetActiveManeuver();
                 activeManeuver.StartExecute(_pc, this, Runner);
@@ -339,10 +349,10 @@ namespace LichLord
                 return 0f;
 
             ManeuverDefinition definition = maneuverList[slot];
-            if (definition.Cooldown == 0)
+            if (definition.CooldownTicks == 0)
                 return 0;
 
-            float? remainingTime = cooldownTimer.RemainingTime(Runner); // Use float? to accept nullable float
+            float? remainingTime = cooldownTimer.RemainingTicks(Runner); // Use float? to accept nullable float
 
             // Handle the nullable case
             if (!remainingTime.HasValue)
@@ -350,7 +360,7 @@ namespace LichLord
                 return 0f; // Or another default value, depending on your requirements
             }
 
-            return (remainingTime.Value / definition.Cooldown);
+            return ((float)remainingTime.Value / (float)definition.CooldownTicks);
         }
 
         public void UpdateMoveSpeed(float deltaTime)
@@ -475,17 +485,17 @@ namespace LichLord
 
             if (maneuver == _swapWeaponManeuver)
             {
-                _swapWeaponCooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
+                _swapWeaponCooldownTimer = TickTimer.CreateFromTicks(Runner, maneuver.CooldownTicks);
             }
             else if (maneuver == _weaponAttackManeuver)
             {
-                _weaponAttackCooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
+                _weaponAttackCooldownTimer = TickTimer.CreateFromTicks(Runner, maneuver.CooldownTicks);
             }
             else
             {
                 if (_spellCooldownTimers.TryGet(_activeManeuverId, out TickTimer cooldownTimer))
                 {
-                    cooldownTimer = TickTimer.CreateFromSeconds(Runner, maneuver.Cooldown);
+                    cooldownTimer = TickTimer.CreateFromTicks(Runner, maneuver.CooldownTicks);
                     _spellCooldownTimers.Set(_selectedIndex, cooldownTimer);
                 }
             }

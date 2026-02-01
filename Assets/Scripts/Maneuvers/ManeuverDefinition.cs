@@ -15,13 +15,25 @@ namespace LichLord
         private string _maneuverName;
         public string ManeuverName => _maneuverName;
 
-        [SerializeField] 
-        private float _duration = 1f;
-        public float Duration => _duration;
+        [SerializeField]
+        private string _activationTooltipText;
+        public string ActivationTooltipText => _activationTooltipText;
+
+        [SerializeField]
+        private string _progressTooltipText;
+        public string ProgressTooltipText => _progressTooltipText;
 
         [SerializeField] 
-        private float _cooldown = 1f;
-        public float Cooldown => _cooldown;
+        private int _durationTicks = 32;
+        public int DurationTicks => _durationTicks;
+
+        [SerializeField] 
+        private int _cooldownTicks = 32;
+        public int CooldownTicks => _cooldownTicks;
+
+        [SerializeField] // When the held button is down, this will automatically 
+        private int _maxHeldTime = -1;
+        public int MaxHeldTicks => _maxHeldTime;
 
         [SerializeField] 
         private EFireButton _fireButton;

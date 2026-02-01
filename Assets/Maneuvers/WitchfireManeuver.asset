@@ -12,12 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: WitchfireManeuver
   m_EditorClassIdentifier: 
-  _tableID: 14
-  ManeuverName: Witchfire
-  _duration: 0.25
-  _cooldown: 1
+  _tableID: 16
+  _maneuverName: Witchfire
+  _activationTooltipText: Cast
+  _progressTooltipText: 
+  _durationTicks: 8
+  _cooldownTicks: 8
+  _maxHeldTime: -1
   _fireButton: 1
   _inputType: 1
+  _targeting: {fileID: 0}
   _muzzleEffectPrefab:
     _name: 
     _bundle: 

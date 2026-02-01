@@ -28,7 +28,10 @@ namespace LichLord
         [SerializeField] private LayerMask _trackableLayerMask;
         [SerializeField] private LayerMask _interactableLayerMask;
 
-        [SerializeField] private Image reticle; // Reference to the reticle UI element
+        private Vector3 _reticlePosition = Vector3.zero;
+        public Vector3 ReticlePosition => _reticlePosition;
+
+        public Action<Vector3> OnReticlePositionChanged;
 
         private float sphereRadius = 0.1f; // Radius of the debug sphere
 
@@ -64,14 +67,6 @@ namespace LichLord
             thirdPersonCam.LookAt = _cameraFollowTarget;
             firstPersonCam.Follow = _cameraFollowTarget;
             firstPersonCam.LookAt = _cameraFollowTarget;
-
-            // Ensure reticle is visible if assigned
-            if (reticle != null)
-            {
-                reticle.gameObject.SetActive(true);
-            }
-
-
         }
 
         private void EnsureNoiseSettings(CinemachineBasicMultiChannelPerlin noise)
@@ -369,7 +364,7 @@ namespace LichLord
 
         private void UpdateReticlePosition(Vector3 rayOrigin, Vector3 rayDirection)
         {
-            if (reticle == null || Camera.main == null)
+            if (Camera.main == null)
                 return;
 
             Camera mainCamera = Camera.main;
@@ -383,12 +378,8 @@ namespace LichLord
             screenPosition.x = Mathf.Clamp(screenPosition.x, viewportRect.xMin, viewportRect.xMax);
             screenPosition.y = Mathf.Clamp(screenPosition.y, viewportRect.yMin, viewportRect.yMax);
 
-            // Set reticle position (convert to UI space, assuming Canvas is Screen Space - Overlay)
-            RectTransform reticleRectTransform = reticle.GetComponent<RectTransform>();
-            if (reticleRectTransform != null)
-            {
-                reticleRectTransform.position = screenPosition;
-            }
+            _reticlePosition = screenPosition;
+            OnReticlePositionChanged?.Invoke(ReticlePosition);
         }
 
         private void OnDrawGizmos()

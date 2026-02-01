@@ -13,11 +13,14 @@ MonoBehaviour:
   m_Name: FireballManeuver_AltFire
   m_EditorClassIdentifier: 
   _tableID: 2
-  ManeuverName: Fireball Alt Fire
-  _duration: 0.5
-  _cooldown: 1
+  _maneuverName: Fireball Alt
+  _activationTooltipText: Burning
+  _durationTicks: 12
+  _cooldownTicks: 8
+  _maxHeldTime: -1
   _fireButton: 2
   _inputType: 1
+  _targeting: {fileID: 0}
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
@@ -66,3 +69,4 @@ MonoBehaviour:
   _projectileTicksPerCycle: 16
   _timedActions: []
   _altFireManeuver: {fileID: 0}
+  _squadId: -1

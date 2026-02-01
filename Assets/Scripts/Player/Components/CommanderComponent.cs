@@ -242,6 +242,26 @@ namespace LichLord
             return false;
         }
 
+        public Vector3 GetSquadAveragePosition(int squadId)
+        {
+            CommandSquad squad = _squads[squadId];
+
+            Vector3 sum = Vector3.zero;
+            int count = 0;
+
+            for (int i = 0; i < squad.CommandUnits.Length; i++)
+            {
+                var unit = squad.CommandUnits[i];
+                if (unit.IsFilled && unit.NPC != null)
+                {
+                    sum += unit.NPC.Position;
+                    count++;
+                }
+            }
+
+            return count > 0 ? sum / count : Vector3.zero;
+        }
+
         public (Vector3, Quaternion) GetCommandTransformForSquad(int squadId)
         {
             switch (squadId)

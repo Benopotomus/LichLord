@@ -13,11 +13,14 @@ MonoBehaviour:
   m_Name: FireballManeuver
   m_EditorClassIdentifier: 
   _tableID: 1
-  ManeuverName: Fireball
-  _duration: 0.5
-  _cooldown: 1
+  _maneuverName: Fireball
+  _activationTooltipText: Cast
+  _durationTicks: 16
+  _cooldownTicks: 8
+  _maxHeldTime: -1
   _fireButton: 1
   _inputType: 0
+  _targeting: {fileID: 0}
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
@@ -66,3 +69,4 @@ MonoBehaviour:
   _projectileTicksPerCycle: 0
   _timedActions: []
   _altFireManeuver: {fileID: 11400000, guid: e4e0fb01e274bc44fa9931606a372afa, type: 2}
+  _squadId: -1

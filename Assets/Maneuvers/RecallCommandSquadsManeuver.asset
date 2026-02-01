@@ -10,24 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
-  m_Name: SquadCommandManeuver_0_AltFire
+  m_Name: RecallCommandSquadsManeuver
   m_EditorClassIdentifier: 
-  _tableID: 6
-  _maneuverName: Command Squad Alt Fire
-  _activationTooltipText: Posture
-  _progressTooltipText: 
+  _tableID: 3
+  _maneuverName: Recall
+  _activationTooltipText: Recall
+  _progressTooltipText: Recalling
   _durationTicks: 1
   _cooldownTicks: 1
-  _maxHeldTime: -1
-  _fireButton: 2
+  _maxHeldTime: 32
+  _fireButton: 1
   _inputType: 1
-  _targeting: {fileID: 0}
+  _targeting: {fileID: 11400000, guid: fd4174936fe7fb44e884acd511a84021, type: 2}
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
   _icon:
-    _name: 
-    _bundle: 
+    _name: summon_skeleton_army
+    _bundle: summon_skeleton_army
   Fullbody: 0
   _upperBodyAnimationStates:
     _serializedList:
@@ -59,7 +59,7 @@ MonoBehaviour:
   _projectileCycleDelayTicks: 0
   _projectileTicksPerCycle: 0
   _timedActions:
-  - SpawnTick: 1
-    Definition: {fileID: 11400000, guid: 815d8fbf837da9247ad9237aae7bc10f, type: 2}
+  - SpawnTick: 32
+    Definition: {fileID: 11400000, guid: 2f9ff6e984579d24188f8cfdf618dec8, type: 2}
   _altFireManeuver: {fileID: 0}
   _squadId: -1

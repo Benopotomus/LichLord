@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: SummonCommandSquadsManeuver
   m_EditorClassIdentifier: 
-  _tableID: 9
-  _maneuverName: 
-  _duration: 1
-  _cooldown: 1
+  _tableID: 11
+  _maneuverName: Summon
+  _activationTooltipText: Summon
+  _progressTooltipText: Summoning
+  _durationTicks: 1
+  _cooldownTicks: 1
+  _maxHeldTime: 32
   _fireButton: 1
   _inputType: 1
   _targeting: {fileID: 11400000, guid: fd4174936fe7fb44e884acd511a84021, type: 2}
@@ -56,7 +59,7 @@ MonoBehaviour:
   _projectileCycleDelayTicks: 0
   _projectileTicksPerCycle: 0
   _timedActions:
-  - SpawnTick: 16
+  - SpawnTick: 32
     Definition: {fileID: 11400000, guid: 2f9ff6e984579d24188f8cfdf618dec8, type: 2}
   _altFireManeuver: {fileID: 0}
   _squadId: -1
