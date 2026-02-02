@@ -15,6 +15,7 @@ MonoBehaviour:
   _tableID: 2
   _maneuverName: Fireball Alt
   _activationTooltipText: Burning
+  _progressTooltipText: 
   _durationTicks: 12
   _cooldownTicks: 8
   _maxHeldTime: -1
@@ -56,7 +57,7 @@ MonoBehaviour:
   _timedProjectiles: []
   _cycleProjectiles:
   - SpawnTick: 12
-    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
+    Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:
       DamageValue: 10
@@ -69,4 +70,5 @@ MonoBehaviour:
   _projectileTicksPerCycle: 16
   _timedActions: []
   _altFireManeuver: {fileID: 0}
+  _refreshBehavior: {fileID: 0}
   _squadId: -1

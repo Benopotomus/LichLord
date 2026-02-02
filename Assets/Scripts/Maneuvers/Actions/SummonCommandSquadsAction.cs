@@ -11,17 +11,7 @@ namespace LichLord
         {
             FWorldPosition position = new FWorldPosition();
             position.CopyPosition(pc.Maneuvers.ManeuverTargetPosition);
-
-            // Limit the distance from the static position to 20 units
-            // Then if its not on the terrian, raycast down from that point to hit the ground
-
-            pc.Context.NonPlayerCharacterManager.RPC_SpawnCommandGroupsFromItems(
-                position,
-                pc.Inventory.GetSquadItemsAtIndex(0),
-                pc.Inventory.GetSquadItemsAtIndex(1),
-                pc.Inventory.GetSquadItemsAtIndex(2),
-                pc.TeamID,
-                (byte)pc.PlayerIndex);
+            pc.Commander.SummonCommandSquads(position);
         }
 
         public override void Sustain(PlayerCharacter pc, NetworkRunner runner)

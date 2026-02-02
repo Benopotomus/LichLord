@@ -21,13 +21,13 @@ MonoBehaviour:
   _maxHeldTime: 32
   _fireButton: 1
   _inputType: 1
-  _targeting: {fileID: 11400000, guid: fd4174936fe7fb44e884acd511a84021, type: 2}
+  _targeting: {fileID: 0}
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
   _icon:
-    _name: summon_skeleton_army
-    _bundle: summon_skeleton_army
+    _name: disarmament
+    _bundle: disarmament
   Fullbody: 0
   _upperBodyAnimationStates:
     _serializedList:
@@ -60,6 +60,7 @@ MonoBehaviour:
   _projectileTicksPerCycle: 0
   _timedActions:
   - SpawnTick: 32
-    Definition: {fileID: 11400000, guid: 2f9ff6e984579d24188f8cfdf618dec8, type: 2}
+    Definition: {fileID: 11400000, guid: 17d8003c55d544648a3a717170f1e912, type: 2}
   _altFireManeuver: {fileID: 0}
+  _refreshBehavior: {fileID: 11400000, guid: 640487df231e98b49b04a3347b4786be, type: 2}
   _squadId: -1

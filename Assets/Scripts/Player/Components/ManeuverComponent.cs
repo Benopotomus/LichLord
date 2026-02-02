@@ -120,6 +120,7 @@ namespace LichLord
         public void OnFixedUpdate()
         {
             ProcessManeuverExpiration();
+            RefreshManeuvers();
         }
 
         private void ProcessManeuverTargeting()
@@ -505,6 +506,24 @@ namespace LichLord
             _pc.Aim.TargetRollOffset = 0;
 
             _activeManeuverId = -1;
+        }
+
+        private void RefreshManeuvers()
+        {
+            for (int i = 0; i < _spellManeuvers.Count; i++)
+            {
+                ManeuverDefinition maneuver = _spellManeuvers[i];
+                if (maneuver.RefreshBehavior == null)
+                    continue;
+
+                if (maneuver.RefreshBehavior.ShouldManeuverSwap(_pc))
+                {
+                    _spellManeuvers[i] = maneuver.RefreshBehavior.NewBehavior;
+                    UpdateManeuverSelection(_selectedIndex);
+                }
+
+            }
+        
         }
 
         public int GetAvailableActionsCount()

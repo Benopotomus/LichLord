@@ -103,6 +103,10 @@ namespace LichLord
         public ManeuverDefinition AltFireManeuver => _altFireManeuver;
 
         [SerializeField]
+        private ManeuverRefreshBehavior _refreshBehavior;
+        public ManeuverRefreshBehavior RefreshBehavior => _refreshBehavior;
+
+        [SerializeField]
         private int _squadId = -1;
         public int SquadId => _squadId;
 

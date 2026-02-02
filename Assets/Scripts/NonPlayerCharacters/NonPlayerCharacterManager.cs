@@ -215,7 +215,7 @@ namespace LichLord.NonPlayerCharacters
         }
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
-        public void RPC_SpawnCommandGroupsFromItems(FWorldPosition centerPosition,
+        public void RPC_SummonCommandSquadsFromItems(FWorldPosition centerPosition,
            FItemData[] commandUnitItems_0,
            FItemData[] commandUnitItems_1,
            FItemData[] commandUnitItems_2,
@@ -231,43 +231,80 @@ namespace LichLord.NonPlayerCharacters
             if (formationComponent == null)
                 return;
 
-            int squadId = 0;
-
-            for (int i = 0; i < commandUnitItems_0.Length; i++)
+            for (int squadId = 0; squadId < pc.Commander.Squads.Length; squadId++)
             {
-                if (pc.Commander.IsFormationIndexFilled(squadId, i))
-                    continue;
-
-                FItemData commanedItem = commandUnitItems_0[i];
-
-                SummonableItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(commanedItem.DefinitionID) as SummonableItemDefinition;
-                if(itemDefinition == null ) 
-                    continue;
-
-                NonPlayerCharacterDefinition definition = itemDefinition.NonPlayerCharacterDefinition;
-                if (definition == null)
-                    continue;
-
-                Vector3 randomPosition = new Vector3(
-                Random.Range(-5f, 5f),
-                0, // Keep Y fixed
-                Random.Range(-5f, 5f)
-                );
-
-                // Combine offset into raycast origin
-                if (Physics.Raycast((randomPosition + centerPosition.Position) +
-                    (Vector3.up * (raycastLength * 0.5f)),
-                    Vector3.down,
-                    out RaycastHit hit,
-                    raycastLength,
-                    hitMask))
+                var commandUnitItems = commandUnitItems_0;
+                switch (squadId)
                 {
-                    pc.Commander.SetFormationIndexFilled(squadId, i);
-                    SpawnCommandUnit(hit.point, definition, teamId, playerFollowIndex, squadId, i);
+                    case 1:
+                        commandUnitItems = commandUnitItems_1;
+                        break;
+                    case 2:
+                        commandUnitItems = commandUnitItems_2;
+                        break;
+                }
+
+                for (int i = 0; i < commandUnitItems.Length; i++)
+                {
+                    if (pc.Commander.IsFormationIndexFilled(squadId, i))
+                        continue;
+
+                    FItemData commanedItem = commandUnitItems[i];
+
+                    SummonableItemDefinition itemDefinition = Global.Tables.ItemTable.TryGetDefinition(commanedItem.DefinitionID) as SummonableItemDefinition;
+                    if (itemDefinition == null)
+                        continue;
+
+                    NonPlayerCharacterDefinition definition = itemDefinition.NonPlayerCharacterDefinition;
+                    if (definition == null)
+                        continue;
+
+                    Vector3 randomPosition = new Vector3(
+                    Random.Range(-5f, 5f),
+                    0, // Keep Y fixed
+                    Random.Range(-5f, 5f)
+                    );
+
+                    // Combine offset into raycast origin
+                    if (Physics.Raycast((randomPosition + centerPosition.Position) +
+                        (Vector3.up * (raycastLength * 0.5f)),
+                        Vector3.down,
+                        out RaycastHit hit,
+                        raycastLength,
+                        hitMask))
+                    {
+                        pc.Commander.SetFormationIndexFilled(squadId, i);
+                        SpawnCommandUnit(hit.point, definition, teamId, playerFollowIndex, squadId, i);
+                    }
                 }
             }
         }
 
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority, Channel = RpcChannel.Reliable, InvokeLocal = true)]
+        public void RPC_RecallCommandSquads(byte playerFollowIndex)
+        {
+            var pc = Context.NetworkGame.GetPlayerByIndex(playerFollowIndex);
+            if (pc == null)
+                return;
+
+            var formationComponent = pc.Commander;
+            if (formationComponent == null)
+                return;
+
+            for (int squadId = 0; squadId < pc.Commander.Squads.Length; squadId++)
+            {
+                var squad = pc.Commander.Squads[squadId];
+                for (int i = 0; i < squad.CommandUnits.Length; i++)
+                {
+                    var commandUnit = squad.CommandUnits[i];
+
+                    if (!commandUnit.IsFilled)
+                        continue;
+
+                    commandUnit.NPC.RuntimeState.ApplyDamage(10000, 0, 0);
+                }
+            }
+        }
 
         public void SpawnNPCFromSave(FNonPlayerCharacterSaveState saveState)
         {

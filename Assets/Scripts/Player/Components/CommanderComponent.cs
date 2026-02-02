@@ -20,6 +20,9 @@ namespace LichLord
         private float xSpacing = 2f; // Fixed 2-unit spacing between characters along x-axis
 
         [Networked]
+        public NetworkBool HasCommandSquadsSummoned { get; set; }
+
+        [Networked]
         public ref FCommandTransform SquadTargetTransform_0 => ref MakeRef<FCommandTransform>();
         private float _desiredY_0 = 0;
         private ESquadStance _desiredStance_0;
@@ -490,6 +493,26 @@ namespace LichLord
         {
             ToggleVisuals(false);
         }
+
+        public void SummonCommandSquads(FWorldPosition position)
+        {
+            HasCommandSquadsSummoned = true;
+
+            _pc.Context.NonPlayerCharacterManager.RPC_SummonCommandSquadsFromItems(
+                position,
+                _pc.Inventory.GetSquadItemsAtIndex(0),
+                _pc.Inventory.GetSquadItemsAtIndex(1),
+                _pc.Inventory.GetSquadItemsAtIndex(2),
+                _pc.TeamID,
+                (byte)_pc.PlayerIndex);
+        }
+
+        public void RecallCommandSquads()
+        {
+            HasCommandSquadsSummoned = false;
+            _pc.Context.NonPlayerCharacterManager.RPC_RecallCommandSquads((byte)_pc.PlayerIndex);
+        }
+
     }
 
     [Serializable]
