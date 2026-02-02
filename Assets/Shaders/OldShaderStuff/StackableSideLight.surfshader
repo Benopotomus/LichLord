@@ -3,28 +3,44 @@
 //Last Owned by: Allen White (allen@dicewrenchdesigns.com)
 
 BEGIN_PROPERTIES   
-   [GroupRollout(Side Light)]
-   [Toggle(_HQ_SIDELIGHT)] _HQSide("Enable High Quality?", float) = 1.0
-   [Group(Side Light)][HDR] _Left("Left Side", Color) = (0.47, 0.22, 0.23, 1.0)
-   [Group(Side Light)] _LeftFall ("Falloff", float) = 0.0
-   [Group(Side Light)] _LeftPow ("Pow", float) = 8.02
-   [Group(Side Light)] _LeftBoost("Boost", float) = 1.2
-   [Space]
-   [Group(Side Light)][HDR] _Right("Right Side", Color) = (0.22, 0.67, 1.05, 1.0)
-   [Group(Side Light)] _RightFall ("Falloff", float) = 0.56
-   [Group(Side Light)] _RightPow ("Pow", float) = 2.27
-   [Group(Side Light)] _RightBoost("Boost", float) = 2.42
+    [GroupRollout(Side Light)]
+    [Toggle(_HQ_SIDELIGHT)] _HQSide("Enable High Quality?", float) = 1.0
+    [Group(Side Light)][HDR] _Left("Left Side", Color) = (0.47, 0.22, 0.23, 1.0)
+    [Group(Side Light)] _LeftFall ("Falloff", float) = 0.0
+    [Group(Side Light)] _LeftPow ("Pow", float) = 8.02
+    [Group(Side Light)] _LeftBoost("Boost", float) = 1.2
+    [Space]
+    [Group(Side Light)][HDR] _Right("Right Side", Color) = (0.22, 0.67, 1.05, 1.0)
+    [Group(Side Light)] _RightFall ("Falloff", float) = 0.56
+    [Group(Side Light)] _RightPow ("Pow", float) = 2.27
+    [Group(Side Light)] _RightBoost("Boost", float) = 2.42
+    [Space]
+    [Group(Side Light)] _GreyscaleIntensity("Greyscale Intensity", Range(-1,2)) = 1
+    [Space]
+    [Group(Side Light)] [Toggle] _SideHeight("Side Height Fade?", float) = 0
+    [Group(Side Light)] _SideFadeOffset("Offset", float) = -1
+    [Group(Side Light)] _SideFadeScale("Scale", float) = 1
+    [Group(Side Light)] _SideFadePow("Pow", float) = 1
+    [Group(Side Light)] _SideFadeBoost("Boost", float) = 1
 END_PROPERTIES
 
 BEGIN_CBUFFER
-	half4 _Left;
-   half _LeftFall, _LeftPow, _LeftBoost;
-   half4 _Right;
-   half _RightFall, _RightPow, _RightBoost;
+    half4 _Left;
+    half _LeftFall, _LeftPow, _LeftBoost;
+    half4 _Right;
+    half _RightFall, _RightPow, _RightBoost;
+    half _SideFadeScale, _SideFadePow, _SideFadeBoost, _SideFadeOffset;
+    half _GreyscaleIntensity;
 END_CBUFFER
 
 BEGIN_DEFINES
    #pragma multi_compile __ _HQ_SIDELIGHT
+   #pragma multi_compile __ _SIDEHEIGHT_ON
+
+   #ifndef HASFUNC
+		#include "DWD_ShaderFunctions.cginc" 
+		#define HASFUNC 1
+	#endif
 END_DEFINES
 
 
@@ -37,29 +53,40 @@ BEGIN_CODE
       half rSide = 0.0;
 
       #if _HQ_SIDELIGHT
-         float3 view = normalize(d.worldSpaceViewDir);
-         float3 up = mul((float3x3)UNITY_MATRIX_I_V, float3(0,1,0));
-         float3 down = mul((float3x3)UNITY_MATRIX_I_V, float3(0,-1,0));
-         float3 ri = normalize(cross(up, view));
-         float3 le = normalize(cross(down, view));
+         half3 view = normalize(d.worldSpaceViewDir);
+         half3 up = mul((half3x3)UNITY_MATRIX_I_V, half3(0,1,0));
+         half3 down = mul((half3x3)UNITY_MATRIX_I_V, half3(0,-1,0));
+         half3 ri = normalize(cross(up, view));
+         half3 le = normalize(cross(down, view));
          up = cross(view, ri);
-         float2 rimUV = mul(float3x3(ri, up, view), d.worldSpaceNormal).xy;
-         float2 rimUVFlip = mul(float3x3(le, up, view), d.worldSpaceNormal).xy;
+         half2 rimUV = mul(half3x3(ri, up, view), d.worldSpaceNormal).xy;
+         half2 rimUVFlip = mul(half3x3(le, up, view), d.worldSpaceNormal).xy;
          side = rimUV.x;
          lSide = saturate(rimUV.x);
          rSide = saturate(rimUVFlip.x);
       #else
-         side = dot(d.worldSpaceNormal, cross(d.worldSpaceViewDir, float3(0.0, 1.0, 0.0))) * 0.5 + 0.5;
+         side = dot(d.worldSpaceNormal, cross(d.worldSpaceViewDir, half3(0.0, 1.0, 0.0))) * 0.5 + 0.5;
          lSide = saturate(1.0.x - side);
          rSide = saturate(side);
       #endif
 
       lSide = saturate(lSide - _LeftFall);
-      half3 left = _Left.rgb * saturate( pow( lSide, _LeftPow) * _LeftBoost).xxx * _Left.aaa;
-
       rSide = saturate(rSide - _RightFall);
-      half3 right = _Right.rgb * saturate( pow( rSide, _RightPow) * _RightBoost).xxx * _Right.aaa;
 
+      #if _SIDEHEIGHT_ON
+        half heightMask = saturate((d.localSpacePosition.y - _SideFadeOffset) * _SideFadeScale);
+        heightMask = saturate(pow(heightMask, _SideFadePow) * _SideFadeBoost);
+        lSide *= heightMask;
+        rSide *= heightMask;
+      #endif
+
+      half grey = Greyscale(o.Albedo, 1.0).g;
+      grey = grey * grey * 2.0.x;
+      lSide = lerp(lSide, lSide * grey * o.Occlusion, _GreyscaleIntensity);
+      rSide = lerp(rSide, rSide * grey * o.Occlusion, _GreyscaleIntensity);
+
+      half3 left = _Left.rgb * saturate( pow( lSide, _LeftPow) * _LeftBoost).xxx * _Left.aaa;
+      half3 right = _Right.rgb * saturate( pow( rSide, _RightPow) * _RightBoost).xxx * _Right.aaa;
       o.Emission += saturate(left + right);
 	}
 

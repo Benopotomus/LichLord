@@ -15,7 +15,7 @@ BEGIN_PROPERTIES
 	[HDR] _EmissionColor("Emission Color", Color) = (1,0,0,1)
 	[Header(Detail Pack)]
 	[NoScaleOffset] _NMAO("Normal, Metallic, AO", 2D) = "bump" {}
-	_NormalIntensity("Normal Strength", Range(0,2)) = 1
+	_NormalIntensity("Normal Strength", Range(0,4)) = 1
 	[Header(Saturation)]
 	_Saturation("Saturation", Range(0,3)) = 1.0
 	_AlbedoMask("Albedo Sat Intensity", Range(0,1)) = 1.0

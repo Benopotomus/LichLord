@@ -15,6 +15,7 @@ Material:
   m_ValidKeywords:
   - _EMISSION_ON
   - _HQ_SIDELIGHT
+  - _SIDEHEIGHT_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -54,31 +55,37 @@ Material:
     - _EmissionPower: 0
     - _EmissiveMax: 10
     - _EmissiveMulAlbedo: 0.54
+    - _GreyscaleIntensity: 0.64
     - _HQSide: 1
-    - _LeftBoost: 1.2
-    - _LeftFall: 0
-    - _LeftPow: 13.33
+    - _LeftBoost: 3.2
+    - _LeftFall: 0.2
+    - _LeftPow: 2.06
     - _Metalness: 0.012
-    - _NormalIntensity: 2
+    - _NormalIntensity: 2.1
     - _Occlusion: 0.2
     - _QueueControl: -1
     - _QueueOffset: 0
     - _RightBoost: 2.42
     - _RightFall: 0.56
-    - _RightPow: 3.13
+    - _RightPow: 2.55
     - _SSWrap: 0.4
     - _Saturation: 1.44
     - _ShadowMin: 0.3
+    - _SideFadeBoost: 2.45
+    - _SideFadeOffset: 0.17
+    - _SideFadePow: 0.5
+    - _SideFadeScale: -1
+    - _SideHeight: 1
     - _Smoothness: 0.268
-    - _Wrap: 0
+    - _Wrap: 0.158
     - _WrapBoost: 1
-    - _WrapIntensity: 0.2
+    - _WrapIntensity: 0.134
     - _WrapPow: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 8, g: 0.06903319, b: 0, a: 1}
+    - _EmissionColor: {r: 16, g: 0.13806638, b: 0, a: 1}
     - _EmissiveOverlayColor: {r: 0, g: 1, b: 0, a: 1}
-    - _Left: {r: 0.20408587, g: 0.35992026, b: 0.8890321, a: 1}
+    - _Left: {r: 0.021320727, g: 0.80075777, b: 2.0361254, a: 1}
     - _Right: {r: 2.5016265, g: 0.7346691, b: 0.5900059, a: 1}
     - _SSColor: {r: 1, g: 0.3, b: 0.1, a: 1}
     - _ShadowColor: {r: 0.2, g: 0.05, b: 0.3, a: 1}
