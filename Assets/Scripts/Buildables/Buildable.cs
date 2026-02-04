@@ -82,7 +82,6 @@ namespace LichLord.Buildables
             _chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
             _chunk.AddObject(this);
             _chunk.AddHitTarget(this);
-
             _spawnTransformer.PlaySpawnAnimation();
         }
 

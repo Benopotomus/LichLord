@@ -22,7 +22,7 @@ namespace LichLord.World
 
         [SerializeField]
         private List<Lair> _activeLairs = new List<Lair>();
-        public List<Lair> ActiveStrongholds => _activeLairs;
+        public List<Lair> ActiveLairs => _activeLairs;
 
         public void LoadLairs()
         {
@@ -77,10 +77,13 @@ namespace LichLord.World
             return null;
         }
 
-        public Lair GetLair(int index)
+        public Lair GetLair(int lairId)
         {
-            if (_activeLairs.Count <= index)
-                return _activeLairs[index];
+            foreach (var lair in _activeLairs)
+            {
+                if (lair.LairID == lairId)
+                    return lair;
+            }
 
             return null;
         }

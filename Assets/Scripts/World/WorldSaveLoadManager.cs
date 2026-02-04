@@ -94,7 +94,7 @@ namespace LichLord.World
 
                 // --- Save strongholds ---
                 List<FStrongholdSaveData> strongholdSaveDatas = new List<FStrongholdSaveData>();
-                foreach (var stronghold in Context.LairManager.ActiveStrongholds)
+                foreach (var stronghold in Context.LairManager.ActiveLairs)
                 {
                     var buildableList = new List<FBuildableSaveState>();
                     var buildableZone = stronghold.BuildableZone;

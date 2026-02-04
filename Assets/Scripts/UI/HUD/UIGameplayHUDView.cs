@@ -24,7 +24,7 @@
             Context.LairManager.onLairSpawned += _strongholdTracker.OnStrongholdSpawned;
             Context.LairManager.onLairDespawned += _strongholdTracker.OnStrongholdDespawned;
 
-            foreach(var stronghold in Context.LairManager.ActiveStrongholds)
+            foreach(var stronghold in Context.LairManager.ActiveLairs)
                 _strongholdTracker.OnStrongholdSpawned(stronghold);
 
             _warningText.SetActive(false);

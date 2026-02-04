@@ -113,13 +113,14 @@ namespace LichLord.Projectiles
             Vector3 oldPosition = data.Position.Position;
             Vector3 newPosition = oldPosition;
             Vector3 newVelocity = Vector3.zero;
+            IHitTarget target = projectile.Target;
 
             if (projectile.TicksSinceFired >= TicksToHome)
             {
                 data.IsHoming = true;
             }
 
-            if (data.IsHoming)
+            if (data.IsHoming && target != null)
             {
                 newPosition = GetHomingMovePosition(projectile, definition, ref data, newTimeSinceFired, deltaTime);
             }

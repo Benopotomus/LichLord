@@ -79,6 +79,10 @@ namespace LichLord
                 case EObjectType.NonPlayerCharacter:
                     return context.NonPlayerCharacterManager;
                 case EObjectType.Lair:
+                case EObjectType.Buildable_Lair_0:
+                case EObjectType.Buildable_Lair_1:
+                case EObjectType.Buildable_Lair_2:
+                case EObjectType.Buildable_Lair_3:
                     return context.LairManager;
             }
 
@@ -206,11 +210,18 @@ namespace LichLord
                 SetObjectType(EObjectType.Player);
                 SetIndex(pc.PlayerIndex);
             }
-
-            if (hitTarget is NonPlayerCharacter npc)
+            else if (hitTarget is NonPlayerCharacter npc)
             {
                 SetObjectType(EObjectType.NonPlayerCharacter);
                 SetIndex(npc.FullIndex);
+            }
+            else if (hitTarget is Lair lair)
+            {
+                Copy(lair.NetObjectID);
+            }
+            else if (hitTarget is Buildable buildable)
+            {
+                Copy(buildable.NetObjectID);
             }
         }
 

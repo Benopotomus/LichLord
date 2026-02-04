@@ -32,7 +32,7 @@ namespace LichLord.Projectiles
             ref FProjectileFireEvent fireEvent,
             ProjectileDefinition projectileDefinition,
             IHitInstigator instigator,
-            IHitTarget targetID,
+            IHitTarget target,
             Vector3 spawnPosition,
             Vector3 targetPosition,
             int fireTick,
@@ -42,7 +42,8 @@ namespace LichLord.Projectiles
             fireEvent.projectileDefinition = projectileDefinition;
 
             fireEvent.instigator = instigator;
-            fireEvent.target = targetID;
+
+            fireEvent.target = target;
             fireEvent.fireTick = fireTick;
 
             fireEvent.spawnPosition = spawnPosition;

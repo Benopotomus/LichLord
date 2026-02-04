@@ -72,7 +72,6 @@ namespace LichLord
             get
             {
                 FNetObjectID newId = new FNetObjectID();
-
                 newId.SetObjectType(EObjectType.Lair);
                 newId.SetIndex(LairID);
                 return newId;
@@ -143,7 +142,7 @@ namespace LichLord
             _currentHealth = currentHealth;
             _rank = rank;
             _maxHealth = 1000 + ((rank - 1) * 100);
-            _influenceDistance = 20 + ((rank - 1) * 5);
+            _influenceDistance = 40 + ((rank - 1) * 5);
             LairID = (byte)strongholdId;
             ContainerIndex = (ushort)containerIndex;
         }
