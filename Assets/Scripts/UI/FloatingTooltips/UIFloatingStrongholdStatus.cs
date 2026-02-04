@@ -16,7 +16,7 @@ namespace LichLord.UI
 
         [SerializeField] private Image _invasionIcon;
 
-        private Stronghold _stronghold;
+        private Lair _stronghold;
 
         private bool _invasionActive;
 
@@ -65,7 +65,7 @@ namespace LichLord.UI
             */
         }
 
-        public void SetStronghold(Stronghold stronghold)
+        public void SetStronghold(Lair stronghold)
         {
             _stronghold = stronghold;
         }

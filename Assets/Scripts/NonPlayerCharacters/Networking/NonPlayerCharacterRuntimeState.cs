@@ -351,12 +351,12 @@ namespace LichLord.NonPlayerCharacters
             }
         }
 
-        public Stronghold GetWorkerStronghold()
+        public Lair GetWorkerStronghold()
         {
             if (!IsWorker())
                 return null;
 
-            return Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
+            return Context.LairManager.GetStronghold(GetWorkerStrongholdId());
         }
 
         public void SendWorkerStateChanged(ENPCState newState)
@@ -364,7 +364,7 @@ namespace LichLord.NonPlayerCharacters
             if (!IsWorker() || !IsWorkerValid())
                 return;
 
-            Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
+            Lair stronghold = Context.LairManager.GetStronghold(GetWorkerStrongholdId());
             stronghold.WorkerComponent.OnWorkerStateChanged(GetWorkerIndex(), newState);
         }
 
@@ -373,7 +373,7 @@ namespace LichLord.NonPlayerCharacters
             if (!IsWorker() || !IsWorkerValid())
                 return (false, new FStaticPropPosition());
 
-            Stronghold stronghold = Context.StrongholdManager.GetStronghold(GetWorkerStrongholdId());
+            Lair stronghold = Context.LairManager.GetStronghold(GetWorkerStrongholdId());
             FWorkerData workerData = stronghold.WorkerComponent.GetWorkerData(GetWorkerIndex());
 
             return (workerData.HasTargetNode, workerData.TargetNode);
@@ -392,7 +392,7 @@ namespace LichLord.NonPlayerCharacters
             if (!IsWorker())
                 return false;
 
-            Stronghold stronghold = GetWorkerStronghold();
+            Lair stronghold = GetWorkerStronghold();
             var workerData = stronghold.WorkerComponent.GetWorkerData(GetWorkerIndex());
             var tasks = GetCommandTasks();
 

@@ -147,7 +147,7 @@ namespace LichLord.Props
             staticPropPosition.PropIndex = (ushort)Index;
 
             context.MissionManager.NexusInteractionComplete();
-            context.StrongholdManager.RPC_ActivateNexus(staticPropPosition);
+            context.LairManager.RPC_ActivateNexus(staticPropPosition);
             
         }
     }

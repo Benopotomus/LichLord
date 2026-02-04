@@ -25,7 +25,7 @@ namespace LichLord.World
             }
 
             Context.ChunkManager.InitializeWorldChunks();
-            Context.StrongholdManager.LoadStrongholds();
+            Context.LairManager.LoadLairs();
             Context.InvasionManager.LoadInvasionData();
 
             Context.PlayerSaveLoadManager.LoadPlayer();

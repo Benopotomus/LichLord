@@ -6,13 +6,13 @@ namespace LichLord.UI
 {
     public class UIStrongholdTracker : UIWidget
     {
-        Dictionary<Stronghold, UIFloatingStrongholdStatus> _strongholdWidgets = new Dictionary<Stronghold, UIFloatingStrongholdStatus>();
+        Dictionary<Lair, UIFloatingStrongholdStatus> _strongholdWidgets = new Dictionary<Lair, UIFloatingStrongholdStatus>();
         public List<UIFloatingStrongholdStatus> _freeWidgets = new List<UIFloatingStrongholdStatus>();
 
         [SerializeField] private UIFloatingStrongholdStatus _floatingStrongholdWidgetPrefab; // Prefab for the UI widget
         [SerializeField] private Transform _widgetParent; // Parent transform for spawned widgets
 
-        public void OnStrongholdSpawned(Stronghold stronghold)
+        public void OnStrongholdSpawned(Lair stronghold)
         {
             // Check if widget already exists (defensive check)
             if (!_strongholdWidgets.ContainsKey(stronghold))
@@ -38,7 +38,7 @@ namespace LichLord.UI
             }
         }
 
-        public void OnStrongholdDespawned(Stronghold stronghold)
+        public void OnStrongholdDespawned(Lair stronghold)
         {
             // Remove widget if it exists
             if (_strongholdWidgets.TryGetValue(stronghold, out var widget))

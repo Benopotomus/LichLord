@@ -86,7 +86,7 @@ namespace LichLord.UI
             return interactable.Owner switch
             {
                 StorageChest => ERightWidgetType.StorageChest,
-                Stronghold => ERightWidgetType.Stronghold,
+                Lair => ERightWidgetType.Stronghold,
                 Stockpile => ERightWidgetType.Stockpile,
                 Refinery => ERightWidgetType.Refinery,
                 TaskMaster => ERightWidgetType.TaskMaster,

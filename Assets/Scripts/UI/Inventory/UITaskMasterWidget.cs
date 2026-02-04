@@ -54,7 +54,7 @@ namespace LichLord.UI
 
             _nameText.text = definition.BuildableName;
 
-            Stronghold stronghold = _taskMaster.Stronghold;
+            Lair stronghold = _taskMaster.Lair;
             _workerComponent = stronghold.WorkerComponent;
             _workerComponent.OnWorkersChanged += OnWorkersChanged;
             OnWorkersChanged(_workerComponent.WorkerCharacters);

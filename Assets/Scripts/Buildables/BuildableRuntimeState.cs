@@ -7,6 +7,9 @@ namespace LichLord.Buildables
 {
     public class BuildableRuntimeState
     {
+        private int _lairId; // lair Index
+        public int LairID => _lairId;
+
         private int _index; // index in buildable zone
         public int Index => _index;
 
@@ -47,6 +50,7 @@ namespace LichLord.Buildables
         {
             this.buildableZone = zone;
             _context = zone.Context;
+            this._lairId = zone.Lair.LairID;
             this._index = index;
             _data.Copy(in buildableData);
         }

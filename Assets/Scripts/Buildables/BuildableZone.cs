@@ -1,6 +1,4 @@
-﻿using DWD.Pooling;
-using DWD.Utility.Loading;
-using Fusion;
+﻿using Fusion;
 using LichLord.Items;
 using LichLord.World;
 using UnityEngine;
@@ -11,8 +9,8 @@ namespace LichLord.Buildables
     public partial class BuildableZone : ContextBehaviour
     {
         [SerializeField] 
-        private Stronghold _stronghold;
-        public Stronghold Stronghold => _stronghold;
+        private Lair _lair;
+        public Lair Lair => _lair;
 
         [SerializeField] 
         private CapsuleCollider _trigger;
@@ -64,7 +62,7 @@ namespace LichLord.Buildables
 
             for (int i = 0; i < _buildableDatas.Length; i++)
             {
-                var loadstate = _loadStates[i];
+                FBuildableLoadState loadstate = _loadStates[i];
                 ref FBuildableData data = ref _buildableDatas.GetRef(i);
 
                 BuildableRuntimeState runtimeState = GetRenderState(i, ref data);

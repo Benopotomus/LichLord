@@ -125,8 +125,8 @@ namespace LichLord.NonPlayerCharacters
         public int StrongholdId => _strongholdId;
 
         [SerializeField]
-        private Stronghold _stronghold;
-        public Stronghold Stronghold => _stronghold;
+        private Lair _stronghold;
+        public Lair Stronghold => _stronghold;
 
         [SerializeField]
         private int _workerIndex = -1;
@@ -264,7 +264,7 @@ namespace LichLord.NonPlayerCharacters
             _workerIndex = RuntimeState.GetWorkerIndex();
 
             if(_strongholdId >= 0)
-                _stronghold = Context.StrongholdManager.GetStronghold(_strongholdId);
+                _stronghold = Context.LairManager.GetStronghold(_strongholdId);
         }
 
         private void UpdateTeam(NonPlayerCharacterRuntimeState runtimeState)
@@ -339,7 +339,7 @@ namespace LichLord.NonPlayerCharacters
                 if (!runner.IsSharedModeMasterClient && runner.GameMode != GameMode.Single)
                     Context.PropManager.Predict_DealDamage(prop.RuntimeState.chunk.ChunkID, prop.RuntimeState.index, hit.damageData.damageValue);
             }
-            else if (hit.target is Stronghold stronghold)
+            else if (hit.target is Lair stronghold)
             {
                 stronghold.RPC_DealDamage(hit.damageData.damageValue);
             }

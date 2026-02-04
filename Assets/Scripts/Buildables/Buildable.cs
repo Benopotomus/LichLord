@@ -12,8 +12,8 @@ namespace LichLord.Buildables
         private BuildableZone _zone;
         public BuildableZone Zone => _zone;
 
-        private Stronghold _stronghold;
-        public Stronghold Stronghold => _stronghold;
+        private Lair _lair;
+        public Lair Lair => _lair;
 
         [SerializeField]
         protected BuildableRuntimeState _runtimeState;
@@ -39,6 +39,37 @@ namespace LichLord.Buildables
         [SerializeField] protected BuildableSpawnTransformer _spawnTransformer;
         public BuildableSpawnTransformer SpawnTransformer => _spawnTransformer;
 
+        public FNetObjectID NetObjectID
+        {
+            get
+            {
+                FNetObjectID newId = new FNetObjectID();
+
+                if(RuntimeState == null)
+                    return newId;
+
+                switch (RuntimeState.LairID)
+                {
+                    case 0:
+                        newId.SetObjectType(EObjectType.Buildable_Lair_0);
+                        break;
+                    case 1:
+                        newId.SetObjectType(EObjectType.Buildable_Lair_1);
+                        break;
+                    case 2:
+                        newId.SetObjectType(EObjectType.Buildable_Lair_2);
+                        break;
+                    case 3:
+                        newId.SetObjectType(EObjectType.Buildable_Lair_3);
+                        break;
+
+                }
+                
+                newId.SetIndex(RuntimeState.Index);
+                return newId;
+            }
+        }
+
         public virtual void OnSpawned(BuildableZone zone, BuildableRuntimeState runtimeState)
         {
             _runtimeState = runtimeState;
@@ -46,7 +77,7 @@ namespace LichLord.Buildables
             _cachedTransform.rotation = runtimeState.Data.Rotation;
 
             _zone = zone;
-            _stronghold = zone.Stronghold;
+            _lair = zone.Lair;
             _sceneContext = zone.Context;
             _chunk = Context.ChunkManager.GetChunkAtPosition(_cachedTransform.position);
             _chunk.AddObject(this);

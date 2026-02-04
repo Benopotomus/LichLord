@@ -21,10 +21,10 @@
         {
             base.OnVisible();
 
-            Context.StrongholdManager.onStrongholdSpawned += _strongholdTracker.OnStrongholdSpawned;
-            Context.StrongholdManager.onStrongholdDespawned += _strongholdTracker.OnStrongholdDespawned;
+            Context.LairManager.onLairSpawned += _strongholdTracker.OnStrongholdSpawned;
+            Context.LairManager.onLairDespawned += _strongholdTracker.OnStrongholdDespawned;
 
-            foreach(var stronghold in Context.StrongholdManager.ActiveStrongholds)
+            foreach(var stronghold in Context.LairManager.ActiveStrongholds)
                 _strongholdTracker.OnStrongholdSpawned(stronghold);
 
             _warningText.SetActive(false);

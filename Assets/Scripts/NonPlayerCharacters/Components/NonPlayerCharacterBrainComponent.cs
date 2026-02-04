@@ -264,7 +264,7 @@ namespace LichLord.NonPlayerCharacters
                 if (_wanderPositionSet)
                     return;
 
-                Stronghold stronghold = runtimeState.GetWorkerStronghold();
+                Lair stronghold = runtimeState.GetWorkerStronghold();
 
                 if (stronghold != null)
                 {
@@ -679,7 +679,7 @@ namespace LichLord.NonPlayerCharacters
                 }
             }
 
-            if (trackable is Stronghold strongHold)
+            if (trackable is Lair strongHold)
             {
                 if (_npc.TeamID == ETeamID.PlayerTeam)
                 {
@@ -901,7 +901,7 @@ namespace LichLord.NonPlayerCharacters
             if (target is Nexus nexus)
                 attackTargetGO = nexus.gameObject;
             
-            if (target is Stronghold stronghold)
+            if (target is Lair stronghold)
                 attackTargetGO = stronghold.gameObject;
 
             if (target is Buildable buildable)

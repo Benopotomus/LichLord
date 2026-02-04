@@ -56,7 +56,7 @@ namespace LichLord.NonPlayerCharacters
                 if (ValidTargetTypes.Contains(EManeuverTarget.PC))
                     return true;
             }
-            else if (target is Stronghold)
+            else if (target is Lair)
             {
                 if (ValidTargetTypes.Contains(EManeuverTarget.Stronghold))
                     return true;

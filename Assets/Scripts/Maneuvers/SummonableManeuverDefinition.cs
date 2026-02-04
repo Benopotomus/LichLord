@@ -48,7 +48,7 @@ namespace LichLord
 
             Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;
 
-            var nearestStronghold = pc.Context.StrongholdManager.GetNearestStronghold(targetPos);
+            var nearestStronghold = pc.Context.LairManager.GetNearestStronghold(targetPos);
 
             if (nearestStronghold == null)
             {

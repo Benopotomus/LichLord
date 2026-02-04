@@ -9,8 +9,8 @@ namespace LichLord
     {
 #if UNITY_EDITOR
         [SerializeField]
-        private Stronghold _prefab;
-        public Stronghold Prefab;
+        private Lair _prefab;
+        public Lair Prefab;
 #endif
     }
 }

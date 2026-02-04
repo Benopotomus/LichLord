@@ -33,7 +33,7 @@ namespace LichLord
         public ChunkManager ChunkManager;
         public SceneCamera Camera;
         public SceneUI UI;
-        public StrongholdManager StrongholdManager;
+        public LairManager LairManager;
         public InvasionManager InvasionManager;
         public ContainerManager ContainerManager;
         public DialogManager DialogManager;

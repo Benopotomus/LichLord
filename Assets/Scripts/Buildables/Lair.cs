@@ -8,10 +8,10 @@ using UnityEngine.Rendering.Universal;
 
 namespace LichLord
 {
-    public class Stronghold : ContextBehaviour, IChunkTrackable, IHitTarget
+    public class Lair : ContextBehaviour, IChunkTrackable, IHitTarget, IHitInstigator
     {
         [Networked]
-        public byte StrongholdID { get; set; }
+        public byte LairID { get; set; }
 
         [Networked]
         public ushort ContainerIndex { get; set; }
@@ -67,6 +67,18 @@ namespace LichLord
         // IHitTarget
         public IChunkTrackable ChunkTrackable => this;
 
+        public FNetObjectID NetObjectID
+        {
+            get
+            {
+                FNetObjectID newId = new FNetObjectID();
+
+                newId.SetObjectType(EObjectType.Lair);
+                newId.SetIndex(LairID);
+                return newId;
+            }
+        }
+
         public virtual Collider HurtBoxCollider { get { return Hurtbox.HurtBoxes[0]; } }
         public bool IsAttackable {
             get
@@ -77,6 +89,8 @@ namespace LichLord
                 return false;
             }
         }
+
+        public ETeamID TeamID => throw new System.NotImplementedException();
 
         public HurtboxComponent Hurtbox;
 
@@ -109,7 +123,7 @@ namespace LichLord
 
             _cachedTransform.position = _data.GetPosition(Context, HasStateAuthority);
             _containerSlotData = Context.ContainerManager.GetContainerDataAtIndex(ContainerIndex);
-            Context.StrongholdManager.OnStrongholdSpawned(this);
+            Context.LairManager.OnLairSpawned(this);
         }
 
         private void OnChunksReady()
@@ -130,7 +144,7 @@ namespace LichLord
             _rank = rank;
             _maxHealth = 1000 + ((rank - 1) * 100);
             _influenceDistance = 20 + ((rank - 1) * 5);
-            StrongholdID = (byte)strongholdId;
+            LairID = (byte)strongholdId;
             ContainerIndex = (ushort)containerIndex;
         }
 
@@ -145,7 +159,7 @@ namespace LichLord
             {
                 _decalProjector.size = new Vector3(_influenceDistance * 2.95f, _influenceDistance * 2.95f, _influenceDistance * 2.95f);
                 _buildableZone.SetTriggerSize(_influenceDistance);
-                //_terrainFlattener.TryFlatten(_influenceDistance, 10f);
+                _terrainFlattener.TryFlatten(_influenceDistance, 10f);
                 _localInfluenceDistance = _influenceDistance;
             }
         }
@@ -181,7 +195,7 @@ namespace LichLord
             _interactableComponent.onInteractionComplete -= OnInteractionComplete;
             _chunk.RemoveObject(this);
             _chunk.RemoveHitTarget(this);
-            Context.StrongholdManager.OnStrongholdDespawned(this);
+            Context.LairManager.OnLairDespawned(this);
 
             base.Despawned(runner, hasState);
         }
@@ -248,6 +262,10 @@ namespace LichLord
 
 
             //_rank++;
+        }
+
+        public void OnHitPerformed(ref FHitUtilityData hit)
+        {
         }
     }
 }

@@ -16,7 +16,7 @@ namespace LichLord.World
         public Dictionary<FChunkPosition, FChunkSaveData> LoadedChunks => _loadedChunks;
 
         private List<FStrongholdSaveData> _loadedStrongholds = new List<FStrongholdSaveData>();
-        public List<FStrongholdSaveData> LoadedStrongholds => _loadedStrongholds;
+        public List<FStrongholdSaveData> LoadedLairs => _loadedStrongholds;
 
         private List<FNonPlayerCharacterSaveState> _loadedNPCs = new List<FNonPlayerCharacterSaveState>();
         public List<FNonPlayerCharacterSaveState> LoadedNPCs => _loadedNPCs;
@@ -94,7 +94,7 @@ namespace LichLord.World
 
                 // --- Save strongholds ---
                 List<FStrongholdSaveData> strongholdSaveDatas = new List<FStrongholdSaveData>();
-                foreach (var stronghold in Context.StrongholdManager.ActiveStrongholds)
+                foreach (var stronghold in Context.LairManager.ActiveStrongholds)
                 {
                     var buildableList = new List<FBuildableSaveState>();
                     var buildableZone = stronghold.BuildableZone;
@@ -129,7 +129,7 @@ namespace LichLord.World
                         index = stronghold.Data.PropIndex,
                         currentHealth = stronghold.CurrentHealth,
                         rank = stronghold.Rank,
-                        strongholdId = stronghold.StrongholdID,
+                        strongholdId = stronghold.LairID,
                         containerIndex = stronghold.ContainerIndex,
                         buildableStates = buildableList.ToArray(),
                         workerSaveDatas = workerSaveData.ToArray()

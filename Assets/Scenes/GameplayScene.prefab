@@ -7940,7 +7940,7 @@ MonoBehaviour:
     ChunkManager: {fileID: 6418235338973710349}
     Camera: {fileID: 393352328543011169}
     UI: {fileID: 4235548199455008882}
-    StrongholdManager: {fileID: 2600286277624370897}
+    LairManager: {fileID: 2600286277624370897}
     InvasionManager: {fileID: 156898910518370702}
     ContainerManager: {fileID: 2099940939551755748}
     DialogManager: {fileID: 754671849189099409}
@@ -17497,7 +17497,7 @@ GameObject:
   - component: {fileID: 1157049727817132551}
   - component: {fileID: 2600286277624370897}
   m_Layer: 0
-  m_Name: StrongholdManager
+  m_Name: LairManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17527,14 +17527,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 8921692020260725069}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c63a471eb34660242a87b66d59dd5341, type: 3}
+  m_Script: {fileID: 11500000, guid: c03544184a65dfa4fbbd291e83d68305, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _strongholdPrefab: {fileID: 3375435704011219859, guid: c46db5c0445771344a338580e7fe17e9,
+  _lairPrefab: {fileID: 3375435704011219859, guid: c46db5c0445771344a338580e7fe17e9,
     type: 3}
   _preSpawnVisualEffect: {fileID: 5894957125435778597, guid: 3260d541cc519654f832cc5a44e59db4,
     type: 3}
-  _activeStrongholds: []
+  _activeLairs: []
 --- !u!1 &8981083752927187975
 GameObject:
   m_ObjectHideFlags: 0

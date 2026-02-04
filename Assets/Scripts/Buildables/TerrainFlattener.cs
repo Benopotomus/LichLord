@@ -36,8 +36,6 @@ public class TerrainFlattener : MonoBehaviour
 
     private void FlattenTerrain(Terrain terrain, Vector3 worldPosition, float flatRadius, float featherRadius)
     {
-        return;
-
         TerrainData data = terrain.terrainData;
         Vector3 terrainPos = terrain.transform.position;
 

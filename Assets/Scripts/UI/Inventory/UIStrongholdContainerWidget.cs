@@ -28,7 +28,7 @@ namespace LichLord.UI
             if (interactable == null)
                 return;
 
-            if (interactable.Owner is Stronghold stronghold)
+            if (interactable.Owner is Lair stronghold)
             {
                 _containerIndex = stronghold.ContainerIndex;
                 FContainerSlotData containerData = Context.ContainerManager.GetContainerDataAtIndex(_containerIndex);

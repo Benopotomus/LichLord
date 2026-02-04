@@ -1,5 +1,7 @@
 ﻿using Fusion;
+using LichLord.Buildables;
 using LichLord.NonPlayerCharacters;
+using LichLord.World;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -11,11 +13,11 @@ namespace LichLord
         [FieldOffset(0)]
         public ushort _data;
 
-        private const int TYPE_BITS = 4;                // 0–15
+        private const int TYPE_BITS = 5;                // 0–31
         private const int TYPE_SHIFT = 0;
         private const ushort TYPE_MASK = (1 << TYPE_BITS) - 1;
 
-        private const int INDEX_BITS = 10;                // 0–1023
+        private const int INDEX_BITS = 11;                // 0–2047
         private const int INDEX_SHIFT = TYPE_SHIFT + TYPE_BITS;
         private const ushort INDEX_MASK = (1 << INDEX_BITS) - 1;
 
@@ -76,8 +78,8 @@ namespace LichLord
                     return context.NetworkGame;
                 case EObjectType.NonPlayerCharacter:
                     return context.NonPlayerCharacterManager;
-                case EObjectType.Buildable_Stronghold_1:
-                    return context.StrongholdManager;
+                case EObjectType.Lair:
+                    return context.LairManager;
             }
 
             return null;
@@ -90,6 +92,10 @@ namespace LichLord
             if (component == null)
                 return null;
 
+            LairManager lairManager = null;
+            Lair lair = null;
+            FBuildableLoadState loadState;
+
             switch (GetObjectType())
             {
                 case EObjectType.Player:
@@ -98,6 +104,58 @@ namespace LichLord
                 case EObjectType.NonPlayerCharacter:
                     var npcManager = context.NonPlayerCharacterManager;
                     return npcManager.GetNpcAtIndex(GetIndex());
+                case EObjectType.Lair:
+                    lairManager = context.LairManager;
+                    return lairManager.GetLair(GetIndex());
+                case EObjectType.Buildable_Lair_0:
+                    lairManager = context.LairManager;
+
+                    lair = lairManager.GetLair(0);
+                    if (lair == null)
+                        return null;
+
+                    loadState = lair.BuildableZone.LoadStates[GetIndex()];
+                    if (loadState.LoadState != ELoadState.Loaded)
+                        return null;
+
+                    return loadState.Buildable;
+                case EObjectType.Buildable_Lair_1:
+                    lairManager = context.LairManager;
+
+                    lair = lairManager.GetLair(1);
+                    if (lair == null)
+                        return null;
+
+                    loadState = lair.BuildableZone.LoadStates[GetIndex()];
+                    if (loadState.LoadState != ELoadState.Loaded)
+                        return null;
+
+                    return loadState.Buildable;
+                case EObjectType.Buildable_Lair_2:
+                    lairManager = context.LairManager;
+
+                    lair = lairManager.GetLair(2);
+                    if (lair == null)
+                        return null;
+
+                    loadState = lair.BuildableZone.LoadStates[GetIndex()];
+                    if (loadState.LoadState != ELoadState.Loaded)
+                        return null;
+
+                    return loadState.Buildable;
+                case EObjectType.Buildable_Lair_3:
+                    lairManager = context.LairManager;
+
+                    lair = lairManager.GetLair(3);
+                    if (lair == null)
+                        return null;
+
+                    loadState = lair.BuildableZone.LoadStates[GetIndex()];
+                    if (loadState.LoadState != ELoadState.Loaded)
+                        return null;
+
+                    return loadState.Buildable;
+
             }
 
             return null;
@@ -117,6 +175,9 @@ namespace LichLord
                 case EObjectType.NonPlayerCharacter:
                     var npcManager = context.NonPlayerCharacterManager;
                     return npcManager.GetNpcAtIndex(GetIndex());
+                case EObjectType.Lair:
+                    var lairManager = context.LairManager;
+                    return lairManager.GetLair(GetIndex());
             }
 
             return null;
@@ -164,9 +225,10 @@ namespace LichLord
         None,
         Player,
         NonPlayerCharacter,
-        Buildable_Stronghold_0,
-        Buildable_Stronghold_1,
-        Buildable_Stronghold_3,
-        Buildable_Stronghold_4,
+        Lair,
+        Buildable_Lair_0,
+        Buildable_Lair_1,
+        Buildable_Lair_2,
+        Buildable_Lair_3,
     }
 }

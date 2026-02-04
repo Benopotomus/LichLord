@@ -9,35 +9,35 @@ using UnityEngine;
 
 namespace LichLord.World
 {
-    public class StrongholdManager : ContextBehaviour
+    public class LairManager : ContextBehaviour
     {
         private List<PropRuntimeState> _authorityNexusStates = new List<PropRuntimeState>();
         private List<PropRuntimeState> _predictedStates = new List<PropRuntimeState>();
 
-        public Action<Stronghold> onStrongholdSpawned;
-        public Action<Stronghold> onStrongholdDespawned;
+        public Action<Lair> onLairSpawned;
+        public Action<Lair> onLairDespawned;
 
-        [SerializeField] private Stronghold _strongholdPrefab;
+        [SerializeField] private Lair _lairPrefab;
         [SerializeField] private StandaloneVisualEffect _preSpawnVisualEffect;
 
         [SerializeField]
-        private List<Stronghold> _activeStrongholds = new List<Stronghold>();
-        public List<Stronghold> ActiveStrongholds => _activeStrongholds;
+        private List<Lair> _activeLairs = new List<Lair>();
+        public List<Lair> ActiveStrongholds => _activeLairs;
 
-        public void LoadStrongholds()
+        public void LoadLairs()
         {
             if (!HasStateAuthority)
                 return;
 
-            var loadedStrongholds = Context.WorldSaveLoadManager.LoadedStrongholds;
+            var loadedLairs = Context.WorldSaveLoadManager.LoadedLairs;
 
-            foreach (FStrongholdSaveData strongholdSaveData in loadedStrongholds)
+            foreach (FStrongholdSaveData strongholdSaveData in loadedLairs)
             {
                 FStaticPropPosition propPosition  = new FStaticPropPosition();
                 propPosition.ChunkPosition = strongholdSaveData.chunkCoord;
                 propPosition.PropIndex = (ushort)strongholdSaveData.index;
 
-                Stronghold strongholdSpawned = SpawnStronghold(strongholdSaveData.strongholdId, 
+                Lair strongholdSpawned = SpawnStronghold(strongholdSaveData.strongholdId, 
                     propPosition, 
                     strongholdSaveData.currentHealth, 
                     strongholdSaveData.rank,
@@ -48,40 +48,48 @@ namespace LichLord.World
             }
         }
 
-        public void OnStrongholdSpawned(Stronghold stronghold)
+        public void OnLairSpawned(Lair lair)
         {
-            if (_activeStrongholds.Contains(stronghold))
+            if (_activeLairs.Contains(lair))
                 return;
 
-            _activeStrongholds.Add(stronghold);
-            onStrongholdSpawned?.Invoke(stronghold);
+            _activeLairs.Add(lair);
+            onLairSpawned?.Invoke(lair);
         }
 
-        public void OnStrongholdDespawned(Stronghold stronghold)
+        public void OnLairDespawned(Lair lair)
         {
-            if (!_activeStrongholds.Contains(stronghold))
+            if (!_activeLairs.Contains(lair))
                 return;
 
-            _activeStrongholds.Remove(stronghold);
-            onStrongholdDespawned?.Invoke(stronghold);
+            _activeLairs.Remove(lair);
+            onLairDespawned?.Invoke(lair);
         }
 
-        public Stronghold GetStronghold(FStaticPropPosition strongholdData)
+        public Lair GetLair(FStaticPropPosition lairData)
         {
-            foreach(var stronghold in  _activeStrongholds) 
+            foreach(var lair in  _activeLairs) 
             {
-                if(stronghold.Data.IsEqual(strongholdData))
-                    return stronghold;
+                if(lair.Data.IsEqual(lairData))
+                    return lair;
             }
 
             return null;
         }
 
-        public BuildableZone GetBuildableZone(int strongholdId)
+        public Lair GetLair(int index)
         {
-            foreach (var stronghold in _activeStrongholds)
+            if (_activeLairs.Count <= index)
+                return _activeLairs[index];
+
+            return null;
+        }
+
+        public BuildableZone GetBuildableZone(int lairId)
+        {
+            foreach (var stronghold in _activeLairs)
             {
-                if (stronghold.StrongholdID == strongholdId)
+                if (stronghold.LairID == lairId)
                     return stronghold.BuildableZone;
             }
 
@@ -110,29 +118,29 @@ namespace LichLord.World
 
             if (HasStateAuthority)
             {
-                SpawnStronghold(_activeStrongholds.Count, staticPropPosition, 1000, 1, containerIndex);
+                SpawnStronghold(_activeLairs.Count, staticPropPosition, 1000, 1, containerIndex);
             }
         }
 
-        public Stronghold SpawnStronghold(int strongholdId, FStaticPropPosition strongholdData, int health, int rank, int containerIndex)
+        public Lair SpawnStronghold(int strongholdId, FStaticPropPosition strongholdData, int health, int rank, int containerIndex)
         {
             var position = GetStrongholdPosition(strongholdData);
-            return Runner.Spawn(_strongholdPrefab, position, Quaternion.identity, null,
+            return Runner.Spawn(_lairPrefab, position, Quaternion.identity, null,
                                 onBeforeSpawned: (runner, obj) =>
                                 {
-                                    var r = obj.GetComponent<Stronghold>();
+                                    var r = obj.GetComponent<Lair>();
                                     r.SetSpawnData(strongholdId, strongholdData, health, rank, containerIndex);
                                 });
             
         }
 
         // Get the nearest runtime state for a nexus
-        public Stronghold GetNearestStronghold(Vector3 playerPosition)
+        public Lair GetNearestStronghold(Vector3 playerPosition)
         {
-            Stronghold nearestStronghold = null; // Reset to null each frame
+            Lair nearestStronghold = null; // Reset to null each frame
             float minSqrDistance = float.MaxValue;
 
-            foreach (var stronghold in _activeStrongholds)
+            foreach (var stronghold in _activeLairs)
             {
                 float sqrDist = Vector3.SqrMagnitude(stronghold.Position - playerPosition);
                 // Debug.Log($"Nexus {nexusData.GUID} Health: {state.GetHealth()}"); // Uncomment for debugging
@@ -159,11 +167,11 @@ namespace LichLord.World
             return null;
         }
 
-        public Stronghold GetStronghold(int strongholdId)
+        public Lair GetStronghold(int strongholdId)
         {
-            foreach (var stronghold in _activeStrongholds)
+            foreach (var stronghold in _activeLairs)
             { 
-                if(stronghold.StrongholdID == strongholdId)
+                if(stronghold.LairID == strongholdId)
                     return stronghold;
             }
 

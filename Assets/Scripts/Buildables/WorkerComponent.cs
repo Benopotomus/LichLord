@@ -13,7 +13,7 @@ namespace LichLord.NonPlayerCharacters
     public class WorkerComponent : ContextBehaviour
     {
         [SerializeField] 
-        private Stronghold _stronghold;
+        private Lair _stronghold;
 
         [Networked, Capacity(BuildableConstants.MAX_WORKERS_PER_STRONGHOLD)]
         protected NetworkArray<FWorkerData> _workerDatas { get; }
@@ -71,7 +71,7 @@ namespace LichLord.NonPlayerCharacters
                 ref FWorkerData workerData = ref _workerDatas.GetRef(localIndex);
                 workerData.IsAssigned = true;
 
-                TrySpawnWorkerFromCenter(_stronghold.StrongholdID, localIndex, summableDefinition.NonPlayerCharacterDefinition);
+                TrySpawnWorkerFromCenter(_stronghold.LairID, localIndex, summableDefinition.NonPlayerCharacterDefinition);
             }
             else
             {
@@ -250,7 +250,7 @@ namespace LichLord.NonPlayerCharacters
                 }
             }
 
-            TrySpawnWorker(spawnPosition, _stronghold.StrongholdID, emptyWorkerSlot, summableDefinition.NonPlayerCharacterDefinition);
+            TrySpawnWorker(spawnPosition, _stronghold.LairID, emptyWorkerSlot, summableDefinition.NonPlayerCharacterDefinition);
             Context.ContainerManager.AddItemToContainer(_stronghold.ContainerIndex, itemData);
         }
 
