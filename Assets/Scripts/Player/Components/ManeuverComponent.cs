@@ -212,6 +212,36 @@ namespace LichLord
                     }
                 }
 
+                // Timed Muzzle VFX
+                for (int i = 0; i < definition.TimedMuzzleEffects.Length; i++)
+                {
+                    var muzzleVisual = definition.TimedMuzzleEffects[i];   // ref to the actual list element
+                    if (muzzleVisual.SpawnTick == t)
+                    {
+                        Transform attachment = MuzzleUtility.GetMuzzleTransform(_pc, muzzleVisual.Muzzle);
+                        Quaternion rotation = _pc.IK.CameraPivot.rotation;
+                        _pc.Context.VFXManager.SpawnVisualEffectAttached(attachment, rotation, muzzleVisual.MuzzleEffectPrefab);
+                    }
+                }
+
+                // Cycle Muzzle VFX
+                if (t >= definition.MuzzleCycleDelayTicks && definition.MuzzleTicksPerCycle > 0)
+                {
+                    int cycleTicksElapsed = t - definition.MuzzleCycleDelayTicks;
+                    int currentCycleTick = cycleTicksElapsed % definition.MuzzleTicksPerCycle;
+
+                    for (int i = 0; i < definition.CycleMuzzleEffects.Length; i++)
+                    {
+                        var muzzleVisual = definition.CycleMuzzleEffects[i];
+                        if (muzzleVisual.SpawnTick == currentCycleTick)
+                        {
+                            Transform attachment = MuzzleUtility.GetMuzzleTransform(_pc, muzzleVisual.Muzzle);
+                            Quaternion rotation = _pc.IK.CameraPivot.rotation;
+                            _pc.Context.VFXManager.SpawnVisualEffectAttached(attachment, rotation, muzzleVisual.MuzzleEffectPrefab);
+                        }
+                    }
+                }
+
                 // Timed Actions
                 for (int i = 0; i < definition.TimedActions.Count; i++)
                 {

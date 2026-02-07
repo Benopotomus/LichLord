@@ -5,20 +5,20 @@ using System.Collections.Generic;
 
 namespace LichLord.Projectiles
 {
-    [CreateAssetMenu(menuName = "LichLord/Projectiles/ProjectileImpactActionDefinition")]
-    public class ProjectileImpactActionDefinition : ScriptableObject
+    [CreateAssetMenu(menuName = "LichLord/Projectiles/SummonProjectileImpactActionDefinition")]
+    public class SummonProjectileImpactActionDefinition : ProjectileImpactActionDefinition
     {
         [SerializeField]
         private NonPlayerCharacterDefinition[] _summonedCharacters = new NonPlayerCharacterDefinition[0];
         public NonPlayerCharacterDefinition[] SummonedCharacters => _summonedCharacters;
 
-
-        public void Trigger(ref FProjectileData data, ref FPhysicsHitData impactHit, FixedUpdateProjectile projectile)
+        public override void Trigger(ref FProjectileData data, Projectile projectile)
         {
-            SpawnSummonedCharacters(ref data, ref impactHit, projectile);
+            base.Trigger(ref data, projectile);
+            SpawnSummonedCharacters(ref data, projectile);
         }
 
-        public void SpawnSummonedCharacters(ref FProjectileData data, ref FPhysicsHitData impactHit, FixedUpdateProjectile projectile)
+        public void SpawnSummonedCharacters(ref FProjectileData data, Projectile projectile)
         {
             PlayerCharacter pc = projectile.Instigator as PlayerCharacter;
 
@@ -28,7 +28,7 @@ namespace LichLord.Projectiles
             int playerIndex = pc.PlayerIndex;
 
             FWorldPosition hitPosition = new FWorldPosition();
-            hitPosition.CopyPosition(impactHit.ImpactPoint);
+            hitPosition.CopyPosition(data.TargetPosition);
 
             List<byte> validDefinitionIds = new List<byte>();
 

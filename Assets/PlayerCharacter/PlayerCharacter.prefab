@@ -6338,7 +6338,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7384818388112598965}
   m_Layer: 0
-  m_Name: weaponShield_l
+  m_Name: weapon_l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6353,7 +6353,7 @@ Transform:
   m_GameObject: {fileID: 1825059519824887521}
   serializedVersion: 2
   m_LocalRotation: {x: 2.4980018e-16, y: -2.7755576e-17, z: 6.933348e-33, w: 1}
-  m_LocalPosition: {x: -0.024163324, y: -0.027253026, z: 0.054585528}
+  m_LocalPosition: {x: -0.0242, y: -0.0127, z: 0.0546}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11928,6 +11928,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1738229200772960705}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2875240222657164003
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 111968235702661570}
+  m_Layer: 0
+  m_Name: weapon_r
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &111968235702661570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2875240222657164003}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0.0258, z: 0.0506}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3423735672707374332}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3041271417471768361
 GameObject:
   m_ObjectHideFlags: 0
@@ -12054,6 +12085,7 @@ MonoBehaviour:
   Weapons: {fileID: 8453103197528511047}
   Inventory: {fileID: 1203748198828285372}
   Summoner: {fileID: 3700213216379212753}
+  IK: {fileID: 975723772845658309}
   _animationController: {fileID: 2637221445499037506}
   HeadRenderers: []
   FirstPersonOverlayObjects: []
@@ -12150,7 +12182,7 @@ MonoBehaviour:
   _spellManeuvers:
   - {fileID: 11400000, guid: 09476ec1745004b4089ac02d09baca45, type: 2}
   - {fileID: 11400000, guid: 71c7cefcfae79134d83a32db88893771, type: 2}
-  - {fileID: 11400000, guid: fa5a12f2917bdad4dbc7236637674db6, type: 2}
+  - {fileID: 11400000, guid: e4e0fb01e274bc44fa9931606a372afa, type: 2}
   - {fileID: 11400000, guid: a02020ea099ebd649a78f181028efde9, type: 2}
   _commandManeuvers:
   - {fileID: 11400000, guid: 751855629f607e044a17fff50f8f287e, type: 2}
@@ -12308,8 +12340,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12c05af24cb5a254f97a252501c15f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _handBoneLeft: {fileID: 5362074393791706597}
-  _handBoneRight: {fileID: 3423735672707374332}
+  _handBoneLeft: {fileID: 7384818388112598965}
+  _handBoneRight: {fileID: 111968235702661570}
 --- !u!114 &4804172155013043321
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12529,6 +12561,8 @@ MonoBehaviour:
       IsFilled: 0
     - NPC: {fileID: 0}
       IsFilled: 0
+  _HasCommandSquadsSummoned:
+    _value: 0
   _squadCommmandVisualPrefab: {fileID: 7326009730553760371, guid: ce5ff3c1ee6125343aae922757772edf,
     type: 3}
 --- !u!114 &8453103197528511047
@@ -14007,6 +14041,7 @@ Transform:
   - {fileID: 2573934774030177570}
   - {fileID: 4215413902992808882}
   - {fileID: 6711757633376894510}
+  - {fileID: 111968235702661570}
   m_Father: {fileID: 391938289574255156}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4923602275675959253

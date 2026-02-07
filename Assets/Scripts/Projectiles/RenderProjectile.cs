@@ -17,6 +17,7 @@ namespace LichLord.Projectiles
         public ProjectileVisualEffect VisualsInstance { get; private set; }
         private const bool _FORCE_WARMUP_VISUALS = false;
         private bool _hasWarmedUp = false;
+        private bool _hasImpacted = false;
 
         // Interpolation
         public Vector3 StartOffset;
@@ -38,6 +39,7 @@ namespace LichLord.Projectiles
             FireTick = data.FireTick;
             RenderTimeSinceFired = 0;
             _lastTick = 0;
+            _hasImpacted = false;
 
             if (Definition != null)
             {
@@ -55,7 +57,7 @@ namespace LichLord.Projectiles
             Timestamp = 0f;
             FireTick = 0;
             Rotation = Quaternion.identity;
-
+            _hasImpacted = false;
             ClearVisuals();
         }
 
@@ -85,6 +87,14 @@ namespace LichLord.Projectiles
             float renderTimeSinceFired = renderTime - Timestamp;
 
             Definition.ProjectileMovement.OnRender(this, ref toData, ref fromData, bufferAlpha, localDelta, renderTimeSinceFired, tick);
+
+            if (toData.HasImpacted == true &&
+               fromData.HasImpacted == false &&
+               !_hasImpacted               )
+            {
+                _hasImpacted = true;
+                Definition.TriggerImpactActions(ref toData, this);
+            }
 
             UpdateNPCProjectileCasts(ref toData, tick, renderTime, networkDelta, localDelta);
 

@@ -2,6 +2,7 @@
 using DWD.Utility.Loading;
 using Fusion;
 using LichLord.Projectiles;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -48,10 +49,21 @@ namespace LichLord
         public ManeuverTargetingDefinition Targeting => _targeting;
 
         //Visuals
-        [BundleObject(typeof(GameObject))]
         [SerializeField]
-        protected BundleObject _muzzleEffectPrefab;
-        public BundleObject MuzzleEffectPrefab => _muzzleEffectPrefab;
+        protected FMuzzleVisual[] _timedMuzzleEffects;
+        public FMuzzleVisual[] TimedMuzzleEffects => _timedMuzzleEffects;
+
+        [SerializeField]
+        protected FMuzzleVisual[] _cycleMuzzleEffects;
+        public FMuzzleVisual[] CycleMuzzleEffects => _cycleMuzzleEffects;
+
+        [SerializeField]
+        private int _muzzleCycleDelayTicks;
+        public int MuzzleCycleDelayTicks => _muzzleCycleDelayTicks;
+
+        [SerializeField]
+        private int _muzzleTicksPerCycle;
+        public int MuzzleTicksPerCycle => _muzzleTicksPerCycle;
 
         //UI
         [BundleObject(typeof(Sprite))]
@@ -159,7 +171,24 @@ namespace LichLord
             if (projectileManager == null)
                 return;
 
+            Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(pc, projectileData.Muzzle);
+
             Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;
+
+            // Apply aim offset here
+            if (projectileData.AimOffset != Vector2.zero)
+            {
+                Vector3 dir = (targetPos - muzzlePosition).normalized;
+                Vector3 right = Vector3.Cross(dir, Vector3.up).normalized;
+                if (right.sqrMagnitude < 0.001f) right = Vector3.right;
+
+                Vector3 up = Vector3.Cross(right, dir);
+
+                float dist = Vector3.Distance(muzzlePosition, targetPos);
+
+                targetPos += right * projectileData.AimOffset.x * dist;
+                targetPos += up * projectileData.AimOffset.y * dist;
+            }
 
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
             FProjectilePayload payload = new FProjectilePayload();
@@ -198,5 +227,20 @@ namespace LichLord
     { 
         Pressed,
         Held,
+    }
+
+    [Serializable]
+    public struct FMuzzleVisual
+    {
+        [SerializeField]
+        public EMuzzle Muzzle;
+
+        [SerializeField]
+        public int SpawnTick;
+
+        //Visuals
+        [BundleObject(typeof(GameObject))]
+        [SerializeField]
+        public BundleObject MuzzleEffectPrefab;
     }
 }

@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
-  m_Name: SquadCommandManeuver_2
+  m_Name: MAN_SquadCommand_2_AltFire
   m_EditorClassIdentifier: 
-  _tableID: 9
-  _maneuverName: Command Squad
-  _activationTooltipText: Relocate
+  _tableID: 8
+  _maneuverName: Command Squad Alt Fire
+  _activationTooltipText: Posture
   _progressTooltipText: 
-  _durationTicks: 1
+  _durationTicks: 32
   _cooldownTicks: 32
   _maxHeldTime: -1
-  _fireButton: 1
+  _fireButton: 2
   _inputType: 1
   _targeting: {fileID: 0}
   _muzzleEffectPrefab:
@@ -60,6 +60,7 @@ MonoBehaviour:
   _projectileTicksPerCycle: 0
   _timedActions:
   - SpawnTick: 1
-    Definition: {fileID: 11400000, guid: 8b9ff1dbf5b6156488829a2099a58c35, type: 2}
-  _altFireManeuver: {fileID: 11400000, guid: 9b51b608f8f06a94f9da2125d5502980, type: 2}
-  _squadId: 2
+    Definition: {fileID: 11400000, guid: ddd8a3dad56d12e42b73b302e5094642, type: 2}
+  _altFireManeuver: {fileID: 0}
+  _refreshBehavior: {fileID: 0}
+  _squadId: -1

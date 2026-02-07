@@ -347,6 +347,31 @@ namespace LichLord
             return transform.position;
         }
 
+        public Transform GetMuzzleTransform(EMuzzle muzzleName)
+        {
+            switch (muzzleName)
+            {
+                case EMuzzle.LeftHand:
+                case EMuzzle.Left_WeaponSocket_1:
+                case EMuzzle.Left_WeaponSocket_2:
+                case EMuzzle.Left_WeaponSocket_3:
+                    if (_weaponLeft.LoadState == ELoadState.Loaded)
+                        return _weaponLeft.Weapon.GetMuzzleTransform(muzzleName);
+                    return _handBoneLeft;
+
+                case EMuzzle.RightHand:
+                case EMuzzle.Right_WeaponSocket_1:
+                case EMuzzle.Right_WeaponSocket_2:
+                case EMuzzle.Right_WeaponSocket_3:
+                    if (_weaponRight.LoadState == ELoadState.Loaded)
+                        return _weaponRight.Weapon.GetMuzzleTransform(muzzleName);
+
+                    return _handBoneRight;
+            }
+
+            return transform;
+        }
+
         [Serializable]
         private struct FWeaponLoadState
         { 

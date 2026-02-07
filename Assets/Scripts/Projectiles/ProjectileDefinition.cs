@@ -143,14 +143,14 @@ namespace LichLord.Projectiles
         }
 
         [SerializeField]
-        protected List<ProjectileImpactActionDefinition> _impactActions = new List<ProjectileImpactActionDefinition>();
-        public List<ProjectileImpactActionDefinition> ImpactActions => _impactActions;
+        protected ProjectileImpactActionDefinition[] _impactActions;
+        public ProjectileImpactActionDefinition[] ImpactActions => _impactActions;
 
-        public void TriggerImpactActions(ref FProjectileData data, ref FPhysicsHitData impactHit, FixedUpdateProjectile projectile)
+        public void TriggerImpactActions(ref FProjectileData data, Projectile projectile)
         {
             foreach( var action in ImpactActions)
             {
-                action.Trigger(ref data, ref impactHit, projectile);
+                action.Trigger(ref data, projectile);
             }
         }
 

@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
-  m_Name: SquadCommandManeuver_0
+  m_Name: MAN_SquadCommand_2
   m_EditorClassIdentifier: 
-  _tableID: 5
+  _tableID: 7
   _maneuverName: Command Squad
   _activationTooltipText: Relocate
   _progressTooltipText: 
   _durationTicks: 1
-  _cooldownTicks: 1
+  _cooldownTicks: 32
   _maxHeldTime: -1
   _fireButton: 1
   _inputType: 1
@@ -60,6 +60,7 @@ MonoBehaviour:
   _projectileTicksPerCycle: 0
   _timedActions:
   - SpawnTick: 1
-    Definition: {fileID: 11400000, guid: ee2d123361eb3114a926373f14390d19, type: 2}
-  _altFireManeuver: {fileID: 11400000, guid: f1392985f19a7c745be385ecf77519fe, type: 2}
-  _squadId: 0
+    Definition: {fileID: 11400000, guid: 8b9ff1dbf5b6156488829a2099a58c35, type: 2}
+  _altFireManeuver: {fileID: 11400000, guid: 9b51b608f8f06a94f9da2125d5502980, type: 2}
+  _refreshBehavior: {fileID: 0}
+  _squadId: 2

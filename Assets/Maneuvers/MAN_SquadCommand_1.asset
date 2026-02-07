@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
-  m_Name: SquadCommandManeuver_1
+  m_Name: MAN_SquadCommand_1
   m_EditorClassIdentifier: 
-  _tableID: 7
+  _tableID: 5
   _maneuverName: Command Squad
   _activationTooltipText: Relocate
   _progressTooltipText: 
@@ -62,4 +62,5 @@ MonoBehaviour:
   - SpawnTick: 1
     Definition: {fileID: 11400000, guid: b5aa1bde582ea2a479d48ec9949ca507, type: 2}
   _altFireManeuver: {fileID: 11400000, guid: 1f8b4a05a9da8bd469f783b048706dd8, type: 2}
+  _refreshBehavior: {fileID: 0}
   _squadId: 1

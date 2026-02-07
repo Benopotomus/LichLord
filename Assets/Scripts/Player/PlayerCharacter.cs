@@ -32,6 +32,7 @@ namespace LichLord
         public PlayerWeaponsComponent Weapons;
         public PlayerInventoryComponent Inventory;
         public SummonerComponent Summoner;
+        public PlayerCharacterIK IK;
 
         [SerializeField] private PlayerCharacterAnimationController _animationController;
         public PlayerCharacterAnimationController AnimationController => _animationController;

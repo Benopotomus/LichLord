@@ -10,24 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
-  m_Name: SquadCommandManeuver_1_AltFire
+  m_Name: MAN_Fireball
   m_EditorClassIdentifier: 
-  _tableID: 8
-  _maneuverName: Command Squad Alt Fire
-  _activationTooltipText: Posture
+  _tableID: 1
+  _maneuverName: Fireball
+  _activationTooltipText: Cast
   _progressTooltipText: 
-  _durationTicks: 32
-  _cooldownTicks: 32
+  _durationTicks: 16
+  _cooldownTicks: 8
   _maxHeldTime: -1
-  _fireButton: 2
-  _inputType: 1
+  _fireButton: 1
+  _inputType: 0
   _targeting: {fileID: 0}
   _muzzleEffectPrefab:
     _name: 
     _bundle: 
   _icon:
-    _name: 
-    _bundle: 
+    _name: fireball
+    _bundle: fireball
   Fullbody: 0
   _upperBodyAnimationStates:
     _serializedList:
@@ -54,12 +54,21 @@ MonoBehaviour:
         RollOffset: 0
   _animationSpeed: 1
   _movementSpeedMultiplier: 1
-  _timedProjectiles: []
+  _timedProjectiles:
+  - SpawnTick: 12
+    Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
+    Muzzle: 1
+    Damage:
+      DamageValue: 35
+      DamageType: 2
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+    AimOffset: {x: 0, y: 0}
   _cycleProjectiles: []
   _projectileCycleDelayTicks: 0
   _projectileTicksPerCycle: 0
-  _timedActions:
-  - SpawnTick: 1
-    Definition: {fileID: 11400000, guid: b49b686d4a085804a98eaffab9480948, type: 2}
+  _timedActions: []
   _altFireManeuver: {fileID: 0}
+  _refreshBehavior: {fileID: 0}
   _squadId: -1
