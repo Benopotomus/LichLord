@@ -39,7 +39,7 @@ namespace LichLord
             fsmRef.PC.Maneuvers.UpdateMoveSpeed(deltaTime);
 
             fsmRef.PC.Movement.WritePosition();
-            fsmRef.PC.Maneuvers.OnFixedUpdate();
+            fsmRef.PC.Maneuvers.OnFixedUpdate(tick);
             fsmRef.PC.Commander.OnFixedUpdate();
 
             fsmRef.PC.Interactor.RefreshInteractables();

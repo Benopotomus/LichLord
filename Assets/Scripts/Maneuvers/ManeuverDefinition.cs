@@ -65,6 +65,23 @@ namespace LichLord
         private int _muzzleTicksPerCycle;
         public int MuzzleTicksPerCycle => _muzzleTicksPerCycle;
 
+        //Visuals
+        [SerializeField]
+        protected FCameraShake[] _timedCameraShakes;
+        public FCameraShake[] TimedCameraShakes => _timedCameraShakes;
+
+        [SerializeField]
+        protected FCameraShake[] _cycleCameraShakes;
+        public FCameraShake[] CycleCameraShakes => _cycleCameraShakes;
+
+        [SerializeField]
+        private int _cameraShakeCycleDelayTicks;
+        public int CameraShakeCycleDelayTicks => _cameraShakeCycleDelayTicks;
+
+        [SerializeField]
+        private int _cameraShakeTicksPerCycle;
+        public int CameraShakeTicksPerCycle => _cameraShakeTicksPerCycle;
+
         //UI
         [BundleObject(typeof(Sprite))]
         [SerializeField]
@@ -242,5 +259,21 @@ namespace LichLord
         [BundleObject(typeof(GameObject))]
         [SerializeField]
         public BundleObject MuzzleEffectPrefab;
+    }
+
+    [Serializable]
+    public struct FCameraShake
+    {
+        [SerializeField]
+        public ECameraShakeType ShakeType;
+
+        [SerializeField]
+        public int SpawnTick;
+
+        [SerializeField]
+        public float Amplitude;
+
+        [SerializeField]
+        public float Duration;
     }
 }

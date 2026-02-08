@@ -17,7 +17,6 @@ namespace LichLord.Projectiles
 
         public virtual void Trigger(ref FProjectileData data, Projectile projectile)
         {
-            Debug.Log("triggered " + data.TargetPosition.Position);
             Quaternion rotation = Quaternion.LookRotation((data.Position.Position - data.TargetPosition.Position).normalized);
             projectile.Context.VFXManager.SpawnVisualEffect(data.TargetPosition.Position, rotation, VisualsPrefab);
         }

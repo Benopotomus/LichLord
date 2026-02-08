@@ -22,9 +22,18 @@ MonoBehaviour:
   _fireButton: 1
   _inputType: 1
   _targeting: {fileID: 0}
-  _muzzleEffectPrefab:
-    _name: 
-    _bundle: 
+  _timedMuzzleEffects: []
+  _cycleMuzzleEffects: []
+  _muzzleCycleDelayTicks: 0
+  _muzzleTicksPerCycle: 0
+  _timedCameraShakes: []
+  _cycleCameraShakes:
+  - ShakeType: 0
+    SpawnTick: 0
+    Amplitude: 0.4
+    Duration: 0.6
+  _cameraShakeCycleDelayTicks: 10
+  _cameraShakeTicksPerCycle: 10
   _icon:
     _name: Storm
     _bundle: storm

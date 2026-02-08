@@ -39,7 +39,7 @@ namespace LichLord
             fsmRef.PC.Maneuvers.UpdateMoveSpeed(deltaTime);
 
             fsmRef.PC.Movement.WritePosition();
-            fsmRef.PC.Maneuvers.OnFixedUpdate();
+            fsmRef.PC.Maneuvers.OnFixedUpdate(tick);
 
             fsmRef.PC.Interactor.RefreshInteractables();
             fsmRef.PC.Interactor.ProcessInput(ref input);
@@ -63,6 +63,7 @@ namespace LichLord
 
             fsmRef.PC.Aim.OnRender(deltaTime);
             fsmRef.PC.Weapons.OnRender(deltaTime);
+            fsmRef.PC.Maneuvers.OnRender(tick);
 
             // Remote Only
             fsmRef.PC.Movement.UpdateRemotePosition(deltaTime);

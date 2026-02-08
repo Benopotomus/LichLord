@@ -154,6 +154,7 @@ namespace LichLord
         {
             Nickname = nickName;
             transform.position = position;
+            Movement.SpawnForcedPosition = position;
             Movement.SetMovementState(moveState);
             Input.SetLookRotation(rotation);
         }

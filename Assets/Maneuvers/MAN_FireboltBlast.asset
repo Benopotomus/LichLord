@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _tableID: 2
   _maneuverName: Fireball Alt
-  _activationTooltipText: Burning
+  _activationTooltipText: Cast
   _progressTooltipText: 
   _durationTicks: 12
   _cooldownTicks: 8
@@ -25,12 +25,20 @@ MonoBehaviour:
   _timedMuzzleEffects: []
   _cycleMuzzleEffects:
   - Muzzle: 1
-    SpawnTick: 12
+    SpawnTick: 4
     MuzzleEffectPrefab:
-      _name: VFX_Muzzle_Fireball
-      _bundle: vfx_muzzle_fireball
+      _name: VFX_Muzzle_FireboltBlast
+      _bundle: vfx_muzzle_fireboltblast
   _muzzleCycleDelayTicks: 0
   _muzzleTicksPerCycle: 16
+  _timedCameraShakes: []
+  _cycleCameraShakes:
+  - ShakeType: 0
+    SpawnTick: 4
+    Amplitude: 0.7
+    Duration: 0.25
+  _cameraShakeCycleDelayTicks: 0
+  _cameraShakeTicksPerCycle: 16
   _icon:
     _name: fire_rain
     _bundle: fire_rain
@@ -62,7 +70,7 @@ MonoBehaviour:
   _movementSpeedMultiplier: 1
   _timedProjectiles: []
   _cycleProjectiles:
-  - SpawnTick: 12
+  - SpawnTick: 4
     Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:
@@ -72,7 +80,7 @@ MonoBehaviour:
       KnockbackStrength: 0
       ArmorPenetration: 0
     AimOffset: {x: -0.3, y: 0}
-  - SpawnTick: 12
+  - SpawnTick: 4
     Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:
@@ -82,7 +90,7 @@ MonoBehaviour:
       KnockbackStrength: 0
       ArmorPenetration: 0
     AimOffset: {x: -0.2, y: 0}
-  - SpawnTick: 12
+  - SpawnTick: 4
     Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:
@@ -92,7 +100,7 @@ MonoBehaviour:
       KnockbackStrength: 0
       ArmorPenetration: 0
     AimOffset: {x: -0.1, y: 0}
-  - SpawnTick: 12
+  - SpawnTick: 4
     Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:
@@ -102,7 +110,7 @@ MonoBehaviour:
       KnockbackStrength: 0
       ArmorPenetration: 0
     AimOffset: {x: 0, y: 0}
-  - SpawnTick: 12
+  - SpawnTick: 4
     Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:
@@ -112,7 +120,7 @@ MonoBehaviour:
       KnockbackStrength: 0
       ArmorPenetration: 0
     AimOffset: {x: 0.1, y: 0}
-  - SpawnTick: 12
+  - SpawnTick: 4
     Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:
@@ -122,7 +130,7 @@ MonoBehaviour:
       KnockbackStrength: 0
       ArmorPenetration: 0
     AimOffset: {x: 0.2, y: 0}
-  - SpawnTick: 12
+  - SpawnTick: 4
     Definition: {fileID: 11400000, guid: eb88d136231dc7f45ba2617796f7a307, type: 2}
     Muzzle: 1
     Damage:

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Fusion;
+using DG.Tweening;
 
 namespace LichLord
 {
@@ -447,6 +448,8 @@ namespace LichLord
 
         // Just for moving the controller
         bool _spawnComplete = false;
+        public Vector3 SpawnForcedPosition;
+
         public void FixedUpdate()
         {
             if(!HasStateAuthority)
@@ -455,6 +458,7 @@ namespace LichLord
             if (!_spawnComplete)
             {
                 _spawnComplete = true;
+                CC.transform.position = SpawnForcedPosition;
                 return;
             }
 
@@ -462,21 +466,24 @@ namespace LichLord
             CC.Move(_authorityMoveVelocity * Time.fixedDeltaTime);
         }
 
-        public void WritePosition()
+        public void WritePosition(bool forceWrite = false)
         {
             const float POSITION_THRESHOLD_XZ = 0.01f;
-            if (Mathf.Abs(_pc.CachedTransform.position.x - _worldTransform.PositionX) > POSITION_THRESHOLD_XZ)
+            if (Mathf.Abs(_pc.CachedTransform.position.x - _worldTransform.PositionX) > POSITION_THRESHOLD_XZ
+                || forceWrite)
             {
                 _worldTransform.PositionX = _pc.CachedTransform.position.x;
             }
 
-            if (Mathf.Abs(_pc.CachedTransform.position.z - _worldTransform.PositionZ) > POSITION_THRESHOLD_XZ)
+            if (Mathf.Abs(_pc.CachedTransform.position.z - _worldTransform.PositionZ) > POSITION_THRESHOLD_XZ
+                || forceWrite)
             {
                 _worldTransform.PositionZ = _pc.CachedTransform.position.z;
             }
 
             const float POSITION_THRESHOLD_Y = 0.01f;
-            if (Mathf.Abs(_pc.CachedTransform.position.y - _worldTransform.PositionY) > POSITION_THRESHOLD_Y)
+            if (Mathf.Abs(_pc.CachedTransform.position.y - _worldTransform.PositionY) > POSITION_THRESHOLD_Y
+                || forceWrite)
             {
                 _worldTransform.PositionY = _pc.CachedTransform.position.y;
             }

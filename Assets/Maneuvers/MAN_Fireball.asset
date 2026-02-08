@@ -15,16 +15,30 @@ MonoBehaviour:
   _tableID: 1
   _maneuverName: Fireball
   _activationTooltipText: Cast
-  _progressTooltipText: 
+  _progressTooltipText: Casting
   _durationTicks: 16
   _cooldownTicks: 8
-  _maxHeldTime: -1
+  _maxHeldTime: 12
   _fireButton: 1
-  _inputType: 0
+  _inputType: 1
   _targeting: {fileID: 0}
-  _muzzleEffectPrefab:
-    _name: 
-    _bundle: 
+  _timedMuzzleEffects:
+  - Muzzle: 1
+    SpawnTick: 12
+    MuzzleEffectPrefab:
+      _name: VFX_Muzzle_Fireball
+      _bundle: vfx_muzzle_fireball
+  _cycleMuzzleEffects: []
+  _muzzleCycleDelayTicks: 0
+  _muzzleTicksPerCycle: 0
+  _timedCameraShakes:
+  - ShakeType: 0
+    SpawnTick: 12
+    Amplitude: 1.5
+    Duration: 0.35
+  _cycleCameraShakes: []
+  _cameraShakeCycleDelayTicks: 0
+  _cameraShakeTicksPerCycle: 0
   _icon:
     _name: fireball
     _bundle: fireball

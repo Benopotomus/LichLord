@@ -46,7 +46,9 @@ namespace LichLord
 
         [Networked]
         private TickTimer _activeManeuverTimer { get; set; }
-        private int _activeManeuverTick;
+
+        [Networked]
+        private int _activeManeuverTick { get; set; }
 
         private VisualEffectSpawner _visualEffectSpawner = new VisualEffectSpawner();
         private StandaloneVisualEffect _maneuverTargetVisualInstance;
@@ -56,7 +58,8 @@ namespace LichLord
 
         private float _moveSpeedMultiplier = 1f;
 
-        private int _lastProcessedTick = -1;
+        private int _lastProcessedFixedUpdateTick = -1;
+        private int _lastProcessedRenderTick = -1;
 
         public Action<ManeuverDefinition> OnSelectedManeuverChanged;
         public Action<ManeuverDefinition> OnActiveManeuverChanged;
@@ -73,7 +76,6 @@ namespace LichLord
         public override void Spawned()
         {
             base.Spawned();
-            ReplicateToAll(false);
 
             _visualEffectSpawner.OnLoaded += OnVisualEffectSpawned;
 
@@ -117,7 +119,7 @@ namespace LichLord
             ProcessActiveManeuver(ref input);
         }
 
-        public void OnFixedUpdate()
+        public void OnFixedUpdate(int tick)
         {
             ProcessManeuverExpiration();
             RefreshManeuvers();
@@ -184,7 +186,7 @@ namespace LichLord
 
         public void SustainManeuver(ManeuverDefinition definition, int ticksSinceStart)
         {
-            for (int t = _lastProcessedTick + 1; t <= ticksSinceStart; t++)
+            for (int t = _lastProcessedFixedUpdateTick + 1; t <= ticksSinceStart; t++)
             {
                 // Timed Projectiles
                 for (int i = 0; i < definition.TimedProjectiles.Count; i++)
@@ -212,6 +214,7 @@ namespace LichLord
                     }
                 }
 
+                /*
                 // Timed Muzzle VFX
                 for (int i = 0; i < definition.TimedMuzzleEffects.Length; i++)
                 {
@@ -241,7 +244,7 @@ namespace LichLord
                         }
                     }
                 }
-
+                */
                 // Timed Actions
                 for (int i = 0; i < definition.TimedActions.Count; i++)
                 {
@@ -257,7 +260,7 @@ namespace LichLord
                 }
             }
 
-            _lastProcessedTick = ticksSinceStart;
+            _lastProcessedFixedUpdateTick = ticksSinceStart;
 
             definition.SustainExecute(_pc, Runner, ticksSinceStart);
 
@@ -338,7 +341,7 @@ namespace LichLord
             _activeManeuverTimer = TickTimer.CreateFromTicks(Runner, selectedManeuver.DurationTicks);
 
             selectedManeuver.StartExecute(_pc, this, Runner);
-            _lastProcessedTick = Runner.Tick;
+            _lastProcessedFixedUpdateTick = Runner.Tick;
             OnActiveManeuverChanged?.Invoke(selectedManeuver);
         }
 
@@ -365,7 +368,7 @@ namespace LichLord
 
                 activeManeuver = GetActiveManeuver();
                 activeManeuver.StartExecute(_pc, this, Runner);
-                _lastProcessedTick = Runner.Tick;
+                _lastProcessedFixedUpdateTick = Runner.Tick;
             }
         }
 
@@ -485,6 +488,88 @@ namespace LichLord
             OnSelectedManeuverChanged?.Invoke(newSelectedManeuver);
         }
 
+        public void OnRender(int tick)
+        {
+            ManeuverDefinition activeManeuver = GetActiveManeuver();
+            if (activeManeuver == null)
+                return;
+
+            int ticksSinceStart = tick - _activeManeuverTick;
+
+            UpdateRenderManeuver(activeManeuver, ticksSinceStart);
+        }
+
+        public void UpdateRenderManeuver(ManeuverDefinition definition, int ticksSinceStart)
+        {
+            for (int t = _lastProcessedRenderTick + 1; t <= ticksSinceStart; t++)
+            {
+                // Timed Muzzle VFX
+                for (int i = 0; i < definition.TimedMuzzleEffects.Length; i++)
+                {
+                    var muzzleVisual = definition.TimedMuzzleEffects[i];   // ref to the actual list element
+                    if (muzzleVisual.SpawnTick == t)
+                    {
+                        Transform attachment = MuzzleUtility.GetMuzzleTransform(_pc, muzzleVisual.Muzzle);
+                        Quaternion rotation = _pc.IK.CameraPivot.rotation;
+                        _pc.Context.VFXManager.SpawnVisualEffectAttached(attachment, rotation, muzzleVisual.MuzzleEffectPrefab);
+                    }
+                }
+
+                // Cycle Muzzle VFX
+                if (t >= definition.MuzzleCycleDelayTicks && definition.MuzzleTicksPerCycle > 0)
+                {
+                    int cycleTicksElapsed = t - definition.MuzzleCycleDelayTicks;
+                    int currentCycleTick = cycleTicksElapsed % definition.MuzzleTicksPerCycle;
+
+                    for (int i = 0; i < definition.CycleMuzzleEffects.Length; i++)
+                    {
+                        var muzzleVisual = definition.CycleMuzzleEffects[i];
+                        if (muzzleVisual.SpawnTick == currentCycleTick)
+                        {
+                            Transform attachment = MuzzleUtility.GetMuzzleTransform(_pc, muzzleVisual.Muzzle);
+                            Quaternion rotation = _pc.IK.CameraPivot.rotation;
+                            _pc.Context.VFXManager.SpawnVisualEffectAttached(attachment, rotation, muzzleVisual.MuzzleEffectPrefab);
+                        }
+                    }
+                }
+
+                if (!HasStateAuthority)
+                    continue;
+
+                // Timed CameraShakes
+                for (int i = 0; i < definition.TimedCameraShakes.Length; i++)
+                {
+                    var cameraShake = definition.TimedCameraShakes[i];   // ref to the actual list element
+                    if (cameraShake.SpawnTick == t)
+                    {
+                        _pc.Context.Camera.Shake(cameraShake.ShakeType,
+                            overrideAmplitude: cameraShake.Amplitude,
+                            overrideDuration: cameraShake.Duration);
+                    }
+                }
+
+                // Cycle Camera Shakes
+                if (t >= definition.CameraShakeCycleDelayTicks && definition.CameraShakeTicksPerCycle > 0)
+                {
+                    int cycleTicksElapsed = t - definition.CameraShakeCycleDelayTicks;
+                    int currentCycleTick = cycleTicksElapsed % definition.CameraShakeTicksPerCycle;
+
+                    for (int i = 0; i < definition.CycleCameraShakes.Length; i++)
+                    {
+                        var cameraShake = definition.CycleCameraShakes[i];
+                        if (cameraShake.SpawnTick == currentCycleTick)
+                        {
+                            _pc.Context.Camera.Shake(cameraShake.ShakeType, 
+                                overrideAmplitude: cameraShake.Amplitude,
+                                overrideDuration: cameraShake.Duration);
+                        }
+                    }
+                }
+            }
+
+            _lastProcessedRenderTick = ticksSinceStart;
+        }
+
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         public void RPC_NotifyStartExecute(ushort maneuverDefinitionID)
         {
@@ -492,6 +577,7 @@ namespace LichLord
 
             int weaponId = _pc.Weapons.GetWeaponID();
             var animationState = maneuver.UpperBodyAnimationStates[weaponId];
+            _lastProcessedRenderTick = _activeManeuverTick;
 
             if (!maneuver.Fullbody)
             {
@@ -501,6 +587,7 @@ namespace LichLord
             _pc.Aim.TargetPitchOffset = animationState.PitchOffset;
             _pc.Aim.TargetYawOffset = animationState.YawOffset;
             _pc.Aim.TargetRollOffset = animationState.RollOffset;
+
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

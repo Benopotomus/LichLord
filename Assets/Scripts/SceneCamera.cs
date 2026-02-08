@@ -1,13 +1,13 @@
-using Cinemachine;
+ï»¿using Cinemachine;
 using LichLord.Buildables;
 using LichLord.World;
 using System;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI; // For UI elements
 
 namespace LichLord
 {
-    public class SceneCamera : SceneService
+    public partial class SceneCamera : SceneService
     {
         [SerializeField] private Transform _skydomeTransform;
 
@@ -31,6 +31,8 @@ namespace LichLord
         private Vector3 _reticlePosition = Vector3.zero;
         public Vector3 ReticlePosition => _reticlePosition;
 
+        [SerializeField] private Vector2 _rayOrigin = new Vector2(0.5f, 0.5f);
+
         public Action<Vector3> OnReticlePositionChanged;
 
         private float sphereRadius = 0.1f; // Radius of the debug sphere
@@ -42,15 +44,6 @@ namespace LichLord
         public FCachedRaycast CachedRaycastHit => _cachedRaycastHit;
 
         private bool lastRaycastHit; // True if last raycast hit something
-        
-        [Header("Camera Shake")]
-        [SerializeField] private float _defaultShakeDuration = 0.3f;
-        [SerializeField] private float _defaultShakeAmplitude = 1.5f;
-        [SerializeField] private float _defaultShakeFrequency = 12f;
-
-        private Coroutine _shakeRoutine;
-        private CinemachineBasicMultiChannelPerlin _thirdPersonNoise;
-        private CinemachineBasicMultiChannelPerlin _firstPersonNoise;
 
         protected override void OnInitialize()
         {
@@ -67,56 +60,6 @@ namespace LichLord
             thirdPersonCam.LookAt = _cameraFollowTarget;
             firstPersonCam.Follow = _cameraFollowTarget;
             firstPersonCam.LookAt = _cameraFollowTarget;
-        }
-
-        private void EnsureNoiseSettings(CinemachineBasicMultiChannelPerlin noise)
-        {
-            if (noise == null) return;
-
-            // Option 1: Use a NoiseSettings asset you created in the editor (recommended)
-            // Drag it onto the field below in the inspector
-            if (noise.m_NoiseProfile == null)
-            {
-                // Try to load the built-in basic profile that ships with Cinemachine
-                var basic = Resources.Load<Cinemachine.NoiseSettings>("CinemachineBasicNoise");
-                if (basic != null)
-                    noise.m_NoiseProfile = basic;
-                else
-                {
-                    // Fallback: create a minimal one at runtime
-                    noise.m_NoiseProfile = CreateMinimalNoiseSettings();
-                }
-            }
-        }
-
-        private Cinemachine.NoiseSettings CreateMinimalNoiseSettings()
-        {
-            var settings = ScriptableObject.CreateInstance<Cinemachine.NoiseSettings>();
-            settings.name = "RuntimeMinimalShake";
-
-            // ----- POSITION (XYZ) -----
-            settings.PositionNoise = new Cinemachine.NoiseSettings.TransformNoiseParams[]
-            {
-        new Cinemachine.NoiseSettings.TransformNoiseParams
-        {
-            X = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
-            Y = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
-            Z = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f }
-        }
-            };
-
-            // ----- ROTATION (XYZ) -----
-            settings.OrientationNoise = new Cinemachine.NoiseSettings.TransformNoiseParams[]
-            {
-        new Cinemachine.NoiseSettings.TransformNoiseParams
-        {
-            X = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
-            Y = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f },
-            Z = new Cinemachine.NoiseSettings.NoiseParams { Amplitude = 1f, Frequency = 1f }
-        }
-            };
-
-            return settings;
         }
 
         public void ModifyCameraTargetRotation(Quaternion newRotation)
@@ -162,7 +105,7 @@ namespace LichLord
             Vector3 cameraPosition = mainCamera.transform.position;
 
             // Create a ray from the center of the camera viewport (slightly upward)
-            Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+            Ray ray = mainCamera.ViewportPointToRay(new Vector3(_rayOrigin.x, _rayOrigin.y, 0));
 
             // Offset the ray origin forward in third person mode
             float minDistance = isFirstPerson ? 0f : _minRaycastDistance;
@@ -299,7 +242,7 @@ namespace LichLord
                     }
                 }
 
-                // Interactables – keep the closest one + remember its hit
+                // Interactables â€“ keep the closest one + remember its hit
                 if ((_interactableLayerMask.value & layerBit) != 0)
                 {
                     InteractableComponent interactable = hit.collider.GetComponent<InteractableComponent>();
@@ -316,7 +259,7 @@ namespace LichLord
                     }
                 }
 
-                // World / solid geometry – only the CLOSEST one
+                // World / solid geometry â€“ only the CLOSEST one
                 if ((_raycastLayerMask.value & layerBit) != 0)
                 {
                     if (dist < closestWorldDistance)

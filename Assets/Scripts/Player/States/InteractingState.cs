@@ -28,7 +28,7 @@ namespace LichLord
 
             fsmRef.PC.Movement.WritePosition();
             fsmRef.PC.Movement.UpdateLookRotation(deltaTime, 4f);
-            fsmRef.PC.Maneuvers.OnFixedUpdate();
+            fsmRef.PC.Maneuvers.OnFixedUpdate(tick);
             
             fsmRef.PC.Interactor.RefreshInteractables();
             fsmRef.PC.Interactor.ProcessInput(ref input);
