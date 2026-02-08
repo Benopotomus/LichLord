@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using UnityEngine;
 
 namespace LichLord
@@ -12,7 +8,7 @@ namespace LichLord
         [SerializeField] protected Collider[] _hurtBoxes;
         public Collider[] HurtBoxes => _hurtBoxes;
 
-        public void SetHitBoxesActive(bool newIsActive)
+        public void SetHurtBoxesActive(bool newIsActive)
         {
             foreach (var hitbox in _hurtBoxes)
                 hitbox.enabled = newIsActive;

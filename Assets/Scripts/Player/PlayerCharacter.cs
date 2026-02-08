@@ -27,7 +27,7 @@ namespace LichLord
         public InteractorComponent Interactor;
         public PlayerCharacterAimComponent Aim;
         public PlayerNexusComponent Nexus;
-        public PlayerHealthComponent Health;
+        public PlayerStatsComponent Stats;
         public CommanderComponent Commander;
         public PlayerWeaponsComponent Weapons;
         public PlayerInventoryComponent Inventory;
@@ -330,13 +330,13 @@ namespace LichLord
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_TakeProjectileHit(int projectileIndex, int damage)
         { 
-            Health.ApplyDamage(damage);
+            Stats.ApplyDamage(damage);
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_TakeHitNPC(int index, int damage)
         {
-            Health.ApplyDamage(damage);
+            Stats.ApplyDamage(damage);
         }
 
         private string GetProjectName()

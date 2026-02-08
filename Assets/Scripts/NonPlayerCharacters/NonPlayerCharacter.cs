@@ -388,7 +388,7 @@ namespace LichLord.NonPlayerCharacters
             _interactableComponent.onInteractEnd -= OnInteractEnd;
             _interactableComponent.onInteractionComplete -= OnInteractionComplete;
 
-            Hurtbox.SetHitBoxesActive(false);
+            Hurtbox.SetHurtBoxesActive(false);
             _movementComponent.StartRecycle();
             _brainComponent.StartRecycle();
             _stateComponent.StartRecycle();

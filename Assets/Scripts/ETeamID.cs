@@ -9,6 +9,6 @@
         EnemiesTeamD,
         EnemiesTeamE,
         EnemiesTeamF,
-        EnemiesTeamG,
+        Static,
     }
 }

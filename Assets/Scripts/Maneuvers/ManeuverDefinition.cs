@@ -65,7 +65,6 @@ namespace LichLord
         private int _muzzleTicksPerCycle;
         public int MuzzleTicksPerCycle => _muzzleTicksPerCycle;
 
-        //Visuals
         [SerializeField]
         protected FCameraShake[] _timedCameraShakes;
         public FCameraShake[] TimedCameraShakes => _timedCameraShakes;
@@ -81,6 +80,10 @@ namespace LichLord
         [SerializeField]
         private int _cameraShakeTicksPerCycle;
         public int CameraShakeTicksPerCycle => _cameraShakeTicksPerCycle;
+
+        [SerializeField] 
+        private int _manaCost = 0;
+        public int ManaCost => _manaCost;
 
         //UI
         [BundleObject(typeof(Sprite))]

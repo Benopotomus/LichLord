@@ -34,6 +34,7 @@ namespace LichLord.Buildables
 
         // IHitTarget
         public IChunkTrackable ChunkTrackable => this;
+        public ETeamID TeamID => ETeamID.PlayerTeam;
 
         public HurtboxComponent Hurtbox;
         [SerializeField] protected BuildableSpawnTransformer _spawnTransformer;

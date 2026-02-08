@@ -2,14 +2,14 @@
 using LichLord.Buildables;
 using LichLord.World;
 using System;
-using System.Collections;
 using UnityEngine;
 
 namespace LichLord
 {
     public partial class SceneCamera : SceneService
     {
-        [SerializeField] private Transform _skydomeTransform;
+        [SerializeField] 
+        private Transform _skydomeTransform;
 
         [SerializeField]
         public Transform _cameraFollowTarget;
@@ -201,7 +201,11 @@ namespace LichLord
 
             // NEW: We'll cache the actual hit for the closest interactable so we can use its precise point
             RaycastHit closestInteractableHit = default;
-            bool haveValidInteractableHit = false;
+            bool hasValidInteractableHit = false;
+
+            // NEW: We'll cache the actual hit for the closest interactable so we can use its precise point
+            RaycastHit closestTrackableHit = default;
+            bool hasValidTrackableHit = false;
 
             RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, _maxRaycastDistance, combinedMask, QueryTriggerInteraction.Collide);
 
@@ -228,6 +232,8 @@ namespace LichLord
                     {
                         closestTrackableDist = dist;
                         _cachedRaycastHit.trackable = trackable;
+                        closestTrackableHit = hit;
+                        hasValidTrackableHit = true;
                     }
                 }
 
@@ -254,7 +260,7 @@ namespace LichLord
                             closestInteractableDist = dist;
                             _cachedRaycastHit.interactable = interactable;
                             closestInteractableHit = hit;
-                            haveValidInteractableHit = true;
+                            hasValidInteractableHit = true;
                         }
                     }
                 }
@@ -285,10 +291,16 @@ namespace LichLord
             }
 
             // position = interaction point: prefer interactable's real hit point if we have one, else world, else max
-            if (haveValidInteractableHit && closestInteractableDist < float.MaxValue)
+            if (hasValidInteractableHit && closestInteractableDist < float.MaxValue)
             {
                 _cachedRaycastHit.position = closestInteractableHit.point;
                 _cachedRaycastHit.raycastHit = closestInteractableHit;
+                lastRaycastHit = true;
+            }
+            else if (hasValidTrackableHit && closestTrackableDist < float.MaxValue)
+            {
+                _cachedRaycastHit.position = closestTrackableHit.point;
+                _cachedRaycastHit.raycastHit = closestTrackableHit;
                 lastRaycastHit = true;
             }
             else if (foundValidWorldHit)
@@ -351,6 +363,7 @@ namespace LichLord
         public BuildableZone buildableZone;
         public IChunkTrackable trackable;
         public InteractableComponent interactable;
+        public HurtboxOwner hurtbox;
         public Vector3 staticPosition;
 
         public void Clear()
@@ -358,6 +371,7 @@ namespace LichLord
             buildableZone = null;
             trackable = null;
             interactable = null;
+            hurtbox = null;
         }
     }
 }

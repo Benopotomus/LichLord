@@ -15,6 +15,7 @@ namespace LichLord.Props
 
         // IHitTarget
         public IChunkTrackable ChunkTrackable => this;
+        public ETeamID TeamID => ETeamID.Static;
 
         public HurtboxComponent Hurtbox;
 

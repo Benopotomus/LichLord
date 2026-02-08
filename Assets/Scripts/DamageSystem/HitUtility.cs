@@ -37,12 +37,13 @@ namespace LichLord
     {
         void OnHitTaken(ref FHitUtilityData hit);
         public IChunkTrackable ChunkTrackable { get;}
-}
+        public ETeamID TeamID { get; }
+    }
 
     public interface IHitInstigator
     {
         public IChunkTrackable ChunkTrackable { get; }
-        ETeamID TeamID { get; }
+        public ETeamID TeamID { get; }
 
         void OnHitPerformed(ref FHitUtilityData hit);
     }

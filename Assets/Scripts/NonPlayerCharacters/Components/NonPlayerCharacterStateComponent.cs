@@ -62,7 +62,7 @@ namespace LichLord.NonPlayerCharacters
             {
                 case ENPCState.Idle:
                     NPC.Collider.enabled = true;
-                    NPC.Hurtbox.SetHitBoxesActive(true);
+                    NPC.Hurtbox.SetHurtBoxesActive(true);
                     if (hasAuthority)
                     {
                         NPC.Movement.SetRVOSettings(false, 0.5f);
@@ -75,7 +75,7 @@ namespace LichLord.NonPlayerCharacters
 
                 case ENPCState.Inactive:
 
-                    NPC.Hurtbox.SetHitBoxesActive(false);
+                    NPC.Hurtbox.SetHurtBoxesActive(false);
                     if (hasAuthority)
                     {
                         NPC.Movement.SetFollowerUpdatePosition(false);
@@ -85,7 +85,7 @@ namespace LichLord.NonPlayerCharacters
                     break;
                 case ENPCState.Dead:
                     _deathEndTick = tick + _deathTicks;
-                    NPC.Hurtbox.SetHitBoxesActive(false);
+                    NPC.Hurtbox.SetHurtBoxesActive(false);
                     NPC.Collider.enabled = false;
                     //NPC.HitReact.SpawnImpactVisualEffect(0);
 
@@ -123,7 +123,7 @@ namespace LichLord.NonPlayerCharacters
                     break;
 
                 case ENPCState.Spawning:
-                    NPC.Hurtbox.SetHitBoxesActive(false);
+                    NPC.Hurtbox.SetHurtBoxesActive(false);
                     NPC.Collider.enabled = false;
                     NPC.SpawningComponent.StartSpawnState(tick);
 

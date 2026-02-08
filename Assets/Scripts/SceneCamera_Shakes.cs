@@ -1,6 +1,4 @@
 ﻿using Cinemachine;
-using LichLord.Buildables;
-using LichLord.World;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -66,7 +64,7 @@ namespace LichLord
                 => new(profile, 0.25f, 1f, 1f, 0.05f, 0.1f, 0f);
 
             public static CameraShakeParams Damage(NoiseSettings profile)
-                => new(profile, 0.45f, 3.5f, 14f, 0.08f, 0.25f, 0f);
+                => new(profile, 0.3f, 3.5f, 14f, 0.08f, 0.1f, 0f);
 
             public static CameraShakeParams AOE(NoiseSettings profile)
                 => new(profile, 1.1f, 4.2f, 9f, 0.15f, 0.50f, 0.45f);
@@ -165,7 +163,7 @@ namespace LichLord
             float sustainEnd = fadeInEnd + (p.sustainTime * scale);
             float fadeOutEnd = actualDuration;  // fade-out gets whatever time is left
 
-            Debug.Log($"[Shake] {p.duration}s total | fadeIn: {fadeInEnd:F2} | sustainEnd: {sustainEnd:F2} | actual end: {actualDuration:F2}");
+            //Debug.Log($"[Shake] {p.duration}s total | fadeIn: {fadeInEnd:F2} | sustainEnd: {sustainEnd:F2} | actual end: {actualDuration:F2}");
 
             // Phase 1: Fade IN
             while (elapsed < fadeInEnd)
