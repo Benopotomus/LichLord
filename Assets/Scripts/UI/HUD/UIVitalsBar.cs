@@ -7,6 +7,9 @@ namespace LichLord
     public class UIVitalsBar : MonoBehaviour
     {
         [SerializeField]
+        private RectTransform _rectTransform;
+
+        [SerializeField]
         private Slider _vitalSlider;
 
         [SerializeField]
@@ -18,7 +21,21 @@ namespace LichLord
         [SerializeField]
         private float _vitalLagDuration = 0.6f;
 
+        [SerializeField]
+        private float _pointsPerUnit = 0.6f;
+
         private Coroutine _vitalLagCoroutine;
+
+        public void SetVitalMax(float max)
+        {
+            // Keep existing height, change only width
+            float newWidth = max * _pointsPerUnit;
+
+            _rectTransform.sizeDelta = new Vector2(
+                newWidth,
+                _rectTransform.sizeDelta.y 
+            );
+        }
 
         public void SetVitalPercent(float vitalPercent)
         { 

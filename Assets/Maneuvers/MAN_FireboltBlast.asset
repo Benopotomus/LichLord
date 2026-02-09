@@ -39,6 +39,15 @@ MonoBehaviour:
     Duration: 0.25
   _cameraShakeCycleDelayTicks: 0
   _cameraShakeTicksPerCycle: 16
+  _manaCostToInitiate: 25
+  _manaCostToSustain: 25
+  _timedSpend: []
+  _cycleSpends:
+  - StatName: 3
+    SpendTick: 6
+    SpendAmount: 25
+  _spendCycleDelayTicks: 0
+  _spendTicksPerCycle: 16
   _icon:
     _name: fire_rain
     _bundle: fire_rain
@@ -67,7 +76,7 @@ MonoBehaviour:
         YawOffset: 70
         RollOffset: 0
   _animationSpeed: 1
-  _movementSpeedMultiplier: 1
+  _movementSpeedMultiplier: 0.8
   _timedProjectiles: []
   _cycleProjectiles:
   - SpawnTick: 6

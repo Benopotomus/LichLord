@@ -38,6 +38,7 @@ namespace LichLord.UI
 
             _pc = Context.LocalPlayerCharacter;
             OnStatChanged(EStatName.HealthMax);
+            OnStatChanged(EStatName.ManaMax);
 
             _pc.Stats.OnStatChanged += OnStatChanged;
         }
@@ -48,11 +49,13 @@ namespace LichLord.UI
             {
                 case EStatName.HealthMax:
                 case EStatName.HealthCurrent:
+                    _healthBar.SetVitalMax(_pc.Stats.MaxHealth);
                     _healthBar.SetVitalPercent(_pc.Stats.HealthPercent);
                     break;
 
                 case EStatName.ManaMax:
                 case EStatName.ManaCurrent:
+                    _manaBar.SetVitalMax(_pc.Stats.MaxMana);
                     _manaBar.SetVitalPercent(_pc.Stats.ManaPercent);
                     break;
             }

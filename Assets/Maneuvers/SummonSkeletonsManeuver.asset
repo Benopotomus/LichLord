@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
   m_Name: SummonSkeletonsManeuver
   m_EditorClassIdentifier: 
-  _tableID: 12
+  _tableID: 14
   _maneuverName: 
   _activationTooltipText: 
   _progressTooltipText: 
@@ -22,9 +22,20 @@ MonoBehaviour:
   _fireButton: 1
   _inputType: 0
   _targeting: {fileID: 0}
-  _muzzleEffectPrefab:
-    _name: 
-    _bundle: 
+  _timedMuzzleEffects: []
+  _cycleMuzzleEffects: []
+  _muzzleCycleDelayTicks: 0
+  _muzzleTicksPerCycle: 0
+  _timedCameraShakes: []
+  _cycleCameraShakes: []
+  _cameraShakeCycleDelayTicks: 0
+  _cameraShakeTicksPerCycle: 0
+  _manaCostToInitiate: 0
+  _manaCostToSustain: 0
+  _timedSpend: []
+  _cycleSpends: []
+  _spendCycleDelayTicks: 0
+  _spendTicksPerCycle: 0
   _icon:
     _name: summon_skeleton_warrior
     _bundle: summon_skeleton_warrior
@@ -70,4 +81,5 @@ MonoBehaviour:
   _projectileTicksPerCycle: 0
   _timedActions: []
   _altFireManeuver: {fileID: 0}
+  _refreshBehavior: {fileID: 0}
   _squadId: -1

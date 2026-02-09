@@ -16,9 +16,9 @@ MonoBehaviour:
   _maneuverName: Fireball
   _activationTooltipText: Cast
   _progressTooltipText: Casting
-  _durationTicks: 16
-  _cooldownTicks: 8
-  _maxHeldTime: 12
+  _durationTicks: 7
+  _cooldownTicks: 12
+  _maxHeldTime: 6
   _fireButton: 1
   _inputType: 1
   _targeting: {fileID: 0}
@@ -39,6 +39,15 @@ MonoBehaviour:
   _cycleCameraShakes: []
   _cameraShakeCycleDelayTicks: 0
   _cameraShakeTicksPerCycle: 0
+  _manaCostToInitiate: 50
+  _manaCostToSustain: 0
+  _timedSpend:
+  - StatName: 3
+    SpendTick: 12
+    SpendAmount: 50
+  _cycleSpends: []
+  _spendCycleDelayTicks: 0
+  _spendTicksPerCycle: 0
   _icon:
     _name: fireball
     _bundle: fireball
@@ -67,9 +76,9 @@ MonoBehaviour:
         YawOffset: 70
         RollOffset: 0
   _animationSpeed: 1
-  _movementSpeedMultiplier: 1
+  _movementSpeedMultiplier: 0.5
   _timedProjectiles:
-  - SpawnTick: 12
+  - SpawnTick: 6
     Definition: {fileID: 11400000, guid: 6991a20812392a24ba9c2e2838af2f99, type: 2}
     Muzzle: 1
     Damage:

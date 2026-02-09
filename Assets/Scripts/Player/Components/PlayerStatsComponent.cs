@@ -31,7 +31,18 @@ namespace LichLord
         private ref FPlayerStatData _currentMana => ref MakeRef<FPlayerStatData>();
         public int CurrentMana => _currentMana.GetValueAsInt();
 
+        [Networked]
+        private ref FPlayerStatData _manaRegen => ref MakeRef<FPlayerStatData>();
+        public int ManaRegen => _manaRegen.GetValueAsInt();
+
+        [Networked]
+        private ref FPlayerStatData _manaRegenDelayTicks => ref MakeRef<FPlayerStatData>();
+        public int ManaRegenDelayTicks => _manaRegenDelayTicks.GetValueAsInt();
+
         public float ManaPercent { get { return Mathf.Clamp01((float)CurrentMana / (float)MaxMana); } }
+
+        private int _manaSpendTick;
+        private float _manaRegenAccumulator;
 
         [BundleObject(typeof(GameObject))]
         [SerializeField]
@@ -51,8 +62,34 @@ namespace LichLord
 
             _maxHealth.SetValueAsInt(500);
             _currentHealth.SetValueAsInt(500);
-            _maxMana.SetValueAsInt(1000);
-            _currentMana.SetValueAsInt(1000);
+            _maxMana.SetValueAsInt(400);
+            _currentMana.SetValueAsInt(400);
+            _manaRegen.SetValueAsInt(30);
+            _manaRegenDelayTicks.SetValueAsInt(32);
+        }
+
+        public override void FixedUpdateNetwork()
+        {
+            if (Runner.Tick < _manaSpendTick + ManaRegenDelayTicks)
+                return;
+
+            if (CurrentMana >= MaxMana)
+            {
+                _manaRegenAccumulator = 0f;
+                return;
+            }
+
+            _manaRegenAccumulator += ManaRegen / 32f;
+
+            int toAdd = Mathf.FloorToInt(_manaRegenAccumulator);
+            if (toAdd > 0)
+            {
+                int added = Mathf.Min(toAdd, MaxMana - CurrentMana);
+                _currentMana.SetValueAsInt(CurrentMana + added);
+                _manaRegenAccumulator -= added;
+
+                OnStatChanged(EStatName.ManaCurrent);
+            }
         }
 
         public void ApplyDamage(int damage)
@@ -76,9 +113,13 @@ namespace LichLord
             {
                 Context.Camera.Shake(ECameraShakeType.Damage);
             }
+        }
 
-
-
+        public void SpendMana(int mana)
+        {
+            _currentMana.SetValueAsInt(Mathf.Clamp(CurrentMana - mana, 0, MaxMana));
+            OnStatChanged(EStatName.ManaCurrent);
+            _manaSpendTick = Runner.Tick;
         }
 
         public void SpawnImpactVisualEffect(int animIndex)

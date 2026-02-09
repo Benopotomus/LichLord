@@ -13,5 +13,6 @@
         Right_WeaponSocket_1,
         Right_WeaponSocket_2,
         Right_WeaponSocket_3,
+        TargetLocation,
     }
 }

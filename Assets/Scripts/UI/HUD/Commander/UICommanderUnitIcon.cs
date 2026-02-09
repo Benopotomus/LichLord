@@ -10,7 +10,6 @@ namespace LichLord.UI
     {
         [SerializeField] protected Image _iconImage;
         [SerializeField] private Slider _healthSlider;
-        [SerializeField] private TextMeshProUGUI _healthText;
 
         private NonPlayerCharacter _npc;
         protected NonPlayerCharacterDefinition _npcDefinition;
@@ -24,7 +23,6 @@ namespace LichLord.UI
                 _iconImage.enabled = false;
                 _healthSlider.enabled = false;
                 _healthSlider.gameObject.SetActive(false);
-                _healthText.enabled = false;
 
                 if(_npc != null) 
                     _npc.Health.OnHealthChanged -= SetHealth;
@@ -50,8 +48,6 @@ namespace LichLord.UI
         {
             _healthSlider.gameObject.SetActive(true);
             _healthSlider.enabled = true;
-            _healthText.enabled = true;
-            _healthText.text = currentHealth + " / " + maxHealth;
             _healthSlider.value = (float)currentHealth / (float)maxHealth;
         }
 

@@ -81,9 +81,31 @@ namespace LichLord
         private int _cameraShakeTicksPerCycle;
         public int CameraShakeTicksPerCycle => _cameraShakeTicksPerCycle;
 
+        [Header("Cost")]
+
         [SerializeField] 
-        private int _manaCost = 0;
-        public int ManaCost => _manaCost;
+        private int _manaCostToInitiate = 0;
+        public int ManaCostToInitiate => _manaCostToInitiate;
+
+        [SerializeField]
+        private int _manaCostToSustain = 0;
+        public int ManaCostToSustain => _manaCostToSustain;
+
+        [SerializeField]
+        protected FCostSpend[] _timedSpend;
+        public FCostSpend[] TimedSpends => _timedSpend;
+
+        [SerializeField]
+        protected FCostSpend[] _cycleSpends;
+        public FCostSpend[] CycleSpends => _cycleSpends;
+
+        [SerializeField]
+        private int _spendCycleDelayTicks;
+        public int SpendCycleDelayTicks => _spendCycleDelayTicks;
+
+        [SerializeField]
+        private int _spendTicksPerCycle;
+        public int SpendTicksPerCycle => _spendTicksPerCycle;
 
         //UI
         [BundleObject(typeof(Sprite))]
@@ -154,6 +176,21 @@ namespace LichLord
             return Targeting.GetTargetPosition(this, pc, runner);
         }
 
+        public virtual bool HasResourcesToActivate(PlayerCharacter pc)
+        {
+            return pc.Stats.CurrentMana >= ManaCostToInitiate;
+        }
+
+        public virtual bool HasResourcesToSustain(PlayerCharacter pc)
+        {
+            return pc.Stats.CurrentMana >= ManaCostToSustain;
+        }
+
+        public virtual void SpendResources(PlayerCharacter pc, EStatName statName, int cost)
+        {
+            pc.Stats.SpendMana(cost);
+        }
+
         public virtual void StartExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 
         {
             if (component == null)
@@ -194,6 +231,10 @@ namespace LichLord
             Vector3 muzzlePosition = MuzzleUtility.GetMuzzlePosition(pc, projectileData.Muzzle);
 
             Vector3 targetPos = pc.Context.Camera.CachedRaycastHit.position;
+            if (Targeting != null)
+            {
+                targetPos = Targeting.GetTargetPosition(this, pc, pc.Runner);
+            }
 
             // Apply aim offset here
             if (projectileData.AimOffset != Vector2.zero)
@@ -210,6 +251,10 @@ namespace LichLord
                 targetPos += up * projectileData.AimOffset.y * dist;
             }
 
+            Vector3 spawnPosition = muzzlePosition;
+            if (projectileData.Muzzle == EMuzzle.TargetLocation)
+                spawnPosition = targetPos;
+
             FProjectileFireEvent fireEvent = new FProjectileFireEvent();
             FProjectilePayload payload = new FProjectilePayload();
             FProjectilePayload payload_spawnedProjectile = new FProjectilePayload();
@@ -224,7 +269,7 @@ namespace LichLord
                 projectileData.Definition,
                 pc,
                 null,
-                MuzzleUtility.GetMuzzlePosition(pc, projectileData.Muzzle),
+                spawnPosition,
                 targetPos,
                 tick,
                 ref payload,
@@ -278,5 +323,18 @@ namespace LichLord
 
         [SerializeField]
         public float Duration;
+    }
+
+    [Serializable]
+    public struct FCostSpend
+    {
+        [SerializeField]
+        public EStatName StatName;
+
+        [SerializeField]
+        public int SpendTick;
+
+        [SerializeField]
+        public int SpendAmount;
     }
 }

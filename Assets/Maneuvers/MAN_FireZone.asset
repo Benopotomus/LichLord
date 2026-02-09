@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1743490ec293c2429e7437b62328ea5, type: 3}
+  m_Name: MAN_FireZone
+  m_EditorClassIdentifier: 
+  _tableID: 3
+  _maneuverName: Fire Zone
+  _activationTooltipText: Cast
+  _progressTooltipText: 
+  _durationTicks: 2
+  _cooldownTicks: 2
+  _maxHeldTime: 8
+  _fireButton: 1
+  _inputType: 0
+  _targeting: {fileID: 11400000, guid: 5edb79c2dce719443aab452826e7eab8, type: 2}
+  _timedMuzzleEffects: []
+  _cycleMuzzleEffects: []
+  _muzzleCycleDelayTicks: 0
+  _muzzleTicksPerCycle: 0
+  _timedCameraShakes: []
+  _cycleCameraShakes: []
+  _cameraShakeCycleDelayTicks: 0
+  _cameraShakeTicksPerCycle: 0
+  _manaCostToInitiate: 0
+  _manaCostToSustain: 0
+  _timedSpend: []
+  _cycleSpends: []
+  _spendCycleDelayTicks: 0
+  _spendTicksPerCycle: 0
+  _icon:
+    _name: Skill_FireRing
+    _bundle: skill_firering
+  Fullbody: 0
+  _upperBodyAnimationStates:
+    _serializedList:
+    - Key: 0
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 12
+        PitchOffset: 0
+        YawOffset: 0
+        RollOffset: 0
+    - Key: 6
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 8
+        PitchOffset: 45
+        YawOffset: 50
+        RollOffset: 0
+    - Key: 7
+      Value:
+        UpperbodyTriggerNumber: 2
+        UpperbodyTriggerDuration: 8
+        PitchOffset: 20
+        YawOffset: 70
+        RollOffset: 0
+  _animationSpeed: 1
+  _movementSpeedMultiplier: 0.75
+  _timedProjectiles:
+  - SpawnTick: 1
+    Definition: {fileID: 11400000, guid: b523ee05e006f2749901e9c2798f5875, type: 2}
+    Muzzle: 11
+    Damage:
+      DamageValue: 20
+      DamageType: 2
+      StaggerRating: 0
+      KnockbackStrength: 0
+      ArmorPenetration: 0
+    AimOffset: {x: 0, y: 0}
+  _cycleProjectiles: []
+  _projectileCycleDelayTicks: 0
+  _projectileTicksPerCycle: 0
+  _timedActions: []
+  _altFireManeuver: {fileID: 0}
+  _refreshBehavior: {fileID: 0}
+  _squadId: -1
