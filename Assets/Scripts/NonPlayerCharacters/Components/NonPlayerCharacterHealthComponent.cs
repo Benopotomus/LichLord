@@ -16,7 +16,7 @@ namespace LichLord.NonPlayerCharacters
         private int _maxHealth;
         public int MaxHealth => _maxHealth;
 
-        public Action<int, int> OnHealthChanged;
+        public Action<int, int, int> OnHealthChanged;
 
         public void OnSpawned(NonPlayerCharacterRuntimeState state)
         {
@@ -26,6 +26,7 @@ namespace LichLord.NonPlayerCharacters
 
         public void OnRender(NonPlayerCharacterRuntimeState state, int tick)
         {
+            var oldHealth = _currentHealth;
             var newHealth = state.GetHealth();
 
             if (newHealth == _currentHealth)
@@ -33,7 +34,7 @@ namespace LichLord.NonPlayerCharacters
 
             _currentHealth = newHealth;
 
-            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+            OnHealthChanged?.Invoke(oldHealth, _currentHealth, _maxHealth);
         }
     }
 }

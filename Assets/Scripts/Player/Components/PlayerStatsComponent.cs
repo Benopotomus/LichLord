@@ -64,7 +64,7 @@ namespace LichLord
             _currentHealth.SetValueAsInt(500);
             _maxMana.SetValueAsInt(400);
             _currentMana.SetValueAsInt(400);
-            _manaRegen.SetValueAsInt(30);
+            _manaRegen.SetValueAsInt(50);
             _manaRegenDelayTicks.SetValueAsInt(32);
         }
 
@@ -115,11 +115,21 @@ namespace LichLord
             }
         }
 
-        public void SpendMana(int mana)
+        public void SpendResource(EStatName stat, int mana)
         {
-            _currentMana.SetValueAsInt(Mathf.Clamp(CurrentMana - mana, 0, MaxMana));
-            OnStatChanged(EStatName.ManaCurrent);
-            _manaSpendTick = Runner.Tick;
+            switch (stat)
+            {
+                case EStatName.ManaCurrent:
+                _currentMana.SetValueAsInt(Mathf.Clamp(CurrentMana - mana, 0, MaxMana));
+                OnStatChanged(EStatName.ManaCurrent);
+                _manaSpendTick = Runner.Tick;
+                    break;
+                case EStatName.HealthCurrent:
+                    _currentHealth.SetValueAsInt(Mathf.Clamp(CurrentHealth - mana, 0, MaxHealth));
+                    OnStatChanged(EStatName.HealthCurrent);
+                    break;
+
+            }
         }
 
         public void SpawnImpactVisualEffect(int animIndex)

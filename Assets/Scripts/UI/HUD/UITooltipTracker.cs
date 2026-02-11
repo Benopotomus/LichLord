@@ -1,5 +1,7 @@
 ﻿
+using LichLord.NonPlayerCharacters;
 using LichLord.World;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +12,12 @@ namespace LichLord.UI
         Dictionary<IChunkTrackable, UIFloatingTooltip> _tooltipWidgets = new Dictionary<IChunkTrackable, UIFloatingTooltip>();
         public List<UIFloatingTooltip> _freeWidgets = new List<UIFloatingTooltip>();
 
+        Dictionary<NonPlayerCharacter, UINonPlayerCharacterTooltip> _npcTooltipWidgets = new Dictionary<NonPlayerCharacter, UINonPlayerCharacterTooltip>();
+        public List<UINonPlayerCharacterTooltip> _freeNpcWidgets = new List<UINonPlayerCharacterTooltip>();
+
         [SerializeField] private UIFloatingTooltip _floatingTooltipPrefab; // Prefab for the UI widget
+        [SerializeField] private UINonPlayerCharacterTooltip _npcFloatingTooltipPrefab; // Prefab for the UI widget
+
         [SerializeField] private Transform _widgetParent; // Parent transform for spawned widgets
         [SerializeField] private float _trackableDetectionRange = 75f; // Max distance for the box
         [SerializeField] private LayerMask _trackableLayerMask; // Layer mask for trackables
@@ -27,6 +34,51 @@ namespace LichLord.UI
         public void Awake()
         {
             _colliderBuffer = new Collider[_maxColliders]; // Initialize buffer
+        }
+
+        protected override void OnVisible()
+        {
+            base.OnVisible();
+            Context.NonPlayerCharacterManager.OnCharacterSpawned += OnNPCSpawned;
+            Context.NonPlayerCharacterManager.OnCharacterDespawned += OnNPCDespawned;
+        }
+
+        protected override void OnHidden()
+        {
+            Context.NonPlayerCharacterManager.OnCharacterSpawned -= OnNPCSpawned;
+            Context.NonPlayerCharacterManager.OnCharacterDespawned -= OnNPCDespawned;
+            base.OnHidden();
+        }
+
+        private void OnNPCSpawned(NonPlayerCharacter npc)
+        {
+             UINonPlayerCharacterTooltip widget;
+
+            if (!_npcTooltipWidgets.ContainsKey(npc) 
+                && _freeNpcWidgets.Count > 0)
+            {
+                widget = _freeNpcWidgets[0];
+                _freeNpcWidgets.RemoveAt(0);
+            }
+            else 
+            {
+                widget = Instantiate(_npcFloatingTooltipPrefab, _widgetParent);
+                AddChild(widget);
+            }
+
+            widget.SetTarget(npc.CachedTransform);
+            widget.SetNpcData(npc);
+            widget.Hidden();
+            _npcTooltipWidgets[npc] = widget;
+        }
+
+        private void OnNPCDespawned(NonPlayerCharacter character)
+        {
+            if (_npcTooltipWidgets.TryGetValue(character, out UINonPlayerCharacterTooltip tooltip))
+            {
+                _freeNpcWidgets.Add(tooltip);
+                tooltip.Hidden();
+            }
         }
 
         protected override void OnTick()
@@ -84,6 +136,22 @@ namespace LichLord.UI
                 }
 
                 _hoveredTrackable = currentTrackable;
+            }
+        }
+
+        private void LateUpdate()
+        {
+            UpdateTrackedNpcs();
+        }
+
+        private void UpdateTrackedNpcs()
+        {
+            foreach (var npcTooltip in _npcTooltipWidgets.Values)
+            {
+                if (npcTooltip.IsVisible)
+                {
+                    npcTooltip.OnLateUpdate();
+                }
             }
         }
 

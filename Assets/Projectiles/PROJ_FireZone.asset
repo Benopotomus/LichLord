@@ -10,47 +10,45 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 970265f9fb8ed1140beb986a19c3fb37, type: 3}
-  m_Name: PROJ_SummonSkeletons
+  m_Name: PROJ_FireZone
   m_EditorClassIdentifier: 
-  _tableID: 10
-  _lifetimeTicks: 160
+  _tableID: 7
+  _lifetimeTicks: 320
   _lifetimeExpiredSpawnedProjectiles: []
-  _projectileMovement: {fileID: 11400000, guid: 339f033f4deb71d4e9d8f12a1f09c1af,
+  _projectileMovement: {fileID: 11400000, guid: 73f3a09a38ebc1549a0ae6dde5708fca,
     type: 2}
-  _speed: 30
+  _speed: 0
   _impactCollisionLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 0
   _overlapCollisionLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 256
   _shape: 1
   _lineOfSightRequirement: 0
-  _rotationType: 1
-  _extents: {x: 0.05, y: 0, z: 0}
+  _rotationType: 0
+  _extents: {x: 4, y: 0, z: 0}
   _onlyAffectsOnce: 0
-  _affectsEachCast: 0
-  _physicsSweep: 2
+  _affectsEachCast: 1
+  _physicsSweep: 1
   _collisionCheckTrim: {x: 0, y: 0}
-  _collisionCheckRate: 0
-  _collisionCheckNumber: 4
+  _collisionCheckRate: 16
+  _collisionCheckNumber: 12
   _onlyAffectImpactTarget: 0
   _lineOfSightLayer:
     serializedVersion: 2
     m_Bits: 0
   _scaleOverLifetime: {fileID: 0}
   _visualsPrefab:
-    _name: PROJ_VIS_SummonSkeletons
-    _bundle: proj_vis_summonskeletons
+    _name: PROJ_VIS_FireZone
+    _bundle: proj_vis_firezone
   _impactSticksToHitActor: 0
   _homesAtApex: 0
   _damage: 10
   _damageType: 0
   _postImpactTicks: 16
-  _impactSpawnedProjectiles:
-  - {fileID: 11400000, guid: 5776b41bbc5f10c458b879d3ff0c6a96, type: 2}
-  _impactActions:
-  - {fileID: 11400000, guid: 20a1294a4284c314ca6e8f7885e0c4c4, type: 2}
+  _impactSpawnedProjectiles: []
+  _impactActions: []
   _proximityDetonationRange: 0
   _proximityDetonationTicks: 0
   _proximityDetonationProjectile: []

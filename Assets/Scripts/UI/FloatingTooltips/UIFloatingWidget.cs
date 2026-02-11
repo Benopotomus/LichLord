@@ -18,7 +18,7 @@ namespace LichLord.UI
             _rectTransform = GetComponent<RectTransform>();
         }
 
-        public void LateUpdate()
+        public void OnLateUpdate()
         {
             if (_camera == null)
                 _camera = Camera.main;
@@ -80,6 +80,11 @@ namespace LichLord.UI
             _target = target;
         }
 
+        protected override void OnHidden()
+        {
+            _rectTransform.position = new Vector2(-200, -200); // Offscreen position
+            base.OnHidden();
+        }
 
     }
 }

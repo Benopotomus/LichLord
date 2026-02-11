@@ -3722,7 +3722,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8238993, g: 0.015212317, b: 0, a: 1}
+  m_Color: {r: 0.6289307, g: 0, b: 0.07932469, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -6002,7 +6002,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _freeWidgets: []
+  _freeNpcWidgets: []
   _floatingTooltipPrefab: {fileID: 7188693134298706628, guid: 6b69980ff8e442746aedbe024b7e71c8,
+    type: 3}
+  _npcFloatingTooltipPrefab: {fileID: 6408608747753614378, guid: 6a68deb670213c142adeeb4ae2c0695f,
     type: 3}
   _widgetParent: {fileID: 2279972434163937567}
   _trackableDetectionRange: 75
@@ -11309,10 +11312,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 320b11ce1c1fe614b9992405c2f2c580, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rectTransform: {fileID: 1173372069672250864}
   _vitalSlider: {fileID: 5132266530776359181}
   _vitalLagSlider: {fileID: 9062995797697896190}
   _vitalLagDelay: 0.2
   _vitalLagDuration: 0.6
+  _pointsPerUnit: 0.8
 --- !u!1 &5320099401378737237
 GameObject:
   m_ObjectHideFlags: 0
@@ -11364,10 +11369,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 320b11ce1c1fe614b9992405c2f2c580, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rectTransform: {fileID: 3969720825613835833}
   _vitalSlider: {fileID: 3642356370595633241}
   _vitalLagSlider: {fileID: 3581367637193666330}
   _vitalLagDelay: 0.2
   _vitalLagDuration: 0.6
+  _pointsPerUnit: 0.8
 --- !u!1 &5387341713777361292
 GameObject:
   m_ObjectHideFlags: 0

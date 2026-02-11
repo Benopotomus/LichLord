@@ -188,7 +188,7 @@ namespace LichLord
 
         public virtual void SpendResources(PlayerCharacter pc, EStatName statName, int cost)
         {
-            pc.Stats.SpendMana(cost);
+            pc.Stats.SpendResource(statName, cost);
         }
 
         public virtual void StartExecute(PlayerCharacter playerCharacter, Component component, NetworkRunner runner) 

@@ -2,6 +2,7 @@
 using LichLord.Dialog;
 using LichLord.Items;
 using LichLord.World;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,6 +17,9 @@ namespace LichLord.NonPlayerCharacters
         [SerializeField] private float raycastLength = 6f; 
 
         private List<NonPlayerCharacterReplicator> _replicators = new List<NonPlayerCharacterReplicator>();
+
+        public Action<NonPlayerCharacter> OnCharacterSpawned;
+        public Action<NonPlayerCharacter> OnCharacterDespawned;
 
         public void AddReplicator(NonPlayerCharacterReplicator replicator)
         {
@@ -144,9 +148,9 @@ namespace LichLord.NonPlayerCharacters
                     continue;
 
                 Vector3 randomPosition = new Vector3(
-                Random.Range(-2f, 2f),
+                UnityEngine.Random.Range(-2f, 2f),
                 0, // Keep Y fixed
-                Random.Range(-2f, 2f)
+                UnityEngine.Random.Range(-2f, 2f)
                 );
 
                 // Combine offset into raycast origin
@@ -260,9 +264,9 @@ namespace LichLord.NonPlayerCharacters
                         continue;
 
                     Vector3 randomPosition = new Vector3(
-                    Random.Range(-5f, 5f),
+                    UnityEngine.Random.Range(-5f, 5f),
                     0, // Keep Y fixed
-                    Random.Range(-5f, 5f)
+                    UnityEngine.Random.Range(-5f, 5f)
                     );
 
                     // Combine offset into raycast origin

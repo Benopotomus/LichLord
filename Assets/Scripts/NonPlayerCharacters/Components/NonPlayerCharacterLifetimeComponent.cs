@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace LichLord.NonPlayerCharacters
 {
@@ -9,6 +10,13 @@ namespace LichLord.NonPlayerCharacters
 
         [SerializeField]
         private int _lifetimeProgress;
+        public int LifetimeProgress => _lifetimeProgress;
+
+        [SerializeField]
+        private int _lifetimeProgressMax;
+        public int LifetimeProgressMax => _lifetimeProgressMax;
+
+        public Action<int, int> OnLifetimeProgressChanged;
 
         public void OnSpawned(NonPlayerCharacterRuntimeState runtimeState, int tick)
         {
@@ -16,6 +24,7 @@ namespace LichLord.NonPlayerCharacters
                 return;
 
             _lifetimeProgress = runtimeState.GetLifetimeProgress();
+            _lifetimeProgressMax = runtimeState.GetLifetimeProgressMax();
             _nextLifetimeProgressTick = tick + runtimeState.GetTicksPerLifetime();
         }
 
@@ -38,6 +47,8 @@ namespace LichLord.NonPlayerCharacters
                 {
                     runtimeState.SetState(ENPCState.Dead);
                 }
+
+                OnLifetimeProgressChanged?.Invoke(_lifetimeProgress, _lifetimeProgressMax);
             }
         }
 

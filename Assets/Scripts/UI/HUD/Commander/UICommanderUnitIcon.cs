@@ -39,12 +39,12 @@ namespace LichLord.UI
             if (_npcDefinition != null)
             {
                 LoadIcon(_npcDefinition.Icon);
-                SetHealth(_npc.Health.CurrentHealth, _npc.Health.MaxHealth);
+                SetHealth(_npc.Health.CurrentHealth, _npc.Health.CurrentHealth, _npc.Health.MaxHealth);
                 _npc.Health.OnHealthChanged += SetHealth;
             }
         }
 
-        public void SetHealth(int currentHealth, int maxHealth)
+        public void SetHealth(int lastHealth, int currentHealth, int maxHealth)
         {
             _healthSlider.gameObject.SetActive(true);
             _healthSlider.enabled = true;

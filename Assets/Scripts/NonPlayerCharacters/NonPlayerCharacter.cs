@@ -52,7 +52,7 @@ namespace LichLord.NonPlayerCharacters
         public NonPlayerCharacterSpawningComponent SpawningComponent => _spawningComponent;
 
         [SerializeField] private NonPlayerCharacterLifetimeComponent _lifetimeComponent;
-        public NonPlayerCharacterLifetimeComponent LifetimeComponent => _lifetimeComponent;
+        public NonPlayerCharacterLifetimeComponent Lifetime => _lifetimeComponent;
 
         [SerializeField] private MeleeHitTrackerComponent _meleeHitTracker;
         public MeleeHitTrackerComponent MeleeHitTracker => _meleeHitTracker;
@@ -200,6 +200,8 @@ namespace LichLord.NonPlayerCharacters
                         runtimeState.GetFormationIndex());
                 }
             }
+
+            Context.NonPlayerCharacterManager.OnCharacterSpawned(this);
         }
 
         public void OnRender(NonPlayerCharacterRuntimeState runtimeState, 
@@ -419,6 +421,8 @@ namespace LichLord.NonPlayerCharacters
                         _runtimeState.GetFormationIndex());
                 }
             }
+
+            Context.NonPlayerCharacterManager.OnCharacterDespawned(this);
         }
 
         private NonPlayerCharacterDefinition _definition;
