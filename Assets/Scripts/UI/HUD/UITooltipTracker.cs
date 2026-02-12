@@ -31,6 +31,7 @@ namespace LichLord.UI
         private float _lastUpdateTime = 0f;
         private Collider[] _colliderBuffer; // Reusable buffer for OverlapBoxNonAlloc
 
+
         public void Awake()
         {
             _colliderBuffer = new Collider[_maxColliders]; // Initialize buffer
@@ -125,12 +126,12 @@ namespace LichLord.UI
             var currentTrackable = Context.Camera.CachedRaycastHit.trackable;
             if (_hoveredTrackable != currentTrackable)
             {
-                if (_hoveredTrackable != null && !_visibleTrackables.Contains(_hoveredTrackable))
+                if (_hoveredTrackable != null)
                 {
                     OnUnhover(_hoveredTrackable);
                 }
 
-                if (currentTrackable != null && !_visibleTrackables.Contains(currentTrackable))
+                if (currentTrackable != null)
                 {
                     OnHover(currentTrackable);
                 }
@@ -222,6 +223,17 @@ namespace LichLord.UI
 
         public void OnHover(IChunkTrackable trackableHovered)
         {
+            if (trackableHovered is NonPlayerCharacter npc)
+            {
+                if (_npcTooltipWidgets.TryGetValue(npc, out var npcWidget))
+                {
+                    npcWidget.VisibleFromTracker = true;
+                    npcWidget.UpdateVisibility();
+                }
+
+                return;
+            }
+
             if (!_tooltipWidgets.ContainsKey(trackableHovered))
             {
                 UIFloatingTooltip widget;
@@ -244,6 +256,17 @@ namespace LichLord.UI
 
         public void OnUnhover(IChunkTrackable trackableUnhovered)
         {
+            if (trackableUnhovered is NonPlayerCharacter npc)
+            {
+                if (_npcTooltipWidgets.TryGetValue(npc, out var npcWidget))
+                {
+                    npcWidget.VisibleFromTracker = false;
+                    npcWidget.UpdateVisibility();
+                }
+
+                return;
+            }
+
             if (_tooltipWidgets.TryGetValue(trackableUnhovered, out var widget))
             {
                 widget.SetTooltipTarget(null);
