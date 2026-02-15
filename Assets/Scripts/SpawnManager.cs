@@ -2,13 +2,14 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 using System.IO;
+using Example.ExpertMovement;
 
 namespace LichLord
 {
     public class SpawnManager : ContextBehaviour
     {
-        [SerializeField] private PlayerCharacter _playerPrefab;
-        public PlayerCharacter LocalPlayer { get; private set; }
+        [SerializeField] private ThirdPersonExpertPlayer _playerPrefab;
+        public ThirdPersonExpertPlayer LocalPlayer { get; private set; }
 
         [SerializeField]
         private PlayerSpawnPoint[] _spawnPoints;
@@ -53,9 +54,9 @@ namespace LichLord
             string nickname = loadedPlayerData.playerName;
 
             LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
-            LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState, nickname);
+            //LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState, nickname);
 
-            Debug.Log($"Spawned local player from save at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
+           // Debug.Log($"Spawned local player from save at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
         }
 
         private void CreateAndSpawnPlayer(PlayerRef playerRef)
@@ -65,9 +66,9 @@ namespace LichLord
             string nickname = GetInstanceId();
 
             LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition.Item1, spawnPosition.Item2, inputAuthority: playerRef);
-            LocalPlayer.ApplySpawnParameters(spawnPosition.Item1, spawnPosition.Item2, moveState, nickname);
+           // LocalPlayer.ApplySpawnParameters(spawnPosition.Item1, spawnPosition.Item2, moveState, nickname);
 
-            Debug.Log($"Create local player at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
+           // Debug.Log($"Create local player at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
         }
 
         private string GetInstanceId()

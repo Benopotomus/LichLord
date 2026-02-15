@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9210010051615565378}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4105906397310079399
 MonoBehaviour:
@@ -50,7 +50,6 @@ MonoBehaviour:
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours: []
-  ForceRemoteRenderTimeframe: 0
 --- !u!114 &4219866145273439913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,7 +64,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   KinematicSpeed: 8
   JumpMultiplier: 2
-  Gravity: {x: 0, y: 0, z: 0}
+  Gravity: {x: 0, y: -40, z: 0}
   RelativePriority: 0
   MaxGroundAngle: 60
   DynamicGroundFriction: 20

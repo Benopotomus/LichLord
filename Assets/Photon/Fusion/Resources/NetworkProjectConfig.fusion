@@ -13,6 +13,7 @@
     "NetworkIdIsObjectName": false,
     "HideNetworkObjectInactivityGuard": false,
     "AllowClientServerModesInWebGL": false,
+    "ClientsRecordFrameAndPacketTimingTraces": false,
     "Simulation": {
         "InputDataWordCount": 0,
         "ReplicationFeatures": 3,
@@ -24,7 +25,10 @@
             "ServerIndex": 0,
             "ClientSendIndex": 1,
             "ServerSendIndex": 1
-        }
+        },
+        "MaxObjectDestroysSentPerPacket": 32,
+        "EnableExperimentalPacketLossRecovery": false,
+        "EnableAdaptivePacketFragmentation": false
     },
     "Network": {
         "ConnectionTimeout": 10.0,
@@ -64,10 +68,8 @@
         "Assembly-CSharp-firstpass",
         "Fusion.Addons.Physics",
         "Fusion.Addons.FSM",
-        "Starter.Shooter",
-        "LichLord",
-        "Starter.ThirdPersonCharacter",
-        "Starter"
+        "Fusion.Addons.KCC",
+        "LichLord"
     ],
     "UseSerializableDictionary": false,
     "NullChecksForNetworkedProperties": true,

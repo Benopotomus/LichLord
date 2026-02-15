@@ -59,8 +59,10 @@ namespace LichLord.UI
 
         private IEnumerator BindPlayerCharacter()
         {
-            if (Context.LocalPlayerCharacter == null)
-                yield return null;
+            while (Context.LocalPlayerCharacter == null)
+            {
+                yield return null;  // Wait one frame and check again
+            }
 
             _pc = Context.LocalPlayerCharacter;
 
