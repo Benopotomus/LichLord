@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Fusion;
-using DG.Tweening;
+using DG.Tweening; // kept if you use it elsewhere
+using Fusion.Addons.KCC;
 
 namespace LichLord
 {
@@ -12,22 +13,21 @@ namespace LichLord
         Flying,
     }
 
-    public class PlayerCharacterMovementComponent : ContextBehaviour
+    [RequireComponent(typeof(KCC))]
+    public class PlayerCharacterMovementComponent : ContextBehaviour // ← changed to NetworkBehaviour
     {
-        [SerializeField]
-        private PlayerCharacter _pc;
+        // ──────────────────────────────────────────────────────────────
+        // References
+        // ──────────────────────────────────────────────────────────────
 
-        [SerializeField]
-        private CharacterController _cc;
-        public CharacterController CC => _cc;
+        [SerializeField] private PlayerCharacter _pc;
 
-        [Networked]
-        [SerializeField]
-        private EMovementState _currentMoveState { get; set; }
-        public EMovementState CurrentMoveState => _currentMoveState;
+        private KCC _ncc; // Fusion wrapper
+        public KCC CC => _ncc;
 
-        [SerializeField]
-        private EMovementState _lastMoveState = EMovementState.None;
+        [Networked] public EMovementState CurrentMoveState { get; set; }
+
+        [SerializeField] private EMovementState _lastMoveState = EMovementState.None;
 
         [Header("References")]
         public Transform ScalingRoot;
@@ -57,12 +57,13 @@ namespace LichLord
 
         [Header("Jump Setup")]
         public float JumpImpulse = 5f;
-        public float JumpHoldVelocity = 5.5f;
+        public float JumpHoldVelocity = 5.5f; // unused in current logic — can add variable height
         public float JumpBufferTime = 0.2f;
 
         private float _jumpBufferTimer;
         private bool _jumpInputBuffered;
-        private int _jumpCount { get; set; }
+        private int _jumpCount;
+        private bool _jumpInitiated;
 
         public AudioSource FootstepSound;
         public AudioClip JumpAudioClip;
@@ -70,15 +71,16 @@ namespace LichLord
 
         [Header("VFX")]
         public ParticleSystem DustParticles;
-        [SerializeField]
-        private VisualEffectBase _flyVisualEffect;
+        [SerializeField] private VisualEffectBase _flyVisualEffect;
 
-        [Networked]
-        private ref FWorldTransform _worldTransform => ref MakeRef<FWorldTransform>();
+        // ──────────────────────────────────────────────────────────────
+        // Networked & runtime fields (kept/adapted)
+        // ──────────────────────────────────────────────────────────────
+
+        [Networked] private ref FWorldTransform _worldTransform => ref MakeRef<FWorldTransform>();
         public FWorldTransform WorldTransform => _worldTransform;
 
-        [SerializeField]
-        private Vector3 _worldVelocity;
+        [SerializeField] private Vector3 _worldVelocity;
         public Vector3 WorldVelocity => _worldVelocity;
 
         private Vector3 _authorityMoveVelocity;
@@ -87,139 +89,81 @@ namespace LichLord
         private float _lastYaw;
         private float _yawVelocity;
 
+        public Vector3 SpawnForcedPosition;
+
+        public Transform LookTarget { get; set; }
+
+        private void Awake()
+        {
+            _ncc = GetComponent<KCC>();
+            if (_ncc == null)
+            {
+                Debug.LogError("NetworkCharacterController missing on " + name);
+                enabled = false;
+            }
+        }
+
         public void OnSpawned()
         {
-            base.Spawned();
+            if (Object.HasStateAuthority)
+            {
+                CurrentMoveState = EMovementState.Walking;
+                _authorityMoveVelocity = Vector3.zero;
+            }
 
-            if (HasStateAuthority)
-                _currentMoveState = EMovementState.Walking;
-            
             _jumpCount = 0;
             _localVelocity = Vector3.zero;
             _jumpBufferTimer = 0f;
             _jumpInputBuffered = false;
+            _jumpInitiated = false;
         }
 
-        public void OnDisable()
+        public override void FixedUpdateNetwork()
         {
-            _lastMoveState = EMovementState.None;
-        }
+            /*
+            if (!Object.HasStateAuthority) return;
 
-        public void OnRender(float renderDeltaTime)
-        {
-            UpdateVelocity(renderDeltaTime);
-            UpdateYawVelocity();
-            UpdateMovementState();
-
-            _pc.AnimationController.UpdateAnimatonForMovement(_localVelocity, _yawVelocity, _currentMoveState, renderDeltaTime);
-        }
-
-        private void UpdateVelocity(float renderDeltaTime)
-        {
-            _worldVelocity = HasStateAuthority ? _authorityMoveVelocity : (_pc.CachedTransform.position - _lastPosition) / renderDeltaTime;
-            _lastPosition = _pc.CachedTransform.position;
-            _localVelocity = _pc.CachedTransform.InverseTransformDirection(_worldVelocity);
-        }
-
-        private void UpdateYawVelocity()
-        {
-            Vector3 forward = _pc.CachedTransform.forward;
-            float currentYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
-            _yawVelocity = currentYaw - _lastYaw;
-            _lastYaw = currentYaw;
-        }
-
-        public void UpdateRemotePosition(float deltaTime)
-        {
-            if (HasStateAuthority)
+            if (!_spawnComplete)
+            {
+                _spawnComplete = true;
+                transform.position = SpawnForcedPosition;
                 return;
-
-            Vector3 lastPos = CC.transform.position;
-
-            Vector3 newPosition = _worldTransform.Position;
-
-            if ((newPosition - lastPos).sqrMagnitude > 36f)
-            {
-                CC.transform.position = newPosition;
-            }
-            else
-            {
-                float x = Mathf.Lerp(lastPos.x, _worldTransform.PositionX, deltaTime * 5f);
-                float y = Mathf.Lerp(lastPos.y, _worldTransform.PositionY, deltaTime * 10f);
-                float z = Mathf.Lerp(lastPos.z, _worldTransform.PositionZ, deltaTime * 5f);
-                CC.transform.position = new Vector3(x, y, z);
             }
 
-            CC.transform.rotation = Quaternion.Lerp(CC.transform.rotation, Quaternion.Euler(0f, _worldTransform.Yaw, 0f), deltaTime * 8f);
-        }
+            _jumpInitiated = false;
 
-        public Transform LookTarget { get; set; }
+            // Fetch your input here — replace with your actual input system
+            FGameplayInput input = default; // ← TODO: Get real networked input!
 
-        public void UpdateLookRotation(float deltaTime, float lerpSpeed)
-        {
-            Quaternion targetRotation = LookTarget != null
-                ? GetLookTargetRotation()
-                : Context.Camera._cameraFollowTarget.rotation;
+            ProcessMovement(ref input, Runner.DeltaTime);
 
-            // Extract desired yaw and pitch from target rotation
-            float rawPitch = targetRotation.eulerAngles.x;
-            float yaw = targetRotation.eulerAngles.y;
-            float normalizedPitch = rawPitch > 180f ? rawPitch - 360f : rawPitch;
 
-            // Lerp only the Yaw (Y-axis) for horizontal character rotation
-            Quaternion currentRotation = CC.transform.rotation;
-            Quaternion targetYawRotation = Quaternion.Euler(0f, yaw, 0f);
-            Quaternion lerpedRotation = Quaternion.Slerp(currentRotation, targetYawRotation, lerpSpeed * deltaTime);
-
-            CC.transform.rotation = lerpedRotation;
-
-            // Update world transform with latest values
-            _worldTransform.Yaw = lerpedRotation.eulerAngles.y;
-            _worldTransform.Pitch = normalizedPitch;
-        }
-
-        // Get desired rotation when facing interactable
-        public Quaternion GetLookTargetRotation()
-        {
-            Vector3 faceDirection = (LookTarget.position - CC.transform.position).normalized;
-            return Quaternion.LookRotation(faceDirection);
+            */
+            // Optional: update networked world transform if not using NetworkTransform
+            //WritePosition();
         }
 
         public void ProcessInput(ref FGameplayInput input, float deltaTime)
         {
-            if (!HasStateAuthority)
-                return;
-
-            ProcessMovement(ref input, deltaTime);
-        }
-
-        public void ProcessMovement(ref FGameplayInput input, float deltaTime)
-        {
-            if (!HasStateAuthority)
-                return;
-
             bool isGrounded = IsGrounded();
 
             Vector3 lastHorizontalVelocity = new Vector3(_authorityMoveVelocity.x, 0f, _authorityMoveVelocity.z);
             float gravity = DownGravity;
 
-            var inputDirection = CC.transform.rotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
+            var inputDirection = transform.rotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
 
             float targetSpeed = input.Sprint ? SprintSpeed : WalkSpeed;
-            if (_currentMoveState == EMovementState.Flying)
+            if (CurrentMoveState == EMovementState.Flying)
                 targetSpeed = FlyHorizontalSpeed;
 
-            // Adjust speed based on movement direction
             if (inputDirection != Vector3.zero)
             {
-                Vector3 forward = CC.transform.forward;
-                float dot = Vector3.Dot(inputDirection.normalized, forward);
-                float t = (dot + 1.0f) / 2.0f; // Normalize dot from [-1, 1] to [0, 1]
+                float dot = Vector3.Dot(inputDirection.normalized, transform.forward);
+                float t = (dot + 1.0f) / 2.0f;
                 float speedMultiplier = Mathf.SmoothStep(0.75f, 1.0f, t);
                 targetSpeed *= speedMultiplier;
             }
 
-            // Adjust speed by maneuver
             targetSpeed *= _pc.Maneuvers.GetMoveSpeedMultiplier();
 
             Vector3 desiredMoveVelocity = inputDirection * targetSpeed;
@@ -229,59 +173,54 @@ namespace LichLord
                 : (isGrounded ? GroundAcceleration : AirAcceleration);
 
             Vector3 newHorizontalVelocity = Vector3.Lerp(lastHorizontalVelocity, desiredMoveVelocity, acceleration * deltaTime);
+
+            // Preserve vertical from last frame, update horizontal
             Vector3 moveVelocity = new Vector3(newHorizontalVelocity.x, _authorityMoveVelocity.y, newHorizontalVelocity.z);
-            Vector3 horizontalVelocity = new Vector3(moveVelocity.x, 0f, moveVelocity.z);
 
-            bool isRising = _authorityMoveVelocity.y > 0f;
-
+            // Jump buffering
             if (input.Jump && !input.JumpHeld)
             {
                 _jumpInputBuffered = true;
                 _jumpBufferTimer = JumpBufferTime;
             }
-
             if (_jumpInputBuffered)
             {
                 _jumpBufferTimer -= deltaTime;
                 if (_jumpBufferTimer <= 0f)
-                {
                     _jumpInputBuffered = false;
-                }
             }
 
-            switch (_currentMoveState)
+            bool isRising = _authorityMoveVelocity.y > 0f;
+
+            switch (CurrentMoveState)
             {
                 case EMovementState.Walking:
-                    gravity = DownGravity;
                     _jumpCount = 0;
 
                     if (isGrounded)
                     {
-                        // Apply the grounded gravity value
-                        moveVelocity.y = gravity;
+                        moveVelocity.y = gravity * deltaTime; // gentle downward to stick
 
-                        if ((_jumpInputBuffered || input.Jump))
+                        if (_jumpInputBuffered || input.Jump)
                         {
-                            moveVelocity.y = JumpImpulse; // Apply jump here
+                            moveVelocity.y = JumpImpulse;
                             _jumpCount = 1;
-                            _currentMoveState = EMovementState.Jumping;
+                            CurrentMoveState = EMovementState.Jumping;
                             _jumpInputBuffered = false;
                             _jumpInitiated = true;
+
                             if (JumpAudioClip != null)
-                                FootstepSound.PlayOneShot(JumpAudioClip);
+                                FootstepSound?.PlayOneShot(JumpAudioClip);
                         }
                     }
                     else
                     {
-                        // Apply Gravity
-                        moveVelocity.y += (gravity * deltaTime);
+                        moveVelocity.y += gravity * deltaTime;
                         moveVelocity.y = Mathf.Max(TerminalVelocity, moveVelocity.y);
-
                         _jumpCount = 1;
-                        _currentMoveState = EMovementState.Jumping;
+                        CurrentMoveState = EMovementState.Jumping;
                         _jumpInputBuffered = false;
                     }
-
                     break;
 
                 case EMovementState.Jumping:
@@ -289,38 +228,34 @@ namespace LichLord
 
                     if ((_jumpInputBuffered || input.Jump) && _jumpCount < 2)
                     {
-                        moveVelocity.y = JumpImpulse; // Apply double jump here
+                        moveVelocity.y = JumpImpulse;
                         _jumpCount = 2;
-                        _currentMoveState = EMovementState.Flying;
-
+                        CurrentMoveState = EMovementState.Flying;
                         _jumpInputBuffered = false;
-                        gravity = 0;
+                        gravity = 0f;
                     }
                     else
                     {
-                        // Apply Gravity
-                        moveVelocity.y += (gravity * deltaTime);
+                        moveVelocity.y += gravity * deltaTime;
                         moveVelocity.y = Mathf.Max(TerminalVelocity, moveVelocity.y);
                     }
 
                     if (isGrounded)
                     {
-                        // Apply Gravity
-                        moveVelocity.y += (gravity * deltaTime);
+                        moveVelocity.y += gravity * deltaTime; // optional extra stick
                         moveVelocity.y = Mathf.Max(TerminalVelocity, moveVelocity.y);
-
-                        _currentMoveState = EMovementState.Walking;
-
+                        CurrentMoveState = EMovementState.Walking;
                         _jumpCount = 0;
                         _jumpInputBuffered = false;
-                        if (LandAudioClip != null)
-                            FootstepSound.PlayOneShot(LandAudioClip);
-                    }
 
-                    moveVelocity = new Vector3(horizontalVelocity.x, moveVelocity.y, horizontalVelocity.z);
+                        if (LandAudioClip != null)
+                            FootstepSound?.PlayOneShot(LandAudioClip);
+                    }
                     break;
 
                 case EMovementState.Flying:
+                    // Horizontal preserved from earlier lerp
+                    // Vertical control
                     if (input.JumpHeld)
                     {
                         moveVelocity.y = Mathf.Lerp(moveVelocity.y, FlyAscendSpeed, FlyAscendAcceleration * deltaTime);
@@ -331,193 +266,214 @@ namespace LichLord
                     }
                     else
                     {
-                        moveVelocity.y = Mathf.Lerp(moveVelocity.y, 0, FlyVerticalBraking * deltaTime);
+                        moveVelocity.y = Mathf.Lerp(moveVelocity.y, 0f, FlyVerticalBraking * deltaTime);
                     }
-
-                    moveVelocity = new Vector3(horizontalVelocity.x, moveVelocity.y, horizontalVelocity.z);
 
                     if (isGrounded)
                     {
-                        // Apply the grounded gravity value
                         moveVelocity.y = gravity;
-                        _currentMoveState = EMovementState.Walking;
+                        CurrentMoveState = EMovementState.Walking;
                     }
-
                     break;
             }
 
             _authorityMoveVelocity = moveVelocity;
+
+            // Apply movement using Fusion's networked controller
+            _ncc.SetKinematicVelocity(_authorityMoveVelocity);
         }
-        
+
+        private bool IsGrounded()
+        {
+            if (_jumpInitiated) return false;
+            return CC.Data.IsGrounded;
+        }
+
+        // Keep your helper methods
+        public void UpdateRemotePosition(float deltaTime)
+        {
+            /*
+            if (Object.HasStateAuthority) return;
+
+            Vector3 lastPos = transform.position;
+            Vector3 newPosition = _worldTransform.Position;
+
+            if ((newPosition - lastPos).sqrMagnitude > 36f)
+            {
+                transform.position = newPosition;
+            }
+            else
+            {
+                float x = Mathf.Lerp(lastPos.x, _worldTransform.PositionX, deltaTime * 5f);
+                float y = Mathf.Lerp(lastPos.y, _worldTransform.PositionY, deltaTime * 10f);
+                float z = Mathf.Lerp(lastPos.z, _worldTransform.PositionZ, deltaTime * 5f);
+                transform.position = new Vector3(x, y, z);
+            }
+
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0f, _worldTransform.Yaw, 0f), deltaTime * 8f);
+            */
+        }
+
+        public void UpdateLookRotation(float deltaTime, float lerpSpeed)
+        {
+            // Your existing logic — uses transform now instead of CC.transform
+            Quaternion targetRotation = LookTarget != null
+                ? GetLookTargetRotation()
+                : Context.Camera._cameraFollowTarget.rotation;
+
+            float rawPitch = targetRotation.eulerAngles.x;
+            float yaw = targetRotation.eulerAngles.y;
+            float normalizedPitch = rawPitch > 180f ? rawPitch - 360f : rawPitch;
+
+            Quaternion currentRotation = transform.rotation;
+            Quaternion targetYawRotation = Quaternion.Euler(0f, yaw, 0f);
+            Quaternion lerpedRotation = Quaternion.Slerp(currentRotation, targetYawRotation, lerpSpeed * deltaTime);
+            transform.rotation = lerpedRotation;
+
+            _worldTransform.Yaw = lerpedRotation.eulerAngles.y;
+            _worldTransform.Pitch = normalizedPitch;
+        }
+
+        public Quaternion GetLookTargetRotation()
+        {
+            Vector3 faceDirection = (LookTarget.position - transform.position).normalized;
+            return Quaternion.LookRotation(faceDirection);
+        }
+
+        public void WritePosition(bool forceWrite = false)
+        {
+            // Your existing logic — now using transform
+            const float POSITION_THRESHOLD_XZ = 0.01f;
+            if (Mathf.Abs(transform.position.x - _worldTransform.PositionX) > POSITION_THRESHOLD_XZ || forceWrite)
+                _worldTransform.PositionX = transform.position.x;
+
+            if (Mathf.Abs(transform.position.z - _worldTransform.PositionZ) > POSITION_THRESHOLD_XZ || forceWrite)
+                _worldTransform.PositionZ = transform.position.z;
+
+            const float POSITION_THRESHOLD_Y = 0.01f;
+            if (Mathf.Abs(transform.position.y - _worldTransform.PositionY) > POSITION_THRESHOLD_Y || forceWrite)
+                _worldTransform.PositionY = transform.position.y;
+
+            _worldTransform.Yaw = transform.eulerAngles.y;
+        }
+
+        private void UpdateVelocity(float renderDeltaTime)
+        {
+            _worldVelocity = Object.HasStateAuthority ? _authorityMoveVelocity : (transform.position - _lastPosition) / renderDeltaTime;
+            _lastPosition = transform.position;
+            _localVelocity = transform.InverseTransformDirection(_worldVelocity);
+        }
+
+        private void UpdateYawVelocity()
+        {
+            Vector3 forward = transform.forward;
+            float currentYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+            _yawVelocity = currentYaw - _lastYaw;
+            _lastYaw = currentYaw;
+        }
+
+        private void UpdateMovementState()
+        {
+            if (CurrentMoveState == _lastMoveState) return;
+            _pc.AnimationController.OnMovementStateChanged(CurrentMoveState);
+            _flyVisualEffect?.Toggle(CurrentMoveState == EMovementState.Flying);
+            _lastMoveState = CurrentMoveState;
+        }
+
+        public void OnRender(float renderDeltaTime)
+        {
+            UpdateVelocity(renderDeltaTime);
+            UpdateYawVelocity();
+            UpdateMovementState();
+            _pc.AnimationController.UpdateAnimatonForMovement(_localVelocity, _yawVelocity, CurrentMoveState, renderDeltaTime);
+        }
+
+        /// <summary>
+        /// Special movement mode: smoothly lerp and brake toward an interactable position (e.g. during interaction animation or dialogue).
+        /// Runs on authority only.
+        /// </summary>
+        /// <param name="interactablePosition">World position to approach</param>
+        /// <param name="deltaTime">Should be Runner.DeltaTime when called from FixedUpdateNetwork</param>
         public void ProcessInteractMovement(Vector3 interactablePosition, float deltaTime)
         {
-            // Lerp and brake towards the interactable
-
-            if (!HasStateAuthority)
+            if (!Object.HasStateAuthority)
                 return;
 
-            bool isGrounded = CC.isGrounded;
-
+            bool isGrounded = IsGrounded();
             float gravity = DownGravity;
 
-            float targetSpeed = 0;
-
-            var moveDirection = (interactablePosition - CC.transform.position).normalized;
+            // Direction and desired speed (brake to 0)
+            Vector3 moveDirection = (interactablePosition - transform.position).normalized;
+            float targetSpeed = 0f; // we want to slow down to stop near the target
 
             Vector3 lastHorizontalVelocity = new Vector3(_authorityMoveVelocity.x, 0f, _authorityMoveVelocity.z);
 
+            // Strong lerp toward zero speed (strong braking)
             float currentSpeed = Mathf.Lerp(lastHorizontalVelocity.magnitude, targetSpeed, 20f * deltaTime);
 
             Vector3 desiredMoveVelocity = moveDirection * currentSpeed;
 
+            // Use normal acceleration rules (but very high deceleration is already in the lerp above)
             float acceleration = desiredMoveVelocity == Vector3.zero
                 ? (isGrounded ? GroundDeceleration : AirDeceleration)
                 : (isGrounded ? GroundAcceleration : AirAcceleration);
 
-
             Vector3 newHorizontalVelocity = Vector3.Lerp(lastHorizontalVelocity, desiredMoveVelocity, acceleration * deltaTime);
+
+            // Preserve vertical velocity, update horizontal
             Vector3 moveVelocity = new Vector3(newHorizontalVelocity.x, _authorityMoveVelocity.y, newHorizontalVelocity.z);
-            Vector3 horizontalVelocity = new Vector3(moveVelocity.x, 0f, moveVelocity.z);
 
             bool isRising = _authorityMoveVelocity.y > 0f;
 
-            switch (_currentMoveState)
+            switch (CurrentMoveState)
             {
                 case EMovementState.Walking:
-                    gravity = DownGravity;
-
                     if (isGrounded)
                     {
-                        // Apply the grounded gravity value
-                        moveVelocity.y = gravity;
+                        // Keep slight downward force to stay grounded
+                        moveVelocity.y = gravity * deltaTime;
                     }
                     else
                     {
-                        // Apply Gravity
-                        moveVelocity.y += (gravity * deltaTime);
+                        // Fall normally if airborne during interaction
+                        moveVelocity.y += gravity * deltaTime;
                         moveVelocity.y = Mathf.Max(TerminalVelocity, moveVelocity.y);
-
                         _jumpCount = 1;
-                        _currentMoveState = EMovementState.Jumping;
+                        CurrentMoveState = EMovementState.Jumping;
                         _jumpInputBuffered = false;
                     }
-
                     break;
 
                 case EMovementState.Jumping:
                     gravity = isRising ? UpGravity : DownGravity;
 
-                    // Apply Gravity
-                    moveVelocity.y += (gravity * deltaTime);
+                    moveVelocity.y += gravity * deltaTime;
                     moveVelocity.y = Mathf.Max(TerminalVelocity, moveVelocity.y);
-                 
+
                     if (isGrounded)
                     {
-                        // Apply Gravity
-                        moveVelocity.y += (gravity * deltaTime);
-                        moveVelocity.y = Mathf.Max(TerminalVelocity, moveVelocity.y);
-
-                        _currentMoveState = EMovementState.Walking;
-
+                        CurrentMoveState = EMovementState.Walking;
                         _jumpCount = 0;
                         _jumpInputBuffered = false;
-                        if (LandAudioClip != null)
-                            FootstepSound.PlayOneShot(LandAudioClip);
-                    }
 
-                    moveVelocity = new Vector3(horizontalVelocity.x, moveVelocity.y, horizontalVelocity.z);
+                        if (LandAudioClip != null)
+                            FootstepSound?.PlayOneShot(LandAudioClip);
+                    }
                     break;
 
                 case EMovementState.Flying:
-
-                    moveVelocity.y = Mathf.Lerp(moveVelocity.y, 0, 20f * deltaTime);        
-                    moveVelocity = new Vector3(horizontalVelocity.x, moveVelocity.y, horizontalVelocity.z);
+                    // Strong vertical brake during interaction (override flying controls)
+                    moveVelocity.y = Mathf.Lerp(moveVelocity.y, 0f, 20f * deltaTime);
 
                     if (isGrounded)
                     {
-                        // Apply the grounded gravity value
-                        moveVelocity.y = gravity;
-                        _currentMoveState = EMovementState.Walking;
+                        moveVelocity.y = gravity * deltaTime;
+                        CurrentMoveState = EMovementState.Walking;
                     }
-
                     break;
             }
 
             _authorityMoveVelocity = moveVelocity;
-        }
-
-        // Just for moving the controller
-        bool _spawnComplete = false;
-        public Vector3 SpawnForcedPosition;
-
-        public void FixedUpdate()
-        {
-            if(!HasStateAuthority)
-                return;
-
-            if (!_spawnComplete)
-            {
-                _spawnComplete = true;
-                CC.transform.position = SpawnForcedPosition;
-                return;
-            }
-
-            _jumpInitiated = false;
-            CC.Move(_authorityMoveVelocity * Time.fixedDeltaTime);
-        }
-
-        public void WritePosition(bool forceWrite = false)
-        {
-            const float POSITION_THRESHOLD_XZ = 0.01f;
-            if (Mathf.Abs(_pc.CachedTransform.position.x - _worldTransform.PositionX) > POSITION_THRESHOLD_XZ
-                || forceWrite)
-            {
-                _worldTransform.PositionX = _pc.CachedTransform.position.x;
-            }
-
-            if (Mathf.Abs(_pc.CachedTransform.position.z - _worldTransform.PositionZ) > POSITION_THRESHOLD_XZ
-                || forceWrite)
-            {
-                _worldTransform.PositionZ = _pc.CachedTransform.position.z;
-            }
-
-            const float POSITION_THRESHOLD_Y = 0.01f;
-            if (Mathf.Abs(_pc.CachedTransform.position.y - _worldTransform.PositionY) > POSITION_THRESHOLD_Y
-                || forceWrite)
-            {
-                _worldTransform.PositionY = _pc.CachedTransform.position.y;
-            }
-
-            _worldTransform.Yaw = _pc.CachedTransform.eulerAngles.y;
-        }
-
-        // Called from spawn parameters
-        public void SetMovementState(EMovementState movementState)
-        {
-            _currentMoveState = movementState;
-        }
-        
-        private void UpdateMovementState()
-        {
-            if (_currentMoveState == _lastMoveState)
-                return;
-
-            _pc.AnimationController.OnMovementStateChanged(_currentMoveState);
-
-            _flyVisualEffect.Toggle(_currentMoveState == EMovementState.Flying);
-
-            _lastMoveState = _currentMoveState;
-        }
-
-        private bool _jumpInitiated; // Tracks if a jump is pending until FixedUpdate applies it
-        private bool IsGrounded()
-        {
-            bool isGrounded = CC.isGrounded;
-
-            if (_jumpInitiated)
-                return false;
-
-            return isGrounded;
         }
     }
 }

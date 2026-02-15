@@ -91,6 +91,7 @@ namespace LichLord
 
         protected override void OnTick()
         {
+            base.OnTick();
             PlayerCharacter localPlayerCreature = Context.LocalPlayerCharacter;
 
             Camera mainCamera = Camera.main;
@@ -121,7 +122,12 @@ namespace LichLord
             CheckOverlapsAtOriginNonAlloc(rayOrigin, localPlayerCreature.gameObject);
 
             if (followTransform != null)
-                _cameraFollowTarget.position = followTransform.position;
+            {
+                _cameraFollowTarget.position =  followTransform.position;
+
+                Debug.Log("cam: " + _cameraFollowTarget.position + " player: " + followTransform.position);
+
+            }
 
             // Update reticle position
             UpdateReticlePosition(rayOrigin, rayDirection);

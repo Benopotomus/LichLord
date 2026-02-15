@@ -1,6 +1,5 @@
 using Fusion;
 using Fusion.Addons.FSM;
-using Fusion.Addons.SimpleKCC;
 using UnityEngine;
 
 namespace LichLord
