@@ -8,10 +8,11 @@ using LichLord.Props;
 using System.Collections.Generic;
 using System.IO;
 using LichLord.Buildables;
+using Example.ExpertMovement;
 
 namespace LichLord
 {
-    public class PlayerCharacter : RelayPlayer, IHitInstigator, IHitTarget, IChunkTrackable
+    public class PlayerCharacter : ThirdPersonExpertPlayer, IHitInstigator, IHitTarget, IChunkTrackable, IContextBehaviour
     {
         [Header("References")]
         public PlayerCharacterMovementComponent Movement;
@@ -85,6 +86,7 @@ namespace LichLord
         [Networked]
         [SerializeField]
         public int PlayerIndex { get; set; }
+        public SceneContext Context { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
         public bool SpawnComplete = false;
 
@@ -154,8 +156,6 @@ namespace LichLord
         {
             Nickname = nickName;
             transform.position = position;
-            Movement.SpawnForcedPosition = position;
-
             Input.SetLookRotation(rotation);
         }
 
@@ -172,9 +172,9 @@ namespace LichLord
 
         }
 
-        public override void Render()
+        protected override void OnRenderUpdate()
         {
-            base.Render();
+            base.OnRenderUpdate();
             // Disable hits when player is dead
 
             // Change the chunk and tell the server we've changed chunks

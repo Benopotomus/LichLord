@@ -41,8 +41,18 @@ namespace LichLord
         }
         */
 
+        bool _isSpawned = false;
+        public override void Spawned()
+        {
+            base.Spawned();
+            _isSpawned = true;
+        }
+
         private void LateUpdate()
         {
+            if (!_isSpawned)
+                return;
+
             // Existing upper body and head IK
             Quaternion pitchRotation = Quaternion.AngleAxis(_pc.Aim.PitchOffset, Vector3.right);
             Quaternion yawRotation = Quaternion.AngleAxis(_pc.Aim.YawOffset, Vector3.forward);

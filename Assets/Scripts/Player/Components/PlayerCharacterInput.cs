@@ -92,6 +92,8 @@ namespace LichLord
 
         private void Update()
         {
+            return;
+
             if (!HasStateAuthority)
                 return;
 

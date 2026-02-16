@@ -3,7 +3,22 @@ using UnityEngine;
 
 namespace LichLord
 {
-    public struct FGameplayInput
+    using UnityEngine;
+    using Fusion;
+
+    public enum EGameplayInputAction
+    {
+        Fire = 0,
+        AltFire = 1,
+        MMB = 2,
+        Jump = 3,
+        Crouch = 4,
+        Sprint = 5,
+        Interact = 6,
+
+    }
+
+    public struct FGameplayInput : INetworkInput
     {
         public Vector2 LookDelta;
         public Vector2 MoveDirection;

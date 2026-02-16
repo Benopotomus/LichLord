@@ -269,8 +269,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8839848659093734841}
   - component: {fileID: 3816291510956059953}
-  - component: {fileID: 5501363436665568790}
-  - component: {fileID: 975723772845658309}
   m_Layer: 0
   m_Name: SkeletonWizard
   m_TagString: Untagged
@@ -316,40 +314,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &5501363436665568790
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 768775516241630998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 789eaf0828f59d142b12a596e8ed3e02, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pc: {fileID: 0}
---- !u!114 &975723772845658309
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 768775516241630998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8204f4325d920141905165ea796e359, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pc: {fileID: 0}
-  ChestTargetTransform: {fileID: 536988984119202717}
-  ChestBone: {fileID: 4836376708090050560}
-  SpineBoneTop: {fileID: 7650269161246345248}
-  SpineBoneBottom: {fileID: 3686196781133769102}
-  CameraPivot: {fileID: 4348685969970783698}
-  HeadTargetTransform: {fileID: 1044241402898733276}
-  NeckBone: {fileID: 9166408995050002226}
-  HeadBone: {fileID: 742485161562100312}
 --- !u!1 &885567648627484572
 GameObject:
   m_ObjectHideFlags: 0
@@ -12008,7 +11972,7 @@ GameObject:
   - component: {fileID: 6334924345866122621}
   - component: {fileID: 7188720608360981711}
   m_Layer: 10
-  m_Name: PlayerCharacter
+  m_Name: PlayerCharacter_v2
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12051,7 +12015,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 4199700906
+  SortKey: 629784713
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
@@ -12060,7 +12024,6 @@ MonoBehaviour:
   - {fileID: 7273889240721054577}
   - {fileID: 6334924345866122621}
   - {fileID: 7188720608360981711}
-  - {fileID: 975723772845658309}
   - {fileID: 8473141530021393840}
   - {fileID: 6231497543318802807}
   - {fileID: 5933867338918213662}
@@ -12274,6 +12237,7 @@ MonoBehaviour:
     - {fileID: 5676373106594474765, guid: 222c9056b455cf64d8e1f0b580db346a, type: 3}
     - {fileID: -4514500717821726082, guid: 6e87955e8fb019e42a2c1b1ad4ccbeab, type: 3}
     - {fileID: 1029934173028022551, guid: df4105db36cde6648b56f503ec71aea0, type: 3}
+    - {fileID: 2093064057704703403, guid: 5ec6749a6dd372142b2b0fd04e911033, type: 3}
     MaxPenetrationSteps: 8
     CCDRadiusMultiplier: 0.75
     AntiJitterDistance: {x: 0.025, y: 0.01}

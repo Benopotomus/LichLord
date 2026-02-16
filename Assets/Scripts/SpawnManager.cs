@@ -1,15 +1,13 @@
 ﻿using Fusion;
 using UnityEngine;
-using Random = UnityEngine.Random;
 using System.IO;
-using Example.ExpertMovement;
 
 namespace LichLord
 {
     public class SpawnManager : ContextBehaviour
     {
-        [SerializeField] private ThirdPersonExpertPlayer _playerPrefab;
-        public ThirdPersonExpertPlayer LocalPlayer { get; private set; }
+        [SerializeField] private NetworkObject _playerPrefab;
+        public PlayerCharacter LocalPlayer { get; private set; }
 
         [SerializeField]
         private PlayerSpawnPoint[] _spawnPoints;
@@ -43,7 +41,6 @@ namespace LichLord
             { 
                 CreateAndSpawnPlayer(playerRef);
             }
-
         }
 
         private void SpawnPlayerFromSave(PlayerRef playerRef, FPlayerSaveData loadedPlayerData)
@@ -53,10 +50,12 @@ namespace LichLord
             EMovementState moveState = loadedPlayerData.moveState;
             string nickname = loadedPlayerData.playerName;
 
-            LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
+            var networkObject = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
             //LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState, nickname);
+            
+            // Debug.Log($"Spawned local player from save at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
+            Runner.SetPlayerObject(playerRef, LocalPlayer.GetComponent<NetworkObject>());
 
-           // Debug.Log($"Spawned local player from save at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
         }
 
         private void CreateAndSpawnPlayer(PlayerRef playerRef)
@@ -65,10 +64,15 @@ namespace LichLord
             EMovementState moveState = EMovementState.Walking;
             string nickname = GetInstanceId();
 
-            LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition.Item1, spawnPosition.Item2, inputAuthority: playerRef);
+            Debug.Log("Before creating player");
+
+            var networkObject = Runner.Spawn(_playerPrefab, spawnPosition.Item1, spawnPosition.Item2, inputAuthority: playerRef);
+                        
+            
+            Runner.SetPlayerObject(playerRef, LocalPlayer.GetComponent<NetworkObject>());
            // LocalPlayer.ApplySpawnParameters(spawnPosition.Item1, spawnPosition.Item2, moveState, nickname);
 
-           // Debug.Log($"Create local player at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
+            Debug.Log($"Create local player at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
         }
 
         private string GetInstanceId()

@@ -91,6 +91,7 @@ namespace Example.ExpertMovement
 
 		public override void Spawned()
 		{
+			Debug.Log("Spawned1?");
 			name = Object.InputAuthority.ToString();
 
 			_sortedUpdateInvoker = Runner.GetSingleton<SortedUpdateInvoker>();
@@ -120,6 +121,7 @@ namespace Example.ExpertMovement
 
 		public override sealed void FixedUpdateNetwork()
 		{
+			//Debug.Log("Fixed Update");
 			OnFixedUpdate();
 
 			float sortOrder = Input.FixedInput.LocalAlpha;

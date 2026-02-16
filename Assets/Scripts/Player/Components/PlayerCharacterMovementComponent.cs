@@ -89,22 +89,16 @@ namespace LichLord
         private float _lastYaw;
         private float _yawVelocity;
 
-        public Vector3 SpawnForcedPosition;
-
         public Transform LookTarget { get; set; }
 
         private void Awake()
         {
-            _ncc = GetComponent<KCC>();
-            if (_ncc == null)
-            {
-                Debug.LogError("NetworkCharacterController missing on " + name);
-                enabled = false;
-            }
+
         }
 
         public void OnSpawned()
         {
+            return;
             if (Object.HasStateAuthority)
             {
                 CurrentMoveState = EMovementState.Walking;
@@ -145,6 +139,7 @@ namespace LichLord
 
         public void ProcessInput(ref FGameplayInput input, float deltaTime)
         {
+            return;
             bool isGrounded = IsGrounded();
 
             Vector3 lastHorizontalVelocity = new Vector3(_authorityMoveVelocity.x, 0f, _authorityMoveVelocity.z);
@@ -316,6 +311,7 @@ namespace LichLord
 
         public void UpdateLookRotation(float deltaTime, float lerpSpeed)
         {
+            return;
             // Your existing logic — uses transform now instead of CC.transform
             Quaternion targetRotation = LookTarget != null
                 ? GetLookTargetRotation()
@@ -342,6 +338,7 @@ namespace LichLord
 
         public void WritePosition(bool forceWrite = false)
         {
+            return;
             // Your existing logic — now using transform
             const float POSITION_THRESHOLD_XZ = 0.01f;
             if (Mathf.Abs(transform.position.x - _worldTransform.PositionX) > POSITION_THRESHOLD_XZ || forceWrite)
@@ -359,6 +356,7 @@ namespace LichLord
 
         private void UpdateVelocity(float renderDeltaTime)
         {
+            return;
             _worldVelocity = Object.HasStateAuthority ? _authorityMoveVelocity : (transform.position - _lastPosition) / renderDeltaTime;
             _lastPosition = transform.position;
             _localVelocity = transform.InverseTransformDirection(_worldVelocity);
@@ -366,6 +364,7 @@ namespace LichLord
 
         private void UpdateYawVelocity()
         {
+            return;
             Vector3 forward = transform.forward;
             float currentYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
             _yawVelocity = currentYaw - _lastYaw;
@@ -374,6 +373,7 @@ namespace LichLord
 
         private void UpdateMovementState()
         {
+            return;
             if (CurrentMoveState == _lastMoveState) return;
             _pc.AnimationController.OnMovementStateChanged(CurrentMoveState);
             _flyVisualEffect?.Toggle(CurrentMoveState == EMovementState.Flying);
@@ -382,6 +382,7 @@ namespace LichLord
 
         public void OnRender(float renderDeltaTime)
         {
+            return;
             UpdateVelocity(renderDeltaTime);
             UpdateYawVelocity();
             UpdateMovementState();
@@ -396,6 +397,7 @@ namespace LichLord
         /// <param name="deltaTime">Should be Runner.DeltaTime when called from FixedUpdateNetwork</param>
         public void ProcessInteractMovement(Vector3 interactablePosition, float deltaTime)
         {
+            return;
             if (!Object.HasStateAuthority)
                 return;
 

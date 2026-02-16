@@ -152,6 +152,8 @@ namespace Example.ExpertMovement
 				KCC.SetLookRotation(facingRotation);
 			}
 
+			Debug.Log("INPUT " + inputDirection);
+
 			KCC.SetInputDirection(inputDirection);
 
 			if (Input.WasActivated(EExpertInputAction.Jump) == true && KCC.FixedData.IsGrounded == true)
