@@ -8,11 +8,10 @@ using LichLord.Props;
 using System.Collections.Generic;
 using System.IO;
 using LichLord.Buildables;
-using Example.ExpertMovement;
 
 namespace LichLord
 {
-    public class PlayerCharacter : ThirdPersonExpertPlayer, IHitInstigator, IHitTarget, IChunkTrackable, IContextBehaviour
+    public class PlayerCharacter : RelayPlayer, IHitInstigator, IHitTarget, IChunkTrackable
     {
         [Header("References")]
         public PlayerCharacterMovementComponent Movement;
@@ -47,7 +46,7 @@ namespace LichLord
         [SerializeField] private Transform _cachedTransform;
         public Transform CachedTransform => _cachedTransform;
 
-        public FNetObjectID NetObjectID 
+        public FNetObjectID NetObjectID
         {
             get
             {
@@ -86,7 +85,6 @@ namespace LichLord
         [Networked]
         [SerializeField]
         public int PlayerIndex { get; set; }
-        public SceneContext Context { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
         public bool SpawnComplete = false;
 
@@ -156,6 +154,8 @@ namespace LichLord
         {
             Nickname = nickName;
             transform.position = position;
+            Movement.SpawnForcedPosition = position;
+
             Input.SetLookRotation(rotation);
         }
 
@@ -166,15 +166,15 @@ namespace LichLord
             Context.NetworkGame.OnPlayerDespawned(this);
             //Context.WorldSaveLoadManager.OnPlayerDespawned(this);
 
-            if(CurrentChunk != null)
+            if (CurrentChunk != null)
                 CurrentChunk.RemoveObject(this);
 
 
         }
 
-        protected override void OnRenderUpdate()
+        public override void Render()
         {
-            base.OnRenderUpdate();
+            base.Render();
             // Disable hits when player is dead
 
             // Change the chunk and tell the server we've changed chunks
@@ -329,7 +329,7 @@ namespace LichLord
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All, Channel = RpcChannel.Reliable, InvokeLocal = true)]
         public void RPC_TakeProjectileHit(int projectileIndex, int damage)
-        { 
+        {
             Stats.ApplyDamage(damage);
         }
 

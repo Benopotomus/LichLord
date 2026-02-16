@@ -80,7 +80,6 @@ namespace LichLord
 
             _input.Sprint = false;
             _input.ToggleCameraView = false;
-            _input.ScrollDelta = 0f;
             _input.ActionSelection = 0;
             _input.BuildMode = false;
             _input.SummonMode = false;
@@ -92,8 +91,7 @@ namespace LichLord
 
         private void Update()
         {
-            return;
-
+            
             if (!HasStateAuthority)
                 return;
 

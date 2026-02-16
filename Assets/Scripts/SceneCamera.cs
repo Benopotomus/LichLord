@@ -125,7 +125,7 @@ namespace LichLord
             {
                 _cameraFollowTarget.position =  followTransform.position;
 
-                Debug.Log("cam: " + _cameraFollowTarget.position + " player: " + followTransform.position);
+                //Debug.Log("cam: " + _cameraFollowTarget.position + " player: " + followTransform.position);
 
             }
 

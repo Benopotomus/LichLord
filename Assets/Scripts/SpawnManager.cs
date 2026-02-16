@@ -1,12 +1,13 @@
 ﻿using Fusion;
 using UnityEngine;
+using Random = UnityEngine.Random;
 using System.IO;
 
 namespace LichLord
 {
     public class SpawnManager : ContextBehaviour
     {
-        [SerializeField] private NetworkObject _playerPrefab;
+        [SerializeField] private PlayerCharacter _playerPrefab;
         public PlayerCharacter LocalPlayer { get; private set; }
 
         [SerializeField]
@@ -22,7 +23,7 @@ namespace LichLord
 
         public void SpawnLocalPlayer(PlayerRef playerRef)
         {
-            if(LocalPlayer != null) 
+            if (LocalPlayer != null)
                 return;
 
             if (!Runner.IsPlayerValid(Runner.LocalPlayer))
@@ -38,9 +39,10 @@ namespace LichLord
                 SpawnPlayerFromSave(playerRef, loadedPlayerData);
             }
             else
-            { 
+            {
                 CreateAndSpawnPlayer(playerRef);
             }
+
         }
 
         private void SpawnPlayerFromSave(PlayerRef playerRef, FPlayerSaveData loadedPlayerData)
@@ -50,12 +52,10 @@ namespace LichLord
             EMovementState moveState = loadedPlayerData.moveState;
             string nickname = loadedPlayerData.playerName;
 
-            var networkObject = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
-            //LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState, nickname);
-            
-            // Debug.Log($"Spawned local player from save at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
-            Runner.SetPlayerObject(playerRef, LocalPlayer.GetComponent<NetworkObject>());
+            LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition, spawnRotation, inputAuthority: playerRef);
+            LocalPlayer.ApplySpawnParameters(spawnPosition, spawnRotation, moveState, nickname);
 
+            Debug.Log($"Spawned local player from save at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
         }
 
         private void CreateAndSpawnPlayer(PlayerRef playerRef)
@@ -64,13 +64,8 @@ namespace LichLord
             EMovementState moveState = EMovementState.Walking;
             string nickname = GetInstanceId();
 
-            Debug.Log("Before creating player");
-
-            var networkObject = Runner.Spawn(_playerPrefab, spawnPosition.Item1, spawnPosition.Item2, inputAuthority: playerRef);
-                        
-            
-            Runner.SetPlayerObject(playerRef, LocalPlayer.GetComponent<NetworkObject>());
-           // LocalPlayer.ApplySpawnParameters(spawnPosition.Item1, spawnPosition.Item2, moveState, nickname);
+            LocalPlayer = Runner.Spawn(_playerPrefab, spawnPosition.Item1, spawnPosition.Item2, inputAuthority: playerRef);
+            LocalPlayer.ApplySpawnParameters(spawnPosition.Item1, spawnPosition.Item2, moveState, nickname);
 
             Debug.Log($"Create local player at {spawnPosition} with Nickname {LocalPlayer.Nickname}");
         }
@@ -90,7 +85,7 @@ namespace LichLord
                 var spawnPoint = _spawnPoints[0];
                 return (spawnPoint.transform.position, spawnPoint.transform.rotation);
             }
-            
+
             //Debug.Log("No spawn points available, using default position (0,0,0)");
             return (_fallbackSpawnPosition, Quaternion.identity);
         }
