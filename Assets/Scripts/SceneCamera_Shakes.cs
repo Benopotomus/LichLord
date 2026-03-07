@@ -83,6 +83,8 @@ namespace LichLord
             float overrideFadeOut = -1f,
             float overrideSustain = -1f)
         {
+            Debug.Log("Shake");
+
             var (profile, baseParams) = GetBaseShake(type);
             if (profile == null)
             {

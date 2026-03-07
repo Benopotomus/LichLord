@@ -40,7 +40,7 @@ namespace LichLord
         [Networked]
         private TickTimer _weaponAttackCooldownTimer { get; set; }
 
-        [Networked] private sbyte _selectedIndex { get; set; }
+        [Networked] public sbyte _selectedIndex { get; set; }
 
         [Networked] private sbyte _activeManeuverId { get; set; }
 
@@ -148,7 +148,7 @@ namespace LichLord
             ManeuverDefinition selectedManeuver = GetSelectedManeuver();
 
             if (activeManeuver != null &&
-                activeManeuver != selectedManeuver &&
+                activeManeuver.TableID != selectedManeuver.TableID &&
                 activeManeuver != selectedManeuver.AltFireManeuver)
                 return;
 
@@ -189,6 +189,7 @@ namespace LichLord
 
         public void SustainManeuver(ManeuverDefinition definition, int ticksSinceStart)
         {
+
             for (int t = _lastProcessedFixedUpdateTick + 1; t <= ticksSinceStart; t++)
             {
                 // Timed Projectiles
@@ -273,6 +274,8 @@ namespace LichLord
 
             if (!_activeManeuverTimer.ExpiredOrNotRunning(Runner))
                 return;
+
+            Debug.Log("End Maneuver: " + activeManeuver.ManeuverName);
 
             activeManeuver.EndExecute(_pc, this, Runner);
             OnActiveManeuverChanged?.Invoke(null);
@@ -424,7 +427,7 @@ namespace LichLord
             {
                 int delta = input.ScrollDelta > 0 ? 1 : -1;
                 newIndex = (_selectedIndex + delta + maneuverList.Count) % maneuverList.Count;
-                //Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
+                Debug.Log($"[ActionManager] ScrollDelta={input.ScrollDelta}, Delta={delta}, NewIndex={newIndex}");
             }
 
             if (input.ActionSelection > 0)
