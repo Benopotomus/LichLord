@@ -29,6 +29,9 @@ namespace LichLord
         {
             public float currentAmplitude;
             public Coroutine routine;
+            public NoiseSettings profile;
+            public float frequency;
+            public ECameraShakeType? type;  // null = custom shake (always stacks)
         }
 
         [Serializable]
@@ -73,7 +76,6 @@ namespace LichLord
         // ────────────────────────────────────────────────────────────────
         // Public shake methods
         // ────────────────────────────────────────────────────────────────
-
         public void Shake(
             ECameraShakeType type,
             float overrideAmplitude = -1f,
@@ -83,8 +85,6 @@ namespace LichLord
             float overrideFadeOut = -1f,
             float overrideSustain = -1f)
         {
-            Debug.Log("Shake");
-
             var (profile, baseParams) = GetBaseShake(type);
             if (profile == null)
             {
@@ -102,7 +102,7 @@ namespace LichLord
                 overrideSustain >= 0 ? overrideSustain : baseParams.sustainTime
             );
 
-            StartNewShake(p);
+            StartNewShake(p, type);
         }
 
         public void ShakeCamera(CameraShakeParams shakeParams)
@@ -112,11 +112,9 @@ namespace LichLord
                 Debug.LogWarning("[Camera Shake] No NoiseSettings profile provided!");
                 return;
             }
-
-            StartNewShake(shakeParams);
+            StartNewShake(shakeParams, null); // custom → no type, can stack
         }
 
-        // Quick overload with defaults (still requires profile)
         public void ShakeCamera(
             NoiseSettings profile,
             float duration = -1f,
@@ -139,15 +137,33 @@ namespace LichLord
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Stacking / Additive logic
+        // Stacking + Per-Type Replacement
         // ────────────────────────────────────────────────────────────────
-
-        private void StartNewShake(CameraShakeParams p)
+        private void StartNewShake(CameraShakeParams p, ECameraShakeType? shakeType = null)
         {
-            var shake = new ActiveShake { currentAmplitude = 0f };
+            // Replace any existing shake of the same type
+            if (shakeType.HasValue)
+            {
+                for (int i = _activeShakes.Count - 1; i >= 0; i--)
+                {
+                    if (_activeShakes[i].type == shakeType.Value)
+                    {
+                        if (_activeShakes[i].routine != null)
+                            StopCoroutine(_activeShakes[i].routine);
+                        _activeShakes.RemoveAt(i);
+                    }
+                }
+            }
+
+            var shake = new ActiveShake
+            {
+                currentAmplitude = 0f,
+                profile = p.profile,
+                frequency = p.peakFrequency,
+                type = shakeType
+            };
 
             shake.routine = StartCoroutine(ShakeWithFadeCoroutine(p, shake));
-
             _activeShakes.Add(shake);
         }
 
@@ -155,30 +171,27 @@ namespace LichLord
         {
             float elapsed = 0f;
 
-            // Calculate ideal phase times, but cap total to p.duration
-            float idealTotal = p.fadeInTime + p.duration + p.fadeOutTime;
-            float actualDuration = Mathf.Min(p.duration, idealTotal);  // respect override duration
+            // Better timing: total duration = fadeIn + sustain + fadeOut, but clamp to requested duration
+            float requestedTotal = p.duration;
+            float idealTotal = p.fadeInTime + p.sustainTime + p.fadeOutTime;
+            float scale = (idealTotal > 0f && requestedTotal > 0f) ? requestedTotal / idealTotal : 1f;
 
-            // Adjust phases proportionally if duration is shorter than ideal
-            float scale = (idealTotal > 0) ? actualDuration / idealTotal : 1f;
             float fadeInEnd = p.fadeInTime * scale;
             float sustainEnd = fadeInEnd + (p.sustainTime * scale);
-            float fadeOutEnd = actualDuration;  // fade-out gets whatever time is left
-
-            //Debug.Log($"[Shake] {p.duration}s total | fadeIn: {fadeInEnd:F2} | sustainEnd: {sustainEnd:F2} | actual end: {actualDuration:F2}");
+            float totalEnd = requestedTotal;  // respect the caller's duration
 
             // Phase 1: Fade IN
             while (elapsed < fadeInEnd)
             {
                 elapsed += Time.deltaTime;
-                float t = elapsed / fadeInEnd;
+                float t = Mathf.Clamp01(elapsed / fadeInEnd);
                 thisShake.currentAmplitude = Mathf.Lerp(0f, p.peakAmplitude, t);
                 UpdateCombinedAmplitude();
                 yield return null;
             }
 
-            // Phase 2: Sustain at peak
-            while (elapsed < sustainEnd)
+            // Phase 2: Sustain
+            while (elapsed < sustainEnd && elapsed < totalEnd)
             {
                 elapsed += Time.deltaTime;
                 thisShake.currentAmplitude = p.peakAmplitude;
@@ -186,14 +199,14 @@ namespace LichLord
                 yield return null;
             }
 
-            // Phase 3: Fade OUT (uses remaining time)
+            // Phase 3: Fade OUT
             float fadeOutStart = elapsed;
-            float fadeOutDuration = actualDuration - fadeOutStart;
-            while (elapsed < actualDuration)
+            float fadeOutDuration = Mathf.Max(0.01f, totalEnd - fadeOutStart);
+
+            while (elapsed < totalEnd)
             {
                 elapsed += Time.deltaTime;
-                float t = (elapsed - fadeOutStart) / fadeOutDuration;
-                t = Mathf.Clamp01(t);
+                float t = Mathf.Clamp01((elapsed - fadeOutStart) / fadeOutDuration);
                 thisShake.currentAmplitude = Mathf.Lerp(p.peakAmplitude, 0f, t);
                 UpdateCombinedAmplitude();
                 yield return null;
@@ -207,80 +220,107 @@ namespace LichLord
 
         private void UpdateCombinedAmplitude()
         {
-            float total = 0f;
+            float totalAmplitude = 0f;
+            NoiseSettings dominantProfile = null;
+            float dominantFreq = _defaultShakeFrequency;
+            float highestAmp = -1f;
+
             foreach (var shake in _activeShakes)
             {
-                total += shake.currentAmplitude;
+                totalAmplitude += shake.currentAmplitude;
+
+                if (shake.currentAmplitude > highestAmp)
+                {
+                    highestAmp = shake.currentAmplitude;
+                    dominantProfile = shake.profile;
+                    dominantFreq = shake.frequency;
+                }
             }
 
-            // Optional: cap to prevent extreme shaking
-            // total = Mathf.Min(total, 12f);
+            // Optional safety cap
+            // totalAmplitude = Mathf.Min(totalAmplitude, 15f);
 
-            SetAmplitudeOnBoth(total);
+            SetNoiseParamsOnBoth(totalAmplitude, dominantProfile, dominantFreq);
         }
 
-        private void SetAmplitudeOnBoth(float amp)
+        private void SetNoiseParamsOnBoth(float amplitudeGain, NoiseSettings profile, float frequencyGain)
         {
-            SetAmplitude(thirdPersonCam, amp);
-            SetAmplitude(firstPersonCam, amp);
+            SetNoiseParams(thirdPersonCam, profile, frequencyGain, amplitudeGain);
+            SetNoiseParams(firstPersonCam, profile, frequencyGain, amplitudeGain);
         }
 
-        private void SetAmplitude(CinemachineVirtualCamera vcam, float amp)
-        {
-            if (vcam == null) return;
-            var noise = vcam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-            if (noise == null) return;
-            noise.m_AmplitudeGain = amp;
-        }
-
-        private void ResetShake(CinemachineVirtualCamera vcam)
+        private void SetNoiseParams(CinemachineVirtualCamera vcam, NoiseSettings profile, float freqGain, float ampGain)
         {
             if (vcam == null) return;
+
             var noise = vcam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
             if (noise == null) return;
-            noise.m_AmplitudeGain = 0f;
+
+            if (profile != null)
+                noise.m_NoiseProfile = profile;  // Use m_Noise (not m_NoiseProfile in newer versions — check your Cinemachine version)
+
+            noise.m_FrequencyGain = freqGain;
+            noise.m_AmplitudeGain = ampGain;
         }
 
-        // Utility: stop everything (e.g. player death, cutscene)
+        // ────────────────────────────────────────────────────────────────
+        // Utility
+        // ────────────────────────────────────────────────────────────────
         public void StopAllShakes()
         {
             foreach (var shake in _activeShakes)
             {
                 if (shake.routine != null)
-                {
                     StopCoroutine(shake.routine);
-                }
             }
             _activeShakes.Clear();
-            SetAmplitudeOnBoth(0f);
+            SetNoiseParamsOnBoth(0f, null, 0f);
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // Internal helpers (unchanged)
-        // ────────────────────────────────────────────────────────────────
+        public void ResetAll()
+        {
+            StopAllShakes();
+
+            if (thirdPersonCam != null)
+            {
+                var noise = thirdPersonCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+                if (noise != null)
+                {
+                    noise.m_AmplitudeGain = 0f;
+                    noise.m_FrequencyGain = 0f;
+                }
+            }
+
+            if (firstPersonCam != null)
+            {
+                var noise = firstPersonCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+                if (noise != null)
+                {
+                    noise.m_AmplitudeGain = 0f;
+                    noise.m_FrequencyGain = 0f;
+                }
+            }
+
+            Debug.Log("Full camera shake reset complete");
+        }
+
         private (NoiseSettings profile, CameraShakeParams baseParams) GetBaseShake(ECameraShakeType type)
         {
             return type switch
             {
-                ECameraShakeType.Fire =>
-                    (_fireShakeSettings, CameraShakeParams.Fire(_fireShakeSettings)),
-                ECameraShakeType.Damage =>
-                    (_takeDamageShakeSettings, CameraShakeParams.Damage(_takeDamageShakeSettings)),
-                ECameraShakeType.AOE =>
-                    (_aoeShakeSettings, CameraShakeParams.AOE(_aoeShakeSettings)),
+                ECameraShakeType.Fire => (_fireShakeSettings, CameraShakeParams.Fire(_fireShakeSettings)),
+                ECameraShakeType.Damage => (_takeDamageShakeSettings, CameraShakeParams.Damage(_takeDamageShakeSettings)),
+                ECameraShakeType.AOE => (_aoeShakeSettings, CameraShakeParams.AOE(_aoeShakeSettings)),
                 _ => throw new ArgumentException($"Unsupported ShakeType: {type}")
             };
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Your original non-shake code goes here (OnInitialize, OnTick, raycast, etc.)
+        // Your original non-shake code goes here (OnInitialize, OnTick, etc.)
         // ────────────────────────────────────────────────────────────────
         // ...
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // Shake Type & Parameters
-    // ────────────────────────────────────────────────────────────────
     public enum ECameraShakeType
     {
         Fire,

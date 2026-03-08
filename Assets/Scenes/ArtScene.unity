@@ -2392,12 +2392,17 @@ PrefabInstance:
         type: 3}
       propertyPath: m_NoiseProfile
       value: 
-      objectReference: {fileID: 11400000, guid: c198bebab8a3478428877c2059c6ee5d,
+      objectReference: {fileID: 11400000, guid: 727876522942e3143b90b4ab4c6b75fa,
         type: 2}
     - target: {fileID: 1531488282778672406, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: m_AmplitudeGain
-      value: 1.22983
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1531488282778672406, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: m_FrequencyGain
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1566467133908214045, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
@@ -3155,6 +3160,12 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5154719494780308176, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: f644b6420a7c01b4ab64ee6b554b006b,
+        type: 3}
     - target: {fileID: 5383663815041408853, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -3659,11 +3670,17 @@ PrefabInstance:
         type: 3}
       propertyPath: m_NoiseProfile
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: 727876522942e3143b90b4ab4c6b75fa,
+        type: 2}
     - target: {fileID: 8078249160554988519, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
       propertyPath: m_AmplitudeGain
-      value: 1.22983
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8078249160554988519, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: m_FrequencyGain
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8113843857799798740, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
@@ -3837,6 +3854,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8549867704554615902, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
+      propertyPath: m_CameraDistance
+      value: 2.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 8549867704554615902, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
       propertyPath: m_DeadZoneHeight
       value: 0
       objectReference: {fileID: 0}
@@ -3844,6 +3866,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_TargetMovementOnly
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8549867704554615902, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: m_TrackedObjectOffset.x
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8549867704554615902, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
+        type: 3}
+      propertyPath: m_TrackedObjectOffset.y
+      value: -0.1
       objectReference: {fileID: 0}
     - target: {fileID: 8630788583882255460, guid: 465fd4e57519ec44fb1a0a4afb74af8c,
         type: 3}
