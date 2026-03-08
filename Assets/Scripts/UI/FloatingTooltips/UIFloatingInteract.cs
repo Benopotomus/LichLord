@@ -17,6 +17,11 @@ namespace LichLord.UI
             _warningText.SetActive(false);
         }
 
+        public void LateUpdate()
+        {
+            base.OnLateUpdate();
+        }
+
         protected override void OnTick()
         {
             base.OnTick();

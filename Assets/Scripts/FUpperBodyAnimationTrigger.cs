@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace LichLord
 {
@@ -11,5 +12,10 @@ namespace LichLord
         public float PitchOffset;
         public float YawOffset;
         public float RollOffset;
+
+        [Header("Forearm Offset (Euler Degrees)")]
+        public Vector3 UpperArmOffsetEuler;
+        public Vector3 LowerArmOffsetEuler;
+
     }
 }

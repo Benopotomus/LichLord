@@ -24,7 +24,7 @@ MonoBehaviour:
   _targeting: {fileID: 0}
   _timedMuzzleEffects:
   - Muzzle: 1
-    SpawnTick: 12
+    SpawnTick: 6
     MuzzleEffectPrefab:
       _name: VFX_Muzzle_Fireball
       _bundle: vfx_muzzle_fireball
@@ -61,6 +61,8 @@ MonoBehaviour:
         PitchOffset: 0
         YawOffset: 0
         RollOffset: 0
+        UpperArmOffsetEuler: {x: 0, y: 0, z: 0}
+        LowerArmOffsetEuler: {x: 0, y: 0, z: 0}
     - Key: 6
       Value:
         UpperbodyTriggerNumber: 2
@@ -68,6 +70,8 @@ MonoBehaviour:
         PitchOffset: 45
         YawOffset: 50
         RollOffset: 0
+        UpperArmOffsetEuler: {x: 0, y: 0, z: 0}
+        LowerArmOffsetEuler: {x: 0, y: 30, z: 0}
     - Key: 7
       Value:
         UpperbodyTriggerNumber: 2
@@ -75,6 +79,8 @@ MonoBehaviour:
         PitchOffset: 20
         YawOffset: 70
         RollOffset: 0
+        UpperArmOffsetEuler: {x: 0, y: 30, z: 0}
+        LowerArmOffsetEuler: {x: 0, y: 40, z: 0}
   _animationSpeed: 1
   _movementSpeedMultiplier: 0.5
   _timedProjectiles:

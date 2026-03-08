@@ -350,6 +350,11 @@ MonoBehaviour:
   HeadTargetTransform: {fileID: 1044241402898733276}
   NeckBone: {fileID: 9166408995050002226}
   HeadBone: {fileID: 742485161562100312}
+  RightUpperArm: {fileID: 6642562640177835139}
+  RightLowerArm: {fileID: 391938289574255156}
+  upperArmOffsetEuler: {x: 0, y: 0, z: 0}
+  lowerArmOffsetEuler: {x: 0, y: 0, z: 0}
+  armOffsetWeight: 1
 --- !u!1 &885567648627484572
 GameObject:
   m_ObjectHideFlags: 0
@@ -12194,6 +12199,7 @@ MonoBehaviour:
     type: 2}
   _weaponAttackManeuver: {fileID: 11400000, guid: 08a351e19b56bcf42851bc5ecce5751f,
     type: 2}
+  __selectedIndex: 0
 --- !u!114 &4625314071529301451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12373,7 +12379,7 @@ MonoBehaviour:
   TargetPitchOffset: 0
   TargetYawOffset: 0
   TargetRollOffset: 0
-  _rotationLerpSpeed: 5
+  _rotationLerpSpeed: 12
 --- !u!114 &4155602845998252645
 MonoBehaviour:
   m_ObjectHideFlags: 0

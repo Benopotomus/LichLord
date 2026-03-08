@@ -61,6 +61,8 @@ MonoBehaviour:
         PitchOffset: 0
         YawOffset: 0
         RollOffset: 0
+        UpperArmOffsetEuler: {x: 0, y: 0, z: 0}
+        LowerArmOffsetEuler: {x: 0, y: 0, z: 0}
     - Key: 6
       Value:
         UpperbodyTriggerNumber: 2
@@ -68,13 +70,17 @@ MonoBehaviour:
         PitchOffset: 45
         YawOffset: 50
         RollOffset: 0
+        UpperArmOffsetEuler: {x: 0, y: 0, z: 0}
+        LowerArmOffsetEuler: {x: 0, y: 30, z: 0}
     - Key: 7
       Value:
         UpperbodyTriggerNumber: 2
         UpperbodyTriggerDuration: 8
-        PitchOffset: 20
-        YawOffset: 70
+        PitchOffset: 30
+        YawOffset: 65
         RollOffset: 0
+        UpperArmOffsetEuler: {x: 0, y: 30, z: 0}
+        LowerArmOffsetEuler: {x: 0, y: 40, z: 0}
   _animationSpeed: 1
   _movementSpeedMultiplier: 0.8
   _timedProjectiles: []

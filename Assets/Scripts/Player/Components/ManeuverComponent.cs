@@ -578,9 +578,8 @@ namespace LichLord
         public void RPC_NotifyStartExecute(ushort maneuverDefinitionID)
         {
             ManeuverDefinition maneuver = Global.Tables.ManeuverTable.TryGetDefinition(maneuverDefinitionID);
+            var animationState = maneuver.GetUpperBodyAnimationTrigger(_pc);
 
-            int weaponId = _pc.Weapons.GetWeaponID();
-            var animationState = maneuver.UpperBodyAnimationStates[weaponId];
             _lastProcessedRenderTick = _activeManeuverTick;
 
             if (!maneuver.Fullbody)

@@ -154,6 +154,14 @@ namespace LichLord.UI
                     npcTooltip.OnLateUpdate();
                 }
             }
+
+            foreach (var tooltipWidget in _tooltipWidgets.Values)
+            {
+                if (tooltipWidget.IsVisible)
+                {
+                    tooltipWidget.OnLateUpdate();
+                }
+            }
         }
 
         private void UpdateVisibleTrackables()

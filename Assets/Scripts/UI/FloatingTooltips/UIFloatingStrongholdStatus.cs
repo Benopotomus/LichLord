@@ -24,6 +24,11 @@ namespace LichLord.UI
         private float duration = 0.35f;
         private Ease ease = Ease.OutQuad;
 
+        public void LateUpdate()
+        {
+            base.OnLateUpdate();
+        }
+
         protected override void OnTick()
         {
             base.OnTick();

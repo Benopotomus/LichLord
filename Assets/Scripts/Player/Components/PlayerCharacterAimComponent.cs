@@ -23,7 +23,7 @@ namespace LichLord
         public float TargetRollOffset;
 
         [SerializeField]
-        private float _rotationLerpSpeed = 5f;
+        private float _rotationLerpSpeed = 8f;
 
         public void OnRender(float deltaTime)
         {

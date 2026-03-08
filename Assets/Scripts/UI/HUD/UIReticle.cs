@@ -65,16 +65,18 @@ namespace LichLord.UI
             }
 
             _pc = Context.LocalPlayerCharacter;
-
+            /*
             OnSelectedManeuverChanged(_pc.Maneuvers.GetSelectedManeuver());
             OnActiveManeuverChanged(_pc.Maneuvers.GetActiveManeuver());
             _pc.Maneuvers.OnSelectedManeuverChanged += OnSelectedManeuverChanged;
             _pc.Maneuvers.OnActiveManeuverChanged += OnActiveManeuverChanged;
             _pc.Maneuvers.OnActiveManeuverUpdated += OnActiveManeuverUpdated;
+             */
 
             OnIsModifyingStanceChanged(0, false);
             _pc.Commander.OnIsModifyingStanceChanged += OnIsModifyingStanceChanged;
             _pc.Commander.OnDesiredSquadStanceChanged += OnDesiredSquadStanceChanged;
+
         }
 
         private void OnActiveManeuverUpdated(ManeuverDefinition definition, int ticksSinceStart)
@@ -95,7 +97,7 @@ namespace LichLord.UI
 
         private void OnIsModifyingStanceChanged(int squadId, bool isModifying)
         {
-            _maneuverReticleContainer.gameObject.SetActive(!isModifying);
+            //_maneuverReticleContainer.gameObject.SetActive(!isModifying);
             _commandReticleContainer.gameObject.SetActive(isModifying);
             _commandReticleContainer.OnIsModifyingStanceChanged(_pc, squadId, isModifying);
         }

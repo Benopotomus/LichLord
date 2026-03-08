@@ -279,6 +279,15 @@ namespace LichLord
             var projectile = projectileManager.SpawnProjectile(fireEvent);
             //Debug.Log($"[GunActionData] Fired projectile with {ActionName} using ProjectileManager");
         }
+
+        public FUpperBodyAnimationTrigger GetUpperBodyAnimationTrigger(PlayerCharacter pc)
+        {
+            int weaponId = pc.Weapons.GetWeaponID();
+            if (_upperBodyAnimationStates.TryGetValue(weaponId, out var animationState))
+                return animationState;
+
+            return new FUpperBodyAnimationTrigger();
+        }
     }
 
     public enum EFireButton

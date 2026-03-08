@@ -372,6 +372,11 @@ namespace LichLord
             return transform;
         }
 
+        public WeaponDefinition GetWeaponRight()
+        {
+            return _weaponRight.WeaponDefinition;
+        }
+
         [Serializable]
         private struct FWeaponLoadState
         { 
