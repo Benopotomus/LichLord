@@ -82,10 +82,10 @@ namespace LichLord.CardGame
                     break;
 
                 case EEffectType.RemoveDie:
-                    if (effect.diceTarget == ECardTarget.EnemyDice)
-                        enemy.Dice.RemoveDie();
-                    else
+                    if (effect.diceTarget == ECardTarget.PlayerDice)
                         player.Dice.RemoveDie();
+                    else
+                        enemy.Dice.RemoveDie();
                     break;
             }
         }

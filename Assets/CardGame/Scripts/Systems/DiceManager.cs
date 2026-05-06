@@ -77,10 +77,11 @@ namespace LichLord.CardGame
             int[] indices = GetIndicesSortedAscending();
             int removeIdx = indices[0];
 
+            int originalCount = DiceCount;
             DiceCount--;
             int[] newRoll = new int[DiceCount];
             int dst = 0;
-            for (int i = 0; i <= DiceCount; i++)
+            for (int i = 0; i < originalCount; i++)
             {
                 if (i == removeIdx) continue;
                 newRoll[dst++] = CurrentRoll[i];

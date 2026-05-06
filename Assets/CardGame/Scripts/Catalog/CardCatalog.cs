@@ -596,7 +596,6 @@ namespace LichLord.CardGame
                 {
                     effectType = EEffectType.AddDie,
                     diceTarget = ECardTarget.PlayerDice,
-                    count      = 1,
                 },
             };
             return card;
