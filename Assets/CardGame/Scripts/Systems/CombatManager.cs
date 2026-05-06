@@ -9,11 +9,14 @@ namespace LichLord.CardGame
     /// Turn order each round:
     ///   1. Both sides roll their dice (StartRound).
     ///   2. Enemy pre-round passives fire (rerolls of specific values, etc.).
-    ///   3. Persistent card effects apply (block from shield cards, forced enemy rerolls).
-    ///   4. Player turn — cards may be played freely while energy allows.
-    ///   5. Player calls EndPlayerTurn() to trigger the enemy's damage phase.
-    ///   6. Enemy damage is applied to the player (block absorbs first).
-    ///   7. A new round begins automatically unless combat has ended.
+    ///   3. DOT phase: Burning and Poisoned deal their damage to both combatants.
+    ///   4. Persistent card effects apply (block from shield cards, forced enemy rerolls).
+    ///   5. Player turn — cards may be played freely while energy allows.
+    ///   6. Player calls EndPlayerTurn() to trigger the enemy's phase.
+    ///   7. Enemy phase: enemy gains block, applies status effects to player, then deals damage
+    ///      (modified by Stunned, Weak, Strength, Vulnerable).
+    ///   8. Status effects tick (duration decrements). Enemy block clears.
+    ///   9. A new round begins unless combat has ended.
     /// </summary>
     public class CombatManager
     {
@@ -52,7 +55,7 @@ namespace LichLord.CardGame
         /// </summary>
         public bool TryPlayCard(CardData card)
         {
-            if (State != ECombatState.PlayerTurn)         return false;
+            if (State != ECombatState.PlayerTurn)          return false;
             if (!Player.Energy.CanAfford(card.energyCost)) return false;
             if (!Player.Deck.Hand.Contains(card))          return false;
 
@@ -72,7 +75,7 @@ namespace LichLord.CardGame
             return true;
         }
 
-        /// <summary>Ends the player's turn and triggers enemy damage resolution.</summary>
+        /// <summary>Ends the player's turn and triggers the enemy phase.</summary>
         public void EndPlayerTurn()
         {
             if (State != ECombatState.PlayerTurn) return;
@@ -89,6 +92,11 @@ namespace LichLord.CardGame
             // Pre-round enemy passives (e.g., Stone Golem rerolls all [1]s)
             Enemy.ApplyPreRoundEffects();
 
+            // DOT phase: Burning and Poisoned deal damage to both combatants
+            ApplyDotEffects();
+            if (!Player.IsAlive) { SetState(ECombatState.Defeat);  OnCombatEnded?.Invoke(false); return; }
+            if (!Enemy.IsAlive)  { SetState(ECombatState.Victory); OnCombatEnded?.Invoke(true);  return; }
+
             // Persistent cards apply their recurring effects (block, enemy rerolls)
             ApplyPersistentCardEffects();
 
@@ -97,8 +105,28 @@ namespace LichLord.CardGame
         }
 
         /// <summary>
+        /// Applies Burning and Poisoned DOT damage to both combatants.
+        /// Uses TakeDamage so enemy block (if any remains from last round) absorbs first.
+        /// </summary>
+        private void ApplyDotEffects()
+        {
+            int playerBurning = Player.StatusEffects.Get(EStatusEffect.Burning);
+            if (playerBurning > 0) Player.TakeDamage(playerBurning);
+
+            int playerPoison = Player.StatusEffects.Get(EStatusEffect.Poisoned);
+            if (playerPoison > 0) Player.TakeDamage(playerPoison);
+
+            int enemyBurning = Enemy.StatusEffects.Get(EStatusEffect.Burning);
+            if (enemyBurning > 0) Enemy.TakeDamage(enemyBurning);
+
+            int enemyPoison = Enemy.StatusEffects.Get(EStatusEffect.Poisoned);
+            if (enemyPoison > 0) Enemy.TakeDamage(enemyPoison);
+        }
+
+        /// <summary>
         /// Re-applies recurring effects from persistent cards.
-        /// One-time effects (AddDie, RemoveDie) are skipped — they already fired on play.
+        /// One-time effects (AddDie, RemoveDie, ApplyStatusEffect) are skipped
+        /// — they already fired when the card was first played.
         /// </summary>
         private void ApplyPersistentCardEffects()
         {
@@ -106,8 +134,9 @@ namespace LichLord.CardGame
             {
                 foreach (var effect in card.effects)
                 {
-                    if (effect.effectType == EEffectType.AddDie ||
-                        effect.effectType == EEffectType.RemoveDie)
+                    if (effect.effectType == EEffectType.AddDie         ||
+                        effect.effectType == EEffectType.RemoveDie      ||
+                        effect.effectType == EEffectType.ApplyStatusEffect)
                         continue;
 
                     CardEffectProcessor.ProcessEffect(effect, Player, Enemy);
@@ -119,8 +148,38 @@ namespace LichLord.CardGame
         {
             SetState(ECombatState.EnemyTurn);
 
-            int damage = Enemy.CalculateDamage();
-            Player.TakeDamage(damage);
+            // 1. Enemy gains block from GainBlock passives
+            Enemy.CalculateAndApplyBlock();
+
+            // 2. Enemy applies status effects to the player
+            Enemy.ApplyStatusEffectsToPlayer(Player);
+
+            // 3. Enemy deals damage (skipped while Stunned)
+            if (!Enemy.StatusEffects.Has(EStatusEffect.Stunned))
+            {
+                int damage = Enemy.CalculateDamage();
+
+                // Weak: enemy deals 25% less damage (rounds down)
+                if (Enemy.StatusEffects.Has(EStatusEffect.Weak))
+                    damage = (int)(damage * 0.75f);
+
+                // Strength: enemy deals extra flat damage
+                damage += Enemy.StatusEffects.Get(EStatusEffect.Strength);
+                damage = Math.Max(0, damage);
+
+                // Vulnerable: player receives 50% more damage (rounds up)
+                if (Player.StatusEffects.Has(EStatusEffect.Vulnerable))
+                    damage = (int)Math.Ceiling(damage * 1.5);
+
+                Player.TakeDamage(damage);
+            }
+
+            // 4. Tick all status effects (duration-based statuses decrement by 1)
+            Player.StatusEffects.Tick();
+            Enemy.StatusEffects.Tick();
+
+            // 5. Clear enemy block (block does not carry between rounds)
+            Enemy.ClearBlock();
 
             if (!Player.IsAlive)
             {

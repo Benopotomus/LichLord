@@ -35,6 +35,9 @@ namespace LichLord.CardGame
                 CreateBoneWard(),
                 CreateTowerShield(),
                 CreateRuneShield(),
+                CreateHighGuard(),
+                CreateScatterDefense(),
+                CreateBrittleWard(),
 
                 // ── Dice Manipulation ─────────────────────────────────────────────
                 CreateLuckyReroll(),
@@ -44,6 +47,15 @@ namespace LichLord.CardGame
                 CreateWarDrums(),
                 CreateCursedAura(),
                 CreateLuckyCharm(),
+
+                // ── Status Effects ────────────────────────────────────────────────
+                CreateCripplingBlow(),
+                CreateExpose(),
+                CreateBurningHands(),
+                CreateVenomStrike(),
+                CreateStagger(),
+                CreateStoneSkin(),
+                CreateBattleStance(),
             };
         }
 
@@ -596,6 +608,256 @@ namespace LichLord.CardGame
                 {
                     effectType = EEffectType.AddDie,
                     diceTarget = ECardTarget.PlayerDice,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 26 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateHighGuard()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "High Guard";
+            card.description = "Block 1 damage for each die showing 3 or higher.";
+            card.energyCost  = 1;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType     = EEffectType.GainBlock,
+                    diceTarget     = ECardTarget.PlayerDice,
+                    triggerOn      = EPokerHandType.PerHighDie,
+                    valueThreshold = 3,
+                    magnitude      = 1,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 27 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateScatterDefense()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Scatter Defense";
+            card.description = "Block 1 damage per unique die value showing.";
+            card.energyCost  = 1;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType = EEffectType.GainBlock,
+                    diceTarget = ECardTarget.PlayerDice,
+                    triggerOn  = EPokerHandType.PerUniqueDieValue,
+                    magnitude  = 1,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 28 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateBrittleWard()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Brittle Ward";
+            card.description = "Gain 5 Block. Apply 1 Frail to yourself.";
+            card.energyCost  = 0;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType = EEffectType.GainBlock,
+                    diceTarget = ECardTarget.PlayerDice,
+                    triggerOn  = EPokerHandType.Always,
+                    magnitude  = 5,
+                },
+                new CardEffectData
+                {
+                    effectType    = EEffectType.ApplyStatusEffect,
+                    diceTarget    = ECardTarget.PlayerDice,
+                    statusEffect  = EStatusEffect.Frail,
+                    magnitude     = 1,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 29 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateCripplingBlow()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Crippling Blow";
+            card.description = "Deal 2 damage. Apply 2 Weak to the enemy.";
+            card.energyCost  = 2;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType = EEffectType.DealDamage,
+                    diceTarget = ECardTarget.PlayerDice,
+                    triggerOn  = EPokerHandType.Always,
+                    magnitude  = 2,
+                },
+                new CardEffectData
+                {
+                    effectType   = EEffectType.ApplyStatusEffect,
+                    diceTarget   = ECardTarget.EnemyDice,
+                    statusEffect = EStatusEffect.Weak,
+                    magnitude    = 2,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 30 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateExpose()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Expose";
+            card.description = "Apply 2 Vulnerable to the enemy.";
+            card.energyCost  = 1;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType   = EEffectType.ApplyStatusEffect,
+                    diceTarget   = ECardTarget.EnemyDice,
+                    statusEffect = EStatusEffect.Vulnerable,
+                    magnitude    = 2,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 31 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateBurningHands()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Burning Hands";
+            card.description = "Deal 1 damage per die showing [5] or [6]. Apply 3 Burning to the enemy.";
+            card.energyCost  = 2;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType     = EEffectType.DealDamage,
+                    diceTarget     = ECardTarget.PlayerDice,
+                    triggerOn      = EPokerHandType.PerHighDie,
+                    valueThreshold = 5,
+                    magnitude      = 1,
+                },
+                new CardEffectData
+                {
+                    effectType   = EEffectType.ApplyStatusEffect,
+                    diceTarget   = ECardTarget.EnemyDice,
+                    statusEffect = EStatusEffect.Burning,
+                    magnitude    = 3,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 32 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateVenomStrike()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Venom Strike";
+            card.description = "Deal 1 damage for each pair rolled. Apply 2 Poisoned to the enemy.";
+            card.energyCost  = 2;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType = EEffectType.DealDamage,
+                    diceTarget = ECardTarget.PlayerDice,
+                    triggerOn  = EPokerHandType.PerPair,
+                    magnitude  = 1,
+                },
+                new CardEffectData
+                {
+                    effectType   = EEffectType.ApplyStatusEffect,
+                    diceTarget   = ECardTarget.EnemyDice,
+                    statusEffect = EStatusEffect.Poisoned,
+                    magnitude    = 2,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 33 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateStagger()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Stagger";
+            card.description = "Apply 1 Stunned to the enemy. They skip their next attack.";
+            card.energyCost  = 2;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType   = EEffectType.ApplyStatusEffect,
+                    diceTarget   = ECardTarget.EnemyDice,
+                    statusEffect = EStatusEffect.Stunned,
+                    magnitude    = 1,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 34 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateStoneSkin()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Stone Skin";
+            card.description = "Gain 2 Dexterity for the rest of combat (+2 Block on every GainBlock effect).";
+            card.energyCost  = 2;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType   = EEffectType.ApplyStatusEffect,
+                    diceTarget   = ECardTarget.PlayerDice,
+                    statusEffect = EStatusEffect.Dexterity,
+                    magnitude    = 2,
+                },
+            };
+            return card;
+        }
+
+        // ── Card 35 ───────────────────────────────────────────────────────────────
+
+        private static CardData CreateBattleStance()
+        {
+            var card = ScriptableObject.CreateInstance<CardData>();
+            card.name = card.cardName = "Battle Stance";
+            card.description = "Gain 2 Strength for the rest of combat (+2 flat damage on every DealDamage effect).";
+            card.energyCost  = 2;
+            card.duration    = ECardDuration.Instant;
+            card.effects = new List<CardEffectData>
+            {
+                new CardEffectData
+                {
+                    effectType   = EEffectType.ApplyStatusEffect,
+                    diceTarget   = ECardTarget.PlayerDice,
+                    statusEffect = EStatusEffect.Strength,
+                    magnitude    = 2,
                 },
             };
             return card;

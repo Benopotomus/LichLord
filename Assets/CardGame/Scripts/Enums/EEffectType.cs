@@ -31,5 +31,11 @@ namespace LichLord.CardGame
 
         /// <summary>Remove one die from the target pool.</summary>
         RemoveDie,
+
+        /// <summary>
+        /// Apply a status effect to the combatant indicated by diceTarget.
+        /// Uses the statusEffect field to choose the effect and magnitude for the stack count.
+        /// </summary>
+        ApplyStatusEffect,
     }
 }

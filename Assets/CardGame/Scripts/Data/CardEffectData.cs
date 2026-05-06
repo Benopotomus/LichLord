@@ -29,5 +29,8 @@ namespace LichLord.CardGame
 
         [Tooltip("Number of dice to reroll for RerollDice effects.")]
         public int count;
+
+        [Tooltip("Status effect to apply for ApplyStatusEffect effects.")]
+        public EStatusEffect statusEffect;
     }
 }

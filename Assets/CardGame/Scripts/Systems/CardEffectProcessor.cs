@@ -1,8 +1,15 @@
+using System;
+
 namespace LichLord.CardGame
 {
     /// <summary>
     /// Resolves a single <see cref="CardEffectData"/> against the current combat state.
     /// All methods are stateless and operate on the provided combatant references.
+    ///
+    /// Damage modifiers applied here (player's perspective):
+    ///   Strength  — flat bonus added to each DealDamage result.
+    ///   Weak      — player deals 25% less damage (rounds down).
+    ///   Vulnerable — enemy receives 50% more damage (rounds up).
     /// </summary>
     public static class CardEffectProcessor
     {
@@ -26,7 +33,20 @@ namespace LichLord.CardGame
                 {
                     int triggers = PokerEvaluator.EvaluateTriggerCount(
                         effect.triggerOn, targetDice, effect.dieValue, effect.valueThreshold);
-                    enemy.TakeDamage(triggers * effect.magnitude);
+                    int damage = triggers * effect.magnitude;
+
+                    // Strength: flat bonus per DealDamage invocation
+                    damage += player.StatusEffects.Get(EStatusEffect.Strength);
+
+                    // Weak: player deals 25% less (round down)
+                    if (player.StatusEffects.Has(EStatusEffect.Weak))
+                        damage = (int)(damage * 0.75f);
+
+                    // Vulnerable: enemy receives 50% more (round up)
+                    if (enemy.StatusEffects.Has(EStatusEffect.Vulnerable))
+                        damage = (int)Math.Ceiling(damage * 1.5);
+
+                    enemy.TakeDamage(Math.Max(0, damage));
                     break;
                 }
 
@@ -35,9 +55,19 @@ namespace LichLord.CardGame
                     int triggers = PokerEvaluator.EvaluateTriggerCount(
                         effect.triggerOn, targetDice, effect.dieValue, effect.valueThreshold);
                     if (triggers > 0)
-                        enemy.TakeDamage(effect.magnitude);
+                    {
+                        int damage = effect.magnitude;
+                        damage += player.StatusEffects.Get(EStatusEffect.Strength);
+                        if (player.StatusEffects.Has(EStatusEffect.Weak))
+                            damage = (int)(damage * 0.75f);
+                        if (enemy.StatusEffects.Has(EStatusEffect.Vulnerable))
+                            damage = (int)Math.Ceiling(damage * 1.5);
+                        enemy.TakeDamage(Math.Max(0, damage));
+                    }
                     else
+                    {
                         player.TakeDamage(effect.altMagnitude);
+                    }
                     break;
                 }
 
@@ -49,7 +79,13 @@ namespace LichLord.CardGame
                 {
                     int triggers = PokerEvaluator.EvaluateTriggerCount(
                         effect.triggerOn, targetDice, effect.dieValue, effect.valueThreshold);
-                    player.GainBlock(triggers * effect.magnitude);
+                    int blockAmount = triggers * effect.magnitude;
+
+                    // Route to the correct combatant based on diceTarget
+                    if (effect.diceTarget == ECardTarget.EnemyDice)
+                        enemy.GainBlock(blockAmount);
+                    else
+                        player.GainBlock(blockAmount);
                     break;
                 }
 
@@ -86,6 +122,13 @@ namespace LichLord.CardGame
                         player.Dice.RemoveDie();
                     else
                         enemy.Dice.RemoveDie();
+                    break;
+
+                case EEffectType.ApplyStatusEffect:
+                    if (effect.diceTarget == ECardTarget.EnemyDice)
+                        enemy.StatusEffects.Add(effect.statusEffect, effect.magnitude);
+                    else
+                        player.StatusEffects.Add(effect.statusEffect, effect.magnitude);
                     break;
             }
         }

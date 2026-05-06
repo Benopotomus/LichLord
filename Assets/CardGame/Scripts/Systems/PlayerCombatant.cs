@@ -13,16 +13,17 @@ namespace LichLord.CardGame
         public int Block         { get; private set; }
         public bool IsAlive      => CurrentHealth > 0;
 
-        public DiceManager  Dice   { get; }
-        public DeckManager  Deck   { get; }
-        public EnergyManager Energy { get; }
+        public DiceManager       Dice          { get; }
+        public DeckManager       Deck          { get; }
+        public EnergyManager     Energy        { get; }
+        public StatusEffectState StatusEffects { get; } = new StatusEffectState();
 
         /// <summary>Cards with Persistent duration currently in play.</summary>
         public List<CardData> ActivePersistentCards { get; } = new List<CardData>();
 
         public PlayerCombatant(int maxHealth, int maxEnergy, List<CardData> deck, int diceCount = 5)
         {
-            MaxHealth    = maxHealth;
+            MaxHealth     = maxHealth;
             CurrentHealth = maxHealth;
             Dice   = new DiceManager(diceCount);
             Deck   = new DeckManager(deck);
@@ -35,14 +36,23 @@ namespace LichLord.CardGame
         /// </summary>
         public void TakeDamage(int amount)
         {
+            amount = Math.Max(0, amount);
             int absorbed = Math.Min(Block, amount);
             Block         -= absorbed;
             CurrentHealth -= amount - absorbed;
             if (CurrentHealth < 0) CurrentHealth = 0;
         }
 
+        /// <summary>
+        /// Gains block, applying Dexterity bonus first then Frail penalty.
+        /// Frail reduces block gained by 25% (rounds down), applied after Dexterity.
+        /// </summary>
         public void GainBlock(int amount)
         {
+            amount = Math.Max(0, amount);
+            amount += StatusEffects.Get(EStatusEffect.Dexterity);
+            if (StatusEffects.Has(EStatusEffect.Frail))
+                amount = (int)(amount * 0.75f);
             Block += Math.Max(0, amount);
         }
 
