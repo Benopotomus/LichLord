@@ -36,6 +36,9 @@ namespace LichLord.CardGame
         /// </summary>
         public event Action<bool> OnCombatEnded;
 
+        /// <summary>Fired whenever a combat event worth showing in the log occurs.</summary>
+        public event Action<string> OnCombatLog;
+
         // ── Setup ─────────────────────────────────────────────────────────────────
 
         /// <summary>Initialises combat and begins the first round.</summary>
@@ -111,16 +114,32 @@ namespace LichLord.CardGame
         private void ApplyDotEffects()
         {
             int playerBurning = Player.StatusEffects.Get(EStatusEffect.Burning);
-            if (playerBurning > 0) Player.TakeDamage(playerBurning);
+            if (playerBurning > 0)
+            {
+                Player.TakeDamage(playerBurning);
+                OnCombatLog?.Invoke($"You take {playerBurning} Burning damage.");
+            }
 
             int playerPoison = Player.StatusEffects.Get(EStatusEffect.Poisoned);
-            if (playerPoison > 0) Player.TakeDamage(playerPoison);
+            if (playerPoison > 0)
+            {
+                Player.TakeDamage(playerPoison);
+                OnCombatLog?.Invoke($"You take {playerPoison} Poison damage.");
+            }
 
             int enemyBurning = Enemy.StatusEffects.Get(EStatusEffect.Burning);
-            if (enemyBurning > 0) Enemy.TakeDamage(enemyBurning);
+            if (enemyBurning > 0)
+            {
+                Enemy.TakeDamage(enemyBurning);
+                OnCombatLog?.Invoke($"{Enemy.Data.enemyName} takes {enemyBurning} Burning damage.");
+            }
 
             int enemyPoison = Enemy.StatusEffects.Get(EStatusEffect.Poisoned);
-            if (enemyPoison > 0) Enemy.TakeDamage(enemyPoison);
+            if (enemyPoison > 0)
+            {
+                Enemy.TakeDamage(enemyPoison);
+                OnCombatLog?.Invoke($"{Enemy.Data.enemyName} takes {enemyPoison} Poison damage.");
+            }
         }
 
         /// <summary>
@@ -149,13 +168,20 @@ namespace LichLord.CardGame
             SetState(ECombatState.EnemyTurn);
 
             // 1. Enemy gains block from GainBlock passives
+            int blockBefore = Enemy.Block;
             Enemy.CalculateAndApplyBlock();
+            if (Enemy.Block > blockBefore)
+                OnCombatLog?.Invoke($"{Enemy.Data.enemyName} gains {Enemy.Block - blockBefore} Block.");
 
             // 2. Enemy applies status effects to the player
             Enemy.ApplyStatusEffectsToPlayer(Player);
 
             // 3. Enemy deals damage (skipped while Stunned)
-            if (!Enemy.StatusEffects.Has(EStatusEffect.Stunned))
+            if (Enemy.StatusEffects.Has(EStatusEffect.Stunned))
+            {
+                OnCombatLog?.Invoke($"{Enemy.Data.enemyName} is Stunned and cannot attack!");
+            }
+            else
             {
                 int damage = Enemy.CalculateDamage();
 
@@ -171,7 +197,13 @@ namespace LichLord.CardGame
                 if (Player.StatusEffects.Has(EStatusEffect.Vulnerable))
                     damage = (int)Math.Ceiling(damage * 1.5);
 
+                int playerBlockBefore = Player.Block;
                 Player.TakeDamage(damage);
+                int absorbed = Math.Min(playerBlockBefore, damage);
+                int dealt    = damage - absorbed;
+                if (damage > 0)
+                    OnCombatLog?.Invoke($"{Enemy.Data.enemyName} attacks for {damage}" +
+                        (absorbed > 0 ? $" ({absorbed} blocked, {dealt} to HP)" : "") + ".");
             }
 
             // 4. Tick all status effects (duration-based statuses decrement by 1)

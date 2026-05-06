@@ -1,0 +1,33 @@
+HOW TO RUN THE CARD GAME COMBAT SCENE
+======================================
+
+1. Open this project in Unity 2022.3.x.
+
+2. Wait for scripts to compile (bottom status bar).
+
+3. In the menu bar, click:
+       CardGame  ▶  Build Combat Scene
+
+   This will:
+   • Create Assets/CardGame/Prefabs/CardPrefab.prefab
+   • Create Assets/Scenes/CombatScene.unity
+   • Add CombatScene to Build Settings
+
+4. Double-click Assets/Scenes/CombatScene.unity to open it.
+
+5. Press Play.
+
+   A random enemy is selected from the catalog.
+   A 12-card starter deck is dealt.
+   Play cards by clicking them; press End Turn when done.
+
+LAYOUT
+------
+  Top area    — Enemy name, HP, Block, status effects, dice roll
+  Middle-left — Combat log (scrollable)
+  Middle-right— Your dice roll
+  Stats bar   — Your HP / Block / Energy / status effects
+  Bottom      — Your hand (click a card to play it)
+  Right button— End Turn
+
+If you re-run "Build Combat Scene" it will overwrite the existing scene.
