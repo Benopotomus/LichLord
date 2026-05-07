@@ -11,8 +11,7 @@ Unity project repository for **BannerOfBones**.
 1. Install Unity Hub.
 2. Install Unity Editor `2022.3.62f1`.
 3. In Unity Hub, choose **Add project from disk**.
-4. Select this repository folder:
-   - `/home/runner/work/LichLord/LichLord`
+4. Select your local clone of this repository (the `BannerOfBones` project folder).
 5. Open the project and allow package import/compilation to complete.
 
 ## Notes
