@@ -1,4 +1,4 @@
-# Lich Lord: Card & Dice Combat — Game Design Document
+# BannerOfBones: Card & Dice Combat — Game Design Document
 
 ## Overview
 
